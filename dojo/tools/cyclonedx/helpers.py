@@ -31,21 +31,16 @@ class Cyclonedxhelper:
         )
 
     def _collect_hashes(self, raw_hashes):
-        """
-        Convert CycloneDX hash list to dict mapping algorithm to hash values.
-
-        Input: [{"alg": "SHA-256", "content": "abc..."}, ...]
-        Output: {"sha-256": ["abc..."], ...}
-        """
+        """Convert CycloneDX hash list to dict mapping algorithm to lists of hash values."""
         if not raw_hashes:
-            return None
+            return {}
         hashes = {}
         for h in raw_hashes:
             alg = h.get("alg", "").lower()
             content = h.get("content", "")
             if alg and content:
                 hashes.setdefault(alg, []).append(content)
-        return hashes or None
+        return hashes
 
     def fix_severity(self, severity):
         severity = severity.capitalize()

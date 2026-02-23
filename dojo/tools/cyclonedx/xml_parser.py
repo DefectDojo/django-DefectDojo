@@ -53,7 +53,7 @@ class CycloneDXXMLParser:
             # Collect product-level dependency locations for all components
             if settings.V3_FEATURE_LOCATIONS and component_purl:
                 test.unsaved_metadata.append(
-                    LocationData.dependency(purl=component_purl, hashes=component_hashes),
+                    LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes),
                 )
             # for each vulnerabilities add a finding
             for vulnerability in component.findall(
@@ -98,8 +98,7 @@ class CycloneDXXMLParser:
         """
         Extract hashes from an XML component element.
 
-        Returns dict mapping lowercase algorithm name to list of hash values,
-        or None if no hashes found.
+        Returns dict mapping lowercase algorithm name to list of hash values, empty if none are found.
         """
         hashes = {}
         for hash_elem in component.findall(f"{namespace}hashes/{namespace}hash"):
@@ -107,7 +106,7 @@ class CycloneDXXMLParser:
             content = hash_elem.text or ""
             if alg and content:
                 hashes.setdefault(alg, []).append(content)
-        return hashes or None
+        return hashes
 
     def manage_vulnerability_legacy(
         self,
@@ -200,7 +199,7 @@ class CycloneDXXMLParser:
             finding.unsaved_vulnerability_ids = vulnerability_ids
         if settings.V3_FEATURE_LOCATIONS and component_purl:
             finding.unsaved_locations.append(
-                LocationData.dependency(purl=component_purl, hashes=component_hashes),
+                LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes),
             )
         return finding
 
@@ -271,7 +270,7 @@ class CycloneDXXMLParser:
                 bom_refs, ref.text,
             )
             component_purl = bom_refs.get(ref.text, {}).get("purl") if ref is not None else None
-            component_hashes = bom_refs.get(ref.text, {}).get("hashes") if ref is not None else None
+            component_hashes = bom_refs.get(ref.text, {}).get("hashes") if ref is not None else {}
             finding = Finding(
                 title=f"{component_name}:{component_version} | {vuln_id}",
                 description=description,
@@ -336,7 +335,7 @@ class CycloneDXXMLParser:
                             finding.mitigation += f"\n**This vulnerability is mitigated and/or suppressed:** {detail}\n"
             if settings.V3_FEATURE_LOCATIONS and component_purl:
                 finding.unsaved_locations.append(
-                    LocationData.dependency(purl=component_purl, hashes=component_hashes),
+                    LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes),
                 )
             findings.append(finding)
         return findings

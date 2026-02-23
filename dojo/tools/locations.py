@@ -53,7 +53,7 @@ class LocationData:
         version: str = "",
         qualifiers: str = "",
         subpath: str = "",
-        hashes: dict[str, list[str]] | None = None,
+        artifact_hashes: dict[str, list[str]] | None = None,
         license_expression: str = "",
     ) -> LocationData:
         return cls(
@@ -66,7 +66,7 @@ class LocationData:
                 "version": version,
                 "qualifiers": qualifiers,
                 "subpath": subpath,
-                "hashes": hashes,
+                "artifact_hashes": artifact_hashes,
                 "license_expression": license_expression,
             },
         )
