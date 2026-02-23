@@ -102,13 +102,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
-        # process the findings in the foreground or background
         (
             new_findings,
             reactivated_findings,
             findings_to_mitigate,
             untouched_findings,
-        ) = self.determine_process_method(parsed_findings, **kwargs)
+        ) = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
         closed_findings = self.close_old_findings(findings_to_mitigate, **kwargs)
@@ -462,8 +461,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Synchronous tasks were already executed during processing, just calculate grade
         perform_product_grading(self.test.engagement.product)
 
-        # Process the results and return them back
-        return self.process_results(**kwargs)
+        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
     def close_old_findings(
         self,
@@ -1007,13 +1005,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
                 if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):
                     jira_helper.push_to_jira(finding_group)
-
-    def process_results(
-        self,
-        **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
-        """Return the finding lists collected during process_findings."""
-        return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
     def calculate_unsaved_finding_hash_code(
         self,
