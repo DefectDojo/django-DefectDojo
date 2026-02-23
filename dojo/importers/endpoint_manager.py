@@ -114,6 +114,8 @@ class EndpointManager:
         endpoints: list[Endpoint],
         **kwargs: dict,
     ) -> None:
+        if not endpoints:
+            return
         dojo_dispatch_task(EndpointManager.add_endpoints_to_unsaved_finding, finding, endpoints, sync=True)
 
     @staticmethod
