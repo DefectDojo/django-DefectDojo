@@ -162,10 +162,10 @@ datatables.net@2.3.2:
   dependencies:
     jquery ">=1.7"
 
-datatables.net@^2, datatables.net@^2.3.6:
-  version "2.3.6"
-  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.6.tgz#a11be57a2b50d7231cae2980a8ff1df3c18b7b17"
-  integrity sha512-xQ/dCxrjfxM0XY70wSIzakkTZ6ghERwlLmAPyCnu8Sk5cyt9YvOVyOsFNOa/BZ/lM63Q3i2YSSvp/o7GXZGsbg==
+datatables.net@^2, datatables.net@^2.3.7:
+  version "2.3.7"
+  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.7.tgz#3cd34f6f5d1f40a46b5a20a4ba32604bdbcd6738"
+  integrity sha512-AvsjG/Nkp6OxeyBKYZauemuzQCPogE1kOtKwG4sYjvdqGCSLiGaJagQwXv4YxG+ts5vaJr6qKGG9ec3g6vTo3w==
   dependencies:
     jquery ">=1.7"
 
@@ -385,10 +385,10 @@ pdfkit@^0.17.2:
     linebreak "^1.1.0"
     png-js "^1.0.0"
 
-pdfmake@^0.3.3:
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.3.tgz#2705e8fabff4bf52a4a7b7ae9d93caee1b200cb7"
-  integrity sha512-jSnF8rVLkbLLX37bnXWRFhEDO48quE7OIg7lgWBa6ihAbpCxASaBLWFOXNxSDeLBNt92304SBwpYcPkJnIArlA==
+pdfmake@^0.3.4:
+  version "0.3.4"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.4.tgz#3448ca1434396275dce8f49202e761fefad781eb"
+  integrity sha512-zbGBox6pgNeGdG7tlLVBbQJlYIlTHtXo5q8+dNhCb2O0Q2+Nc5bcpsgNzbzqfzlcJ0gX9f+ZBv1z4FuJjUHwVA==
   dependencies:
     linebreak "^1.1.0"
     pdfkit "^0.17.2"
