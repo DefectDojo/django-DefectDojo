@@ -71,7 +71,6 @@ class OSVScannerParser:
         return ("Medium" if severity_input == "MODERATE" else severity_input.lower().capitalize()) if severity_input else "Low"
 
     def get_findings(self, file, test):
-        self.UNSAVED_LOCATIONS = []
         try:
             data = json.load(file)
         except json.decoder.JSONDecodeError:
@@ -87,7 +86,7 @@ class OSVScannerParser:
                     if pkg_name and pkg_ecosystem:
                         purl_type = OSV_ECOSYSTEM_TO_PURL.get(pkg_ecosystem.lower())
                         if purl_type:
-                            self.UNSAVED_LOCATIONS.append(
+                            test.unsaved_metadata.append(
                                 LocationData.dependency(
                                     purl_type=purl_type, name=pkg_name, version=pkg_version,
                                 ),

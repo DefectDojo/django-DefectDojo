@@ -38,7 +38,6 @@ class OssIndexDevauditParser:
         return "Import OssIndex Devaudit SCA Scan in json format."
 
     def get_findings(self, json_file, test):
-        self.UNSAVED_LOCATIONS = []
         tree = self.parse_json(json_file)
 
         if tree:
@@ -67,7 +66,7 @@ class OssIndexDevauditParser:
                 pm = package_data.get("pm", "").lower()
                 purl_type = OSSINDEX_PM_TO_PURL.get(pm)
                 if purl_type:
-                    self.UNSAVED_LOCATIONS.append(
+                    test.unsaved_metadata.append(
                         LocationData.dependency(purl_type=purl_type, name=package_data["name"], version=package_data["version"]),
                     )
 

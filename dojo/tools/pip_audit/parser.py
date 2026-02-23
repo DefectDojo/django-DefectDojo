@@ -29,7 +29,6 @@ class PipAuditParser:
 
     def get_findings(self, scan_file, test):
         """Return the collection of Findings ingested."""
-        self.UNSAVED_LOCATIONS = []
         data = json.load(scan_file)
         # Collect product-level dependency locations for all dependencies
         if settings.V3_FEATURE_LOCATIONS:
@@ -38,7 +37,7 @@ class PipAuditParser:
                 name = item.get("name")
                 version = item.get("version")
                 if name:
-                    self.UNSAVED_LOCATIONS.append(
+                    test.unsaved_metadata.append(
                         LocationData(
                             type="dependency",
                             data={"purl_type": "pypi", "name": name, "version": version},

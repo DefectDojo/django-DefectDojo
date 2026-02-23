@@ -14,7 +14,6 @@ LOGGER = logging.getLogger(__name__)
 class CycloneDXJSONParser:
     def _get_findings_json(self, file, test):
         """Load a CycloneDX file in JSON format"""
-        self.UNSAVED_LOCATIONS = []
         data = json.load(file)
         # Parse timestamp to get the report date
         report_date = None
@@ -30,7 +29,7 @@ class CycloneDXJSONParser:
             for component_data in components.values():
                 component_purl = component_data.get("purl")
                 if component_purl:
-                    self.UNSAVED_LOCATIONS.append(
+                    test.unsaved_metadata.append(
                         LocationData.dependency(purl=component_purl),
                     )
         # for each vulnerabilities create one finding by component affected

@@ -40,7 +40,6 @@ class AuditJSParser:
         return "Info"
 
     def get_findings(self, filename, test):
-        self.UNSAVED_LOCATIONS = []
         try:
             data = json.load(filename)
         except JSONDecodeError:
@@ -51,7 +50,7 @@ class AuditJSParser:
             for dependency in data:
                 coordinates = dependency.get("coordinates")
                 if coordinates:
-                    self.UNSAVED_LOCATIONS.append(
+                    test.unsaved_metadata.append(
                         LocationData.dependency(purl=coordinates),
                     )
 

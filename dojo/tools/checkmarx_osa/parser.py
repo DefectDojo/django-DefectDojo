@@ -24,7 +24,6 @@ class CheckmarxOsaParser:
         )
 
     def get_findings(self, filehandle, test):
-        self.UNSAVED_LOCATIONS = []
         tree = json.load(filehandle)
         if len(tree) != 2:
             logger.error(
@@ -42,7 +41,7 @@ class CheckmarxOsaParser:
                 lib_version = library.get("version")
                 if lib_name and ":" in lib_name:
                     parts = lib_name.split(":", 1)
-                    self.UNSAVED_LOCATIONS.append(
+                    test.unsaved_metadata.append(
                         LocationData(
                             type="dependency",
                             data={"purl_type": "maven", "namespace": parts[0], "name": parts[1], "version": lib_version},

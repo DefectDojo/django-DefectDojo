@@ -28,7 +28,6 @@ class OrtParser:
         return "Import Outpost24 endpoint vulnerability scan in XML format."
 
     def get_findings(self, json_output, test):
-        self.UNSAVED_LOCATIONS = []
         if json_output is None:
             return []
 
@@ -47,7 +46,7 @@ class OrtParser:
                             name = parts[2]
                             version = parts[3]
                             if name:
-                                self.UNSAVED_LOCATIONS.append(
+                                test.unsaved_metadata.append(
                                     LocationData.dependency(
                                         purl_type=purl_type, namespace=namespace or "", name=name, version=version,
                                     ),

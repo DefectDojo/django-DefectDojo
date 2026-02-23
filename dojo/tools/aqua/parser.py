@@ -104,7 +104,6 @@ class AquaParser:
         return ""
 
     def get_findings(self, json_output, test):
-        self.UNSAVED_LOCATIONS = []
         tree = json.load(json_output)
         self.items = {}
         if isinstance(tree, list):  # Aqua Scan Report coming from Azure Devops jobs (Windows based image)

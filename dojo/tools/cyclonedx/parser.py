@@ -26,5 +26,4 @@ class CycloneDXParser:
         else:
             sub_parser = CycloneDXXMLParser()
             findings = sub_parser._get_findings_xml(file, test)
-        self.UNSAVED_LOCATIONS = sub_parser.UNSAVED_LOCATIONS
         return findings

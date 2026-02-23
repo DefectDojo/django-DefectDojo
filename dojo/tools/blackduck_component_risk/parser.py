@@ -36,7 +36,6 @@ class BlackduckComponentRiskParser:
         :param filename: Input in Defect Dojo
         :param test:
         """
-        self.UNSAVED_LOCATIONS = []
         components, securities, sources = self.import_data(filename)
         # Collect product-level dependency locations for all components
         if settings.V3_FEATURE_LOCATIONS:
@@ -47,7 +46,7 @@ class BlackduckComponentRiskParser:
                 if comp_name and origin:
                     purl_type = BLACKDUCK_ORIGIN_TO_PURL.get(origin)
                     if purl_type:
-                        self.UNSAVED_LOCATIONS.append(
+                        test.unsaved_metadata.append(
                             LocationData(
                                 type="dependency",
                                 data={"purl_type": purl_type, "name": comp_name, "version": comp_version},

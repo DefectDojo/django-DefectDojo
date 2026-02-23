@@ -28,7 +28,6 @@ class SonatypeParser:
         return "Can be imported in JSON format"
 
     def get_findings(self, json_output, test):
-        self.UNSAVED_LOCATIONS = []
         sonatype_report = json.load(json_output)
         findings = []
         if "components" in sonatype_report:
@@ -55,7 +54,7 @@ class SonatypeParser:
                                 purl_namespace = None
                                 purl_version = coords.get("version", "")
                             if purl_name:
-                                self.UNSAVED_LOCATIONS.append(
+                                test.unsaved_metadata.append(
                                     LocationData.dependency(
                                         purl_type=purl_type, namespace=purl_namespace or "", name=purl_name, version=purl_version,
                                     ),

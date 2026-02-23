@@ -21,7 +21,6 @@ class WizcliImgParser:
         return "Wizcli Img report file can be imported in JSON format."
 
     def get_findings(self, filename, test):
-        self.UNSAVED_LOCATIONS = []
         scan_data = filename.read()
         try:
             data = json.loads(scan_data.decode("utf-8"))
@@ -39,7 +38,7 @@ class WizcliImgParser:
                     manifest = Path(lib_path).name
                     purl_type = WIZCLI_MANIFEST_TO_PURL.get(manifest)
                     if purl_type:
-                        self.UNSAVED_LOCATIONS.append(
+                        test.unsaved_metadata.append(
                             LocationData.dependency(purl_type=purl_type, name=lib_name, version=lib_version),
                         )
 

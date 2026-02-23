@@ -56,7 +56,6 @@ class MendParser:
         return "Import JSON report"
 
     def get_findings(self, file, test):
-        self.UNSAVED_LOCATIONS = []
         if file is None:
             return []
 
@@ -76,7 +75,7 @@ class MendParser:
                     if lib_name and lib_type:
                         purl_type = MEND_TYPE_TO_PURL.get(lib_type.lower())
                         if purl_type:
-                            self.UNSAVED_LOCATIONS.append(
+                            test.unsaved_metadata.append(
                                 LocationData(
                                     type="dependency",
                                     data={"purl_type": purl_type, "name": lib_name, "version": lib_version},
@@ -90,7 +89,7 @@ class MendParser:
                     if comp_name and comp_type:
                         purl_type = MEND_TYPE_TO_PURL.get(comp_type.lower())
                         if purl_type:
-                            self.UNSAVED_LOCATIONS.append(
+                            test.unsaved_metadata.append(
                                 LocationData(
                                     type="dependency",
                                     data={"purl_type": purl_type, "name": comp_name, "version": comp_version},

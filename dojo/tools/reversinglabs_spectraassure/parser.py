@@ -95,7 +95,6 @@ class ReversinglabsSpectraassureParser:
         file: Any,
         test: Any,
     ) -> list[Finding]:
-        self.UNSAVED_LOCATIONS = []
         # ------------------------------------
         rl_json_info_instance = RlJsonInfo(file_handle=file)
         rl_json_info_instance.get_cve_active_all()
@@ -105,13 +104,13 @@ class ReversinglabsSpectraassureParser:
             for component in rl_json_info_instance.components.values():
                 purl = component.get("identity", {}).get("purl", "")
                 if purl:
-                    self.UNSAVED_LOCATIONS.append(
+                    test.unsaved_metadata.append(
                         LocationData.dependency(purl=purl),
                     )
             for dependency in rl_json_info_instance.dependencies.values():
                 purl = dependency.get("purl", "")
                 if purl:
-                    self.UNSAVED_LOCATIONS.append(
+                    test.unsaved_metadata.append(
                         LocationData.dependency(purl=purl),
                     )
 
