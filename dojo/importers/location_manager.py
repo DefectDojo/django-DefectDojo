@@ -84,6 +84,8 @@ class LocationManager:
         locations: list[AbstractLocation],
         **kwargs: dict,
     ) -> None:
+        if not locations:
+            return
         dojo_dispatch_task(LocationManager.add_locations_to_unsaved_finding, finding, locations, sync=True)
 
     @staticmethod

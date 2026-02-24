@@ -122,6 +122,7 @@ services:
   postgres:
     image: postgres:18.1-alpine@sha256:4eb15de8e7b692c02427a2df278d18eb89422a534e428efb6d43c968250334d4
     environment:
+      PGDATA: /var/lib/postgresql/data
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}
       POSTGRES_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
