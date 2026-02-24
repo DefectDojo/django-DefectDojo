@@ -19,6 +19,8 @@ from dojo.url.models import URL
 logger = logging.getLogger(__name__)
 
 
+# TypeVar to represent unsaved locations coming from parsers. These might be existing AbstractLocations (when linking
+# existing endpoints) or LocationData objects sent by the parser.
 UnsavedLocation = TypeVar("UnsavedLocation", LocationData, AbstractLocation)
 
 
