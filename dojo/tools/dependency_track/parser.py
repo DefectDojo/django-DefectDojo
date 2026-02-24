@@ -252,8 +252,7 @@ class DependencyTrackParser:
             finding.epss_percentile = epss_percentile
 
         if settings.V3_FEATURE_LOCATIONS:
-            component_purl = dependency_track_finding["component"].get("purl")
-            if component_purl:
+            if component_purl := dependency_track_finding.get("component", {}).get("purl"):
                 finding.unsaved_locations.append(
                     LocationData.dependency(purl=component_purl),
                 )
