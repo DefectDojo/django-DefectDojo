@@ -2775,9 +2775,6 @@ class Finding(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.unsaved_metadata: list = []
-
         if settings.V3_FEATURE_LOCATIONS:
             self.unsaved_locations: list[UnsavedLocation] = []
         else:
