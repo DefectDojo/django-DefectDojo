@@ -42,10 +42,7 @@ class CheckmarxOsaParser:
                 if lib_name and ":" in lib_name:
                     parts = lib_name.split(":", 1)
                     test.unsaved_metadata.append(
-                        LocationData(
-                            type="dependency",
-                            data={"purl_type": "maven", "namespace": parts[0], "name": parts[1], "version": lib_version},
-                        ),
+                        LocationData.dependency(purl_type="maven", namespace=parts[0], name=parts[1], version=lib_version),
                     )
 
         vulnerabilities = self.get_vunlerabilities(tree)

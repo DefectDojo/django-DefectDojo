@@ -91,10 +91,7 @@ def get_item(dependency_name, dependency_version, advisory, test):
 
     if settings.V3_FEATURE_LOCATIONS and dependency_name:
         finding.unsaved_locations.append(
-            LocationData(
-                type="dependency",
-                data={"purl_type": "composer", "name": dependency_name, "version": dependency_version},
-            ),
+            LocationData.dependency(purl_type="composer", name=dependency_name, version=dependency_version),
         )
 
     return finding

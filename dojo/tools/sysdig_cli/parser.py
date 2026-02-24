@@ -69,10 +69,7 @@ class SysdigCLIParser:
                     purl_type = SYSDIG_TYPE_TO_PURL.get(pkg_type.lower())
                     if purl_type:
                         test.unsaved_metadata.append(
-                            LocationData(
-                                type="dependency",
-                                data={"purl_type": purl_type, "name": pkg_name, "version": pkg_version},
-                            ),
+                            LocationData.dependency(purl_type=purl_type, name=pkg_name, version=pkg_version),
                         )
 
         for package in packages:

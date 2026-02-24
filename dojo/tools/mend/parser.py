@@ -76,10 +76,7 @@ class MendParser:
                         purl_type = MEND_TYPE_TO_PURL.get(lib_type.lower())
                         if purl_type:
                             test.unsaved_metadata.append(
-                                LocationData(
-                                    type="dependency",
-                                    data={"purl_type": purl_type, "name": lib_name, "version": lib_version},
-                                ),
+                                LocationData.dependency(purl_type=purl_type, name=lib_name, version=lib_version),
                             )
             elif "components" in content:
                 for comp_node in content.get("components"):
@@ -90,10 +87,7 @@ class MendParser:
                         purl_type = MEND_TYPE_TO_PURL.get(comp_type.lower())
                         if purl_type:
                             test.unsaved_metadata.append(
-                                LocationData(
-                                    type="dependency",
-                                    data={"purl_type": purl_type, "name": comp_name, "version": comp_version},
-                                ),
+                                LocationData.dependency(purl_type=purl_type, name=comp_name, version=comp_version),
                             )
 
         def _build_common_output(node, lib_name=None):
@@ -295,10 +289,7 @@ class MendParser:
                 purl_type = MEND_TYPE_TO_PURL.get(library_type.lower())
                 if purl_type:
                     new_finding.unsaved_locations.append(
-                        LocationData(
-                            type="dependency",
-                            data={"purl_type": purl_type, "name": component_name, "version": component_version},
-                        ),
+                        LocationData.dependency(purl_type=purl_type, name=component_name, version=component_version),
                     )
 
             return new_finding

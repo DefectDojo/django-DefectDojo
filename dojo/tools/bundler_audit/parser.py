@@ -97,10 +97,7 @@ class BundlerAuditParser:
                     find.unsaved_vulnerability_ids = [advisory_id]
                 if settings.V3_FEATURE_LOCATIONS and gem_name:
                     find.unsaved_locations.append(
-                        LocationData(
-                            type="dependency",
-                            data={"purl_type": "gem", "name": gem_name, "version": gem_version},
-                        ),
+                        LocationData.dependency(purl_type="gem", name=gem_name, version=gem_version),
                     )
 
                 dupes[dupe_key] = find

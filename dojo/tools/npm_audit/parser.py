@@ -152,10 +152,7 @@ def get_item(item_node, test):
 
     if settings.V3_FEATURE_LOCATIONS and item_node["module_name"] and component_version:
         dojo_finding.unsaved_locations.append(
-            LocationData(
-                type="dependency",
-                data={"purl_type": "npm", "name": item_node["module_name"], "version": component_version},
-            ),
+            LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=component_version),
         )
 
     return dojo_finding

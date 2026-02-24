@@ -28,10 +28,7 @@ class RetireJsParser:
                     comp_version = result.get("version")
                     if comp_name and comp_version:
                         test.unsaved_metadata.append(
-                            LocationData(
-                                type="dependency",
-                                data={"purl_type": "npm", "name": comp_name, "version": comp_version},
-                            ),
+                            LocationData.dependency(purl_type="npm", name=comp_name, version=comp_version),
                         )
         return self.get_items(tree, test)
 
@@ -62,10 +59,7 @@ class RetireJsParser:
 
                         if settings.V3_FEATURE_LOCATIONS and result.get("component") and result.get("version"):
                             item.unsaved_locations.append(
-                                LocationData(
-                                    type="dependency",
-                                    data={"purl_type": "npm", "name": result["component"], "version": result["version"]},
-                                ),
+                                LocationData.dependency(purl_type="npm", name=result["component"], version=result["version"]),
                             )
 
                         encrypted_file = node["file"]

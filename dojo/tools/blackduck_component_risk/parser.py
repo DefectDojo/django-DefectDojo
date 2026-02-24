@@ -47,10 +47,7 @@ class BlackduckComponentRiskParser:
                     purl_type = BLACKDUCK_ORIGIN_TO_PURL.get(origin)
                     if purl_type:
                         test.unsaved_metadata.append(
-                            LocationData(
-                                type="dependency",
-                                data={"purl_type": purl_type, "name": comp_name, "version": comp_version},
-                            ),
+                            LocationData.dependency(purl_type=purl_type, name=comp_name, version=comp_version),
                         )
         return self.ingest_findings(components, securities, sources, test)
 

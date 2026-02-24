@@ -143,10 +143,7 @@ class CargoAuditParser:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
                     if settings.V3_FEATURE_LOCATIONS and package_name:
                         finding.unsaved_locations.append(
-                            LocationData(
-                                type="dependency",
-                                data={"purl_type": "cargo", "name": package_name, "version": package_version},
-                            ),
+                            LocationData.dependency(purl_type="cargo", name=package_name, version=package_version),
                         )
                     dupes[dupe_key] = finding
         return list(dupes.values())

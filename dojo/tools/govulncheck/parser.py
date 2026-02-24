@@ -130,10 +130,7 @@ class GovulncheckParser:
                         finding = Finding(**d)
                         if settings.V3_FEATURE_LOCATIONS and d["component_name"]:
                             finding.unsaved_locations.append(
-                                LocationData(
-                                    type="dependency",
-                                    data={"purl_type": "golang", "name": d["component_name"], "version": d["component_version"]},
-                                ),
+                                LocationData.dependency(purl_type="golang", name=d["component_name"], version=d["component_version"]),
                             )
                         findings.append(finding)
             elif isinstance(data, list):
@@ -210,10 +207,7 @@ class GovulncheckParser:
                         finding = Finding(**d)
                         if settings.V3_FEATURE_LOCATIONS and component_name:
                             finding.unsaved_locations.append(
-                                LocationData(
-                                    type="dependency",
-                                    data={"purl_type": "golang", "name": component_name, "version": affected_version},
-                                ),
+                                LocationData.dependency(purl_type="golang", name=component_name, version=affected_version),
                             )
                         findings.append(finding)
             return findings

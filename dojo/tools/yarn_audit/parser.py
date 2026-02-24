@@ -82,10 +82,7 @@ class YarnAuditParser:
                 dojo_finding.component_name = value
                 if settings.V3_FEATURE_LOCATIONS:
                     dojo_finding.unsaved_locations.append(
-                        LocationData(
-                            type="dependency",
-                            data={"purl_type": "npm", "name": value, "version": str(child_tree_versions)},
-                        ),
+                        LocationData.dependency(purl_type="npm", name=value, version=str(child_tree_versions)),
                     )
         return items
 
@@ -150,10 +147,7 @@ class YarnAuditParser:
                 dojo_finding.cwe = tree.get("advisories").get(element).get("cwe")[0].strip("CWE-")
             if settings.V3_FEATURE_LOCATIONS and dojo_finding.component_name and dojo_finding.component_version:
                 dojo_finding.unsaved_locations.append(
-                    LocationData(
-                        type="dependency",
-                        data={"purl_type": "npm", "name": dojo_finding.component_name, "version": dojo_finding.component_version},
-                    ),
+                    LocationData.dependency(purl_type="npm", name=dojo_finding.component_name, version=dojo_finding.component_version),
                 )
             items.append(dojo_finding)
         return items
@@ -229,9 +223,6 @@ class YarnAuditParser:
                 dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
         if settings.V3_FEATURE_LOCATIONS and item_node["module_name"]:
             dojo_finding.unsaved_locations.append(
-                LocationData(
-                    type="dependency",
-                    data={"purl_type": "npm", "name": item_node["module_name"], "version": item_node["findings"][0]["version"]},
-                ),
+                LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=item_node["findings"][0]["version"]),
             )
         return dojo_finding

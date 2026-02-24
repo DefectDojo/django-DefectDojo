@@ -38,10 +38,7 @@ class PipAuditParser:
                 version = item.get("version")
                 if name:
                     test.unsaved_metadata.append(
-                        LocationData(
-                            type="dependency",
-                            data={"purl_type": "pypi", "name": name, "version": version},
-                        ),
+                        LocationData.dependency(purl_type="pypi", name=name, version=version),
                     )
         # this parser can handle two distinct formats see sample scan files
         return get_file_findings(data, test) if "dependencies" in data else get_legacy_findings(data, test)
@@ -116,10 +113,7 @@ def get_item_findings(item, test):
 
             if settings.V3_FEATURE_LOCATIONS and component_name:
                 finding.unsaved_locations.append(
-                    LocationData(
-                        type="dependency",
-                        data={"purl_type": "pypi", "name": component_name, "version": component_version},
-                    ),
+                    LocationData.dependency(purl_type="pypi", name=component_name, version=component_version),
                 )
 
             findings.append(finding)
