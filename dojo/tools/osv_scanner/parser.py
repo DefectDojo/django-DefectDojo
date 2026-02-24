@@ -175,7 +175,7 @@ class OSVScannerParser:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
                     if settings.V3_FEATURE_LOCATIONS and vulnerabilitypackagepurl:
                         finding.unsaved_locations.append(
-                            LocationData.dependency(purl=vulnerabilitypackagepurl),
+                            LocationData.dependency(purl=vulnerabilitypackagepurl, file_path=source_path),
                         )
                     findings.append(finding)
         return findings

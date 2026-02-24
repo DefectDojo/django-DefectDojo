@@ -213,7 +213,7 @@ class AnchoreGrypeParser:
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
                 if settings.V3_FEATURE_LOCATIONS and artifact_purl:
                     dupes[dupe_key].unsaved_locations.append(
-                        LocationData.dependency(purl=artifact_purl),
+                        LocationData.dependency(purl=artifact_purl, file_path=file_path),
                     )
 
         return list(dupes.values())

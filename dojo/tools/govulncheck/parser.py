@@ -207,7 +207,7 @@ class GovulncheckParser:
                         finding = Finding(**d)
                         if settings.V3_FEATURE_LOCATIONS and component_name:
                             finding.unsaved_locations.append(
-                                LocationData.dependency(purl_type="golang", name=component_name, version=affected_version),
+                                LocationData.dependency(purl_type="golang", name=component_name, version=affected_version, file_path=path),
                             )
                         findings.append(finding)
             return findings

@@ -161,7 +161,7 @@ def get_item(vulnerability, test):
     if settings.V3_FEATURE_LOCATIONS and package_type and component_name:
         purl_type = package_type.lower()
         finding.unsaved_locations.append(
-            LocationData.dependency(purl_type=purl_type, name=component_name, version=component_version),
+            LocationData.dependency(purl_type=purl_type, name=component_name, version=component_version, file_path=vulnerability["path"]),
         )
 
     return finding

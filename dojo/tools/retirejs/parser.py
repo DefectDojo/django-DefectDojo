@@ -59,7 +59,7 @@ class RetireJsParser:
 
                         if settings.V3_FEATURE_LOCATIONS and result.get("component") and result.get("version"):
                             item.unsaved_locations.append(
-                                LocationData.dependency(purl_type="npm", name=result["component"], version=result["version"]),
+                                LocationData.dependency(purl_type="npm", name=result["component"], version=result["version"], file_path=node["file"]),
                             )
 
                         encrypted_file = node["file"]

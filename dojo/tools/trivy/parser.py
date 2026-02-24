@@ -361,13 +361,13 @@ class TrivyParser:
                     purl_value = vuln.get("PkgIdentifier", {}).get("PURL")
                     if purl_value:
                         finding.unsaved_locations.append(
-                            LocationData.dependency(purl=purl_value, license_expression=trivy_license),
+                            LocationData.dependency(purl=purl_value, license_expression=trivy_license, file_path=file_path),
                         )
                     else:
                         purl_type = TRIVY_TYPE_TO_PURL.get(vul_type.lower())
                         if purl_type:
                             finding.unsaved_locations.append(
-                                LocationData.dependency(purl_type=purl_type, name=package_name, version=package_version, license_expression=trivy_license),
+                                LocationData.dependency(purl_type=purl_type, name=package_name, version=package_version, license_expression=trivy_license, file_path=file_path),
                             )
 
                 items.append(finding)

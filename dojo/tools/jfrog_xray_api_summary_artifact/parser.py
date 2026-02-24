@@ -146,7 +146,7 @@ def get_item(
 
     if settings.V3_FEATURE_LOCATIONS and artifact_name and artifact_version:
         finding.unsaved_locations.append(
-            LocationData.dependency(name=artifact_name, version=artifact_version),
+            LocationData.dependency(name=artifact_name, version=artifact_version, file_path=impact_paths[0]),
         )
 
     return finding

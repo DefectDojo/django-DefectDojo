@@ -55,6 +55,7 @@ class LocationData:
         subpath: str = "",
         artifact_hashes: dict[str, list[str]] | None = None,
         license_expression: str = "",
+        file_path: str = "",
     ) -> LocationData:
         return cls(
             type="dependency",
@@ -68,6 +69,7 @@ class LocationData:
                 "subpath": subpath,
                 "artifact_hashes": artifact_hashes,
                 "license_expression": license_expression,
+                "file_path": file_path,
             },
         )
 

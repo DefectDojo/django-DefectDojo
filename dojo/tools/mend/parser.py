@@ -289,7 +289,7 @@ class MendParser:
                 purl_type = MEND_TYPE_TO_PURL.get(library_type.lower())
                 if purl_type:
                     new_finding.unsaved_locations.append(
-                        LocationData.dependency(purl_type=purl_type, name=component_name, version=component_version),
+                        LocationData.dependency(purl_type=purl_type, name=component_name, version=component_version, file_path=", ".join(filepaths)),
                     )
 
             return new_finding

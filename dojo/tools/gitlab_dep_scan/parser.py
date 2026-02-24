@@ -145,7 +145,7 @@ class GitlabDepScanParser:
 
         if settings.V3_FEATURE_LOCATIONS and component_name and component_version:
             finding.unsaved_locations.append(
-                LocationData.dependency(name=component_name, version=component_version),
+                LocationData.dependency(name=component_name, version=component_version, file_path=file_path),
             )
 
         return finding

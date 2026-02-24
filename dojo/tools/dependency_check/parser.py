@@ -401,7 +401,7 @@ class DependencyCheckParser:
 
         if settings.V3_FEATURE_LOCATIONS and component_purl:
             finding.unsaved_locations.append(
-                LocationData.dependency(purl=component_purl),
+                LocationData.dependency(purl=component_purl, file_path=dependency_filename),
             )
 
         if vulnerability_id:

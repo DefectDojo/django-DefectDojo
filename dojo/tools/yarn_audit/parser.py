@@ -223,6 +223,6 @@ class YarnAuditParser:
                 dojo_finding.unsaved_vulnerability_ids.append(vulnerability_id)
         if settings.V3_FEATURE_LOCATIONS and item_node["module_name"]:
             dojo_finding.unsaved_locations.append(
-                LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=item_node["findings"][0]["version"]),
+                LocationData.dependency(purl_type="npm", name=item_node["module_name"], version=item_node["findings"][0]["version"], file_path=item_node["findings"][0]["paths"][0]),
             )
         return dojo_finding

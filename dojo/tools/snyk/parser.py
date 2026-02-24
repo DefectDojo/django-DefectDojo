@@ -294,7 +294,7 @@ class SnykParser:
             purl_type = SNYK_PM_TO_PURL.get(package_manager.lower())
             if purl_type:
                 finding.unsaved_locations.append(
-                    LocationData.dependency(purl_type=purl_type, name=vulnerability["packageName"], version=vulnerability.get("version", "")),
+                    LocationData.dependency(purl_type=purl_type, name=vulnerability["packageName"], version=vulnerability.get("version", ""), file_path=vulnPath),
                 )
 
         return finding
