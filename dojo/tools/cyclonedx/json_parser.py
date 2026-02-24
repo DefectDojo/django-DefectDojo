@@ -30,8 +30,9 @@ class CycloneDXJSONParser:
                 component_purl = component_data.get("purl")
                 if component_purl:
                     component_hashes = Cyclonedxhelper()._collect_hashes(component_data.get("hashes"))
+                    license_expression = Cyclonedxhelper.extract_license_expression_json(component_data)
                     test.unsaved_metadata.append(
-                        LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes),
+                        LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=license_expression),
                     )
         # for each vulnerabilities create one finding by component affected
         findings = []
@@ -89,9 +90,10 @@ class CycloneDXJSONParser:
                 if settings.V3_FEATURE_LOCATIONS:
                     if component_data := components.get(reference, {}):
                         component_hashes = Cyclonedxhelper()._collect_hashes(component_data.get("hashes"))
+                        license_expression = Cyclonedxhelper.extract_license_expression_json(component_data)
                         if component_purl := component_data.get("purl"):
                             finding.unsaved_locations.append(
-                                LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes),
+                                LocationData.dependency(purl=component_purl, artifact_hashes=component_hashes, license_expression=license_expression),
                             )
                         else:
                             finding.unsaved_locations.append(
@@ -99,6 +101,7 @@ class CycloneDXJSONParser:
                                     name=component_name,
                                     version=component_version,
                                     artifact_hashes=component_hashes,
+                                    license_expression=license_expression,
                                 ),
                             )
                 if report_date:

@@ -98,8 +98,9 @@ class XeolParser:
 
             artifact_purl = artifact.get("purl")
             if settings.V3_FEATURE_LOCATIONS and artifact_purl:
+                license_expression = " OR ".join(artifact.get("licenses", []))
                 finding.unsaved_locations.append(
-                    LocationData.dependency(purl=artifact_purl),
+                    LocationData.dependency(purl=artifact_purl, license_expression=license_expression),
                 )
 
             findings.append(finding)

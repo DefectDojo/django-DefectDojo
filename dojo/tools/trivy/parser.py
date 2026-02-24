@@ -257,6 +257,17 @@ class TrivyParser:
             target_class = target_data.get("Class")
             target_type = target_data.get("Type")
 
+            # Build package name → license mapping from the Licenses section
+            pkg_license_map: dict[str, str] = {}
+            for lic in target_data.get("Licenses", []) or []:
+                pkg_name_lic = lic.get("PkgName", "")
+                license_name = lic.get("Name", "")
+                if pkg_name_lic and license_name:
+                    if pkg_name_lic in pkg_license_map:
+                        pkg_license_map[pkg_name_lic] += f" OR {license_name}"
+                    else:
+                        pkg_license_map[pkg_name_lic] = license_name
+
             vulnerabilities = target_data.get("Vulnerabilities", []) or []
             for vuln in vulnerabilities:
                 if not isinstance(vuln, dict):
@@ -346,16 +357,17 @@ class TrivyParser:
                     finding.unsaved_vulnerability_ids = [vuln_id]
 
                 if settings.V3_FEATURE_LOCATIONS and package_name:
+                    trivy_license = pkg_license_map.get(package_name, "")
                     purl_value = vuln.get("PkgIdentifier", {}).get("PURL")
                     if purl_value:
                         finding.unsaved_locations.append(
-                            LocationData.dependency(purl=purl_value),
+                            LocationData.dependency(purl=purl_value, license_expression=trivy_license),
                         )
                     else:
                         purl_type = TRIVY_TYPE_TO_PURL.get(vul_type.lower())
                         if purl_type:
                             finding.unsaved_locations.append(
-                                LocationData.dependency(purl_type=purl_type, name=package_name, version=package_version),
+                                LocationData.dependency(purl_type=purl_type, name=package_name, version=package_version, license_expression=trivy_license),
                             )
 
                 items.append(finding)
