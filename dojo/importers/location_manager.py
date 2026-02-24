@@ -114,7 +114,7 @@ class LocationManager:
     ) -> None:
         if not locations:
             return
-        dojo_dispatch_task(self.add_locations_to_unsaved_finding, LocationManager, finding, locations, sync=True)
+        dojo_dispatch_task(self.add_locations_to_unsaved_finding, self, finding, locations, sync=True)
 
     @classmethod
     def clean_unsaved_locations(
