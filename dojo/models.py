@@ -3090,8 +3090,10 @@ class Finding(BaseModel):
             if len(finding.unsaved_locations) > 0:
                 deduplicationLogger.debug("get_locations before the finding was saved")
                 # convert list of unsaved locations to the list of their canonical representation
+                from dojo.importers.location_manager import LocationManager  # noqa: PLC0415
+                unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
                 # deduplicate (usually done upon saving finding) and sort locations
-                locations = sorted({location.get_location_value() for location in finding.unsaved_locations})
+                locations = sorted({location.get_location_value() for location in unsaved_locations})
                 return "".join(locations)
             # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
             # In this case, before saving the finding, both static_finding and dynamic_finding are True
@@ -3101,9 +3103,11 @@ class Finding(BaseModel):
 
         def _get_saved_locations(finding) -> str:
             if finding.id is not None:
-                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(finding.locations.count()))
+                from dojo.url.models import URL  # noqa: PLC0415
+                url_locations = finding.locations.filter(location__location_type=URL.get_location_type())
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(url_locations.count()))
                 # convert list of locations to the list of their canonical representation
-                locations = sorted({location_ref.location.get_location_value() for location_ref in finding.locations.all()})
+                locations = sorted({location_ref.location.get_location_value() for location_ref in url_locations.all()})
                 # sort locations strings
                 return "".join(sorted(locations))
             return ""
