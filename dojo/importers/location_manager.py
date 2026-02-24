@@ -26,6 +26,7 @@ UnsavedLocation = TypeVar("UnsavedLocation", LocationData, AbstractLocation)
 class LocationManager:
     @classmethod
     def get_or_create_location(cls, unsaved_location: AbstractLocation) -> AbstractLocation | None:
+        """Gets/creates the given AbstractLocation."""
         if isinstance(unsaved_location, URL):
             return URL.get_or_create_from_object(unsaved_location)
         logger.debug(f"IMPORT_SCAN: Unsupported location type: {type(unsaved_location)}")
@@ -33,6 +34,7 @@ class LocationManager:
 
     @classmethod
     def make_abstract_locations(cls, locations: list[UnsavedLocation]) -> list[AbstractLocation]:
+        """Converts the list of unsaved locations (AbstractLocation/LocationData objects) to a list of AbstractLocations."""
         abstract_locations = []
 
         for location in locations:
@@ -56,7 +58,7 @@ class LocationManager:
         locations: list[UnsavedLocation],
         **kwargs: dict,  # noqa: ARG003
     ) -> None:
-        """Creates AbstractLocation objects for a single finding links them to it."""
+        """Creates AbstractLocation objects from the given list and links them to the given finding."""
         locations = cls.clean_unsaved_locations(locations)
 
         logger.debug(f"IMPORT_SCAN: Adding {len(locations)} locations to finding: {finding}")
