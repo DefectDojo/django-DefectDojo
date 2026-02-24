@@ -317,7 +317,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         return getattr(self, "_association_data", LocationAssociationData())
 
     @classmethod
-    def get_or_create_from_object(cls: T, location: T):
+    def get_or_create_from_object(cls: T, location: T) -> T:
         """Given an object of this type, this method should get/create the object and return it."""
         msg = "Subclasses must implement get_or_create_from_object"
         raise NotImplementedError(msg)
