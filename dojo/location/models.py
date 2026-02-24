@@ -240,6 +240,7 @@ class Location(BaseModel):
         ]
 
 
+# TypeVar to help linting in AbstractLocation child classes
 T = TypeVar("T", bound="AbstractLocation")
 
 
@@ -267,7 +268,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         raise NotImplementedError(msg)
 
     @staticmethod
-    def create_location_from_value(value: str) -> Self:
+    def create_location_from_value(value: str) -> T:
         """
         Dynamically create a Location and subclass instance based on location_type
         and location_value. Uses parse_string_value from the correct subclass.
@@ -292,6 +293,10 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
 
     @classmethod
     def from_location_data(cls: T, location_data: LocationData) -> T:
+        """
+        Checks that the given LocationData object represents this type, then calls #_from_location_data_impl() to build
+        one based on its contents. Saving boilerplate checking is all.
+        """
         if location_data.type != cls.get_location_type():
             error_message = f"Cannot create instance of {cls} from LocationData of type {location_data.type}"
             raise ValueError(error_message)
@@ -299,15 +304,21 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
 
     @classmethod
     def _from_location_data_impl(cls: T, location_data: LocationData) -> T:
+        """Given a LocationData object trusted to represent this type, build a Location object from its contents."""
         msg = "Subclasses must implement _from_location_data_impl"
         raise NotImplementedError(msg)
 
     def get_association_data(self) -> LocationAssociationData:
-        """Return (relationship, relationship_data) stashed by _from_location_data_impl."""
+        """
+        Return the LocationAssociationData associated with this AbstractLocation. For convenience, if one does not
+        exist, this returns an empty (falsey) LocationAssociationData that defaults to the empty values expected by
+        the backing ReferenceDataMixin models.
+        """
         return getattr(self, "_association_data", LocationAssociationData())
 
     @classmethod
     def get_or_create_from_object(cls: T, location: T):
+        """Given an object of this type, this method should get/create the object and return it."""
         msg = "Subclasses must implement get_or_create_from_object"
         raise NotImplementedError(msg)
 
