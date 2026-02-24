@@ -54,6 +54,10 @@ class TestDependencyTrackParser(DojoTestCase):
             parser = DependencyTrackParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.assertEqual(
+                "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46",
+                findings[0].unique_id_from_tool,
+            )
 
     def test_dependency_track_parser_v3_8_0(self):
         with (
@@ -64,6 +68,7 @@ class TestDependencyTrackParser(DojoTestCase):
             self.assertEqual(9, len(findings))
             self.assertTrue(all(item.file_path is not None for item in findings))
             self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
+            self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
 
     def test_dependency_track_parser_findings_with_alias(self):
         with (
@@ -75,6 +80,7 @@ class TestDependencyTrackParser(DojoTestCase):
             self.assertEqual(12, len(findings))
             self.assertTrue(all(item.file_path is not None for item in findings))
             self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
+            self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
             self.assertIn("CVE-2022-42004", findings[0].unsaved_vulnerability_ids)
 
     def test_dependency_track_parser_findings_with_empty_alias(self):
@@ -94,6 +100,7 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertEqual(12, len(findings))
         self.assertTrue(all(item.file_path is not None for item in findings))
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
+        self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
         self.assertIn("CVE-2022-42004", findings[0].unsaved_vulnerability_ids)
         self.assertEqual(8.3, findings[0].cvssv3_score)
 

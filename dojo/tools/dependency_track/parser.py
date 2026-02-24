@@ -230,6 +230,7 @@ class DependencyTrackParser:
             component_version=component_version,
             file_path=file_path,
             vuln_id_from_tool=vuln_id_from_tool,
+            unique_id_from_tool=dependency_track_finding.get("matrix"),
             static_finding=True,
             dynamic_finding=False)
 
