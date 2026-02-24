@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import io
+import re
 
 from dojo.models import Finding
 
@@ -9,6 +10,7 @@ SEVERITY_MAPPING = {
     "Low": "Low",
     "Medium": "Medium",
     "High": "High",
+    "Critical": "Critical",
 }
 
 
@@ -42,6 +44,8 @@ class IriusriskParser:
             countermeasure_tests = (row.get("Countermeasure tests") or "").strip()
             projected_risk = (row.get("Projected Risk") or "").strip()
             owner = (row.get("Owner") or "").strip()
+            mitre_reference = (row.get("MITRE reference") or "").strip()
+            stride_lm = (row.get("STRIDE-LM") or "").strip()
 
             # Title: truncate to 150 chars with ellipsis if needed
             title = threat[:147] + "..." if len(threat) > 150 else threat
@@ -63,12 +67,24 @@ class IriusriskParser:
             ]
             if owner:
                 description_parts.append(f"**Owner:** {owner}")
+            if stride_lm:
+                description_parts.append(f"**STRIDE-LM:** {stride_lm}")
             description = "\n".join(description_parts)
 
             # Unique ID for deduplication across reimports
             unique_id = hashlib.sha256(
                 f"{component}|{threat}|{risk_response}".encode(),
             ).hexdigest()
+
+            # Extract CWE from MITRE reference if present
+            cwe = None
+            references = ""
+            if mitre_reference:
+                cwe_match = re.match(r"CWE-(\d+)", mitre_reference)
+                if cwe_match:
+                    cwe = int(cwe_match.group(1))
+                else:
+                    references = mitre_reference
 
             finding = Finding(
                 test=test,
@@ -78,9 +94,13 @@ class IriusriskParser:
                 mitigation=risk_response,
                 component_name=component,
                 active=current_risk != "Very low",
-                static_finding=True,
+                static_finding=False,
                 dynamic_finding=False,
                 unique_id_from_tool=unique_id,
             )
+            if cwe:
+                finding.cwe = cwe
+            if references:
+                finding.references = references
             findings.append(finding)
         return findings

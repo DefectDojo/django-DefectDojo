@@ -21,7 +21,7 @@ class TestIriusriskParser(DojoTestCase):
         with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
             parser = IriusriskParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(5, len(findings))
+            self.assertEqual(6, len(findings))
 
     def test_finding_severity_high(self):
         with (get_unit_tests_scans_path("iriusrisk") / "one_vuln.csv").open(encoding="utf-8") as testfile:
@@ -46,6 +46,13 @@ class TestIriusriskParser(DojoTestCase):
             parser = IriusriskParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual("Info", findings[3].severity)
+
+    def test_finding_severity_critical(self):
+        with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
+            parser = IriusriskParser()
+            findings = parser.get_findings(testfile, Test())
+            # Row 6 (index 5) has Current Risk = "Critical"
+            self.assertEqual("Critical", findings[5].severity)
 
     def test_finding_title_truncated_at_150_chars(self):
         with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
@@ -102,7 +109,7 @@ class TestIriusriskParser(DojoTestCase):
         with (get_unit_tests_scans_path("iriusrisk") / "one_vuln.csv").open(encoding="utf-8") as testfile:
             parser = IriusriskParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertTrue(findings[0].static_finding)
+            self.assertFalse(findings[0].static_finding)
             self.assertFalse(findings[0].dynamic_finding)
 
     def test_finding_unique_id_from_tool(self):
@@ -131,3 +138,25 @@ class TestIriusriskParser(DojoTestCase):
             parser = IriusriskParser()
             findings = parser.get_findings(testfile, Test())
             self.assertNotIn("None", findings[0].description)
+
+    def test_finding_cwe_from_mitre_reference(self):
+        with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
+            parser = IriusriskParser()
+            findings = parser.get_findings(testfile, Test())
+            # Row 1 (index 0) has MITRE reference = "CWE-284"
+            self.assertEqual(284, findings[0].cwe)
+
+    def test_finding_references_from_mitre_reference(self):
+        with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
+            parser = IriusriskParser()
+            findings = parser.get_findings(testfile, Test())
+            # Row 2 (index 1) has MITRE reference = "T1059" (not a CWE)
+            self.assertEqual("T1059", findings[1].references)
+
+    def test_finding_stride_lm_in_description(self):
+        with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
+            parser = IriusriskParser()
+            findings = parser.get_findings(testfile, Test())
+            # Row 1 (index 0) has STRIDE-LM = "Elevation of Privilege"
+            self.assertIn("STRIDE-LM", findings[0].description)
+            self.assertIn("Elevation of Privilege", findings[0].description)
