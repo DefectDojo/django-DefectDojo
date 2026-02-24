@@ -31,7 +31,7 @@ You will need an API key with access to the Akamai API. We recommend creating a 
 
 #### Connector Mappings
 
-1. Enter your Akamai API base URL in the **Location** field. This URL is specific to your Akamai account and can be found in your Akamai account credentials.
+1. Enter your Akamai API base URL in the **Location** field. This URL is specific to your Akamai instance: for example
 2. Enter a valid **API Key** in the **Secret** field.
 
 DefectDojo will map **Applications** and **Hosts** as separate Records. Each Application will appear as `{name} (application)` and each Host as `{name} (host)` in your Records list.
@@ -162,7 +162,13 @@ You will need an API token with access to both Artifactory and Xray APIs. We rec
 #### Connector Mappings
 
 1. Enter your JFrog instance base URL in the **Location** field. This should be the root URL of your JFrog instance, for example `https://your-instance.jfrog.io`. Do not include a trailing path — DefectDojo will construct the appropriate API paths automatically.
-2. Enter a valid **API Token** in the **Secret** field. Tokens can be generated under **User Management \> Access Tokens** in the JFrog Platform UI.
+2. Enter a valid **Reference Token** in the **Secret** field. Tokens can be generated under **User Management \> Access Tokens** in the JFrog Platform UI.
+You'll need to generate a **Reference Token** and use that value.
+
+Required token scopes for JFrog Xray:
+
+- **All Services**, as DefectDojo needs access to both access to both XRay and Artifactory services
+- **Manage Reports + Manage Resources** at a minimum.
 
 DefectDojo maps each Artifactory **repository** as a separate Record. On first Sync, DefectDojo generates a full historical vulnerability report; subsequent Syncs generate incremental (delta) reports covering new findings since the last Sync.
 
