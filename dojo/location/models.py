@@ -149,8 +149,6 @@ class Location(BaseModel):
             # Now associate the product for this finding (already uses update_or_create)
             self.associate_with_product(
                 finding.test.engagement.product,
-                relationship=relationship,
-                relationship_data=relationship_data,
             )
 
             return reference

@@ -114,7 +114,7 @@ class LocationManager:
     ) -> None:
         if not locations:
             return
-        dojo_dispatch_task(self.add_locations_to_unsaved_finding, self, finding, locations, sync=True)
+        dojo_dispatch_task(self.add_locations_to_unsaved_finding, finding, locations, sync=True)
 
     @classmethod
     def clean_unsaved_locations(
@@ -138,7 +138,7 @@ class LocationManager:
         location_refs: QuerySet[LocationFindingReference],
         **kwargs: dict,
     ) -> None:
-        dojo_dispatch_task(LocationManager.reactivate_location_status, location_refs, sync=True)
+        dojo_dispatch_task(self.reactivate_location_status, location_refs, sync=True)
 
     def chunk_locations_and_mitigate(
         self,
@@ -146,7 +146,7 @@ class LocationManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        dojo_dispatch_task(LocationManager.mitigate_location_status, location_refs, user, sync=True)
+        dojo_dispatch_task(self.mitigate_location_status, location_refs, user, sync=True)
 
     def update_location_status(
         self,
@@ -167,7 +167,7 @@ class LocationManager:
             # New finding not mitigated; so, reactivate all refs
             existing_location_refs: QuerySet[LocationFindingReference] = existing_finding.locations.all()
 
-            new_locations_values = [str(location) for location in new_finding.unsaved_locations]
+            new_locations_values = [str(location) for location in self.clean_unsaved_locations(new_finding.unsaved_locations)]
 
             # Reactivate endpoints in the old finding that are in the new finding
             location_refs_to_reactivate = existing_location_refs.filter(location__location_value__in=new_locations_values)

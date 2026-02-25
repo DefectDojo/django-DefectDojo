@@ -144,9 +144,10 @@ def get_item(
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids
 
-    if settings.V3_FEATURE_LOCATIONS and artifact_name and artifact_version:
+    if settings.V3_FEATURE_LOCATIONS and (artifact_name or artifact_version or len(impact_paths) > 0):
+        impact_path = impact_paths[0] if len(impact_paths) > 0 else ""
         finding.unsaved_locations.append(
-            LocationData.dependency(name=artifact_name, version=artifact_version, file_path=impact_paths[0]),
+            LocationData.dependency(name=artifact_name, version=artifact_version, file_path=impact_path),
         )
 
     return finding
