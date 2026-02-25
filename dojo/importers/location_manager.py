@@ -53,8 +53,7 @@ class LocationManager:
         return abstract_locations
 
     @classmethod
-    @app.task
-    def add_locations_to_unsaved_finding(
+    def _add_locations_to_unsaved_finding(
         cls,
         finding: Finding,
         locations: list[UnsavedLocation],
@@ -82,6 +81,19 @@ class LocationManager:
         logger.debug(f"IMPORT_SCAN: {locations_saved} locations imported")
 
     @app.task
+    def add_locations_to_unsaved_finding(
+        manager_cls_path: str,  # noqa: N805
+        finding: Finding,
+        locations: list[UnsavedLocation],
+        **kwargs: dict,
+    ) -> None:
+        """Celery task that resolves the LocationManager class and delegates to _add_locations_to_unsaved_finding."""
+        from django.utils.module_loading import import_string  # noqa: PLC0415
+
+        manager_cls = import_string(manager_cls_path)
+        manager_cls._add_locations_to_unsaved_finding(finding, locations, **kwargs)
+
+    @app.task
     def mitigate_location_status(
         location_refs: QuerySet[LocationFindingReference],  # noqa: N805
         user: Dojo_User,
@@ -106,16 +118,6 @@ class LocationManager:
             status=FindingLocationStatus.Active,
         )
 
-    def chunk_locations_and_disperse(
-        self,
-        finding: Finding,
-        locations: list[UnsavedLocation],
-        **kwargs: dict,
-    ) -> None:
-        if not locations:
-            return
-        dojo_dispatch_task(self.add_locations_to_unsaved_finding, finding, locations, sync=True)
-
     @classmethod
     def clean_unsaved_locations(
         cls,
@@ -132,21 +134,6 @@ class LocationManager:
             except ValidationError as e:
                 logger.warning("DefectDojo is storing broken locations because cleaning wasn't successful: %s", e)
         return locations
-
-    def chunk_locations_and_reactivate(
-        self,
-        location_refs: QuerySet[LocationFindingReference],
-        **kwargs: dict,
-    ) -> None:
-        dojo_dispatch_task(self.reactivate_location_status, location_refs, sync=True)
-
-    def chunk_locations_and_mitigate(
-        self,
-        location_refs: QuerySet[LocationFindingReference],
-        user: Dojo_User,
-        **kwargs: dict,
-    ) -> None:
-        dojo_dispatch_task(self.mitigate_location_status, location_refs, user, sync=True)
 
     def update_location_status(
         self,
@@ -167,7 +154,7 @@ class LocationManager:
             # New finding not mitigated; so, reactivate all refs
             existing_location_refs: QuerySet[LocationFindingReference] = existing_finding.locations.all()
 
-            new_locations_values = [str(location) for location in self.clean_unsaved_locations(new_finding.unsaved_locations)]
+            new_locations_values = [str(location) for location in type(self).clean_unsaved_locations(new_finding.unsaved_locations)]
 
             # Reactivate endpoints in the old finding that are in the new finding
             location_refs_to_reactivate = existing_location_refs.filter(location__location_value__in=new_locations_values)
@@ -176,3 +163,29 @@ class LocationManager:
 
             self.chunk_locations_and_reactivate(location_refs_to_reactivate)
             self.chunk_locations_and_mitigate(location_refs_to_mitigate, user)
+
+    def chunk_locations_and_disperse(
+        self,
+        finding: Finding,
+        locations: list[UnsavedLocation],
+        **kwargs: dict,
+    ) -> None:
+        if not locations:
+            return
+        cls_path = f"{type(self).__module__}.{type(self).__qualname__}"
+        dojo_dispatch_task(self.add_locations_to_unsaved_finding, cls_path, finding, locations, sync=True)
+
+    def chunk_locations_and_reactivate(
+        self,
+        location_refs: QuerySet[LocationFindingReference],
+        **kwargs: dict,
+    ) -> None:
+        dojo_dispatch_task(self.reactivate_location_status, location_refs, sync=True)
+
+    def chunk_locations_and_mitigate(
+        self,
+        location_refs: QuerySet[LocationFindingReference],
+        user: Dojo_User,
+        **kwargs: dict,
+    ) -> None:
+        dojo_dispatch_task(self.mitigate_location_status, location_refs, user, sync=True)
