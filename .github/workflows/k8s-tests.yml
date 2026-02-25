@@ -27,7 +27,7 @@ jobs:
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@8234275e0386fe1cdaf519d28c90f4f03fad89e4 # v2.15.0
         with:
-          minikube version: 'v1.38.0' # renovate: datasource=github-releases depName=kubernetes/minikube
+          minikube version: 'v1.38.1' # renovate: datasource=github-releases depName=kubernetes/minikube
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'

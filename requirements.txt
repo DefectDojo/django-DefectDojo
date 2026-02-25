@@ -6,13 +6,13 @@ celery[sqs]==5.6.2
 defusedxml==0.7.1
 django_celery_results==2.6.0
 django-auditlog==3.2.1
-django-pghistory==3.9.1
+django-pghistory==3.9.2
 django-dbbackup==5.2.0
-django-environ==0.12.1
+django-environ==0.13.0
 django-filter==25.2
-django-imagekit==6.0.0
+django-imagekit==6.1.0
 django-multiselectfield==1.0.1
-django-polymorphic==4.11.0
+django-polymorphic==4.11.1
 django-crispy-forms==2.5
 django_extensions==4.1
 django-slack==5.19.0
@@ -30,10 +30,10 @@ lxml==6.0.2
 Markdown==3.10.2
 openpyxl==3.1.5
 Pillow==12.1.1  # required by django-imagekit
-psycopg[c]==3.3.2
+psycopg[c]==3.3.3
 cryptography==46.0.5
 python-dateutil==2.9.0.post0
-redis==7.1.1
+redis==7.2.0
 requests==2.32.5
 sqlalchemy==2.0.46  # Required by Celery broker transport
 urllib3==2.6.3
@@ -57,7 +57,7 @@ PyJWT==2.11.0
 cvss==3.6
 django-fieldsignals==0.8.0
 hyperlink==21.0.0
-djangosaml2==1.11.1
+djangosaml2==1.12.0
 drf-spectacular==0.29.0
 drf-spectacular-sidecar==2026.1.1
 django-ratelimit==4.1.0

@@ -71,7 +71,7 @@ jobs:
     secrets: inherit
 
   release-drafter:
-    needs: publish-container-digests
+    needs: [publish-container-digests, release-helm-chart]
     uses: ./.github/workflows/release-drafter.yml
     with:
       version: ${{ inputs.release_number }}

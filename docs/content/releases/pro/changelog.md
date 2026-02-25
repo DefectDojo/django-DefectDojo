@@ -10,7 +10,20 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/changelog/os_upgrading/upgrading_guide/).
 
-## Feb 2025: v2.55
+## Feb 2026: v2.55
+
+### Feb 17, 2026: v2.55.3
+
+* **(Pro UI)** Added “Scheduled” status to Engagements to enhances the tracking and management of Engagements.
+
+### Feb 10, 2026: v2.55.2
+
+* **(Pro UI)** Enhanced Organization addition permissions with configuration checks.
+
+### Feb 4, 2026: v2.55.1
+
+* **(Pro UI)** Findings: Added support for Custom Fields; key-value pairs that can be added to Findings.
+* **(Pro UI)** Fixed an issue where a date filter could throw a 500 error.
 
 ### Feb 2, 2026: v2.55.0
 
