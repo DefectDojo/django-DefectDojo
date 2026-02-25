@@ -1,5 +1,5 @@
 ---
-title: "Deduplication Tuning"
+title: "Deduplication Tuning (Open Source)"
 description: "Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service"
 weight: 5
 audience: opensource
@@ -106,6 +106,10 @@ Notes:
 
 ## After changing deduplication settings
 
+After changing algorithms or Hash computation, you will need to **recompute hashes** for the affected parser/test type before the new matching behavior will apply consistently across existing data.
+
+Note: Recomputing hashes can be lead to on large instances. Plan maintenance windows accordingly.
+
 - Changes to dedupe configuration (e.g., `HASHCODE_FIELDS_PER_SCANNER`, `HASH_CODE_FIELDS_ALWAYS`, `DEDUPLICATION_ALGORITHM_PER_PARSER`) are not applied retroactively automatically. To re-evaluate existing findings you must run the management command below.
 
 Run inside the uwsgi container. Example (hash codes only, no dedupe):
@@ -141,3 +145,6 @@ To help troubleshooting deduplication use the following tools:
 ![Unique ID from Tool and Hash Code on the View Finding page](images/hash_code_id_field.png)
 
 ![Unique ID from Tool and Hash Code on the Finding List Status Column](images/hash_code_status_column.png)
+
+In Open Source, 
+

@@ -1,11 +1,12 @@
 ---
-title: "Deduplication Tuning"
+title: "Deduplication Tuning (Pro)"
 description: "Configure how DefectDojo identifies and manages duplicate findings"
 weight: 4
 audience: pro
 aliases:
   - /en/working_with_findings/finding_deduplication/tune_deduplication
 ---
+
 Deduplication Tuning is a DefectDojo Pro feature that gives you fine-grained control over how findings are deduplicated, allowing you to optimize duplicate detection for your specific security testing workflow.
 
 ## Deduplication Settings
@@ -41,6 +42,8 @@ Uses a combination of selected fields to generate a unique hash. When selected, 
 #### Unique ID From Tool
 Leverages the security tool's own internal identifier for findings, ensuring perfect deduplication when the scanner provides reliable unique IDs.
 
+This algorithm can be useful when working with SAST scanners, or situations where a Finding can "move around" in source code as development progresses.
+
 #### Unique ID From Tool or Hash Code
 Attempts to use the tool's unique ID first, then falls back to the hash code if no unique ID is available. This provides the most flexible deduplication option.
 
@@ -60,7 +63,11 @@ Unlike Same Tool Deduplication, Cross Tool Deduplication only supports the Hash 
 
 ## Reimport Deduplication
 
-Reimport Deduplication Settings are specifically designed for reimporting data using Universal Parsers or the Generic Parser.
+**⚠️ Reimport processes can completely discard Findings before they are recorded.  This can lead to data loss if set incorrectly, so Reimport Deduplication settings should be adjusted with caution.**
+
+Reimport Deduplication Settings can be used to set an algorithm for Universal Parsers, or for a Generic Findings Import Parser.
+
+Reimport Deduplication cannot be adjusted for other tools by default.  Users who want to adjust the Reimport Deduplication algorithm for other tools in their instance should reach out to [DefectDojo Support](mailto:support@defectdojo.com) for assistance.
 
 ![image](images/reimport_deduplication.png)
 
@@ -74,6 +81,8 @@ The same three algorithm options are available for Reimport Deduplication as for
 - Unique ID From Tool
 - Unique ID From Tool or Hash Code
 
+Reimport can completely discard Findings before they are recorded, so Reimport Deduplication settings should be adjusted with caution.
+
 ## Deduplication Best Practices
 
 For optimal results with Deduplication Tuning:
@@ -85,3 +94,7 @@ For optimal results with Deduplication Tuning:
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
 
 By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.
+
+## Locked Findings 
+
+Whenever Deduplication Settings are changed for a given tool, Deduplication hashes will need to be re-calculated for that tool across the entire DefectDojo instance.  During this process, Findings of this tool will be "locked", and their Deduplication Algorithm cannot not be changed again until the recalculation is complete.
