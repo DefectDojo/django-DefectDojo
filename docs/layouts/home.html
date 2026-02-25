@@ -8,7 +8,7 @@
           Official documentation for DefectDojo Pro and Open-Source editions,<br>
           maintained by DefectDojo Inc. and the Open-Source community.
         </p>
-        <p class="lead">{{ .Params.lead | safeHTML }}</p>
+        {{ with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
         <div class="hero-actions">
           <a class="btn btn-primary rounded-pill btn-lg" href="{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}/get_started/about/about_defectdojo/" role="button">Get Started</a>
           <a class="btn btn-outline-secondary rounded-pill btn-lg ms-2" href="/supported_tools/" role="button">Supported Tools</a>
