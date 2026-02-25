@@ -27,9 +27,8 @@ class LocationData:
         fragment: str = "",
         user_info: str = "",
     ) -> LocationData:
-        from dojo.url.models import URL  # noqa: PLC0415
         return cls(
-            type=URL.get_location_type(),
+            type="url",
             data={
                 "url": url,
                 "host": host,
@@ -67,7 +66,7 @@ class LocationData:
                 "version": version,
                 "qualifiers": qualifiers,
                 "subpath": subpath,
-                "artifact_hashes": artifact_hashes,
+                "artifact_hashes": artifact_hashes or {},
                 "license_expression": license_expression,
                 "file_path": file_path,
             },

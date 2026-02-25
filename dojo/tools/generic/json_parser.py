@@ -144,6 +144,18 @@ class GenericJSONParser:
                         else:
                             endpoint = Endpoint(**endpoint_item)
                         finding.unsaved_endpoints.append(endpoint)
+            if settings.V3_FEATURE_LOCATIONS:
+                component_name = item.get("component_name")
+                component_version = item.get("component_version")
+                file_path = item.get("file_path")
+                if component_name or component_version or file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.dependency(
+                            name=component_name,
+                            version=component_version,
+                            file_path=file_path,
+                        ),
+                    )
             if unsaved_files:
                 for unsaved_file in unsaved_files:
                     data = base64.b64decode(unsaved_file.get("data"))
