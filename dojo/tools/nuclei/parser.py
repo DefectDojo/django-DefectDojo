@@ -151,7 +151,12 @@ class NucleiParser:
                 host,
             )
 
-            dupe_host = urlparse(matched).hostname if settings.V3_FEATURE_LOCATIONS else str(location.host)
+            if settings.V3_FEATURE_LOCATIONS:
+                dupe_host = (urlparse(matched).hostname or "") if matched else ""
+            else:
+                # TODO: Delete this after the move to Locations
+                dupe_host = str(location.host) if location else ""
+
             dupe_key = hashlib.sha256(
                 (template_id + item_type + matcher + dupe_host).encode(
                     "utf-8",
