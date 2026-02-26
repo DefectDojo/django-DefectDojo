@@ -1012,6 +1012,31 @@ def normalize_datetime(value):
     return value
 
 
+def _create_note_if_provided(
+    finding,
+    note_entry,
+    *,
+    user=None,
+    note_type=None,
+    note_date=None,
+):
+    """
+    Create a note for the finding when content is provided. Returns the note or None.
+    Note author defaults to finding.last_reviewed_by
+    """
+    if not note_entry:
+        return None
+
+    new_note = Notes.objects.create(
+        entry=note_entry,
+        author=user or finding.last_reviewed_by,
+        note_type=note_type,
+        date=note_date,
+    )
+    finding.notes.add(new_note)
+    return new_note
+
+
 def close_finding(
     *,
     finding,
@@ -1046,15 +1071,12 @@ def close_finding(
     finding.last_reviewed_by = user
 
     # Create note if provided
-    new_note = None
-    if note_entry:
-        new_note = Notes.objects.create(
-            entry=note_entry,
-            author=user,
-            note_type=note_type,
-            date=mitigated_date,
-        )
-        finding.notes.add(new_note)
+    new_note = _create_note_if_provided(
+        finding,
+        note_entry,
+        note_type=note_type,
+        note_date=mitigated_date,
+    )
 
     if settings.V3_FEATURE_LOCATIONS:
         # Related locations
@@ -1105,3 +1127,28 @@ def close_finding(
         description=f'The finding "{finding.title}" was closed by {user}',
         url=reverse("view_finding", args=(finding.id,)),
     )
+
+
+def verify_finding(
+    *,
+    finding,
+    user,
+    note_entry=None,
+    note_type=None,
+) -> None:
+    """Shared verify logic used by UI and API."""
+    verification_time = now()
+
+    finding.verified = True
+    finding.last_reviewed = verification_time
+    finding.last_reviewed_by = user
+    finding.last_status_update = verification_time
+
+    _create_note_if_provided(
+        finding,
+        note_entry,
+        note_type=note_type,
+        note_date=verification_time,
+    )
+
+    finding.save(push_to_jira=False)

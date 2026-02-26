@@ -2976,6 +2976,11 @@ class FindingCloseSerializer(serializers.ModelSerializer):
         return data
 
 
+class FindingVerifySerializer(serializers.Serializer):
+    note = serializers.CharField(required=False, allow_blank=True)
+    note_type = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Note_Type.objects.all())
+
+
 class ReportGenerateOptionSerializer(serializers.Serializer):
     include_finding_notes = serializers.BooleanField(default=False)
     include_finding_images = serializers.BooleanField(default=False)

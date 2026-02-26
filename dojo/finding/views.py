@@ -1247,19 +1247,12 @@ def verify_finding(request, fid):
     form.fields["entry"].label = _("Comment (optional)")
 
     if request.method == "POST" and form.is_valid():
-        entry = form.cleaned_data.get("entry", "").strip()
-        if entry:
-            note = form.save(commit=False)
-            note.author = request.user
-            note.save()
-            finding.notes.add(note)
-
-        now_time = timezone.now()
-        finding.verified = True
-        finding.last_reviewed = now_time
-        finding.last_reviewed_by = request.user
-        finding.last_status_update = now_time
-        finding.save(push_to_jira=False)
+        entry = form.cleaned_data.get("entry", "")
+        finding_helper.verify_finding(
+            finding=finding,
+            user=request.user,
+            note_entry=entry,
+        )
 
         messages.add_message(
             request,
