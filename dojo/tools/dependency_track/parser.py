@@ -197,6 +197,7 @@ class DependencyTrackParser:
         if "description" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["description"] is not None:
             vulnerability_description += "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
         if "uuid" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["uuid"] is not None:
+            unique_id_from_tool = dependency_track_finding["vulnerability"]["uuid"]
             vuln_id_from_tool = dependency_track_finding["vulnerability"]["uuid"]
 
         # Get severity according to Dependency Track and convert it to a severity DefectDojo understands
@@ -229,6 +230,7 @@ class DependencyTrackParser:
             component_name=component_name,
             component_version=component_version,
             file_path=file_path,
+            unique_id_from_tool=unique_id_from_tool,
             vuln_id_from_tool=vuln_id_from_tool,
             unique_id_from_tool=dependency_track_finding.get("matrix"),
             static_finding=True,
