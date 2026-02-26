@@ -11,6 +11,7 @@ from django.test import override_settings
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
+from parameterized import parameterized
 
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
 
@@ -2002,6 +2003,53 @@ class ImportReimportMixin:
 
         test_id2 = reimport0["test"]
         self.assertEqual(test_id, test_id2)
+
+    @parameterized.expand(
+        [
+            ("Test false_positive Status", {"false_positive": True}),
+            ("Test out_of_scope Status", {"out_of_scope": True}),
+            ("Test risk_accepted Status", {"risk_accepted": True}),
+        ],
+    )
+    def test_import_reimport_endpoint_where_eps_reactivation_skips_special_status(self, label: str, special_status_fields: dict):
+        """
+        When Findings are set to False Positive, Out of Scope, or Risk Accepted, they are not reactivated
+        because these statuses are often set by humans. The same needs to apply for the Endpoint Status as
+        they are an extension of the finding being partially mitigated.
+        """
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import0 = self.import_scan_with_params(
+                self.gitlab_dast_file_name, self.scan_type_gitlab_dast, active=True, verified=True,
+            )
+        test_id = import0["test"]
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(1, findings)
+        finding = Finding.objects.get(id=findings["results"][0]["id"])
+        # Get the endpoint status on the finding
+        endpoint_statuses = finding.status_finding.all()
+        self.assertEqual(len(endpoint_statuses), 1)
+        # Set the baseline for the endpoint status, and then use it to compare after the reimport is finished
+        endpoint_status_context = {
+            "mitigated": True,
+            "mitigated_by": User.objects.get(username="admin"),
+            "mitigated_time": timezone.now(),
+            **special_status_fields,
+        }
+        # Update the endpoint status with the special status fields (false_positive, out_of_scope or risk_accepted) and mitigated=True
+        endpoint_statuses.update(**endpoint_status_context)
+        # Reimport the same file
+        reimport0 = self.reimport_scan_with_params(
+            test_id, self.gitlab_dast_file_name, scan_type=self.scan_type_gitlab_dast,
+        )
+        test_id = reimport0["test"]
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(1, findings)
+        finding = Finding.objects.get(id=findings["results"][0]["id"])
+        # Get the endpoint status on the finding
+        endpoint_status = finding.status_finding.first()
+        # Ensure the status is the same as the baseline
+        for key, value in endpoint_status_context.items():
+            self.assertEqual(getattr(endpoint_status, key), value)
 
     def test_import_reimport_endpoint_where_eps_date_is_different(self):
         endpoint_count_before = self.db_endpoint_count()
