@@ -11,7 +11,7 @@
 &lt;p&gt;See instructions in &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md"&gt;KUBERNETES.md&lt;/a&gt;&lt;/p&gt;</description></item><item><title>System Architecture</title><link>https://docs.defectdojo.com/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/open_source/architecture/</guid><description>&lt;p&gt;
 
 &lt;img
- src="https://docs.defectdojo.com/images/dd-architecture_hu_6864a350491adb1d.webp"
+ src="https://docs.defectdojo.com/images/dd-architecture.png"
  width="721"
  height="511"
  decoding="async"
