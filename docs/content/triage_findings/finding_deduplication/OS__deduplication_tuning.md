@@ -108,7 +108,7 @@ Notes:
 
 After changing algorithms or Hash computation, you will need to **recompute hashes** for the affected parser/test type before the new matching behavior will apply consistently across existing data.
 
-Note: Recomputing hashes can be lead to on large instances. Plan maintenance windows accordingly.
+Note: Recomputing hashes can be lead to long wait times on large instances. Plan maintenance windows accordingly.
 
 - Changes to dedupe configuration (e.g., `HASHCODE_FIELDS_PER_SCANNER`, `HASH_CODE_FIELDS_ALWAYS`, `DEDUPLICATION_ALGORITHM_PER_PARSER`) are not applied retroactively automatically. To re-evaluate existing findings you must run the management command below.
 
