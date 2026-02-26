@@ -2711,8 +2711,11 @@ class ReImportScanSerializer(CommonImportScanSerializer):
                 # Attempt to create an engagement
                 logger.debug("reimport for non-existing test, using import to create new test")
                 context["engagement"] = auto_create_manager.get_or_create_engagement(**context)
+                # Do not close old findings when creating a brand new test: there are no
+                # existing findings to compare against, and close_old_findings would
+                # incorrectly close findings from other tests in the same scope.
                 context["test"], _, _, _, _, _, _ = self.get_importer(
-                    **context,
+                    **{**context, "close_old_findings": False},
                 ).process_scan(
                     context.pop("scan", None),
                 )
