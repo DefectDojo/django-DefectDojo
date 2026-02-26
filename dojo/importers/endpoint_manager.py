@@ -158,7 +158,6 @@ class EndpointManager:
         """Update the list of endpoints from the new finding with the list that is in the old finding"""
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
-        # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.
         existing_finding_endpoint_status_list = existing_finding.status_finding.exclude(
             Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
         )
