@@ -111,7 +111,7 @@ class DependencyCheckParser:
             # analyzing identifier from the more generic to
             package_node = identifiers_node.find(".//" + namespace + "package")
             if package_node is not None:
-                pck_id = package_node.findtext(f"{namespace}id")
+                pck_id = package_node.findtext(f"{namespace}id").strip()
                 purl = PackageURL.from_string(pck_id)
                 purl_parts = purl.to_dict()
                 component_name = (

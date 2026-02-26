@@ -68,7 +68,7 @@ def get_location(finding: Finding):
 def finalize_location(finding: Finding):
     """Convert the mutable location builder to a frozen LocationData and store in unsaved_locations."""
     if settings.V3_FEATURE_LOCATIONS:
-        finding.unsaved_locations = [finding._location_builder.to_location_data()]
+        finding.unsaved_locations.append(finding._location_builder.to_location_data())
 
 
 def is_valid_severity(severity: str) -> bool:

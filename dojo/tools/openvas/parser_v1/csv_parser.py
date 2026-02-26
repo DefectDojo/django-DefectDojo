@@ -10,9 +10,35 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
 
-def get_endpoint(finding: Finding):
-    """Get the mutable endpoint for non-V3 path."""
-    return finding.unsaved_endpoints[0]
+class _MutableLocationParts:
+
+    """Mutable container for building location data incrementally before creating a frozen LocationData."""
+
+    def __init__(self):
+        self.host = ""
+        self.port = None
+        self.protocol = ""
+
+    def __str__(self):
+        parts = []
+        if self.protocol:
+            parts.append(f"{self.protocol}://")
+        if self.host:
+            parts.append(self.host)
+        if self.port:
+            parts.append(f":{self.port}")
+        return "".join(parts)
+
+    def to_location_data(self):
+        return LocationData.url(host=self.host, port=self.port, protocol=self.protocol)
+
+
+def get_location(finding: Finding):
+    """Get the mutable location object for building up location data incrementally."""
+    # TODO: Delete this after the move to Locations
+    if not settings.V3_FEATURE_LOCATIONS:
+        return finding.unsaved_endpoints[0]
+    return finding._location_builder
 
 
 class ColumnMappingStrategy:
@@ -77,10 +103,7 @@ class PortColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value.isdigit():
-            if settings.V3_FEATURE_LOCATIONS:
-                finding._location_parts["port"] = int(column_value)
-            else:
-                get_endpoint(finding).port = int(column_value)
+            get_location(finding).port = int(column_value)
 
 
 class CveColumnMappingStrategy(ColumnMappingStrategy):
@@ -117,10 +140,7 @@ class ProtocolColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not store empty protocol
-            if settings.V3_FEATURE_LOCATIONS:
-                finding._location_parts["protocol"] = column_value
-            else:
-                get_endpoint(finding).protocol = column_value
+            get_location(finding).protocol = column_value
 
 
 class IpColumnMappingStrategy(ColumnMappingStrategy):
@@ -129,13 +149,9 @@ class IpColumnMappingStrategy(ColumnMappingStrategy):
         super().__init__()
 
     def map_column_value(self, finding, column_value):
-        if column_value is not None:
-            if settings.V3_FEATURE_LOCATIONS:
-                if not finding._location_parts.get("host"):  # process only if host is not already defined (by field hostname)
-                    # strip due to https://github.com/greenbone/gvmd/issues/2378
-                    finding._location_parts["host"] = column_value.strip()
-            elif not get_endpoint(finding).host:
-                get_endpoint(finding).host = column_value.strip()
+        if not get_location(finding).host and column_value is not None:  # process only if host is not already defined (by field hostname)
+            # strip due to https://github.com/greenbone/gvmd/issues/2378
+            get_location(finding).host = column_value.strip()
 
 
 class HostnameColumnMappingStrategy(ColumnMappingStrategy):
@@ -145,11 +161,7 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
-            if settings.V3_FEATURE_LOCATIONS:
-                # strip due to https://github.com/greenbone/gvmd/issues/2378
-                finding._location_parts["host"] = column_value.strip()
-            else:
-                get_endpoint(finding).host = column_value.strip()
+            get_location(finding).host = column_value.strip()
 
 
 class SeverityColumnMappingStrategy(ColumnMappingStrategy):
@@ -309,7 +321,7 @@ class OpenVASCSVParser:
             finding = Finding(test=test)
             finding.unsaved_vulnerability_ids = []
             if settings.V3_FEATURE_LOCATIONS:
-                finding._location_parts = {"host": "", "port": None, "protocol": ""}
+                finding._location_builder = _MutableLocationParts()
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint()]
@@ -340,12 +352,10 @@ class OpenVASCSVParser:
                 if finding.description is None:
                     finding.description = ""
                 if settings.V3_FEATURE_LOCATIONS:
-                    location_str = str(finding.unsaved_locations[0])
-                else:
-                    location_str = str(get_endpoint(finding))
+                    finding.unsaved_locations.append(finding._location_builder.to_location_data())
                 key = hashlib.sha256(
                     (
-                        location_str
+                        str(get_location(finding))
                         + "|"
                         + finding.severity
                         + "|"
