@@ -49,8 +49,8 @@ class OssIndexDevauditParser:
         for package in results.get("Packages", []):
             package_data = package["Package"]
             package_manager = package_data["pm"]
-            package_name = package_data.get["name"]
-            package_version = package_data.get["version"]
+            package_name = package_data["name"]
+            package_version = package_data["version"]
 
             dep = None
             if settings.V3_FEATURE_LOCATIONS and package_manager and package_name:

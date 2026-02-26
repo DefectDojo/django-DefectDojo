@@ -2,7 +2,6 @@ import datetime
 import hashlib
 import logging
 import re
-from collections import defaultdict
 
 import dateutil
 from cpe import CPE
@@ -204,6 +203,7 @@ class DependencyCheckParser:
             )
             if product_node is not None:
                 component_name = product_node.findtext(f"{namespace}value")
+                component_version = None
                 version_node = evidence_collected_node.find(
                     ".//" + namespace + 'evidence[@type="version"]',
                 )
@@ -215,18 +215,6 @@ class DependencyCheckParser:
                 return component_name, component_version, None
 
         return None, None, None
-
-    def get_hashes_from_dependency(
-        self, dependency, related_dependency, namespace,
-    ):
-        hashes = defaultdict(list)
-        for alg in ("md5", "sha1", "sha256"):
-            if related_dependency is None:
-                if h := dependency.findtext(f"{namespace}{alg}"):
-                    hashes[alg].append(h)
-            elif h := related_dependency.findtext(f"{namespace}{alg}"):
-                hashes[alg].append(h)
-        return dict(hashes)
 
     def get_severity_and_cvss_meta(self, vulnerability, namespace) -> dict:
         # Get the base severity from the report
@@ -413,9 +401,8 @@ class DependencyCheckParser:
         )
 
         if settings.V3_FEATURE_LOCATIONS and component_purl:
-            artifact_hashes = self.get_hashes_from_dependency(dependency, related_dependency, namespace)
             finding.unsaved_locations.append(
-                LocationData.dependency(purl=component_purl, file_path=dependency_filename, artifact_hashes=artifact_hashes),
+                LocationData.dependency(purl=component_purl, file_path=dependency_filename),
             )
 
         if vulnerability_id:
@@ -518,11 +505,8 @@ class DependencyCheckParser:
                         dependency, None, namespace,
                     )
                     if component_purl:
-                        artifact_hashes = self.get_hashes_from_dependency(
-                            dependency, None, namespace,
-                        )
                         test.unsaved_metadata.append(
-                            LocationData.dependency(purl=component_purl, artifact_hashes=artifact_hashes),
+                            LocationData.dependency(purl=component_purl),
                         )
 
         return list(dupes.values())
