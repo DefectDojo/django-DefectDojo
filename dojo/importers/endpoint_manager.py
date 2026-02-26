@@ -1,6 +1,7 @@
 import logging
 
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -158,7 +159,9 @@ class EndpointManager:
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
         # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.
-        existing_finding_endpoint_status_list = existing_finding.status_finding.all()
+        existing_finding_endpoint_status_list = existing_finding.status_finding.exclude(
+            Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
+        )
         new_finding_endpoints_list = new_finding.unsaved_endpoints
         if new_finding.is_mitigated:
             # New finding is mitigated, so mitigate all old endpoints
