@@ -161,6 +161,7 @@ class HostnameColumnMappingStrategy(ColumnMappingStrategy):
 
     def map_column_value(self, finding, column_value):
         if column_value:  # do not override IP if hostname is empty
+            # strip due to https://github.com/greenbone/gvmd/issues/2378
             get_location(finding).host = column_value.strip()
 
 
@@ -339,12 +340,6 @@ class OpenVASCSVParser:
 
             if ip:
                 finding.description += f"\n**IP**: {ip}"
-
-            # Create LocationData from collected parts after all columns are processed
-            if settings.V3_FEATURE_LOCATIONS:
-                location = LocationData.url(**finding._location_parts)
-                finding.unsaved_locations = [location]
-                del finding._location_parts
 
             if finding is not None and row_number > 0:
                 if finding.title is None:
