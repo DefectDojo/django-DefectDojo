@@ -12,6 +12,12 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Feb 2026: v2.55
 
+### Feb 24, 2026: v2.55.4
+
+* **(Connectors)** Added Akamai API Security, JFrog Xray to Connectors.
+* **(Surveys)** Anonymous surveys: users can now access surveys without logging in when anonymous surveys are enabled.
+* **(Pro UI)** The Pro UI editor now uses Markdown-based editing for text fields.  This resolves issues with HTML-string encoding, especially when Findings were manually entered or edited.
+
 ### Feb 17, 2026: v2.55.3
 
 * **(Pro UI)** Added “Scheduled” status to Engagements to enhances the tracking and management of Engagements.
