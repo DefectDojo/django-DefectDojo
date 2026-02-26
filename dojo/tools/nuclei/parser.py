@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+from urllib.parse import urlparse
 
 from cvss import parser as cvss_parser
 from dateutil import parser as date_parser
@@ -150,8 +151,9 @@ class NucleiParser:
                 host,
             )
 
+            dupe_host = urlparse(matched).hostname if settings.V3_FEATURE_LOCATIONS else str(location.host)
             dupe_key = hashlib.sha256(
-                (template_id + item_type + matcher + host).encode(
+                (template_id + item_type + matcher + dupe_host).encode(
                     "utf-8",
                 ),
             ).hexdigest()
