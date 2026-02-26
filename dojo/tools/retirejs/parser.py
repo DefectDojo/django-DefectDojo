@@ -19,17 +19,6 @@ class RetireJsParser:
 
     def get_findings(self, json_output, test):
         tree = json.load(json_output)
-        # Collect product-level dependency locations for all components
-        if settings.V3_FEATURE_LOCATIONS:
-            tree_data = tree.get("data", tree) if isinstance(tree, dict) and "data" in tree else tree
-            for node in tree_data:
-                for result in node.get("results", []):
-                    comp_name = result.get("component")
-                    comp_version = result.get("version")
-                    if comp_name and comp_version:
-                        test.unsaved_metadata.append(
-                            LocationData.dependency(purl_type="npm", name=comp_name, version=comp_version),
-                        )
         return self.get_items(tree, test)
 
     def get_items(self, tree, test):
@@ -38,6 +27,9 @@ class RetireJsParser:
             tree = tree["data"]
         for node in tree:
             for result in node["results"]:
+                component_name = result.get("component")
+                component_version = result.get("version")
+                file_path = node["file"]
                 if "vulnerabilities" in result:
                     for vulnerability in result["vulnerabilities"]:
                         item = self.get_item(vulnerability, test, node["file"])
@@ -53,13 +45,13 @@ class RetireJsParser:
                         )
                         item.references = item.references
 
-                        item.component_name = result.get("component")
-                        item.component_version = result.get("version")
-                        item.file_path = node["file"]
+                        item.component_name = component_name
+                        item.component_version = component_version
+                        item.file_path = file_path
 
-                        if settings.V3_FEATURE_LOCATIONS and result.get("component") and result.get("version"):
+                        if settings.V3_FEATURE_LOCATIONS and component_name and component_version:
                             item.unsaved_locations.append(
-                                LocationData.dependency(purl_type="npm", name=result["component"], version=result["version"], file_path=node["file"]),
+                                LocationData.dependency(purl_type="npm", name=component_name, version=component_version, file_path=file_path),
                             )
 
                         encrypted_file = node["file"]
@@ -69,6 +61,11 @@ class RetireJsParser:
                             ).encode(), usedforsecurity=False,
                         ).hexdigest()
                         items[unique_key] = item
+                elif settings.V3_FEATURE_LOCATIONS and component_name and component_version:
+                    test.unsaved_metadata.append(
+                        LocationData.dependency(purl_type="npm", name=component_name, version=component_version,
+                                                file_path=file_path),
+                    )
         return list(items.values())
 
     def get_item(self, item_node, test, file):

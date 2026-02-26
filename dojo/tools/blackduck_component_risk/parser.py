@@ -40,15 +40,19 @@ class BlackduckComponentRiskParser:
         # Collect product-level dependency locations for all components
         if settings.V3_FEATURE_LOCATIONS:
             for component in components.values():
-                origin = component.get("Origin name", "").lower()
+                origin = component.get("Origin name", "").lower().split(",")[0]
+                purl_type = BLACKDUCK_ORIGIN_TO_PURL.get(origin)
                 comp_name = component.get("Component name")
                 comp_version = component.get("Component version name")
-                if comp_name and origin:
-                    purl_type = BLACKDUCK_ORIGIN_TO_PURL.get(origin)
-                    if purl_type:
-                        test.unsaved_metadata.append(
-                            LocationData.dependency(purl_type=purl_type, name=comp_name, version=comp_version),
-                        )
+                if purl_type and comp_name and comp_version:
+                    test.unsaved_metadata.append(
+                        LocationData.dependency(
+                            purl_type=purl_type,
+                            name=comp_name,
+                            version=comp_version,
+                            license_expression=component.get("Licence names"),
+                        ),
+                    )
         return self.ingest_findings(components, securities, sources, test)
 
     def import_data(self, filename) -> (dict, dict, dict):

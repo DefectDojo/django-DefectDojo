@@ -1,10 +1,6 @@
 import json
-from pathlib import Path
 
-from django.conf import settings
-
-from dojo.tools.locations import LocationData
-from dojo.tools.wizcli_common_parsers.parsers import WIZCLI_MANIFEST_TO_PURL, WizcliParsers
+from dojo.tools.wizcli_common_parsers.parsers import WizcliParsers
 
 
 class WizcliDirParser:
@@ -28,19 +24,6 @@ class WizcliDirParser:
             data = json.loads(scan_data)
         findings = []
         results = data.get("result", {})
-
-        if settings.V3_FEATURE_LOCATIONS:
-            for lib in results.get("libraries") or []:
-                lib_name = lib.get("name")
-                lib_version = lib.get("version")
-                lib_path = lib.get("path", "")
-                if lib_name and lib_path:
-                    manifest = Path(lib_path).name
-                    purl_type = WIZCLI_MANIFEST_TO_PURL.get(manifest)
-                    if purl_type:
-                        test.unsaved_metadata.append(
-                            LocationData.dependency(purl_type=purl_type, name=lib_name, version=lib_version),
-                        )
 
         libraries = results.get("libraries", None)
         if libraries:

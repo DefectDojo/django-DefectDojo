@@ -76,9 +76,9 @@ class TestsslParser:
                 # manage endpoint/location
                 if settings.V3_FEATURE_LOCATIONS:
                     port = int(row["port"]) if row.get("port") and row["port"].isdigit() else None
-                    finding.unsaved_locations = [LocationData.url(
-                        host=row["fqdn/ip"].split("/")[0], port=port,
-                    )]
+                    finding.unsaved_locations.append(
+                        LocationData.url(host=row["fqdn/ip"].split("/")[0], port=port),
+                    )
                 else:
                     # TODO: Delete this after the move to Locations
                     finding.unsaved_endpoints = [

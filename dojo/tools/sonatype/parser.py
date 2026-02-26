@@ -33,42 +33,45 @@ class SonatypeParser:
         if "components" in sonatype_report:
             components = sonatype_report["components"]
 
-            # Collect product-level dependency locations for all components
-            if settings.V3_FEATURE_LOCATIONS:
-                for component in components:
-                    if "componentIdentifier" in component:
-                        comp_format = component["componentIdentifier"]["format"]
-                        purl_type = SONATYPE_FORMAT_TO_PURL.get(comp_format)
-                        if purl_type:
-                            coords = component["componentIdentifier"]["coordinates"]
-                            if comp_format == "maven":
-                                purl_name = coords.get("artifactId", "")
-                                purl_namespace = coords.get("groupId")
-                                purl_version = coords.get("version", "")
-                            elif comp_format in {"npm", "nuget"}:
-                                purl_name = coords.get("packageId", "")
-                                purl_namespace = None
-                                purl_version = coords.get("version", "")
-                            else:
-                                purl_name = coords.get("name", "")
-                                purl_namespace = None
-                                purl_version = coords.get("version", "")
-                            if purl_name:
-                                test.unsaved_metadata.append(
-                                    LocationData.dependency(
-                                        purl_type=purl_type, namespace=purl_namespace or "", name=purl_name, version=purl_version,
-                                    ),
-                                )
-
             for component in components:
                 if component["securityData"] is None or len(component["securityData"]["securityIssues"]) < 1:
-                    continue
-
-                for security_issue in component["securityData"]["securityIssues"]:
-                    finding = get_finding(security_issue, component, test)
-                    findings.append(finding)
+                    if settings.V3_FEATURE_LOCATIONS and (dep := get_dependency_from_component(component)):
+                        test.unsaved_metadata.append(dep)
+                else:
+                    for security_issue in component["securityData"]["securityIssues"]:
+                        finding = get_finding(security_issue, component, test)
+                        findings.append(finding)
 
         return findings
+
+
+def get_dependency_from_component(component):
+    if purl := component.get("packageUrl"):
+        return LocationData.dependency(purl=purl)
+    if "componentIdentifier" in component:
+        comp_format = component["componentIdentifier"]["format"]
+        purl_type = SONATYPE_FORMAT_TO_PURL.get(comp_format.lower())
+        if purl_type:
+            coords = component["componentIdentifier"]["coordinates"]
+            version = coords.get("version", "")
+            namespace = ""
+
+            if comp_format == "maven":
+                name = coords.get("artifactId", "")
+                namespace = coords.get("groupId")
+            elif comp_format in {"npm", "nuget"}:
+                name = coords.get("packageId", "")
+            else:
+                name = coords.get("name", "")
+
+            if name:
+                return LocationData.dependency(
+                    purl_type=purl_type,
+                    namespace=namespace,
+                    name=name,
+                    version=version,
+                )
+    return None
 
 
 def get_finding(security_issue, component, test):
@@ -112,6 +115,9 @@ def get_finding(security_issue, component, test):
     if security_issue.get("source") == "cve":
         vulnerability_id = security_issue.get("reference")
         finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+    if settings.V3_FEATURE_LOCATIONS and (dep := get_dependency_from_component(component)):
+        finding.unsaved_locations.append(dep)
 
     return finding
 

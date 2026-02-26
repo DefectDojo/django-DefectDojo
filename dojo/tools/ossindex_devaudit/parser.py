@@ -6,19 +6,6 @@ from django.conf import settings
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
-OSSINDEX_PM_TO_PURL = {
-    "npm": "npm",
-    "nuget": "nuget",
-    "maven": "maven",
-    "pypi": "pypi",
-    "gem": "gem",
-    "golang": "golang",
-    "cargo": "cargo",
-    "composer": "composer",
-    "cocoapods": "cocoapods",
-    "swift": "swift",
-}
-
 
 class OssIndexDevauditParser:
 
@@ -59,39 +46,38 @@ class OssIndexDevauditParser:
         items = {}
 
         results = dict(tree.items())
-
-        if settings.V3_FEATURE_LOCATIONS:
-            for package in results.get("Packages", []):
-                package_data = package["Package"]
-                pm = package_data.get("pm", "").lower()
-                purl_type = OSSINDEX_PM_TO_PURL.get(pm)
-                if purl_type:
-                    test.unsaved_metadata.append(
-                        LocationData.dependency(purl_type=purl_type, name=package_data["name"], version=package_data["version"]),
-                    )
-
         for package in results.get("Packages", []):
             package_data = package["Package"]
+            package_manager = package_data["pm"]
+            package_name = package_data.get["name"]
+            package_version = package_data.get["version"]
+
+            dep = None
+            if settings.V3_FEATURE_LOCATIONS and package_manager and package_name:
+                package_group = package_data.get("group", "")
+                if package_group == "None":
+                    purl_string = f"pkg:{package_manager}/{package_name}/{package_version}"
+                else:
+                    purl_string = f"pkg:{package_manager}/{package_group}/{package_name}/{package_version}"
+                dep = LocationData.dependency(purl=purl_string)
+
             if len(package.get("Vulnerabilities", [])) > 0:
                 for vulnerability in package.get("Vulnerabilities", []):
                     item = get_item(
-                        dependency_name=package_data["name"],
-                        dependency_version=package_data["version"],
-                        dependency_source=package_data["pm"],
+                        dependency_name=package_name,
+                        dependency_version=package_version,
+                        dependency_source=package_manager,
                         vulnerability=vulnerability,
                         test=test,
                     )
 
-                    if settings.V3_FEATURE_LOCATIONS:
-                        pm = package_data.get("pm", "").lower()
-                        purl_type = OSSINDEX_PM_TO_PURL.get(pm)
-                        if purl_type:
-                            item.unsaved_locations.append(
-                                LocationData.dependency(purl_type=purl_type, name=package_data["name"], version=package_data["version"]),
-                            )
+                    if dep:
+                        item.unsaved_locations.append(dep)
 
                     unique_key = vulnerability["id"]
                     items[unique_key] = item
+            elif dep:
+                test.unsaved_metadata.append(dep)
 
         return items.values()
 

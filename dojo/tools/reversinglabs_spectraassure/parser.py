@@ -75,6 +75,11 @@ class ReversinglabsSpectraassureParser:
         finding.unsaved_tags = node.tags
         finding.impact = node.impact
 
+        if settings.V3_FEATURE_LOCATIONS and node.component_purl:
+            finding.unsaved_locations.append(
+                LocationData.dependency(purl=node.component_purl),
+            )
+
         return finding
 
     # --------------------------------------------
@@ -98,21 +103,6 @@ class ReversinglabsSpectraassureParser:
         # ------------------------------------
         rl_json_info_instance = RlJsonInfo(file_handle=file)
         rl_json_info_instance.get_cve_active_all()
-
-        # Collect product-level dependency locations for all components and dependencies
-        if settings.V3_FEATURE_LOCATIONS:
-            for component in rl_json_info_instance.components.values():
-                purl = component.get("identity", {}).get("purl", "")
-                if purl:
-                    test.unsaved_metadata.append(
-                        LocationData.dependency(purl=purl),
-                    )
-            for dependency in rl_json_info_instance.dependencies.values():
-                purl = dependency.get("purl", "")
-                if purl:
-                    test.unsaved_metadata.append(
-                        LocationData.dependency(purl=purl),
-                    )
 
         self._findings: list[Finding] = []
         self._duplicates: dict[str, Finding] = {}

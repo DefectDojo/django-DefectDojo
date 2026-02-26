@@ -4,19 +4,10 @@ import json
 
 import cvss.parser
 from cvss.cvss3 import CVSS3
-from django.conf import settings
 
 from dojo.models import Finding
-from dojo.tools.locations import LocationData
-from dojo.tools.sysdig_common.sysdig_data import SysdigData
+from dojo.tools.sysdig_common.sysdig_data import SysdigData, add_package_info
 from dojo.validators import clean_tags
-
-SYSDIG_TYPE_TO_PURL = {
-    "apk": "apk", "deb": "deb", "rpm": "rpm",
-    "npm": "npm", "python": "pypi", "java": "maven",
-    "go": "golang", "gem": "gem", "nuget": "nuget",
-    "composer": "composer", "cargo": "cargo",
-}
 
 
 class SysdigCLIParser:
@@ -58,19 +49,6 @@ class SysdigCLIParser:
     def parse_json(self, data, test):
         findings = []
         packages = data.get("result", {}).get("packages", [])
-
-        # Collect product-level dependency locations for all packages
-        if settings.V3_FEATURE_LOCATIONS:
-            for package in packages:
-                pkg_name = package.get("name", "")
-                pkg_type = package.get("type", "")
-                pkg_version = package.get("version", "")
-                if pkg_name and pkg_type:
-                    purl_type = SYSDIG_TYPE_TO_PURL.get(pkg_type.lower())
-                    if purl_type:
-                        test.unsaved_metadata.append(
-                            LocationData.dependency(purl_type=purl_type, name=pkg_name, version=pkg_version),
-                        )
 
         for package in packages:
             # print(package)
@@ -125,6 +103,8 @@ class SysdigCLIParser:
                     component_name=packageName,
                     component_version=packageVersion,
                 )
+
+                add_package_info(finding, packageName, packageType, packageVersion, packagePath)
 
                 try:
                     if float(vulnCvssVersion) >= 3 and float(vulnCvssVersion) < 4:
@@ -182,6 +162,7 @@ class SysdigCLIParser:
             if row.package_path:
                 finding.description += f"\n - **Package Path:** {row.package_path}"
                 finding.file_path = row.package_path
+            add_package_info(finding, row.package_name, row.package_type, row.package_version, row.package_path)
             try:
                 if float(row.cvss_version) >= 3 and float(row.cvss_version) < 4:
                     finding.cvssv3_score = float(row.cvss_score)

@@ -90,8 +90,7 @@ def get_item(dependency_name, dependency_version, advisory, test):
         finding.unsaved_vulnerability_ids = [advisory["cve"]]
 
     if settings.V3_FEATURE_LOCATIONS and dependency_name:
-        finding.unsaved_locations.append(
-            LocationData.dependency(purl_type="composer", name=dependency_name, version=dependency_version),
-        )
+        purl_string = f"pkg:composer/{dependency_name}/{dependency_version}"
+        finding.unsaved_locations.append(LocationData.dependency(purl=purl_string))
 
     return finding

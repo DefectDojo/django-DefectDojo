@@ -67,6 +67,13 @@ def get_component_name_version(name):
     return match[1], match[2]
 
 
+def get_dependency_info(name):
+    match = re.match(r"([a-z]+)://([a-z\d\.:]+):([a-z\d\.\-]+)", name, re.IGNORECASE)
+    if match is None:
+        return None
+    return match[1], match[2], match[3]
+
+
 def get_severity(vulnerability):
     if "severity" in vulnerability:
         severity = "Info" if vulnerability["severity"] == "Unknown" else vulnerability["severity"].title()
@@ -204,22 +211,13 @@ def get_item_set(vulnerability):
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
 
-        if settings.V3_FEATURE_LOCATIONS and "://" in component_name_with_version:
-            type_prefix = component_name_with_version.split("://")[0]
-            purl_type = JFROG_XRAY_TYPE_TO_PURL.get(type_prefix)
-            if purl_type and component_version:
-                clean_name = component_name
-                if "://" in clean_name:
-                    clean_name = clean_name.split("://", 1)[1]
-                if purl_type == "maven" and ":" in clean_name:
-                    parts = clean_name.split(":", 1)
-                    ns, dep_name = parts[0], parts[1]
-                else:
-                    ns, dep_name = "", clean_name
+        if settings.V3_FEATURE_LOCATIONS and (dependency_info := get_dependency_info(component_name_with_version)):
+            component_type, component_name, component_version = dependency_info
+            purl_type = JFROG_XRAY_TYPE_TO_PURL.get(component_type.lower())
+            if purl_type and component_name:
+                purl_string = f"pkg:{purl_type}/{component_name}/{component_version}"
                 finding.unsaved_locations.append(
-                    LocationData.dependency(
-                        purl_type=purl_type, namespace=ns, name=dep_name, version=component_version,
-                    ),
+                    LocationData.dependency(purl=purl_string),
                 )
 
         item_set.append(finding)

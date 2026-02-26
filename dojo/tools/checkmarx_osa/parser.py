@@ -36,14 +36,9 @@ class CheckmarxOsaParser:
         libraries_dict = self.get_libraries(tree)
 
         if settings.V3_FEATURE_LOCATIONS:
-            for library in tree[1]:
-                lib_name = library.get("name", "")
-                lib_version = library.get("version")
-                if lib_name and ":" in lib_name:
-                    parts = lib_name.split(":", 1)
-                    test.unsaved_metadata.append(
-                        LocationData.dependency(purl_type="maven", namespace=parts[0], name=parts[1], version=lib_version),
-                    )
+            for library in libraries_dict.values():
+                if dep := self.dependency_info(library):
+                    test.unsaved_metadata.append(dep)
 
         vulnerabilities = self.get_vunlerabilities(tree)
         items = []
@@ -101,8 +96,20 @@ class CheckmarxOsaParser:
             )
             if vulnerability_id != "NC":
                 finding_item.unsaved_vulnerability_ids = [vulnerability_id]
+
+            if settings.V3_FEATURE_LOCATIONS and (dep := self.dependency_info(library)):
+                finding_item.unsaved_locations.append(dep)
+
             items.append(finding_item)
         return items
+
+    def dependency_info(self, library):
+        lib_name = library.get("name", "")
+        lib_version = library.get("version")
+        if lib_name and ":" in lib_name:
+            parts = lib_name.split(":", 1)
+            return LocationData.dependency(purl_type="maven", namespace=parts[0], name=parts[1], version=lib_version)
+        return None
 
     def get_libraries(self, tree):
         libraries_dict = {}

@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import logging
 import re
+from collections import defaultdict
 
 import dateutil
 from cpe import CPE
@@ -215,6 +216,18 @@ class DependencyCheckParser:
 
         return None, None, None
 
+    def get_hashes_from_dependency(
+        self, dependency, related_dependency, namespace,
+    ):
+        hashes = defaultdict(list)
+        for alg in ("md5", "sha1", "sha256"):
+            if related_dependency is None:
+                if h := dependency.findtext(f"{namespace}{alg}"):
+                    hashes[alg].append(h)
+            elif h := related_dependency.findtext(f"{namespace}{alg}"):
+                hashes[alg].append(h)
+        return dict(hashes)
+
     def get_severity_and_cvss_meta(self, vulnerability, namespace) -> dict:
         # Get the base severity from the report
         severity = vulnerability.findtext(f"{namespace}severity")
@@ -400,8 +413,9 @@ class DependencyCheckParser:
         )
 
         if settings.V3_FEATURE_LOCATIONS and component_purl:
+            artifact_hashes = self.get_hashes_from_dependency(dependency, related_dependency, namespace)
             finding.unsaved_locations.append(
-                LocationData.dependency(purl=component_purl, file_path=dependency_filename),
+                LocationData.dependency(purl=component_purl, file_path=dependency_filename, artifact_hashes=artifact_hashes),
             )
 
         if vulnerability_id:
@@ -441,20 +455,6 @@ class DependencyCheckParser:
                 )
 
         if dependencies is not None:
-            # Collect product-level dependency locations for all dependencies
-            if settings.V3_FEATURE_LOCATIONS:
-                for dependency in dependencies.findall(namespace + "dependency"):
-                    try:
-                        _, _, component_purl = self.get_component_name_and_version_from_dependency(
-                            dependency, None, namespace,
-                        )
-                        if component_purl:
-                            test.unsaved_metadata.append(
-                                LocationData.dependency(purl=component_purl),
-                            )
-                    except Exception:
-                        logger.warning("Failed to get component purl for dependency: %s", dependency)
-
             for dependency in dependencies.findall(namespace + "dependency"):
                 vulnerabilities = dependency.find(
                     namespace + "vulnerabilities",
@@ -512,5 +512,17 @@ class DependencyCheckParser:
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
+                elif settings.V3_FEATURE_LOCATIONS:
+                    # Collect product-level dependency locations
+                    _, _, component_purl = self.get_component_name_and_version_from_dependency(
+                        dependency, None, namespace,
+                    )
+                    if component_purl:
+                        artifact_hashes = self.get_hashes_from_dependency(
+                            dependency, None, namespace,
+                        )
+                        test.unsaved_metadata.append(
+                            LocationData.dependency(purl=component_purl, artifact_hashes=artifact_hashes),
+                        )
 
         return list(dupes.values())

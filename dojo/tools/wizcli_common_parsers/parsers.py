@@ -1,4 +1,9 @@
+from pathlib import Path
+
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 WIZCLI_MANIFEST_TO_PURL = {
     "go.mod": "golang", "go.sum": "golang",
@@ -64,6 +69,17 @@ class WizcliParsers:
                         test=test,
                     )
                     findings.append(finding)
+
+                if settings.V3_FEATURE_LOCATIONS:
+                    lib_name_raw = library.get("name")
+                    lib_version_raw = library.get("version")
+                    lib_path_raw = library.get("path", "")
+                    if lib_name_raw and lib_path_raw:
+                        manifest = Path(lib_path_raw).name
+                        if purl_type := WIZCLI_MANIFEST_TO_PURL.get(manifest):
+                            test.unsaved_metadata.append(
+                                LocationData.dependency(purl_type=purl_type, name=lib_name_raw, version=lib_version_raw),
+                            )
         return findings
 
     @staticmethod

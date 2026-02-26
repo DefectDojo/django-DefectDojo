@@ -30,16 +30,6 @@ class PipAuditParser:
     def get_findings(self, scan_file, test):
         """Return the collection of Findings ingested."""
         data = json.load(scan_file)
-        # Collect product-level dependency locations for all dependencies
-        if settings.V3_FEATURE_LOCATIONS:
-            items = data.get("dependencies", data) if isinstance(data, dict) and "dependencies" in data else data
-            for item in items:
-                name = item.get("name")
-                version = item.get("version")
-                if name:
-                    test.unsaved_metadata.append(
-                        LocationData.dependency(purl_type="pypi", name=name, version=version),
-                    )
         # this parser can handle two distinct formats see sample scan files
         return get_file_findings(data, test) if "dependencies" in data else get_legacy_findings(data, test)
 
@@ -67,10 +57,10 @@ def get_legacy_findings(data, test):
 def get_item_findings(item, test):
     """Return list of Findings."""
     findings = []
+    component_name = item["name"]
+    component_version = item.get("version")
     vulnerabilities = item.get("vulns", [])
     if vulnerabilities:
-        component_name = item["name"]
-        component_version = item.get("version")
         for vulnerability in vulnerabilities:
             vuln_id = vulnerability.get("id")
             vuln_fix_versions = vulnerability.get("fix_versions")
@@ -117,5 +107,9 @@ def get_item_findings(item, test):
                 )
 
             findings.append(finding)
+    elif settings.V3_FEATURE_LOCATIONS and component_name and not item.get("skip_reason"):
+        test.unsaved_metadata.append(
+            LocationData.dependency(purl_type="pypi", name=component_name, version=component_version),
+        )
 
     return findings

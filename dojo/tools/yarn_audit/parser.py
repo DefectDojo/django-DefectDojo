@@ -81,9 +81,10 @@ class YarnAuditParser:
             if value is not None:
                 dojo_finding.component_name = value
                 if settings.V3_FEATURE_LOCATIONS:
-                    dojo_finding.unsaved_locations.append(
-                        LocationData.dependency(purl_type="npm", name=value, version=str(child_tree_versions)),
-                    )
+                    for version in set(child.get("Tree Versions")):
+                        dojo_finding.unsaved_locations.append(
+                            LocationData.dependency(purl_type="npm", name=value, version=str(version)),
+                        )
         return items
 
     def get_items_auditci(self, tree, test):  # https://github.com/DefectDojo/django-DefectDojo/issues/6495

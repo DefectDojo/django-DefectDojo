@@ -7,12 +7,6 @@ from django.conf import settings
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
-ORT_TYPE_TO_PURL = {
-    "maven": "maven", "npm": "npm", "pypi": "pypi", "go": "golang",
-    "nuget": "nuget", "gem": "gem", "cargo": "cargo", "cocoapods": "cocoapods",
-    "composer": "composer", "pub": "pub", "bower": "npm",
-}
-
 
 class OrtParser:
 
@@ -33,24 +27,6 @@ class OrtParser:
 
         evaluated_model = self.parse_json(json_output)
         if evaluated_model:
-            # Collect product-level dependency locations for all packages
-            if settings.V3_FEATURE_LOCATIONS and evaluated_model.get("packages"):
-                for package in evaluated_model["packages"]:
-                    pkg_id = package.get("id", "")
-                    parts = pkg_id.split(":")
-                    if len(parts) >= 4:
-                        pkg_type_raw = parts[0].lower()
-                        purl_type = ORT_TYPE_TO_PURL.get(pkg_type_raw)
-                        if purl_type:
-                            namespace = parts[1] or None
-                            name = parts[2]
-                            version = parts[3]
-                            if name:
-                                test.unsaved_metadata.append(
-                                    LocationData.dependency(
-                                        purl_type=purl_type, namespace=namespace or "", name=name, version=version,
-                                    ),
-                                )
             return self.get_items(evaluated_model, test)
         return []
 
@@ -160,6 +136,7 @@ def find_package_by_id(packages, pkg_id):
 
 
 def find_license_id(licenses, license_id):
+    lic_id = ""
     for lic in licenses:
         if lic["_id"] == license_id:
             lic_id = lic["id"]
@@ -177,7 +154,7 @@ how to fix : {model.rule_violation['how_to_fix']}"""
 
     severity = get_severity(model.rule_violation)
 
-    return Finding(
+    finding = Finding(
         title=model.rule_violation["rule"],
         test=test,
         references=model.rule_violation["message"],
@@ -186,11 +163,19 @@ how to fix : {model.rule_violation['how_to_fix']}"""
         static_finding=True,
     )
 
+    if settings.V3_FEATURE_LOCATIONS and model.pkg:
+        if purl := model.pkg.get("purl"):
+            finding.unsaved_locations.append(
+                LocationData.dependency(purl=purl),
+            )
+
+    return finding
+
 
 class RuleViolationModel(NamedTuple):
     pkg: dict
     license_id: str
-    projects: []
+    projects: list
     rule_violation: dict
 
 

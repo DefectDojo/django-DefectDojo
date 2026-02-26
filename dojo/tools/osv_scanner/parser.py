@@ -75,22 +75,6 @@ class OSVScannerParser:
             data = json.load(file)
         except json.decoder.JSONDecodeError:
             return []
-        # Collect product-level dependency locations for all packages
-        if settings.V3_FEATURE_LOCATIONS:
-            for result in data.get("results", []):
-                for package in result.get("packages", []):
-                    pkg_data = package.get("package", {})
-                    pkg_name = pkg_data.get("name")
-                    pkg_version = pkg_data.get("version")
-                    pkg_ecosystem = pkg_data.get("ecosystem", "")
-                    if pkg_name and pkg_ecosystem:
-                        purl_type = OSV_ECOSYSTEM_TO_PURL.get(pkg_ecosystem.lower())
-                        if purl_type:
-                            test.unsaved_metadata.append(
-                                LocationData.dependency(
-                                    purl_type=purl_type, name=pkg_name, version=pkg_version,
-                                ),
-                            )
         findings = []
         for result in data.get("results", []):
             # Extract source locations if present
@@ -173,9 +157,15 @@ class OSVScannerParser:
 
                     if vulnerabilityid:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
-                    if settings.V3_FEATURE_LOCATIONS and vulnerabilitypackagepurl:
-                        finding.unsaved_locations.append(
-                            LocationData.dependency(purl=vulnerabilitypackagepurl, file_path=source_path),
-                        )
+                    if settings.V3_FEATURE_LOCATIONS and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                        finding.unsaved_locations.append(dep)
                     findings.append(finding)
+                if settings.V3_FEATURE_LOCATIONS and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                    test.unsaved_metadata.append(dep)
         return findings
+
+    def get_dependency_info(self, pacakge_ecosystem, package_name, package_version):
+        if purl_type := OSV_ECOSYSTEM_TO_PURL.get(pacakge_ecosystem.lower()):
+            purl_string = f"pkg:/{purl_type}/{package_name}/{package_version}"
+            return LocationData.dependency(purl=purl_string)
+        return None

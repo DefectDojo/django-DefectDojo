@@ -119,15 +119,13 @@ class VeracodeScaParser:
             if settings.V3_FEATURE_LOCATIONS:
                 lib_id = library.get("id", "")
                 if ":" in lib_id:
-                    lib_type = lib_id.split(":")[0].lower()
-                    purl_type = VERACODE_TYPE_TO_PURL.get(lib_type)
-                    if purl_type and component_name and component_version:
-                        id_parts = lib_id.split(":")
-                        ns = id_parts[1] if purl_type == "maven" and len(id_parts) >= 3 else ""
+                    lib_type, rest = lib_id.split(":", 1)
+                    purl_type = VERACODE_TYPE_TO_PURL.get(lib_type.lower())
+                    name_and_version = rest.removesuffix(":").replace(":", "/")
+                    if purl_type and name_and_version:
+                        purl_string = f"pkg:{purl_type}/{name_and_version}"
                         finding.unsaved_locations.append(
-                            LocationData.dependency(
-                                purl_type=purl_type, namespace=ns, name=component_name, version=component_version,
-                            ),
+                            LocationData.dependency(purl=purl_string),
                         )
 
             if vulnerability.get("cvss3_vector"):
@@ -242,13 +240,11 @@ class VeracodeScaParser:
             if settings.V3_FEATURE_LOCATIONS:
                 pkg_manager = row.get("Package manager", "").lower()
                 purl_type = VERACODE_TYPE_TO_PURL.get(pkg_manager)
-                if purl_type and library and version:
-                    coord1 = row.get("Coordinate 1", "")
-                    ns = coord1 if purl_type == "maven" and coord1 else ""
+                name = "/".join([row.get("Coordinate 1", ""), row.get("Coordinate 2", "")]).lower()
+                if purl_type and name and version:
+                    purl_string = f"pkg:{purl_type}/{name}/{version}"
                     finding.unsaved_locations.append(
-                        LocationData.dependency(
-                            purl_type=purl_type, namespace=ns, name=library, version=version,
-                        ),
+                        LocationData.dependency(purl=purl_string),
                     )
 
             if (
