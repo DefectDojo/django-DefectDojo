@@ -2856,30 +2856,36 @@ class ImportLanguagesSerializer(serializers.Serializer):
             msg = "Invalid format"
             raise Exception(msg)
 
+        # Filter out ignored keys
+        language_names = [name for name in deserialized if name not in {"header", "SUM"}]
+        # Prepopulate existing Language_Type objects
+        existing_types = {
+            lt.language: lt
+            for lt in Language_Type.objects.filter(language__in=language_names)
+        }
+        # Determine which Language_Type objects need to be created
+        new_language_names = [name for name in language_names if name not in existing_types]
+        new_types = [Language_Type(language=name) for name in new_language_names]
+        Language_Type.objects.bulk_create(new_types)
+        # Add newly created Language_Type objects to cache
+        for lt in Language_Type.objects.filter(language__in=new_language_names):
+            existing_types[lt.language] = lt
+        # Delete all Languages for this product
         Languages.objects.filter(product=product).delete()
-
-        for name in deserialized:
-            if name not in {"header", "SUM"}:
-                element = deserialized[name]
-
-                try:
-                    (
-                        language_type,
-                        _created,
-                    ) = Language_Type.objects.get_or_create(language=name)
-                except Language_Type.MultipleObjectsReturned:
-                    language_type = Language_Type.objects.filter(
-                        language=name,
-                    ).first()
-
-                language = Languages()
-                language.product = product
-                language.language = language_type
-                language.files = element.get("nFiles", 0)
-                language.blank = element.get("blank", 0)
-                language.comment = element.get("comment", 0)
-                language.code = element.get("code", 0)
-                language.save()
+        # Prepare Languages objects for bulk insert
+        languages_to_create = [
+            Languages(
+                product=product,
+                language=existing_types[name],
+                files=deserialized[name].get("nFiles", 0),
+                blank=deserialized[name].get("blank", 0),
+                comment=deserialized[name].get("comment", 0),
+                code=deserialized[name].get("code", 0),
+            )
+            for name in language_names
+        ]
+        # Bulk insert all Languages in one query
+        Languages.objects.bulk_create(languages_to_create)
 
     def validate(self, data):
         if is_scan_file_too_large(data["file"]):
