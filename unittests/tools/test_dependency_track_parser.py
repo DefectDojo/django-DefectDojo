@@ -41,7 +41,7 @@ class TestDependencyTrackParser(DojoTestCase):
             self.assertIsNone(findings[1].unsaved_vulnerability_ids)
             self.assertEqual(1, len(findings[2].unsaved_vulnerability_ids))
             self.assertEqual("CVE-2016-2097", findings[2].unsaved_vulnerability_ids[0])
-            self.assertEqual("900991f6-335a-49cb-9bf6-87b545f960ce", findings[2].unique_id_from_tool)
+            self.assertEqual("8d7f5fcd-210b-491d-a29e-904c2e01b281:3e52f829-3317-48c3-bde1-342c610bd223:900991f6-335a-49cb-9bf6-87b545f960ce", findings[2].unique_id_from_tool)
             self.assertEqual("900991f6-335a-49cb-9bf6-87b545f960ce", findings[2].vuln_id_from_tool)
             self.assertTrue(findings[2].false_p)
             self.assertTrue(findings[2].is_mitigated)
