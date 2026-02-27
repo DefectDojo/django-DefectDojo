@@ -700,7 +700,8 @@ class EngagementViewSet(
         responses={status.HTTP_200_OK: serializers.EngagementUpdateJiraEpicSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission),
     )
     def update_jira_epic(self, request, pk=None):
         engagement = self.get_object()
