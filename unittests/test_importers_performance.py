@@ -270,9 +270,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=295,
             expected_num_async_tasks1=6,
-            expected_num_queries2=267,
+            expected_num_queries2=232,
             expected_num_async_tasks2=17,
-            expected_num_queries3=154,
+            expected_num_queries3=114,
             expected_num_async_tasks3=16,
         )
 
@@ -292,9 +292,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=302,
             expected_num_async_tasks1=6,
-            expected_num_queries2=274,
+            expected_num_queries2=239,
             expected_num_async_tasks2=17,
-            expected_num_queries3=161,
+            expected_num_queries3=121,
             expected_num_async_tasks3=16,
         )
 
@@ -315,9 +315,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=309,
             expected_num_async_tasks1=8,
-            expected_num_queries2=281,
+            expected_num_queries2=246,
             expected_num_async_tasks2=19,
-            expected_num_queries3=165,
+            expected_num_queries3=125,
             expected_num_async_tasks3=18,
         )
 
