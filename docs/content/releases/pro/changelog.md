@@ -12,11 +12,17 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Feb 2026: v2.55
 
+### Feb 26, 2026: v2.55.5
+
+* **(Rules Engine)** Rules Engine now automatically retries when encountering database lock contention or serialization conflicts, reducing the likelihood of a rule run failing due to temporary load on the system.
+
 ### Feb 24, 2026: v2.55.4
 
 * **(Connectors)** Added Akamai API Security, JFrog Xray to Connectors.
 * **(Surveys)** Anonymous surveys: users can now access surveys without logging in when anonymous surveys are enabled.
 * **(Pro UI)** The Pro UI editor now uses Markdown-based editing for text fields.  This resolves issues with HTML-string encoding, especially when Findings were manually entered or edited.
+* **(Rules Engine)** Added **Set Mitigation Policy** action type: Rules can now assign a pre-configured Mitigation Policy to matching Findings.
+* **(Rules Engine)** Added **Add to Risk Acceptance** action type: Rules can now add matching Findings to an existing Risk Acceptance record, automatically setting them as risk-accepted and inactive, and handling Jira integration and endpoint statuses.
 
 ### Feb 17, 2026: v2.55.3
 
@@ -126,6 +132,7 @@ No significant UX changes.
 #### Oct 20, 2025: v2.51.2
 
 * **(Connectors)** Added Anchore Enterprise Connector.
+* **(Rules Engine)** Rules can now be scheduled to run automatically on a recurring or one-time basis.  From the Rules list, use the **⋮** menu on any rule to open the **Schedule Rule** form.
 
 
 #### Oct 14, 2025: v2.51.1
