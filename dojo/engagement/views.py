@@ -1377,10 +1377,7 @@ def edit_risk_acceptance(request, eid, raid):
 # will only be called by view_risk_acceptance and edit_risk_acceptance
 def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
-    # Ensure the risk acceptance belongs to the supplied engagement
-    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
-        raise PermissionDenied
+    eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
 
     if edit_mode and not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied
@@ -1540,11 +1537,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    # Validate the engagement ID exists before moving forward
-    get_object_or_404(Engagement, pk=eid)
-    # Ensure the risk acceptance belongs to the supplied engagement
-    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
-        raise PermissionDenied
+    get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
 
     ra_helper.expire_now(risk_acceptance)
 
@@ -1554,10 +1547,7 @@ def expire_risk_acceptance(request, eid, raid):
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
-    # Ensure the risk acceptance belongs to the supplied engagement
-    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
-        raise PermissionDenied
+    eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
 
     if not eng.product.enable_full_risk_acceptance:
         raise PermissionDenied
@@ -1570,10 +1560,7 @@ def reinstate_risk_acceptance(request, eid, raid):
 @user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
-    eng = get_object_or_404(Engagement, pk=eid)
-    # Ensure the risk acceptance belongs to the supplied engagement
-    if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
-        raise PermissionDenied
+    eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
 
     ra_helper.delete(eng, risk_acceptance)
 

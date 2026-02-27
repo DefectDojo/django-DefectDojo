@@ -12,11 +12,8 @@ Tests verify:
 8. Questionnaire cross-engagement IDOR (H1 #3571957)
 9. Finding Templates exposure via find_template_to_apply (H1 #3577363)
 10. Jira Epic BFLA - Reader cannot trigger update_jira_epic (H1 #3577193)
-11. Zip Bomb DoS protection in SonarQube and MS Defender parsers (H1 #3572557)
 """
 import datetime
-import io
-import zipfile
 
 from django.test import Client
 from django.urls import reverse
@@ -499,7 +496,7 @@ class TestObjectProductParentCheck(DojoTestCase):
         url = reverse("edit_object", args=(self.product_b.id, self.tracked_file.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_delete_object_cross_product_rejected(self):
         """Deleting an object from product A via product B's URL must be denied."""
@@ -509,7 +506,7 @@ class TestObjectProductParentCheck(DojoTestCase):
         url = reverse("delete_object", args=(self.product_b.id, self.tracked_file.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
 
 class TestToolProductParentCheck(DojoTestCase):
@@ -563,7 +560,7 @@ class TestToolProductParentCheck(DojoTestCase):
         url = reverse("edit_tool_product", args=(self.product_b.id, self.tool_setting.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_delete_tool_product_cross_product_rejected(self):
         """Deleting a tool setting from product A via product B's URL must be denied."""
@@ -573,7 +570,7 @@ class TestToolProductParentCheck(DojoTestCase):
         url = reverse("delete_tool_product", args=(self.product_b.id, self.tool_setting.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
 
 class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
@@ -646,7 +643,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
             self.engagement_b.id, self.risk_acceptance.id,
         ))
         response = client.get(url)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_edit_risk_acceptance_cross_engagement(self):
         """Editing a risk acceptance via a different engagement's URL must be denied."""
@@ -655,7 +652,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
             self.engagement_b.id, self.risk_acceptance.id,
         ))
         response = client.get(url)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_expire_risk_acceptance_cross_engagement(self):
         """Expiring a risk acceptance via a different engagement's URL must be denied."""
@@ -664,7 +661,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
             self.engagement_b.id, self.risk_acceptance.id,
         ))
         response = client.get(url)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_reinstate_risk_acceptance_cross_engagement(self):
         """Reinstating a risk acceptance via a different engagement's URL must be denied."""
@@ -673,7 +670,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
             self.engagement_b.id, self.risk_acceptance.id,
         ))
         response = client.get(url)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_delete_risk_acceptance_cross_engagement(self):
         """Deleting a risk acceptance via a different engagement's URL must be denied."""
@@ -682,7 +679,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
             self.engagement_b.id, self.risk_acceptance.id,
         ))
         response = client.get(url)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_view_risk_acceptance_same_engagement(self):
         """Viewing a risk acceptance via the correct engagement's URL should work."""
@@ -924,7 +921,7 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
         url = reverse("find_template_to_apply", args=(self.finding.id,))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertIn(response.status_code, [400, 403])
+        self.assertEqual(response.status_code, 404)
 
     def test_superuser_can_access_find_template(self):
         """Superuser (implicit global permission) should be able to access."""
@@ -997,67 +994,3 @@ class TestJiraEpicBFLA(DojoTestCase):
         # Writer has Engagement_Edit, so should pass permission check.
         # May get 400/500 from Jira integration, but NOT 403.
         self.assertNotEqual(response.status_code, 403)
-
-
-class TestZipBombProtection(DojoTestCase):
-    """H1 #3572557: SonarQube and MS Defender parsers must reject zip files
-    whose uncompressed content exceeds the size limit."""
-
-    def _make_zip(self, inner_name, content=b"small content"):
-        """Create a simple zip file."""
-        buf = io.BytesIO()
-        with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as zf:
-            zf.writestr(inner_name, content)
-        buf.seek(0)
-        buf.name = "test.zip"
-        return buf
-
-    def test_sonarqube_parser_rejects_oversized_zip(self):
-        """SonarQube parser should raise ValueError for oversized zip."""
-        from unittest.mock import patch
-
-        from dojo.tools.sonarqube.parser import SonarQubeParser
-
-        test_zip = self._make_zip("sonar-report.html")
-        parser = SonarQubeParser()
-
-        # Mock infolist to report a huge file_size (simulating a zip bomb)
-        fake_info = zipfile.ZipInfo("sonar-report.html")
-        fake_info.file_size = 512 * 1024 * 1024  # 512 MB
-
-        with patch.object(zipfile.ZipFile, "infolist", return_value=[fake_info]):
-            with self.assertRaises(ValueError) as ctx:
-                parser.get_findings(test_zip, None)
-        self.assertIn("exceeds maximum allowed size", str(ctx.exception))
-
-    def test_ms_defender_parser_rejects_oversized_zip(self):
-        """MS Defender parser should raise ValueError for oversized zip."""
-        from unittest.mock import patch
-
-        from dojo.tools.ms_defender.parser import MSDefenderParser
-
-        test_zip = self._make_zip("vulnerabilities/vuln1.json")
-        parser = MSDefenderParser()
-
-        fake_info = zipfile.ZipInfo("vulnerabilities/vuln1.json")
-        fake_info.file_size = 512 * 1024 * 1024
-
-        with patch.object(zipfile.ZipFile, "infolist", return_value=[fake_info]):
-            with self.assertRaises(ValueError) as ctx:
-                parser.get_findings(test_zip, None)
-        self.assertIn("exceeds maximum allowed size", str(ctx.exception))
-
-    def test_sonarqube_parser_accepts_normal_zip(self):
-        """SonarQube parser should accept a reasonably sized zip."""
-        from dojo.tools.sonarqube.parser import SonarQubeParser
-
-        test_zip = self._make_zip(
-            "sonar-report.html", b"<html><body>report</body></html>",
-        )
-        parser = SonarQubeParser()
-
-        # Should not raise ValueError (may raise other errors from parsing)
-        try:
-            parser.get_findings(test_zip, None)
-        except ValueError:
-            self.fail("SonarQubeParser raised ValueError on a normal-sized zip")

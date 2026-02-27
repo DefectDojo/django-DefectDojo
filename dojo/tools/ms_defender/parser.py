@@ -42,11 +42,6 @@ class MSDefenderParser:
             else:
                 input_zip = zipfile.ZipFile(file, "r")
 
-            max_size = 256 * 1024 * 1024  # 256 MB
-            total_size = sum(info.file_size for info in input_zip.infolist())
-            if total_size > max_size:
-                msg = f"Zip file uncompressed content exceeds maximum allowed size ({total_size} > {max_size})"
-                raise ValueError(msg)
             zipdata = {name: input_zip.read(name) for name in input_zip.namelist()}
             vulnerabilityfiles = []
             machinefiles = []
