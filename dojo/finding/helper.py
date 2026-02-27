@@ -1037,6 +1037,31 @@ def _create_note_if_provided(
     return new_note
 
 
+def _save_finding_with_jira_sync(finding, *, new_note=None):
+    """
+    Persist finding and apply JIRA sync behavior used by finding status actions.
+    """
+    push_to_jira = False
+    finding_in_group = finding.has_finding_group
+    jira_issue_exists = finding.has_jira_issue or (
+        finding.finding_group and finding.finding_group.has_jira_issue
+    )
+    jira_instance = jira_helper.get_jira_instance(finding)
+    jira_project = jira_helper.get_jira_project(finding)
+
+    if jira_issue_exists:
+        push_to_jira = (
+            jira_helper.is_push_all_issues(finding)
+            or (jira_instance and jira_instance.finding_jira_sync)
+        )
+        if new_note and (getattr(jira_project, "push_notes", False) or push_to_jira) and not finding_in_group:
+            jira_helper.add_comment(finding, new_note, force_push=True)
+
+    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+    if push_to_jira and finding_in_group:
+        jira_helper.push_to_jira(finding.finding_group)
+
+
 def close_finding(
     *,
     finding,
@@ -1098,26 +1123,7 @@ def close_finding(
     # External issues (best effort)
     close_external_issue(finding.id, "Closed by defectdojo", "github")
 
-    # JIRA sync
-    push_to_jira = False
-    finding_in_group = finding.has_finding_group
-    jira_issue_exists = finding.has_jira_issue or (
-        finding.finding_group and finding.finding_group.has_jira_issue
-    )
-    jira_instance = jira_helper.get_jira_instance(finding)
-    jira_project = jira_helper.get_jira_project(finding)
-    if jira_issue_exists:
-        push_to_jira = (
-            jira_helper.is_push_all_issues(finding)
-            or (jira_instance and jira_instance.finding_jira_sync)
-        )
-        if new_note and (getattr(jira_project, "push_notes", False) or push_to_jira) and not finding_in_group:
-            jira_helper.add_comment(finding, new_note, force_push=True)
-
-    # Persist and push JIRA if applicable
-    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-    if push_to_jira and finding_in_group:
-        jira_helper.push_to_jira(finding.finding_group)
+    _save_finding_with_jira_sync(finding, new_note=new_note)
 
     # Notification
     create_notification(
@@ -1144,11 +1150,11 @@ def verify_finding(
     finding.last_reviewed_by = user
     finding.last_status_update = verification_time
 
-    _create_note_if_provided(
+    new_note = _create_note_if_provided(
         finding,
         note_entry,
         note_type=note_type,
         note_date=verification_time,
     )
 
-    finding.save(push_to_jira=False)
+    _save_finding_with_jira_sync(finding, new_note=new_note)
