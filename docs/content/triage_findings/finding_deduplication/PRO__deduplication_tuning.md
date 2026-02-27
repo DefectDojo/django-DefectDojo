@@ -97,4 +97,4 @@ By tuning deduplication settings to your specific tools, you can significantly r
 
 ## Locked Findings 
 
-Whenever Deduplication Settings are changed for a given tool, Deduplication hashes will need to be re-calculated for that tool across the entire DefectDojo instance.  During this process, Findings of this tool will be "locked", and their Deduplication Algorithm cannot not be changed again until the recalculation is complete.
+Whenever Deduplication Settings are changed for a given tool, Deduplication hashes are re-calculated for that tool across the entire DefectDojo instance.
