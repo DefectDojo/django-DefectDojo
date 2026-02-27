@@ -1,7 +1,6 @@
 import logging
 
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
-from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -158,12 +157,9 @@ class EndpointManager:
         """Update the list of endpoints from the new finding with the list that is in the old finding"""
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
-        # Evaluate the queryset once into a list to avoid double DB evaluation below
-        existing_finding_endpoint_status_list = list(
-            existing_finding.status_finding.exclude(
-                Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
-            ).select_related("endpoint"),
-        )
+        # status_finding_non_special is prefetched by build_candidate_scope_queryset with the
+        # special-status exclusion and endpoint select_related already applied at the DB level
+        existing_finding_endpoint_status_list = existing_finding.status_finding_non_special
         new_finding_endpoints_list = new_finding.unsaved_endpoints
         if new_finding.is_mitigated:
             # New finding is mitigated, so mitigate all old endpoints
