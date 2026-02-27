@@ -46,6 +46,8 @@ def update_benchmark(request, pid, _type):
         field = request.POST.get("field")
         value = request.POST.get("value")
         value = {"true": True, "false": False}.get(value, value)
+        product = get_object_or_404(Product, id=pid)
+        bench = get_object_or_404(Benchmark_Product.objects.filter(product=product), id=bench_id)
 
         if field in {
             "enabled",
@@ -54,7 +56,6 @@ def update_benchmark(request, pid, _type):
             "get_notes",
             "delete_notes",
         }:
-            bench = Benchmark_Product.objects.get(id=bench_id)
             if field == "enabled":
                 bench.enabled = value
             elif field == "pass_fail":
@@ -90,21 +91,22 @@ def update_benchmark(request, pid, _type):
 @user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def update_benchmark_summary(request, pid, _type, summary):
     if request.method == "POST":
+        product = get_object_or_404(Product, id=pid)
+        benchmark_summary = get_object_or_404(Benchmark_Product_Summary.objects.filter(product=product), id=summary)
         field = request.POST.get("field")
         value = request.POST.get("value")
         value = {"true": True, "false": False}.get(value, value)
 
         if field in {"publish", "desired_level"}:
-            summary = Benchmark_Product_Summary.objects.get(id=summary)
             data = {}
             if field == "publish":
-                summary.publish = value
+                benchmark_summary.publish = value
                 data = {"publish": value}
             elif field == "desired_level":
-                summary.desired_level = value
-                data = {"desired_level": value, "text": asvs_level(summary)}
+                benchmark_summary.desired_level = value
+                data = {"desired_level": value, "text": asvs_level(benchmark_summary)}
 
-            summary.save()
+            benchmark_summary.save()
             return JsonResponse(data)
 
     return redirect_to_return_url_or_else(

@@ -47,7 +47,7 @@ def all_cred_product(request, pid):
     return render(request, "dojo/view_cred_prod.html", {"product_tab": product_tab, "creds": creds, "prod": prod})
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_Edit, "ttid")
+@user_is_configuration_authorized(Permissions.Credential_Edit)
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
     if request.method == "POST":
@@ -79,7 +79,7 @@ def edit_cred(request, ttid):
     })
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
+@user_is_configuration_authorized(Permissions.Credential_View)
 def view_cred_details(request, ttid):
     cred = Cred_User.objects.get(pk=ttid)
     notes = cred.notes.all()
@@ -127,7 +127,7 @@ def cred(request):
 
 
 @user_is_authorized(Product, Permissions.Product_View, "pid")
-@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 def view_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related("cred_id"), id=ttid)
@@ -182,8 +182,8 @@ def view_cred_product(request, pid, ttid):
         })
 
 
-@user_is_authorized(Product, Permissions.Engagement_View, "eid")
-@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
+@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related("cred_id"), id=ttid)
@@ -231,8 +231,8 @@ def view_cred_product_engagement(request, eid, ttid):
         })
 
 
-@user_is_authorized(Product, Permissions.Test_View, "tid")
-@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
+@user_is_authorized(Test, Permissions.Test_View, "tid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related("cred_id"), id=ttid)
@@ -282,8 +282,8 @@ def view_cred_engagement_test(request, tid, ttid):
         })
 
 
-@user_is_authorized(Product, Permissions.Finding_View, "fid")
-@user_is_authorized(Cred_User, Permissions.Credential_View, "ttid")
+@user_is_authorized(Finding, Permissions.Finding_View, "fid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related("cred_id"), id=ttid)
@@ -334,7 +334,7 @@ def view_cred_finding(request, fid, ttid):
 
 
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
-@user_is_authorized(Cred_User, Permissions.Credential_Edit, "ttid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_Edit, "ttid")
 def edit_cred_product(request, pid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related("cred_id"), id=ttid)
@@ -362,7 +362,7 @@ def edit_cred_product(request, pid, ttid):
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
-@user_is_authorized(Cred_User, Permissions.Credential_Edit, "ttid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_Edit, "ttid")
 def edit_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
         Cred_Mapping.objects.select_related("cred_id"), id=ttid)
@@ -582,7 +582,6 @@ def new_cred_finding(request, fid):
         })
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
 def delete_cred_controller(request, destination_url, elem_id, ttid):
     cred = Cred_Mapping.objects.filter(pk=ttid).first()
     if request.method == "POST":
@@ -662,30 +661,30 @@ def delete_cred_controller(request, destination_url, elem_id, ttid):
     })
 
 
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
+@user_is_configuration_authorized(Permissions.Credential_Delete)
 def delete_cred(request, ttid):
     return delete_cred_controller(request, "cred", 0, ttid=ttid)
 
 
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 def delete_cred_product(request, pid, ttid):
     return delete_cred_controller(request, "all_cred_product", pid, ttid)
 
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 def delete_cred_engagement(request, eid, ttid):
     return delete_cred_controller(request, "view_engagement", eid, ttid)
 
 
 @user_is_authorized(Test, Permissions.Test_Edit, "tid")
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 def delete_cred_test(request, tid, ttid):
     return delete_cred_controller(request, "view_test", tid, ttid)
 
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
-@user_is_authorized(Cred_User, Permissions.Credential_Delete, "ttid")
+@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 def delete_cred_finding(request, fid, ttid):
     return delete_cred_controller(request, "view_finding", fid, ttid)

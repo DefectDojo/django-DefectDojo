@@ -1760,9 +1760,7 @@ class FindingSerializer(serializers.ModelSerializer):
     mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
-    accepted_risks = RiskAcceptanceSerializer(
-        many=True, read_only=True, source="risk_acceptance_set",
-    )
+    accepted_risks = serializers.SerializerMethodField()
     push_to_jira = serializers.BooleanField(default=False)
     found_by = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all(), many=True,
@@ -1805,6 +1803,16 @@ class FindingSerializer(serializers.ModelSerializer):
             self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
                 many=True, required=False, queryset=Endpoint.objects.all(),
             )
+
+    def get_accepted_risks(self, obj):
+        request = self.context.get("request")
+        if request is None:
+            return []
+        if not user_has_permission(request.user, obj, Permissions.Risk_Acceptance):
+            return []
+        return RiskAcceptanceSerializer(
+            obj.risk_acceptance_set.all(), many=True,
+        ).data
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_creation(self, obj):
