@@ -1038,9 +1038,7 @@ def _create_note_if_provided(
 
 
 def _save_finding_with_jira_sync(finding, *, new_note=None):
-    """
-    Persist finding and apply JIRA sync behavior used by finding status actions.
-    """
+    """Persist finding and apply JIRA sync behavior used by finding status actions."""
     push_to_jira = False
     finding_in_group = finding.has_finding_group
     jira_issue_exists = finding.has_jira_issue or (
