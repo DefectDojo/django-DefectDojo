@@ -30,6 +30,7 @@ from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
 from dojo.decorators import dojo_async_task_counter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     Development_Environment,
     Dojo_User,
@@ -228,7 +229,6 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
 
-# TODO: Implement Locations
 @skip_unless_v2
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
@@ -450,6 +450,149 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         # Enable deduplication
+        self.system_settings(enable_deduplication=True)
+
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+
+        self._deduplication_performance(
+            expected_num_queries1=271,
+            expected_num_async_tasks1=7,
+            expected_num_queries2=236,
+            expected_num_async_tasks2=7,
+        )
+
+
+@override_settings(V3_FEATURE_LOCATIONS=True)
+class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase):
+
+    r"""
+    Performance tests using small sample files (StackHawk, ~6 findings) with v3 locations enabled.
+
+    These mirror TestDojoImporterPerformanceSmall but run with V3_FEATURE_LOCATIONS=True.
+    Query counts are specific to the locations code path and will differ from the v2 endpoint counts.
+
+    To determine or update the expected counts, run:
+        python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmallLocations
+    """
+
+    def setUp(self):
+        super().setUp()
+        # Warm up ContentType cache for Location models so these queries don't
+        # count against the measured sections.
+        for model in [Location, LocationFindingReference]:
+            ContentType.objects.get_for_model(model)
+
+    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
+        r"""
+        Log output can be quite large as when the assertNumQueries fails, all queries are printed.
+        It could be useful to capture the output in `less`:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformanceSmallLocations 2>&1 | less
+        Then search for `expected` to find the lines where the expected number of queries is printed.
+        Or you can use `grep` to filter the output:
+            ./run-unittest.sh --test-case unittests.test_importers_performance.TestDojoImporterPerformanceSmallLocations 2>&1 | grep expected -B 10
+        """
+        return super()._import_reimport_performance(
+            expected_num_queries1,
+            expected_num_async_tasks1,
+            expected_num_queries2,
+            expected_num_async_tasks2,
+            expected_num_queries3,
+            expected_num_async_tasks3,
+            scan_file1=STACK_HAWK_SUBSET_FILENAME,
+            scan_file2=STACK_HAWK_FILENAME,
+            scan_file3=STACK_HAWK_SUBSET_FILENAME,
+            scan_type=STACK_HAWK_SCAN_TYPE,
+            product_name="TestDojoDefaultImporterLocations",
+            engagement_name="Test Create Engagement Locations",
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_import_reimport_reimport_performance_pghistory_async(self):
+        """
+        This test checks the performance of the importers when using django-pghistory with async enabled.
+        Query counts will need to be determined by running the test initially.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        self._import_reimport_performance(
+            expected_num_queries1=1091,
+            expected_num_async_tasks1=6,
+            expected_num_queries2=1286,
+            expected_num_async_tasks2=17,
+            expected_num_queries3=874,
+            expected_num_async_tasks3=16,
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_import_reimport_reimport_performance_pghistory_no_async(self):
+        """
+        This test checks the performance of the importers when using django-pghistory with async disabled.
+        Query counts will need to be determined by running the test initially.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+
+        self._import_reimport_performance(
+            expected_num_queries1=1098,
+            expected_num_async_tasks1=6,
+            expected_num_queries2=1293,
+            expected_num_async_tasks2=17,
+            expected_num_queries3=881,
+            expected_num_async_tasks3=16,
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_import_reimport_reimport_performance_pghistory_no_async_with_product_grading(self):
+        """
+        This test checks the performance of the importers when using django-pghistory with async disabled and product grading enabled.
+        Query counts will need to be determined by running the test initially.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        testuser = User.objects.get(username="admin")
+        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.save()
+        self.system_settings(enable_product_grade=True)
+
+        self._import_reimport_performance(
+            expected_num_queries1=1105,
+            expected_num_async_tasks1=8,
+            expected_num_queries2=1300,
+            expected_num_async_tasks2=19,
+            expected_num_queries3=885,
+            expected_num_async_tasks3=18,
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_deduplication_performance_pghistory_async(self):
+        """Test deduplication performance with django-pghistory and async tasks enabled."""
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        self.system_settings(enable_deduplication=True)
+
+        self._deduplication_performance(
+            expected_num_queries1=264,
+            expected_num_async_tasks1=7,
+            expected_num_queries2=175,
+            expected_num_async_tasks2=7,
+            check_duplicates=False,  # Async mode - deduplication happens later
+        )
+
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_deduplication_performance_pghistory_no_async(self):
+        """Test deduplication performance with django-pghistory and async tasks disabled."""
+        configure_audit_system()
+        configure_pghistory_triggers()
+
         self.system_settings(enable_deduplication=True)
 
         testuser = User.objects.get(username="admin")
