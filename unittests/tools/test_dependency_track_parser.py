@@ -41,7 +41,7 @@ class TestDependencyTrackParser(DojoTestCase):
             self.assertIsNone(findings[1].unsaved_vulnerability_ids)
             self.assertEqual(1, len(findings[2].unsaved_vulnerability_ids))
             self.assertEqual("CVE-2016-2097", findings[2].unsaved_vulnerability_ids[0])
-            self.assertEqual("900991f6-335a-49cb-9bf6-87b545f960ce", findings[2].unique_id_from_tool)
+            self.assertEqual("8d7f5fcd-210b-491d-a29e-904c2e01b281:3e52f829-3317-48c3-bde1-342c610bd223:900991f6-335a-49cb-9bf6-87b545f960ce", findings[2].unique_id_from_tool)
             self.assertEqual("900991f6-335a-49cb-9bf6-87b545f960ce", findings[2].vuln_id_from_tool)
             self.assertTrue(findings[2].false_p)
             self.assertTrue(findings[2].is_mitigated)
@@ -56,6 +56,10 @@ class TestDependencyTrackParser(DojoTestCase):
             parser = DependencyTrackParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
+            self.assertEqual(
+                "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46",
+                findings[0].unique_id_from_tool,
+            )
 
     def test_dependency_track_parser_v3_8_0(self):
         with (
@@ -65,6 +69,7 @@ class TestDependencyTrackParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(9, len(findings))
             self.assertTrue(all(item.file_path is not None for item in findings))
+            self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
             self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
 
     def test_dependency_track_parser_findings_with_alias(self):
@@ -78,6 +83,7 @@ class TestDependencyTrackParser(DojoTestCase):
             self.assertTrue(all(item.file_path is not None for item in findings))
             self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
             self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
+            self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
             self.assertIn("CVE-2022-42004", findings[0].unsaved_vulnerability_ids)
             self.assertIn("DSA-5283-1", findings[0].unsaved_vulnerability_ids)
             self.assertIn("GHSA-rgv9-q543-rqg4", findings[0].unsaved_vulnerability_ids)
@@ -100,6 +106,7 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertTrue(all(item.file_path is not None for item in findings))
         self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
         self.assertTrue(all(item.vuln_id_from_tool is not None for item in findings))
+        self.assertTrue(all(item.unique_id_from_tool is not None for item in findings))
         self.assertIn("CVE-2022-42004", findings[0].unsaved_vulnerability_ids)
         self.assertEqual(8.3, findings[0].cvssv3_score)
 
