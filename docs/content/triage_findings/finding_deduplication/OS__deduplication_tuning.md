@@ -145,6 +145,3 @@ To help troubleshooting deduplication use the following tools:
 ![Unique ID from Tool and Hash Code on the View Finding page](images/hash_code_id_field.png)
 
 ![Unique ID from Tool and Hash Code on the Finding List Status Column](images/hash_code_status_column.png)
-
-In Open Source, 
-
