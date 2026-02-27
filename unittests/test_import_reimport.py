@@ -2006,17 +2006,42 @@ class ImportReimportMixin:
 
     @parameterized.expand(
         [
-            ("Test false_positive Status", {"false_positive": True}),
-            ("Test out_of_scope Status", {"out_of_scope": True}),
-            ("Test risk_accepted Status", {"risk_accepted": True}),
+            ("Test False Positive Status (Endpoint Status)", {"false_positive": True}, "status_finding"),
+            ("Test Out of Scope Status (Endpoint Status)", {"out_of_scope": True}, "status_finding"),
+            ("Test Risk Accepted Status (Endpoint Status)", {"risk_accepted": True}, "status_finding"),
+            ("Test False Positive Status (Locations)", {"status": "FalsePositive"}, "locations"),
+            ("Test Out of Scope Status (Locations)", {"status": "OutOfScope"}, "locations"),
+            ("Test Risk Accepted Status (Locations)", {"status": "RiskAccepted"}, "locations"),
         ],
     )
-    def test_import_reimport_endpoint_where_eps_reactivation_skips_special_status(self, label: str, special_status_fields: dict):
+    def test_import_reimport_endpoint_where_eps_reactivation_skips_special_status(self, label: str, special_status_fields: dict, m2m_key: str):
         """
         When Findings are set to False Positive, Out of Scope, or Risk Accepted, they are not reactivated
         because these statuses are often set by humans. The same needs to apply for the Endpoint Status as
         they are an extension of the finding being partially mitigated.
         """
+        if settings.V3_FEATURE_LOCATIONS:
+            # TODO: Delete this after the move to Locations
+            if m2m_key == "status_finding":
+                # This test will fail for endpoint statuses with locations enabled
+                # return early here
+                return
+            context = {
+                "auditor": User.objects.get(username="admin"),
+                "audit_time": timezone.now(),
+            }
+        # TODO: Delete this after the move to Locations
+        else:
+            if m2m_key == "locations":
+                # This test will fail for locations with locations disabled
+                # return early here
+                return
+            context = {
+                "mitigated": True,
+                "mitigated_by": User.objects.get(username="admin"),
+                "mitigated_time": timezone.now(),
+            }
+        # Now start the test
         with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
             import0 = self.import_scan_with_params(
                 self.gitlab_dast_file_name, self.scan_type_gitlab_dast, active=True, verified=True,
@@ -2025,18 +2050,12 @@ class ImportReimportMixin:
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(1, findings)
         finding = Finding.objects.get(id=findings["results"][0]["id"])
-        # Get the endpoint status on the finding
-        endpoint_statuses = finding.status_finding.all()
-        self.assertEqual(len(endpoint_statuses), 1)
-        # Set the baseline for the endpoint status, and then use it to compare after the reimport is finished
-        endpoint_status_context = {
-            "mitigated": True,
-            "mitigated_by": User.objects.get(username="admin"),
-            "mitigated_time": timezone.now(),
-            **special_status_fields,
-        }
-        # Update the endpoint status with the special status fields (false_positive, out_of_scope or risk_accepted) and mitigated=True
-        endpoint_statuses.update(**endpoint_status_context)
+        # Get the related objects on the finding
+        related_obects = getattr(finding, m2m_key).all()
+        self.assertEqual(len(related_obects), 1)
+        # Update the related objects with the special status fields
+        related_objects_context = {**context, **special_status_fields}
+        related_obects.update(**related_objects_context)
         # Reimport the same file
         reimport0 = self.reimport_scan_with_params(
             test_id, self.gitlab_dast_file_name, scan_type=self.scan_type_gitlab_dast,
@@ -2045,11 +2064,13 @@ class ImportReimportMixin:
         findings = self.get_test_findings_api(test_id)
         self.assert_finding_count_json(1, findings)
         finding = Finding.objects.get(id=findings["results"][0]["id"])
-        # Get the endpoint status on the finding
-        endpoint_status = finding.status_finding.first()
+        # Get the related objects on the finding
+        related_obects = getattr(finding, m2m_key).all()
+        self.assertEqual(len(related_obects), 1)
+        related_object = related_obects.first()
         # Ensure the status is the same as the baseline
-        for key, value in endpoint_status_context.items():
-            self.assertEqual(getattr(endpoint_status, key), value)
+        for key, value in related_objects_context.items():
+            self.assertEqual(getattr(related_object, key), value)
 
     def test_import_reimport_endpoint_where_eps_date_is_different(self):
         endpoint_count_before = self.db_endpoint_count()
