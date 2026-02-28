@@ -1804,6 +1804,7 @@ class FindingSerializer(serializers.ModelSerializer):
                 many=True, required=False, queryset=Endpoint.objects.all(),
             )
 
+    @extend_schema_field(RiskAcceptanceSerializer(many=True))
     def get_accepted_risks(self, obj):
         request = self.context.get("request")
         if request is None:

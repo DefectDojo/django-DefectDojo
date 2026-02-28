@@ -72,12 +72,12 @@ class TestRiskAcceptanceExposure(DojoTestCase):
         # Create users
         cls.reader_user = Dojo_User.objects.create_user(
             username="ra_test_reader",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         cls.writer_user = Dojo_User.objects.create_user(
             username="ra_test_writer",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
 
@@ -170,7 +170,7 @@ class TestMetadataBatchPermissions(DojoTestCase):
         # User with Writer on accessible product, no role on inaccessible product
         cls.writer_user = Dojo_User.objects.create_user(
             username="meta_batch_writer",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -182,7 +182,7 @@ class TestMetadataBatchPermissions(DojoTestCase):
         # User with Reader on accessible product (Reader lacks Product_Edit)
         cls.reader_user = Dojo_User.objects.create_user(
             username="meta_batch_reader",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -250,7 +250,7 @@ class TestNoteRelationshipVerification(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="note_test_owner",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -356,7 +356,7 @@ class TestBenchmarkIDOR(DojoTestCase):
         # User with Owner on both products
         cls.user = Dojo_User.objects.create_user(
             username="bench_idor_owner",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -397,7 +397,7 @@ class TestBenchmarkIDOR(DojoTestCase):
     def test_update_benchmark_cross_product_rejected(self):
         """POSTing a bench_id from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="bench_idor_owner", password="testpass123")
+        client.login(username="bench_idor_owner", password="testTEST1234!@#$")
 
         # Try to update product A's benchmark through product B's endpoint
         url = reverse(
@@ -416,7 +416,7 @@ class TestBenchmarkIDOR(DojoTestCase):
     def test_update_benchmark_summary_cross_product_rejected(self):
         """POSTing a summary from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="bench_idor_owner", password="testpass123")
+        client.login(username="bench_idor_owner", password="testTEST1234!@#$")
 
         url = reverse(
             "update_product_benchmark_summary",
@@ -433,7 +433,7 @@ class TestBenchmarkIDOR(DojoTestCase):
     def test_update_benchmark_same_product_allowed(self):
         """POSTing a bench_id for the correct product should succeed."""
         client = Client()
-        client.login(username="bench_idor_owner", password="testpass123")
+        client.login(username="bench_idor_owner", password="testTEST1234!@#$")
 
         url = reverse(
             "update_product_benchmark",
@@ -468,7 +468,7 @@ class TestObjectProductParentCheck(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="object_parent_owner",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -491,22 +491,22 @@ class TestObjectProductParentCheck(DojoTestCase):
     def test_edit_object_cross_product_rejected(self):
         """Editing an object from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="object_parent_owner", password="testpass123")
+        client.login(username="object_parent_owner", password="testTEST1234!@#$")
 
         url = reverse("edit_object", args=(self.product_b.id, self.tracked_file.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertEqual(response.status_code, 404)
+        self.assertIn(response.status_code, [400, 403])
 
     def test_delete_object_cross_product_rejected(self):
         """Deleting an object from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="object_parent_owner", password="testpass123")
+        client.login(username="object_parent_owner", password="testTEST1234!@#$")
 
         url = reverse("delete_object", args=(self.product_b.id, self.tracked_file.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertEqual(response.status_code, 404)
+        self.assertIn(response.status_code, [400, 403])
 
 
 class TestToolProductParentCheck(DojoTestCase):
@@ -530,7 +530,7 @@ class TestToolProductParentCheck(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="tool_parent_owner",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -555,22 +555,22 @@ class TestToolProductParentCheck(DojoTestCase):
     def test_edit_tool_product_cross_product_rejected(self):
         """Editing a tool setting from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="tool_parent_owner", password="testpass123")
+        client.login(username="tool_parent_owner", password="testTEST1234!@#$")
 
         url = reverse("edit_tool_product", args=(self.product_b.id, self.tool_setting.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertEqual(response.status_code, 404)
+        self.assertIn(response.status_code, [400, 403])
 
     def test_delete_tool_product_cross_product_rejected(self):
         """Deleting a tool setting from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="tool_parent_owner", password="testpass123")
+        client.login(username="tool_parent_owner", password="testTEST1234!@#$")
 
         url = reverse("delete_tool_product", args=(self.product_b.id, self.tool_setting.id))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertEqual(response.status_code, 404)
+        self.assertIn(response.status_code, [400, 403])
 
 
 class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
@@ -588,7 +588,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
         )
         cls.user = Dojo_User.objects.create_user(
             username="ra_idor_owner",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -633,7 +633,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
 
     def _login(self):
         client = Client()
-        client.login(username="ra_idor_owner", password="testpass123")
+        client.login(username="ra_idor_owner", password="testTEST1234!@#$")
         return client
 
     def test_view_risk_acceptance_cross_engagement(self):
@@ -713,7 +713,7 @@ class TestEngagementPresetsCrossProductIDOR(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="preset_idor_owner",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -732,7 +732,7 @@ class TestEngagementPresetsCrossProductIDOR(DojoTestCase):
 
     def _login(self):
         client = Client()
-        client.login(username="preset_idor_owner", password="testpass123")
+        client.login(username="preset_idor_owner", password="testTEST1234!@#$")
         return client
 
     def test_edit_preset_cross_product(self):
@@ -779,7 +779,7 @@ class TestQuestionnaireCrossEngagementIDOR(DojoTestCase):
         )
         cls.user = Dojo_User.objects.create_user(
             username="survey_idor_owner",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -814,7 +814,7 @@ class TestQuestionnaireCrossEngagementIDOR(DojoTestCase):
 
     def _login(self):
         client = Client()
-        client.login(username="survey_idor_owner", password="testpass123")
+        client.login(username="survey_idor_owner", password="testTEST1234!@#$")
         return client
 
     def test_view_questionnaire_cross_engagement(self):
@@ -871,7 +871,7 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
         # Product-level writer (no global permission)
         cls.product_writer = Dojo_User.objects.create_user(
             username="template_test_writer",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         Product_Member.objects.create(
@@ -881,7 +881,7 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
         # Superuser (has global permissions)
         cls.superuser = Dojo_User.objects.create_user(
             username="template_test_super",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
             is_superuser=True,
         )
@@ -917,16 +917,16 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
     def test_product_writer_cannot_access_find_template(self):
         """Product-level Writer without global permission should be denied."""
         client = Client()
-        client.login(username="template_test_writer", password="testpass123")
+        client.login(username="template_test_writer", password="testTEST1234!@#$")
         url = reverse("find_template_to_apply", args=(self.finding.id,))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
-        self.assertEqual(response.status_code, 404)
+        self.assertIn(response.status_code, [400, 403])
 
     def test_superuser_can_access_find_template(self):
         """Superuser (implicit global permission) should be able to access."""
         client = Client()
-        client.login(username="template_test_super", password="testpass123")
+        client.login(username="template_test_super", password="testTEST1234!@#$")
         url = reverse("find_template_to_apply", args=(self.finding.id,))
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
@@ -949,12 +949,12 @@ class TestJiraEpicBFLA(DojoTestCase):
 
         cls.reader_user = Dojo_User.objects.create_user(
             username="jira_epic_reader",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
         cls.writer_user = Dojo_User.objects.create_user(
             username="jira_epic_writer",
-            password="testpass123",
+            password="testTEST1234!@#$",
             is_active=True,
         )
 
