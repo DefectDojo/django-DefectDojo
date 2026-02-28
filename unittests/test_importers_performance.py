@@ -474,7 +474,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
     Query counts are specific to the locations code path and will differ from the v2 endpoint counts.
 
     To determine or update the expected counts, run:
-        python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmallLocations
+        python3 scripts/update_performance_test_counts.py
     """
 
     def setUp(self):
@@ -571,6 +571,87 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks3=18,
         )
 
+    def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
+        """
+        Test method to measure deduplication performance by importing the same scan twice.
+        Mirrors TestDojoImporterPerformanceSmall._deduplication_performance but uses
+        Locations-specific product/engagement names for test isolation.
+        """
+        _, engagement, lead, environment = self._create_test_objects(
+            "TestDojoDeduplicationPerformanceLocations",
+            "Test Deduplication Performance Engagement Locations",
+        )
+
+        with (  # noqa: SIM117
+            self.subTest("first_import"), impersonate(Dojo_User.objects.get(username="admin")),
+            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+        ):
+            with self.subTest(step="first_import", metric="queries"):
+                with self.assertNumQueries(expected_num_queries1):
+                    with self.subTest(step="first_import", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks1):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "scan_type": STACK_HAWK_SCAN_TYPE,
+                                "engagement": engagement,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
+
+        with (  # noqa: SIM117
+            self.subTest("second_import"), impersonate(Dojo_User.objects.get(username="admin")),
+            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+        ):
+            with self.subTest(step="second_import", metric="queries"):
+                with self.assertNumQueries(expected_num_queries2):
+                    with self.subTest(step="second_import", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks2):
+                            import_options = {
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "environment": environment,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "scan_type": STACK_HAWK_SCAN_TYPE,
+                                "engagement": engagement,
+                            }
+                            importer = DefaultImporter(**import_options)
+                            _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
+
+        logger.debug(f"First import: {len_new_findings1} new findings, {len_closed_findings1} closed findings")
+        logger.debug(f"Second import: {len_new_findings2} new findings, {len_closed_findings2} closed findings")
+
+        self.assertEqual(len_new_findings1, 6, "First import should create 6 new findings")
+        self.assertEqual(len_closed_findings1, 0, "First import should not close any findings")
+        self.assertEqual(len_new_findings2, 6, "Second import should report 6 new findings initially (before deduplication)")
+        self.assertEqual(len_closed_findings2, 0, "Second import should not close any findings")
+
+        if check_duplicates:
+            active_findings = Finding.objects.filter(
+                test__engagement=engagement,
+                active=True,
+                duplicate=False,
+            ).count()
+            duplicate_findings = Finding.objects.filter(
+                test__engagement=engagement,
+                duplicate=True,
+            ).count()
+            self.assertEqual(active_findings, 6, f"Expected 6 active findings, got {active_findings}")
+            self.assertEqual(duplicate_findings, 6, f"Expected 6 duplicate findings, got {duplicate_findings}")
+            total_findings = Finding.objects.filter(test__engagement=engagement).count()
+            self.assertEqual(total_findings, 12, f"Expected 12 total findings, got {total_findings}")
+        else:
+            total_findings = Finding.objects.filter(test__engagement=engagement).count()
+            self.assertEqual(total_findings, 12, f"Expected 12 total findings, got {total_findings}")
+
     @override_settings(ENABLE_AUDITLOG=True)
     def test_deduplication_performance_pghistory_async(self):
         """Test deduplication performance with django-pghistory and async tasks enabled."""
@@ -580,9 +661,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=264,
+            expected_num_queries1=1356,
             expected_num_async_tasks1=7,
-            expected_num_queries2=175,
+            expected_num_queries2=1165,
             expected_num_async_tasks2=7,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -600,8 +681,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=271,
+            expected_num_queries1=1363,
             expected_num_async_tasks1=7,
-            expected_num_queries2=236,
+            expected_num_queries2=1438,
             expected_num_async_tasks2=7,
         )
