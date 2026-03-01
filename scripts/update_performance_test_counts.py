@@ -14,15 +14,19 @@ How to run:
     # Default: Update both v2 and v3 test classes
     python3 scripts/update_performance_test_counts.py
 
+    # Or update a specific test class:
+    python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmall
+    python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmallLocations
+
     # Step 1: Run tests and generate report only (without updating)
     python3 scripts/update_performance_test_counts.py --report-only
 
     # Step 2: Verify all tests pass
     python3 scripts/update_performance_test_counts.py --verify
 
-The script always runs and updates both TestDojoImporterPerformanceSmall (v2) and
-TestDojoImporterPerformanceSmallLocations (v3). The script defaults to --update
-behavior if no action flag is provided.
+By default (no --test-class) the script runs and updates both
+TestDojoImporterPerformanceSmall (v2) and TestDojoImporterPerformanceSmallLocations (v3).
+The script defaults to --update behavior if no action flag is provided.
 """
 
 import argparse
@@ -34,11 +38,11 @@ from pathlib import Path
 # Path to the test file
 TEST_FILE = Path(__file__).parent.parent / "unittests" / "test_importers_performance.py"
 
-# Both v2 and v3 performance test classes - script always updates/verifies both
-TEST_CLASSES = (
+# All performance test classes, in run order
+TEST_CLASSES = [
     "TestDojoImporterPerformanceSmall",
     "TestDojoImporterPerformanceSmallLocations",
-)
+]
 
 
 class TestCount:
@@ -68,9 +72,9 @@ def extract_test_methods(test_class: str) -> list[str]:
 
     content = TEST_FILE.read_text()
 
-    # Find the test class definition (use (?<!-) to avoid matching "test-class" in docstrings)
+    # Find the test class definition
     class_pattern = re.compile(
-        rf"class {re.escape(test_class)}.*?(?=(?<!-)class \w|\Z)",
+        rf"class {re.escape(test_class)}.*?(?=class |\Z)",
         re.DOTALL,
     )
     class_match = class_pattern.search(content)
@@ -366,7 +370,7 @@ def generate_report(counts: list[TestCount], expected_counts: dict[str, dict[str
 
     print("=" * 80)
     print("\nTo update the test file, run:")
-    print("  python3 scripts/update_performance_test_counts.py")
+    print(f"  python scripts/update_performance_test_counts.py --test-class {test_name.split('_')[0]} --update")
     print()
 
 
@@ -374,8 +378,8 @@ def update_test_file(counts: list[TestCount], test_class: str | None = None):
     """
     Update the test file with new expected counts.
 
-    When test_class is provided, only update test methods within that class.
-    This is required when multiple classes (e.g. v2 and v3) share the same test method names.
+    When test_class is provided, method lookups are scoped to that class.
+    This is required because both v2 and v3 classes share the same method names.
     """
     if not counts:
         print("No counts to update.")
@@ -428,12 +432,13 @@ def update_test_file(counts: list[TestCount], test_class: str | None = None):
         "second_import_async_tasks": "expected_num_async_tasks2",
     }
 
-    # Restrict search to the specified test class if given
+    # Restrict method search to the specified class to avoid updating the wrong
+    # class when v2 and v3 share identical method names.
     search_content = content
     search_offset = 0
     if test_class:
         class_pattern = re.compile(
-            rf"class {re.escape(test_class)}.*?(?=(?<!-)class \w|\Z)",
+            rf"class {re.escape(test_class)}.*?(?=class |\Z)",
             re.DOTALL,
         )
         class_match = class_pattern.search(content)
@@ -568,6 +573,12 @@ def main():
         epilog=__doc__,
     )
     parser.add_argument(
+        "--test-class",
+        required=False,
+        default=None,
+        help="Test class name to run (e.g., TestDojoImporterPerformanceSmall). Defaults to running all test classes if not provided.",
+    )
+    parser.add_argument(
         "--report-only",
         action="store_true",
         help="Only generate a report, don't update the file",
@@ -584,22 +595,21 @@ def main():
     )
 
     args = parser.parse_args()
+    classes_to_run = [args.test_class] if args.test_class else TEST_CLASSES
 
     if args.report_only:
-        # Step 1: Run tests and generate report for both test classes
         all_counts = []
-        for test_class in TEST_CLASSES:
+        for test_class in classes_to_run:
             test_methods = extract_test_methods(test_class)
             if not test_methods:
                 print(f"⚠️  No test methods found in {test_class}")
                 continue
 
-            print(f"\n{'=' * 80}")
-            print(f"Test class: {test_class} ({len(test_methods)} methods)")
+            print(f"\nFound {len(test_methods)} test method(s) in {test_class}")
             print("=" * 80)
 
             for test_method in test_methods:
-                print("\n---")
+                print(f"\n{'=' * 80}")
                 output, return_code = run_test_method(test_class, test_method)
                 success, error_msg = check_test_execution_success(output, return_code)
                 if not success:
@@ -611,35 +621,30 @@ def main():
                 if counts:
                     all_counts.extend(counts)
 
-        if all_counts:
-            generate_report(all_counts, {})
-        else:
-            print("✅ All tests passed! No count differences found.")
+            expected_counts = extract_expected_counts_from_file(test_class)
+            generate_report(all_counts, expected_counts)
 
     elif args.verify:
-        # Step 3: Verify both test classes
         all_pass = True
-        for test_class in TEST_CLASSES:
+        for test_class in classes_to_run:
             if not verify_tests(test_class):
                 all_pass = False
         sys.exit(0 if all_pass else 1)
 
     else:
         # Default: Update the file (--update is the default behavior)
-        # Run each test method in both test classes
         all_counts = []
-        for test_class in TEST_CLASSES:
+        for test_class in classes_to_run:
             test_methods = extract_test_methods(test_class)
             if not test_methods:
                 print(f"⚠️  No test methods found in {test_class}")
                 continue
 
-            print(f"\n{'=' * 80}")
-            print(f"Test class: {test_class} ({len(test_methods)} methods)")
+            print(f"\nFound {len(test_methods)} test method(s) in {test_class}")
             print("=" * 80)
 
             for test_method in test_methods:
-                print("\n---")
+                print(f"\n{'=' * 80}")
                 output, return_code = run_test_method(test_class, test_method)
                 success, error_msg = check_test_execution_success(output, return_code)
                 if not success:
@@ -654,7 +659,7 @@ def main():
 
                 if counts:
                     all_counts.extend(counts)
-                    # Update immediately after each test
+                    # Update immediately after each test, scoped to the current class
                     update_test_file(counts, test_class=test_class)
                     print(f"⚠️  {test_method}: Found {len(counts)} count mismatch(es) - updated file")
                 elif test_passed:
@@ -663,6 +668,7 @@ def main():
                     # Test might have failed for other reasons
                     print(f"⚠️  {test_method}: Test failed (exit code {return_code}) but no count mismatches parsed")
                     print("   This might indicate a parsing issue or a different type of failure")
+                    # Show a snippet of the output to help debug
                     fail_lines = [line for line in output.split("\n") if "FAIL" in line or "Error" in line or "Exception" in line]
                     if fail_lines:
                         print("   Relevant error lines:")
@@ -676,7 +682,7 @@ def main():
             # Do a final full-suite pass and apply any remaining mismatches so the suite passes as run in CI.
             print("\nRunning a final verify pass for stability...")
             all_pass = True
-            for test_class in TEST_CLASSES:
+            for test_class in classes_to_run:
                 success, suite_mismatches = verify_and_get_mismatches(test_class)
                 if not success and suite_mismatches:
                     print(f"\nApplying remaining mismatches from {test_class}...")
@@ -685,11 +691,10 @@ def main():
             if not all_pass:
                 print("\nRe-running verify...")
                 all_pass = True
-                for test_class in TEST_CLASSES:
+                for test_class in classes_to_run:
                     success, _ = verify_and_get_mismatches(test_class)
                     if not success:
                         all_pass = False
-                sys.exit(0 if all_pass else 1)
             sys.exit(0 if all_pass else 1)
         else:
             print(f"\n{'=' * 80}")
