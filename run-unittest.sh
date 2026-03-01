@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 unset TEST_CASE
 unset FAIL_FAST
-unset KEEP_DB
-EXTRA_ARGS=()
 
 bash ./docker/docker-compose-check.sh
 if [[ $? -eq 1 ]]; then exit 1; fi
@@ -14,7 +12,6 @@ usage() {
   echo "Options:"
   echo "  --test-case -t {YOUR_FULLY_QUALIFIED_TEST_CASE}"
   echo "  --fail-fast -f - stop on first test failure"
-  echo "  --no-keepdb - recreate the test database (don't reuse existing)"
   echo "  --help -h - prints this dialogue."
   echo
   echo "You must specify a test case (arg)!"
@@ -44,10 +41,6 @@ while [[ $# -gt 0 ]]; do
       FAIL_FAST="--failfast"
       shift # past argument
       ;;
-    --no-keepdb)
-      KEEP_DB=""
-      shift # past argument
-      ;;
     -h|--help)
       usage
       exit 0
@@ -73,5 +66,4 @@ echo "Running docker compose unit tests with test case $TEST_CASE ..."
 # Compose V2 integrates compose functions into the Docker platform, continuing to support
 # most of the  previous docker-compose features and flags. You can run Compose V2 by
 # replacing the hyphen (-) with a space, using docker compose, instead of docker-compose.
-KEEP_DB="${KEEP_DB:---keepdb}"
-docker compose exec uwsgi bash -c "python manage.py test $TEST_CASE -v2 $KEEP_DB $FAIL_FAST ${EXTRA_ARGS[*]}"
+docker compose exec uwsgi bash -c "python manage.py test $TEST_CASE -v2 --keepdb $FAIL_FAST"
