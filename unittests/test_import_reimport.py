@@ -2582,6 +2582,63 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         date = findings["results"][0]["date"]
         self.assertEqual(date, "2006-12-26")
 
+    def test_reimport_auto_create_does_not_close_findings_in_existing_test(self):
+        """
+        Regression test for #14363: when reimport with auto_create_context=True creates
+        a brand new test, close_old_findings must not close findings from other tests in
+        the same engagement scope.
+
+        The serializer now forces close_old_findings=False when calling DefaultImporter
+        in this path. Without the fix, all 4 findings from the pre-existing test would be
+        incorrectly closed.
+        """
+        product_type, _ = Product_Type.objects.get_or_create(name="PT CloseOld AutoCreate")
+        product, _ = Product.objects.get_or_create(
+            name="P CloseOld AutoCreate",
+            description="test",
+            prod_type=product_type,
+        )
+        engagement = Engagement.objects.create(
+            name="E CloseOld AutoCreate",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+
+        acunetix_many_findings = get_unit_tests_scans_path("acunetix") / "many_findings.xml"
+
+        # Step 1: import 4 findings into an existing test (test1) in the engagement.
+        # minimum_severity="Info" is required to include all 4 findings in the file.
+        import1 = self.import_scan_with_params(
+            acunetix_many_findings,
+            scan_type=self.scan_type_acunetix,
+            engagement=engagement.id,
+            minimum_severity="Info",
+        )
+        test1_id = import1["test"]
+        self.assert_finding_count_json(4, self.get_test_findings_api(test1_id, active=True))
+
+        # Step 2: call the reimport endpoint with auto_create_context=True and a
+        # different test_title so a new test is created.  close_old_findings=True
+        # is the value a caller would pass (and the reimport default); the serializer
+        # must suppress it when auto-creating a new test.  The scan uses a different
+        # file so its hash codes don't overlap with test1's findings, meaning the
+        # bug would close all 4 of test1's findings if the fix were reverted.
+        self.reimport_scan_with_params(
+            None,
+            self.acunetix_file_name,
+            scan_type=self.scan_type_acunetix,
+            test_title="Brand New Test From Reimport",
+            product_name="P CloseOld AutoCreate",
+            engagement_name="E CloseOld AutoCreate",
+            product_type_name="PT CloseOld AutoCreate",
+            auto_create_context=True,
+            close_old_findings=True,
+        )
+
+        # Step 3: test1's 4 findings must all still be active
+        self.assert_finding_count_json(4, self.get_test_findings_api(test1_id, active=True))
+
     @override_settings(
         IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=200,
         IMPORT_REIMPORT_MATCH_BATCH_SIZE=200,
