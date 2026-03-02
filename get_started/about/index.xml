@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>About DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/get_started/about/</link><description>Recent content in About DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>en-US</language><copyright>Copyright (c) 2020-2024 Thulite</copyright><lastBuildDate>Tue, 02 Feb 2021 20:46:29 +0100</lastBuildDate><atom:link href="https://docs.defectdojo.com/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>About DefectDojo</title><link>https://docs.defectdojo.com/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/get_started/about/about_defectdojo/</guid><description>&lt;p&gt;
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>About DefectDojo on DefectDojo Documentation</title><link>https://docs.defectdojo.com/get_started/about/</link><description>Recent content in About DefectDojo on DefectDojo Documentation</description><generator>Hugo</generator><language>en-US</language><copyright>Copyright (c) 2020-2025 DefectDojo Inc.</copyright><lastBuildDate>Tue, 02 Feb 2021 20:46:29 +0100</lastBuildDate><atom:link href="https://docs.defectdojo.com/get_started/about/index.xml" rel="self" type="application/rss+xml"/><item><title>About DefectDojo</title><link>https://docs.defectdojo.com/get_started/about/about_defectdojo/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/get_started/about/about_defectdojo/</guid><description>&lt;div class="version-opensource"&gt;
+&lt;p&gt;
 
 &lt;img
  src="https://docs.defectdojo.com/images/dashboard.png"
@@ -10,6 +11,21 @@
  alt="image"
  id="h-rh-i-0"
 &gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class="version-pro"&gt;
+&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/Introduction_to_Dashboard_Features.png"
+ width="1600"
+ height="861"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-1"
+&gt;&lt;/p&gt;
+&lt;/div&gt;
 &lt;p&gt;&lt;span style="background-color:rgba(242, 86, 29, 0.3)"&gt;DefectDojo Inc. and open-source contributors maintain this documentation to support both the Community and Pro editions of DefectDojo.&lt;/span&gt;&lt;/p&gt;</description></item><item><title>Feature comparison</title><link>https://docs.defectdojo.com/get_started/about/defectdojo_versions/</link><pubDate>Tue, 02 Feb 2021 20:46:29 +0100</pubDate><guid>https://docs.defectdojo.com/get_started/about/defectdojo_versions/</guid><description>&lt;p&gt;&lt;strong&gt;DefectDojo Open-Source&lt;/strong&gt; is a powerful, free vulnerability management platform with core importing, deduplication, basic dashboards, API access, and essential reporting — ideal for smaller teams or those wanting to self-host and extend the tool using community resources.&lt;/p&gt;</description></item><item><title>❓ Frequently Asked Questions</title><link>https://docs.defectdojo.com/get_started/about/faq/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/about/faq/</guid><description>&lt;p&gt;Here are some frequently asked questions about working with DefectDojo - both in DefectDojo Pro or DefectDojo OS.&lt;/p&gt;
 &lt;h2 id="general-questions"&gt;General Questions&lt;/h2&gt;
 &lt;h3 id="how-should-i-organize-my-security-testing-in-defectdojo"&gt;How should I organize my security testing in DefectDojo?&lt;/h3&gt;
