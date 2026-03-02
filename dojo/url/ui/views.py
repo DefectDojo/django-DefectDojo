@@ -8,7 +8,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -100,6 +100,14 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
 
     """
     location = get_object_or_404(Location, id=location_id)
+    if location.location_type != URL.get_location_type():
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Viewing this object is only available in the Pro new UI.",
+            extra_tags="alert-danger",
+        )
+        raise Http404
     host = location.url.host
     locations = None
     metadata = None
