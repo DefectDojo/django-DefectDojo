@@ -259,6 +259,8 @@ class TrivyParser:
                     cvssclass = None
                     cvssv3 = None
                     cvssv3_score = None
+                    cvssv4 = None
+                    cvssv4_score = None
                     severity = TRIVY_SEVERITIES[vuln["Severity"]] if vuln.get("Severity") else None
                     # Iterate over the possible severity sources tom find the first match
                     for severity_source in [detected_severity_source, *CVSS_SEVERITY_SOURCES]:
@@ -267,7 +269,17 @@ class TrivyParser:
                             break
                     # Parse the CVSS class if it is not None
                     if cvssclass is not None:
-                        if cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
+                        # First parse the CVSSv4 vector if present, then CVSSv3 vector, then CVSSv3 score, then CVSSv2 score to determine severity and CVSS scores and vectors
+                        if cvss_data := parse_cvss_data(cvssclass.get("V40Vector", "")):
+                            cvssv4 = cvss_data.get("cvssv4")
+                            cvssv4_score = cvss_data.get("cvssv4_score")
+                            if severity is None:
+                                severity = cvss_data.get("severity")
+                        elif (cvss_v4_score := cvssclass.get("V4Score")) is not None:
+                            cvssv4_score = cvss_v4_score
+                            if severity is None:
+                                severity = self.convert_cvss_score(cvss_v4_score)
+                        elif cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
                             cvssv3 = cvss_data.get("cvssv3")
                             cvssv3_score = cvss_data.get("cvssv3_score")
                             if severity is None:
@@ -324,6 +336,8 @@ class TrivyParser:
                     component_version=package_version,
                     cvssv3=cvssv3,
                     cvssv3_score=cvssv3_score,
+                    cvssv4=cvssv4,
+                    cvssv4_score=cvssv4_score,
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=fix_available,
