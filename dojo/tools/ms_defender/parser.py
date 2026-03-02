@@ -4,8 +4,8 @@ import logging
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.tools.utils import safe_read_all_zip
 from dojo.tools.locations import LocationData
+from dojo.tools.utils import safe_read_all_zip
 
 logger = logging.getLogger(__name__)
 
