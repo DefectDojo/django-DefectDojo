@@ -11,7 +11,7 @@ on:
     - cron: '0 0 1 1,4,7,10 *'
 
 jobs:
-  run-binary-and-create-pr:
+  run-script-and-create-pr:
     runs-on: ubuntu-latest
     steps:
       # Checkout the repository
@@ -40,4 +40,4 @@ jobs:
           branch: update-sample-data
           base: dev
           title: "Update sample data"
-          body: "This pull request updates the sample data."
+          body: "This pull request updates the timestamps in the sample data to keep them up to date."
