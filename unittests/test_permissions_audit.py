@@ -54,6 +54,7 @@ from .dojo_test_case import DojoTestCase
 
 
 class TestRiskAcceptanceExposure(DojoTestCase):
+
     """FindingSerializer must not expose accepted_risks to users without Risk_Acceptance permission."""
 
     @classmethod
@@ -72,12 +73,12 @@ class TestRiskAcceptanceExposure(DojoTestCase):
         # Create users
         cls.reader_user = Dojo_User.objects.create_user(
             username="ra_test_reader",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         cls.writer_user = Dojo_User.objects.create_user(
             username="ra_test_writer",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
 
@@ -145,6 +146,7 @@ class TestRiskAcceptanceExposure(DojoTestCase):
 
 
 class TestMetadataBatchPermissions(DojoTestCase):
+
     """Metadata batch endpoint must enforce permissions on parent objects."""
 
     @classmethod
@@ -170,7 +172,7 @@ class TestMetadataBatchPermissions(DojoTestCase):
         # User with Writer on accessible product, no role on inaccessible product
         cls.writer_user = Dojo_User.objects.create_user(
             username="meta_batch_writer",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -182,7 +184,7 @@ class TestMetadataBatchPermissions(DojoTestCase):
         # User with Reader on accessible product (Reader lacks Product_Edit)
         cls.reader_user = Dojo_User.objects.create_user(
             username="meta_batch_reader",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -235,6 +237,7 @@ class TestMetadataBatchPermissions(DojoTestCase):
 
 
 class TestNoteRelationshipVerification(DojoTestCase):
+
     """Regression: remove_note must verify the note belongs to the finding."""
 
     @classmethod
@@ -250,7 +253,7 @@ class TestNoteRelationshipVerification(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="note_test_owner",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -334,6 +337,7 @@ class TestNoteRelationshipVerification(DojoTestCase):
 
 
 class TestBenchmarkIDOR(DojoTestCase):
+
     """update_benchmark must reject bench_id belonging to a different product."""
 
     @classmethod
@@ -356,7 +360,7 @@ class TestBenchmarkIDOR(DojoTestCase):
         # User with Owner on both products
         cls.user = Dojo_User.objects.create_user(
             username="bench_idor_owner",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -397,7 +401,7 @@ class TestBenchmarkIDOR(DojoTestCase):
     def test_update_benchmark_cross_product_rejected(self):
         """POSTing a bench_id from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="bench_idor_owner", password="testTEST1234!@#$")
+        client.login(username="bench_idor_owner", password="testTEST1234!@#$")  # noqa: S106
 
         # Try to update product A's benchmark through product B's endpoint
         url = reverse(
@@ -416,7 +420,7 @@ class TestBenchmarkIDOR(DojoTestCase):
     def test_update_benchmark_summary_cross_product_rejected(self):
         """POSTing a summary from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="bench_idor_owner", password="testTEST1234!@#$")
+        client.login(username="bench_idor_owner", password="testTEST1234!@#$")  # noqa: S106
 
         url = reverse(
             "update_product_benchmark_summary",
@@ -433,7 +437,7 @@ class TestBenchmarkIDOR(DojoTestCase):
     def test_update_benchmark_same_product_allowed(self):
         """POSTing a bench_id for the correct product should succeed."""
         client = Client()
-        client.login(username="bench_idor_owner", password="testTEST1234!@#$")
+        client.login(username="bench_idor_owner", password="testTEST1234!@#$")  # noqa: S106
 
         url = reverse(
             "update_product_benchmark",
@@ -448,6 +452,7 @@ class TestBenchmarkIDOR(DojoTestCase):
 
 
 class TestObjectProductParentCheck(DojoTestCase):
+
     """edit_object and delete_object must reject objects from different products."""
 
     @classmethod
@@ -468,7 +473,7 @@ class TestObjectProductParentCheck(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="object_parent_owner",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -491,7 +496,7 @@ class TestObjectProductParentCheck(DojoTestCase):
     def test_edit_object_cross_product_rejected(self):
         """Editing an object from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="object_parent_owner", password="testTEST1234!@#$")
+        client.login(username="object_parent_owner", password="testTEST1234!@#$")  # noqa: S106
 
         url = reverse("edit_object", args=(self.product_b.id, self.tracked_file.id))
         response = client.get(url)
@@ -501,7 +506,7 @@ class TestObjectProductParentCheck(DojoTestCase):
     def test_delete_object_cross_product_rejected(self):
         """Deleting an object from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="object_parent_owner", password="testTEST1234!@#$")
+        client.login(username="object_parent_owner", password="testTEST1234!@#$")  # noqa: S106
 
         url = reverse("delete_object", args=(self.product_b.id, self.tracked_file.id))
         response = client.get(url)
@@ -510,6 +515,7 @@ class TestObjectProductParentCheck(DojoTestCase):
 
 
 class TestToolProductParentCheck(DojoTestCase):
+
     """edit_tool_product and delete_tool_product must reject tools from different products."""
 
     @classmethod
@@ -530,7 +536,7 @@ class TestToolProductParentCheck(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="tool_parent_owner",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -555,7 +561,7 @@ class TestToolProductParentCheck(DojoTestCase):
     def test_edit_tool_product_cross_product_rejected(self):
         """Editing a tool setting from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="tool_parent_owner", password="testTEST1234!@#$")
+        client.login(username="tool_parent_owner", password="testTEST1234!@#$")  # noqa: S106
 
         url = reverse("edit_tool_product", args=(self.product_b.id, self.tool_setting.id))
         response = client.get(url)
@@ -565,7 +571,7 @@ class TestToolProductParentCheck(DojoTestCase):
     def test_delete_tool_product_cross_product_rejected(self):
         """Deleting a tool setting from product A via product B's URL must be denied."""
         client = Client()
-        client.login(username="tool_parent_owner", password="testTEST1234!@#$")
+        client.login(username="tool_parent_owner", password="testTEST1234!@#$")  # noqa: S106
 
         url = reverse("delete_tool_product", args=(self.product_b.id, self.tool_setting.id))
         response = client.get(url)
@@ -574,8 +580,11 @@ class TestToolProductParentCheck(DojoTestCase):
 
 
 class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
-    """H1 #3577434 / #3569882: Risk acceptance endpoints must reject
-    a raid belonging to a different engagement than the eid in the URL."""
+
+    """
+    H1 #3577434 / #3569882: Risk acceptance endpoints must reject
+    a raid belonging to a different engagement than the eid in the URL.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -588,7 +597,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
         )
         cls.user = Dojo_User.objects.create_user(
             username="ra_idor_owner",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -633,7 +642,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
 
     def _login(self):
         client = Client()
-        client.login(username="ra_idor_owner", password="testTEST1234!@#$")
+        client.login(username="ra_idor_owner", password="testTEST1234!@#$")  # noqa: S106
         return client
 
     def test_view_risk_acceptance_cross_engagement(self):
@@ -692,8 +701,11 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
 
 
 class TestEngagementPresetsCrossProductIDOR(DojoTestCase):
-    """H1 #3577398 / #3570349: Engagement preset endpoints must reject
-    a preset belonging to a different product than the pid in the URL."""
+
+    """
+    H1 #3577398 / #3570349: Engagement preset endpoints must reject
+    a preset belonging to a different product than the pid in the URL.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -713,7 +725,7 @@ class TestEngagementPresetsCrossProductIDOR(DojoTestCase):
 
         cls.user = Dojo_User.objects.create_user(
             username="preset_idor_owner",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -732,7 +744,7 @@ class TestEngagementPresetsCrossProductIDOR(DojoTestCase):
 
     def _login(self):
         client = Client()
-        client.login(username="preset_idor_owner", password="testTEST1234!@#$")
+        client.login(username="preset_idor_owner", password="testTEST1234!@#$")  # noqa: S106
         return client
 
     def test_edit_preset_cross_product(self):
@@ -765,8 +777,11 @@ class TestEngagementPresetsCrossProductIDOR(DojoTestCase):
 
 
 class TestQuestionnaireCrossEngagementIDOR(DojoTestCase):
-    """H1 #3571957: Survey/questionnaire endpoints must reject
-    a survey belonging to a different engagement than the eid in the URL."""
+
+    """
+    H1 #3571957: Survey/questionnaire endpoints must reject
+    a survey belonging to a different engagement than the eid in the URL.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -779,7 +794,7 @@ class TestQuestionnaireCrossEngagementIDOR(DojoTestCase):
         )
         cls.user = Dojo_User.objects.create_user(
             username="survey_idor_owner",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -814,7 +829,7 @@ class TestQuestionnaireCrossEngagementIDOR(DojoTestCase):
 
     def _login(self):
         client = Client()
-        client.login(username="survey_idor_owner", password="testTEST1234!@#$")
+        client.login(username="survey_idor_owner", password="testTEST1234!@#$")  # noqa: S106
         return client
 
     def test_view_questionnaire_cross_engagement(self):
@@ -855,8 +870,11 @@ class TestQuestionnaireCrossEngagementIDOR(DojoTestCase):
 
 
 class TestFindingTemplatesGlobalPermission(DojoTestCase):
-    """H1 #3577363: find_template_to_apply must require global Finding_Edit
-    permission, not just product-level Finding_Edit."""
+
+    """
+    H1 #3577363: find_template_to_apply must require global Finding_Edit
+    permission, not just product-level Finding_Edit.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -871,7 +889,7 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
         # Product-level writer (no global permission)
         cls.product_writer = Dojo_User.objects.create_user(
             username="template_test_writer",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         Product_Member.objects.create(
@@ -881,7 +899,7 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
         # Superuser (has global permissions)
         cls.superuser = Dojo_User.objects.create_user(
             username="template_test_super",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
             is_superuser=True,
         )
@@ -917,7 +935,7 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
     def test_product_writer_cannot_access_find_template(self):
         """Product-level Writer without global permission should be denied."""
         client = Client()
-        client.login(username="template_test_writer", password="testTEST1234!@#$")
+        client.login(username="template_test_writer", password="testTEST1234!@#$")  # noqa: S106
         url = reverse("find_template_to_apply", args=(self.finding.id,))
         response = client.get(url)
         # PermissionDenied raised; custom handler403 returns 400 (DD bug)
@@ -926,15 +944,18 @@ class TestFindingTemplatesGlobalPermission(DojoTestCase):
     def test_superuser_can_access_find_template(self):
         """Superuser (implicit global permission) should be able to access."""
         client = Client()
-        client.login(username="template_test_super", password="testTEST1234!@#$")
+        client.login(username="template_test_super", password="testTEST1234!@#$")  # noqa: S106
         url = reverse("find_template_to_apply", args=(self.finding.id,))
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
 
 
 class TestJiraEpicBFLA(DojoTestCase):
-    """H1 #3577193: update_jira_epic must enforce Engagement_Edit permission,
-    not just IsAuthenticated. Reader role should be denied."""
+
+    """
+    H1 #3577193: update_jira_epic must enforce Engagement_Edit permission,
+    not just IsAuthenticated. Reader role should be denied.
+    """
 
     @classmethod
     def setUpTestData(cls):
@@ -949,12 +970,12 @@ class TestJiraEpicBFLA(DojoTestCase):
 
         cls.reader_user = Dojo_User.objects.create_user(
             username="jira_epic_reader",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
         cls.writer_user = Dojo_User.objects.create_user(
             username="jira_epic_writer",
-            password="testTEST1234!@#$",
+            password="testTEST1234!@#$",  # noqa: S106
             is_active=True,
         )
 
@@ -986,8 +1007,10 @@ class TestJiraEpicBFLA(DojoTestCase):
         self.assertIn(response.status_code, [403, 404])
 
     def test_writer_allowed_update_jira_epic(self):
-        """Writer role should be allowed to POST to update_jira_epic
-        (may fail at Jira level, but not at permission level)."""
+        """
+        Writer role should be allowed to POST to update_jira_epic
+        (may fail at Jira level, but not at permission level).
+        """
         client = self._client_for_user(self.writer_user)
         url = reverse("engagement-update-jira-epic", args=(self.engagement.id,))
         response = client.post(url, data={}, format="json")
