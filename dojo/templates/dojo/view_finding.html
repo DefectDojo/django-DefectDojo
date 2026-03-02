@@ -758,48 +758,6 @@
         <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
     </form>
 
-    <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
-        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
-            <div class="btn-group mr-2" role="group" aria-label="Second group">
-                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-label="Bulk Edit">
-                    Bulk Edit
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
-                    <li style="padding-left: 8px;">
-                        <form action="{% url 'endpoints_status_bulk' finding.id %}" method="post" id="bulk_change_form">
-                            {% csrf_token %}
-                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
-                            <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_active" label="active "name="active" type="checkbox"/>
-                                <span>Active</span>
-                            </label>
-                            <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_false_p" label="false_positive" name="false_positive" type="checkbox"/>
-                                <span>False Positive</span>
-                            </label>
-                            <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_out_of_scope" label="out_of_scope" name="out_of_scope" type="checkbox"/>
-                                <span>Out of scope</span>
-                            </label>
-                            <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_mitigated" label="mitigated" name="mitigated" type="checkbox"/>
-                                <span>Mitigated</span>
-                            </label>
-                            <label style="font-size: 80%; font-weight: normal; display: block">
-                                <input id="id_bulk_risk_accepted" label="risk_accepted" name="risk_accepted" type="checkbox"/>
-                                <span>Risk Accepted</span>
-                            </label>
-                            <br/>
-                            <input type="submit" class="btn btn-sm btn-primary" label="Submit" name="Submit" value="Submit"/>
-                        </form>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-
     <!--Import History begin -->
     {% if 'TRACK_IMPORT_HISTORY'|setting_enabled and latest_test_import_finding_action %}
         <div class="panel panel-default collapse in">
@@ -906,6 +864,72 @@
         </div>
     {% endif %}
     <!--Import activity end -->
+
+    <div class="hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
+        <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+            <div class="btn-group mr-2" role="group" aria-label="Second group">
+                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="dropdownMenu2"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" aria-label="Bulk Edit">
+                    Bulk Edit
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" id="bulk_edit">
+                    <li style="padding-left: 8px;">
+                        <form action="{% url 'endpoints_status_bulk' finding.id %}" method="post" id="bulk_change_form">
+                            {% csrf_token %}
+                            <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
+                            {% if V3_FEATURE_LOCATIONS %}
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_active_location" name="bulk_status" type="radio" value="Active"/>
+                                    <span>Active</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_false_p_location" name="bulk_status" type="radio" value="FalsePositive"/>
+                                    <span>False Positive</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_out_of_scope_location" name="bulk_status" type="radio" value="OutOfScope"/>
+                                    <span>Out of scope</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_mitigated_location" name="bulk_status" type="radio" value="Mitigated"/>
+                                    <span>Mitigated</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_risk_accepted_location" name="bulk_status" type="radio" value="RiskAccepted"/>
+                                    <span>Risk Accepted</span>
+                                </label>
+                            {% else %}
+                                {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_active" label="active" name="active" type="checkbox"/>
+                                    <span>Active</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_false_p" label="false_positive" name="false_positive" type="checkbox"/>
+                                    <span>False Positive</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_out_of_scope" label="out_of_scope" name="out_of_scope" type="checkbox"/>
+                                    <span>Out of scope</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_mitigated" label="mitigated" name="mitigated" type="checkbox"/>
+                                    <span>Mitigated</span>
+                                </label>
+                                <label style="font-size: 80%; font-weight: normal; display: block">
+                                    <input id="id_bulk_risk_accepted" label="risk_accepted" name="risk_accepted" type="checkbox"/>
+                                    <span>Risk Accepted</span>
+                                </label>
+                            {% endif %}
+                            <br/>
+                            <input type="submit" class="btn btn-sm btn-primary" label="Submit" name="Submit" value="Submit"/>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
     {% include "dojo/snippets/endpoints.html" with finding=finding destination="UI" %}
 
