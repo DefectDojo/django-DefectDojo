@@ -559,26 +559,14 @@ def finding_location_bulk_update(request, finding_id):
     if request.method == "POST":
         # Get the list of endpoint IDs to update and the statuses to enable
         finding_locations_to_update = request.POST.getlist("endpoints_to_update")
-        status_list = FindingLocationStatus.values
-        enable = [item for item in status_list if item in list(request.POST.keys())]
+        # Get the status
+        status = request.POST.get("bulk_status")
         # Check that endpoints and statuses are selected before proceeding
-        if finding_locations_to_update and len(enable) > 0:
+        if finding_locations_to_update and status in FindingLocationStatus:
             # Iterate over selected locations and update their finding location references
-            for location in Location.objects.filter(id__in=finding_locations_to_update):
-                finding_location = LocationFindingReference.objects.get(location=location, finding__id=finding_id)
-                for status in status_list:
-                    # Set the status attribute based on whether it is enabled in the POST request
-                    if status in enable:
-                        # Enable this status
-                        finding_location.__setattr__(status, True)  # noqa: PLC2801
-                        # If the status is 'Mitigated', record the auditor and audit time
-                        if status == FindingLocationStatus.Mitigated:
-                            finding_location.auditor = request.user
-                            finding_location.audit_time = timezone.now()
-                    else:
-                        # Disable this status
-                        finding_location.__setattr__(status, False)  # noqa: PLC2801
-                finding_location.save()
+            for location_ref in LocationFindingReference.objects.filter(location__in=finding_locations_to_update, finding__id=finding_id):
+                # Set the status
+                location_ref.set_status(FindingLocationStatus(status), request.user, timezone.now())
             # Add a success message after bulk editing endpoints
             messages.add_message(
                 request,

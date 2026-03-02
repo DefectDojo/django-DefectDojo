@@ -11,6 +11,7 @@ from django.test import override_settings
 from django.test.client import Client
 from django.urls import reverse
 from django.utils import timezone
+from parameterized import parameterized
 
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
 
@@ -2003,6 +2004,74 @@ class ImportReimportMixin:
         test_id2 = reimport0["test"]
         self.assertEqual(test_id, test_id2)
 
+    @parameterized.expand(
+        [
+            ("Test False Positive Status (Endpoint Status)", {"false_positive": True}, "status_finding"),
+            ("Test Out of Scope Status (Endpoint Status)", {"out_of_scope": True}, "status_finding"),
+            ("Test Risk Accepted Status (Endpoint Status)", {"risk_accepted": True}, "status_finding"),
+            ("Test False Positive Status (Locations)", {"status": "FalsePositive"}, "locations"),
+            ("Test Out of Scope Status (Locations)", {"status": "OutOfScope"}, "locations"),
+            ("Test Risk Accepted Status (Locations)", {"status": "RiskAccepted"}, "locations"),
+        ],
+    )
+    def test_import_reimport_endpoint_where_eps_reactivation_skips_special_status(self, label: str, special_status_fields: dict, m2m_key: str):
+        """
+        When Findings are set to False Positive, Out of Scope, or Risk Accepted, they are not reactivated
+        because these statuses are often set by humans. The same needs to apply for the Endpoint Status as
+        they are an extension of the finding being partially mitigated.
+        """
+        if settings.V3_FEATURE_LOCATIONS:
+            # TODO: Delete this after the move to Locations
+            if m2m_key == "status_finding":
+                # This test will fail for endpoint statuses with locations enabled
+                # return early here
+                return
+            context = {
+                "auditor": User.objects.get(username="admin"),
+                "audit_time": timezone.now(),
+            }
+        # TODO: Delete this after the move to Locations
+        else:
+            if m2m_key == "locations":
+                # This test will fail for locations with locations disabled
+                # return early here
+                return
+            context = {
+                "mitigated": True,
+                "mitigated_by": User.objects.get(username="admin"),
+                "mitigated_time": timezone.now(),
+            }
+        # Now start the test
+        with assertTestImportModelsCreated(self, imports=1, affected_findings=1, created=1):
+            import0 = self.import_scan_with_params(
+                self.gitlab_dast_file_name, self.scan_type_gitlab_dast, active=True, verified=True,
+            )
+        test_id = import0["test"]
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(1, findings)
+        finding = Finding.objects.get(id=findings["results"][0]["id"])
+        # Get the related objects on the finding
+        related_obects = getattr(finding, m2m_key).all()
+        self.assertEqual(len(related_obects), 1)
+        # Update the related objects with the special status fields
+        related_objects_context = {**context, **special_status_fields}
+        related_obects.update(**related_objects_context)
+        # Reimport the same file
+        reimport0 = self.reimport_scan_with_params(
+            test_id, self.gitlab_dast_file_name, scan_type=self.scan_type_gitlab_dast,
+        )
+        test_id = reimport0["test"]
+        findings = self.get_test_findings_api(test_id)
+        self.assert_finding_count_json(1, findings)
+        finding = Finding.objects.get(id=findings["results"][0]["id"])
+        # Get the related objects on the finding
+        related_obects = getattr(finding, m2m_key).all()
+        self.assertEqual(len(related_obects), 1)
+        related_object = related_obects.first()
+        # Ensure the status is the same as the baseline
+        for key, value in related_objects_context.items():
+            self.assertEqual(getattr(related_object, key), value)
+
     def test_import_reimport_endpoint_where_eps_date_is_different(self):
         endpoint_count_before = self.db_endpoint_count()
         endpoint_status_count_before_active = self.db_endpoint_status_count(mitigated=False)
@@ -2513,6 +2582,63 @@ class ImportReimportTestAPI(DojoAPITestCase, ImportReimportMixin):
         # Get the date
         date = findings["results"][0]["date"]
         self.assertEqual(date, "2006-12-26")
+
+    def test_reimport_auto_create_does_not_close_findings_in_existing_test(self):
+        """
+        Regression test for #14363: when reimport with auto_create_context=True creates
+        a brand new test, close_old_findings must not close findings from other tests in
+        the same engagement scope.
+
+        The serializer now forces close_old_findings=False when calling DefaultImporter
+        in this path. Without the fix, all 4 findings from the pre-existing test would be
+        incorrectly closed.
+        """
+        product_type, _ = Product_Type.objects.get_or_create(name="PT CloseOld AutoCreate")
+        product, _ = Product.objects.get_or_create(
+            name="P CloseOld AutoCreate",
+            description="test",
+            prod_type=product_type,
+        )
+        engagement = Engagement.objects.create(
+            name="E CloseOld AutoCreate",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+
+        acunetix_many_findings = get_unit_tests_scans_path("acunetix") / "many_findings.xml"
+
+        # Step 1: import 4 findings into an existing test (test1) in the engagement.
+        # minimum_severity="Info" is required to include all 4 findings in the file.
+        import1 = self.import_scan_with_params(
+            acunetix_many_findings,
+            scan_type=self.scan_type_acunetix,
+            engagement=engagement.id,
+            minimum_severity="Info",
+        )
+        test1_id = import1["test"]
+        self.assert_finding_count_json(4, self.get_test_findings_api(test1_id, active=True))
+
+        # Step 2: call the reimport endpoint with auto_create_context=True and a
+        # different test_title so a new test is created.  close_old_findings=True
+        # is the value a caller would pass (and the reimport default); the serializer
+        # must suppress it when auto-creating a new test.  The scan uses a different
+        # file so its hash codes don't overlap with test1's findings, meaning the
+        # bug would close all 4 of test1's findings if the fix were reverted.
+        self.reimport_scan_with_params(
+            None,
+            self.acunetix_file_name,
+            scan_type=self.scan_type_acunetix,
+            test_title="Brand New Test From Reimport",
+            product_name="P CloseOld AutoCreate",
+            engagement_name="E CloseOld AutoCreate",
+            product_type_name="PT CloseOld AutoCreate",
+            auto_create_context=True,
+            close_old_findings=True,
+        )
+
+        # Step 3: test1's 4 findings must all still be active
+        self.assert_finding_count_json(4, self.get_test_findings_api(test1_id, active=True))
 
     @override_settings(
         IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=200,

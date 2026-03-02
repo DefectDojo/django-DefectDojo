@@ -23,9 +23,9 @@ class TrivyChecksHandler:
         for check in checks:
             check_title = check.get("title")
             check_severity = TRIVY_SEVERITIES[check.get("severity")]
-            check_id = check.get("checkID", "0")
+            check_id = check.get("checkID") or "0"
             check_references = ""
-            if check_id != 0:
+            if check_id != "0":
                 check_references = (
                     "https://avd.aquasec.com/misconfig/kubernetes/"
                     + check_id.lower()
@@ -60,7 +60,7 @@ class TrivyChecksHandler:
             )
             finding_tags = [resource_namespace, check_category]
             finding.unsaved_tags = [tag for tag in finding_tags if tag]
-            if check_id:
+            if check_id != "0":
                 finding.unsaved_vulnerability_ids = [UniformTrivyVulnID().return_uniformed_vulnid(check_id)]
             findings.append(finding)
         return findings

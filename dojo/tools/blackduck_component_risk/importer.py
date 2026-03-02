@@ -4,6 +4,8 @@ import logging
 import zipfile
 from pathlib import Path
 
+from dojo.tools.utils import safe_open_zip
+
 logger = logging.getLogger(__name__)
 
 
@@ -42,7 +44,7 @@ class BlackduckCRImporter:
         components = {}
         source = {}
         try:
-            with zipfile.ZipFile(report) as zipf:
+            with safe_open_zip(report) as zipf:
                 c_file = False
                 s_file = False
                 for full_file_name in zipf.namelist():
