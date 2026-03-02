@@ -147,7 +147,7 @@
                 <div class="col-md-12">
                     <div class="panel panel-default table-responsive">
                         <div class="panel-heading">
-                            <h4>Vulnerable Endpoints / Systems ({{ finding.active_endpoint_count }}) </h4>
+                            <h4>Vulnerable Endpoints / Systems ({{ finding.active_endpoint_count }})
                                 <span class="pull-right"><a data-toggle="collapse" href="#vuln_endpoints"><i
                                         class="glyphicon glyphicon-chevron-up"></i></a></span>
                             </h4>
@@ -255,7 +255,7 @@
                                                 <a data-toggle="tooltip" data-placement="top" data-original-title="{{ endpoint.location }}" title="{{ endpoint.location }}" href="{% url 'view_endpoint' endpoint.object_id %}">{{ endpoint.location|url_shortener }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
                                                 {% include "dojo/snippets/tags.html" with tags=endpoint.location.tags.all %}
                                             </td>
-                                            <td>{{ endpoint.status }}</td>
+                                            <td>{{ endpoint.get_status_display }}</td>
                                             <td>{{ endpoint.auditor|safe }}</td>
                                             <td>{{ endpoint.audit_time|date }}</td>
                                         {% else %}

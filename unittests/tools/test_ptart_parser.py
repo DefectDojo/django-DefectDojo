@@ -1,4 +1,6 @@
+from django.conf import settings
 
+from dojo.importers.location_manager import LocationManager
 from dojo.models import Engagement, Product, Test
 from dojo.tools.ptart.parser import PTARTParser
 from dojo.tools.ptart.ptart_parser_tools import (
@@ -445,20 +447,26 @@ class TestPTARTParser(DojoTestCase):
             hit = {}
             self.assertEqual(None, parse_cwe_from_hit(hit))
 
+    def get_locations_from_hit(self, hit):
+        if not settings.V3_FEATURE_LOCATIONS:
+            # TODO: Delete this after the move to Locations
+            return parse_locations_from_hit(hit)
+        return LocationManager.make_abstract_locations(parse_locations_from_hit(hit))
+
     def test_ptart_parser_tools_parse_locations_from_hit(self):
         with self.subTest("No Asset"):
             hit = {}
-            self.assertEqual([], parse_locations_from_hit(hit))
+            self.assertEqual([], self.get_locations_from_hit(hit))
         with self.subTest("Empty Asset"):
             hit = {
                 "asset": "",
             }
-            self.assertEqual([], parse_locations_from_hit(hit))
+            self.assertEqual([], self.get_locations_from_hit(hit))
         with self.subTest("Valid Asset"):
             hit = {
                 "asset": "https://test.example.com",
             }
-            locations = parse_locations_from_hit(hit)
+            locations = self.get_locations_from_hit(hit)
             self.assertEqual(1, len(locations))
             location = locations[0]
             self.assertEqual("test.example.com", location.host)
@@ -469,13 +477,13 @@ class TestPTARTParser(DojoTestCase):
             hit = {
                 "asset": "https://test.example.com:<random_port>",
             }
-            locations = parse_locations_from_hit(hit)
+            locations = self.get_locations_from_hit(hit)
             self.assertEqual(0, len(locations))
         with self.subTest("Asset with Invalid Protocol"):
             hit = {
                 "asset": "test.example.com",
             }
-            locations = parse_locations_from_hit(hit)
+            locations = self.get_locations_from_hit(hit)
             self.assertEqual(1, len(locations))
             location = locations[0]
             self.assertEqual("test.example.com", location.host)

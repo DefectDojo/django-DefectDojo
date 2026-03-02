@@ -3,7 +3,10 @@
 import json
 import logging
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -23,6 +26,7 @@ CVSS_SEVERITY_SOURCES = [
     "redhat",
     "bitnami",
 ]
+
 
 DESCRIPTION_TEMPLATE = """{title}
 **Target:** {target}
@@ -64,7 +68,7 @@ class TrivyParser:
         if raw_value is None:
             return "Info"
         val = float(raw_value)
-        if val == 0.0:
+        if val == 0:
             return "Info"
         if val < 4.0:
             return "Low"
@@ -255,6 +259,8 @@ class TrivyParser:
                     cvssclass = None
                     cvssv3 = None
                     cvssv3_score = None
+                    cvssv4 = None
+                    cvssv4_score = None
                     severity = TRIVY_SEVERITIES[vuln["Severity"]] if vuln.get("Severity") else None
                     # Iterate over the possible severity sources tom find the first match
                     for severity_source in [detected_severity_source, *CVSS_SEVERITY_SOURCES]:
@@ -263,7 +269,17 @@ class TrivyParser:
                             break
                     # Parse the CVSS class if it is not None
                     if cvssclass is not None:
-                        if cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
+                        # First parse the CVSSv4 vector if present, then CVSSv3 vector, then CVSSv3 score, then CVSSv2 score to determine severity and CVSS scores and vectors
+                        if cvss_data := parse_cvss_data(cvssclass.get("V40Vector", "")):
+                            cvssv4 = cvss_data.get("cvssv4")
+                            cvssv4_score = cvss_data.get("cvssv4_score")
+                            if severity is None:
+                                severity = cvss_data.get("severity")
+                        elif (cvss_v4_score := cvssclass.get("V4Score")) is not None:
+                            cvssv4_score = cvss_v4_score
+                            if severity is None:
+                                severity = self.convert_cvss_score(cvss_v4_score)
+                        elif cvss_data := parse_cvss_data(cvssclass.get("V3Vector", "")):
                             cvssv3 = cvss_data.get("cvssv3")
                             cvssv3_score = cvss_data.get("cvssv3_score")
                             if severity is None:
@@ -320,6 +336,8 @@ class TrivyParser:
                     component_version=package_version,
                     cvssv3=cvssv3,
                     cvssv3_score=cvssv3_score,
+                    cvssv4=cvssv4,
+                    cvssv4_score=cvssv4_score,
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=fix_available,
@@ -330,6 +348,11 @@ class TrivyParser:
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
+
+                if settings.V3_FEATURE_LOCATIONS and package_name and package_version:
+                    finding.unsaved_locations.append(
+                        LocationData.dependency(name=package_name, version=package_version, file_path=file_path),
+                    )
 
                 items.append(finding)
 

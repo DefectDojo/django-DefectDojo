@@ -9,6 +9,20 @@ from django.conf import settings
 from django.utils import timezone
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+
+VERACODE_TYPE_TO_PURL = {
+    "maven": "maven",
+    "npm": "npm",
+    "pypi": "pypi",
+    "gem": "gem",
+    "nuget": "nuget",
+    "go": "golang",
+    "cargo": "cargo",
+    "composer": "composer",
+    "cocoapods": "cocoapods",
+    "bower": "bower",
+}
 
 
 class VeracodeScaParser:
@@ -101,6 +115,18 @@ class VeracodeScaParser:
 
             if vuln_id:
                 finding.unsaved_vulnerability_ids = [vuln_id]
+
+            if settings.V3_FEATURE_LOCATIONS:
+                lib_id = library.get("id", "")
+                if ":" in lib_id:
+                    lib_type, rest = lib_id.split(":", 1)
+                    purl_type = VERACODE_TYPE_TO_PURL.get(lib_type.lower())
+                    name_and_version = rest.removesuffix(":").replace(":", "/")
+                    if purl_type and name_and_version:
+                        purl_string = f"pkg:{purl_type}/{name_and_version}"
+                        finding.unsaved_locations.append(
+                            LocationData.dependency(purl=purl_string),
+                        )
 
             if vulnerability.get("cvss3_vector"):
                 cvssv3_vector = vulnerability.get("cvss3_vector")
@@ -210,6 +236,16 @@ class VeracodeScaParser:
             finding.unsaved_vulnerability_ids = [vuln_id]
             if cvss_score:
                 finding.cvssv3_score = cvss_score
+
+            if settings.V3_FEATURE_LOCATIONS:
+                pkg_manager = row.get("Package manager", "").lower()
+                purl_type = VERACODE_TYPE_TO_PURL.get(pkg_manager)
+                name = "/".join([row.get("Coordinate 1", ""), row.get("Coordinate 2", "")]).lower()
+                if purl_type and name and version:
+                    purl_string = f"pkg:{purl_type}/{name}/{version}"
+                    finding.unsaved_locations.append(
+                        LocationData.dependency(purl=purl_string),
+                    )
 
             if (
                 (row.get("Ignored")

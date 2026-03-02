@@ -1,7 +1,10 @@
 import hashlib
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class CargoAuditParser:
@@ -138,5 +141,9 @@ class CargoAuditParser:
                         mitigation=mitigation,
                     )
                     finding.unsaved_vulnerability_ids = vulnerability_ids
+                    if settings.V3_FEATURE_LOCATIONS and package_name:
+                        finding.unsaved_locations.append(
+                            LocationData.dependency(purl_type="cargo", name=package_name, version=package_version),
+                        )
                     dupes[dupe_key] = finding
         return list(dupes.values())

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from dojo.models import Endpoint
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 ATTACHMENT_ERROR = "Attachment data not found"
 SCREENSHOT_ERROR = "Screenshot data not found"
@@ -168,7 +168,7 @@ def parse_locations_from_hit(hit):
         # If there's no protocol, it will assume the hostname is the protocol.
         asset = f"https://{asset}" if "://" not in asset else asset
         # TODO: Delete this after the move to Locations
-        location = URL.from_value(asset) if settings.V3_FEATURE_LOCATIONS else Endpoint.from_uri(asset)
+        location = LocationData.url(url=asset) if settings.V3_FEATURE_LOCATIONS else Endpoint.from_uri(asset)
     except ValidationError:
         location = None
     return [] if not location else [location]

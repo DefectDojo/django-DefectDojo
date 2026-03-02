@@ -345,3 +345,15 @@ Number  Content
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 1)
             self.assertEqual("Low", findings[0].severity)
+
+    def test_cvssv4_severity_sources(self):
+        """Testing with three findings with CVSSv4 scores"""
+        with sample_path("cvssv4_severity_source.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 3)
+            with self.subTest("CVSSv4 finding"):
+                finding = findings[0]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N", finding.cvssv4)
+                self.assertEqual(6.3, finding.cvssv4_score)

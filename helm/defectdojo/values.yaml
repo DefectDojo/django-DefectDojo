@@ -652,6 +652,9 @@ valkey:
     # certFilename: tls.crt
     # certKeyFilename: tls.key
     # certCAFilename: ca.crt
+  serviceAccount:
+    # -- Autocreate dedicated service account (as part of the best practice)
+    create: true
 
 # -- To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below:
 # NOTE  Do not store any kind of sensitive information inside of it

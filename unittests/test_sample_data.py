@@ -8,7 +8,7 @@ class TestSampleData(DojoTestCase):
     def get_fixture_file(self):
         # TODO: Delete this after the move to Locations
         if not settings.V3_FEATURE_LOCATIONS:
-            "dojo/fixtures/defect_dojo_sample_data"
+            return "dojo/fixtures/defect_dojo_sample_data"
         return "dojo/fixtures/defect_dojo_sample_data_locations"
 
     def test_loaddata(self):

@@ -32,7 +32,7 @@ from imagekit.processors import ResizeToFill
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 from dojo.authorization.authorization_decorators import (
     user_has_global_permission,
     user_is_authorized,
@@ -267,6 +267,8 @@ class BaseListFindings:
         kwargs = {
             "user": request.user,
             "pid": self.get_product_id(),
+            "eid": self.get_engagement_id(),
+            "tid": self.get_test_id(),
         }
 
         filter_string_matching = get_system_setting("filter_string_matching", False)
@@ -360,10 +362,11 @@ class ListFindings(View, BaseListFindings):
 
         return request, context
 
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
-        # Store the product and engagement ids
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
+        # Store the product, engagement, and test ids
         self.product_id = product_id
         self.engagement_id = engagement_id
+        self.test_id = test_id
         # Get the initial context
         request, context = self.get_initial_context(request)
         # Get the filtered findings
@@ -386,46 +389,46 @@ class ListFindings(View, BaseListFindings):
 
 
 class ListOpenFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
         self.filter_name = "Open"
-        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+        return super().get(request, product_id=product_id, engagement_id=engagement_id, test_id=test_id)
 
 
 class ListVerifiedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
         self.filter_name = "Verified"
-        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+        return super().get(request, product_id=product_id, engagement_id=engagement_id, test_id=test_id)
 
 
 class ListOutOfScopeFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
         self.filter_name = "Out of Scope"
-        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+        return super().get(request, product_id=product_id, engagement_id=engagement_id, test_id=test_id)
 
 
 class ListFalsePositiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
         self.filter_name = "False Positive"
-        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+        return super().get(request, product_id=product_id, engagement_id=engagement_id, test_id=test_id)
 
 
 class ListInactiveFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
         self.filter_name = "Inactive"
-        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+        return super().get(request, product_id=product_id, engagement_id=engagement_id, test_id=test_id)
 
 
 class ListAcceptedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
         self.filter_name = "Accepted"
-        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+        return super().get(request, product_id=product_id, engagement_id=engagement_id, test_id=test_id)
 
 
 class ListClosedFindings(ListFindings):
-    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None):
+    def get(self, request: HttpRequest, product_id: int | None = None, engagement_id: int | None = None, test_id: int | None = None):
         self.filter_name = "Closed"
         self.order_by = "-mitigated"
-        return super().get(request, product_id=product_id, engagement_id=engagement_id)
+        return super().get(request, product_id=product_id, engagement_id=engagement_id, test_id=test_id)
 
 
 class ViewFinding(View):
@@ -1732,6 +1735,9 @@ def mktemplate(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def find_template_to_apply(request, fid):
+    # Templates may contain sensitive data from any product; require global permission
+    # to match the authorization level of the /template list view
+    user_has_global_permission_or_403(request.user, Permissions.Finding_Edit)
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
     templates_by_cve = (

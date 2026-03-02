@@ -10,7 +10,7 @@ from cvss import CVSS3
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding, Test
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -279,7 +279,7 @@ class TenableCSVParser:
 
             if settings.V3_FEATURE_LOCATIONS:
                 # Update the location
-                location = URL.from_value(host) if "://" in host else URL(protocol=protocol, host=host, port=port)
+                location = LocationData.url(url=host) if "://" in host else LocationData.url(protocol=protocol, host=host, port=port)
                 # Add the list to be processed later
                 find.unsaved_locations.append(location)
             else:

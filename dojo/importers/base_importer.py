@@ -15,10 +15,10 @@ import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.importers.endpoint_manager import EndpointManager
-from dojo.importers.location_manager import LocationManager
+from dojo.importers.location_manager import LocationManager, UnsavedLocation
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
-from dojo.location.models import AbstractLocation, Location
+from dojo.location.models import Location
 from dojo.models import (
     # Import History States
     IMPORT_CLOSED_FINDING,
@@ -283,27 +283,6 @@ class BaseImporter(ImporterOptions):
         elapsed_time = time.perf_counter() - start_time
         logger.info(f"Parsing findings took {elapsed_time:.2f} seconds ({len(parsed_findings) if parsed_findings else 0} findings parsed)")
         return parsed_findings
-
-    def sync_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
-        """
-        Processes findings in a synchronous manner such that all findings
-        will be processed in a worker/process/thread
-        """
-        return self.process_findings(parsed_findings, **kwargs)
-
-    def determine_process_method(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        return self.sync_process_findings(
-            parsed_findings,
-            **kwargs,
-        )
 
     def determine_deduplication_algorithm(self) -> str:
         """
@@ -813,7 +792,7 @@ class BaseImporter(ImporterOptions):
     def process_locations(
         self,
         finding: Finding,
-        locations_to_add: list[AbstractLocation],
+        locations_to_add: list[UnsavedLocation],
     ) -> None:
         """
         Process any locations to add to the finding. Locations could come from two places

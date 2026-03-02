@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Self, TypeVar
 
 from auditlog.registry import auditlog
 from django.db import transaction
@@ -11,9 +11,12 @@ from django.db.models import (
     DateTimeField,
     ForeignKey,
     Index,
+    JSONField,
+    Model,
     OneToOneField,
     Q,
     QuerySet,
+    TextChoices,
     UniqueConstraint,
 )
 from django.utils.translation import gettext_lazy as _
@@ -32,9 +35,12 @@ from dojo.location.manager import (
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Dojo_User, Finding, Product, _manage_inherited_tags, copy_model_util
 from dojo.settings import settings
+from dojo.tools.locations import LocationAssociationData
 
 if TYPE_CHECKING:
     from datetime import datetime
+
+    from dojo.tools.locations import LocationData
 
 
 class Location(BaseModel):
@@ -109,16 +115,32 @@ class Location(BaseModel):
         status: FindingLocationStatus | None = None,
         auditor: Dojo_User | None = None,
         audit_time: datetime | None = None,
+        relationship: str = "",
+        relationship_data: dict | None = None,
     ) -> LocationFindingReference:
         """
-        Get or create a LocationFindingReference for this location and finding,
-        updating the status each time. Also associates the related product.
+        Get or create a LocationFindingReference for this location and finding.
+        Also associates the related product.
         """
+        # Check if there is an existing reference for this finding and location
+        # If this method is being used to set the status
+        if LocationFindingReference.objects.filter(
+            location=self,
+            finding=finding,
+        ).exists():
+            return LocationFindingReference.objects.get(
+                location=self,
+                finding=finding,
+            )
         # Determine the status
         if status is None:
             status = self.status_from_finding(finding)
         # Setup some context aware updated fields
-        context_fields = {"status": status}
+        context_fields = {
+            "status": status,
+            "relationship": relationship,
+            "relationship_data": relationship_data if relationship_data is not None else {},
+        }
         # Check for an auditor
         if auditor is not None:
             context_fields["auditor"] = auditor
@@ -143,11 +165,20 @@ class Location(BaseModel):
         self,
         product: Product,
         status: ProductLocationStatus | None = None,
+        relationship: str = "",
+        relationship_data: dict | None = None,
     ) -> LocationProductReference:
-        """
-        Get or create a LocationProductReference for this location and product,
-        updating the status each time.
-        """
+        """Get or create a LocationProductReference for this location and product"""
+        # Check if there is an existing reference for this finding and location
+        # If this method is being used to set the status
+        if LocationProductReference.objects.filter(
+            location=self,
+            product=product,
+        ).exists():
+            return LocationProductReference.objects.get(
+                location=self,
+                product=product,
+            )
         if status is None:
             status = self.status_from_product(product)
         # Use a transaction for safety in concurrent scenarios
@@ -155,7 +186,11 @@ class Location(BaseModel):
             return LocationProductReference.objects.update_or_create(
                 location=self,
                 product=product,
-                defaults={"status": status},
+                defaults={
+                    "status": status,
+                    "relationship": relationship,
+                    "relationship_data": relationship_data if relationship_data is not None else {},
+                },
             )[0]
 
     def disassociate_from_finding(
@@ -218,6 +253,10 @@ class Location(BaseModel):
         ]
 
 
+# TypeVar to help linting in AbstractLocation child classes
+T = TypeVar("T", bound="AbstractLocation")
+
+
 class AbstractLocation(BaseModelWithoutTimeMeta):
     location = OneToOneField(
         Location,
@@ -242,7 +281,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         raise NotImplementedError(msg)
 
     @staticmethod
-    def create_location_from_value(value: str) -> Self:
+    def create_location_from_value(value: str) -> T:
         """
         Dynamically create a Location and subclass instance based on location_type
         and location_value. Uses parse_string_value from the correct subclass.
@@ -265,8 +304,66 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             self.location.location_value = location_value
             self.location.save(update_fields=["location_type", "location_value"])
 
+    @classmethod
+    def from_location_data(cls: T, location_data: LocationData) -> T:
+        """
+        Checks that the given LocationData object represents this type, then calls #_from_location_data_impl() to build
+        one based on its contents. Saving boilerplate checking is all.
+        """
+        if location_data.type != cls.get_location_type():
+            error_message = f"Cannot create instance of {cls} from LocationData of type {location_data.type}"
+            raise ValueError(error_message)
+        return cls._from_location_data_impl(location_data)
 
-class LocationFindingReference(BaseModel):
+    @classmethod
+    def _from_location_data_impl(cls: T, location_data: LocationData) -> T:
+        """Given a LocationData object trusted to represent this type, build a Location object from its contents."""
+        msg = "Subclasses must implement _from_location_data_impl"
+        raise NotImplementedError(msg)
+
+    def get_association_data(self) -> LocationAssociationData:
+        """
+        Return the LocationAssociationData associated with this AbstractLocation. For convenience, if one does not
+        exist, this returns an empty (falsey) LocationAssociationData that defaults to the empty values expected by
+        the backing ReferenceDataMixin models.
+        """
+        return getattr(self, "_association_data", LocationAssociationData())
+
+    @classmethod
+    def get_or_create_from_object(cls: T, location: T) -> T:
+        """Given an object of this type, this method should get/create the object and return it."""
+        msg = "Subclasses must implement get_or_create_from_object"
+        raise NotImplementedError(msg)
+
+
+class ReferenceDataMixin(Model):
+
+    """Provides fields for relationship data relevant to a Location and Finding/Product reference."""
+
+    class RelationshipType(TextChoices):
+        OWNED_BY = "owned_by", _("is owned by")
+        USED_BY = "used_by", _("is used by")
+
+    relationship = CharField(
+        max_length=16,
+        null=False,
+        blank=True,
+        choices=RelationshipType.choices,
+        default="",
+        help_text=_("The relationship between two locations"),
+    )
+    relationship_data = JSONField(
+        null=False,
+        blank=True,
+        default=dict,
+        help_text=_("Any extra data about this relationship"),
+    )
+
+    class Meta:
+        abstract = True
+
+
+class LocationFindingReference(BaseModel, ReferenceDataMixin):
 
     """Manually managed One-2-Many field to represent the relationship of a finding and a location."""
 
@@ -288,6 +385,20 @@ class LocationFindingReference(BaseModel):
 
     objects = LocationFindingReferenceManager().from_queryset(LocationFindingReferenceQueryset)()
 
+    class Meta:
+        verbose_name = "Locations - FindingReference"
+        verbose_name_plural = "Locations - FindingReferences"
+        constraints = [
+            UniqueConstraint(
+                fields=["location", "finding"],
+                name="unique_location_and_finding",
+            ),
+        ]
+        indexes = [
+            Index(fields=["location"]),
+            Index(fields=["finding"]),
+        ]
+
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
         return f"{self.location} - Finding: {self.finding} ({self.status})"
@@ -305,22 +416,8 @@ class LocationFindingReference(BaseModel):
         self.audit_time = audit_time
         self.save()
 
-    class Meta:
-        verbose_name = "Locations - FindingReference"
-        verbose_name_plural = "Locations - FindingReferences"
-        constraints = [
-            UniqueConstraint(
-                fields=["location", "finding"],
-                name="unique_location_and_finding",
-            ),
-        ]
-        indexes = [
-            Index(fields=["location"]),
-            Index(fields=["finding"]),
-        ]
 
-
-class LocationProductReference(BaseModel):
+class LocationProductReference(BaseModel, ReferenceDataMixin):
 
     """Manually managed One-2-Many field to represent the relationship of a product and a location."""
 
@@ -340,10 +437,6 @@ class LocationProductReference(BaseModel):
 
     objects = LocationProductReferenceManager().from_queryset(LocationProductReferenceQueryset)()
 
-    def __str__(self) -> str:
-        """Return the string representation of a LocationProductReference."""
-        return f"{self.location} - Product: {self.product} ({self.status})"
-
     class Meta:
         verbose_name = "Locations - ProductReference"
         verbose_name_plural = "Locations - ProductReferences"
@@ -357,6 +450,10 @@ class LocationProductReference(BaseModel):
             Index(fields=["location"]),
             Index(fields=["product"]),
         ]
+
+    def __str__(self) -> str:
+        """Return the string representation of a LocationProductReference."""
+        return f"{self.location} - Product: {self.product} ({self.status})"
 
 
 if settings.ENABLE_AUDITLOG:

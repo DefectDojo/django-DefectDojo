@@ -34,7 +34,7 @@ env = environ.FileAwareEnv(
     # django-jsonfield-backport raises a warning that can be ignored,
     # see https://github.com/laymonage/django-jsonfield-backport
     # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
-    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
+    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001", "polymorphic.W001", "polymorphic.W002"]),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
@@ -1634,7 +1634,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Coverity Scan JSON Report": DEDUPE_ALGO_HASH_CODE,
     "Cobalt.io API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Crunch42 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_HASH_CODE,
+    "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Horusec Scan": DEDUPE_ALGO_HASH_CODE,
     "Mobsfscan Scan": DEDUPE_ALGO_HASH_CODE,
     "SonarQube Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
