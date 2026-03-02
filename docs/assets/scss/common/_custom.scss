@@ -1,30 +1,252 @@
-/* work-sans-regular - latin */
+// ============================================================
+// Font Face Declarations — Work Sans (Brand Typeface)
+// ============================================================
+
+/* work-sans-300 (Light) - latin */
 @font-face {
   font-display: swap;
-  /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Worksans';
+  font-style: normal;
+  font-weight: 300;
+  src: url('/fonts/worksans/work-sans-v24-latin-300.woff2') format('woff2');
+}
+
+/* work-sans-regular (400) - latin */
+@font-face {
+  font-display: swap;
   font-family: 'Worksans';
   font-style: normal;
   font-weight: 400;
   src: url('/fonts/worksans/work-sans-v19-latin-regular.woff2') format('woff2');
-  /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
-/* work-sans-500 - latin */
+/* work-sans-regular-italic (400i) - latin */
 @font-face {
   font-display: swap;
-  /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+  font-family: 'Worksans';
+  font-style: italic;
+  font-weight: 400;
+  src: url('/fonts/worksans/work-sans-v24-latin-italic.woff2') format('woff2');
+}
+
+/* work-sans-500 (Medium) - latin */
+@font-face {
+  font-display: swap;
   font-family: 'Worksans';
   font-style: normal;
   font-weight: 500;
   src: url('/fonts/worksans/work-sans-v19-latin-500.woff2') format('woff2');
-  /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
+
+/* work-sans-600 (Semi Bold) - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Worksans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/worksans/work-sans-v24-latin-600.woff2') format('woff2');
+}
+
+/* work-sans-600-italic (Semi Bold Italic) - latin */
+@font-face {
+  font-display: swap;
+  font-family: 'Worksans';
+  font-style: italic;
+  font-weight: 600;
+  src: url('/fonts/worksans/work-sans-v24-latin-600italic.woff2') format('woff2');
+}
+
+// ============================================================
+// Layout
+// ============================================================
 
 .container-lg {
   max-width: 100%;
 }
 
-// DocSearch
+html {
+  font-size: 85%;
+}
+
+// ============================================================
+// Typography — Brand Weight Hierarchy
+// ============================================================
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-weight: 600; // Semi Bold per brand guidelines
+  color: #191919;   // Dojo Black
+}
+
+// ============================================================
+// Navbar
+// ============================================================
+
+.navbar .nav-link {
+  font-weight: 500; // Medium per brand guidelines for nav/buttons
+}
+
+.navbar .nav-link.active {
+  color: #1779C5; // Fuji Blue
+}
+
+// ============================================================
+// Sidebar
+// ============================================================
+
+.docs-sidebar {
+  visibility: hidden; // Hide sidebar until version is resolved
+}
+
+.doks-sidebar .section-nav a {
+  color: #333333; // Dojo Hue 04
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.doks-sidebar .section-nav a:hover {
+  color: #1779C5; // Fuji Blue
+  background-color: rgba(#C6DDF2, 0.3); // Fuji Hue 01, subtle
+}
+
+.doks-sidebar .section-nav a[aria-current="page"] {
+  color: #1779C5; // Fuji Blue
+  font-weight: 600;
+  border-left: 3px solid #1779C5;
+  padding-left: 0.5rem;
+  background-color: rgba(#C6DDF2, 0.15);
+}
+
+// ============================================================
+// Buttons
+// ============================================================
+
+.btn-primary {
+  --bs-btn-bg: #1779C5;
+  --bs-btn-border-color: #1779C5;
+  --bs-btn-hover-bg: #204D87;
+  --bs-btn-hover-border-color: #204D87;
+  --bs-btn-active-bg: #003864;
+  --bs-btn-active-border-color: #003864;
+}
+
+.btn-cta {
+  --bs-btn-bg: #F2561D;
+  --bs-btn-border-color: #F2561D;
+  --bs-btn-hover-bg: #F2762E;
+  --bs-btn-hover-border-color: #F2762E;
+  --bs-btn-active-bg: #C1230D;
+  --bs-btn-active-border-color: #C1230D;
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  font-weight: 500; // Medium for buttons
+}
+
+.hero-actions .btn-outline-secondary {
+  --bs-btn-color: #191919;
+  --bs-btn-border-color: #191919;
+  --bs-btn-hover-bg: #191919;
+  --bs-btn-hover-border-color: #191919;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: #333333;
+  --bs-btn-active-border-color: #333333;
+  --bs-btn-active-color: #fff;
+}
+
+[data-bs-theme="dark"] .hero-actions .btn-outline-secondary {
+  --bs-btn-color: #e0e0e0;
+  --bs-btn-border-color: #e0e0e0;
+  --bs-btn-hover-bg: #e0e0e0;
+  --bs-btn-hover-border-color: #e0e0e0;
+  --bs-btn-hover-color: #191919;
+  --bs-btn-active-bg: #cccccc;
+  --bs-btn-active-border-color: #cccccc;
+  --bs-btn-active-color: #191919;
+}
+
+// ============================================================
+// Version Selector
+// ============================================================
+
+#version-select[data-version="opensource"] {
+  background-color: rgba(#003864, 0.72);
+  border: 2px solid #003864;
+  color: white;
+}
+
+#version-select[data-version="pro"] {
+  background-color: rgba(#F2561D, 0.72);
+  border: 2px solid #F2561D;
+  color: white;
+}
+
+// Hide Pro-versioned content by default (opensource is default).
+// JS sets explicit inline display:block/none when version is toggled.
+.version-pro {
+  display: none;
+}
+
+// ============================================================
+// Cards
+// ============================================================
+
+.card {
+  border-color: #DCDCDC; // Dojo Hue 01
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  border-color: #82B0D9; // Fuji Hue 02
+  box-shadow: 0 2px 8px rgba(#1779C5, 0.1);
+}
+
+.card a.stretched-link {
+  color: #1779C5;
+  font-weight: 500;
+}
+
+// ============================================================
+// Code Blocks
+// ============================================================
+
+:not(pre) > code {
+  background-color: rgba(#C6DDF2, 0.25); // Fuji Hue 01, subtle
+  color: #204D87; // Fuji Hue 03
+  border-radius: 3px;
+  padding: 0.15em 0.35em;
+}
+
+// ============================================================
+// Breadcrumb
+// ============================================================
+
+.breadcrumb-item a {
+  color: #1779C5;
+}
+
+.breadcrumb-item.active {
+  color: #666666; // Dojo Hue 03
+}
+
+// ============================================================
+// Logo — Dark / Light mode switching
+// ============================================================
+
+.logo-darkmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-lightmode {
+  display: none;
+}
+
+[data-bs-theme="dark"] .logo-darkmode {
+  display: inline-block;
+}
+
+// ============================================================
+// DocSearch Overrides
+// ============================================================
 
 .DocSearch-Container {
   z-index: 2000 !important;
@@ -39,42 +261,757 @@
   padding: 0;
 }
 
+.DocSearch-Logo {
+  display: none !important;
+}
+
 @media (max-width: 768px) {
   .DocSearch-Modal {
     position: fixed !important;
   }
 }
 
-.logo-darkmode {
+// ============================================================
+// Selection Color
+// ============================================================
+
+::selection {
+  background-color: rgba(#1779C5, 0.2);
+  color: #191919;
+}
+
+// ============================================================
+// Homepage Sections
+// ============================================================
+
+.section-features h2 {
+  color: #1779C5; // Fuji Blue
+}
+
+.section-features a {
+  color: #F2561D; // Torii Orange for call-to-action links
+  font-weight: 500;
+}
+
+.section-features a:hover {
+  color: #C1230D; // Torii Hue 03
+}
+
+// ============================================================
+// Dark Mode — Brand Adaptation
+// ============================================================
+
+[data-bs-theme="dark"] {
+  // Headings in dark mode — bright white for strong contrast
+  h1, h2, h3, h4, h5, h6,
+  .h1, .h2, .h3, .h4, .h5, .h6 {
+    color: #f0f0f0;
+  }
+
+  // Links use lighter blue in dark mode
+  a {
+    color: #82B0D9; // Fuji Hue 02
+  }
+
+  a:hover {
+    color: #C6DDF2; // Fuji Hue 01
+  }
+
+  // CTA button — ensure solid fill in dark mode
+  .btn-cta {
+    --bs-btn-bg: #F2561D !important;
+    --bs-btn-border-color: #F2561D !important;
+    --bs-btn-hover-bg: #F2762E !important;
+    --bs-btn-hover-border-color: #F2762E !important;
+    --bs-btn-active-bg: #C1230D !important;
+    --bs-btn-active-border-color: #C1230D !important;
+    --bs-btn-color: #fff !important;
+    --bs-btn-hover-color: #fff !important;
+    --bs-btn-active-color: #fff !important;
+    background-color: #F2561D !important;
+    border-color: #F2561D !important;
+    color: #fff !important;
+  }
+
+  .btn-cta:hover {
+    background-color: #F2762E !important;
+    border-color: #F2762E !important;
+  }
+
+  // Primary button in dark mode
+  .btn-primary {
+    --bs-btn-bg: #1779C5;
+    --bs-btn-border-color: #1779C5;
+    --bs-btn-hover-bg: #82B0D9;
+    --bs-btn-hover-border-color: #82B0D9;
+    --bs-btn-color: #fff;
+    --bs-btn-hover-color: #fff;
+  }
+
+  // Sidebar adjustments for dark mode
+  .doks-sidebar .section-nav a {
+    color: #B3B3B3; // Dojo Hue 02
+  }
+
+  .doks-sidebar .section-nav a:hover {
+    color: #82B0D9;
+    background-color: rgba(#1779C5, 0.1);
+  }
+
+  .doks-sidebar .section-nav a[aria-current="page"] {
+    color: #82B0D9;
+    border-left-color: #82B0D9;
+    background-color: rgba(#1779C5, 0.08);
+  }
+
+  // Inline code in dark mode
+  :not(pre) > code {
+    background-color: rgba(#1779C5, 0.15);
+    color: #C6DDF2;
+  }
+
+  // Cards in dark mode
+  .card {
+    border-color: #333333;
+  }
+
+  .card:hover {
+    border-color: #82B0D9;
+    box-shadow: 0 2px 8px rgba(#1779C5, 0.15);
+  }
+
+  .card a.stretched-link {
+    color: #82B0D9;
+  }
+
+  // Version selector in dark mode
+  #version-select[data-version="opensource"] {
+    background-color: rgba(#003864, 0.85);
+    border-color: #82B0D9;
+  }
+
+  #version-select[data-version="pro"] {
+    background-color: rgba(#F2561D, 0.85);
+    border-color: #F2762E;
+  }
+
+  // Selection color in dark mode
+  ::selection {
+    background-color: rgba(#82B0D9, 0.3);
+    color: #DCDCDC;
+  }
+
+  // Homepage features section — vibrant headings
+  .section-features h2 {
+    color: #C6DDF2; // Fuji Hue 01 — brighter for dark bg
+  }
+
+  .section-features a {
+    color: #F2561D; // Full Torii Orange — vivid on dark
+  }
+
+  .section-features a:hover {
+    color: #F2D49B; // Torii Hue 01
+  }
+
+  // Homepage description text
+  .section .lead,
+  .section .text-center {
+    color: #DCDCDC;
+  }
+
+  // Breadcrumb
+  .breadcrumb-item a {
+    color: #82B0D9;
+  }
+
+  .breadcrumb-item.active {
+    color: #B3B3B3;
+  }
+}
+
+// ============================================================
+// WORLD-CLASS ENHANCEMENTS
+// ============================================================
+
+// --- Version Selector Proper Styling ---
+
+.version-label {
+  padding-top: 2rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #666666;
+}
+
+.version-menu-wrapper {
+  border-top: 1px solid #B3B3B3;
+  padding-top: 0.5rem;
+}
+
+[data-bs-theme="dark"] .version-label {
+  color: #B3B3B3;
+}
+
+[data-bs-theme="dark"] .version-menu-wrapper {
+  border-top-color: #333333;
+}
+
+// --- Sidebar Details/Summary Chevron Indicators ---
+
+.section-nav details > summary {
+  position: relative;
+  cursor: pointer;
+  padding-right: 1.5rem;
+  list-style: none;
+}
+
+.section-nav details > summary::-webkit-details-marker {
   display: none;
 }
 
-[data-bs-theme="dark"] .logo-lightmode {
-  display: none;
+.section-nav details > summary::after {
+  content: '';
+  position: absolute;
+  right: 0.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 5px solid #666666;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  transition: transform 0.2s ease;
 }
 
-[data-bs-theme="dark"] .logo-darkmode {
-  display: inline-block;
+.section-nav details[open] > summary::after {
+  transform: translateY(-50%) rotate(90deg);
 }
 
-html {
-  font-size: 85%; /* scales all rem/em fonts */
+[data-bs-theme="dark"] .section-nav details > summary::after {
+  border-left-color: #B3B3B3;
 }
 
-/* Hide sidebar until version is resolved */
-.docs-sidebar {
-  visibility: hidden;
+// --- Site Footer ---
+
+.site-footer {
+  border-top: 1px solid #DCDCDC;
+  background-color: #fafafa;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  padding-bottom: 0;
 }
 
-
-#version-select[data-version="opensource"] {
-  background-color: #003964b7;
-  border: 2px solid #003864;
-  color: white;
+.footer-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #666666;
+  margin-bottom: 0.75rem;
 }
 
-#version-select[data-version="pro"] {
-  background-color: #a84e32b7;
-  border: 2px solid #a84e32;
-  color: white;
+.footer-links {
+  li {
+    margin-bottom: 0.375rem;
+  }
+  a {
+    color: #333333;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    &:hover {
+      color: #1779C5;
+      text-decoration: none;
+    }
+  }
+}
+
+.footer-social {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.footer-social-link {
+  color: #666666;
+  transition: color 0.15s ease;
+  &:hover {
+    color: #1779C5;
+    text-decoration: none;
+  }
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.footer-bottom {
+  border-top: 1px solid #DCDCDC;
+  padding: 1rem 0;
+  margin-top: 1.5rem;
+}
+
+[data-bs-theme="dark"] {
+  .site-footer {
+    background-color: #111111;
+    border-top-color: #333333;
+  }
+  .footer-heading {
+    color: #B3B3B3;
+  }
+  .footer-links a {
+    color: #B3B3B3;
+    &:hover {
+      color: #82B0D9;
+    }
+  }
+  .footer-social-link {
+    color: #B3B3B3;
+    &:hover {
+      color: #82B0D9;
+    }
+  }
+  .footer-bottom {
+    border-top-color: #333333;
+  }
+}
+
+// --- Homepage Hero ---
+
+.hero-section {
+  padding: 4rem 0 3rem;
+  text-align: center;
+}
+
+.hero-title {
+  font-size: calc(2rem + 1.5vw);
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  color: #666666;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.hero-actions {
+  margin-bottom: 1rem;
+}
+
+.hero-actions .btn {
+  min-width: 160px;
+}
+
+[data-bs-theme="dark"] .hero-subtitle {
+  color: #B3B3B3;
+}
+
+// --- Home Navigation Cards ---
+
+.home-card {
+  display: block;
+  padding: 1.5rem;
+  border: 1px solid #DCDCDC;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  height: 100%;
+
+  &:hover {
+    border-color: #82B0D9;
+    box-shadow: 0 4px 12px rgba(23, 121, 197, 0.1);
+    transform: translateY(-2px);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0.75rem 0 0.375rem;
+    color: #191919;
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: #666666;
+    margin-bottom: 0;
+    line-height: 1.5;
+  }
+}
+
+.home-card-icon {
+  color: #1779C5;
+  svg {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+[data-bs-theme="dark"] {
+  .home-card {
+    border-color: #333333;
+    &:hover {
+      border-color: #82B0D9;
+      box-shadow: 0 4px 12px rgba(23, 121, 197, 0.15);
+    }
+    h3 { color: #f0f0f0; }
+    p { color: #B3B3B3; }
+  }
+  .home-card-icon {
+    color: #82B0D9;
+  }
+}
+
+// --- 404 Page ---
+
+.error-code {
+  font-size: 8rem;
+  font-weight: 600;
+  color: #DCDCDC;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+[data-bs-theme="dark"] .error-code {
+  color: #333333;
+}
+
+// --- Back-to-Top Button Branding ---
+
+#toTop {
+  background-color: #1779C5;
+  border-color: #1779C5;
+  &:hover {
+    background-color: #204D87;
+    border-color: #204D87;
+  }
+}
+
+// --- Breadcrumb Refinements ---
+
+.breadcrumb {
+  font-size: 0.8125rem;
+  padding: 0;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/";
+  color: #B3B3B3;
+}
+
+// --- Scroll Progress Indicator ---
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #1779C5, #F2561D);
+  z-index: 9999;
+  transition: width 0.1s linear;
+}
+
+// --- Typography Refinements ---
+
+.docs-content {
+  line-height: 1.7;
+
+  h2 {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #DCDCDC;
+  }
+
+  h2:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  h3 {
+    margin-top: 2rem;
+  }
+
+  // Better table styling
+  table {
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+  }
+
+  // Blockquote styling
+  blockquote {
+    border-left: 3px solid #1779C5;
+    padding: 0.5rem 1rem;
+    margin: 1.5rem 0;
+    color: #666666;
+    background: rgba(#C6DDF2, 0.1);
+    border-radius: 0 0.25rem 0.25rem 0;
+  }
+}
+
+[data-bs-theme="dark"] .docs-content {
+  h2 {
+    border-top-color: #333333;
+  }
+  blockquote {
+    border-left-color: #82B0D9;
+    color: #B3B3B3;
+    background: rgba(#1779C5, 0.08);
+  }
+}
+
+// --- TOC Active State Enhancement ---
+
+.page-links a.active {
+  color: #1779C5;
+  font-weight: 500;
+  position: relative;
+}
+
+.page-links a.active::before {
+  content: '';
+  position: absolute;
+  left: -0.75rem;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  width: 2px;
+  background: #1779C5;
+  border-radius: 1px;
+}
+
+[data-bs-theme="dark"] .page-links a.active {
+  color: #82B0D9;
+}
+
+[data-bs-theme="dark"] .page-links a.active::before {
+  background: #82B0D9;
+}
+
+// --- Header Nav Refinements ---
+
+.navbar-nav.flex-grow-1 {
+  gap: 0;
+  flex-wrap: wrap;
+}
+
+.navbar-nav.flex-grow-1 .nav-link {
+  font-size: 0.9rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: rgba(#C6DDF2, 0.2);
+  }
+
+  &.active {
+    background-color: rgba(#C6DDF2, 0.3);
+  }
+}
+
+[data-bs-theme="dark"] .navbar-nav.flex-grow-1 .nav-link {
+  &:hover {
+    background-color: rgba(#1779C5, 0.15);
+  }
+  &.active {
+    background-color: rgba(#1779C5, 0.2);
+  }
+}
+
+// --- Search Button Refinement ---
+
+#searchToggleDesktop {
+  border: 1px solid #CDCDCD;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.875rem;
+  font-size: 0.875rem;
+  color: #555555;
+  background: #f5f5f5;
+  gap: 0.25rem;
+  min-width: 13rem;
+
+  &:hover {
+    border-color: #1779C5;
+    color: #1779C5;
+    background: #eef5fb;
+  }
+
+  .search-kbd {
+    font-family: inherit;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border: 1px solid #CDCDCD;
+    border-radius: 0.25rem;
+    padding: 0.05rem 0.4rem;
+    line-height: 1.4;
+    color: #888888;
+    background: #ffffff;
+  }
+}
+
+[data-bs-theme="dark"] #searchToggleDesktop {
+  border-color: #444444;
+  color: #B3B3B3;
+  background: #2a2a2a;
+
+  &:hover {
+    border-color: #82B0D9;
+    color: #82B0D9;
+    background: rgba(#1779C5, 0.15);
+  }
+
+  .search-kbd {
+    border-color: #555555;
+    color: #888888;
+    background: #333333;
+  }
+}
+
+// --- Header Social Links ---
+
+.header-social-links {
+  gap: 0.125rem;
+
+  .social-link {
+    padding: 0.25rem;
+    opacity: 0.6;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// --- Print Styles ---
+
+@media print {
+  .navbar,
+  .sticky-top,
+  .docs-sidebar,
+  .docs-toc,
+  .site-footer,
+  .footer,
+  #toTop,
+  .scroll-progress,
+  .page-nav,
+  .hero-actions,
+  .DocSearch-Button,
+  .breadcrumb,
+  .page-footer-meta {
+    display: none !important;
+  }
+
+  .docs-content {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    color: #000;
+  }
+
+  h1, h2, h3, h4 {
+    page-break-after: avoid;
+    color: #000;
+  }
+
+  pre, code {
+    page-break-inside: avoid;
+    border: 1px solid #ccc;
+  }
+
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  a[href^="#"]::after,
+  a[href^="javascript"]::after,
+  a.btn::after,
+  .stretched-link::after {
+    content: "";
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table td, table th {
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+  }
+}
+
+// --- Accessibility ---
+
+// Focus visible states
+*:focus-visible {
+  outline: 2px solid #1779C5;
+  outline-offset: 2px;
+}
+
+.btn:focus-visible {
+  outline: 2px solid #1779C5;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+// Reduced motion preferences
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .home-card:hover {
+    transform: none;
+  }
+
+  .scroll-progress {
+    transition: none;
+  }
+}
+
+// Skip-to-content link
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 10000;
+  padding: 0.5rem 1rem;
+  background: #1779C5;
+  color: #fff;
+  border-radius: 0 0 0.25rem 0.25rem;
+  text-decoration: none;
+  font-weight: 500;
+
+  &:focus {
+    top: 0;
+    color: #fff;
+  }
 }

@@ -4,7 +4,30 @@ from dataclasses import dataclass
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
+
+
+class _MutableLocationParts:
+
+    """Mutable container for building location data incrementally before creating a frozen LocationData."""
+
+    def __init__(self):
+        self.host = ""
+        self.port = None
+        self.protocol = ""
+
+    def __str__(self):
+        parts = []
+        if self.protocol:
+            parts.append(f"{self.protocol}://")
+        if self.host:
+            parts.append(self.host)
+        if self.port:
+            parts.append(f":{self.port}")
+        return "".join(parts)
+
+    def to_location_data(self):
+        return LocationData.url(host=self.host, port=self.port, protocol=self.protocol)
 
 
 @dataclass
@@ -24,7 +47,7 @@ def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
     finding = Finding(test=test, dynamic_finding=True, static_finding=False, severity="Info", nb_occurences=1, cwe=None)
     finding.unsaved_vulnerability_ids = []
     if settings.V3_FEATURE_LOCATIONS:
-        finding.unsaved_locations = [URL()]
+        finding._location_builder = _MutableLocationParts()
     else:
         # TODO: Delete this after the move to Locations
         finding.unsaved_endpoints = [Endpoint()]
@@ -35,10 +58,17 @@ def setup_finding(test) -> tuple[Finding, OpenVASFindingAuxData]:
 
 
 def get_location(finding: Finding):
+    """Get the mutable location object for building up location data incrementally."""
     # TODO: Delete this after the move to Locations
     if not settings.V3_FEATURE_LOCATIONS:
         return finding.unsaved_endpoints[0]
-    return finding.unsaved_locations[0]
+    return finding._location_builder
+
+
+def finalize_location(finding: Finding):
+    """Convert the mutable location builder to a frozen LocationData and store in unsaved_locations."""
+    if settings.V3_FEATURE_LOCATIONS:
+        finding.unsaved_locations.append(finding._location_builder.to_location_data())
 
 
 def is_valid_severity(severity: str) -> bool:
@@ -108,14 +138,15 @@ def deduplicate(dupes: dict[str, Finding], finding: Finding):
                 org.steps_to_reproduce += tmp
 
         # combine identical findings on different hosts into one with multiple hosts
-        location = get_location(finding)
-
         if settings.V3_FEATURE_LOCATIONS:
+            location = finding.unsaved_locations[0]
             if location not in org.unsaved_locations:
                 org.unsaved_locations += finding.unsaved_locations
-        # TODO: Delete this after the move to Locations
-        elif location not in org.unsaved_endpoints:
-            org.unsaved_endpoints += finding.unsaved_endpoints
+        else:
+            # TODO: Delete this after the move to Locations
+            location = get_location(finding)
+            if location not in org.unsaved_endpoints:
+                org.unsaved_endpoints += finding.unsaved_endpoints
 
 
 def gen_finding_hash(finding: Finding) -> str:

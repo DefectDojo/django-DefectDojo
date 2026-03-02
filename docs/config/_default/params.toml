@@ -58,8 +58,8 @@ mainSections = ["docs"]
     "asset_modelling",
     "issue_tracking"] # ["docs"] (default) or list of sections (e.g. ["docs", "guides"])
 
-  toTopButton = false # false (default) or true
-  breadcrumbTrail = false # false (default) or true
+  toTopButton = true # scroll-to-top button
+  breadcrumbTrail = true # breadcrumb navigation on doc pages
   headlineHash = true # true (default) or false
   scrollSpy = true # true (default) or false
 

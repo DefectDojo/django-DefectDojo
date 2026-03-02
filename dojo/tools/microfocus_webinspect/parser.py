@@ -6,7 +6,7 @@ from defusedxml.ElementTree import parse
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class MicrofocusWebinspectParser:
@@ -80,7 +80,7 @@ class MicrofocusWebinspectParser:
                     finding.unique_id_from_tool = issue.attrib.get("id")
                 # manage endpoint/location
                 if settings.V3_FEATURE_LOCATIONS:
-                    location = URL.from_value(url)
+                    location = LocationData.url(url=url)
                     finding.unsaved_locations = [location]
                 else:
                     # TODO: Delete this after the move to Locations

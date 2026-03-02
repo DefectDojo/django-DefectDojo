@@ -2093,6 +2093,7 @@ class ImportReimportMixin:
         finding = Finding.objects.filter(test__engagement_id=1, test=test).first()
 
         original_date = self.get_first_import_date(finding)
+        self.assertTrue(original_date)
 
         self.assertEqual(endpoint_count_before + 1, self.db_endpoint_count())
         self.assertEqual(endpoint_status_count_before_active + 1, self.db_endpoint_status_count(mitigated=False))
@@ -2307,7 +2308,7 @@ class ImportReimportMixin:
             self.assertEqual(finding.status_finding.count(), 1)
             return finding.status_finding.first().date
         self.assertEqual(finding.locations.count(), 1)
-        return finding.locations.first().audit_time
+        return finding.locations.first().created
 
 
 @versioned_fixtures

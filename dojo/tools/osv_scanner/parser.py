@@ -1,6 +1,17 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+
+OSV_ECOSYSTEM_TO_PURL = {
+    "npm": "npm", "pypi": "pypi", "go": "golang", "maven": "maven",
+    "crates.io": "cargo", "rubygems": "gem", "nuget": "nuget",
+    "packagist": "composer", "hex": "hex", "pub": "pub",
+    "cocoapods": "cocoapods", "swifturl": "swift",
+    "alpine": "apk", "debian": "deb",
+}
 
 
 class OSVScannerParser:
@@ -146,5 +157,15 @@ class OSVScannerParser:
 
                     if vulnerabilityid:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
+                    if settings.V3_FEATURE_LOCATIONS and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                        finding.unsaved_locations.append(dep)
                     findings.append(finding)
+                if settings.V3_FEATURE_LOCATIONS and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
+                    test.unsaved_metadata.append(dep)
         return findings
+
+    def get_dependency_info(self, pacakge_ecosystem, package_name, package_version):
+        if purl_type := OSV_ECOSYSTEM_TO_PURL.get(pacakge_ecosystem.lower()):
+            purl_string = f"pkg:/{purl_type}/{package_name}/{package_version}"
+            return LocationData.dependency(purl=purl_string)
+        return None

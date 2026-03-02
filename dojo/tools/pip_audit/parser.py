@@ -1,7 +1,10 @@
 """Parser for pip-audit."""
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class PipAuditParser:
@@ -54,10 +57,10 @@ def get_legacy_findings(data, test):
 def get_item_findings(item, test):
     """Return list of Findings."""
     findings = []
+    component_name = item["name"]
+    component_version = item.get("version")
     vulnerabilities = item.get("vulns", [])
     if vulnerabilities:
-        component_name = item["name"]
-        component_version = item.get("version")
         for vulnerability in vulnerabilities:
             vuln_id = vulnerability.get("id")
             vuln_fix_versions = vulnerability.get("fix_versions")
@@ -98,6 +101,15 @@ def get_item_findings(item, test):
             if vulnerability_ids:
                 finding.unsaved_vulnerability_ids = vulnerability_ids
 
+            if settings.V3_FEATURE_LOCATIONS and component_name:
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl_type="pypi", name=component_name, version=component_version),
+                )
+
             findings.append(finding)
+    elif settings.V3_FEATURE_LOCATIONS and component_name and not item.get("skip_reason"):
+        test.unsaved_metadata.append(
+            LocationData.dependency(purl_type="pypi", name=component_name, version=component_version),
+        )
 
     return findings

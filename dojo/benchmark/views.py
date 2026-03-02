@@ -292,9 +292,9 @@ def benchmark_view(request, pid, benchmark_type, cat=None):
 @user_is_authorized(Product, Permissions.Benchmark_Delete, "pid")
 def delete(request, pid, benchmark_type):
     product = get_object_or_404(Product, id=pid)
-    benchmark_product_summary = Benchmark_Product_Summary.objects.filter(
-        product=product, benchmark_type=benchmark_type,
-    ).first()
+    benchmark_product_summary = get_object_or_404(
+        Benchmark_Product_Summary.objects.filter(product=product), benchmark_type=benchmark_type,
+    )
     form = DeleteBenchmarkForm(instance=benchmark_product_summary)
 
     if request.method == "POST":

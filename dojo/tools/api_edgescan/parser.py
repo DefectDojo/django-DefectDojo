@@ -4,7 +4,7 @@ from cvss import parser as cvss_parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 from .importer import EdgescanImporter
 
@@ -69,9 +69,9 @@ class ApiEdgescanParser:
 
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations = [
-                URL.from_value(vulnerability["location"])
+                LocationData.url(url=vulnerability["location"])
                 if "://" in vulnerability["location"]
-                else URL.from_value("//" + vulnerability["location"]),
+                else LocationData.url(url="//" + vulnerability["location"]),
             ]
         else:
             # TODO: Delete this after the move to Locations
