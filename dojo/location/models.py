@@ -111,9 +111,19 @@ class Location(BaseModel):
         audit_time: datetime | None = None,
     ) -> LocationFindingReference:
         """
-        Get or create a LocationFindingReference for this location and finding,
-        updating the status each time. Also associates the related product.
+        Get or create a LocationFindingReference for this location and finding.
+        Also associates the related product.
         """
+        # Check if there is an existing reference for this finding and location
+        # If this method is being used to set the status
+        if LocationFindingReference.objects.filter(
+            location=self,
+            finding=finding,
+        ).exists():
+            return LocationFindingReference.objects.get(
+                location=self,
+                finding=finding,
+            )
         # Determine the status
         if status is None:
             status = self.status_from_finding(finding)
@@ -144,10 +154,17 @@ class Location(BaseModel):
         product: Product,
         status: ProductLocationStatus | None = None,
     ) -> LocationProductReference:
-        """
-        Get or create a LocationProductReference for this location and product,
-        updating the status each time.
-        """
+        """Get or create a LocationProductReference for this location and product"""
+        # Check if there is an existing reference for this finding and location
+        # If this method is being used to set the status
+        if LocationProductReference.objects.filter(
+            location=self,
+            product=product,
+        ).exists():
+            return LocationProductReference.objects.get(
+                location=self,
+                product=product,
+            )
         if status is None:
             status = self.status_from_product(product)
         # Use a transaction for safety in concurrent scenarios
