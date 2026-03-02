@@ -57,7 +57,7 @@ from dojo.utils import add_breadcrumb, get_page_items, get_setting
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def delete_engagement_survey(request, eid, sid):
     engagement = get_object_or_404(Engagement, id=eid)
-    survey = get_object_or_404(Answered_Survey, id=sid)
+    survey = get_object_or_404(Answered_Survey.objects.filter(engagement=engagement), id=sid)
     questions = get_answered_questions(survey=survey, read_only=True)
     form = Delete_Questionnaire_Form(instance=survey)
 
@@ -96,8 +96,8 @@ def delete_engagement_survey(request, eid, sid):
 
 
 def answer_questionnaire(request, eid, sid):
-    survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
+    survey = get_object_or_404(Answered_Survey.objects.filter(engagement=engagement), id=sid)
     system_settings = System_Settings.objects.all()[0]
 
     if not system_settings.allow_anonymous_survey_repsonse:
@@ -162,8 +162,8 @@ def answer_questionnaire(request, eid, sid):
 
 @user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def assign_questionnaire(request, eid, sid):
-    survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
+    survey = get_object_or_404(Answered_Survey.objects.filter(engagement=engagement), id=sid)
 
     form = AssignUserForm(instance=survey)
     if request.method == "POST":
@@ -183,8 +183,8 @@ def assign_questionnaire(request, eid, sid):
 
 @user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_questionnaire(request, eid, sid):
-    survey = get_object_or_404(Answered_Survey, id=sid)
     engagement = get_object_or_404(Engagement, id=eid)
+    survey = get_object_or_404(Answered_Survey.objects.filter(engagement=engagement), id=sid)
     questions = get_answered_questions(survey=survey, read_only=True)
 
     add_breadcrumb(

@@ -5,7 +5,7 @@ from dateutil import parser as date_parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
 
 
@@ -264,7 +264,7 @@ class AWSInspector2Parser:
                 msg = "Incorrect Inspector2 report format"
                 raise TypeError(msg)
             if settings.V3_FEATURE_LOCATIONS:
-                endpoints.append(URL(host=endpoint_host))
+                endpoints.append(LocationData.url(host=endpoint_host))
             else:
                 # TODO: Delete this after the move to Locations
                 endpoints.append(Endpoint(host=endpoint_host))

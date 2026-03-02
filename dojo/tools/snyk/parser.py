@@ -2,9 +2,18 @@ import io
 import json
 
 from cvss.cvss3 import CVSS3
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.snyk_code.parser import SnykCodeParser
+
+SNYK_PM_TO_PURL = {
+    "npm": "npm", "yarn": "npm", "pip": "pypi", "poetry": "pypi",
+    "maven": "maven", "gradle": "maven", "rubygems": "gem",
+    "nuget": "nuget", "composer": "composer", "gomodules": "golang",
+    "cocoapods": "cocoapods", "hex": "hex", "pub": "pub",
+}
 
 
 class SnykParser:
@@ -279,4 +288,13 @@ class SnykParser:
                     )
                     finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
+
+        if settings.V3_FEATURE_LOCATIONS:
+            package_manager = vulnerability.get("packageManager", "")
+            purl_type = SNYK_PM_TO_PURL.get(package_manager.lower())
+            if purl_type and vulnerability["packageName"] and vulnerability["version"]:
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl_type=purl_type, name=vulnerability["packageName"], version=vulnerability["version"], file_path=vulnPath),
+                )
+
         return finding

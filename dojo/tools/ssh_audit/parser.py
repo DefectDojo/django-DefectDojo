@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class SSHAuditParser:
@@ -26,7 +26,7 @@ class SSHAuditParser:
         Critical 	9.0-10.0
         """
         val = float(raw_value)
-        if val == 0.0:
+        if val == 0:
             return "Info"
         if val < 4.0:
             return "Low"
@@ -38,7 +38,7 @@ class SSHAuditParser:
 
     def add_location(self, finding, host, port):
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations.append(URL(host=host, port=port))
+            finding.unsaved_locations.append(LocationData.url(host=host, port=port))
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints.append(Endpoint(host=host, port=port))

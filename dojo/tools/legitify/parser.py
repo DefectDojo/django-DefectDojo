@@ -3,7 +3,7 @@ import json
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class LegitifyParser:
@@ -46,19 +46,12 @@ class LegitifyParser:
             policy_info = content_value.get("policyInfo", {})
             is_finding = False
             locations = set()
-            references = set()
             for violation in content_value.get("violations", []):
                 if violation.get("status", None) == "FAILED":
                     is_finding = True
                     url = violation.get("canonicalLink", None)
                     if url:
-                        references.add(url)
-                        if settings.V3_FEATURE_LOCATIONS:
-                            locations.add(URL.from_value(url))
-                        else:
-                            # TODO: Delete this after the move to Locations
-                            locations.add(Endpoint.from_uri(url))
-
+                        locations.add(url)
             if is_finding:
                 remediation_steps = policy_info.get("remediationSteps", [])
                 fix_available = False
@@ -69,7 +62,7 @@ class LegitifyParser:
                     dynamic_finding=False,
                     impact="\n".join(policy_info.get("threat", [])),
                     mitigation="\n".join(remediation_steps),
-                    references="\n".join(references),
+                    references="\n".join(locations),
                     severity=self.severity_mapper(policy_info.get("severity", "LOW")),
                     static_finding=True,
                     title=f'{policy_info.get("namespace", "").capitalize()} | {policy_info.get("title", "")}',
@@ -77,9 +70,9 @@ class LegitifyParser:
                     fix_available=fix_available,
                 )
                 if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations = list(locations)
+                    finding.unsaved_locations = [LocationData.url(url=url) for url in locations]
                 else:
                     # TODO: Delete this after the move to Locations
-                    finding.unsaved_endpoints = list(locations)
+                    finding.unsaved_endpoints = [Endpoint.from_uri(url) for url in locations]
                 findings.append(finding)
         return findings

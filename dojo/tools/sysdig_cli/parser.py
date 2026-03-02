@@ -6,7 +6,7 @@ import cvss.parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
-from dojo.tools.sysdig_common.sysdig_data import SysdigData
+from dojo.tools.sysdig_common.sysdig_data import SysdigData, add_package_info
 from dojo.validators import clean_tags
 
 
@@ -104,6 +104,8 @@ class SysdigCLIParser:
                     component_version=packageVersion,
                 )
 
+                add_package_info(finding, packageName, packageType, packageVersion, packagePath)
+
                 try:
                     if float(vulnCvssVersion) >= 3 and float(vulnCvssVersion) < 4:
                         finding.cvssv3_score = vulnCvssScore
@@ -160,6 +162,7 @@ class SysdigCLIParser:
             if row.package_path:
                 finding.description += f"\n - **Package Path:** {row.package_path}"
                 finding.file_path = row.package_path
+            add_package_info(finding, row.package_name, row.package_type, row.package_version, row.package_path)
             try:
                 if float(row.cvss_version) >= 3 and float(row.cvss_version) < 4:
                     finding.cvssv3_score = float(row.cvss_score)
