@@ -5,7 +5,7 @@ import zipfile
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -184,11 +184,11 @@ class MSDefenderParser:
         if settings.V3_FEATURE_LOCATIONS:
             if "computerDnsName" in machine and machine["computerDnsName"] is not None:
                 host = str(machine["computerDnsName"]).replace(" ", "").replace("(", "_").replace(")", "_")
-                locations.append(URL(host=host))
+                locations.append(LocationData.url(host=host))
             if "lastIpAddress" in machine and machine["lastIpAddress"] is not None:
-                locations.append(URL(host=str(machine["lastIpAddress"])))
+                locations.append(LocationData.url(host=str(machine["lastIpAddress"])))
             if "lastExternalIpAddress" in machine and machine["lastExternalIpAddress"] is not None:
-                locations.append(URL(host=str(machine["lastExternalIpAddress"])))
+                locations.append(LocationData.url(host=str(machine["lastExternalIpAddress"])))
             finding.unsaved_locations = locations
         else:
             # TODO: Delete this after the move to Locations

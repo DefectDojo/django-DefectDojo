@@ -2,8 +2,10 @@ import json
 
 from cvss.cvss3 import CVSS3
 from cvss.cvss4 import CVSS4
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class NancyParser:
@@ -92,6 +94,11 @@ class NancyParser:
                         cwe = (associated_vuln["Title"]
                                .split(":")[0].split("-")[1])
                         finding.cwe = int(cwe)
+
+                    if settings.V3_FEATURE_LOCATIONS and vuln.get("Coordinates"):
+                        finding.unsaved_locations.append(
+                            LocationData.dependency(purl=vuln["Coordinates"]),
+                        )
 
                     findings.append(finding)
 

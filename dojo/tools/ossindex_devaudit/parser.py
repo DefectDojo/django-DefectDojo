@@ -1,7 +1,10 @@
 import json
 from json import JSONDecodeError
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class OssIndexDevauditParser:
@@ -45,17 +48,36 @@ class OssIndexDevauditParser:
         results = dict(tree.items())
         for package in results.get("Packages", []):
             package_data = package["Package"]
+            package_manager = package_data["pm"]
+            package_name = package_data["name"]
+            package_version = package_data["version"]
+
+            dep = None
+            if settings.V3_FEATURE_LOCATIONS and package_manager and package_name:
+                package_group = package_data.get("group", "")
+                if package_group == "None":
+                    purl_string = f"pkg:{package_manager}/{package_name}/{package_version}"
+                else:
+                    purl_string = f"pkg:{package_manager}/{package_group}/{package_name}/{package_version}"
+                dep = LocationData.dependency(purl=purl_string)
+
             if len(package.get("Vulnerabilities", [])) > 0:
                 for vulnerability in package.get("Vulnerabilities", []):
                     item = get_item(
-                        dependency_name=package_data["name"],
-                        dependency_version=package_data["version"],
-                        dependency_source=package_data["pm"],
+                        dependency_name=package_name,
+                        dependency_version=package_version,
+                        dependency_source=package_manager,
                         vulnerability=vulnerability,
                         test=test,
                     )
+
+                    if dep:
+                        item.unsaved_locations.append(dep)
+
                     unique_key = vulnerability["id"]
                     items[unique_key] = item
+            elif dep:
+                test.unsaved_metadata.append(dep)
 
         return items.values()
 

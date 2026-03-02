@@ -15,10 +15,10 @@ import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.importers.endpoint_manager import EndpointManager
-from dojo.importers.location_manager import LocationManager
+from dojo.importers.location_manager import LocationManager, UnsavedLocation
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
-from dojo.location.models import AbstractLocation, Location
+from dojo.location.models import Location
 from dojo.models import (
     # Import History States
     IMPORT_CLOSED_FINDING,
@@ -792,7 +792,7 @@ class BaseImporter(ImporterOptions):
     def process_locations(
         self,
         finding: Finding,
-        locations_to_add: list[AbstractLocation],
+        locations_to_add: list[UnsavedLocation],
     ) -> None:
         """
         Process any locations to add to the finding. Locations could come from two places
