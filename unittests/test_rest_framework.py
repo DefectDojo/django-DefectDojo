@@ -3788,26 +3788,101 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
     def __del__(self: object):
         self.payload["file"].close()
 
+    def _build_payload(self, data):
+        return {
+            "product": 1,
+            "file": SimpleUploadedFile(
+                "defectdojo_cloc.json",
+                json.dumps(data).encode("utf-8"),
+                content_type="application/json",
+            ),
+        }
+
     def test_create(self):
-        BaseClass.CreateRequestTest.test_create(self)
+        self.payload["file"].close()
+        base_data = json.loads(
+            Path("unittests/files/defectdojo_cloc.json").read_text(
+                encoding="utf-8",
+            ),
+        )
+        updated_data = json.loads(json.dumps(base_data))
+        updated_data.pop("JSON", None)
+        updated_data["Python"]["code"] = 51057
+        updated_data["Go"] = {
+            "nFiles": 1,
+            "blank": 2,
+            "comment": 3,
+            "code": 4,
+        }
 
-        languages = Languages.objects.filter(product=1).order_by("language")
+        test_cases = [
+            (
+                "initial",
+                base_data,
+                {
+                    "JSON": {
+                        "files": 21,
+                        "blank": 7,
+                        "comment": 0,
+                        "code": 63996,
+                    },
+                    "Python": {
+                        "files": 432,
+                        "blank": 10813,
+                        "comment": 5054,
+                        "code": 51056,
+                    },
+                },
+            ),
+            (
+                "updated",
+                updated_data,
+                {
+                    "Go": {
+                        "files": 1,
+                        "blank": 2,
+                        "comment": 3,
+                        "code": 4,
+                    },
+                    "Python": {
+                        "files": 432,
+                        "blank": 10813,
+                        "comment": 5054,
+                        "code": 51057,
+                    },
+                },
+            ),
+        ]
 
-        self.assertEqual(2, len(languages))
+        product = Product.objects.get(id=1)
+        for case_name, payload_data, expected in test_cases:
+            with self.subTest(case=case_name):
+                self.payload = self._build_payload(payload_data)
+                response = self.client.post(self.url, self.payload)
+                self.assertEqual(201, response.status_code, response.content[:1000])
+                self.check_schema_response("post", "201", response)
 
-        self.assertEqual(languages[0].product, Product.objects.get(id=1))
-        self.assertEqual(languages[0].language, Language_Type.objects.get(id=1))
-        self.assertEqual(languages[0].files, 21)
-        self.assertEqual(languages[0].blank, 7)
-        self.assertEqual(languages[0].comment, 0)
-        self.assertEqual(languages[0].code, 63996)
+                languages = (
+                    Languages.objects.filter(product=1)
+                    .select_related("language")
+                    .order_by("language__language")
+                )
+                self.assertEqual(len(expected), languages.count())
 
-        self.assertEqual(languages[1].product, Product.objects.get(id=1))
-        self.assertEqual(languages[1].language, Language_Type.objects.get(id=2))
-        self.assertEqual(languages[1].files, 432)
-        self.assertEqual(languages[1].blank, 10813)
-        self.assertEqual(languages[1].comment, 5054)
-        self.assertEqual(languages[1].code, 51056)
+                languages_by_name = {
+                    language.language.language: language
+                    for language in languages
+                }
+                self.assertEqual(set(expected.keys()), set(languages_by_name.keys()))
+
+                for name, counts in expected.items():
+                    language = languages_by_name[name]
+                    self.assertEqual(product, language.product)
+                    self.assertEqual(name, language.language.language)
+                    self.assertEqual(counts["files"], language.files)
+                    self.assertEqual(counts["blank"], language.blank)
+                    self.assertEqual(counts["comment"], language.comment)
+                    self.assertEqual(counts["code"], language.code)
 
 
 @versioned_fixtures

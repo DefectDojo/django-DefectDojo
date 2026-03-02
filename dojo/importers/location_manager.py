@@ -127,17 +127,19 @@ class LocationManager:
         """Update the list of locations from the new finding with the list that is in the old finding"""
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
-        # using `.all()` will mark as mitigated also `endpoint_status` with flags `false_positive`, `out_of_scope` and `risk_accepted`. This is a known issue. This is not a bug. This is a future.
-
+        existing_location_refs: QuerySet[LocationFindingReference] = existing_finding.locations.exclude(
+            status__in=[
+                FindingLocationStatus.FalsePositive,
+                FindingLocationStatus.RiskAccepted,
+                FindingLocationStatus.OutOfScope,
+            ],
+        )
         if new_finding.is_mitigated:
             # New finding is mitigated, so mitigate all existing location refs
-            self.chunk_locations_and_mitigate(existing_finding.locations.all(), user)
+            self.chunk_locations_and_mitigate(existing_location_refs, user)
         else:
             # New finding not mitigated; so, reactivate all refs
-            existing_location_refs: QuerySet[LocationFindingReference] = existing_finding.locations.all()
-
-            new_locations_values = [str(location) for location in new_finding.unsaved_locations]
-
+            new_locations_values = {str(location) for location in new_finding.unsaved_locations}
             # Reactivate endpoints in the old finding that are in the new finding
             location_refs_to_reactivate = existing_location_refs.filter(location__location_value__in=new_locations_values)
             # Mitigate endpoints in the existing finding not in the new finding
