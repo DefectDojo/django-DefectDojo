@@ -32,7 +32,7 @@ from imagekit.processors import ResizeToFill
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 from dojo.authorization.authorization_decorators import (
     user_has_global_permission,
     user_is_authorized,
@@ -1732,6 +1732,9 @@ def mktemplate(request, fid):
 
 @user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def find_template_to_apply(request, fid):
+    # Templates may contain sensitive data from any product; require global permission
+    # to match the authorization level of the /template list view
+    user_has_global_permission_or_403(request.user, Permissions.Finding_Edit)
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
     templates_by_cve = (

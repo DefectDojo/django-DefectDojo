@@ -1597,7 +1597,7 @@ def engagement_presets(request, pid):
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
-    preset = get_object_or_404(Engagement_Presets, id=eid)
+    preset = get_object_or_404(Engagement_Presets.objects.filter(product=prod), id=eid)
 
     product_tab = Product_Tab(prod, title=_("Edit Engagement Preset"), tab="settings")
 
@@ -1646,7 +1646,7 @@ def add_engagement_presets(request, pid):
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
-    preset = get_object_or_404(Engagement_Presets, id=eid)
+    preset = get_object_or_404(Engagement_Presets.objects.filter(product=prod), id=eid)
     form = DeleteEngagementPresetsForm(instance=preset)
 
     if request.method == "POST":
