@@ -104,7 +104,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         messages.add_message(
             request,
             messages.ERROR,
-            "Viewing this object is only available in the Pro new UI.",
+            "Viewing this object is only available in the Pro UI.",
             extra_tags="alert-danger",
         )
         raise Http404
