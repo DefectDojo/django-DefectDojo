@@ -21,4 +21,4 @@ jobs:
         uses: suzuki-shunsuke/github-action-renovate-config-validator@ee9f69e1f683ed0d08225086482b34fc9abe9300 # v2.1.0
         with:
           strict: "true"
-          validator_version: 43.31.7 # renovate: datasource=github-releases depName=renovatebot/renovate
+          validator_version: 43.51.2 # renovate: datasource=github-releases depName=renovatebot/renovate
