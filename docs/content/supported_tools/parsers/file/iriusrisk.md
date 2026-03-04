@@ -3,7 +3,7 @@ title: "IriusRisk Threats Scan"
 toc_hide: true
 ---
 
-The [IriusRisk](https://www.iriusrisk.com/) parser for DefectDojo supports imports from CSV format. This document details the parsing of IriusRisk threat model CSV exports into DefectDojo field mappings, unmapped fields, and location of each field's parsing code for easier troubleshooting and analysis.
+The [IriusRisk](https://www.iriusrisk.com/) parser for DefectDojo supports imports from CSV format. This document details the parsing of IriusRisk threat model CSV exports into DefectDojo field mappings, unmapped fields, and transformation notes for easier troubleshooting and analysis.
 
 ## Supported File Types
 
@@ -47,26 +47,26 @@ Sample IriusRisk scans can be found in the [sample scan data folder](https://git
 <details>
 <summary>Click to expand Field Mapping Table</summary>
 
-| Source Field             | DefectDojo Field     | Parser Line # | Notes                                                                 |
-| ------------------------ | -------------------- | ------------- | --------------------------------------------------------------------- |
-| Threat                   | title                | 51            | Truncated to 150 characters with "..." suffix if longer               |
-| Current Risk             | severity             | 53            | Mapped from IriusRisk risk levels to DefectDojo severity levels       |
-| Component                | component_name       | 95            | The affected asset or component from the threat model                 |
-| Threat                   | description          | 57            | Full threat text included as first line of structured description     |
-| Component                | description          | 58            | Included in structured description block                              |
-| Use case                 | description          | 59            | Threat category included in structured description                    |
-| Source                   | description          | 60            | Origin of the threat included in structured description               |
-| Inherent Risk            | description          | 61            | Pre-control risk level included in structured description             |
-| Current Risk             | description          | 62            | Current risk level included in structured description                 |
-| Projected Risk           | description          | 63            | Post-mitigation risk level included in structured description         |
-| Countermeasure progress  | description          | 64            | Percentage complete included in structured description                |
-| Weakness tests           | description          | 65            | Test status included in structured description                        |
-| Countermeasure tests     | description          | 66            | Test status included in structured description                        |
-| Owner                    | description          | 68-69         | Conditionally appended to description only when present               |
-| STRIDE-LM               | description          | 70-71         | Conditionally appended to description only when present               |
-| Risk Response            | mitigation           | 94            | Mitigation status percentages from IriusRisk                          |
-| MITRE reference          | cwe                  | 82-85         | When value matches CWE-NNN pattern, integer is extracted to cwe field |
-| MITRE reference          | references           | 86-87         | When value does not match CWE pattern, stored as references           |
+| Source Field             | DefectDojo Field     | Notes                                                                 |
+| ------------------------ | -------------------- | --------------------------------------------------------------------- |
+| Threat                   | title                | Truncated to 150 characters with "..." suffix if longer               |
+| Current Risk             | severity             | Mapped from IriusRisk risk levels to DefectDojo severity levels       |
+| Component                | component_name       | The affected asset or component from the threat model                 |
+| Threat                   | description          | Full threat text included as first line of structured description     |
+| Component                | description          | Included in structured description block                              |
+| Use case                 | description          | Threat category included in structured description                    |
+| Source                   | description          | Origin of the threat included in structured description               |
+| Inherent Risk            | description          | Pre-control risk level included in structured description             |
+| Current Risk             | description          | Current risk level included in structured description                 |
+| Projected Risk           | description          | Post-mitigation risk level included in structured description         |
+| Countermeasure progress  | description          | Percentage complete included in structured description                |
+| Weakness tests           | description          | Test status included in structured description                        |
+| Countermeasure tests     | description          | Test status included in structured description                        |
+| Owner                    | description          | Conditionally appended to description only when present               |
+| STRIDE-LM               | description          | Conditionally appended to description only when present               |
+| Risk Response            | mitigation           | Mitigation status percentages from IriusRisk                          |
+| MITRE reference          | cwe                  | When value matches CWE-NNN pattern, integer is extracted to cwe field |
+| MITRE reference          | references           | When value does not match CWE pattern, stored as references           |
 
 </details>
 
@@ -75,11 +75,11 @@ Sample IriusRisk scans can be found in the [sample scan data folder](https://git
 <details>
 <summary>Click to expand Additional Settings Table</summary>
 
-| Finding Field    | Default Value                    | Parser Line # | Notes                                                       |
-| ---------------- | -------------------------------- | ------------- | ----------------------------------------------------------- |
-| static_finding   | False                            | 97            | Threat model data is neither static nor dynamic analysis    |
-| dynamic_finding  | False                            | 98            | Threat model data is neither static nor dynamic analysis    |
-| active           | True (False when "Very low")     | 96            | Set to False when Current Risk is "Very low" (fully mitigated) |
+| Finding Field    | Default Value                    | Notes                                                       |
+| ---------------- | -------------------------------- | ----------------------------------------------------------- |
+| static_finding   | False                            | Threat model data is neither static nor dynamic analysis    |
+| dynamic_finding  | False                            | Threat model data is neither static nor dynamic analysis    |
+| active           | True (False when "Very low")     | Set to False when Current Risk is "Very low" (fully mitigated) |
 
 </details>
 
@@ -87,7 +87,7 @@ Sample IriusRisk scans can be found in the [sample scan data folder](https://git
 
 ### Status Conversion
 
-IriusRisk uses a five-level risk scale that is mapped to DefectDojo severity levels (lines 8-14):
+IriusRisk uses a five-level risk scale that is mapped to DefectDojo severity levels:
 
 - `Critical` → Critical
 - `High` → High
@@ -95,15 +95,15 @@ IriusRisk uses a five-level risk scale that is mapped to DefectDojo severity lev
 - `Low` → Low
 - `Very low` → Info
 
-Any unrecognized risk value defaults to Info (line 53). The mapping uses the "Current Risk" column, which reflects the risk level accounting for existing controls and represents the most accurate current exposure.
+Any unrecognized risk value defaults to Info. The mapping uses the "Current Risk" column, which reflects the risk level accounting for existing controls and represents the most accurate current exposure.
 
 ### Title Format
 
-Finding titles are derived from the "Threat" column (line 51). Threat descriptions longer than 150 characters are truncated to 147 characters with a "..." suffix appended. Shorter threat texts are used as-is without modification.
+Finding titles are derived from the "Threat" column. Threat descriptions longer than 150 characters are truncated to 147 characters with a "..." suffix appended. Shorter threat texts are used as-is without modification.
 
 ### Description Construction
 
-The parser constructs a structured markdown description containing all relevant CSV fields (lines 56-72):
+The parser constructs a structured markdown description containing all relevant CSV fields:
 
 1. Full threat text (untruncated, regardless of title truncation)
 2. Component name
@@ -122,7 +122,7 @@ Each field is formatted as a bold markdown label followed by the value, with fie
 
 ### MITRE Reference / CWE Extraction
 
-The parser reads the "MITRE reference" column (lines 79-87) and applies conditional mapping:
+The parser reads the "MITRE reference" column and applies conditional mapping:
 
 - If the value matches the pattern `CWE-NNN` (e.g., "CWE-284"), the integer portion is extracted and set on the finding's `cwe` field.
 - If the value is present but does not match the CWE pattern (e.g., "T1059" for a MITRE ATT&CK technique), the full value is stored in the finding's `references` field.
@@ -130,11 +130,11 @@ The parser reads the "MITRE reference" column (lines 79-87) and applies conditio
 
 ### Mitigation Construction
 
-The mitigation field is populated directly from the "Risk Response" column (line 94), which contains the IriusRisk mitigation status in the format: "Planned mitigation: X%. Mitigated: Y%. Unmitigated: Z%." This preserves the original IriusRisk mitigation tracking percentages.
+The mitigation field is populated directly from the "Risk Response" column, which contains the IriusRisk mitigation status in the format: "Planned mitigation: X%. Mitigated: Y%. Unmitigated: Z%." This preserves the original IriusRisk mitigation tracking percentages.
 
 ### Active/Inactive Logic
 
-Findings are set to active by default (line 96). When the "Current Risk" value is "Very low", the finding is set to inactive, as this indicates the threat has been fully mitigated through implemented countermeasures.
+Findings are set to active by default. When the "Current Risk" value is "Very low", the finding is set to inactive, as this indicates the threat has been fully mitigated through implemented countermeasures.
 
 ### Deduplication
 
