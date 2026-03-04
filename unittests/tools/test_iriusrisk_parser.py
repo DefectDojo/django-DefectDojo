@@ -21,7 +21,7 @@ class TestIriusriskParser(DojoTestCase):
         with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
             parser = IriusriskParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertEqual(6, len(findings))
+            self.assertEqual(7, len(findings))
 
     def test_finding_severity_high(self):
         with (get_unit_tests_scans_path("iriusrisk") / "one_vuln.csv").open(encoding="utf-8") as testfile:
@@ -54,12 +54,13 @@ class TestIriusriskParser(DojoTestCase):
             # Row 6 (index 5) has Current Risk = "Critical"
             self.assertEqual("Critical", findings[5].severity)
 
-    def test_finding_title_truncated_at_150_chars(self):
+    def test_finding_title_truncated_at_500_chars(self):
         with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
             parser = IriusriskParser()
             findings = parser.get_findings(testfile, Test())
-            self.assertLessEqual(len(findings[4].title), 150)
-            self.assertTrue(findings[4].title.endswith("..."))
+            # Row 7 (index 6) has a threat longer than 500 characters
+            self.assertLessEqual(len(findings[6].title), 500)
+            self.assertTrue(findings[6].title.endswith("..."))
 
     def test_finding_title_not_truncated_when_short(self):
         with (get_unit_tests_scans_path("iriusrisk") / "one_vuln.csv").open(encoding="utf-8") as testfile:

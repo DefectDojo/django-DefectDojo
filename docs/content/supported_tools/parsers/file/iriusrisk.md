@@ -49,7 +49,7 @@ Sample IriusRisk scans can be found in the [sample scan data folder](https://git
 
 | Source Field             | DefectDojo Field     | Notes                                                                 |
 | ------------------------ | -------------------- | --------------------------------------------------------------------- |
-| Threat                   | title                | Truncated to 150 characters with "..." suffix if longer               |
+| Threat                   | title                | Truncated to 500 characters with "..." suffix if longer               |
 | Current Risk             | severity             | Mapped from IriusRisk risk levels to DefectDojo severity levels       |
 | Component                | component_name       | The affected asset or component from the threat model                 |
 | Threat                   | description          | Full threat text included as first line of structured description     |
@@ -99,7 +99,7 @@ Any unrecognized risk value defaults to Info. The mapping uses the "Current Risk
 
 ### Title Format
 
-Finding titles are derived from the "Threat" column. Threat descriptions longer than 150 characters are truncated to 147 characters with a "..." suffix appended. Shorter threat texts are used as-is without modification.
+Finding titles are derived from the "Threat" column. Threat descriptions longer than 500 characters are truncated to 497 characters with a "..." suffix appended. Shorter threat texts are used as-is without modification.
 
 ### Description Construction
 

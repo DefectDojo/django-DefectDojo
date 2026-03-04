@@ -46,8 +46,8 @@ class IriusriskParser:
             mitre_reference = (row.get("MITRE reference") or "").strip()
             stride_lm = (row.get("STRIDE-LM") or "").strip()
 
-            # Title: truncate to 150 chars with ellipsis if needed
-            title = threat[:147] + "..." if len(threat) > 150 else threat
+            # Title: truncate to 500 chars with ellipsis if needed
+            title = threat[:497] + "..." if len(threat) > 500 else threat
 
             severity = SEVERITY_MAPPING.get(current_risk, "Info")
 
