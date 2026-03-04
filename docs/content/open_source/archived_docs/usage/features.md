@@ -10,7 +10,7 @@ aliases:
 ## Tags
 
 In DefectDojo, tags are a first class citizen and are recognized as the facilitators
-of organization within each level of the [data model](../models). Tags are
+of organization within each level of the data model. Tags are
 ideal for grouping objects in a manner that can be filtered out into smaller, more
 digestible chunks.
 
