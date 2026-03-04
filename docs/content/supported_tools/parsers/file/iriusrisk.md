@@ -17,13 +17,10 @@ The IriusRisk parser accepts CSV file format. To generate this file from IriusRi
 
 ## Default Deduplication Hashcode Fields
 
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
-- cwe
-- line
-- file_path
-- description
+- component_name
 
 ### Sample Scan Data
 
@@ -138,7 +135,7 @@ Findings are set to active by default. When the "Current Risk" value is "Very lo
 
 ### Deduplication
 
-Deduplication relies on DefectDojo's default hashcode algorithm, which uses the title, cwe, line, file_path, and description fields to identify duplicate findings.
+Deduplication uses DefectDojo's hashcode algorithm with the title and component_name fields to identify duplicate findings. These stable fields ensure that reimports correctly match existing findings even when risk levels or countermeasure progress change between scans.
 
 ### Duplicate Rows in Source Data
 
