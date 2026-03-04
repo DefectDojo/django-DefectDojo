@@ -16,9 +16,9 @@ from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
 
-import bleach
 import crum
 import cvss
+import nh3
 import vobject
 from amqp.exceptions import ChannelError
 from auditlog.models import LogEntry
@@ -1819,7 +1819,7 @@ def create_bleached_link(url, title):
     link += '">'
     link += title
     link += "</a>"
-    return bleach.clean(link, tags={"a"}, attributes={"a": ["href", "target", "title"]})
+    return nh3.clean(link, tags={"a"}, attributes={"a": {"href", "target", "title"}})
 
 
 def get_object_or_none(klass, *args, **kwargs):

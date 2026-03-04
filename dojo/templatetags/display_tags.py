@@ -8,10 +8,9 @@ from ast import literal_eval
 from itertools import chain
 from pathlib import Path
 
-import bleach
 import dateutil.relativedelta
 import markdown
-from bleach.css_sanitizer import CSSSanitizer
+import nh3
 from django import template
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -50,17 +49,21 @@ markdown_tags = {
 }
 
 markdown_attrs = {
-    "*": ["id"],
-    "img": ["src", "alt", "title", "width", "height", "style"],
-    "a": ["href", "alt", "target", "title"],
-    "span": ["class"],  # used for code highlighting
-    "pre": ["class"],  # used for code highlighting
-    "div": ["class"],  # used for code highlighting
+    "*": {"id"},
+    "img": {"src", "alt", "title", "width", "height"},
+    "a": {"href", "alt", "target", "title"},
+    "span": {"class"},  # used for code highlighting
+    "pre": {"class"},  # used for code highlighting
+    "div": {"class"},  # used for code highlighting
 }
 
-markdown_styles = [
-    "background-color",
-]
+# nh3 base allowlist (equivalent to bleach.ALLOWED_TAGS / bleach.ALLOWED_ATTRIBUTES)
+_NH3_ALLOWED_TAGS = {"a", "abbr", "acronym", "b", "blockquote", "code", "em", "i", "li", "ol", "strong", "ul"}
+_NH3_ALLOWED_ATTRIBUTES = {
+    "a": {"href", "title", "target"},
+    "abbr": {"title"},
+    "acronym": {"title"},
+}
 
 finding_related_action_classes_dict = {
     "reset_finding_duplicate_status": "fa-solid fa-eraser",
@@ -91,21 +94,13 @@ def markdown_render(value):
                                                       "markdown.extensions.fenced_code",
                                                       "markdown.extensions.toc",
                                                       "markdown.extensions.tables"])
-        return mark_safe(bleach.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs, css_sanitizer=markdown_styles))
+        return mark_safe(nh3.clean(markdown_text, tags=markdown_tags, attributes=markdown_attrs))
     return None
 
 
 @register.filter
 def bleach_with_a_tags(message):
-    # Create a copy of ALLOWED_ATTRIBUTES to avoid mutating the global
-    allowed_attributes = {
-        **bleach.ALLOWED_ATTRIBUTES,
-        "a": [*bleach.ALLOWED_ATTRIBUTES.get("a", []), "style", "target"],
-    }
-    return mark_safe(bleach.clean(
-        message,
-        attributes=allowed_attributes,
-        css_sanitizer=CSSSanitizer(allowed_css_properties=["color", "font-weight"])))
+    return mark_safe(nh3.clean(message, tags=_NH3_ALLOWED_TAGS, attributes=_NH3_ALLOWED_ATTRIBUTES))
 
 
 def text_shortener(value, length):
