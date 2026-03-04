@@ -5,7 +5,7 @@ weight: 3
 audience: pro
 ---
 
-DefectDojo Pro supports login via Auth0. Open-Source users should refer to the [Open-Source Auth0 guide](../OS__auth0/).
+DefectDojo Pro supports login via Auth0. Open-Source users should refer to the [Open-Source Auth0 guide](/admin/sso/os__auth0/).
 
 ## Prerequisites
 

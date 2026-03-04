@@ -7,7 +7,7 @@ aliases:
   - /en/working_with_findings/sla_configuration
 ---
 
-Open-Source DefectDojo supports SAML authentication via environment variables. DefectDojo Pro users should refer to the [Pro SAML guide](../PRO__saml/).
+Open-Source DefectDojo supports SAML authentication via environment variables. DefectDojo Pro users should refer to the [Pro SAML guide](/admin/sso/pro__saml/).
 
 ## Setup
 
