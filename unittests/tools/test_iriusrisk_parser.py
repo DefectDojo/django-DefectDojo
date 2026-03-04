@@ -112,21 +112,6 @@ class TestIriusriskParser(DojoTestCase):
             self.assertFalse(findings[0].static_finding)
             self.assertFalse(findings[0].dynamic_finding)
 
-    def test_finding_unique_id_from_tool(self):
-        with (get_unit_tests_scans_path("iriusrisk") / "one_vuln.csv").open(encoding="utf-8") as testfile:
-            parser = IriusriskParser()
-            findings = parser.get_findings(testfile, Test())
-            self.assertIsNotNone(findings[0].unique_id_from_tool)
-            self.assertGreater(len(findings[0].unique_id_from_tool), 0)
-
-    def test_finding_unique_id_is_consistent(self):
-        """Parsing the same file twice should produce the same unique IDs."""
-        with (get_unit_tests_scans_path("iriusrisk") / "one_vuln.csv").open(encoding="utf-8") as testfile:
-            findings1 = IriusriskParser().get_findings(testfile, Test())
-        with (get_unit_tests_scans_path("iriusrisk") / "one_vuln.csv").open(encoding="utf-8") as testfile:
-            findings2 = IriusriskParser().get_findings(testfile, Test())
-        self.assertEqual(findings1[0].unique_id_from_tool, findings2[0].unique_id_from_tool)
-
     def test_finding_with_owner(self):
         with (get_unit_tests_scans_path("iriusrisk") / "many_vulns.csv").open(encoding="utf-8") as testfile:
             parser = IriusriskParser()

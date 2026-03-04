@@ -25,8 +25,6 @@ By default, DefectDojo identifies duplicate Findings using these [hashcode field
 - file_path
 - description
 
-The parser also populates `unique_id_from_tool` with a SHA-256 hash of the Component, Threat, and Risk Response fields, providing an additional layer of deduplication across reimports.
-
 ### Sample Scan Data
 
 Sample IriusRisk scans can be found in the [sample scan data folder](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/iriusrisk).
@@ -69,7 +67,6 @@ Sample IriusRisk scans can be found in the [sample scan data folder](https://git
 | Risk Response            | mitigation           | 94            | Mitigation status percentages from IriusRisk                          |
 | MITRE reference          | cwe                  | 82-85         | When value matches CWE-NNN pattern, integer is extracted to cwe field |
 | MITRE reference          | references           | 86-87         | When value does not match CWE pattern, stored as references           |
-| Component + Threat + Risk Response | unique_id_from_tool | 74-77 | SHA-256 hash used for deduplication across reimports                  |
 
 </details>
 
@@ -83,7 +80,6 @@ Sample IriusRisk scans can be found in the [sample scan data folder](https://git
 | static_finding   | False                            | 97            | Threat model data is neither static nor dynamic analysis    |
 | dynamic_finding  | False                            | 98            | Threat model data is neither static nor dynamic analysis    |
 | active           | True (False when "Very low")     | 96            | Set to False when Current Risk is "Very low" (fully mitigated) |
-| unique_id_from_tool | SHA-256 hash                  | 99            | Hash of Component, Threat, and Risk Response                |
 
 </details>
 
@@ -142,8 +138,8 @@ Findings are set to active by default (line 96). When the "Current Risk" value i
 
 ### Deduplication
 
-The parser generates a `unique_id_from_tool` by computing a SHA-256 hash of the Component, Threat, and Risk Response fields concatenated with pipe delimiters (lines 74-77). This ensures that each distinct combination of component, threat, and mitigation state produces a unique identifier. On reimport, findings with matching unique IDs are recognized as the same finding rather than being duplicated.
+Deduplication relies on DefectDojo's default hashcode algorithm, which uses the title, cwe, line, file_path, and description fields to identify duplicate findings.
 
 ### Duplicate Rows in Source Data
 
-IriusRisk CSV exports can contain multiple rows with the same Component and Threat but different Risk Response values. These represent distinct countermeasure paths for the same threat. Each row is imported as a separate finding, distinguished by its unique ID which incorporates the Risk Response field.
+IriusRisk CSV exports can contain multiple rows with the same Component and Threat but different Risk Response values. These represent distinct countermeasure paths for the same threat. Each row is imported as a separate finding, distinguished by its description content which incorporates all CSV fields.

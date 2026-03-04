@@ -1,5 +1,4 @@
 import csv
-import hashlib
 import io
 import re
 
@@ -71,11 +70,6 @@ class IriusriskParser:
                 description_parts.append(f"**STRIDE-LM:** {stride_lm}")
             description = "\n".join(description_parts)
 
-            # Unique ID for deduplication across reimports
-            unique_id = hashlib.sha256(
-                f"{component}|{threat}|{risk_response}".encode(),
-            ).hexdigest()
-
             # Extract CWE from MITRE reference if present
             cwe = None
             references = ""
@@ -96,7 +90,6 @@ class IriusriskParser:
                 active=current_risk != "Very low",
                 static_finding=False,
                 dynamic_finding=False,
-                unique_id_from_tool=unique_id,
             )
             if cwe:
                 finding.cwe = cwe
