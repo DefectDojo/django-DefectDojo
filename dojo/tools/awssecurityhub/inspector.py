@@ -3,7 +3,7 @@ import datetime
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 SEVERITY_MAP = {
     "INFORMATIONAL": "Info",
@@ -72,7 +72,7 @@ class Inspector:
             component_name = resource.get("Type")
             host_value = f"{component_name}_{resource.get('Id')}".replace(":", "_").replace("/", "_")
             if settings.V3_FEATURE_LOCATIONS:
-                locations.append(URL(host=host_value))
+                locations.append(LocationData.url(host=host_value))
             else:
                 # TODO: Delete this after the move to Locations
                 locations.append(Endpoint(host=host_value))

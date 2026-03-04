@@ -3,7 +3,10 @@
 import json
 import logging
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -23,6 +26,7 @@ CVSS_SEVERITY_SOURCES = [
     "redhat",
     "bitnami",
 ]
+
 
 DESCRIPTION_TEMPLATE = """{title}
 **Target:** {target}
@@ -344,6 +348,11 @@ class TrivyParser:
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
+
+                if settings.V3_FEATURE_LOCATIONS and package_name and package_version:
+                    finding.unsaved_locations.append(
+                        LocationData.dependency(name=package_name, version=package_version, file_path=file_path),
+                    )
 
                 items.append(finding)
 

@@ -2,8 +2,29 @@ import json
 import re
 
 from cvss import CVSS3
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+
+JFROG_XRAY_TYPE_TO_PURL = {
+    "gav": "maven",
+    "npm": "npm",
+    "pypi": "pypi",
+    "alpine": "apk",
+    "go": "golang",
+    "nuget": "nuget",
+    "rpm": "rpm",
+    "deb": "deb",
+    "docker": "docker",
+    "cargo": "cargo",
+    "composer": "composer",
+    "gem": "gem",
+    "cocoapods": "cocoapods",
+    "swift": "swift",
+    "pub": "pub",
+    "hex": "hex",
+}
 
 
 class JFrogXrayOnDemandBinaryScanParser:
@@ -44,6 +65,13 @@ def get_component_name_version(name):
     if match is None:
         return name, ""
     return match[1], match[2]
+
+
+def get_dependency_info(name):
+    match = re.match(r"([a-z]+)://([a-z\d\.:]+):([a-z\d\.\-]+)", name, re.IGNORECASE)
+    if match is None:
+        return None
+    return match[1], match[2], match[3]
 
 
 def get_severity(vulnerability):
@@ -182,5 +210,15 @@ def get_item_set(vulnerability):
         )
         if vulnerability_ids:
             finding.unsaved_vulnerability_ids = vulnerability_ids
+
+        if settings.V3_FEATURE_LOCATIONS and (dependency_info := get_dependency_info(component_name_with_version)):
+            component_type, component_name, component_version = dependency_info
+            purl_type = JFROG_XRAY_TYPE_TO_PURL.get(component_type.lower())
+            if purl_type and component_name:
+                purl_string = f"pkg:{purl_type}/{component_name}/{component_version}"
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl=purl_string),
+                )
+
         item_set.append(finding)
     return item_set

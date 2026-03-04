@@ -2,7 +2,10 @@ import json
 import logging
 from itertools import groupby, islice
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -124,7 +127,12 @@ class GovulncheckParser:
                         d[
                             "description"
                         ] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
-                        findings.append(Finding(**d))
+                        finding = Finding(**d)
+                        if settings.V3_FEATURE_LOCATIONS and d["component_name"]:
+                            finding.unsaved_locations.append(
+                                LocationData.dependency(purl_type="golang", name=d["component_name"], version=d["component_version"]),
+                            )
+                        findings.append(finding)
             elif isinstance(data, list):
                 # Parsing for new govulncheck output format
                 for elem in data:
@@ -196,5 +204,10 @@ class GovulncheckParser:
                             "unique_id_from_tool": osv_id,
                         }
 
-                        findings.append(Finding(**d))
+                        finding = Finding(**d)
+                        if settings.V3_FEATURE_LOCATIONS and component_name:
+                            finding.unsaved_locations.append(
+                                LocationData.dependency(purl_type="golang", name=component_name, version=affected_version, file_path=path),
+                            )
+                        findings.append(finding)
             return findings

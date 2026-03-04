@@ -45,6 +45,7 @@ from dojo.api_v2 import (
     serializers,
 )
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.cred.queries import get_authorized_cred_mappings
@@ -351,7 +352,11 @@ class EndPointViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         endpoint = self.get_object()
@@ -475,7 +480,11 @@ class EngagementViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         engagement = self.get_object()
@@ -691,7 +700,8 @@ class EngagementViewSet(
         responses={status.HTTP_200_OK: serializers.EngagementUpdateJiraEpicSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission),
     )
     def update_jira_epic(self, request, pk=None):
         engagement = self.get_object()
@@ -1383,7 +1393,11 @@ class FindingViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=False, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=False, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request):
         findings = self.get_queryset()
@@ -1728,38 +1742,55 @@ class DojoMetaViewSet(
         serialized_data = serializers.MetaMainSerializer(data=request.data)
         if serialized_data.is_valid(raise_exception=True):
             if request.method == "POST":
-                self.process_post(request.data)
+                self.process_post(request)
                 status_code = status.HTTP_201_CREATED
             if request.method == "PATCH":
-                self.process_patch(request.data)
+                self.process_patch(request)
                 status_code = status.HTTP_200_OK
 
         return Response(status=status_code, data=serialized_data.data)
 
-    def process_post(self: object, data: dict):
-        product = Product.objects.filter(id=data.get("product")).first()
-        finding = Finding.objects.filter(id=data.get("finding")).first()
-        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+    def _fetch_and_authorize_parents(self, request, permission_map):
+        """Fetch parent objects and verify the user has the required permissions."""
+        data = request.data
+        parents = {}
+        for field, (model, permission) in permission_map.items():
+            obj = model.objects.filter(id=data.get(field)).first()
+            if obj:
+                user_has_permission_or_403(request.user, obj, permission)
+            parents[field] = obj
+        return parents
+
+    def process_post(self, request):
+        data = request.data
+        parents = self._fetch_and_authorize_parents(request, {
+            "product": (Product, Permissions.Product_Edit),
+            "finding": (Finding, Permissions.Finding_Edit),
+            "endpoint": (Endpoint, Permissions.Location_Edit),
+        })
         metalist = data.get("metadata")
         for metadata in metalist:
             try:
                 DojoMeta.objects.create(
-                    product=product,
-                    finding=finding,
-                    endpoint=endpoint,
+                    product=parents["product"],
+                    finding=parents["finding"],
+                    endpoint=parents["endpoint"],
                     name=metadata.get("name"),
                     value=metadata.get("value"),
                     )
             except (IntegrityError) as ex:  # this should not happen as the data was validated in the batch call
                 raise ValidationError(str(ex))
 
-    def process_patch(self: object, data: dict):
-        product = Product.objects.filter(id=data.get("product")).first()
-        finding = Finding.objects.filter(id=data.get("finding")).first()
-        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+    def process_patch(self, request):
+        data = request.data
+        parents = self._fetch_and_authorize_parents(request, {
+            "product": (Product, Permissions.Product_Edit),
+            "finding": (Finding, Permissions.Finding_Edit),
+            "endpoint": (Endpoint, Permissions.Location_Edit),
+        })
         metalist = data.get("metadata")
         for metadata in metalist:
-            dojometa = DojoMeta.objects.filter(product=product, finding=finding, endpoint=endpoint, name=metadata.get("name"))
+            dojometa = DojoMeta.objects.filter(product=parents["product"], finding=parents["finding"], endpoint=parents["endpoint"], name=metadata.get("name"))
             if dojometa:
                 try:
                     dojometa.update(
@@ -1815,7 +1846,11 @@ class ProductViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         product = self.get_object()
@@ -1956,7 +1991,11 @@ class ProductTypeViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         product_type = self.get_object()
@@ -2143,7 +2182,11 @@ class TestsViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         test = self.get_object()

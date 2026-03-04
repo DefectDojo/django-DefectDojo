@@ -2,7 +2,7 @@
 import logging
 
 from django.contrib import messages
-from django.core.exceptions import BadRequest
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -60,10 +60,9 @@ def all_tool_product(request, pid):
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_tool_product(request, pid, ttid):
     product = get_object_or_404(Product, id=pid)
-    tool_product = Tool_Product_Settings.objects.get(pk=ttid)
+    tool_product = get_object_or_404(Tool_Product_Settings, pk=ttid)
     if tool_product.product != product:
-        msg = f"Product {pid} does not fit to product of Tool_Product {tool_product.product.id}"
-        raise BadRequest(msg)
+        raise PermissionDenied
 
     if request.method == "POST":
         tform = ToolProductSettingsForm(request.POST, instance=tool_product)
@@ -87,11 +86,10 @@ def edit_tool_product(request, pid, ttid):
 
 @user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def delete_tool_product(request, pid, ttid):
-    tool_product = Tool_Product_Settings.objects.get(pk=ttid)
+    tool_product = get_object_or_404(Tool_Product_Settings, pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if tool_product.product != product:
-        msg = f"Product {pid} does not fit to product of Tool_Product {tool_product.product.id}"
-        raise BadRequest(msg)
+        raise PermissionDenied
 
     if request.method == "POST":
         DeleteToolProductSettingsForm(request.POST, instance=tool_product)

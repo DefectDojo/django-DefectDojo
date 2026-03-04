@@ -2,7 +2,10 @@ import hashlib
 import json
 import logging
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -91,6 +94,11 @@ class KiuwanSCAParser:
                         + str(finding.cwe or "")
                     ).encode("utf-8"),
                 ).hexdigest()
+
+                if settings.V3_FEATURE_LOCATIONS and finding.component_name and finding.component_version:
+                    finding.unsaved_locations.append(
+                        LocationData.dependency(name=finding.component_name, version=finding.component_version),
+                    )
 
                 if key not in dupes:
                     dupes[key] = finding

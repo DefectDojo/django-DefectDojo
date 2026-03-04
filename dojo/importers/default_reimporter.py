@@ -764,12 +764,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         else:
             # TODO: Delete this after the move to Locations
             # Reactivate mitigated endpoints that are not false positives, out of scope, or risk accepted
-            endpoint_statuses = existing_finding.status_finding.exclude(
-                Q(false_positive=True)
-                | Q(out_of_scope=True)
-                | Q(risk_accepted=True),
-            )
-            self.endpoint_manager.chunk_endpoints_and_reactivate(endpoint_statuses)
+            # status_finding_non_special is prefetched by build_candidate_scope_queryset
+            self.endpoint_manager.chunk_endpoints_and_reactivate(existing_finding.status_finding_non_special)
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
         # The new finding is active while the existing on is mitigated. The existing finding needs to

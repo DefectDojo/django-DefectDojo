@@ -6,7 +6,7 @@ import cvss.parser
 from cvss.cvss3 import CVSS3
 
 from dojo.models import Finding
-from dojo.tools.sysdig_common.sysdig_data import SysdigData
+from dojo.tools.sysdig_common.sysdig_data import SysdigData, add_package_info
 from dojo.validators import clean_tags
 
 
@@ -131,6 +131,9 @@ class SysdigReportsParser:
             if vulnName:
                 find.unsaved_vulnerability_ids = []
                 find.unsaved_vulnerability_ids.append(vulnName)
+
+            add_package_info(find, packageName, packageType, packageVersion, packagePath)
+
             findings.append(find)
         return findings
 
@@ -229,6 +232,7 @@ class SysdigReportsParser:
             if row.registry_name:
                 finding.description += f"\n - **Registry Name:** {row.registry_name}"
                 finding.description += f"\n - **Registy Image Repository:** {row.registry_image_repository}"
+            add_package_info(finding, row.package_name, row.package_type, row.package_version, row.package_path)
             try:
                 if float(row.cvss_version) >= 3 and float(row.cvss_version) < 4:
                     finding.cvssv3_score = float(row.cvss_score)

@@ -34,7 +34,7 @@ env = environ.FileAwareEnv(
     # django-jsonfield-backport raises a warning that can be ignored,
     # see https://github.com/laymonage/django-jsonfield-backport
     # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
-    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
+    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001", "polymorphic.W001", "polymorphic.W002"]),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
