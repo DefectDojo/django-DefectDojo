@@ -1011,7 +1011,38 @@ class FindingCloseAPITest(DojoAPITestCase):
             }
             response = self.client.post(self._close_url(finding.id), payload, format="json")
             self.assertEqual(200, response.status_code, response.content[:1000])
-            self.assertTrue(add_comment_mock.called)
+        self.assertTrue(add_comment_mock.called)
+
+
+@versioned_fixtures
+class FindingVerifyAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.admin = testuser
+
+    def _verify_url(self, finding_id: int) -> str:
+        return f"/api/v2/findings/{finding_id}/verify/"
+
+    def test_verify_finding_basic(self):
+        finding = Finding.objects.get(id=7)
+        response = self.client.post(self._verify_url(finding.id), {"note": "Marked verified"}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.verified)
+        self.assertEqual(finding.last_reviewed_by, self.admin)
+        self.assertTrue(finding.notes.filter(entry__icontains="Marked verified").exists())
+
+    def test_verify_finding_invalid_payload(self):
+        finding = Finding.objects.get(id=7)
+        # note_type specified but invalid id
+        response = self.client.post(self._verify_url(finding.id), {"note_type": 9999}, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
 
 
 @versioned_fixtures
