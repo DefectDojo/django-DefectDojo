@@ -1719,6 +1719,42 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # The pre-existing active finding must now be retroactively marked FP.
         self.assert_finding(find_pre, false_p=True)
 
+    def test_fp_history_batch_query_count_does_not_grow_with_affected_findings(self):
+        """
+        Query count must stay flat (7) no matter how many findings are retroactively marked.
+
+        With the old per-finding approach this would have been 7 + N queries where N is the
+        number of pre-existing findings that get marked as FP. With the batch approach it is
+        always 7: System_Settings, 4 lazy-load chain, candidates SELECT, one bulk UPDATE.
+        """
+        NUM_PRE_EXISTING = 5
+
+        # Create several pre-existing active findings with the same hash_code.
+        pre_existing = []
+        for _ in range(NUM_PRE_EXISTING):
+            find, _f = self.copy_and_reset_finding(find_id=2)
+            find.save()
+            pre_existing.append(find)
+
+        # Incoming batch finding already carries false_p=True — triggers retroactive marking.
+        find_incoming, _f = self.copy_and_reset_finding(find_id=2)
+        find_incoming.false_p = True
+        find_incoming.active = False
+        find_incoming.save()
+
+        batch = [Finding.objects.get(id=find_incoming.id)]
+        # 7 queries regardless of NUM_PRE_EXISTING:
+        #   1 System_Settings SELECT
+        #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
+        #   1 candidates SELECT (with .only())
+        #   1 bulk UPDATE covering all retroactively marked findings
+        with self.assertNumQueries(7):
+            do_false_positive_history_batch(batch)
+
+        # All pre-existing findings must now be marked as FP.
+        for find in pre_existing:
+            self.assert_finding(find, false_p=True)
+
     # -------------------------------------------------------------------- #
     # Single-finding edit: retroactive reactivation (was dead code pre-fix) #
     # -------------------------------------------------------------------- #
