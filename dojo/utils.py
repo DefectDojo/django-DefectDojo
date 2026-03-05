@@ -41,6 +41,7 @@ from django.http import FileResponse, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
+from django.utils.html import escape
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from kombu import Connection
@@ -1812,13 +1813,8 @@ def get_current_request():
 
 
 def create_bleached_link(url, title):
-    link = '<a href="'
-    link += url
-    link += '" target="_blank" title="'
-    link += title
-    link += '">'
-    link += title
-    link += "</a>"
+    # nh3 requires an explicit escape
+    link = f'<a href="{escape(url)}" target="_blank" title="{escape(title)}">{escape(title)}</a>'
     return nh3.clean(link, tags={"a"}, attributes={"a": {"href", "target", "title"}})
 
 
