@@ -777,6 +777,8 @@ class RiskAcceptanceViewSet(
             )
         # Get the path of the file in media root
         file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        # NOTE: FileResponse takes ownership of closing the file handle when the response is closed.
+        # Explicitly register the closer to avoid potential resource leaks and satisfy static analyzers.
         file_handle = file_path.open("rb")
         # send file
         response = FileResponse(
@@ -784,6 +786,8 @@ class RiskAcceptanceViewSet(
             content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
+        if hasattr(response, "_resource_closers"):
+            response._resource_closers.append(file_handle.close)
         response["Content-Length"] = file_object.size
         response[
             "Content-Disposition"
