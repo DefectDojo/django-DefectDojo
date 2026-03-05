@@ -893,6 +893,8 @@ class EditFinding(View):
                 logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", finding)
                 # QuerySet.update() bypasses Django signals, which is intentional here — it mirrors
                 # the previous save_no_options() calls that also disabled all post-save processing.
+                # match_finding_to_existing_findings returns a lazy QS with no .only() applied,
+                # so any field can be added here without needing a corresponding .only() change in deduplication.py#_fetch_fp_candidates_for_batch.
                 match_finding_to_existing_findings(
                     finding, product=finding.test.engagement.product,
                 ).filter(false_p=True).update(

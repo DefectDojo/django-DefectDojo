@@ -847,7 +847,12 @@ def _fetch_fp_candidates_for_batch(findings, product, dedup_alg):
     """
     scope_filter = {"test__engagement__product": product}
     exclude_ids = {f.id for f in findings if f.id}
-    qs = _fp_candidates_qs(scope_filter, dedup_alg, findings, exclude_ids)
+    qs = _fp_candidates_qs(scope_filter, dedup_alg, findings, exclude_ids).only(
+        # Keep this list in sync with every field read from candidate objects in this function.
+        # Accessing a field not listed here causes Django to issue an extra SELECT per object,
+        # silently negating the .only() optimisation.
+        "id", "false_p", "active", "hash_code", "unique_id_from_tool", "title", "severity",
+    )
 
     if dedup_alg == "unique_id_from_tool_or_hash_code":
         by_hash: dict = {}
@@ -947,6 +952,7 @@ def do_false_positive_history_batch(findings):
         )
         # QuerySet.update() bypasses Django signals — intentional, mimicking the previous
         # super(Finding, find).save(skip_validation=True) calls that also skipped all post-save processing.
+        # Note: .only() does not constrain update() — Django generates the UPDATE SQL independently.
         Finding.objects.filter(id__in=to_mark_as_fp_ids).update(false_p=True, active=False, verified=False)
 
 
