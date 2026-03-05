@@ -27,7 +27,6 @@ class TestOrcaSecurityParser(DojoTestCase):
             self.assertEqual("TestRole_abc123", finding.component_name)
             self.assertEqual("TestRole_abc123", finding.service)
             self.assertEqual("OrcaScore: 5.1", finding.severity_justification)
-            self.assertIsNotNone(finding.unique_id_from_tool)
             self.assertIn("IAM misconfigurations", finding.description)
             self.assertEqual(["CSPM", "source: Orca Scan"], finding.unsaved_tags)
 
@@ -72,7 +71,6 @@ class TestOrcaSecurityParser(DojoTestCase):
             self.assertEqual("TestRole_abc123", finding.component_name)
             self.assertEqual("TestRole_abc123", finding.service)
             self.assertEqual("OrcaScore: 5.1", finding.severity_justification)
-            self.assertIsNotNone(finding.unique_id_from_tool)
             self.assertIn("IAM misconfigurations", finding.description)
             self.assertEqual(["CSPM", "source: Orca Scan"], finding.unsaved_tags)
 
@@ -96,16 +94,6 @@ class TestOrcaSecurityParser(DojoTestCase):
             self.assertEqual("Info", closed_finding.severity)
 
     # --- Cross-format consistency tests ---
-
-    def test_unique_id_from_tool_is_consistent(self):
-        """Same alert data in CSV and JSON should produce the same unique_id_from_tool."""
-        with (get_unit_tests_scans_path("orca_security") / "one_vuln.csv").open(encoding="utf-8") as csv_file:
-            csv_findings = OrcaSecurityParser().get_findings(csv_file, Test())
-
-        with (get_unit_tests_scans_path("orca_security") / "one_vuln.json").open(encoding="utf-8") as json_file:
-            json_findings = OrcaSecurityParser().get_findings(json_file, Test())
-
-        self.assertEqual(csv_findings[0].unique_id_from_tool, json_findings[0].unique_id_from_tool)
 
     def test_date_is_parsed(self):
         """CreatedAt should be parsed into a date object."""

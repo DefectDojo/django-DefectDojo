@@ -20,11 +20,10 @@ The parser auto-detects the format: files starting with `[` are treated as JSON,
 
 ## Default Deduplication Hashcode Fields
 
-By default, DefectDojo identifies duplicate Findings using the [unique_id_from_tool](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/) field, which is a SHA-256 hash of:
+By default, DefectDojo identifies duplicate Findings using the [hashcode deduplication algorithm](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/) with the following fields:
 
-- CloudAccount.Name
-- Inventory.Name
-- Title
+- title
+- component_name
 
 ### Sample Scan Data
 
@@ -62,7 +61,6 @@ Sample Orca Security scans can be found in the [sample scan data folder](https:/
 | CreatedAt | date | ISO 8601 parsed to date object |
 | LastSeen | description | Included in description |
 | Labels | tags | JSON-encoded array parsed and stored as finding tags |
-| CloudAccount.Name+Inventory.Name+Title | unique_id_from_tool | SHA-256 hash for deduplication |
 
 </details>
 
@@ -107,7 +105,6 @@ Sample Orca Security scans can be found in the [sample scan data folder](https:/
 | CreatedAt | date | ISO 8601 parsed to date object |
 | LastSeen | description | Included in description |
 | Labels | tags | Array of strings stored as finding tags |
-| CloudAccount.Name+Inventory.Name+Title | unique_id_from_tool | SHA-256 hash for deduplication |
 
 </details>
 
@@ -164,7 +161,7 @@ Orca Security CSV and JSON exports do not include remediation or mitigation text
 
 ### Deduplication
 
-The `unique_id_from_tool` field is populated with a SHA-256 hex digest of the concatenation `CloudAccount.Name|Inventory.Name|Title`. This ensures consistent deduplication across both CSV and JSON imports — the same alert produces the same unique ID regardless of import format. Each row/item in the export becomes one Finding with no internal deduplication.
+Deduplication uses the hashcode algorithm configured in `settings.dist.py` with the fields `title` and `component_name`. This ensures findings with the same alert title on the same resource are deduplicated across reimports. Each row/item in the export becomes one Finding with no internal deduplication.
 
 ### Tags Handling
 

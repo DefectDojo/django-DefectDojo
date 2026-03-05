@@ -4,8 +4,6 @@ Shared helper functions for the Orca Security parser.
 This module contains utility functions used by both the CSV and JSON parsers
 to ensure consistent behavior across input formats.
 """
-import hashlib
-
 from dateutil import parser as dateutil_parser
 
 
@@ -43,27 +41,6 @@ def map_orca_severity(score):
     if score < 9.0:
         return "High"
     return "Critical"
-
-
-def build_unique_id(cloud_account_name, inventory_name, title):
-    """
-    Generate a unique identifier for deduplication.
-
-    Creates a SHA-256 hash from the combination of cloud account, inventory,
-    and title fields. This ensures the same alert produces the same ID
-    regardless of whether it's imported from CSV or JSON format.
-
-    Args:
-        cloud_account_name: The name of the cloud account (e.g., "prod-aws-account")
-        inventory_name: The name of the inventory/resource (e.g., "my-s3-bucket")
-        title: The alert title (e.g., "Public S3 bucket detected")
-
-    Returns:
-        str: 64-character hexadecimal SHA-256 hash
-
-    """
-    raw = f"{cloud_account_name}|{inventory_name}|{title}"
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
 def build_severity_justification(orca_score):

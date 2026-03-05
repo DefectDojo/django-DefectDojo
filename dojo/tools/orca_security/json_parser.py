@@ -28,7 +28,6 @@ from dojo.models import Finding
 from dojo.tools.orca_security.helpers import (
     build_description,
     build_severity_justification,
-    build_unique_id,
     map_orca_severity,
     parse_date,
     truncate_title,
@@ -92,8 +91,6 @@ class OrcaSecurityJSONParser:
                 dynamic_finding=False,
                 service=source or None,  # Source identifies the cloud resource/service
                 component_name=inventory_name or None,  # Inventory is the specific resource
-                # Dedup hash uses cloud account + inventory + title for uniqueness
-                unique_id_from_tool=build_unique_id(cloud_account_name, inventory_name, title_raw),
                 date=parse_date(created_at),
             )
 
