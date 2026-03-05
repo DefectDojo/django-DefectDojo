@@ -1752,6 +1752,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
     "OpenReports": DEDUPE_ALGO_HASH_CODE,
+    "Orca Security Alerts": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
 }
 
 # Override the hardcoded settings here via the env var

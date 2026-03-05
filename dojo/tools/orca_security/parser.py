@@ -1,31 +1,5 @@
-"""
-Orca Security parser for DefectDojo.
-
-Orca Security is a cloud security platform that provides agentless security
-and compliance for AWS, Azure, GCP, and Kubernetes environments. This parser
-imports Orca Security alert exports in CSV or JSON format.
-
-For more information about Orca Security, see: https://orca.security/
-"""
 from dojo.tools.orca_security.csv_parser import OrcaSecurityCSVParser
-from dojo.tools.orca_security.helpers import (
-    build_description,
-    build_unique_id,
-    map_orca_severity,
-    parse_date,
-    truncate_title,
-)
 from dojo.tools.orca_security.json_parser import OrcaSecurityJSONParser
-
-# Re-export helpers so existing imports from this module still work
-__all__ = [
-    "OrcaSecurityParser",
-    "build_description",
-    "build_unique_id",
-    "map_orca_severity",
-    "parse_date",
-    "truncate_title",
-]
 
 
 class OrcaSecurityParser:

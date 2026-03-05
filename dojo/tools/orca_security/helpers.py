@@ -112,7 +112,7 @@ def parse_date(date_string):
         return None
 
 
-def truncate_title(title, max_length=150):
+def truncate_title(title, max_length=500):
     """
     Truncate title to maximum length with ellipsis suffix.
 
@@ -121,7 +121,7 @@ def truncate_title(title, max_length=150):
 
     Args:
         title: The original title string, or None/empty string
-        max_length: Maximum allowed length (default 150 characters)
+        max_length: Maximum allowed length (default 500 characters)
 
     Returns:
         str: Original title if within limit, truncated with "..." if over,
