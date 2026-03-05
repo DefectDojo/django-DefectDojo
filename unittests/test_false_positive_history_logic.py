@@ -1679,7 +1679,13 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         batch = [Finding.objects.get(id=find_a.id), Finding.objects.get(id=find_b.id)]
 
         with patch("dojo.finding.deduplication._fetch_fp_candidates_for_batch", wraps=__import__("dojo.finding.deduplication", fromlist=["_fetch_fp_candidates_for_batch"])._fetch_fp_candidates_for_batch) as mock_fetch:
-            do_false_positive_history_batch(batch)
+            # 7 queries regardless of batch size:
+            #   1 System_Settings SELECT
+            #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
+            #   1 candidates SELECT (with .only())
+            #   1 bulk UPDATE
+            with self.assertNumQueries(7):
+                do_false_positive_history_batch(batch)
             # One candidate-fetch call for the whole batch — not one per finding.
             self.assertEqual(mock_fetch.call_count, 1, "Expected exactly one call to _fetch_fp_candidates_for_batch")
 
@@ -1702,7 +1708,13 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         find_incoming.save()
 
         batch = [Finding.objects.get(id=find_incoming.id)]
-        do_false_positive_history_batch(batch)
+        # 7 queries regardless of how many findings are retroactively marked:
+        #   1 System_Settings SELECT
+        #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
+        #   1 candidates SELECT (with .only())
+        #   1 bulk UPDATE
+        with self.assertNumQueries(7):
+            do_false_positive_history_batch(batch)
 
         # The pre-existing active finding must now be retroactively marked FP.
         self.assert_finding(find_pre, false_p=True)
