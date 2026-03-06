@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Self, TypeVar
 
-from auditlog.registry import auditlog
 from django.db import transaction
 from django.db.models import (
     CASCADE,
@@ -34,7 +33,6 @@ from dojo.location.manager import (
 )
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Dojo_User, Finding, Product, _manage_inherited_tags, copy_model_util
-from dojo.settings import settings
 from dojo.tools.locations import LocationAssociationData
 
 if TYPE_CHECKING:
@@ -454,7 +452,3 @@ class LocationProductReference(BaseModel, ReferenceDataMixin):
     def __str__(self) -> str:
         """Return the string representation of a LocationProductReference."""
         return f"{self.location} - Product: {self.product} ({self.status})"
-
-
-if settings.ENABLE_AUDITLOG:
-    auditlog.register(Location)
