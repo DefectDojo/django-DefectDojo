@@ -613,6 +613,11 @@
                                                             {% trans "System Settings" %}
                                                         </a>
                                                     </li>
+                                                    <li>
+                                                        <a href="{% url 'system_status' %}">
+                                                            {% trans "System Status" %}
+                                                        </a>
+                                                    </li>
                                                 {% endif %}
                                                 {% if "dojo.view_tool_configuration"|has_configuration_permission:request %}
                                                     <li>

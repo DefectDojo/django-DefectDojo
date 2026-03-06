@@ -1312,13 +1312,14 @@ def perform_product_grading(product):
 
 
 def get_celery_worker_status():
-    from .tasks import celery_status  # noqa: PLC0415 circular import
-    res = celery_status.apply_async()
-
-    # Wait 5 seconds for a response from Celery
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    # Use the control channel (celery.pidbox) instead of dispatching a task.
+    # This bypasses the task queue entirely, so it works correctly even when
+    # the queue is clogged with pending tasks.
     try:
-        return res.get(timeout=5)
-    except:
+        result = app.control.ping(timeout=3)
+        return len(result) > 0
+    except Exception:
         return False
 
 
@@ -1330,8 +1331,14 @@ def get_celery_queue_length():
         if "NOT_FOUND" in str(e):
             return 0
         return None
-    except:
+    except Exception:
         return None
+
+
+def purge_celery_queue():
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    with app.connection() as conn, conn.channel() as channel:
+        return channel.queue_purge(queue="celery")
 
 
 # Used to display the counts and enabled tabs in the product view
