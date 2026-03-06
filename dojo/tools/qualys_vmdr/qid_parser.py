@@ -1,10 +1,3 @@
-"""
-QID format parser for Qualys VMDR exports.
-
-This module handles the QID-centric CSV export format where the primary
-identifier is the Qualys QID (vulnerability ID).
-"""
-
 from dojo.models import Finding
 from dojo.tools.qualys_vmdr.helpers import (
     build_description_qid,
@@ -14,47 +7,23 @@ from dojo.tools.qualys_vmdr.helpers import (
     parse_qualys_csv_content,
     parse_qualys_date,
     parse_tags,
+    strip_html,
     truncate_title,
 )
 
 
 class QualysVMDRQIDParser:
 
-    """Parse Qualys VMDR QID format exports."""
-
     def parse(self, content):
-        """
-        Parse QID format CSV content and return findings.
-
-        Args:
-            content: String containing the full CSV content
-
-        Returns:
-            list[Finding]: List of DefectDojo Finding objects
-
-        """
         findings = []
-
-        rows = parse_qualys_csv_content(content, skip_metadata_lines=3)
-
+        rows = parse_qualys_csv_content(content)
         for row in rows:
             finding = self._create_finding(row)
             if finding:
                 findings.append(finding)
-
         return findings
 
     def _create_finding(self, row):
-        """
-        Create a Finding object from a CSV row.
-
-        Args:
-            row: Dictionary containing CSV row data
-
-        Returns:
-            Finding: DefectDojo Finding object
-
-        """
         title = truncate_title(row.get("Title", ""))
         severity = map_qualys_severity(row.get("Severity"))
         severity_justification = build_severity_justification(row.get("Severity"))
@@ -65,8 +34,9 @@ class QualysVMDRQIDParser:
             severity_justification=severity_justification,
             description=build_description_qid(row),
             mitigation=row.get("Solution", ""),
-            impact=row.get("Threat", ""),
+            impact=strip_html(row.get("Threat", "")),
             unique_id_from_tool=row.get("QID", ""),
+            vuln_id_from_tool=row.get("QID", ""),
             date=parse_qualys_date(row.get("First Detected")),
             active=(row.get("Status", "").upper() == "ACTIVE"),
             component_name=row.get("Asset Name", ""),
