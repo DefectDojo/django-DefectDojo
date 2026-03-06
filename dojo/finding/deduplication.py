@@ -112,7 +112,7 @@ def deduplicate_uid_or_hash_code(new_finding):
     _dedupe_batch_uid_or_hash([new_finding])
 
 
-def set_duplicate(new_finding, existing_finding):
+def set_duplicate(new_finding, existing_finding, *, save=True):
     deduplicationLogger.debug(f"new_finding.status(): {new_finding.id} {new_finding.status()}")
     deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:
@@ -135,6 +135,8 @@ def set_duplicate(new_finding, existing_finding):
     new_finding.verified = False
     new_finding.duplicate_finding = existing_finding
 
+    all_modified = [new_finding]
+
     # Make sure transitive duplication is flattened
     # if A -> B and B is made a duplicate of C here, afterwards:
     # A -> C and B -> C should be true
@@ -143,7 +145,7 @@ def set_duplicate(new_finding, existing_finding):
     # order_by here to prevent bypassing the prefetch cache.
     for find in new_finding.original_finding.all():
         new_finding.original_finding.remove(find)
-        set_duplicate(find, existing_finding)
+        all_modified.extend(set_duplicate(find, existing_finding, save=save))
     # Only add test type to found_by if it is not already present.
     # This is efficient because `found_by` is prefetched for candidates via `build_dedupe_scope_queryset()`.
     test_type = getattr(getattr(new_finding, "test", None), "test_type", None)
@@ -152,10 +154,14 @@ def set_duplicate(new_finding, existing_finding):
 
     # existing_finding.found_by.add(new_finding.test.test_type)
 
-    logger.debug("saving new finding: %d", new_finding.id)
-    super(Finding, new_finding).save(skip_validation=True)
-    logger.debug("saving existing finding: %d", existing_finding.id)
-    super(Finding, existing_finding).save(skip_validation=True)
+    if save:
+        for f in all_modified:
+            logger.debug("saving new finding: %d", f.id)
+            super(Finding, f).save(skip_validation=True)
+        logger.debug("saving existing finding: %d", existing_finding.id)
+        super(Finding, existing_finding).save(skip_validation=True)
+
+    return all_modified
 
 
 def is_duplicate_reopen(new_finding, existing_finding) -> bool:
@@ -654,6 +660,25 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
                 yield candidate
 
 
+def _flush_duplicate_changes(modified_new_findings, modified_existing_findings):
+    """
+    Persist duplicate field changes collected during a batch deduplication run.
+
+    new_findings are bulk-updated in one round-trip (no signals needed for a
+    finding being deactivated as a duplicate).  Each unique original finding is
+    saved individually so that its `updated` timestamp is bumped and the normal
+    pre/post-save hooks and Django signals fire (JIRA sync, notifications, etc.).
+    """
+    if modified_new_findings:
+        Finding.objects.bulk_update(
+            modified_new_findings,
+            ["duplicate", "active", "verified", "duplicate_finding"],
+        )
+    for existing_finding in modified_existing_findings.values():
+        logger.debug("saving existing finding: %d", existing_finding.id)
+        super(Finding, existing_finding).save(skip_validation=True)
+
+
 def _dedupe_batch_hash_code(findings):
     if not findings:
         return
@@ -661,14 +686,18 @@ def _dedupe_batch_hash_code(findings):
     candidates_by_hash = find_candidates_for_deduplication_hash(test, findings)
     if not candidates_by_hash:
         return
+    modified_new_findings = []
+    modified_existing_findings = {}
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_HASH_CODE")
         for match in get_matches_from_hash_candidates(new_finding, candidates_by_hash):
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
+                modified_existing_findings[match.id] = match
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
+    _flush_duplicate_changes(modified_new_findings, modified_existing_findings)
 
 
 def _dedupe_batch_unique_id(findings):
@@ -678,16 +707,20 @@ def _dedupe_batch_unique_id(findings):
     candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings)
     if not candidates_by_uid:
         return
+    modified_new_findings = []
+    modified_existing_findings = {}
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL")
         for match in get_matches_from_unique_id_candidates(new_finding, candidates_by_uid):
             deduplicationLogger.debug(f"Trying to deduplicate finding {new_finding.id} against candidate {match.id}")
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
+                modified_existing_findings[match.id] = match
                 deduplicationLogger.debug(f"Successfully deduplicated finding {new_finding.id} against candidate {match.id}")
                 break
             except Exception as e:
                 deduplicationLogger.debug(f"Exception when deduplicating finding {new_finding.id} against candidate {match.id}: {e!s}")
+    _flush_duplicate_changes(modified_new_findings, modified_existing_findings)
 
 
 def _dedupe_batch_uid_or_hash(findings):
@@ -698,6 +731,8 @@ def _dedupe_batch_uid_or_hash(findings):
     candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings)
     if not (candidates_by_uid or existing_by_hash):
         return
+    modified_new_findings = []
+    modified_existing_findings = {}
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE")
         if new_finding.duplicate:
@@ -705,10 +740,12 @@ def _dedupe_batch_uid_or_hash(findings):
 
         for match in get_matches_from_uid_or_hash_candidates(new_finding, candidates_by_uid, existing_by_hash):
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
+                modified_existing_findings[match.id] = match
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
+    _flush_duplicate_changes(modified_new_findings, modified_existing_findings)
 
 
 def _dedupe_batch_legacy(findings):
@@ -718,14 +755,18 @@ def _dedupe_batch_legacy(findings):
     candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings)
     if not (candidates_by_title or candidates_by_cwe):
         return
+    modified_new_findings = []
+    modified_existing_findings = {}
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_LEGACY")
         for match in get_matches_from_legacy_candidates(new_finding, candidates_by_title, candidates_by_cwe):
             try:
-                set_duplicate(new_finding, match)
+                modified_new_findings.extend(set_duplicate(new_finding, match, save=False))
+                modified_existing_findings[match.id] = match
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
+    _flush_duplicate_changes(modified_new_findings, modified_existing_findings)
 
 
 def dedupe_batch_of_findings(findings, *args, **kwargs):
