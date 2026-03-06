@@ -19,7 +19,6 @@ from pathlib import Path
 
 import crum
 import cvss
-import nh3
 import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
@@ -1533,9 +1532,8 @@ def get_current_request():
 
 
 def create_bleached_link(url, title):
-    # nh3 requires an explicit escape
-    link = f'<a href="{escape(url)}" target="_blank" title="{escape(title)}">{escape(title)}</a>'
-    return nh3.clean(link, tags={"a"}, attributes={"a": {"href", "target", "title"}})
+    # escape() encodes text into HTML — the right tool for embedding URLs into attributes, not a sanitizer like nh3
+    return f'<a href="{escape(url)}" target="_blank" title="{escape(title)}" rel="noopener noreferrer">{escape(title)}</a>'
 
 
 def get_object_or_none(klass, *args, **kwargs):

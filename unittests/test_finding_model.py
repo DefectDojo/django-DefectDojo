@@ -334,11 +334,13 @@ class TestFindingModelMixin:
         finding.test = test
         finding.file_path = "<SCRIPT SRC=http://xss.rocks/xss.js></SCRIPT>"
         engagement.source_code_management_uri = "<IMG SRC=javascript:alert('XSS')>"
-        result = finding.get_file_path_with_link()
-        # XSS payloads must be escaped — no raw tags should appear in the output
-        self.assertNotIn("<SCRIPT", result)
-        self.assertNotIn("<IMG", result)
-        self.assertIn('rel="noopener noreferrer"', result)
+        self.assertEqual(
+            '<a href="&lt;IMG SRC=javascript:alert(&#x27;XSS&#x27;)&gt;/&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;"'
+            ' target="_blank"'
+            ' title="&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;"'
+            ' rel="noopener noreferrer"'
+            '>&lt;SCRIPT SRC=http://xss.rocks/xss.js&gt;&lt;/SCRIPT&gt;</a>',
+            finding.get_file_path_with_link())
 
     def test_get_references_with_links_no_references(self):
         finding = Finding()
