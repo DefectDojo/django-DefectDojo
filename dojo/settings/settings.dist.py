@@ -462,6 +462,8 @@ else:
         },
     }
 
+DATABASES["default"]["CONN_MAX_AGE"] = 3600
+
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
     MIGRATION_MODULES = {"dojo": "dojo.db_migrations"}
