@@ -11,11 +11,12 @@ This script:
 
 How to run:
 
-    # Default: Update the test file (uses TestDojoImporterPerformanceSmall by default)
+    # Default: Update both v2 and v3 test classes
     python3 scripts/update_performance_test_counts.py
 
-    # Or specify a different test class:
+    # Or update a specific test class:
     python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmall
+    python3 scripts/update_performance_test_counts.py --test-class TestDojoImporterPerformanceSmallLocations
 
     # Step 1: Run tests and generate report only (without updating)
     python3 scripts/update_performance_test_counts.py --report-only
@@ -23,7 +24,8 @@ How to run:
     # Step 2: Verify all tests pass
     python3 scripts/update_performance_test_counts.py --verify
 
-The script defaults to TestDojoImporterPerformanceSmall if --test-class is not provided.
+By default (no --test-class) the script runs and updates both
+TestDojoImporterPerformanceSmall (v2) and TestDojoImporterPerformanceSmallLocations (v3).
 The script defaults to --update behavior if no action flag is provided.
 """
 
@@ -35,6 +37,12 @@ from pathlib import Path
 
 # Path to the test file
 TEST_FILE = Path(__file__).parent.parent / "unittests" / "test_importers_performance.py"
+
+# All performance test classes, in run order
+TEST_CLASSES = [
+    "TestDojoImporterPerformanceSmall",
+    "TestDojoImporterPerformanceSmallLocations",
+]
 
 
 class TestCount:
@@ -366,8 +374,13 @@ def generate_report(counts: list[TestCount], expected_counts: dict[str, dict[str
     print()
 
 
-def update_test_file(counts: list[TestCount]):
-    """Update the test file with new expected counts."""
+def update_test_file(counts: list[TestCount], test_class: str | None = None):
+    """
+    Update the test file with new expected counts.
+
+    When test_class is provided, method lookups are scoped to that class.
+    This is required because both v2 and v3 classes share the same method names.
+    """
     if not counts:
         print("No counts to update.")
         return
@@ -419,22 +432,38 @@ def update_test_file(counts: list[TestCount]):
         "second_import_async_tasks": "expected_num_async_tasks2",
     }
 
+    # Restrict method search to the specified class to avoid updating the wrong
+    # class when v2 and v3 share identical method names.
+    search_content = content
+    search_offset = 0
+    if test_class:
+        class_pattern = re.compile(
+            rf"class {re.escape(test_class)}.*?(?=class |\Z)",
+            re.DOTALL,
+        )
+        class_match = class_pattern.search(content)
+        if not class_match:
+            print(f"⚠️  Warning: Could not find test class {test_class}")
+            return
+        search_content = class_match.group(0)
+        search_offset = class_match.start()
+
     # Update each test method
     for test_name, test_updates in updates.items():
         print(f"  Updating {test_name}...")
-        # Find the test method boundaries
+        # Find the test method boundaries within the search scope
         test_method_pattern = re.compile(
             rf"(def {re.escape(test_name)}\([^)]*\):.*?)(?=def test_|\Z)",
             re.DOTALL,
         )
-        test_match = test_method_pattern.search(content)
+        test_match = test_method_pattern.search(search_content)
         if not test_match:
             print(f"⚠️  Warning: Could not find test method {test_name}")
             continue
 
         test_method_content = test_match.group(1)
-        test_method_start = test_match.start()
-        test_method_end = test_match.end()
+        test_method_start = search_offset + test_match.start()
+        test_method_end = search_offset + test_match.end()
 
         call_span = _extract_call_span(test_method_content, "self._import_reimport_performance")
         param_map = param_map_import_reimport
@@ -546,8 +575,8 @@ def main():
     parser.add_argument(
         "--test-class",
         required=False,
-        default="TestDojoImporterPerformanceSmall",
-        help="Test class name (e.g., TestDojoImporterPerformanceSmall). Defaults to TestDojoImporterPerformanceSmall if not provided.",
+        default=None,
+        help="Test class name to run (e.g., TestDojoImporterPerformanceSmall). Defaults to running all test classes if not provided.",
     )
     parser.add_argument(
         "--report-only",
@@ -566,83 +595,85 @@ def main():
     )
 
     args = parser.parse_args()
+    classes_to_run = [args.test_class] if args.test_class else TEST_CLASSES
 
     if args.report_only:
-        # Step 1: Run tests and generate report
-        # Run each test method individually
-        test_methods = extract_test_methods(args.test_class)
-        if not test_methods:
-            print(f"⚠️  No test methods found in {args.test_class}")
-            sys.exit(1)
-
-        print(f"\nFound {len(test_methods)} test method(s) in {args.test_class}")
-        print("=" * 80)
-
         all_counts = []
-        for test_method in test_methods:
-            print(f"\n{'=' * 80}")
-            output, return_code = run_test_method(args.test_class, test_method)
-            success, error_msg = check_test_execution_success(output, return_code)
-            if not success:
-                print(f"\n⚠️  Test execution failed for {test_method}: {error_msg}")
-                print("Skipping this test method...")
+        for test_class in classes_to_run:
+            test_methods = extract_test_methods(test_class)
+            if not test_methods:
+                print(f"⚠️  No test methods found in {test_class}")
                 continue
 
-            counts = parse_test_output(output)
-            if counts:
-                all_counts.extend(counts)
+            print(f"\nFound {len(test_methods)} test method(s) in {test_class}")
+            print("=" * 80)
 
-        expected_counts = extract_expected_counts_from_file(args.test_class)
-        generate_report(all_counts, expected_counts)
+            for test_method in test_methods:
+                print(f"\n{'=' * 80}")
+                output, return_code = run_test_method(test_class, test_method)
+                success, error_msg = check_test_execution_success(output, return_code)
+                if not success:
+                    print(f"\n⚠️  Test execution failed for {test_method}: {error_msg}")
+                    print("Skipping this test method...")
+                    continue
+
+                counts = parse_test_output(output)
+                if counts:
+                    all_counts.extend(counts)
+
+            expected_counts = extract_expected_counts_from_file(test_class)
+            generate_report(all_counts, expected_counts)
 
     elif args.verify:
-        # Step 3: Verify
-        success = verify_tests(args.test_class)
-        sys.exit(0 if success else 1)
+        all_pass = True
+        for test_class in classes_to_run:
+            if not verify_tests(test_class):
+                all_pass = False
+        sys.exit(0 if all_pass else 1)
 
     else:
         # Default: Update the file (--update is the default behavior)
-        # Run each test method individually
-        test_methods = extract_test_methods(args.test_class)
-        if not test_methods:
-            print(f"⚠️  No test methods found in {args.test_class}")
-            sys.exit(1)
-
-        print(f"\nFound {len(test_methods)} test method(s) in {args.test_class}")
-        print("=" * 80)
-
         all_counts = []
-        for test_method in test_methods:
-            print(f"\n{'=' * 80}")
-            output, return_code = run_test_method(args.test_class, test_method)
-            success, error_msg = check_test_execution_success(output, return_code)
-            if not success:
-                print(f"\n⚠️  Test execution failed for {test_method}: {error_msg}")
-                print("Skipping this test method...")
+        for test_class in classes_to_run:
+            test_methods = extract_test_methods(test_class)
+            if not test_methods:
+                print(f"⚠️  No test methods found in {test_class}")
                 continue
 
-            counts = parse_test_output(output)
+            print(f"\nFound {len(test_methods)} test method(s) in {test_class}")
+            print("=" * 80)
 
-            # Check if test actually passed
-            test_passed = "OK" in output or ("Ran" in output and "FAILED" not in output and return_code == 0)
+            for test_method in test_methods:
+                print(f"\n{'=' * 80}")
+                output, return_code = run_test_method(test_class, test_method)
+                success, error_msg = check_test_execution_success(output, return_code)
+                if not success:
+                    print(f"\n⚠️  Test execution failed for {test_method}: {error_msg}")
+                    print("Skipping this test method...")
+                    continue
 
-            if counts:
-                all_counts.extend(counts)
-                # Update immediately after each test
-                update_test_file(counts)
-                print(f"⚠️  {test_method}: Found {len(counts)} count mismatch(es) - updated file")
-            elif test_passed:
-                print(f"✅ {test_method}: Test passed, all counts match")
-            elif return_code != 0:
-                # Test might have failed for other reasons
-                print(f"⚠️  {test_method}: Test failed (exit code {return_code}) but no count mismatches parsed")
-                print("   This might indicate a parsing issue or a different type of failure")
-                # Show a snippet of the output to help debug
-                fail_lines = [line for line in output.split("\n") if "FAIL" in line or "Error" in line or "Exception" in line]
-                if fail_lines:
-                    print("   Relevant error lines:")
-                    for line in fail_lines[:5]:
-                        print(f"     {line}")
+                counts = parse_test_output(output)
+
+                # Check if test actually passed
+                test_passed = "OK" in output or ("Ran" in output and "FAILED" not in output and return_code == 0)
+
+                if counts:
+                    all_counts.extend(counts)
+                    # Update immediately after each test, scoped to the current class
+                    update_test_file(counts, test_class=test_class)
+                    print(f"⚠️  {test_method}: Found {len(counts)} count mismatch(es) - updated file")
+                elif test_passed:
+                    print(f"✅ {test_method}: Test passed, all counts match")
+                elif return_code != 0:
+                    # Test might have failed for other reasons
+                    print(f"⚠️  {test_method}: Test failed (exit code {return_code}) but no count mismatches parsed")
+                    print("   This might indicate a parsing issue or a different type of failure")
+                    # Show a snippet of the output to help debug
+                    fail_lines = [line for line in output.split("\n") if "FAIL" in line or "Error" in line or "Exception" in line]
+                    if fail_lines:
+                        print("   Relevant error lines:")
+                        for line in fail_lines[:5]:
+                            print(f"     {line}")
 
         if all_counts:
             print(f"\n{'=' * 80}")
@@ -650,14 +681,21 @@ def main():
             # Some performance counts can vary depending on test ordering / keepdb state.
             # Do a final full-suite pass and apply any remaining mismatches so the suite passes as run in CI.
             print("\nRunning a final verify pass for stability...")
-            success, suite_mismatches = verify_and_get_mismatches(args.test_class)
-            if not success and suite_mismatches:
-                print("\nApplying remaining mismatches from full-suite run...")
-                update_test_file(suite_mismatches)
+            all_pass = True
+            for test_class in classes_to_run:
+                success, suite_mismatches = verify_and_get_mismatches(test_class)
+                if not success and suite_mismatches:
+                    print(f"\nApplying remaining mismatches from {test_class}...")
+                    update_test_file(suite_mismatches, test_class=test_class)
+                    all_pass = False
+            if not all_pass:
                 print("\nRe-running verify...")
-                success, _ = verify_and_get_mismatches(args.test_class)
-                sys.exit(0 if success else 1)
-            sys.exit(0 if success else 1)
+                all_pass = True
+                for test_class in classes_to_run:
+                    success, _ = verify_and_get_mismatches(test_class)
+                    if not success:
+                        all_pass = False
+            sys.exit(0 if all_pass else 1)
         else:
             print(f"\n{'=' * 80}")
             print("\n✅ No differences found. All tests are already up to date.")
