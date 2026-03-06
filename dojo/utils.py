@@ -16,7 +16,6 @@ from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
 
-import bleach
 import crum
 import cvss
 import vobject
@@ -41,6 +40,7 @@ from django.http import FileResponse, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, get_script_prefix, reverse
 from django.utils import timezone
+from django.utils.html import escape
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from kombu import Connection
@@ -1812,14 +1812,8 @@ def get_current_request():
 
 
 def create_bleached_link(url, title):
-    link = '<a href="'
-    link += url
-    link += '" target="_blank" title="'
-    link += title
-    link += '">'
-    link += title
-    link += "</a>"
-    return bleach.clean(link, tags={"a"}, attributes={"a": ["href", "target", "title"]})
+    # escape() encodes text into HTML — the right tool for embedding URLs into attributes, not a sanitizer like nh3
+    return f'<a href="{escape(url)}" target="_blank" title="{escape(title)}" rel="noopener noreferrer">{escape(title)}</a>'
 
 
 def get_object_or_none(klass, *args, **kwargs):
