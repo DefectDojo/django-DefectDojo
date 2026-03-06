@@ -128,6 +128,20 @@ The parser creates Endpoint objects from IP addresses:
 - Multiple IPv4 addresses (comma-separated) create multiple endpoints
 - Falls back to IPv6 if no IPv4 address is present
 
+### CSV Format Handling
+
+Qualys VMDR exports use a non-standard CSV format where each row is wrapped in outer quotes and fields are delimited by `,""` instead of standard `","`. The parser automatically detects and handles both standard and non-standard CSV formats.
+
+**Multi-line records:** Qualys fields such as Results and Threat may contain embedded newlines. The parser correctly assembles multi-line records that span multiple lines in the CSV file, including records containing malformed quote patterns in fields like Results.
+
+**Metadata lines:** Some Qualys exports include 3 metadata lines (report title, date range, column count) before the header row. The parser auto-detects whether metadata is present and skips it accordingly.
+
+### Data Cleaning
+
+- **HTML tags** in fields like Threat (mapped to impact) are stripped automatically
+- **Qualys null markers** (`'-`) are filtered and treated as empty values
+- **Stray quotes** left by the non-standard CSV format are cleaned from field values
+
 ### Format Detection
 
 The parser automatically detects whether the import file is QID format or CVE format by examining the first column of the header row:
