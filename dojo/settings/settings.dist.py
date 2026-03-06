@@ -1513,6 +1513,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "n0s1 Scanner": ["description"],
     "IriusRisk Threats Scan": ["title", "component_name"],
     "Orca Security Alerts": ["title", "component_name"],
+    "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1782,6 +1783,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OpenReports": DEDUPE_ALGO_HASH_CODE,
     "IriusRisk Threats Scan": DEDUPE_ALGO_HASH_CODE,
     "Orca Security Alerts": DEDUPE_ALGO_HASH_CODE,
+    "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
