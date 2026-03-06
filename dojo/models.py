@@ -2415,6 +2415,21 @@ class Finding(BaseModel):
         "line",                 # legacy
     ]
 
+    # Large text fields deferred in build_candidate_scope_queryset.  These are
+    # never accessed during deduplication or reimport candidate matching, so
+    # excluding them reduces the data loaded for every candidate finding.
+    DEDUPLICATION_DEFERRED_FIELDS = [
+        "description",
+        "mitigation",
+        "impact",
+        "steps_to_reproduce",
+        "severity_justification",
+        "references",
+        "url",
+        "cvssv3",
+        "cvssv4",
+    ]
+
     title = models.CharField(max_length=511,
                              verbose_name=_("Title"),
                              help_text=_("A short description of the flaw."))
