@@ -32,6 +32,7 @@ def get_finding_models_for_deduplication(finding_ids):
 
     return list(
         Finding.objects.filter(id__in=finding_ids)
+        .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
             "endpoints",
@@ -113,6 +114,36 @@ def deduplicate_uid_or_hash_code(new_finding):
 
 
 def set_duplicate(new_finding, existing_finding, *, save=True):
+    """
+    Mark new_finding as a duplicate of existing_finding.
+
+    Sets duplicate=True, active=False, verified=False, and duplicate_finding=existing_finding
+    on new_finding, then flattens any transitive duplicates: if any findings already point to
+    new_finding as their original, they are re-pointed directly to existing_finding (so the
+    duplicate chain never has more than one level of indirection).
+
+    The test_type of new_finding is added to existing_finding.found_by if not already present.
+
+    Args:
+        new_finding:      The finding to mark as a duplicate.
+        existing_finding: The original finding that new_finding is a duplicate of.
+                          Must not itself be a duplicate.
+        save:             When True (default), each modified finding and existing_finding are
+                          saved to the database immediately via super().save(skip_validation=True).
+                          Pass save=False in batch contexts to defer persistence; the caller is
+                          then responsible for bulk-saving the returned list and existing_finding.
+
+    Returns:
+        A list of all Finding instances whose fields were modified by this call, including
+        new_finding itself and any transitively re-pointed findings.  The caller must persist
+        these when save=False.
+
+    Raises:
+        Exception: if existing_finding is itself a duplicate, if new_finding == existing_finding,
+                   if marking would reopen a mitigated finding via a duplicate chain, or if
+                   new_finding is already a duplicate and existing_finding is mitigated.
+
+    """
     deduplicationLogger.debug(f"new_finding.status(): {new_finding.id} {new_finding.status()}")
     deduplicationLogger.debug(f"existing_finding.status(): {existing_finding.id} {existing_finding.status()}")
     if existing_finding.duplicate:

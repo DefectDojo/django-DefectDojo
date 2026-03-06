@@ -2381,6 +2381,40 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 
 class Finding(BaseModel):
+    # Fields loaded when performing deduplication (used by get_finding_models_for_deduplication
+    # and build_candidate_scope_queryset to restrict the SELECT to only what is needed).
+    # Covers the union of all deduplication algorithms so that a single queryset works
+    # regardless of which algorithm is in use.  Large text fields (description, mitigation,
+    # impact, references, …) are intentionally excluded.
+    DEDUPLICATION_FIELDS = [
+        "id",
+        # FK required for select_related("test") — must not be deferred
+        "test",
+        # Fields written by set_duplicate
+        "duplicate",
+        "active",
+        "verified",
+        "duplicate_finding",
+        # Guard checks in set_duplicate
+        "is_mitigated",
+        "mitigated",
+        "out_of_scope",
+        "false_p",
+        # Accessed by status() (debug logging only)
+        "under_review",
+        "risk_accepted",
+        # Used by hash-code and legacy algorithms for endpoint/location matching
+        "dynamic_finding",
+        "static_finding",
+        # Algorithm-specific matching fields
+        "hash_code",            # hash_code, uid_or_hash, legacy
+        "unique_id_from_tool",  # unique_id, uid_or_hash
+        "title",                # legacy
+        "cwe",                  # legacy
+        "file_path",            # legacy
+        "line",                 # legacy
+    ]
+
     title = models.CharField(max_length=511,
                              verbose_name=_("Title"),
                              help_text=_("A short description of the flaw."))
