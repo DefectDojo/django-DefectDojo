@@ -1488,6 +1488,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
     "OpenReports": ["vulnerability_ids", "component_name", "component_version", "severity"],
     "n0s1 Scanner": ["description"],
+    "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1752,6 +1753,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
     "OpenReports": DEDUPE_ALGO_HASH_CODE,
+    "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
