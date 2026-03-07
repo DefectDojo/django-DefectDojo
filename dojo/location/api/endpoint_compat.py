@@ -6,6 +6,7 @@ models while using the new URL and LocationFindingReference models underneath.
 """
 import datetime
 
+from django.db.models import Count, Q
 from django_filters import BooleanFilter, CharFilter, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.utils import extend_schema
@@ -101,7 +102,11 @@ class V3EndpointCompatibleFilterSet(FilterSet):
             ("location__url__host", "host"),
             ("product__id", "product"),
             ("id", "id"),
+            ("active_finding_count", "active_finding_count"),
         ),
+        field_labels={
+            "active_finding_count": "Active Findings Count",
+        },
     )
 
 
@@ -118,6 +123,7 @@ class V3EndpointCompatibleSerializer(ModelSerializer):
     fragment = CharField(source="location.url.fragment")
     tags = TagListSerializerField(source="location.tags")
     location_id = IntegerField(source="location.id")
+    active_finding_count = IntegerField(read_only=True)
 
     class Meta:
         model = LocationProductReference
@@ -141,7 +147,15 @@ class V3EndpointCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin, view
 
     def get_queryset(self):
         """Get authorized URLs using Endpoint authorization logic."""
-        return get_authorized_location_product_reference(Permissions.Location_View).filter(location__location_type=URL.LOCATION_TYPE).distinct()
+        return get_authorized_location_product_reference(Permissions.Location_View).filter(
+            location__location_type=URL.LOCATION_TYPE,
+        ).annotate(
+            active_finding_count=Count(
+                "location__findings",
+                filter=Q(location__findings__status=FindingLocationStatus.Active),
+                distinct=True,
+            ),
+        ).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,

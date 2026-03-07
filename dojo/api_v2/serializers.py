@@ -1264,6 +1264,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
 
 class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    active_finding_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Endpoint

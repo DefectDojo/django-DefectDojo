@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied
 from django.db import DEFAULT_DB_ALIAS
-from django.db.models import OuterRef, QuerySet, Value
+from django.db.models import Count, OuterRef, Q, QuerySet, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
@@ -59,7 +59,13 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     else:
         endpoints = Endpoint.objects.all()
 
-    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
+    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").annotate(
+        active_finding_count=Count(
+            "findings",
+            filter=Q(findings__active=True),
+            distinct=True,
+        ),
+    ).distinct()
     endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_View, endpoints, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter

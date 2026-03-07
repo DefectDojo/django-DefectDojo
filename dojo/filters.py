@@ -2866,7 +2866,11 @@ class EndpointFilterHelper(FilterSet):
             ("product", "product"),
             ("host", "host"),
             ("id", "id"),
+            ("active_finding_count", "active_finding_count"),
         ),
+        field_labels={
+            "active_finding_count": "Active Findings Count",
+        },
     )
 
 
@@ -3108,7 +3112,11 @@ class ApiEndpointFilter(DojoFilter):
             ("host", "host"),
             ("product", "product"),
             ("id", "id"),
+            ("active_finding_count", "active_finding_count"),
         ),
+        field_labels={
+            "active_finding_count": "Active Findings Count",
+        },
     )
 
     class Meta:

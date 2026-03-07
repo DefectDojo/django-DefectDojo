@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import Count, Q
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -345,7 +346,13 @@ class EndPointViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_endpoints(Permissions.Location_View).distinct()
+        return get_authorized_endpoints(Permissions.Location_View).annotate(
+            active_finding_count=Count(
+                "findings",
+                filter=Q(findings__active=True),
+                distinct=True,
+            ),
+        ).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
