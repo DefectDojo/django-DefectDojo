@@ -928,6 +928,11 @@
                     </li>
                 </ul>
             </div>
+            <div class="btn-group mr-2" role="group">
+                <a class="btn btn-sm btn-danger remove-from-finding" href="#">
+                    <i class="fa-solid fa-trash"></i> Remove from Finding
+                </a>
+            </div>
         </div>
     </div>
 
@@ -1466,6 +1471,18 @@
                     var hidden_input = $('<input type="hidden" value="' + this.id + '" name="endpoints_to_update">')
                     $('form#bulk_change_form').append(hidden_input);
                 });
+            });
+
+            $('a.remove-from-finding').on('click', function(e) {
+                e.preventDefault();
+                if (confirm('Remove selected endpoints from this finding?')) {
+                    $('input[type=checkbox].select_one:checked').each(function(){
+                        var hidden_input = $('<input type="hidden" value="' + this.id + '" name="endpoints_to_update">');
+                        $('form#bulk_change_form').append(hidden_input);
+                    });
+                    $('form#bulk_change_form').append($('<input type="hidden" name="remove_from_finding" value="1">'));
+                    $('form#bulk_change_form').submit();
+                }
             });
 
             $('input#select_all_vulnerable').on('click', function (e) {
