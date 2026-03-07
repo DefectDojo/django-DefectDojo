@@ -86,7 +86,7 @@ class TestAddLocationsEndpoints(TestCase):
         self.finding.endpoints.add(self.ep1)
 
         form = _make_form(Endpoint.objects.none())
-        add_locations(self.finding, form)
+        add_locations(self.finding, form, replace=True)
 
         self.assertNotIn(self.ep1, self.finding.endpoints.all())
 
@@ -95,7 +95,7 @@ class TestAddLocationsEndpoints(TestCase):
         self.finding.endpoints.add(self.ep1)
 
         form = _make_form(Endpoint.objects.filter(pk=self.ep2.pk))
-        add_locations(self.finding, form)
+        add_locations(self.finding, form, replace=True)
 
         self.assertNotIn(self.ep1, self.finding.endpoints.all())
         self.assertIn(self.ep2, self.finding.endpoints.all())

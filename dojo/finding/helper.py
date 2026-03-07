@@ -765,7 +765,7 @@ def removeLoop(finding_id, counter):
         removeLoop(f.id, counter - 1)
 
 
-def add_locations(finding, form):
+def add_locations(finding, form, *, replace=False):
     # TODO: Delete this after the move to Locations
     if not settings.V3_FEATURE_LOCATIONS:
         added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, finding.test.engagement.product)
@@ -773,7 +773,10 @@ def add_locations(finding, form):
 
         form_endpoints = form.cleaned_data.get("endpoints", Endpoint.objects.none())
         new_endpoints = Endpoint.objects.filter(id__in=endpoint_ids)
-        finding.endpoints.set(form_endpoints | new_endpoints)
+        if replace:
+            finding.endpoints.set(form_endpoints | new_endpoints)
+        else:
+            finding.endpoints.set(form_endpoints | new_endpoints | finding.endpoints.all())
 
         for endpoint in finding.endpoints.all():
             _eps, _created = Endpoint_Status.objects.get_or_create(
