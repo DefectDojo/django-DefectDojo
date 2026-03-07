@@ -50,7 +50,7 @@ class TestAddLocationsEndpoints(TestCase):
 
     def setUp(self):
         product_type = Product_Type.objects.create(name="PT")
-        self.product = Product.objects.create(name="P", prod_type=product_type)
+        self.product = Product.objects.create(name="P", prod_type=product_type, description="Test product")
         engagement = Engagement.objects.create(
             name="E", product=self.product, target_start=now(), target_end=now(),
         )
@@ -145,7 +145,7 @@ class TestEditFindingEndpointView(TestCase):
         )
         self.client.force_login(self.user)
         product_type = Product_Type.objects.create(name="PT")
-        self.product = Product.objects.create(name="P", prod_type=product_type)
+        self.product = Product.objects.create(name="P", prod_type=product_type, description="Test product")
         engagement = Engagement.objects.create(
             name="E", product=self.product, target_start=now(), target_end=now(),
         )
