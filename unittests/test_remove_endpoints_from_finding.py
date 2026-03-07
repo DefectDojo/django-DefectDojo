@@ -46,7 +46,7 @@ def _make_finding(test, reporter):
 
 def _make_product_tree(product_name="P"):
     pt = Product_Type.objects.create(name="PT")
-    product = Product.objects.create(name=product_name, prod_type=pt)
+    product = Product.objects.create(name=product_name, prod_type=pt, description="Test product")
     engagement = Engagement.objects.create(
         name="E", product=product, target_start=now(), target_end=now(),
     )
