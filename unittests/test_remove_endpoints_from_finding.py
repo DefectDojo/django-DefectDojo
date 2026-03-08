@@ -3,14 +3,22 @@ Tests for the "Remove from Finding" bulk action on the View Finding page.
 
 Covers both the non-V3 (Endpoint/Endpoint_Status) and V3 (Location/
 LocationFindingReference) paths via the respective bulk-update views.
+
+The two test classes are gated by skipUnless so that each class only runs
+against the URL configuration that is active for its code path:
+- TestRemoveEndpointsFromFindingView  — skipped when V3_FEATURE_LOCATIONS=True
+- TestRemoveLocationsFromFindingView  — skipped when V3_FEATURE_LOCATIONS=False
 """
 
 import logging
+from unittest import skipUnless
 
-from django.test import TestCase, override_settings
+from django.conf import settings
+from django.test import TestCase
 from django.urls import reverse
 from django.utils.timezone import now
 
+from dojo.location.models import LocationFindingReference
 from dojo.models import (
     Endpoint,
     Endpoint_Status,
@@ -22,6 +30,7 @@ from dojo.models import (
     Test_Type,
     User,
 )
+from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +67,7 @@ def _make_product_tree(product_name="P"):
     return product, test
 
 
-@override_settings(V3_FEATURE_LOCATIONS=False)
+@skipUnless(not settings.V3_FEATURE_LOCATIONS, "Non-V3 endpoint path only")
 class TestRemoveEndpointsFromFindingView(TestCase):
 
     """Tests for endpoint_status_bulk_update (non-V3 path)."""
@@ -139,5 +148,104 @@ class TestRemoveEndpointsFromFindingView(TestCase):
         return_url = reverse("view_finding", args=[self.finding.id])
 
         response = self._post([self.ep1.pk], remove=True)
+
+        self.assertRedirects(response, return_url, fetch_redirect_response=False)
+
+
+@skipUnless(settings.V3_FEATURE_LOCATIONS, "V3 locations path only")
+class TestRemoveLocationsFromFindingView(TestCase):
+
+    """Tests for finding_location_bulk_update (V3/Locations path)."""
+
+    def setUp(self):
+        self.user = _make_superuser("tester")
+        self.client.force_login(self.user)
+        self.product, self.test_obj = _make_product_tree()
+        self.finding = _make_finding(self.test_obj, self.user)
+
+        self.url1 = URL.get_or_create_from_values(host="loc1.example.com")
+        self.url2 = URL.get_or_create_from_values(host="loc2.example.com")
+        self.loc1 = self.url1.location
+        self.loc2 = self.url2.location
+
+        self.url = reverse("endpoints_status_bulk", args=[self.finding.id])
+
+    def _associate(self, location):
+        ref, _ = LocationFindingReference.objects.get_or_create(
+            location=location, finding=self.finding,
+        )
+        return ref
+
+    def _post(self, location_ids, *, remove=False):
+        data = {
+            "return_url": reverse("view_finding", args=[self.finding.id]),
+            "endpoints_to_update": location_ids,
+        }
+        if remove:
+            data["remove_from_finding"] = "1"
+        return self.client.post(self.url, data)
+
+    def test_remove_single_location(self):
+        """POST with remove_from_finding removes the selected location from the finding."""
+        self._associate(self.loc1)
+
+        response = self._post([self.loc1.pk], remove=True)
+
+        self.assertIn(response.status_code, [200, 302])
+        self.assertFalse(
+            LocationFindingReference.objects.filter(
+                finding=self.finding, location=self.loc1,
+            ).exists(),
+        )
+
+    def test_remove_only_selected_location(self):
+        """Only the selected location is removed; others remain."""
+        self._associate(self.loc1)
+        self._associate(self.loc2)
+
+        self._post([self.loc1.pk], remove=True)
+
+        self.assertFalse(
+            LocationFindingReference.objects.filter(
+                finding=self.finding, location=self.loc1,
+            ).exists(),
+        )
+        self.assertTrue(
+            LocationFindingReference.objects.filter(
+                finding=self.finding, location=self.loc2,
+            ).exists(),
+        )
+
+    def test_remove_multiple_locations(self):
+        """Multiple locations can be removed in a single request."""
+        self._associate(self.loc1)
+        self._associate(self.loc2)
+
+        self._post([self.loc1.pk, self.loc2.pk], remove=True)
+
+        self.assertFalse(
+            LocationFindingReference.objects.filter(
+                finding=self.finding, location__in=[self.loc1, self.loc2],
+            ).exists(),
+        )
+
+    def test_remove_without_flag_does_not_remove(self):
+        """Submitting location IDs without remove_from_finding does not remove them."""
+        self._associate(self.loc1)
+
+        self._post([self.loc1.pk], remove=False)
+
+        self.assertTrue(
+            LocationFindingReference.objects.filter(
+                finding=self.finding, location=self.loc1,
+            ).exists(),
+        )
+
+    def test_remove_redirects(self):
+        """The view redirects after a successful remove."""
+        self._associate(self.loc1)
+        return_url = reverse("view_finding", args=[self.finding.id])
+
+        response = self._post([self.loc1.pk], remove=True)
 
         self.assertRedirects(response, return_url, fetch_redirect_response=False)
