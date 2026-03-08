@@ -12,7 +12,8 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.db.models import Count, Q
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import get_object_or_404
@@ -167,6 +168,7 @@ from dojo.product_type.queries import (
     get_authorized_product_type_members,
     get_authorized_product_types,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.reports.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
@@ -346,12 +348,12 @@ class EndPointViewSet(
     )
 
     def get_queryset(self):
+        active_finding_subquery = build_count_subquery(
+            Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+            group_field="endpoints",
+        )
         return get_authorized_endpoints(Permissions.Location_View).annotate(
-            active_finding_count=Count(
-                "findings",
-                filter=Q(findings__active=True),
-                distinct=True,
-            ),
+            active_finding_count=Coalesce(active_finding_subquery, Value(0)),
         ).distinct()
 
     @extend_schema(
