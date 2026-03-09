@@ -463,6 +463,7 @@ else:
     }
 
 DATABASES["default"]["CONN_MAX_AGE"] = 3600
+DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 # Track migrations through source control rather than making migrations locally
 if env("DD_TRACK_MIGRATIONS"):
