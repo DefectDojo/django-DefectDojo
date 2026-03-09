@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestCloseOldDbConnectionsBeforeTask(DojoTestCase):
+
     """Tests for the task_prerun signal handler that closes stale DB connections."""
 
     @patch("django.db.close_old_connections")
@@ -38,6 +39,7 @@ class TestCloseOldDbConnectionsBeforeTask(DojoTestCase):
 
 
 class TestCloseOldDbConnectionsAfterTask(DojoTestCase):
+
     """Tests for the task_postrun signal handler that closes stale DB connections."""
 
     @patch("django.db.close_old_connections")
