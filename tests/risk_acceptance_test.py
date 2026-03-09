@@ -1,6 +1,8 @@
+import os
 import sys
 import time
 import unittest
+from pathlib import Path
 
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest
@@ -84,6 +86,9 @@ class RiskAcceptanceTest(BaseTestCase):
         dec_radios = driver.find_elements(By.NAME, "decision")
         if len(dec_radios) > 0:
             dec_radios[0].click()
+        # Upload a proof file
+        proof_path = Path(os.path.realpath(__file__)).parent / "dedupe_scans" / "dedupe_path_1.json"
+        driver.find_element(By.ID, "id_path").send_keys(str(proof_path))
         # Owner is pre-filled (current user), submit
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
         time.sleep(1)
@@ -113,6 +118,28 @@ class RiskAcceptanceTest(BaseTestCase):
         else:
             # Risk acceptance may be listed differently
             self.assertFalse(self.is_error_message_present())
+
+    @on_exception_html_source_logger
+    def test_download_risk_acceptance_proof(self):
+        """Download the proof file from a risk acceptance (regression test for #14467)."""
+        driver = self.driver
+        eng_url = self._get_engagement_url(driver)
+        self.assertIsNotNone(eng_url, "Could not find Beta Test engagement")
+        time.sleep(1)
+        # Navigate to the risk acceptance detail page
+        risk_links = driver.find_elements(By.PARTIAL_LINK_TEXT, "Test Risk Acceptance")
+        self.assertTrue(len(risk_links) > 0, "Could not find Test Risk Acceptance link")
+        risk_links[0].click()
+        time.sleep(1)
+        # Click the proof download link
+        download_links = driver.find_elements(By.CSS_SELECTOR, "a[href*='risk_acceptance'][href*='download']")
+        self.assertTrue(len(download_links) > 0, "Could not find proof download link")
+        download_links[0].click()
+        time.sleep(2)
+        # Verify no 500 error occurred
+        self.assertFalse(self.is_error_message_present())
+        body_text = driver.find_element(By.TAG_NAME, "body").text
+        self.assertNotIn("Internal Server Error", body_text)
 
     @on_exception_html_source_logger
     def test_delete_risk_acceptance(self):
@@ -154,6 +181,7 @@ def suite():
     suite.addTest(RiskAcceptanceTest("test_enable_full_risk_acceptance"))
     suite.addTest(RiskAcceptanceTest("test_add_risk_acceptance"))
     suite.addTest(RiskAcceptanceTest("test_view_risk_acceptance"))
+    suite.addTest(RiskAcceptanceTest("test_download_risk_acceptance_proof"))
     suite.addTest(RiskAcceptanceTest("test_delete_risk_acceptance"))
     suite.addTest(ProductTest("test_delete_product"))
     return suite
