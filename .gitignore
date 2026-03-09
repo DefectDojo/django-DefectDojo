@@ -149,3 +149,6 @@ docs/.devcontainer/Dockerfile
 docs/LICENSE
 docs/.hugo_build.lock
 .cursor-rules
+
+# claude etc
+MEMORY.md
