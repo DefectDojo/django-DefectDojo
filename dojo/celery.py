@@ -3,7 +3,7 @@ import os
 from logging.config import dictConfig
 
 from celery import Celery, Task
-from celery.signals import setup_logging, task_postrun
+from celery.signals import setup_logging, task_postrun, task_prerun
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
@@ -117,6 +117,15 @@ def debug_task(self):
 @setup_logging.connect
 def config_loggers(*args, **kwags):
     dictConfig(settings.LOGGING)
+
+
+@task_prerun.connect
+def close_old_db_connections_before_task(**kwargs):
+    from celery import current_app  # noqa: PLC0415
+    from django.db import close_old_connections  # noqa: PLC0415
+    if current_app.conf.task_always_eager:
+        return
+    close_old_connections()
 
 
 @task_postrun.connect
