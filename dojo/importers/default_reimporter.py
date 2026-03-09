@@ -945,9 +945,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if finding_from_report.unsaved_tags:
             cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
             if isinstance(cleaned_tags, list):
-                finding.tags.set(cleaned_tags)
+                finding.tags.add(*cleaned_tags)
             elif isinstance(cleaned_tags, str):
-                finding.tags.set([cleaned_tags])
+                finding.tags.add(cleaned_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
