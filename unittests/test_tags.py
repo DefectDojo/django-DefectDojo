@@ -306,7 +306,8 @@ class TagImportMixin:
             self.assertIn(tag, response["tags"])
 
     def test_manually_set_tags_preserved_on_reimport(self):
-        """Manually set tags on findings must survive a reimport.
+        """
+        Manually set tags on findings must survive a reimport.
 
         Regression test for finding_post_processing() using tags.set() instead of
         tags.add(), which caused manually-set tags to be silently wiped when reimporting
