@@ -120,19 +120,17 @@ def config_loggers(*args, **kwags):
 
 
 @task_prerun.connect
-def close_old_db_connections_before_task(**kwargs):
-    from celery import current_app  # noqa: PLC0415
+def close_old_db_connections_before_task(task=None, **kwargs):
     from django.db import close_old_connections  # noqa: PLC0415
-    if current_app.conf.task_always_eager:
+    if task is not None and getattr(task.request, "is_eager", False):
         return
     close_old_connections()
 
 
 @task_postrun.connect
-def close_old_db_connections_after_task(**kwargs):
-    from celery import current_app  # noqa: PLC0415
+def close_old_db_connections_after_task(task=None, **kwargs):
     from django.db import close_old_connections  # noqa: PLC0415
-    if current_app.conf.task_always_eager:
+    if task is not None and getattr(task.request, "is_eager", False):
         return
     close_old_connections()
 
