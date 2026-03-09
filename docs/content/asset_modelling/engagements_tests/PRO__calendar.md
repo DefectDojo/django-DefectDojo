@@ -29,7 +29,7 @@ Importantly, Calendar will only present Engagements and Tests to which the User 
 
 The monthly calendar will preview five entries on each day. Additional entries occurring on that day will be hidden from view unless the **"+ [X] events"** is clicked within the cell of any particular date. Once clicked, the calendar will shift from a monthly view to a daily view.
 
-Clicking on an  for a Test or Engagement will open a pop-up modal with additional information on that entry, including: 
+Clicking on an entry for a Test or Engagement will open a pop-up modal with additional information on that entry, including: 
 - Start and End Date 
 - Test or Engagement Type 
 - Lead 

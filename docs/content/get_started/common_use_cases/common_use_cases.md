@@ -38,7 +38,7 @@ Each of these report categories can be handled by a separate Engagement, with a 
 ![image](images/example_product_hierarchy_bigcorp.png)
 
 - If a Product has a CI/CD pipeline, all of the results from that pipeline can be continually imported into a single open-ended Engagement. Each tool used will create a separate Test within the CI/CD Engagement, which can be continuously updated with new data.  
-(See our guide to [Reimport](/import_data/import_intro/import_vs_reimport/))
+(See our guide to [Reimport](/import_data/import_intro/reimport/))
 - Each Pen Test effort can have a separate Engagement created to contain all of the results: e.g. "Q1 Pen Test 2024," "Q2 Pen Test 2024," etc.
 - BigCorp will likely want to run their own mock PCI audit so that they're prepared for the real thing. The results of those audits can also be stored as a separate Engagement.
 
