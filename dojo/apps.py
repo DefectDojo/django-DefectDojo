@@ -1,7 +1,6 @@
 import logging
 
 from django.apps import AppConfig
-from django.conf import settings
 from django.core.checks import register as register_check
 from django.db import models
 from watson import search as watson
@@ -17,12 +16,6 @@ class DojoAppConfig(AppConfig):
     verbose_name = "Defect Dojo"
 
     def ready(self):
-        if settings.ENABLE_AUDITLOG:
-            from auditlog.registry import auditlog  # noqa: PLC0415 raised: AppRegistryNotReady
-
-            from dojo.location.models import Location  # noqa: PLC0415 raised: AppRegistryNotReady
-
-            auditlog.register(Location)
         # we need to initializer waston here because in models.py is to early if we want add extra fields to index
         # logger.info('ready(): initializing watson')
         # commented out ^ as it prints in manage.py dumpdata, docker logs and many other places
