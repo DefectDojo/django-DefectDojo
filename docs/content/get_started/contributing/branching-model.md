@@ -3,12 +3,13 @@ title: "Open-Source Branching & Releases"
 description: "How we create releases"
 draft: false
 weight: 3
+audience: opensource
 aliases:
   - /en/open_source/contributing/branching-model
 ---
 ## Regular releases
 
-The DefectDojo team aims to maintain the following cadence: 
+The DefectDojo team aims to maintain the following cadence:
 
 - Minor releases: at least once a month on the first Monday of the month.
 - Patch/Bugfix: releases every week on Monday.
@@ -25,7 +26,6 @@ GitHub Actions are the source of truth. The releases are semi-automated. The ste
 PRs that relate to security issues are done through [security advisories](https://github.com/DefectDojo/django-DefectDojo/security/advisories) which provide a way to work privately on code without prematurely disclosing vulnerabilities.
 
 ## Release and hotfix model
-![Schemas](images/branching_model_v2.png)
 
 Diagrams created with [plantUML](https://plantuml.com). Find a web-based editor for PlantUML at https://www.planttext.com.
 
