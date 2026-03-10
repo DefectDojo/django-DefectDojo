@@ -117,10 +117,10 @@ class NotificationManagerHelpers:
 
     def _get_notifications_object(self) -> Notifications:
         """Set the system Notifications object on the class."""
-        try:
-            return Notifications.objects.get(user=None, template=False)
-        except Exception:
-            return Notifications()
+        notifications, _ = Notifications.objects.get_or_create(
+            user=None, product=None, template=False,
+        )
+        return notifications
 
     def _get_system_settings(self) -> System_Settings:
         """Set the system settings object in the class."""
