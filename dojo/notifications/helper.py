@@ -117,9 +117,25 @@ class NotificationManagerHelpers:
 
     def _get_notifications_object(self) -> Notifications:
         """Set the system Notifications object on the class."""
-        notifications, _ = Notifications.objects.get_or_create(
-            user=None, product=None, template=False,
-        )
+        try:
+            notifications, _ = Notifications.objects.get_or_create(
+                user=None, product=None, template=False,
+            )
+        except Notifications.MultipleObjectsReturned:
+            notifications = Notifications.objects.filter(
+                user=None,
+                product=None,
+                template=False,
+            ).first()
+            logger.warning(
+                "Multiple system notifications objects found, using the first one with id %s. Cleaning up the duplicate...",
+                notifications.id,
+            )
+            Notifications.objects.filter(
+                user=None,
+                product=None,
+                template=False,
+            ).exclude(id=notifications.id).delete()
         return notifications
 
     def _get_system_settings(self) -> System_Settings:
