@@ -126,14 +126,10 @@ class RiskAcceptanceTest(BaseTestCase):
         eng_url = self._get_engagement_url(driver)
         self.assertIsNotNone(eng_url, "Could not find Beta Test engagement")
         time.sleep(1)
-        # Navigate to the risk acceptance detail page
-        risk_links = driver.find_elements(By.PARTIAL_LINK_TEXT, "Test Risk Acceptance")
-        self.assertTrue(len(risk_links) > 0, "Could not find Test Risk Acceptance link")
-        risk_links[0].click()
-        time.sleep(1)
-        # Click the proof download link
+        # The engagement detail page has a Risk Acceptance table with a "Yes"
+        # download link when proof was uploaded. Click it directly.
         download_links = driver.find_elements(By.CSS_SELECTOR, "a[href*='risk_acceptance'][href*='download']")
-        self.assertTrue(len(download_links) > 0, "Could not find proof download link")
+        self.assertTrue(len(download_links) > 0, "Could not find proof download link on engagement page")
         download_links[0].click()
         time.sleep(2)
         # Verify no 500 error occurred
