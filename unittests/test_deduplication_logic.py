@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
 
-from dojo.finding.deduplication import set_duplicate
+from dojo.finding.deduplication import build_candidate_scope_queryset, set_duplicate
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import (
     Development_Environment,
@@ -27,7 +27,12 @@ from dojo.models import (
 )
 from dojo.url.models import URL
 
-from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path, versioned_fixtures
+from .dojo_test_case import (
+    DojoTestCase,
+    get_unit_tests_scans_path,
+    skip_unless_v3,
+    versioned_fixtures,
+)
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1892,3 +1897,20 @@ class TestDuplicationLogic(DojoTestCase):
         system_settings = System_Settings.objects.get()
         system_settings.enable_deduplication = enable
         system_settings.save()
+
+
+@versioned_fixtures
+class TestDedupeRelatedMethods(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    @skip_unless_v3
+    def test_build_candidate_scope_queryset_does_not_crash_when_locations_enabled_but_endpoint_exists(self):
+        # Create an Endpoint and associate it with a Finding
+        with Endpoint.allow_endpoint_init():
+            endpoint = Endpoint.objects.create(host="test-host.com")
+        test = Test.objects.get(id=3)
+        finding = Finding.objects.filter(test=test).first()
+        finding.endpoints.add(endpoint)
+        # This explodes if it tries to prefetch Endpoints when they are disabled
+        finding = build_candidate_scope_queryset(test).filter(id=finding.id).first()
+        self.assertTrue(finding)
