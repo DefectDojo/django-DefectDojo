@@ -14,6 +14,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_reimport_legacy,
 )
 from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.location.status import FindingLocationStatus
@@ -95,6 +96,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         - Update the test progress
         """
         logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
+        # Initialize the endpoint manager now that self.test is available
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager = EndpointManager(self.test.engagement.product)
         # Validate the Tool_Configuration
         self.verify_tool_configuration_from_test()
         # Fetch the parser based upon the string version of the scan type
@@ -430,6 +434,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
+                        if not settings.V3_FEATURE_LOCATIONS:
+                            self.endpoint_manager.persist(user=self.user)
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
                         dojo_dispatch_task(
@@ -497,6 +503,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     product_grading_option=False,
                 )
                 mitigated_findings.append(finding)
+        # Persist any accumulated endpoint status mitigations
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager.persist(user=self.user)
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
@@ -763,9 +772,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.location_manager.chunk_locations_and_reactivate(mitigated_locations)
         else:
             # TODO: Delete this after the move to Locations
-            # Reactivate mitigated endpoints that are not false positives, out of scope, or risk accepted
+            # Accumulate endpoint statuses for bulk reactivation in persist()
             # status_finding_non_special is prefetched by build_candidate_scope_queryset
-            self.endpoint_manager.chunk_endpoints_and_reactivate(existing_finding.status_finding_non_special)
+            self.endpoint_manager.record_statuses_to_reactivate(existing_finding.status_finding_non_special)
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
@@ -932,9 +941,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.location_manager.chunk_locations_and_disperse(finding, self.endpoints_to_add)
         else:
             # TODO: Delete this after the move to Locations
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
+            for endpoint in finding_from_report.unsaved_endpoints:
+                key = self.endpoint_manager.record_endpoint(endpoint)
+                self.endpoint_manager.record_status_for_create(finding, key)
             if len(self.endpoints_to_add) > 0:
-                self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
+                for endpoint in self.endpoints_to_add:
+                    key = self.endpoint_manager.record_endpoint(endpoint)
+                    self.endpoint_manager.record_status_for_create(finding, key)
         # Parsers shouldn't use the tags field, and use unsaved_tags instead.
         # Merge any tags set by parser into unsaved_tags
         tags_from_parser = finding_from_report.tags if isinstance(finding_from_report.tags, list) else []
