@@ -8,7 +8,7 @@ aliases:
   - /en/open_source/ldap-authentication
 ---
 
-**LDAP Authentication can be used in Open Source DefectDojo by manipulated the source code. This method is not supported or implementable in DefectDojo Pro at this time.**
+**LDAP Authentication can be used in Open Source DefectDojo by manipulating the source code. This method is not supported or implementable in DefectDojo Pro at this time.**
 
 ## LDAP Authentication
 
