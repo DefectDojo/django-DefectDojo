@@ -4,7 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import Client
+from django.test import Client, override_settings
 from django.urls import reverse
 
 from dojo.models import Finding, Product, Test
@@ -454,6 +454,7 @@ class TagImportTestUI(DojoAPITestCase, TagImportMixin):
             return {"test": new_test_id}
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @versioned_fixtures
 class InheritedTagsTests(DojoAPITestCase):
 
@@ -610,6 +611,7 @@ class InheritedTagsImportMixin:
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("finding")))
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @versioned_fixtures
 class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
 
@@ -626,6 +628,7 @@ class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
         InheritedTagsImportMixin.setUp(self)
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @versioned_fixtures
 class InheritedTagsImportTestUI(DojoAPITestCase, InheritedTagsImportMixin):
 
