@@ -5,7 +5,7 @@ weight: 8
 audience: opensource
 ---
 
-Open-Source DefectDojo supports login via GitHub Enterprise. DefectDojo Pro users should refer to the [Pro GitHub Enterprise guide](../PRO__github_enterprise/).
+Open-Source DefectDojo supports login via GitHub Enterprise. DefectDojo Pro users should refer to the [Pro GitHub Enterprise guide](/admin/sso/pro__github_enterprise/).
 
 ## Prerequisites
 
