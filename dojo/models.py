@@ -4326,11 +4326,6 @@ class Notifications(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=["user", "product"], name="notifications_user_product"),
-            models.UniqueConstraint(
-                fields=["template"],
-                condition=models.Q(user__isnull=True, product__isnull=True),
-                name="notifications_system_unique",
-            ),
         ]
         indexes = [
             models.Index(fields=["user", "product"]),
