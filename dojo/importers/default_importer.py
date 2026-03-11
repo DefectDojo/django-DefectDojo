@@ -84,6 +84,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             api_scan_configuration=self.api_scan_configuration,
             tags=self.tags,
         )
+        # Initialize the endpoint manager now that self.test is available
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager = EndpointManager(self.test.engagement.product)
         return self.test
 
     def process_scan(
@@ -111,9 +114,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
-        # Initialize the endpoint manager now that self.test is available
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager = EndpointManager(self.test.engagement.product)
         new_findings = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs
