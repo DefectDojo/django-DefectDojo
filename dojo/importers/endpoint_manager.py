@@ -13,6 +13,7 @@ from dojo.models import (
     Finding,
     Product,
 )
+from dojo.tags_signals import inherit_instance_tags
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +204,10 @@ class EndpointManager:
             if to_create:
                 created = Endpoint.objects.bulk_create(to_create, batch_size=1000)
                 key_to_endpoint.update(zip(to_create_keys, created, strict=True))
+                # bulk_create bypasses post_save signals, so manually trigger tag inheritance
+                # this is not ideal, but we need to take a separate look at the tag inheritance feature itself later
+                for ep in created:
+                    inherit_instance_tags(ep)
 
         self._endpoints_to_create.clear()
         return key_to_endpoint
