@@ -74,6 +74,7 @@ services:
   "webhook.endpoint":
     image: mccutchen/go-httpbin:2.20.0@sha256:b1620821b6ff191d911629f87a720b88df5397c2554045f1cfb1ffde17c9b898
   integration-tests:
+    platform: "linux/amd64"
     profiles:
       - integration
     build:
