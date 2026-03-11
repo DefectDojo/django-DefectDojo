@@ -14,7 +14,6 @@ from django.utils.timezone import make_aware
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.location_manager import LocationManager, UnsavedLocation
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
@@ -85,7 +84,9 @@ class BaseImporter(ImporterOptions):
             self.location_manager = LocationManager()
         else:
             # TODO: Delete this after the move to Locations
-            self.endpoint_manager = EndpointManager()
+            # EndpointManager is initialized in each subclass's process_scan()
+            # after self.test is available, because it needs the product.
+            self.endpoint_manager = None
 
     def check_child_implementation_exception(self):
         """
@@ -825,12 +826,17 @@ class BaseImporter(ImporterOptions):
             msg = "BaseImporter#process_endpoints() method is deprecated when V3_FEATURE_LOCATIONS is enabled"
             raise NotImplementedError(msg)
 
-        # Save the unsaved endpoints
-        self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding.unsaved_endpoints)
-        # Check for any that were added in the form
+        # Clean and record unsaved endpoints from the report
+        self.endpoint_manager.clean_unsaved_endpoints(finding.unsaved_endpoints)
+        for endpoint in finding.unsaved_endpoints:
+            key = self.endpoint_manager.record_endpoint(endpoint)
+            self.endpoint_manager.record_status_for_create(finding, key)
+        # Record any endpoints added from the form
         if len(endpoints_to_add) > 0:
             logger.debug("endpoints_to_add: %s", endpoints_to_add)
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
+            for endpoint in endpoints_to_add:
+                key = self.endpoint_manager.record_endpoint(endpoint)
+                self.endpoint_manager.record_status_for_create(finding, key)
 
     def sanitize_vulnerability_ids(self, finding) -> None:
         """Remove undisired vulnerability id values"""
@@ -934,14 +940,8 @@ class BaseImporter(ImporterOptions):
             )
         else:
             # TODO: Delete this after the move to Locations
-            # Mitigate the endpoint statuses
-            dojo_dispatch_task(
-                EndpointManager.mitigate_endpoint_status,
-                finding.status_finding.all(),
-                self.user,
-                kwuser=self.user,
-                sync=True,
-            )
+            # Accumulate endpoint statuses for bulk mitigate in persist()
+            self.endpoint_manager.record_statuses_to_mitigate(finding.status_finding.all())
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing

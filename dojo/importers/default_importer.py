@@ -9,6 +9,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.models import (
@@ -83,6 +84,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             api_scan_configuration=self.api_scan_configuration,
             tags=self.tags,
         )
+        # Initialize the endpoint manager now that self.test is available
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager = EndpointManager(self.test.engagement.product)
         return self.test
 
     def process_scan(
@@ -259,8 +263,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
 
-            # If batch is full or we're at the end, dispatch one batched task
+            # If batch is full or we're at the end, persist endpoints and dispatch
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
+                if not settings.V3_FEATURE_LOCATIONS:
+                    self.endpoint_manager.persist(user=self.user)
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
@@ -378,6 +384,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,
             )
+        # Persist any accumulated endpoint status mitigations
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager.persist(user=self.user)
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
