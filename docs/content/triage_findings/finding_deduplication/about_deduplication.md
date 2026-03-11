@@ -26,13 +26,29 @@ By default, these Tests would need to be nested under the same Product for Dedup
 
 Duplicate Findings are set as Inactive by default. This does not mean the Duplicate Finding itself is Inactive. Rather, this is so that your team only has a single active Finding to work on and remediate, with the implication being that once the original Finding is Mitigated, the Duplicates will also be Mitigated.
 
-## Deduplication vs Reimport
+## Reimport Deduplication
 
-Deduplication and Reimport are similar processes but they have a key difference:
+Deduplication and Reimport are similar processes, but they use different algorithms to identify Finding matches.
 
-* When you Reimport to a Test, the Reimport process looks at incoming Findings, **filters and** **discards any matches**. Those matches will never be created as Findings or Finding Duplicates.
-* Deduplication is applied 'passively' on Findings that have already been created. It will identify duplicates in scope and **label them**, but it will not delete or discard the Finding unless 'Delete Deduplicate Findings' is enabled.
-* The 'reimport' action of discarding a Finding always happens before deduplication; DefectDojo **cannot deduplicate Findings that are never created** as a result of Reimport's filtering.
+* When you Reimport to a Test, the Reimport process looks at incoming Findings, **compares hash codes, and then discards any matches**. Those matches will never be created as Findings or Finding Duplicates.
+
+However, any Findings that remain after Reimport Deduplication are still subject to Same-Tool Deduplication.  So if you use narrower a scope for Same-Tool Deduplication, you can end up with Duplicates within a Reimport pipeline.
+
+### Example
+
+Here's a tool with a Reimport Deduplication algorithm which is different from the Same-Tool Deduplication algorithm.
+
+| Deduplication Algorithm | Hash Code Fields |
+| ----- | ---- |
+| Reimport | Title, CWE, Severity, Description, Line Number |
+| Same-Tool | Title, CWE, Severity, Description |
+
+Let's say you had a Finding in DefectDojo with a given line number.  You re-scanned your environment and the line number of that vulnerability changed.  You reimport to the same Test.  Here's what will happen during reimport, and deduplication:
+
+* During Reimport, the Finding will not be matched to any Findings that already exist, because the line number is different.  So a new Finding will be created in the Test.
+* After Reimport is complete, the Same-Tool Deduplication algorithm will run.  Same-Tool Deduplication does not consider line number in this configuration, so the new Finding will be labelled as a duplicate.
+
+Reimport can completely discard Findings before they are recorded, so Reimport Deduplication settings should be adjusted with caution.
 
 ## When are duplicates appropriate?
 
@@ -119,3 +135,14 @@ For example, let’s say that you had your Maximum Duplicates field set to ‘1�
 ### Applying this setting
 
 Applying **Delete Deduplicate Findings** will begin a deletion process immediately. This setting can be applied on the **System Settings** page. See Enabling Deduplication for more information.
+
+## Troubleshooting Deduplication
+
+Sometimes, Deduplication does not work as expected.  Here are some examples of ways that Deduplication might not be working correctly, along with possible solutions.
+
+| What you see | Most likely cause | What to tune |
+| --- | --- | --- |
+| Reimport closes an old Finding and creates a new one when only the line number changed | Reimport matching uses unstable fields (for example, line number) | <strong>Reimport Deduplication</strong> (prefer stable IDs or stable hash fields) |
+| Multiple Findings are created in the same Test that you believe should be duplicates | Deduplication matching is not configured for that tool or scope | <strong>Same Tool Deduplication</strong> (and consider “Delete Deduplicate Findings” behavior) |
+| Duplicates are created across different tools | Cross-tool matching is disabled or too strict | <strong>Cross Tool Deduplication (Pro only)</strong> (hash-based matching) |
+| Excess duplicates of the same Finding are being created, across Tests | Asset Hierarchy is not set up correctly | [Consider Reimport for continual testing](/triage_findings/finding_deduplication/avoid_excess_duplicates/) |
