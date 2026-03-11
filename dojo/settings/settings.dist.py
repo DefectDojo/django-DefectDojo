@@ -1489,6 +1489,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
     "OpenReports": ["vulnerability_ids", "component_name", "component_version", "severity"],
     "n0s1 Scanner": ["description"],
+    "Orca Security Alerts": ["title", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1754,6 +1755,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
     "OpenReports": DEDUPE_ALGO_HASH_CODE,
+    "Orca Security Alerts": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
