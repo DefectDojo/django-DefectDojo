@@ -49,7 +49,7 @@ jobs:
       - name: Start uwsgi (idle)
         timeout-minutes: 5
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.override.yml \
+          docker compose -f docker-compose.yml -f docker-compose.override.unit_tests_cicd.yml \
             -f docker/docker-compose.override.performance_tests_cicd.yml \
             up -d --no-deps uwsgi
         env:
