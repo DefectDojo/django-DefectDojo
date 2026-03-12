@@ -1,5 +1,5 @@
 ---
-title: "Import vs Reimport"
+title: "Reimport"
 description: "Learn how to import data manually, through the API, or via a connector"
 weight: 2
 aliases:
@@ -80,7 +80,13 @@ This header indicates the actions taken by an Import/Reimport.
 * **\# left untouched shows the count of Open Findings which were unchanged by a Reimport (because they also existed in the incoming report).**
 * **\#** **reactivated** shows any Closed Findings which were reopened by an incoming Reimport.
 
-## Reimport via API \- special note
+## Reimport Deduplication
+
+Reimport decides whether an incoming item matches an existing Finding using **[Reimport Deduplication](/triage_findings/finding_deduplication/about_deduplication/)** settings. This is separate from “Same Tool Deduplication” and “Cross Tool Deduplication,” which operate after Findings exist.
+
+If you are seeing Reimport close old Findings and create new Findings when only a minor attribute changes (for example, a line number shift), tune **Reimport Deduplication** for that tool to use stable identifiers that ignore those attributes (such as Unique ID From Tool).
+
+## Reimport via API - special note
 
 Note that the /reimport API endpoint can both **extend an existing Test** (apply the method in this article) **or create a new Test** with new data \- an initial call to `/import`, or setting up a Test in advance is not required.
 

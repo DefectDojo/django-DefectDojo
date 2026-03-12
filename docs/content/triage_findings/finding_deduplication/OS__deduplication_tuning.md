@@ -1,5 +1,5 @@
 ---
-title: "Deduplication Tuning"
+title: "Deduplication Tuning (Open Source)"
 description: "Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service"
 weight: 5
 audience: opensource
@@ -105,6 +105,10 @@ Notes:
 - If you want dedupe independent of service, remove `service` from `HASH_CODE_FIELDS_ALWAYS` or leave the `Service` field empty during import.
 
 ## After changing deduplication settings
+
+After changing algorithms or Hash computation, you will need to **recompute hashes** for the affected parser/test type before the new matching behavior will apply consistently across existing data.
+
+Note: Recomputing hashes can be lead to long wait times on large instances. Plan maintenance windows accordingly.
 
 - Changes to dedupe configuration (e.g., `HASHCODE_FIELDS_PER_SCANNER`, `HASH_CODE_FIELDS_ALWAYS`, `DEDUPLICATION_ALGORITHM_PER_PARSER`) are not applied retroactively automatically. To re-evaluate existing findings you must run the management command below.
 
