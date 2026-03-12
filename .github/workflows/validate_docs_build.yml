@@ -40,3 +40,10 @@ jobs:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && npm ci && hugo --minify --gc --config config/production/hugo.toml
+
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
+        with:
+          args: --offline --no-progress --root-dir docs/public './docs/public/**/*.html'
+          fail: true
+
