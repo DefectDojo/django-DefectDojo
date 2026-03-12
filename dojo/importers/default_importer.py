@@ -243,9 +243,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             # Parsers must use unsaved_tags to store tags, so we can clean them
             cleaned_tags = clean_tags(finding.unsaved_tags)
             if isinstance(cleaned_tags, list):
-                finding.tags.set(cleaned_tags)
+                finding.tags.add(*cleaned_tags)
             elif isinstance(cleaned_tags, str):
-                finding.tags.set([cleaned_tags])
+                finding.tags.add(cleaned_tags)
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
