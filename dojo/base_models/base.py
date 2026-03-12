@@ -42,7 +42,7 @@ class BaseModelWithoutTimeMeta(Model):
 
         abstract = True
 
-    def save(self, *args: list, skip_validation: bool = not settings.V3_FEATURE_LOCATIONS, **kwargs: dict) -> None:
+    def save(self, *args: list, skip_validation: bool | None = None, **kwargs: dict) -> None:
         """
         Override save method to call the `full_clean()` validation function each save.
 
@@ -53,6 +53,9 @@ class BaseModelWithoutTimeMeta(Model):
         - Validate the field uniqueness - `validate_unique()`
         All three steps are performed when you call a model's full_clean() method in the order above
         """
+        # make sure this is evaluated at runtime, not at class definition time which would be the case if we used it in the parameter default value
+        if skip_validation is None:
+            skip_validation = not settings.V3_FEATURE_LOCATIONS
         # Run the pre save logic, if enabled
         self.pre_save_logic()
         # Call the validations
