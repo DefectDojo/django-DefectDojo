@@ -5,7 +5,7 @@ weight: 13
 audience: pro
 ---
 
-DefectDojo Pro supports login via KeyCloak. Open-Source users should refer to the [Open-Source KeyCloak guide](../OS__keycloak/).
+DefectDojo Pro supports login via KeyCloak. Open-Source users should refer to the [Open-Source KeyCloak guide](/admin/sso/os__keycloak/).
 
 This guide assumes you already have a KeyCloak Realm configured. If not, see the [KeyCloak documentation](https://wjw465150.gitbooks.io/keycloak-documentation/content/server_admin/topics/realms/create.html).
 

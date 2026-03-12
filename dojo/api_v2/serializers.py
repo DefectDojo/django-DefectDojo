@@ -1139,6 +1139,13 @@ class EngagementToNotesSerializer(serializers.Serializer):
     notes = NoteSerializer(many=True)
 
 
+class RiskAcceptanceToNotesSerializer(serializers.Serializer):
+    risk_acceptance_id = serializers.PrimaryKeyRelatedField(
+        queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
+    )
+    notes = NoteSerializer(many=True)
+
+
 class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), many=False, allow_null=True,
@@ -1420,6 +1427,12 @@ class JIRAProjectSerializer(serializers.ModelSerializer):
         if (engagement and product) or (not engagement and not product):
             msg = "Either engagement or product has to be set."
             raise serializers.ValidationError(msg)
+
+        if "custom_fields" in data and isinstance(data["custom_fields"], str):
+            try:
+                data["custom_fields"] = json.loads(data["custom_fields"])
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({"custom_fields": f"Invalid JSON: {e}"}) from e
 
         return data
 

@@ -240,9 +240,10 @@ class FindingQueriesTest(DojoTestCase):
             self.assertIn(finding_discovered_before.id, closed_ids,
                          "Finding discovered before range but closed within range should appear in closed metrics")
 
-            # The finding discovered within but closed after should NOT appear
-            self.assertNotIn(finding_closed_after.id, closed_ids,
-                            "Finding discovered within range but closed after range should NOT appear in closed metrics")
+            # The finding closed after the discovery date range but before now() should appear -
+            # the upper bound for mitigated is timezone.now(), not end_date derived from discovery dates.
+            self.assertIn(finding_closed_after.id, closed_ids,
+                          "Finding closed after discovery date range but before now() should appear in closed metrics")
 
             # The finding discovered and closed within should appear
             self.assertIn(finding_both_within.id, closed_ids,
