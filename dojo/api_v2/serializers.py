@@ -1139,6 +1139,13 @@ class EngagementToNotesSerializer(serializers.Serializer):
     notes = NoteSerializer(many=True)
 
 
+class RiskAcceptanceToNotesSerializer(serializers.Serializer):
+    risk_acceptance_id = serializers.PrimaryKeyRelatedField(
+        queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
+    )
+    notes = NoteSerializer(many=True)
+
+
 class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), many=False, allow_null=True,
