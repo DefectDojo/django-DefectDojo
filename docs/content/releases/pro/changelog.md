@@ -21,7 +21,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 ### Mar 5, 2026: v2.56.0
 
 * **(API)** Restricted Note Types are now accessible via the API.
-* **(Connectors)** Added **IriusRisk** connector.
+* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
 * **(SAML)** SAML settings now support optional group attributes, allowing configurations that don't provide group mappings to work without errors.
 * **(SMTP)** Fixed an issue where DefectDojo would attempt SMTP authentication even when no credentials were configured, which could cause email delivery failures.
 * **(Universal Parser)** The Universal Parser now falls back to `clevercsv` for non-standard or malformed CSV files, improving compatibility with edge-case scanner outputs.
