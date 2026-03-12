@@ -1911,6 +1911,6 @@ class TestDedupeRelatedMethods(DojoTestCase):
         test = Test.objects.get(id=3)
         finding = Finding.objects.filter(test=test).first()
         finding.endpoints.add(endpoint)
-        # This explodes if it tries to prefetch Endpoints when they are disabled
+        # This used to explode when it tried to prefetch Endpoints when they are disabled, now fixed
         finding = build_candidate_scope_queryset(test).filter(id=finding.id).first()
         self.assertTrue(finding)
