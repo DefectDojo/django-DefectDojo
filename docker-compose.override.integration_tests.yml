@@ -1,6 +1,7 @@
 ---
 services:
   integration-tests:
+    platform: "linux/amd64"
     build:
       context: ./
       dockerfile: ${INTEGRATION_TESTS_DOCKERFILE:-Dockerfile.integration-tests-debian}
