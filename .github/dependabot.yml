@@ -4,6 +4,7 @@ updates:
   directory: "/"
   schedule:
     interval: daily
+    time: "08:00"
   open-pull-requests-limit: 10
   target-branch: dev
   ignore:
@@ -17,6 +18,7 @@ updates:
   directory: "/components"
   schedule:
     interval: daily
+    time: "08:00"
   open-pull-requests-limit: 10
   target-branch: dev
   ignore:

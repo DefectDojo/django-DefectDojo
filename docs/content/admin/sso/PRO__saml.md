@@ -5,7 +5,7 @@ weight: 1
 audience: pro
 ---
 
-DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. Open-Source users should refer to the [Open-Source SAML guide](../OS__saml/).
+DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. Open-Source users should refer to the [Open-Source SAML guide](/admin/sso/os__saml/).
 
 ## Setup
 
