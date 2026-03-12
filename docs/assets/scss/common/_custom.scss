@@ -98,6 +98,30 @@ h1, h2, h3, h4, h5, h6,
   visibility: hidden; // Hide sidebar until version is resolved
 }
 
+@media (min-width: 992px) {
+  @supports ((position: -webkit-sticky) or (position: sticky)) {
+    .docs-sidebar {
+      display: flex !important; // Override Bootstrap d-lg-block { display: block !important }
+      flex-direction: column;
+    }
+
+    .docs-version-toggle {
+      flex-shrink: 0;
+    }
+
+    .version-menu-wrapper {
+      flex: 1;
+      min-height: 0; // Required: allows flex child to shrink below content size
+      overflow-y: auto;
+    }
+
+    .docs-links {
+      max-height: none; // Parent flex container now handles height/scroll
+      overflow: visible;
+    }
+  }
+}
+
 .doks-sidebar .section-nav a {
   color: #333333; // Dojo Hue 04
   transition: color 0.15s ease, background-color 0.15s ease;

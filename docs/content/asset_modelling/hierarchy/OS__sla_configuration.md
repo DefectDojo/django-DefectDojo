@@ -73,6 +73,6 @@ Once a new SLA has been selected for a Product, all of the associated Findings' 
 
 ## Notes on SLAs
 
-* SLAs can be optionally restarted once a [Risk Accepted](/triage_findings/findings_workflows/risk_acceptances/) Finding reactivates.  This is set when creating the Risk Acceptance by setting the **Restart SLA Expired** field.
+* SLAs can be optionally restarted once a [Risk Accepted](/triage_findings/findings_workflows/os__risk_acceptance/) Finding reactivates.  This is set when creating the Risk Acceptance by setting the **Restart SLA Expired** field.
 * Reimporting a Finding does not restart the SLA - SLAs are always calculated from when a Finding was first detected unless **Restart SLA on Finding Reactivation** is enabled.
 * Risk Acceptance expiry or reactivation of a Closed Finding are the only ways to reset or recalculate an SLA for a Finding once it is created (without changing the Product's SLA configuration).
