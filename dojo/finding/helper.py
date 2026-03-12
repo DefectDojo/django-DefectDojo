@@ -23,6 +23,8 @@ from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
     do_dedupe_finding_task_internal,
+    do_false_positive_history,
+    do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
@@ -49,7 +51,6 @@ from dojo.url.models import URL
 from dojo.utils import (
     calculate_grade,
     close_external_issue,
-    do_false_positive_history,
     get_current_user,
     get_object_or_none,
     to_str_typed,
@@ -503,8 +504,7 @@ def post_process_findings_batch(
         if system_settings.enable_deduplication:
             deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
         else:
-            for finding in findings:
-                do_false_positive_history(finding, *args, **kwargs)
+            do_false_positive_history_batch(findings)
 
     # Non-status changing tasks
     if issue_updater_option:
