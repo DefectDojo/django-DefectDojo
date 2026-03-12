@@ -261,7 +261,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
     @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_async(self):
         """
-        This test checks the performance of the importers when using django-pghistory with async enabled.
+        This test checks the performance of the importers when using django-pghistory and celery tasks in sync mode
         Query counts will need to be determined by running the test initially.
         """
         configure_audit_system()
@@ -279,7 +279,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
     @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_no_async(self):
         """
-        This test checks the performance of the importers when using django-pghistory with async disabled.
+        This test checks the performance of the importers when using django-pghistory and celery tasks in sync mode.
         Query counts will need to be determined by running the test initially.
         """
         configure_audit_system()
@@ -445,7 +445,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     @override_settings(ENABLE_AUDITLOG=True)
     def test_deduplication_performance_pghistory_no_async(self):
-        """Test deduplication performance with django-pghistory and async tasks disabled."""
+        """Test deduplication performance with django-pghistory and celery tasks in sync mode."""
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -459,6 +459,6 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._deduplication_performance(
             expected_num_queries1=271,
             expected_num_async_tasks1=7,
-            expected_num_queries2=236,
+            expected_num_queries2=183,
             expected_num_async_tasks2=7,
         )
