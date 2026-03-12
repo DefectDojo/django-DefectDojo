@@ -3387,6 +3387,8 @@ class QuestionnaireEngagementSurveyViewSet(
         engagement_survey = self.get_object()
         # Safely get the engagement
         engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Verify the user has permission to edit the engagement
+        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit)
         # Link the engagement
         answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
         # Send a favorable response
