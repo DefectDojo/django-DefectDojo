@@ -556,46 +556,36 @@ def verify_and_get_mismatches(test_class: str) -> tuple[bool, list[TestCount]]:
 
 def process_class(test_class: str, *, report_only: bool) -> list[TestCount]:
     """Run update (or report-only) for a single test class. Returns all parsed counts."""
-    test_methods = extract_test_methods(test_class)
-    if not test_methods:
-        print(f"⚠️  No test methods found in {test_class}")
-        return []
-
-    print(f"\nFound {len(test_methods)} test method(s) in {test_class}")
+    print(f"\nRunning all tests for {test_class}...")
     print("=" * 80)
 
-    all_counts = []
-    for test_method in test_methods:
-        print(f"\n{'=' * 80}")
-        output, return_code = run_test_method(test_class, test_method)
-        success, error_msg = check_test_execution_success(output, return_code)
-        if not success:
-            print(f"\n⚠️  Test execution failed for {test_method}: {error_msg}")
-            print("Skipping this test method...")
-            continue
+    output, return_code = run_tests(test_class)
+    success, error_msg = check_test_execution_success(output, return_code)
+    if not success:
+        print(f"\n⚠️  Test execution failed: {error_msg}")
+        return []
 
-        counts = parse_test_output(output)
+    counts = parse_test_output(output)
 
-        if counts:
-            all_counts.extend(counts)
-            if not report_only:
-                update_test_file(counts)
-                print(f"⚠️  {test_method}: Found {len(counts)} count mismatch(es) - updated file")
-        else:
-            test_passed = "OK" in output or ("Ran" in output and "FAILED" not in output and return_code == 0)
-            if test_passed:
-                print(f"✅ {test_method}: Test passed, all counts match")
-            elif return_code != 0:
-                print(f"⚠️  {test_method}: Test failed (exit code {return_code}) but no count mismatches parsed")
-                fail_lines = [
-                    line for line in output.split("\n") if "FAIL" in line or "Error" in line or "Exception" in line
-                ]
-                if fail_lines:
-                    print("   Relevant error lines:")
-                    for line in fail_lines[:5]:
-                        print(f"     {line}")
+    if counts:
+        if not report_only:
+            update_test_file(counts)
+            print(f"⚠️  Found {len(counts)} count mismatch(es) - updated file")
+    else:
+        test_passed = "OK" in output or ("Ran" in output and "FAILED" not in output and return_code == 0)
+        if test_passed:
+            print("✅ All tests passed, all counts match")
+        elif return_code != 0:
+            print(f"⚠️  Tests failed (exit code {return_code}) but no count mismatches parsed")
+            fail_lines = [
+                line for line in output.split("\n") if "FAIL" in line or "Error" in line or "Exception" in line
+            ]
+            if fail_lines:
+                print("   Relevant error lines:")
+                for line in fail_lines[:5]:
+                    print(f"     {line}")
 
-    return all_counts
+    return counts
 
 
 def main():
