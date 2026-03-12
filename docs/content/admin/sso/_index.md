@@ -20,15 +20,15 @@ aliases:
 
 Users can connect to DefectDojo with a Username and Password, but you can also allow users to authenticate via Single Sign-On (SSO). DefectDojo supports SAML and a range of OAuth providers:
 
-* **[Auth0](./PRO__auth0/)**
-* **[Azure Active Directory](./PRO__azure_ad/)**
-* **[GitHub Enterprise](./PRO__github_enterprise/)**
-* **[GitLab](./PRO__gitlab/)**
-* **[Google](./PRO__google/)**
-* **[KeyCloak](./PRO__keycloak/)**
-* **[Okta](./PRO__okta/)**
-* **[OIDC (OpenID Connect)](./PRO__oidc/)**
-* **[SAML](./PRO__saml/)**
+* **[Auth0](/admin/sso/pro__auth0/)**
+* **[Azure Active Directory](/admin/sso/pro__azure_ad/)**
+* **[GitHub Enterprise](/admin/sso/pro__github_enterprise/)**
+* **[GitLab](/admin/sso/pro__gitlab/)**
+* **[Google](/admin/sso/pro__google/)**
+* **[KeyCloak](/admin/sso/pro__keycloak/)**
+* **[Okta](/admin/sso/pro__okta/)**
+* **[OIDC (OpenID Connect)](/admin/sso/pro__oidc/)**
+* **[SAML](/admin/sso/pro__saml/)**
 
 SSO configuration can only be performed by a **Superuser**.
 
