@@ -353,6 +353,20 @@ Check the logs with:
 docker compose logs -f integration-tests
 ```
 
+### Running a single integration test from dev mode
+
+If your dev stack is already running (`docker/setEnv.sh dev && docker compose up`), you can run a single integration test without switching environments.
+The dev override includes an `integration-tests` service behind a Docker Compose profile, so it won't start during normal `docker compose up`.
+
+Make sure the dev containers are up and healthy before running the test:
+
+```
+./run-integration-test-dev.sh tests/finding_test.py
+```
+
+This spins up the integration test runner container against your running dev stack and tears it down when done.
+Note that test data is created in your dev database — the integration tests attempt to clean up after themselves.
+
 # Checking Docker versions
 
 Run the following to determine the versions for docker and docker compose:
