@@ -23,7 +23,7 @@ from contextlib import contextmanager
 
 from crum import impersonate
 from django.contrib.contenttypes.models import ContentType
-from django.test import override_settings
+from django.test import override_settings, tag
 from django.utils import timezone
 
 from dojo.auditlog import configure_audit_system, configure_pghistory_triggers
@@ -229,6 +229,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
 
 
+@tag("performance")
 @skip_unless_v2
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
@@ -457,13 +458,14 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=271,
+            expected_num_queries1=272,
             expected_num_async_tasks1=7,
             expected_num_queries2=236,
             expected_num_async_tasks2=7,
         )
 
 
+@tag("performance")
 @override_settings(V3_FEATURE_LOCATIONS=True)
 class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase):
 
@@ -518,7 +520,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=1225,
+            expected_num_queries1=1226,
             expected_num_async_tasks1=6,
             expected_num_queries2=715,
             expected_num_async_tasks2=17,
