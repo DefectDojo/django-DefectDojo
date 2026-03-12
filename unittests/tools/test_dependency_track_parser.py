@@ -1,3 +1,5 @@
+from datetime import date
+
 from dojo.models import Test
 from dojo.tools.dependency_track.parser import DependencyTrackParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -60,6 +62,17 @@ class TestDependencyTrackParser(DojoTestCase):
                 "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46",
                 findings[0].unique_id_from_tool,
             )
+            self.assertEqual(
+                "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+                findings[0].cvssv3,
+            )
+            self.assertEqual(
+                "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+                findings[0].cvssv4,
+            )
+            self.assertIn("https://example.com", findings[0].references)
+            self.assertIn("https://example.org", findings[0].references)
+            self.assertEqual(date(2025,7,11), findings[0].publish_date)
 
     def test_dependency_track_parser_v3_8_0(self):
         with (
