@@ -55,10 +55,6 @@ jobs:
         env:
           DJANGO_VERSION: alpine
 
-      - name: Run migrations
-        timeout-minutes: 5
-        run: docker compose exec uwsgi python manage.py migrate
-
       - name: Run performance tests (auto-update counts)
         timeout-minutes: 60
         run: python3 scripts/update_performance_test_counts.py
