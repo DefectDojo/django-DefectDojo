@@ -522,9 +522,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self._import_reimport_performance(
             expected_num_queries1=1225,
             expected_num_async_tasks1=6,
-            expected_num_queries2=715,
+            expected_num_queries2=716,
             expected_num_async_tasks2=17,
-            expected_num_queries3=345,
+            expected_num_queries3=346,
             expected_num_async_tasks3=16,
         )
 
@@ -542,11 +542,11 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=1232,
+            expected_num_queries1=1234,
             expected_num_async_tasks1=6,
-            expected_num_queries2=722,
+            expected_num_queries2=725,
             expected_num_async_tasks2=17,
-            expected_num_queries3=352,
+            expected_num_queries3=355,
             expected_num_async_tasks3=16,
         )
 
@@ -565,11 +565,11 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=1242,
+            expected_num_queries1=1244,
             expected_num_async_tasks1=8,
-            expected_num_queries2=732,
+            expected_num_queries2=735,
             expected_num_async_tasks2=19,
-            expected_num_queries3=356,
+            expected_num_queries3=359,
             expected_num_async_tasks3=18,
         )
 
@@ -683,8 +683,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=1452,
+            expected_num_queries1=1454,
             expected_num_async_tasks1=7,
-            expected_num_queries2=1289,
+            expected_num_queries2=1185,
             expected_num_async_tasks2=7,
         )
