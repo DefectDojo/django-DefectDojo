@@ -55,6 +55,12 @@ jobs:
         env:
           DJANGO_VERSION: alpine
 
+        # if the github actions queue is clogged, we can arrive here while new commits were pushed to the PR
+      - name: Rebase on latest before running tests
+        run: |
+          git fetch origin ${{ github.head_ref }}
+          git rebase FETCH_HEAD
+
       - name: Run performance tests (auto-update counts)
         timeout-minutes: 60
         run: python3 scripts/update_performance_test_counts.py
@@ -65,6 +71,8 @@ jobs:
           if ! git diff --quiet unittests/test_importers_performance.py; then
             git add unittests/test_importers_performance.py
             git commit -m "chore: update performance test counts [skip ci]"
+            git fetch origin ${{ github.head_ref }}
+            git rebase FETCH_HEAD
             git push origin HEAD:${{ github.head_ref }}
             gh pr comment ${{ github.event.pull_request.number }} \
               --body "Performance test counts were out of date and have been auto-updated. Please review the changes in the latest commit."
