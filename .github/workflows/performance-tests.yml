@@ -65,7 +65,7 @@ jobs:
           if ! git diff --quiet unittests/test_importers_performance.py; then
             git add unittests/test_importers_performance.py
             git commit -m "chore: update performance test counts [skip ci]"
-            git push
+            git push origin HEAD:${{ github.head_ref }}
             gh pr comment ${{ github.event.pull_request.number }} \
               --body "Performance test counts were out of date and have been auto-updated. Please review the changes in the latest commit."
           else
