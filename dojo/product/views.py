@@ -445,8 +445,10 @@ def finding_queries(request, prod):
     filters["new_verified"] = findings_qs.filter(finding_helper.VERIFIED_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["open"] = findings_qs.filter(finding_helper.OPEN_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["inactive"] = findings_qs.filter(finding_helper.INACTIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
-    # Filter closed findings by mitigated date (not discovery date) to show findings closed within the date range
-    filters["closed"] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(mitigated__range=[start_date, end_date], mitigated__isnull=False).order_by("mitigated")
+    # Filter closed findings by mitigated date (not discovery date).
+    # Use timezone.now() as the upper bound so findings closed after the latest
+    # discovery date are not excluded from the counter.
+    filters["closed"] = findings_qs.filter(finding_helper.CLOSED_FINDINGS_QUERY).filter(mitigated__range=[start_date, timezone.now()], mitigated__isnull=False).order_by("mitigated")
     filters["false_positive"] = findings_qs.filter(finding_helper.FALSE_POSITIVE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["out_of_scope"] = findings_qs.filter(finding_helper.OUT_OF_SCOPE_FINDINGS_QUERY).filter(date__range=[start_date, end_date]).order_by("date")
     filters["all"] = findings_qs.order_by("date")

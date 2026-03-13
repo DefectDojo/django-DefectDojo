@@ -3,6 +3,7 @@ import logging
 import requests
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
@@ -19,11 +20,10 @@ logger = logging.getLogger(__name__)
 
 class SystemNotificationsView(View):
     def get_notifications(self, request: HttpRequest):
-        try:
-            notifications = Notifications.objects.get(user=None, product__isnull=True, template=False)
-        except Notifications.DoesNotExist:
-            notifications = Notifications(user=None, template=False)
-
+        with transaction.atomic():
+            notifications, _ = Notifications.objects.get_or_create(
+                user=None, product=None, template=False,
+            )
         return notifications
 
     def check_user_permissions(self, request: HttpRequest):
@@ -97,10 +97,10 @@ class SystemNotificationsView(View):
 
 class PersonalNotificationsView(SystemNotificationsView):
     def get_notifications(self, request: HttpRequest):
-        try:
-            notifications = Notifications.objects.get(user=request.user, product__isnull=True)
-        except Notifications.DoesNotExist:
-            notifications = Notifications(user=request.user)
+        with transaction.atomic():
+            notifications, _ = Notifications.objects.get_or_create(
+                user=request.user, product=None, template=False,
+            )
         return notifications
 
     def check_user_permissions(self, request: HttpRequest):
@@ -116,10 +116,10 @@ class PersonalNotificationsView(SystemNotificationsView):
 
 class TemplateNotificationsView(SystemNotificationsView):
     def get_notifications(self, request: HttpRequest):
-        try:
-            notifications = Notifications.objects.get(template=True)
-        except Notifications.DoesNotExist:
-            notifications = Notifications(user=None, template=True)
+        with transaction.atomic():
+            notifications, _ = Notifications.objects.get_or_create(
+                user=None, product=None, template=True,
+            )
         return notifications
 
     def get_scope(self):

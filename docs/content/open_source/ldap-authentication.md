@@ -1,11 +1,15 @@
 ---
-title: "Authentication via LDAP (Open-Source)"
+title: "Authentication via LDAP"
 description: "Authenticate users using LDAP"
 draft: false
+audience: opensource
 weight: 4
 aliases:
   - /en/open_source/ldap-authentication
 ---
+
+**LDAP Authentication can be used in Open Source DefectDojo by manipulating the source code. This method is not supported or implementable in DefectDojo Pro at this time.**
+
 ## LDAP Authentication
 
 Out of the box DefectDojo does not support LDAP authentication.

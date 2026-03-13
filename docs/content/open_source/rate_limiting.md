@@ -1,7 +1,8 @@
 ---
-title: "Rate Limiting (Open-Source)"
+title: "Rate Limiting"
 description: "Configurable rate limiting on the login page to mitigate brute force attacks"
 draft: false
+audience: opensource
 weight: 11
 aliases:
   - /en/open_source/rate_limiting
