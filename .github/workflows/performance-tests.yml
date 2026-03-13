@@ -55,12 +55,6 @@ jobs:
         env:
           DJANGO_VERSION: alpine
 
-        # if the github actions queue is clogged, we can arrive here while new commits were pushed to the PR
-      - name: Rebase on latest before running tests
-        run: |
-          git fetch origin ${{ github.head_ref }}
-          git rebase FETCH_HEAD
-
       - name: Run performance tests (auto-update counts)
         timeout-minutes: 60
         run: python3 scripts/update_performance_test_counts.py
