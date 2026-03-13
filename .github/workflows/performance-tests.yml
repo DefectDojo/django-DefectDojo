@@ -65,16 +65,29 @@ jobs:
         timeout-minutes: 60
         run: python3 scripts/update_performance_test_counts.py
 
-        # Commit triggers a new CI run so checks remain visible on the PR
       - name: Commit updated counts if changed
         if: inputs.head_ref != ''
         run: |
           if ! git diff --quiet unittests/test_importers_performance.py; then
+            # Guard against infinite re-trigger loop if the script is non-deterministic:
+            # if the remote branch's last commit was already an auto-update and counts
+            # still differ, something is wrong — fail loudly instead of looping.
+            last_remote_msg=$(git log -1 --format='%s' origin/${{ inputs.head_ref }})
+            if [ "$last_remote_msg" = "chore: update performance test counts" ]; then
+              echo "ERROR: Counts still differ after a previous auto-update commit."
+              echo "The update script may be producing non-deterministic output. Aborting to prevent an infinite loop."
+              exit 1
+            fi
             git add unittests/test_importers_performance.py
             git commit -m "chore: update performance test counts"
             git push origin HEAD:${{ inputs.head_ref }}
             gh pr comment ${{ github.event.pull_request.number }} \
               --body "Performance test counts were out of date and have been auto-updated. Please review the changes in the latest commit."
+            # Pushes via GITHUB_TOKEN do not trigger new workflow runs; re-dispatch manually so
+            # the updated commit gets its CI checks.
+            gh workflow run unit-tests.yml \
+              --repo ${{ github.repository }} \
+              --ref ${{ inputs.head_ref }}
           else
             echo "Performance test counts are up to date."
           fi
