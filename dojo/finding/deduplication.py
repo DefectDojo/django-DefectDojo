@@ -700,21 +700,25 @@ def _flush_duplicate_changes(modified_new_findings):
     save() call per finding.  Uses bulk_update (no signals) which is consistent
     with the original code that called super(Finding, ...).save(skip_validation=True),
     bypassing Finding.save() in both cases.
+
+    Returns the list of modified findings so callers can perform any follow-up
+    processing (e.g. triggering prioritization) on the affected findings.
     """
     if modified_new_findings:
         Finding.objects.bulk_update(
             modified_new_findings,
             ["duplicate", "active", "verified", "duplicate_finding"],
         )
+    return modified_new_findings
 
 
 def _dedupe_batch_hash_code(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_hash = find_candidates_for_deduplication_hash(test, findings)
     if not candidates_by_hash:
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_HASH_CODE")
@@ -724,16 +728,16 @@ def _dedupe_batch_hash_code(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_unique_id(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings)
     if not candidates_by_uid:
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL")
@@ -745,17 +749,17 @@ def _dedupe_batch_unique_id(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(f"Exception when deduplicating finding {new_finding.id} against candidate {match.id}: {e!s}")
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_uid_or_hash(findings):
     if not findings:
-        return
+        return []
 
     test = findings[0].test
     candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings)
     if not (candidates_by_uid or existing_by_hash):
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE")
@@ -768,16 +772,16 @@ def _dedupe_batch_uid_or_hash(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_legacy(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings)
     if not (candidates_by_title or candidates_by_cwe):
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_LEGACY")
@@ -787,7 +791,7 @@ def _dedupe_batch_legacy(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def dedupe_batch_of_findings(findings, *args, **kwargs):
@@ -800,7 +804,7 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
 
     if not findings:
         logger.debug("dedupe_batch_of_findings called with no findings")
-        return None
+        return []
 
     enabled = System_Settings.objects.get().enable_deduplication
 
@@ -813,19 +817,17 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
 
         if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_HASH_CODE - {len(findings)} findings")
-            _dedupe_batch_hash_code(findings)
-        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            return _dedupe_batch_hash_code(findings)
+        if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL - {len(findings)} findings")
-            _dedupe_batch_unique_id(findings)
-        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            return _dedupe_batch_unique_id(findings)
+        if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE - {len(findings)} findings")
-            _dedupe_batch_uid_or_hash(findings)
-        else:
-            logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
-            _dedupe_batch_legacy(findings)
-    else:
-        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
-    return None
+            return _dedupe_batch_uid_or_hash(findings)
+        logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
+        return _dedupe_batch_legacy(findings)
+    deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
+    return []
 
 
 # ---------------------------------------------------------------------------
