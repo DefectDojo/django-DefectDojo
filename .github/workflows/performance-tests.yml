@@ -62,7 +62,7 @@ jobs:
           DJANGO_VERSION: alpine
 
       - name: Run performance tests (auto-update counts)
-        timeout-minutes: 60
+        timeout-minutes: 15
         run: python3 scripts/update_performance_test_counts.py
 
       - name: Commit updated counts if changed
