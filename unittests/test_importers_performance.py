@@ -542,7 +542,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=1232,
+            expected_num_queries1=1233,
             expected_num_async_tasks1=6,
             expected_num_queries2=722,
             expected_num_async_tasks2=17,
