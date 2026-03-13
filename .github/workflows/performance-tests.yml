@@ -60,12 +60,12 @@ jobs:
         timeout-minutes: 60
         run: python3 scripts/update_performance_test_counts.py
 
-        # this commit will not trigger a new build/cicd run
+        # Commit triggers a new CI run so checks remain visible on the PR
       - name: Commit updated counts if changed
         run: |
           if ! git diff --quiet unittests/test_importers_performance.py; then
             git add unittests/test_importers_performance.py
-            git commit -m "chore: update performance test counts [skip ci]"
+            git commit -m "chore: update performance test counts"
             git push origin HEAD:${{ github.head_ref }}
             gh pr comment ${{ github.event.pull_request.number }} \
               --body "Performance test counts were out of date and have been auto-updated. Please review the changes in the latest commit."
