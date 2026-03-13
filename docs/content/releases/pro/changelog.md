@@ -10,6 +10,23 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## Mar 2026: v2.56
+
+### Mar 12, 2026: v2.56.1
+
+* **(Pro UI)** Finding Groups can now be filtered by computed status: resolved, active, or risk-accepted.
+* **(Users)** Filters selected on the Users List are now included when exporting to CSV, so your export reflects the current view.
+* **(Jira)** Basic auth failures with Jira are now surfaced as warnings, making it easier to diagnose connection issues.
+
+### Mar 5, 2026: v2.56.0
+
+* **(API)** Restricted Note Types are now accessible via the API.
+* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
+* **(SAML)** SAML settings now support optional group attributes, allowing configurations that don't provide group mappings to work without errors.
+* **(SMTP)** Fixed an issue where DefectDojo would attempt SMTP authentication even when no credentials were configured, which could cause email delivery failures.
+* **(Universal Parser)** The Universal Parser now falls back to `clevercsv` for non-standard or malformed CSV files, improving compatibility with edge-case scanner outputs.
+
+
 ## Feb 2026: v2.55
 
 ### Feb 26, 2026: v2.55.5
@@ -97,22 +114,22 @@ No significant UX changes.
 
 ## Nov 2025: v2.52
 
-### Nov 24, 2025: v2.52.3
+#### Nov 24, 2025: v2.52.3
 
 * **(Pro UI)** Improved error messaging for failed Imports.
 * **(Pro UI)** Added Engagement Tags column to Finding lists
 
 
-### Nov 17, 2025: v2.52.2
+#### Nov 17, 2025: v2.52.2
 
 * No significant feature changes.
 
-### Nov 10, 2025: v2.52.1
+#### Nov 10, 2025: v2.52.1
 
 * **(Pro UI)** Finding view now shows all associated Endpoints, not just Active Endpoints
 
 
-### Nov 3, 2025: v2.52.0
+#### Nov 3, 2025: v2.52.0
 
 * **(Pro UI)** In-app Contact Support form now requires a valid email address in your user profile.
 * **(Pro UI)** You can now Add Files to Findings through the Pro UI directly from Finding Lists.
