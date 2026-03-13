@@ -1,4 +1,4 @@
-8"""
+"""
 Performance tests for importers.
 
 These tests verify that import and reimport operations maintain acceptable query counts
