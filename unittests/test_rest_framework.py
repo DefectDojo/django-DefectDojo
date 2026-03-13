@@ -1014,6 +1014,7 @@ class FindingCloseAPITest(DojoAPITestCase):
             self.assertTrue(add_comment_mock.called)
 
 
+@versioned_fixtures
 class EngagementCloseReopenAPITest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
