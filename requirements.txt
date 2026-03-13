@@ -1,6 +1,5 @@
 # requirements.txt for DefectDojo using Python 3.x
-bleach==6.3.0
-bleach[css]
+nh3
 celery[sqs]==5.6.2
 # pycurl and boto3 are included via celery[sqs] for Celery Broker AWS (SQS) support
 defusedxml==0.7.1
