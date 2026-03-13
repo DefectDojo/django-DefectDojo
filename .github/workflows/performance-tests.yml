@@ -2,6 +2,11 @@ name: Performance Tests
 
 on:
   workflow_call:
+    inputs:
+      head_ref:
+        description: "PR branch (pass from caller to fix workflow_call context bug)"
+        required: false
+        type: string
 
 jobs:
   performance-tests:
@@ -16,7 +21,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
-          ref: ${{ github.head_ref || github.ref }}
+          ref: ${{ inputs.head_ref || github.sha }}
           persist-credentials: true
 
       - name: Configure git user
@@ -62,11 +67,12 @@ jobs:
 
         # Commit triggers a new CI run so checks remain visible on the PR
       - name: Commit updated counts if changed
+        if: inputs.head_ref != ''
         run: |
           if ! git diff --quiet unittests/test_importers_performance.py; then
             git add unittests/test_importers_performance.py
             git commit -m "chore: update performance test counts"
-            git push origin HEAD:${{ github.head_ref }}
+            git push origin HEAD:${{ inputs.head_ref }}
             gh pr comment ${{ github.event.pull_request.number }} \
               --body "Performance test counts were out of date and have been auto-updated. Please review the changes in the latest commit."
           else
