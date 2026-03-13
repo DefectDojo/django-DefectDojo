@@ -2,7 +2,6 @@ import json
 import logging
 
 from dateutil import parser
-
 from django.conf import settings
 
 from dojo.models import Finding
@@ -14,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class DependencyTrackParser:
 
-    """
+    r"""
     A class that can be used to parse the JSON Finding Packaging Format (FPF) export from OWASP Dependency Track.
 
     See here for more info on this JSON format: https://docs.dependencytrack.org/integrations/file-formats/

@@ -72,7 +72,7 @@ class TestDependencyTrackParser(DojoTestCase):
             )
             self.assertIn("https://example.com", findings[0].references)
             self.assertIn("https://example.org", findings[0].references)
-            self.assertEqual(date(2025,7,11), findings[0].publish_date)
+            self.assertEqual(date(2025, 7, 11), findings[0].publish_date)
 
     def test_dependency_track_parser_v3_8_0(self):
         with (
