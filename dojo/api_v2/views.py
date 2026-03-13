@@ -15,7 +15,7 @@ from django.db import IntegrityError
 from django.db.models import OuterRef, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -469,20 +469,20 @@ class EngagementViewSet(
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def close(self, request, pk=None):
         eng = self.get_object()
         close_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def reopen(self, request, pk=None):
         eng = self.get_object()
         reopen_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
