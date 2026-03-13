@@ -82,7 +82,7 @@ jobs:
             git commit -m "chore: update performance test counts"
             git push origin HEAD:${{ inputs.head_ref }}
             gh pr comment ${{ github.event.pull_request.number }} \
-              --body "Performance test counts were out of date and have been auto-updated. Please review the changes in the latest commit."
+              --body "Performance test counts have been auto-updated. Please review the changes in the latest commit."
             # Pushes via GITHUB_TOKEN do not trigger new workflow runs; re-dispatch manually so
             # the updated commit gets its CI checks.
             gh workflow run unit-tests.yml \
