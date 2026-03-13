@@ -25,8 +25,6 @@ jobs:
     needs: build-docker-containers
     uses: ./.github/workflows/performance-tests.yml
     secrets: inherit
-    with:
-      head_ref: ${{ github.head_ref }}
 
   test-rest-framework:
     strategy:

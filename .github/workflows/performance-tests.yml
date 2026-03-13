@@ -2,11 +2,6 @@ name: Performance Tests
 
 on:
   workflow_call:
-    inputs:
-      head_ref:
-        description: "PR branch (pass from caller to fix workflow_call context bug)"
-        required: false
-        type: string
 
 jobs:
   performance-tests:
@@ -14,20 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: []
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
 
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          ref: ${{ inputs.head_ref || github.sha }}
-          persist-credentials: true
-
-      - name: Configure git user
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Set-platform
         run: |
@@ -65,32 +51,19 @@ jobs:
         timeout-minutes: 15
         run: python3 scripts/update_performance_test_counts.py
 
-      - name: Commit updated counts if changed
-        if: inputs.head_ref != ''
+      - name: Check counts are up to date
         run: |
           if ! git diff --quiet unittests/test_importers_performance.py; then
-            # Guard against infinite re-trigger loop if the script is non-deterministic:
-            # if the remote branch's last commit was already an auto-update and counts
-            # still differ, something is wrong — fail loudly instead of looping.
-            last_remote_msg=$(git log -1 --format='%s' origin/${{ inputs.head_ref }})
-            if [ "$last_remote_msg" = "chore: update performance test counts" ]; then
-              echo "ERROR: Counts still differ after a previous auto-update commit."
-              echo "The update script may be producing non-deterministic output. Aborting to prevent an infinite loop."
-              exit 1
-            fi
-            git add unittests/test_importers_performance.py
-            git commit -m "chore: update performance test counts"
-            # Push using GH_TOKEN (a PAT) instead of GITHUB_TOKEN so that GitHub fires a
-            # pull_request:synchronize event, which re-triggers CI checks on the new commit.
-            # Pushes made with GITHUB_TOKEN are silently ignored by the workflow trigger system.
-            git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ inputs.head_ref }}
-            gh pr comment ${{ github.event.pull_request.number }} \
-              --body "Performance test counts have been auto-updated. Please review the changes in the latest commit."
+            echo "Performance test counts are out of date. Fix them by running locally:"
+            echo ""
+            echo "  python3 scripts/update_performance_test_counts.py"
+            echo ""
+            echo "Diff:"
+            git diff unittests/test_importers_performance.py
+            exit 1
           else
             echo "Performance test counts are up to date."
           fi
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Logs
         if: failure()
