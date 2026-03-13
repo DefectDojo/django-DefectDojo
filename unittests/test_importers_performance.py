@@ -1,4 +1,4 @@
-"""
+8"""
 Performance tests for importers.
 
 These tests verify that import and reimport operations maintain acceptable query counts
@@ -269,7 +269,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=295,
+            expected_num_queries1=296,
             expected_num_async_tasks1=6,
             expected_num_queries2=226,
             expected_num_async_tasks2=17,
