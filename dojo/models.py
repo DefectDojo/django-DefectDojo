@@ -325,6 +325,9 @@ class System_Settings(models.Model):
                                               "issue reaches the maximum "
                                               "number of duplicates, the "
                                               "oldest will be deleted. Duplicate will not be deleted when left empty. A value of 0 will remove all duplicates."))
+    max_import_history = models.IntegerField(blank=True, null=True, default=None,
+                                    verbose_name=_("Max Import History"),
+                                    help_text=_("When set, the oldest import history records will be deleted when a test exceeds this number of imports. Leave empty to keep all history."))
 
     email_from = models.CharField(max_length=200, default="no-reply@example.com", blank=True)
 
