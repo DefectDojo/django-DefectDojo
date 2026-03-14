@@ -280,6 +280,7 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
+    DD_IMPORT_HISTORY_MAX_PER_OBJECT=(int, 200),
     # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
@@ -1773,6 +1774,7 @@ if len(env("DD_DEDUPLICATION_ALGORITHM_PER_PARSER")) > 0:
             DEDUPLICATION_ALGORITHM_PER_PARSER[key] = value
 
 DUPE_DELETE_MAX_PER_RUN = env("DD_DUPE_DELETE_MAX_PER_RUN")
+IMPORT_HISTORY_MAX_PER_OBJECT = env("DD_IMPORT_HISTORY_MAX_PER_OBJECT")
 
 DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 
