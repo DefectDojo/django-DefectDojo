@@ -160,16 +160,19 @@ class EndpointManager:
         """Accumulate endpoint statuses for bulk mitigation in persist()."""
         self._statuses_to_mitigate.extend(statuses)
 
-    def _fetch_and_create_endpoints(self) -> dict[EndpointUniqueKey, Endpoint]:
+    def get_or_create_endpoints(self) -> tuple[dict[EndpointUniqueKey, Endpoint], list[Endpoint]]:
         """
-        Fetch existing product endpoints and bulk_create missing ones.
+        For each queued endpoint record, fetch the existing DB row or bulk_create a new one.
 
-        Returns a key -> Endpoint mapping for all endpoints referenced in _endpoints_to_create.
+        Returns:
+            (endpoints_by_key, created) where:
+            - endpoints_by_key maps each EndpointUniqueKey to its Endpoint object (existing or new)
+            - created is the list of Endpoint objects that were actually inserted into the DB
         """
         if not self._endpoints_to_create:
-            return {}
+            return {}, []
 
-        key_to_endpoint: dict[EndpointUniqueKey, Endpoint] = {}
+        endpoints_by_key: dict[EndpointUniqueKey, Endpoint] = {}
 
         with transaction.atomic():
             # Fetch all existing endpoints for this product
@@ -190,27 +193,28 @@ class EndpointManager:
                     product_id=ep.product_id,
                 )
                 # First-by-id wins, matching endpoint_get_or_create behavior
-                if key not in key_to_endpoint:
-                    key_to_endpoint[key] = ep
+                if key not in endpoints_by_key:
+                    endpoints_by_key[key] = ep
 
             # Determine which endpoints still need creating
             to_create = []
             to_create_keys = []
             for key, kwargs in self._endpoints_to_create.items():
-                if key not in key_to_endpoint:
+                if key not in endpoints_by_key:
                     to_create.append(Endpoint(**kwargs))
                     to_create_keys.append(key)
 
+            created: list[Endpoint] = []
             if to_create:
                 created = Endpoint.objects.bulk_create(to_create, batch_size=1000)
-                key_to_endpoint.update(zip(to_create_keys, created, strict=True))
+                endpoints_by_key.update(zip(to_create_keys, created, strict=True))
                 # bulk_create bypasses post_save signals, so manually trigger tag inheritance
                 # this is not ideal, but we need to take a separate look at the tag inheritance feature itself later
                 for ep in created:
                     inherit_instance_tags(ep)
 
         self._endpoints_to_create.clear()
-        return key_to_endpoint
+        return endpoints_by_key, created
 
     def persist(self, user: Dojo_User | None = None) -> None:
         """
@@ -219,18 +223,18 @@ class EndpointManager:
         Called at batch boundaries during import/reimport.
         """
         # Step 1: Ensure all recorded endpoints exist in DB
-        key_to_endpoint = self._fetch_and_create_endpoints()
+        endpoints_by_key, _ = self.get_or_create_endpoints()
 
         # Step 2: Bulk-create Endpoint_Status rows
         if self._statuses_to_create:
             rows = [
                 Endpoint_Status(
                     finding=finding,
-                    endpoint=key_to_endpoint[key],
+                    endpoint=endpoints_by_key[key],
                     date=finding.date,
                 )
                 for finding, key in self._statuses_to_create
-                if key in key_to_endpoint
+                if key in endpoints_by_key
             ]
             if rows:
                 Endpoint_Status.objects.bulk_create(rows, ignore_conflicts=True, batch_size=1000)
