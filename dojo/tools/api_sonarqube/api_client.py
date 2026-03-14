@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 
 from dojo.utils import prepare_for_view
@@ -62,6 +63,9 @@ class SonarQubeAPI:
         :param project_name:
         :return:
         """
+        if not project_name:
+            msg = "Project name is required. Please provide a Service Key 1 or ensure the Product name is set."
+            raise ValidationError(msg)
         parameters = {"q": project_name, "qualifiers": "TRK"}
 
         if branch:
