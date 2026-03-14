@@ -312,3 +312,64 @@
     }
   }
 ]
+,
+  {
+    "model": "dojo.regulation",
+    "pk": 27,
+    "fields": {
+      "name": "ISO/IEC 42001:2023",
+      "acronym": "ISO 42001",
+      "category": "technology",
+      "jurisdiction": "international",
+      "description": "ISO/IEC 42001:2023 specifies requirements for establishing, implementing, maintaining, and continually improving an Artificial Intelligence Management System (AIMS) within organizations.",
+      "reference": "https://www.iso.org/standard/81230.html"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 28,
+    "fields": {
+      "name": "EU Artificial Intelligence Act",
+      "acronym": "EU AI Act",
+      "category": "technology",
+      "jurisdiction": "eu",
+      "description": "Regulation (EU) 2024/1689 laying down harmonised rules on artificial intelligence, establishing a risk-based framework classifying AI systems by risk level with corresponding compliance obligations.",
+      "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 29,
+    "fields": {
+      "name": "Network and Information Security Directive 2",
+      "acronym": "NIS2",
+      "category": "cybersecurity",
+      "jurisdiction": "eu",
+      "description": "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union, expanding scope and introducing stricter security requirements and incident reporting obligations.",
+      "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2555"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 30,
+    "fields": {
+      "name": "Digital Operational Resilience Act",
+      "acronym": "DORA",
+      "category": "finance",
+      "jurisdiction": "eu",
+      "description": "Regulation (EU) 2022/2554 on digital operational resilience for the financial sector, covering ICT risk management, incident reporting, resilience testing, and third-party risk management.",
+      "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2554"
+    }
+  },
+  {
+    "model": "dojo.regulation",
+    "pk": 31,
+    "fields": {
+      "name": "ISO/IEC 27701:2019",
+      "acronym": "ISO 27701",
+      "category": "privacy",
+      "jurisdiction": "international",
+      "description": "ISO/IEC 27701:2019 specifies requirements for a Privacy Information Management System (PIMS) as an extension to ISO/IEC 27001, addressing GDPR and other privacy regulation requirements.",
+      "reference": "https://www.iso.org/standard/71670.html"
+    }
+  }
