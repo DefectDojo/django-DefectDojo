@@ -1,5 +1,6 @@
 import requests
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 
 from dojo.utils import prepare_for_view
@@ -62,6 +63,9 @@ class SonarQubeAPI:
         :param project_name:
         :return:
         """
+        if not project_name:
+            msg = "Project name is required. Please provide a Service Key 1 or ensure the Product name is set."
+            raise ValidationError(msg)
         parameters = {"q": project_name, "qualifiers": "TRK"}
 
         if branch:
@@ -496,14 +500,9 @@ class SonarQubeAPI:
 
     def test_product_connection(self, api_scan_configuration):
         organization = api_scan_configuration.service_key_2 or None
-        if api_scan_configuration.service_key_1:
-            project = self.get_project(
-                api_scan_configuration.service_key_1, organization=organization,
-            )
-        else:
-            project = self.find_project(
-                api_scan_configuration.product.name, organization=organization,
-            )
+        project = self.get_project(
+            api_scan_configuration.service_key_1, organization=organization,
+        )
         project_name = project.get("name")
         message_prefix = "You have access to project"
         return (
