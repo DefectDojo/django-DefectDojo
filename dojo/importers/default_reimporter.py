@@ -78,9 +78,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             **kwargs,
         )
 
-    def _create_endpoint_manager(self) -> EndpointManager:
+    def _create_endpoint_manager(self, test: Test) -> EndpointManager:
         """Factory method — override in subclasses to inject a custom EndpointManager."""
-        return EndpointManager(self.test.engagement.product)
+        return EndpointManager(test.engagement.product)
 
     def process_scan(
         self,
