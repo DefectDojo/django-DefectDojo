@@ -338,3 +338,22 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             for i, batch in enumerate(batches, 1):
                 logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
                 update_watson_search_index_for_model(model_name, batch)
+
+
+class ApiTokenUsernameLoggingMiddleware:
+    """
+    Middleware to set REMOTE_USER in uWSGI logs when using API Token authentication.
+    When using API tokens, uWSGI logs show '-' instead of the username.
+    This middleware sets the REMOTE_USER environ variable so uWSGI can log it correctly.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        # After the request is processed, the user is authenticated
+        if request.user and request.user.is_authenticated:
+            # Set REMOTE_USER so uWSGI logs the username correctly
+            request.META["REMOTE_USER"] = request.user.username
+        return response
