@@ -221,6 +221,7 @@ def _async_import_history_cleanup_impl():
         max_history = system_settings.max_import_history
         max_per_run = settings.IMPORT_HISTORY_MAX_PER_OBJECT
     except System_Settings.DoesNotExist:
+        logger.error('System_Settings not found, skipping import history cleanup')
         return
 
     if max_history is None:
