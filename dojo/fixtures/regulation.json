@@ -19,7 +19,7 @@
       "acronym": "HIPAA",
       "category": "medical",
       "jurisdiction": "United States",
-      "description": "The Health Insurance Portability and Accountability Act of 1996 (HIPAA) was enacted by the United States Congress and signed by President Bill Clinton in 1996. It has been known as the Kennedy–Kassebaum Act or Kassebaum-Kennedy Act after two of its leading sponsors. Title I of HIPAA protects health insurance coverage for workers and their families when they change or lose their jobs. Title II of HIPAA, known as the Administrative Simplification (AS) provisions, requires the establishment of national standards for electronic health care transactions and national identifiers for providers, health insurance plans, and employers.",
+      "description": "The Health Insurance Portability and Accountability Act of 1996 (HIPAA) was enacted by the United States Congress and signed by President Bill Clinton in 1996. It has been known as the Kennedy\u2013Kassebaum Act or Kassebaum-Kennedy Act after two of its leading sponsors. Title I of HIPAA protects health insurance coverage for workers and their families when they change or lose their jobs. Title II of HIPAA, known as the Administrative Simplification (AS) provisions, requires the establishment of national standards for electronic health care transactions and national identifiers for providers, health insurance plans, and employers.",
       "reference": "http://en.wikipedia.org/wiki/Health_Insurance_Portability_and_Accountability_Act"
     }
   },
@@ -39,11 +39,11 @@
     "model": "dojo.regulation",
     "pk": 4,
     "fields": {
-      "name": "Sarbanes–Oxley Act",
+      "name": "Sarbanes\u2013Oxley Act",
       "acronym": "SOX",
       "category": "finance",
       "jurisdiction": "United States",
-      "description": "The Sarbanes–Oxley Act of 2002 (SOX) is a United States federal law that set new or enhanced standards for all U.S. public company boards, management and public accounting firms. There are also a number of provisions of the Act that also apply to privately held companies, for example the willful destruction of evidence to impede a Federal investigation.",
+      "description": "The Sarbanes\u2013Oxley Act of 2002 (SOX) is a United States federal law that set new or enhanced standards for all U.S. public company boards, management and public accounting firms. There are also a number of provisions of the Act that also apply to privately held companies, for example the willful destruction of evidence to impede a Federal investigation.",
       "reference": "http://en.wikipedia.org/wiki/Sarbanes%E2%80%93Oxley_Act"
     }
   },
@@ -51,11 +51,11 @@
     "model": "dojo.regulation",
     "pk": 5,
     "fields": {
-      "name": "Gramm–Leach–Bliley Act",
+      "name": "Gramm\u2013Leach\u2013Bliley Act",
       "acronym": "GLBA",
       "category": "finance",
       "jurisdiction": "United States",
-      "description": "The Gramm–Leach–Bliley Act (GLBA) is an act of the 106th United States Congress. It repealed part of the Glass–Steagall Act of 1933, removing barriers in the market among banking companies, securities companies and insurance companies that prohibited any one institution from acting as any combination of an investment bank, a commercial bank, and an insurance company. With the bipartisan passage of the Gramm–Leach–Bliley Act, commercial banks, investment banks, securities firms, and insurance companies were allowed to consolidate. Furthermore, it failed to give to the SEC or any other financial regulatory agency the authority to regulate large investment bank holding companies.",
+      "description": "The Gramm\u2013Leach\u2013Bliley Act (GLBA) is an act of the 106th United States Congress. It repealed part of the Glass\u2013Steagall Act of 1933, removing barriers in the market among banking companies, securities companies and insurance companies that prohibited any one institution from acting as any combination of an investment bank, a commercial bank, and an insurance company. With the bipartisan passage of the Gramm\u2013Leach\u2013Bliley Act, commercial banks, investment banks, securities firms, and insurance companies were allowed to consolidate. Furthermore, it failed to give to the SEC or any other financial regulatory agency the authority to regulate large investment bank holding companies.",
       "reference": "http://en.wikipedia.org/wiki/Gramm%E2%80%93Leach%E2%80%93Bliley_Act"
     }
   },
@@ -188,7 +188,7 @@
       "jurisdiction": "United States",
       "category": "government",
       "reference": "https://www.cisa.gov/secure-software-attestation-form",
-      "description": "To ensure a safe and secure digital ecosystem for all Americans, CISA released the Secure Software Development Attestation Form on March 11, 2024, taking a major step in the implementation of its requirement that producers of software used by the Federal Government attest to the adoption of secure development practices. CISA developed this form in close consultation with the Office of Management and Budget (OMB) and based upon practices established in the National Institute of Standards and Technology’s Secure Software Development Framework (SSDF). The release of the secure software development attestation form reinforces secure by design principles advanced by CISA, Federal government partners, and international allies. As a step on this journey, Executive Order 14028 and the OMB M-22-18, Enhancing the Security of the Software Supply Chain through Secure Software Development Practices, and OMB M-23-16, Update to Memorandum M-22-18, required development of an attestation form in which software producers serving the federal government will be required to confirm implementation of specific security practices."
+      "description": "To ensure a safe and secure digital ecosystem for all Americans, CISA released\u202fthe Secure Software Development Attestation Form on March 11, 2024, taking a major step in the implementation of its requirement that producers of software used by the Federal Government attest to the adoption of secure development practices. CISA developed this form in close consultation with the Office of Management and Budget (OMB) and based upon practices established in the National Institute of Standards and Technology\u2019s Secure Software Development Framework (SSDF).\u202fThe release of the secure software development attestation form reinforces secure by design principles advanced by CISA, Federal government partners, and international allies. As a step on this journey, Executive Order 14028 and the OMB M-22-18,\u202fEnhancing the Security of the Software Supply Chain through Secure Software Development Practices, and OMB M-23-16, Update to Memorandum M-22-18, required development of an attestation form in which software producers serving the federal government will be required to confirm implementation of specific security practices."
     }
   },
   {
@@ -212,7 +212,7 @@
       "jurisdiction": "International",
       "category": "security",
       "reference": "https://slsa.dev/",
-      "description": "Supply-chain Levels for Software Artifacts, or SLSA (\"salsa\"). It’s a security framework, a checklist of standards and controls to prevent tampering, improve integrity, and secure packages and infrastructure. It’s how you get from \"safe enough\" to being as resilient as possible, at any link in the chain."
+      "description": "Supply-chain Levels for Software Artifacts, or SLSA (\"salsa\"). It\u2019s a security framework, a checklist of standards and controls to prevent tampering, improve integrity, and secure packages and infrastructure. It\u2019s how you get from \"safe enough\" to being as resilient as possible, at any link in the chain."
     }
   },
   {
@@ -224,7 +224,7 @@
       "jurisdiction": "United States",
       "category": "security",
       "reference": "https://csrc.nist.gov/pubs/sp/800/218/final",
-      "description": "Few software development life cycle (SDLC) models explicitly address software security in detail, so secure software development practices usually need to be added to each SDLC model to ensure that the software being developed is well-secured. This document recommends the Secure Software Development Framework (SSDF) – a core set of high-level secure software development practices that can be integrated into each SDLC implementation. Following these practices should help software producers reduce the number of vulnerabilities in released software, mitigate the potential impact of the exploitation of undetected or unaddressed vulnerabilities, and address the root causes of vulnerabilities to prevent future recurrences. Because the framework provides a common vocabulary for secure software development, software purchasers and consumers can also use it to foster communications with suppliers in acquisition processes and other management activities."
+      "description": "Few software development life cycle (SDLC) models explicitly address software security in detail, so secure software development practices usually need to be added to each SDLC model to ensure that the software being developed is well-secured. This document recommends the Secure Software Development Framework (SSDF) \u2013 a core set of high-level secure software development practices that can be integrated into each SDLC implementation. Following these practices should help software producers reduce the number of vulnerabilities in released software, mitigate the potential impact of the exploitation of undetected or unaddressed vulnerabilities, and address the root causes of vulnerabilities to prevent future recurrences. Because the framework provides a common vocabulary for secure software development, software purchasers and consumers can also use it to foster communications with suppliers in acquisition processes and other management activities."
     }
   },
   {
@@ -310,16 +310,14 @@
       "reference": "https://en.wikipedia.org/wiki/California_Privacy_Rights_Act",
       "description": "The California Privacy Rights Act of 2020 (CPRA), also known as Proposition 24, is a California ballot proposition that was approved by a majority of voters in California. This proposition expands California's consumer privacy law and builds upon the California Consumer Privacy Act (CCPA) of 2018, which established a foundation for consumer privacy regulations. The proposition enshrines more provisions in California state law, allowing consumers to prevent businesses from sharing their personal data, correct inaccurate personal data, and limit businesses' usage of \"sensitive personal information\", which includes precise geolocation, race, ethnicity, religion, genetic data, private communications, sexual orientation, and specified health information."
     }
-  }
-]
-,
+  },
   {
     "model": "dojo.regulation",
     "pk": 27,
     "fields": {
       "name": "ISO/IEC 42001:2023",
       "acronym": "ISO 42001",
-      "category": "technology",
+      "category": "other",
       "jurisdiction": "international",
       "description": "ISO/IEC 42001:2023 specifies requirements for establishing, implementing, maintaining, and continually improving an Artificial Intelligence Management System (AIMS) within organizations.",
       "reference": "https://www.iso.org/standard/81230.html"
@@ -331,8 +329,8 @@
     "fields": {
       "name": "EU Artificial Intelligence Act",
       "acronym": "EU AI Act",
-      "category": "technology",
-      "jurisdiction": "eu",
+      "category": "other",
+      "jurisdiction": "European Union",
       "description": "Regulation (EU) 2024/1689 laying down harmonised rules on artificial intelligence, establishing a risk-based framework classifying AI systems by risk level with corresponding compliance obligations.",
       "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689"
     }
@@ -343,8 +341,8 @@
     "fields": {
       "name": "Network and Information Security Directive 2",
       "acronym": "NIS2",
-      "category": "cybersecurity",
-      "jurisdiction": "eu",
+      "category": "security",
+      "jurisdiction": "European Union",
       "description": "Directive (EU) 2022/2555 on measures for a high common level of cybersecurity across the Union, expanding scope and introducing stricter security requirements and incident reporting obligations.",
       "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022L2555"
     }
@@ -356,7 +354,7 @@
       "name": "Digital Operational Resilience Act",
       "acronym": "DORA",
       "category": "finance",
-      "jurisdiction": "eu",
+      "jurisdiction": "European Union",
       "description": "Regulation (EU) 2022/2554 on digital operational resilience for the financial sector, covering ICT risk management, incident reporting, resilience testing, and third-party risk management.",
       "reference": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32022R2554"
     }
@@ -373,3 +371,4 @@
       "reference": "https://www.iso.org/standard/71670.html"
     }
   }
+]
