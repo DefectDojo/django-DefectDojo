@@ -697,9 +697,7 @@ def _flush_duplicate_changes(modified_new_findings):
     Persist duplicate field changes collected during a batch deduplication run.
 
     Bulk-updates all modified new findings in one round-trip instead of one
-    save() call per finding.  Uses bulk_update (no signals) which is consistent
-    with the original code that called super(Finding, ...).save(skip_validation=True),
-    bypassing Finding.save() in both cases.
+    save() call per finding.  Uses bulk_update to bypass Django signals.
 
     Returns the list of modified findings so callers can perform any follow-up
     processing (e.g. triggering prioritization) on the affected findings.
@@ -1014,8 +1012,7 @@ def do_false_positive_history_batch(findings):
             len(to_mark_as_fp_ids),
             sorted(to_mark_as_fp_ids),
         )
-        # QuerySet.update() bypasses Django signals — intentional, mimicking the previous
-        # super(Finding, find).save(skip_validation=True) calls that also skipped all post-save processing.
+        # QuerySet.update() bypasses Django signals — intentional as this code is called during (post) save processing.
         # Note: .only() does not constrain update() — Django generates the UPDATE SQL independently.
         Finding.objects.filter(id__in=to_mark_as_fp_ids).update(false_p=True, active=False, verified=False)
 
