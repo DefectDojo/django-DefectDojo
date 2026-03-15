@@ -89,7 +89,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
     def _create_endpoint_manager(self, test: Test) -> EndpointManager:
         """Factory method — override in subclasses to inject a custom EndpointManager."""
         if test is None:
-            raise ValueError("Cannot create EndpointManager: test is None. Ensure a test is created before initializing the endpoint manager.")
+            msg = "Cannot create EndpointManager: test is None. Ensure a test is created before initializing the endpoint manager."
+            raise ValueError(msg)
         return EndpointManager(test.engagement.product)
 
     def process_scan(

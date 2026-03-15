@@ -168,6 +168,7 @@ class EndpointManager:
             (endpoints_by_key, created) where:
             - endpoints_by_key maps each EndpointUniqueKey to its Endpoint object (existing or new)
             - created is the list of Endpoint objects that were actually inserted into the DB
+
         """
         if not self._endpoints_to_create:
             return {}, []
