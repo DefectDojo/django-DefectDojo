@@ -59,7 +59,13 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     else:
         endpoints = Endpoint.objects.all()
 
-    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
+    active_finding_subquery = build_count_subquery(
+        Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+        group_field="endpoints",
+    )
+    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").annotate(
+        active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+    ).distinct()
     endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_View, endpoints, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
