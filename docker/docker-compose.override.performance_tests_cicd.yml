@@ -1,0 +1,6 @@
+---
+# uwsgi container with no running daemon, used to run performance tests via run-unittest.sh
+services:
+  uwsgi:
+    entrypoint: ["tail", "-f", "/dev/null"]
+    command: []

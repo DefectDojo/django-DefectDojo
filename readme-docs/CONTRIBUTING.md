@@ -55,6 +55,24 @@ Please use [these test scripts](../tests) to test your changes. These are the sc
 
 For changes that require additional settings, you can now use local_settings.py file. See the logging section below for more information.
 
+## Updating Performance Test Query Counts
+
+The importer performance tests in `unittests/test_importers_performance.py` assert on expected database query and async task counts. If your changes affect import behavior (e.g., adding queries or changing celery task usage), these counts may need to be updated.
+
+Run the update script to refresh expected counts:
+
+```bash
+python3 scripts/update_performance_test_counts.py
+```
+
+The script runs both `TestDojoImporterPerformanceSmall` (v2 endpoints) and `TestDojoImporterPerformanceSmallLocations` (v3 locations), captures actual counts, and updates the test file when they differ from expectations.
+
+To verify all tests pass after updating:
+
+```bash
+python3 scripts/update_performance_test_counts.py --verify
+```
+
 ## Python3 Version
 For compatibility reasons, the code in dev branch should be python3.13 compliant.
 
