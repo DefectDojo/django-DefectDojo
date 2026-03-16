@@ -354,12 +354,14 @@ def parse_finding(host, tree):
             finding.cvssv3_score = temp.get("CVSS_value")
         finding.verified = True
         # manage endpoint/location
+        host = issue_row["fqdn"] or issue_row["ip_address"]
+        port = temp.get("port_status")
         if settings.V3_FEATURE_LOCATIONS:
-            location = LocationData.url(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url(host=issue_row["ip_address"])
+            location = LocationData.url(host=host, port=int(port) if port else None)
             finding.unsaved_locations = [location]
         else:
             # TODO: Delete this after the move to Locations
-            location = Endpoint(host=issue_row["fqdn"]) if issue_row["fqdn"] else Endpoint(host=issue_row["ip_address"])
+            location = Endpoint(host=host, port=int(port) if port else None)
             finding.unsaved_endpoints = [location]
         finding.unsaved_vulnerability_ids = temp.get("cve_list", [])
         ret_rows.append(finding)
