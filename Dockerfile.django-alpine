@@ -45,7 +45,6 @@ RUN \
   apk add --no-cache \
     openjpeg \
     jpeg \
-    tiff \
     bind-tools \
     xmlsec \
     git \

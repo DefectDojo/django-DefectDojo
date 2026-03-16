@@ -1015,6 +1015,76 @@ class FindingCloseAPITest(DojoAPITestCase):
 
 
 @versioned_fixtures
+class EngagementCloseReopenAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+    def _close_url(self, engagement_id: int) -> str:
+        return reverse("engagement-close", args=[engagement_id])
+
+    def _reopen_url(self, engagement_id: int) -> str:
+        return reverse("engagement-reopen", args=[engagement_id])
+
+    def test_close_engagement_basic(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        response = self.client.post(self._close_url(eng.id))
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertFalse(eng.active)
+        self.assertEqual(eng.status, "Completed")
+
+    def test_close_engagement_empty_json_body(self):
+        """The exact failure case from Anduril: POST with empty JSON body."""
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        response = self.client.post(self._close_url(eng.id), {}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertFalse(eng.active)
+        self.assertEqual(eng.status, "Completed")
+
+    def test_reopen_engagement_basic(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        # Close first
+        self.client.post(self._close_url(eng.id))
+        eng.refresh_from_db()
+        self.assertFalse(eng.active)
+        # Reopen
+        response = self.client.post(self._reopen_url(eng.id))
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertTrue(eng.active)
+        self.assertEqual(eng.status, "In Progress")
+
+    def test_reopen_engagement_empty_json_body(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        self.client.post(self._close_url(eng.id))
+        response = self.client.post(self._reopen_url(eng.id), {}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertTrue(eng.active)
+
+    def test_close_nonexistent_engagement_returns_404(self):
+        response = self.client.post(self._close_url(999999))
+        self.assertEqual(404, response.status_code)
+
+    def test_close_engagement_unauthenticated(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        unauthenticated_client = APIClient()
+        response = unauthenticated_client.post(self._close_url(eng.id))
+        self.assertEqual(403, response.status_code)
+
+
+@versioned_fixtures
 class FindingCreateUpdateMitigatedFieldsAPITest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
