@@ -57,6 +57,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             import_type=Test_Import.IMPORT_TYPE,
             **kwargs,
         )
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager = EndpointManager(self.engagement.product)
 
     def create_test(
         self,
@@ -86,13 +88,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         return self.test
 
-    def _create_endpoint_manager(self, test: Test) -> EndpointManager:
-        """Factory method — override in subclasses to inject a custom EndpointManager."""
-        if test is None:
-            msg = "Cannot create EndpointManager: test is None. Ensure a test is created before initializing the endpoint manager."
-            raise ValueError(msg)
-        return EndpointManager(test.engagement.product)
-
     def process_scan(
         self,
         scan: TemporaryUploadedFile,
@@ -120,11 +115,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: for fresh imports, parse_findings() calls create_test() internally,
         # so self.test is guaranteed to be set after this call.
         parsed_findings = self.parse_findings(scan, parser) or []
-        # Initialize the endpoint manager now that self.test is available.
-        # This covers both the sync path (test created inside parse_findings above)
-        # and the async path (test was already set before process_scan was called).
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager = self._create_endpoint_manager(self.test)
         new_findings = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
         # to occur in the form that is then passed to the kwargs

@@ -82,11 +82,6 @@ class BaseImporter(ImporterOptions):
         ImporterOptions.__init__(self, *args, **kwargs)
         if settings.V3_FEATURE_LOCATIONS:
             self.location_manager = LocationManager()
-        else:
-            # TODO: Delete this after the move to Locations
-            # EndpointManager is initialized in each subclass's process_scan()
-            # after self.test is available, because it needs the product.
-            self.endpoint_manager = None
 
     def check_child_implementation_exception(self):
         """

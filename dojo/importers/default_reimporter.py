@@ -77,10 +77,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             import_type=Test_Import.REIMPORT_TYPE,
             **kwargs,
         )
-
-    def _create_endpoint_manager(self, test: Test) -> EndpointManager:
-        """Factory method — override in subclasses to inject a custom EndpointManager."""
-        return EndpointManager(test.engagement.product)
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager = EndpointManager(self.test.engagement.product)
 
     def process_scan(
         self,
@@ -100,9 +98,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         - Update the test progress
         """
         logger.debug(f"REIMPORT_SCAN: parameters: {locals()}")
-        # Initialize the endpoint manager now that self.test is available
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager = self._create_endpoint_manager(self.test)
         # Validate the Tool_Configuration
         self.verify_tool_configuration_from_test()
         # Fetch the parser based upon the string version of the scan type
