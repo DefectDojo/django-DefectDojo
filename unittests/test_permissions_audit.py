@@ -15,6 +15,7 @@ Tests verify:
 """
 import datetime
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
@@ -1015,5 +1016,412 @@ class TestJiraEpicBFLA(DojoTestCase):
         url = reverse("engagement-update-jira-epic", args=(self.engagement.id,))
         response = client.post(url, data={}, format="json")
         # Writer has Engagement_Edit, so should pass permission check.
-        # May get 400/500 from Jira integration, but NOT 403.
-        self.assertNotEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 200)
+
+
+class TestRelatedObjectPermissions(DojoTestCase):
+
+    """
+    Verify permission enforcement on ALL detail-route actions that use
+    BaseRelatedObjectPermission subclasses (including NotePermission variants).
+
+    Reader role should be denied (403) on Edit-gated actions but allowed on
+    View-gated actions. Writer should pass permission checks on all actions.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.reader_role = Role.objects.get(name="Reader")
+        cls.writer_role = Role.objects.get(name="Writer")
+
+        cls.product_type = Product_Type.objects.create(name="RelObjPerm Test PT")
+        cls.product = Product.objects.create(
+            name="RelObjPerm Test Product",
+            description="Test",
+            prod_type=cls.product_type,
+        )
+
+        cls.reader_user = Dojo_User.objects.create_user(
+            username="relobjperm_reader",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+        cls.writer_user = Dojo_User.objects.create_user(
+            username="relobjperm_writer",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+
+        Product_Member.objects.create(
+            product=cls.product, user=cls.reader_user, role=cls.reader_role,
+        )
+        Product_Member.objects.create(
+            product=cls.product, user=cls.writer_user, role=cls.writer_role,
+        )
+
+        cls.engagement = Engagement.objects.create(
+            name="RelObjPerm Engagement",
+            product=cls.product,
+            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+        )
+
+        test_type, _ = Test_Type.objects.get_or_create(name="Semgrep JSON")
+        cls.test = Test.objects.create(
+            engagement=cls.engagement,
+            test_type=test_type,
+            target_start=timezone.make_aware(datetime.datetime(2024, 1, 1)),
+            target_end=timezone.make_aware(datetime.datetime(2024, 12, 31)),
+        )
+
+        cls.finding = Finding.objects.create(
+            title="RelObjPerm Finding",
+            test=cls.test,
+            severity="High",
+            numerical_severity="S1",
+            reporter=cls.writer_user,
+            active=True,
+            verified=True,
+        )
+
+        cls.risk_acceptance = Risk_Acceptance.objects.create(
+            name="RelObjPerm RA",
+            accepted_by="test",
+            owner=cls.writer_user,
+        )
+        cls.risk_acceptance.accepted_findings.add(cls.finding)
+        # Link RA to engagement so get_authorized_risk_acceptances can find it
+        cls.engagement.risk_acceptance.add(cls.risk_acceptance)
+
+    def _client_for_user(self, user):
+        token, _ = Token.objects.get_or_create(user=user)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        return client
+
+    # ── Engagement: close ──────────────────────────────────────────────
+
+    def test_engagement_close_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("engagement-close", args=(self.engagement.id,))
+        response = client.post(url, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_engagement_close_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-close", args=(self.engagement.id,))
+        response = client.post(url, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+        # Reopen so other tests aren't affected
+        self.engagement.refresh_from_db()
+        if not self.engagement.active:
+            self.engagement.active = True
+            self.engagement.status = "In Progress"
+            self.engagement.save()
+
+    # ── Engagement: reopen ─────────────────────────────────────────────
+
+    def test_engagement_reopen_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("engagement-reopen", args=(self.engagement.id,))
+        response = client.post(url, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_engagement_reopen_writer_allowed(self):
+        # Close first so reopen is valid
+        self.engagement.active = False
+        self.engagement.status = "Completed"
+        self.engagement.save()
+
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-reopen", args=(self.engagement.id,))
+        response = client.post(url, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+        # Restore state
+        self.engagement.refresh_from_db()
+        if not self.engagement.active:
+            self.engagement.active = True
+            self.engagement.status = "In Progress"
+            self.engagement.save()
+
+    # ── Engagement: notes (NotePermission — POST uses View) ────────────
+
+    def test_engagement_notes_post_reader_allowed(self):
+        """Reader CAN add notes (NotePermission post_permission = View)."""
+        client = self._client_for_user(self.reader_user)
+        url = reverse("engagement-notes", args=(self.engagement.id,))
+        response = client.post(url, data={"entry": "reader note"}, format="json")
+        self.assertIn(response.status_code, [200, 201], response.content)
+
+    def test_engagement_notes_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-notes", args=(self.engagement.id,))
+        response = client.post(url, data={"entry": "writer note"}, format="json")
+        self.assertIn(response.status_code, [200, 201], response.content)
+
+    # ── Engagement: files ──────────────────────────────────────────────
+
+    def test_engagement_files_post_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("engagement-files", args=(self.engagement.id,))
+        response = client.post(url, data={}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_engagement_files_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-files", args=(self.engagement.id,))
+        test_file = SimpleUploadedFile("proof.txt", b"engagement file content", content_type="text/plain")
+        response = client.post(url, data={"title": "test proof", "file": test_file}, format="multipart")
+        self.assertEqual(response.status_code, 201, response.content)
+
+    # ── Engagement: complete_checklist ─────────────────────────────────
+
+    def test_engagement_complete_checklist_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("engagement-complete-checklist", args=(self.engagement.id,))
+        response = client.post(url, data={}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_engagement_complete_checklist_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("engagement-complete-checklist", args=(self.engagement.id,))
+        response = client.post(url, data={}, format="json")
+        # Permission check passed — expect 200 or 400, never 403/500
+        self.assertIn(response.status_code, [201, 400], response.content)
+
+    # ── Finding: close ─────────────────────────────────────────────────
+
+    def test_finding_close_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-close", args=(self.finding.id,))
+        response = client.post(url, data={"is_mitigated": True}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_finding_close_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-close", args=(self.finding.id,))
+        response = client.post(url, data={"is_mitigated": True}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+        # Restore finding state
+        self.finding.refresh_from_db()
+        self.finding.active = True
+        self.finding.is_mitigated = False
+        self.finding.mitigated = None
+        self.finding.save()
+
+    # ── Finding: tags ──────────────────────────────────────────────────
+
+    def test_finding_tags_post_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-tags", args=(self.finding.id,))
+        response = client.post(url, data={"tags": ["test-tag"]}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_finding_tags_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-tags", args=(self.finding.id,))
+        response = client.post(url, data={"tags": ["test-tag"]}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    # ── Finding: request_response ──────────────────────────────────────
+
+    def test_finding_request_response_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-request-response", args=(self.finding.id,))
+        response = client.post(url, data={}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_finding_request_response_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-request-response", args=(self.finding.id,))
+        response = client.post(url, data={}, format="json")
+        # 400 expected (missing req/resp data) — proves permission check passed
+        self.assertEqual(response.status_code, 400, response.content)
+
+    # ── Finding: notes (NotePermission — POST uses View) ───────────────
+
+    def test_finding_notes_post_reader_allowed(self):
+        """Reader CAN add notes (NotePermission post_permission = View)."""
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-notes", args=(self.finding.id,))
+        response = client.post(url, data={"entry": "reader note"}, format="json")
+        self.assertIn(response.status_code, [200, 201], response.content)
+
+    def test_finding_notes_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-notes", args=(self.finding.id,))
+        response = client.post(url, data={"entry": "writer note"}, format="json")
+        self.assertIn(response.status_code, [200, 201], response.content)
+
+    # ── Finding: files ─────────────────────────────────────────────────
+
+    def test_finding_files_post_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-files", args=(self.finding.id,))
+        response = client.post(url, data={}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_finding_files_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-files", args=(self.finding.id,))
+        test_file = SimpleUploadedFile("evidence.txt", b"finding file content", content_type="text/plain")
+        response = client.post(url, data={"title": "test evidence", "file": test_file}, format="multipart")
+        self.assertEqual(response.status_code, 201, response.content)
+
+    # ── Finding: remove_note (NotePermission — PATCH uses Edit) ────────
+
+    def test_finding_remove_note_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-remove-note", args=(self.finding.id,))
+        response = client.patch(url, data={"id": 99999}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_finding_remove_note_writer_allowed(self):
+        # Create a note first
+        note = Notes.objects.create(entry="to remove", author=self.writer_user)
+        self.finding.notes.add(note)
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-remove-note", args=(self.finding.id,))
+        response = client.patch(url, data={"note_id": note.id}, format="json")
+        self.assertIn(response.status_code, [200, 204], response.content)
+
+    # ── Finding: remove_tags ───────────────────────────────────────────
+
+    def test_finding_remove_tags_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-remove-tags", args=(self.finding.id,))
+        response = client.put(url, data={"tags": ["test-tag"]}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_finding_remove_tags_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-remove-tags", args=(self.finding.id,))
+        response = client.put(url, data={"tags": ["nonexistent"]}, format="json")
+        # 'nonexistent' is not a valid tag in list '[]' proves we passed permission check and got to tag removal logic
+        self.assertEqual(response.status_code, 400, response.content)
+
+    # ── Finding: metadata (GET — View permission) ──────────────────────
+
+    def test_finding_metadata_reader_allowed(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-metadata", args=(self.finding.id,))
+        response = client.get(url, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    # ── Finding: duplicate status actions ──────────────────────────────
+    # NOTE: reset_finding_duplicate_status and set_finding_as_original
+    # bypass self.get_object(), so DRF object-level permission checks
+    # (has_object_permission) never fire. The internal helpers do their
+    # own permission checks. These tests verify current behaviour.
+
+    def test_finding_reset_duplicate_reader(self):
+        """View bypasses get_object() — internal helper checks permissions."""
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-reset-finding-duplicate-status", args=(self.finding.id,))
+        response = client.post(url, format="json")
+        # Returns 400 (not a duplicate) — internal helper runs before perm check
+        self.assertEqual(response.status_code, 400, response.content)
+
+    def test_finding_reset_duplicate_writer(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("finding-reset-finding-duplicate-status", args=(self.finding.id,))
+        response = client.post(url, format="json")
+        # Returns 400 (finding is not a duplicate)
+        self.assertEqual(response.status_code, 400, response.content)
+
+    def test_finding_set_original_writer(self):
+        """set_finding_as_original requires a new_fid URL param."""
+        client = self._client_for_user(self.writer_user)
+        # URL pattern: /api/v2/findings/{pk}/original/{new_fid}/
+        url = f"/api/v2/findings/{self.finding.id}/original/{self.finding.id}/"
+        response = client.post(url, format="json")
+        # 204 on success, or 400 if same finding — both prove permission passed
+        self.assertIn(response.status_code, [204, 400], response.content)
+
+    def test_finding_duplicate_cluster_reader_allowed(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("finding-get-duplicate-cluster", args=(self.finding.id,))
+        response = client.get(url, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    # ── Test: notes (NotePermission — POST uses View) ──────────────────
+
+    def test_test_notes_post_reader_allowed(self):
+        """Reader CAN add notes (NotePermission post_permission = View)."""
+        client = self._client_for_user(self.reader_user)
+        url = reverse("test-notes", args=(self.test.id,))
+        response = client.post(url, data={"entry": "reader note"}, format="json")
+        self.assertIn(response.status_code, [200, 201], response.content)
+
+    def test_test_notes_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("test-notes", args=(self.test.id,))
+        response = client.post(url, data={"entry": "writer note"}, format="json")
+        self.assertIn(response.status_code, [200, 201], response.content)
+
+    # ── Test: files ────────────────────────────────────────────────────
+
+    def test_test_files_post_reader_denied(self):
+        client = self._client_for_user(self.reader_user)
+        url = reverse("test-files", args=(self.test.id,))
+        response = client.post(url, data={}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+
+    def test_test_files_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("test-files", args=(self.test.id,))
+        test_file = SimpleUploadedFile("results.txt", b"test file content", content_type="text/plain")
+        response = client.post(url, data={"title": "test results", "file": test_file}, format="multipart")
+        self.assertEqual(response.status_code, 201, response.content)
+
+    # ── Risk Acceptance: notes ─────────────────────────────────────────
+
+    def test_risk_acceptance_notes_post_reader_denied(self):
+        """Reader lacks Risk_Acceptance perm — queryset hides the object (404)."""
+        client = self._client_for_user(self.reader_user)
+        url = reverse("risk_acceptance-notes", args=(self.risk_acceptance.id,))
+        response = client.post(url, data={"entry": "reader note"}, format="json")
+        self.assertEqual(response.status_code, 404, response.content)
+
+    def test_risk_acceptance_notes_post_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("risk_acceptance-notes", args=(self.risk_acceptance.id,))
+        response = client.post(url, data={"entry": "writer note"}, format="json")
+        self.assertIn(response.status_code, [200, 201], response.content)
+
+    def test_risk_acceptance_notes_get_reader_denied(self):
+        """Reader lacks Risk_Acceptance perm — queryset hides the object (404)."""
+        client = self._client_for_user(self.reader_user)
+        url = reverse("risk_acceptance-notes", args=(self.risk_acceptance.id,))
+        response = client.get(url, format="json")
+        self.assertEqual(response.status_code, 404, response.content)
+
+    def test_risk_acceptance_notes_get_writer_allowed(self):
+        client = self._client_for_user(self.writer_user)
+        url = reverse("risk_acceptance-notes", args=(self.risk_acceptance.id,))
+        response = client.get(url, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    # ── Risk Acceptance: download_proof ────────────────────────────────
+
+    def test_risk_acceptance_download_proof_reader_denied(self):
+        """Reader lacks Risk_Acceptance perm — queryset hides the object (404)."""
+        client = self._client_for_user(self.reader_user)
+        url = reverse("risk_acceptance-download-proof", args=(self.risk_acceptance.id,))
+        response = client.get(url, format="json")
+        self.assertEqual(response.status_code, 404, response.content)
+
+    def test_risk_acceptance_download_proof_writer_allowed(self):
+        proof = SimpleUploadedFile("proof.pdf", b"%PDF-1.4 fake proof content", content_type="application/pdf")
+        self.risk_acceptance.path.save("proof.pdf", proof, save=True)
+
+        client = self._client_for_user(self.writer_user)
+        url = reverse("risk_acceptance-download-proof", args=(self.risk_acceptance.id,))
+        response = client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("attachment;", response["Content-Disposition"])
+        self.assertIn(".pdf", response["Content-Disposition"])
+
+        # Clean up uploaded file
+        self.risk_acceptance.path.delete(save=True)
