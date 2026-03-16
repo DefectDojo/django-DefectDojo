@@ -5,7 +5,7 @@ weight: 12
 audience: opensource
 ---
 
-Open-Source DefectDojo supports login via Google accounts. New users are created automatically on first login if they don't already exist. Existing DefectDojo users are matched to Google accounts by username (the portion before the `@` in their Google email). DefectDojo Pro users should refer to the [Pro Google guide](../PRO__google/).
+Open-Source DefectDojo supports login via Google accounts. New users are created automatically on first login if they don't already exist. Existing DefectDojo users are matched to Google accounts by username (the portion before the `@` in their Google email). DefectDojo Pro users should refer to the [Pro Google guide](/admin/sso/pro__google/).
 
 ## Prerequisites
 

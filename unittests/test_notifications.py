@@ -578,7 +578,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
             manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy")
-        self.assertIn("URLs for Webhooks not configured: skipping system notification", cm.output[0])
+        self.assertIn("URLs for Webhooks not configured: skipping system notification", cm.output[1])
 
     def test_missing_personal_webhook(self):
         # test data contains 2 entries but we need to test missing definition
@@ -586,7 +586,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
             manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy", user=Dojo_User.objects.get(username="admin"))
-        self.assertIn("URLs for Webhooks not configured for user '(admin)': skipping user notification", cm.output[0])
+        self.assertIn("URLs for Webhooks not configured for user '(admin)': skipping user notification", cm.output[1])
 
     def test_system_webhook_inactive(self):
         self.sys_wh.status = Notification_Webhooks.Status.STATUS_INACTIVE_PERMANENT
@@ -594,7 +594,7 @@ class TestNotificationWebhooks(DojoTestCase):
         with self.assertLogs("dojo.notifications.helper", level="INFO") as cm:
             manager = WebhookNotificationManger()
             manager.send_webhooks_notification(event="dummy")
-        self.assertIn("URL for Webhook 'My webhook endpoint' is not active: Permanently inactive (inactive_permanent)", cm.output[0])
+        self.assertIn("URL for Webhook 'My webhook endpoint' is not active: Permanently inactive (inactive_permanent)", cm.output[1])
 
     def test_system_webhook_sucessful(self):
         with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
