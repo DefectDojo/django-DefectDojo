@@ -5,7 +5,7 @@ weight: 17
 audience: pro
 ---
 
-DefectDojo Pro supports login via a generic OpenID Connect (OIDC) provider. Open-Source users should refer to the [Open-Source OIDC guide](../OS__oidc/).
+DefectDojo Pro supports login via a generic OpenID Connect (OIDC) provider. Open-Source users should refer to the [Open-Source OIDC guide](/admin/sso/os__oidc/).
 
 ## Configuration
 

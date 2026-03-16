@@ -5,7 +5,7 @@ weight: 6
 audience: opensource
 ---
 
-Open-Source DefectDojo supports login via Azure Active Directory (Azure AD), including automatic User Group synchronization. DefectDojo Pro users should refer to the [Pro Azure AD guide](../PRO__azure_ad/).
+Open-Source DefectDojo supports login via Azure Active Directory (Azure AD), including automatic User Group synchronization. DefectDojo Pro users should refer to the [Pro Azure AD guide](/admin/sso/pro__azure_ad/).
 
 ## Prerequisites
 

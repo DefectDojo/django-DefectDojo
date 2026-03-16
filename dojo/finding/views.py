@@ -942,8 +942,8 @@ class EditFinding(View):
                     ra_helper.simple_risk_accept(request.user, new_finding, perform_save=False)
             elif new_finding.risk_accepted:
                 ra_helper.risk_unaccept(request.user, new_finding, perform_save=False)
-            # Save and add new locations
-            associated_locations = finding_helper.add_locations(new_finding, context["form"])
+            # Save and add new locations; replace=True so deselected endpoints are removed
+            associated_locations = finding_helper.add_locations(new_finding, context["form"], replace=True)
             # Remove unrelated endpoints
             if settings.V3_FEATURE_LOCATIONS:
                 for ref in new_finding.locations.all():
