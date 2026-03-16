@@ -43,6 +43,12 @@ class RemoteUserMiddleware(OriginalRemoteUserMiddleware):
             settings.AUTH_REMOTEUSER_TRUSTED_PROXY)
         return None
 
+    def process_response(self, request, response):
+        # Set REMOTE_USER so uWSGI logs the username correctly for all auth methods
+        if hasattr(request, "user") and request.user and request.user.is_authenticated:
+            request.META["REMOTE_USER"] = request.user.username
+        return response
+
 
 class PersistentRemoteUserMiddleware(RemoteUserMiddleware):
     # same as https://github.com/django/django/blob/6654289f5b350dfca3dc4f6abab777459b906756/django/contrib/auth/middleware.py#L128

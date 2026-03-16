@@ -992,7 +992,6 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.security.SecurityMiddleware",
     "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "dojo.middleware.ApiTokenUsernameLoggingMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
