@@ -15,6 +15,8 @@ Docker images for `linux/amd64` are published to https://hub.docker.com/u/defect
 
 *  Docker version
     *  Installing with docker compose requires at least Docker 19.03.0 and Docker Compose 1.28.0. See "Checking Docker versions" below for version errors during running docker compose.
+*  BuildKit
+    *  The Dockerfiles require [BuildKit](https://docs.docker.com/build/buildkit/), which is enabled by default since Docker 23.0. If you are on an older version, enable it with `DOCKER_BUILDKIT=1` before building.
 *  Proxies
     *  If you're behind a corporate proxy check https://docs.docker.com/network/proxy/ .
 
