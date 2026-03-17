@@ -15,5 +15,5 @@ jobs:
     steps:
       - uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
         with:
-          workflow_id: 'integration-tests.yml,k8s-testing.yml,unit-tests.yml'
+          workflow_id: 'integration-tests.yml,k8s-tests.yml,unit-tests.yml,validate_docs_build.yml,test-helm-chart.yml,ruff.yml,shellcheck.yml'
           access_token: ${{ github.token }}

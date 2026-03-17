@@ -1271,6 +1271,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
 
 class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    active_finding_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Endpoint
@@ -1427,6 +1428,12 @@ class JIRAProjectSerializer(serializers.ModelSerializer):
         if (engagement and product) or (not engagement and not product):
             msg = "Either engagement or product has to be set."
             raise serializers.ValidationError(msg)
+
+        if "custom_fields" in data and isinstance(data["custom_fields"], str):
+            try:
+                data["custom_fields"] = json.loads(data["custom_fields"])
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({"custom_fields": f"Invalid JSON: {e}"}) from e
 
         return data
 

@@ -12,8 +12,10 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -166,6 +168,7 @@ from dojo.product_type.queries import (
     get_authorized_product_type_members,
     get_authorized_product_types,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.reports.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
@@ -345,7 +348,13 @@ class EndPointViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_endpoints(Permissions.Location_View).distinct()
+        active_finding_subquery = build_count_subquery(
+            Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+            group_field="endpoints",
+        )
+        return get_authorized_endpoints(Permissions.Location_View).annotate(
+            active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+        ).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -460,20 +469,20 @@ class EngagementViewSet(
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def close(self, request, pk=None):
         eng = self.get_object()
         close_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def reopen(self, request, pk=None):
         eng = self.get_object()
         reopen_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -3442,6 +3451,8 @@ class QuestionnaireEngagementSurveyViewSet(
         engagement_survey = self.get_object()
         # Safely get the engagement
         engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Verify the user has permission to edit the engagement
+        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit)
         # Link the engagement
         answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
         # Send a favorable response

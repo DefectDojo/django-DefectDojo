@@ -1582,6 +1582,8 @@ class FindingForm(forms.ModelForm):
         else:
             # TODO: Delete this after the move to Locations
             self.fields["endpoints"].queryset = Endpoint.objects.filter(product=self.instance.test.engagement.product)
+            if self.instance and self.instance.pk:
+                self.fields["endpoints"].initial = self.instance.endpoints.all()
 
         self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
 
