@@ -12,8 +12,10 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -166,6 +168,7 @@ from dojo.product_type.queries import (
     get_authorized_product_type_members,
     get_authorized_product_types,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.reports.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
@@ -345,7 +348,13 @@ class EndPointViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_endpoints(Permissions.Location_View).distinct()
+        active_finding_subquery = build_count_subquery(
+            Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+            group_field="endpoints",
+        )
+        return get_authorized_endpoints(Permissions.Location_View).annotate(
+            active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+        ).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -460,20 +469,20 @@ class EngagementViewSet(
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def close(self, request, pk=None):
         eng = self.get_object()
         close_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def reopen(self, request, pk=None):
         eng = self.get_object()
         reopen_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -762,6 +771,61 @@ class RiskAcceptanceViewSet(
     @extend_schema(
         methods=["GET"],
         responses={
+            status.HTTP_200_OK: serializers.RiskAcceptanceToNotesSerializer,
+        },
+    )
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
+    )
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasRiskAcceptanceRelatedObjectPermission))
+    def notes(self, request, pk=None):
+        risk_acceptance = self.get_object()
+        if request.method == "POST":
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data["entry"]
+                private = new_note.validated_data.get("private", False)
+                note_type = new_note.validated_data.get("note_type", None)
+            else:
+                return Response(new_note.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            notes = risk_acceptance.notes.filter(note_type=note_type).first()
+            if notes and note_type and note_type.is_single:
+                return Response("Only one instance of this note_type allowed on a risk acceptance.", status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
+            note.history.add(history)
+            risk_acceptance.notes.add(note)
+            engagement = risk_acceptance.engagement
+            if engagement:
+                process_tag_notifications(
+                    request=request,
+                    note=note,
+                    parent_url=request.build_absolute_uri(
+                        reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)),
+                    ),
+                    parent_title=f"Risk Acceptance: {risk_acceptance.name}",
+                )
+
+            serialized_note = serializers.NoteSerializer(
+                {"author": author, "entry": entry, "private": private},
+            )
+            return Response(serialized_note.data, status=status.HTTP_201_CREATED)
+
+        notes = risk_acceptance.notes.all()
+        serialized_notes = serializers.RiskAcceptanceToNotesSerializer(
+            {"risk_acceptance_id": risk_acceptance, "notes": notes},
+        )
+        return Response(serialized_notes.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        methods=["GET"],
+        responses={
             status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
         },
     )
@@ -777,6 +841,8 @@ class RiskAcceptanceViewSet(
             )
         # Get the path of the file in media root
         file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        # NOTE: FileResponse takes ownership of closing the file handle when the response is closed.
+        # Explicitly register the closer to avoid potential resource leaks and satisfy static analyzers.
         file_handle = file_path.open("rb")
         # send file
         response = FileResponse(
@@ -784,6 +850,8 @@ class RiskAcceptanceViewSet(
             content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
+        if hasattr(response, "_resource_closers"):
+            response._resource_closers.append(file_handle.close)
         response["Content-Length"] = file_object.size
         response[
             "Content-Disposition"
@@ -3413,6 +3481,8 @@ class QuestionnaireEngagementSurveyViewSet(
         engagement_survey = self.get_object()
         # Safely get the engagement
         engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Verify the user has permission to edit the engagement
+        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit)
         # Link the engagement
         answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
         # Send a favorable response

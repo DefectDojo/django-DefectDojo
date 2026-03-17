@@ -21,6 +21,8 @@ from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
     do_dedupe_finding_task_internal,
+    do_false_positive_history,
+    do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
@@ -46,7 +48,6 @@ from dojo.url.models import URL
 from dojo.utils import (
     calculate_grade,
     close_external_issue,
-    do_false_positive_history,
     get_current_user,
     get_object_or_none,
     mass_model_updater,
@@ -501,8 +502,7 @@ def post_process_findings_batch(
         if system_settings.enable_deduplication:
             deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
         else:
-            for finding in findings:
-                do_false_positive_history(finding, *args, **kwargs)
+            do_false_positive_history_batch(findings)
 
     # Non-status changing tasks
     if issue_updater_option:
@@ -765,16 +765,18 @@ def removeLoop(finding_id, counter):
         removeLoop(f.id, counter - 1)
 
 
-def add_locations(finding, form):
+def add_locations(finding, form, *, replace=False):
     # TODO: Delete this after the move to Locations
     if not settings.V3_FEATURE_LOCATIONS:
         added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, finding.test.engagement.product)
         endpoint_ids = [endpoint.id for endpoint in added_endpoints]
 
-        # Merge form endpoints with existing endpoints (don't replace)
         form_endpoints = form.cleaned_data.get("endpoints", Endpoint.objects.none())
         new_endpoints = Endpoint.objects.filter(id__in=endpoint_ids)
-        finding.endpoints.set(form_endpoints | new_endpoints | finding.endpoints.all())
+        if replace:
+            finding.endpoints.set(form_endpoints | new_endpoints)
+        else:
+            finding.endpoints.set(form_endpoints | new_endpoints | finding.endpoints.all())
 
         for endpoint in finding.endpoints.all():
             _eps, _created = Endpoint_Status.objects.get_or_create(

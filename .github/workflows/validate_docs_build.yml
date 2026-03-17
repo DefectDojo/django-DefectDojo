@@ -17,7 +17,7 @@ jobs:
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6.2.0
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
           node-version: '24.14.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
@@ -40,3 +40,10 @@ jobs:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && npm ci && hugo --minify --gc --config config/production/hugo.toml
+
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
+        with:
+          args: --offline --no-progress --root-dir docs/public './docs/public/**/*.html'
+          fail: true
+

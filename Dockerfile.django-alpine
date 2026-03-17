@@ -45,7 +45,6 @@ RUN \
   apk add --no-cache \
     openjpeg \
     jpeg \
-    tiff \
     bind-tools \
     xmlsec \
     git \
@@ -78,7 +77,7 @@ COPY \
   docker/reach_broker.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py ./
+COPY manage.py ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer

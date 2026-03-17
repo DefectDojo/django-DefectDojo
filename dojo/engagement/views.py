@@ -1578,9 +1578,10 @@ def download_risk_acceptance(request, eid, raid):
     # Ensure the risk acceptance is under the supplied engagement
     if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
         raise PermissionDenied
-    response = StreamingHttpResponse(
-        FileIterWrapper(
-            (Path(settings.MEDIA_ROOT) / "risk_acceptance.path.name").open(mode="rb")))
+    file_handle = (Path(settings.MEDIA_ROOT) / risk_acceptance.path.name).open(mode="rb")
+    response = StreamingHttpResponse(FileIterWrapper(file_handle))
+    if hasattr(response, "_resource_closers"):
+        response._resource_closers.append(file_handle.close)
     response["Content-Disposition"] = f'attachment; filename="{risk_acceptance.filename()}"'
     mimetype, _encoding = mimetypes.guess_type(risk_acceptance.path.name)
     response["Content-Type"] = mimetype or "application/octet-stream"

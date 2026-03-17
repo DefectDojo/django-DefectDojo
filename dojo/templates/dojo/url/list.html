@@ -97,7 +97,7 @@
                                 <th>Endpoint</th>
                             {% endif %}
                             {% if not product_tab %}<th class="text-center" nowrap="nowrap">Active (Total) Products</th>{% endif %}
-                            <th class="text-center" nowrap="nowrap">Active (Total) Findings</th>
+                            <th class="text-center" nowrap="nowrap">{% dojo_sort request 'Active (Total) Findings' 'active_findings' field='ordering' %}</th>
                             <th class="text-center" nowrap="nowrap">Overall Status</th>
                         </tr>
                         {% for location in locations %}
