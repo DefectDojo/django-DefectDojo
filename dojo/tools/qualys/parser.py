@@ -320,7 +320,7 @@ def parse_finding(host, tree):
         if temp_cve_details:
             refs = temp.get("links", "")
             finding = Finding(
-                title="QID-" + gid[4:] + " | " + temp["vuln_name"] + (" | Port: " + str(temp["port_status"]) if temp.get("port_status") else ""),
+                title="QID-" + gid[4:] + " | " + temp["vuln_name"],
                 mitigation=temp["solution"],
                 description=temp["vuln_description"],
                 severity=sev,
@@ -332,7 +332,7 @@ def parse_finding(host, tree):
 
         else:
             finding = Finding(
-                title="QID-" + gid[4:] + " | " + temp["vuln_name"] + (" | Port: " + str(temp["port_status"]) if temp.get("port_status") else ""),
+                title="QID-" + gid[4:] + " | " + temp["vuln_name"],
                 mitigation=temp["solution"],
                 description=temp["vuln_description"],
                 severity=sev,
