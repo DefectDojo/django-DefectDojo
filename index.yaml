@@ -4,6 +4,36 @@ entries:
   - annotations:
       artifacthub.io/changes: |
         - kind: changed
+          description: chore(deps)_ update valkey _ tag from 0.17.0 to v0.17.1 (_/defect_/chart.yaml)
+        - kind: changed
+          description: chore(deps)_ update valkey _ tag from 0.17.1 to v0.18.0 (_/defect_/chart.yaml)
+      artifacthub.io/prerelease: "true"
+    apiVersion: v2
+    appVersion: 2.57.0-dev
+    created: "2026-03-17T05:35:52.68166751Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://us-docker.pkg.dev/os-public-container-registry/defectdojo
+      version: 16.7.27
+    - condition: valkey.enabled
+      name: valkey
+      repository: oci://registry-1.docker.io/cloudpirates
+      version: 0.18.0
+    description: A Helm chart for Kubernetes to install DefectDojo
+    digest: e834a723144f28715a327d2ce0f9fbd4c5823b4f1f85ad47910abad2b8c4162a
+    icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
+    maintainers:
+    - email: defectdojo-project@owasp.org
+      name: madchap
+      url: https://github.com/DefectDojo/django-DefectDojo
+    name: defectdojo
+    urls:
+    - https://github.com/DefectDojo/django-DefectDojo/releases/download/nightly-dev/defectdojo-1.9.19-dev.tgz
+    version: 1.9.19-dev
+  - annotations:
+      artifacthub.io/changes: |
+        - kind: changed
           description: Bump DefectDojo to 2.56.2
       artifacthub.io/prerelease: "false"
     apiVersion: v2
@@ -8082,4 +8112,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2026-03-16T15:57:46.896365486Z"
+generated: "2026-03-17T05:35:52.67195977Z"
