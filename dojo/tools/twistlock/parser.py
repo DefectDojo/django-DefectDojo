@@ -272,6 +272,7 @@ def get_item(vulnerability, test, image_metadata=""):
         cvssv3_score=cvssv3_score,
         impact=impact_text,
         date=date,
+        file_path=vulnerability.get("packagePath", ""),
     )
     finding.unsaved_vulnerability_ids = [vulnerability["id"]] if "id" in vulnerability else None
     finding.description = finding.description.strip()
