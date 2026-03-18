@@ -85,7 +85,7 @@ DefectDojo supports a wide variety of tools. If you’re seeing inconsistent beh
 
 DefectDojo Pro has a Universal Parser import method which allows you to handle any JSON, CSV or XML file. DefectDojo OS users can write custom parsers for the same purpose.
 
-Finally, third-party report formats have been known to change without warning: Our OS community greatly appreciates [PRs and contributions](/open_source/contributing/how-to-write-a-parser/) to keep our parsers up to date.
+Finally, third-party report formats have been known to change without warning: Our OS community greatly appreciates [PRs and contributions](/get_started/contributing/how-to-write-a-parser/) to keep our parsers up to date.
 
 ### How should I handle large scan files?
 
