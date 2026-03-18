@@ -39,7 +39,7 @@ audience: opensource
 
 DefectDojo's docs use Lychee to check for 404s and other link errors.  To run this test locally, you can run this command from the root of the repo.  This will delete anything in Hugo's `/public/` folder and then rebuild.
 
-`cd docs && rm -rf public/ && hugo --minify --gc --config config/production/hugo.toml && lychee --offline --no-progress --root-dir public './public/**/*.html`
+`cd docs && rm -rf public/ && hugo --minify --gc --config config/production/hugo.toml && lychee --offline --no-progress --root-dir public './public/**/*.html'`
 
 ### Theme overrides
 

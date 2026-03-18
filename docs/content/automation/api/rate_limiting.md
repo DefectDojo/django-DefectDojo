@@ -11,7 +11,7 @@ DefectDojo includes login-page rate limiting to protect against brute force atta
 
 ## Configuration
 
-Rate limiting is configured via the following settings (see [Configuration](../../get_started/open_source/configuration) for how to apply these):
+Rate limiting is configured via the following settings (see [Configuration](/get_started/open_source/configuration/) for how to apply these):
 
 ```python
 DD_RATE_LIMITER_ENABLED=(bool, True),

@@ -21,7 +21,7 @@ cloc --json /path/to/your/project > cloc-report.json
 
 Upload the JSON report to DefectDojo via the API. When importing, all existing language data for the Product is replaced with the contents of the new file.
 
-The import endpoint is documented in the [DefectDojo API v2 docs](./api-v2-docs).
+The import endpoint is documented in the [DefectDojo API v2 docs](../api-v2-docs/).
 
 ## Viewing Results
 
