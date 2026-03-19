@@ -1,7 +1,9 @@
 {
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "schedule:weekly"
   ],
+  "schedule": ["* * * * 3"],
   "dependencyDashboard": true,
   "dependencyDashboardApproval": false,
   "baseBranchPatterns": ["dev"],

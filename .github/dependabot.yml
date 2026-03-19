@@ -3,7 +3,8 @@ updates:
 - package-ecosystem: pip
   directory: "/"
   schedule:
-    interval: daily
+    interval: weekly
+    day: wednesday
     time: "08:00"
   open-pull-requests-limit: 10
   target-branch: dev
@@ -17,7 +18,8 @@ updates:
 - package-ecosystem: npm
   directory: "/components"
   schedule:
-    interval: daily
+    interval: weekly
+    day: wednesday
     time: "08:00"
   open-pull-requests-limit: 10
   target-branch: dev
