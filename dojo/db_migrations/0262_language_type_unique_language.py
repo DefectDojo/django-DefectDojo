@@ -1,6 +1,6 @@
 import logging
 
-from django.db import migrations
+from django.db import migrations, models
 from django.db.models import Count, Min
 
 logger = logging.getLogger(__name__)
@@ -89,4 +89,9 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(deduplicate_language_types, noop_reverse),
+        migrations.AlterField(
+            model_name="language_type",
+            name="language",
+            field=models.CharField(max_length=100, unique=True),
+        ),
     ]
