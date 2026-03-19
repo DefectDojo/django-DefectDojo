@@ -84,7 +84,7 @@ def noop_reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0261_remove_url_insert_insert_remove_url_update_update_and_more"),
+        ("dojo", "0262_remove_system_settings_credentials"),
     ]
 
     operations = [
