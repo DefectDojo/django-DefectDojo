@@ -33,7 +33,7 @@ def deduplicate_language_types(apps, schema_editor):
             Language_Type.objects
             .filter(language=dupe["language"])
             .exclude(id=canonical_id)
-            .values_list("id", flat=True)
+            .values_list("id", flat=True),
         )
 
         # Reassign Languages FKs from duplicates to the canonical record

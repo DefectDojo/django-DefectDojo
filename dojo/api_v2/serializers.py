@@ -2924,9 +2924,8 @@ class ImportLanguagesSerializer(serializers.Serializer):
                     language__in=language_types.values(),
                 ).delete()
         except IntegrityError as e:
-            raise serializers.ValidationError(
-                f"Failed to import languages due to a data integrity issue: {e}",
-            )
+            msg = f"Failed to import languages due to a data integrity issue: {e}"
+            raise serializers.ValidationError(msg)
 
     def validate(self, data):
         if is_scan_file_too_large(data["file"]):
