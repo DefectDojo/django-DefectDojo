@@ -56,8 +56,10 @@ class DojoAsyncTask(Task):
         if kwargs is None:
             kwargs = {}
 
-        # Inject user context if not already present
-        if "async_user" not in kwargs:
+        # Inject user context for Dojo tasks only. Celery built-in tasks (e.g.
+        # celery.backend_cleanup) do not accept custom kwargs.
+        task_name = self.name or ""
+        if not task_name.startswith("celery.") and "async_user" not in kwargs:
             kwargs["async_user"] = get_current_user()
 
         # Control flag used for sync/async decision; never pass into the task itself
