@@ -18,7 +18,7 @@
     "dojo/components/yarn.lock",
     "dojo/components/package.json"
   ],
-  "ignoreDeps": [],
+  "ignoreDeps": ["gohugoio/hugo"],
   "packageRules": [{
     "matchPackageNames": ["*"],
     "commitMessageExtra": "from {{currentVersion}} to {{#if isMajor}}v{{{newMajor}}}{{else}}{{#if isSingleVersion}}v{{{newVersion}}}{{else}}{{{newValue}}}{{/if}}{{/if}}",
