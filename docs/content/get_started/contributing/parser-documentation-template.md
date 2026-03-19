@@ -1,7 +1,8 @@
 ---
 title: "Parser Documentation Template"
 toc_hide: true
-weight: 1
+weight: 2
+audience: opensource
 aliases:
   - /en/open_source/contributing/parser-documentation-template
 ---
