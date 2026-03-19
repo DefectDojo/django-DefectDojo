@@ -4487,7 +4487,7 @@ class Cred_Mapping(models.Model):
 
 
 class Language_Type(models.Model):
-    language = models.CharField(max_length=100, null=False)
+    language = models.CharField(max_length=100, null=False, unique=True)
     color = models.CharField(max_length=7, null=True, blank=True, verbose_name=_("HTML color"))
 
     def __str__(self):
