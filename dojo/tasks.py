@@ -138,8 +138,11 @@ def _async_dupe_delete_impl():
         originals_with_too_many_duplicates = Finding.objects.filter(id__in=originals_with_too_many_duplicates_ids).order_by("id")
 
         # prefetch to make it faster
+        # Oldest-first: delete from the front of the list until dupe_count <= 0, keeping the last max_dupes.
+        # order_by("date") alone leaves ties undefined when many duplicates share the same date (e.g. tool date);
+        # add id so we always drop lower-id (older) rows first and retain higher-id (newer) imports.
         originals_with_too_many_duplicates = originals_with_too_many_duplicates.prefetch_related(Prefetch("original_finding",
-            queryset=Finding.objects.filter(duplicate=True).order_by("date")))
+            queryset=Finding.objects.filter(duplicate=True).order_by("date", "id")))
 
         total_deleted_count = 0
         affected_products = set()
