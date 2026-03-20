@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ASSET_DATA_REPORT>
+  <HEADER>
+    <COMPANY><![CDATA[Test Company]]></COMPANY>
+    <REPORT_FILTERS>
+      <COMBINED_IP_LIST>
+        <RANGE>
+          <START>192.168.1.1</START>
+          <END>192.168.1.1</END>
+        </RANGE>
+      </COMBINED_IP_LIST>
+    </REPORT_FILTERS>
+  </HEADER>
+  <GLOSSARY>
+    <VULN_DETAILS_LIST>
+      <VULN_DETAILS id="qid_12345">
+        <QID id="qid_12345">12345</QID>
+        <TITLE><![CDATA[Test Vulnerability]]></TITLE>
+        <SEVERITY>3</SEVERITY>
+        <CATEGORY><![CDATA[Test]]></CATEGORY>
+        <LAST_UPDATE>2024-01-01T00:00:00Z</LAST_UPDATE>
+        <DIAGNOSIS><![CDATA[Test diagnosis]]></DIAGNOSIS>
+        <SOLUTION><![CDATA[Test solution]]></SOLUTION>
+      </VULN_DETAILS>
+    </VULN_DETAILS_LIST>
+  </GLOSSARY>
+  <HOST_LIST>
+    <HOST>
+      <IP>192.168.1.1</IP>
+      <TRACKING_METHOD>IP</TRACKING_METHOD>
+      <DNS><![CDATA[testhost.example.com]]></DNS>
+      <OS><![CDATA[Linux]]></OS>
+      <LAST_SCAN_DATETIME>2024-01-01T00:00:00Z</LAST_SCAN_DATETIME>
+      <VULN_INFO_LIST>
+        <VULN_INFO>
+          <QID id="qid_12345">12345</QID>
+          <TYPE>Practice</TYPE>
+          <PORT>80</PORT>
+          <SSL>false</SSL>
+          <RESULT format="table"><![CDATA[Test result on port 80]]></RESULT>
+          <FIRST_FOUND>2024-01-01T00:00:00Z</FIRST_FOUND>
+          <LAST_FOUND>2024-01-01T00:00:00Z</LAST_FOUND>
+          <TIMES_FOUND>1</TIMES_FOUND>
+        </VULN_INFO>
+        <VULN_INFO>
+          <QID id="qid_12345">12345</QID>
+          <TYPE>Practice</TYPE>
+          <PORT>443</PORT>
+          <SSL>true</SSL>
+          <RESULT format="table"><![CDATA[Test result on port 443]]></RESULT>
+          <FIRST_FOUND>2024-01-01T00:00:00Z</FIRST_FOUND>
+          <LAST_FOUND>2024-01-01T00:00:00Z</LAST_FOUND>
+          <TIMES_FOUND>1</TIMES_FOUND>
+        </VULN_INFO>
+        <VULN_INFO>
+          <QID id="qid_12345">12345</QID>
+          <TYPE>Practice</TYPE>
+          <PORT>8080</PORT>
+          <SSL>false</SSL>
+          <RESULT format="table"><![CDATA[Test result on port 8080]]></RESULT>
+          <FIRST_FOUND>2024-01-01T00:00:00Z</FIRST_FOUND>
+          <LAST_FOUND>2024-01-01T00:00:00Z</LAST_FOUND>
+          <TIMES_FOUND>1</TIMES_FOUND>
+        </VULN_INFO>
+      </VULN_INFO_LIST>
+    </HOST>
+  </HOST_LIST>
+</ASSET_DATA_REPORT>
