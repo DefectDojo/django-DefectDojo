@@ -31,6 +31,7 @@ from dojo.models import (
     Endpoint,
     Endpoint_Status,
     Engagement,
+    FileUpload,
     Finding,
     Finding_Group,
     JIRA_Instance,
@@ -696,6 +697,61 @@ def engagement_pre_delete(sender, instance, **kwargs):
 @receiver(post_delete, sender=Engagement)
 def engagement_post_delete(sender, instance, **kwargs):
     logger.debug("engagement post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
+
+
+def bulk_clear_finding_m2m(finding_qs):
+    """
+    Bulk-clear M2M through tables for a queryset of findings.
+
+    Must be called BEFORE cascade_delete since M2M through tables
+    are not discovered by _meta.related_objects.
+
+    Special handling for FileUpload: deletes via ORM so the custom
+    FileUpload.delete() fires and removes files from disk storage.
+    """
+    finding_ids = finding_qs.values_list("id", flat=True)
+
+    # Collect FileUpload IDs before deleting through table entries
+    file_ids = list(
+        Finding.files.through.objects.filter(
+            finding_id__in=finding_ids,
+        ).values_list("fileupload_id", flat=True),
+    )
+
+    # Collect Note IDs before deleting through table entries
+    note_ids = list(
+        Finding.notes.through.objects.filter(
+            finding_id__in=finding_ids,
+        ).values_list("notes_id", flat=True),
+    )
+
+    # Auto-discover and delete all M2M through tables
+    for m2m_field in Finding._meta.many_to_many:
+        through_model = m2m_field.remote_field.through
+        # Find the FK column that points to Finding
+        fk_column = None
+        for field in through_model._meta.get_fields():
+            if hasattr(field, "related_model") and field.related_model is Finding:
+                fk_column = field.column
+                break
+        if fk_column:
+            count, _ = through_model.objects.filter(
+                **{f"{fk_column}__in": finding_ids},
+            ).delete()
+            if count:
+                logger.debug(
+                    "bulk_clear_finding_m2m: deleted %d rows from %s",
+                    count, through_model._meta.db_table,
+                )
+
+    # Delete FileUpload objects via ORM so custom delete() removes files from disk
+    if file_ids:
+        for file_upload in FileUpload.objects.filter(id__in=file_ids).iterator():
+            file_upload.delete()
+
+    # Delete orphaned Notes
+    if note_ids:
+        Notes.objects.filter(id__in=note_ids).delete()
 
 
 def fix_loop_duplicates():

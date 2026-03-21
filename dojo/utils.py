@@ -6,11 +6,10 @@ import logging
 import mimetypes
 import os
 import pathlib
-import random
 import re
-import time
 from calendar import monthrange
 from collections.abc import Callable
+from contextlib import suppress
 from datetime import date, datetime, timedelta
 from functools import cached_property
 from math import pi, sqrt
@@ -21,7 +20,6 @@ import crum
 import cvss
 import vobject
 from amqp.exceptions import ChannelError
-from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cvss import CVSS2, CVSS3, CVSS4
@@ -30,9 +28,8 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
-from django.db import OperationalError
+from django.db import transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -2056,96 +2053,108 @@ def _get_object_name(obj):
 
 
 @app.task
-def async_delete_chunk_task(objects, **kwargs):
-    """
-    Module-level Celery task to delete a chunk of objects.
-
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
-    """
-    max_retries = 3
-    for obj in objects:
-        retry_count = 0
-        while retry_count < max_retries:
-            try:
-                obj.delete()
-                break  # Success, exit retry loop
-            except OperationalError as e:
-                error_msg = str(e)
-                if "deadlock detected" in error_msg.lower():
-                    retry_count += 1
-                    if retry_count < max_retries:
-                        # Exponential backoff with jitter
-                        wait_time = (2 ** retry_count) + random.uniform(0, 1)  # noqa: S311
-                        logger.warning(
-                            f"ASYNC_DELETE: Deadlock detected deleting {_get_object_name(obj)} {obj.pk}, "
-                            f"retrying ({retry_count}/{max_retries}) after {wait_time:.2f}s",
-                        )
-                        time.sleep(wait_time)
-                        # Refresh object from DB before retry
-                        obj.refresh_from_db()
-                    else:
-                        logger.error(
-                            f"ASYNC_DELETE: Deadlock persisted after {max_retries} retries for {_get_object_name(obj)} {obj.pk}: {e}",
-                        )
-                        raise
-                else:
-                    # Not a deadlock, re-raise
-                    raise
-            except AssertionError:
-                logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
-                # The id must be None
-                # The object has already been deleted elsewhere
-                break
-            except LogEntry.MultipleObjectsReturned:
-                # Delete the log entrys first, then delete
-                LogEntry.objects.filter(
-                    content_type=ContentType.objects.get_for_model(obj.__class__),
-                    object_pk=str(obj.pk),
-                    action=LogEntry.Action.DELETE,
-                ).delete()
-                # Now delete the object again (no retry needed for this case)
-                obj.delete()
-                break
-
-
-@app.task
 def async_delete_crawl_task(obj, model_list, **kwargs):
     """
-    Module-level Celery task to crawl and delete related objects.
+    Delete an object and all its related objects using the SQL cascade walker.
+
+    Handles Python-level concerns (duplicates, integrators, M2M, file cleanup,
+    product grading) explicitly, then uses cascade_delete() for efficient
+    bottom-up SQL deletion of all FK-related tables.
 
     Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
-    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+    from dojo.finding.helper import (  # noqa: PLC0415 circular import
+        bulk_clear_finding_m2m,
+        prepare_duplicates_for_delete,
+    )
+    from dojo.signals import pre_bulk_delete_findings  # noqa: PLC0415 circular import
+    from dojo.utils_cascade_delete import cascade_delete  # noqa: PLC0415 circular import
 
-    logger.debug("ASYNC_DELETE: Crawling " + _get_object_name(obj) + ": " + str(obj))
-    for model_info in model_list:
-        task_results = []
-        model = model_info[0]
-        model_query = model_info[1]
-        filter_dict = {model_query: obj.id}
-        # Only fetch the IDs since we will make a list of IDs in the following function call
-        objects_to_delete = model.objects.only("id").filter(**filter_dict).distinct().order_by("id")
-        logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + _get_object_name(model) + "s in chunks")
-        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-        chunks = [objects_to_delete[i:i + chunk_size] for i in range(0, len(objects_to_delete), chunk_size)]
-        logger.debug("ASYNC_DELETE: Split " + _get_object_name(model) + " into " + str(len(chunks)) + " chunks of " + str(chunk_size))
-        for chunk in chunks:
-            logger.debug(f"deleting {len(chunk)} {_get_object_name(model)}")
-            result = dojo_dispatch_task(async_delete_chunk_task, list(chunk))
-            # Collect async task results to wait for them all at once
-            if hasattr(result, "get"):
-                task_results.append(result)
-        # Wait for all chunk deletions to complete (they run in parallel)
-        for task_result in task_results:
-            task_result.get(timeout=300)  # 5 minute timeout per chunk
-    # Now delete the main object after all chunks are done
-    result = dojo_dispatch_task(async_delete_chunk_task, [obj])
-    # Wait for final deletion to complete
-    if hasattr(result, "get"):
-        result.get(timeout=300)  # 5 minute timeout
-    logger.debug("ASYNC_DELETE: Successfully deleted " + _get_object_name(obj) + ": " + str(obj))
+    obj_name = _get_object_name(obj)
+    logger.info("ASYNC_DELETE: Starting deletion of %s: %s", obj_name, obj)
+
+    # Capture product reference before deletion for product grading at the end
+    product = None
+    with suppress(Product.DoesNotExist, Engagement.DoesNotExist, Test.DoesNotExist):
+        if isinstance(obj, Engagement):
+            product = obj.product
+        elif isinstance(obj, Test):
+            product = obj.engagement.product
+
+    # Step 1: Determine finding scope
+    finding_filter = None
+    for model, query_path in model_list:
+        if model is Finding:
+            finding_filter = {query_path: obj.id}
+            break
+
+    if finding_filter:
+        finding_qs = Finding.objects.filter(**finding_filter)
+
+        # Step 2: Prepare duplicate clusters (must happen before any deletion)
+        if isinstance(obj, Engagement):
+            prepare_duplicates_for_delete(engagement=obj)
+        elif isinstance(obj, Product):
+            for engagement in obj.engagement_set.all():
+                prepare_duplicates_for_delete(engagement=engagement)
+        elif isinstance(obj, Test):
+            prepare_duplicates_for_delete(test=obj)
+
+        # Step 3: Send pre_bulk_delete signal (for Pro integrator dispatch, metering, etc.)
+        pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
+
+        # Step 4: Bulk-clear M2M through tables and clean up files/notes
+        # (M2M through tables are not discovered by _meta.related_objects)
+        bulk_clear_finding_m2m(finding_qs)
+
+    # Step 5: Delete findings in chunks using cascade_delete
+    # skip_relations={Finding} skips the duplicate_finding self-FK (handled in Step 2)
+    chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+
+    if finding_filter:
+        finding_ids = list(
+            Finding.objects.filter(**finding_filter)
+            .values_list("id", flat=True)
+            .order_by("id"),
+        )
+
+        total_chunks = (len(finding_ids) + chunk_size - 1) // chunk_size
+        for i in range(0, len(finding_ids), chunk_size):
+            chunk = finding_ids[i:i + chunk_size]
+            chunk_qs = Finding.objects.filter(id__in=chunk)
+            with transaction.atomic():
+                cascade_delete(
+                    Finding, chunk_qs,
+                    skip_relations={Finding},
+                )
+            logger.info(
+                "ASYNC_DELETE: Deleted finding chunk %d/%d (%d findings)",
+                i // chunk_size + 1, total_chunks, len(chunk),
+            )
+
+        # Delete remaining non-Finding children (Tests, Engagements, Endpoints)
+        # These are now lightweight since their Findings are gone
+        for model, query_path in model_list:
+            if model is not Finding:
+                filter_dict = {query_path: obj.id}
+                qs = model.objects.filter(**filter_dict)
+                if qs.exists():
+                    with transaction.atomic():
+                        cascade_delete(model, qs, skip_relations={Finding})
+
+    # Step 6: Delete the top-level object itself
+    pk_query = type(obj).objects.filter(pk=obj.pk)
+    with transaction.atomic():
+        cascade_delete(type(obj), pk_query, skip_relations={Finding})
+
+    # Step 7: Recalculate product grade once (not per-object)
+    # The custom delete() methods on Finding/Test/Engagement each call
+    # perform_product_grading — cascade_delete bypasses custom delete().
+    if product:
+        perform_product_grading(product)
+
+    logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)
 
 
 @app.task
