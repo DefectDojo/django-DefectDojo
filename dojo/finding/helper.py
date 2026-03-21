@@ -602,15 +602,16 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     if new_original:
         logger.debug("changing original of duplicate cluster %d to: %s:%s", original.id, new_original.id, new_original.title)
 
-        new_original.duplicate = False
-        new_original.duplicate_finding = None
-        new_original.active = original.active
-        new_original.is_mitigated = original.is_mitigated
-        new_original.save_no_options()
+        # Use .update() to avoid triggering Finding.save() signals
+        Finding.objects.filter(id=new_original.id).update(
+            duplicate=False,
+            duplicate_finding=None,
+            active=original.active,
+            is_mitigated=original.is_mitigated,
+        )
         new_original.found_by.set(original.found_by.all())
 
-    # Re-point remaining duplicates to the new original in a single query
-    if new_original and len(cluster_outside) > 1:
+        # Re-point remaining duplicates to the new original in a single query
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 

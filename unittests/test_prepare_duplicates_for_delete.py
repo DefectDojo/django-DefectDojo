@@ -295,3 +295,64 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         found_by_ids = set(outside_dupe.found_by.values_list("id", flat=True))
         self.assertIn(self.test_type.id, found_by_ids)
         self.assertIn(test_type_2.id, found_by_ids)
+
+    def test_delete_finding_reconfigures_cross_engagement_duplicate(self):
+        """Deleting an original finding makes its cross-engagement duplicate standalone.
+
+        Setup: product with eng A (finding A, original) and eng B (finding B, duplicate of A).
+        Action: delete finding A.
+        Expected: finding B becomes a standalone finding (not duplicate, active, no duplicate_finding).
+        """
+        finding_a = self._create_finding(self.test1, "Original A")
+        finding_a.active = True
+        finding_a.is_mitigated = False
+        super(Finding, finding_a).save(skip_validation=True)
+
+        finding_b = self._create_finding(self.test3, "Duplicate B")
+        self._make_duplicate(finding_b, finding_a)
+
+        # Verify setup
+        finding_b.refresh_from_db()
+        self.assertTrue(finding_b.duplicate)
+        self.assertEqual(finding_b.duplicate_finding_id, finding_a.id)
+
+        # Delete finding A — triggers finding_delete signal -> reconfigure_duplicate_cluster
+        with impersonate(self.testuser):
+            finding_a.delete()
+
+        # Finding B should now be standalone
+        finding_b.refresh_from_db()
+        self.assertFalse(finding_b.duplicate)
+        self.assertIsNone(finding_b.duplicate_finding)
+        self.assertTrue(finding_b.active)
+        self.assertFalse(finding_b.is_mitigated)
+
+    def test_delete_product_with_cross_engagement_duplicates(self):
+        """Deleting a product with cross-engagement duplicates succeeds without FK violations.
+
+        Setup: product with eng A (finding A, original) and eng B (finding B, duplicate of A).
+        Action: delete the entire product via async_delete_crawl_task.
+        Expected: product and all findings are deleted without errors.
+        """
+        from dojo.utils import ASYNC_DELETE_MAPPING, async_delete_crawl_task
+
+        finding_a = self._create_finding(self.test1, "Original A")
+        finding_a.active = True
+        finding_a.is_mitigated = False
+        super(Finding, finding_a).save(skip_validation=True)
+
+        finding_b = self._create_finding(self.test3, "Duplicate B")
+        self._make_duplicate(finding_b, finding_a)
+
+        product_id = self.product.id
+        finding_a_id = finding_a.id
+        finding_b_id = finding_b.id
+
+        model_list = ASYNC_DELETE_MAPPING["Product"]
+        with impersonate(self.testuser):
+            async_delete_crawl_task(self.product, model_list)
+
+        # Everything should be gone
+        self.assertFalse(Product.objects.filter(id=product_id).exists())
+        self.assertFalse(Finding.objects.filter(id=finding_a_id).exists())
+        self.assertFalse(Finding.objects.filter(id=finding_b_id).exists())
