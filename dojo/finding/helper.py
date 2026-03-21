@@ -618,14 +618,9 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
             new_original.save_no_options()
             new_original.found_by.set(original.found_by.all())
 
-        # if the cluster is size 1, there's only the new original left
+        # Re-point remaining duplicates to the new original in a single query
         if new_original and len(cluster_outside) > 1:
-            # for find in cluster_outside:
-            #     if find != new_original:
-            #         find.duplicate_finding = new_original
-            #         find.save_no_options()
-
-            mass_model_updater(Finding, cluster_outside, lambda f: set_new_original(f, new_original), fields=["duplicate_finding"])
+            cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 
 def prepare_duplicates_for_delete(test=None, engagement=None):
