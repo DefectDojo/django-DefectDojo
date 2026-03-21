@@ -225,7 +225,8 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
 
     @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
     def test_cascade_delete_skips_outside_reconfigure(self):
-        """When DUPLICATE_CLUSTER_CASCADE_DELETE=True, outside duplicates are left untouched.
+        """
+        When DUPLICATE_CLUSTER_CASCADE_DELETE=True, outside duplicates are left untouched.
 
         The caller (async_delete_crawl_task) handles deletion of outside-scope
         duplicates separately via bulk_delete_findings.
@@ -300,7 +301,8 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertIn(test_type_2.id, found_by_ids)
 
     def test_delete_finding_reconfigures_cross_engagement_duplicate(self):
-        """Deleting an original finding makes its cross-engagement duplicate standalone.
+        """
+        Deleting an original finding makes its cross-engagement duplicate standalone.
 
         Setup: product with eng A (finding A, original) and eng B (finding B, duplicate of A).
         Action: delete finding A.
@@ -331,13 +333,14 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertFalse(finding_b.is_mitigated)
 
     def test_delete_product_with_cross_engagement_duplicates(self):
-        """Deleting a product with cross-engagement duplicates succeeds without FK violations.
+        """
+        Deleting a product with cross-engagement duplicates succeeds without FK violations.
 
         Setup: product with eng A (finding A, original) and eng B (finding B, duplicate of A).
         Action: delete the entire product via async_delete_crawl_task.
         Expected: product and all findings are deleted without errors.
         """
-        from dojo.utils import async_delete_crawl_task
+        from dojo.utils import async_delete_crawl_task  # noqa: PLC0415
 
         finding_a = self._create_finding(self.test1, "Original A")
         finding_a.active = True

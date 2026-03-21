@@ -616,7 +616,8 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
 
 def prepare_duplicates_for_delete(obj):
-    """Prepare duplicate clusters before deleting a Test, Engagement, Product, or Product_Type.
+    """
+    Prepare duplicate clusters before deleting a Test, Engagement, Product, or Product_Type.
 
     Resets inside-scope duplicate FKs and reconfigures outside-scope clusters
     so that cascade_delete won't hit FK violations on the self-referential
@@ -664,7 +665,7 @@ def prepare_duplicates_for_delete(obj):
         .iterator(chunk_size=500)
     )
 
-    for chunk_ids in batched(originals_ids, 500):
+    for chunk_ids in batched(originals_ids, 500, strict=False):
         for original in Finding.objects.filter(id__in=chunk_ids).prefetch_related("original_finding"):
             # Inside-scope duplicates were already unlinked by the bulk UPDATE above,
             # so original_finding.all() now only contains outside-scope duplicates.
