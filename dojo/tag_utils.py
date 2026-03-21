@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from collections.abc import Iterable
 
 from django.conf import settings
@@ -7,6 +8,8 @@ from django.db import models, transaction
 from tagulous.utils import parse_tags
 
 from dojo.models import Product  # local import to avoid circulars at import time
+
+logger = logging.getLogger(__name__)
 
 
 def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "tags", batch_size: int | None = None) -> int:
@@ -161,4 +164,68 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
     return total_created
 
 
-__all__ = ["bulk_add_tags_to_instances"]
+def bulk_remove_all_tags(model_class, instance_ids_qs, tag_field_name: str = "tags"):
+    """
+    Remove all tags from instances identified by the given ID subquery.
+
+    Decrements tag counts correctly and deletes through-table rows.
+    Accepts a QuerySet of IDs (as a subquery) to avoid materializing large ID lists.
+
+    Args:
+        model_class: The model class (e.g. Finding, Product).
+        instance_ids_qs: A QuerySet producing instance PKs (used as subquery).
+        tag_field_name: Name of the TagField (default: "tags").
+
+    """
+    for field_name in [tag_field_name, "inherited_tags"]:
+        try:
+            tag_field = model_class._meta.get_field(field_name)
+        except Exception:  # noqa: S112
+            continue
+
+        if not hasattr(tag_field, "tag_options"):
+            continue
+
+        tag_model = tag_field.related_model
+        through_model = tag_field.remote_field.through
+
+        # Find the FK column that points to the source model
+        source_field_name = None
+        target_field_name = None
+        for field in through_model._meta.get_fields():
+            if hasattr(field, "remote_field") and field.remote_field:
+                if field.remote_field.model == model_class:
+                    source_field_name = field.name
+                elif field.remote_field.model == tag_model:
+                    target_field_name = field.name
+
+        if not source_field_name or not target_field_name:
+            continue
+
+        # Get affected tag IDs and their counts before deletion
+        affected_tags = (
+            through_model.objects.filter(**{f"{source_field_name}__in": instance_ids_qs})
+            .values(target_field_name)
+            .annotate(num=models.Count("id"))
+        )
+
+        # Decrement tag counts. Tag counts are not used in DefectDojo but we
+        # maintain them to avoid breaking tagulous's internal bookkeeping.
+        for entry in affected_tags:
+            tag_model.objects.filter(pk=entry[target_field_name]).update(
+                count=models.F("count") - entry["num"],
+            )
+
+        # Delete through-table rows
+        count, _ = through_model.objects.filter(
+            **{f"{source_field_name}__in": instance_ids_qs},
+        ).delete()
+
+        if count:
+            logger.debug(
+                "bulk_remove_all_tags: removed %d %s.%s through-table rows",
+                count, model_class.__name__, field_name,
+            )
+
+
+__all__ = ["bulk_add_tags_to_instances", "bulk_remove_all_tags"]

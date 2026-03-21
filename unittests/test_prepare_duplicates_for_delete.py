@@ -362,3 +362,50 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertFalse(Product.objects.filter(id=product_id).exists())
         self.assertFalse(Finding.objects.filter(id=finding_a_id).exists())
         self.assertFalse(Finding.objects.filter(id=finding_b_id).exists())
+
+    def test_delete_product_with_tags(self):
+        """
+        Deleting a product with tags on product and findings succeeds
+        and correctly decrements tag counts.
+        """
+        from dojo.utils import async_delete  # noqa: PLC0415
+
+        # Add tags to product and findings
+        self.product.tags = "product-tag, shared-tag"
+        self.product.save()
+
+        finding_a = self._create_finding(self.test1, "Tagged Finding A")
+        finding_a.tags = "finding-tag, shared-tag"
+        super(Finding, finding_a).save(skip_validation=True)
+
+        finding_b = self._create_finding(self.test3, "Tagged Finding B")
+        finding_b.tags = "finding-tag"
+        super(Finding, finding_b).save(skip_validation=True)
+
+        product_id = self.product.id
+        finding_a_id = finding_a.id
+        finding_b_id = finding_b.id
+
+        # Get tag models to check counts after deletion
+        # Product and Finding have separate tag models in tagulous
+        product_tag_model = Product._meta.get_field("tags").related_model
+        finding_tag_model = Finding._meta.get_field("tags").related_model
+        product_shared_tag = product_tag_model.objects.get(name="shared-tag")
+        finding_shared_tag = finding_tag_model.objects.get(name="shared-tag")
+
+        with impersonate(self.testuser):
+            async_del = async_delete()
+            async_del.delete(self.product)
+
+        # Everything should be gone
+        self.assertFalse(Product.objects.filter(id=product_id).exists())
+        self.assertFalse(Finding.objects.filter(id=finding_a_id).exists())
+        self.assertFalse(Finding.objects.filter(id=finding_b_id).exists())
+
+        # Tag counts should be decremented to 0 (all referencing objects deleted).
+        # Tag counts are not used in DefectDojo, but we still verify them to ensure
+        # our bulk removal method doesn't break tagulous's internal bookkeeping.
+        product_shared_tag.refresh_from_db()
+        self.assertEqual(product_shared_tag.count, 0)
+        finding_shared_tag.refresh_from_db()
+        self.assertEqual(finding_shared_tag.count, 0)

@@ -138,7 +138,32 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, base_mode
                 on_delete_name, from_model.__name__, related_model.__name__,
             )
 
-    # After all children are deleted, delete records at this level
+    # Clear M2M through tables before deleting (not discovered by _meta.related_objects).
+    # Tag fields are handled via bulk_remove_all_tags to maintain tag counts correctly.
+    from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+
+    bulk_remove_all_tags(from_model, instance_pk_query)
+
+    for m2m_field in from_model._meta.many_to_many:
+        # Skip tag fields — already handled above
+        if hasattr(m2m_field, "tag_options"):
+            continue
+        through_model = m2m_field.remote_field.through
+        fk_column = None
+        for field in through_model._meta.get_fields():
+            if hasattr(field, "related_model") and field.related_model is from_model:
+                fk_column = field.column
+                break
+        if fk_column:
+            filterspec_m2m = {f"{fk_column}__in": models.Subquery(instance_pk_query)}
+            m2m_count = execute_delete_sql(through_model.objects.filter(**filterspec_m2m))
+            if m2m_count:
+                logger.debug(
+                    "cascade_delete: cleared %d rows from M2M %s",
+                    m2m_count, through_model._meta.db_table,
+                )
+
+    # After all children and M2M are deleted, delete records at this level
     if level == 0:
         del_query = instance_pk_query
     else:

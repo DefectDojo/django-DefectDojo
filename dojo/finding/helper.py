@@ -703,7 +703,10 @@ def bulk_clear_finding_m2m(finding_qs):
 
     Special handling for FileUpload: deletes via ORM so the custom
     FileUpload.delete() fires and removes files from disk storage.
+    Tags are handled via bulk_remove_all_tags to maintain tag counts.
     """
+    from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+
     finding_ids = finding_qs.values_list("id", flat=True)
 
     # Collect FileUpload IDs before deleting through table entries
@@ -720,8 +723,13 @@ def bulk_clear_finding_m2m(finding_qs):
         ).values_list("notes_id", flat=True),
     )
 
-    # Auto-discover and delete all M2M through tables
+    # Remove tags with proper count maintenance
+    bulk_remove_all_tags(Finding, finding_ids)
+
+    # Auto-discover and delete remaining (non-tag) M2M through tables
     for m2m_field in Finding._meta.many_to_many:
+        if hasattr(m2m_field, "tag_options"):
+            continue
         through_model = m2m_field.remote_field.through
         # Find the FK column that points to Finding
         fk_column = None
