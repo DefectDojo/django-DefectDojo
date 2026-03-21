@@ -633,6 +633,8 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
         logger.warning("nothing to prepare as test and engagement are None")
         return
 
+    # should not be needed in normal healthy instances.
+    # but in that case it's a cheap count query and we might as well run it to be safe
     fix_loop_duplicates()
 
     # Build scope filter
