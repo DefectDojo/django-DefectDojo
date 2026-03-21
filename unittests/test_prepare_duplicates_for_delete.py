@@ -104,7 +104,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         f2 = self._create_finding(self.test1, "F2")
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         f1.refresh_from_db()
         f2.refresh_from_db()
@@ -120,7 +120,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         dupe.refresh_from_db()
         self.assertIsNone(dupe.duplicate_finding)
@@ -137,7 +137,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(outside_dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         outside_dupe.refresh_from_db()
         # Outside dupe becomes the new original
@@ -158,7 +158,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(dupe_d, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         dupe_b.refresh_from_db()
         dupe_c.refresh_from_db()
@@ -182,7 +182,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(engagement=self.engagement1)
+            prepare_duplicates_for_delete(self.engagement1)
 
         dupe.refresh_from_db()
         self.assertIsNone(dupe.duplicate_finding)
@@ -195,7 +195,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(outside_dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(engagement=self.engagement1)
+            prepare_duplicates_for_delete(self.engagement1)
 
         outside_dupe.refresh_from_db()
         self.assertFalse(outside_dupe.duplicate)
@@ -210,7 +210,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(outside_dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         inside_dupe.refresh_from_db()
         outside_dupe.refresh_from_db()
@@ -235,7 +235,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(outside_dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         outside_dupe.refresh_from_db()
         # Outside dupe is still a duplicate — not reconfigured or deleted
@@ -252,7 +252,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(dupe_of_b, original_b)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         dupe_of_a.refresh_from_db()
         dupe_of_b.refresh_from_db()
@@ -274,7 +274,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(outside_dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         outside_dupe.refresh_from_db()
         self.assertFalse(outside_dupe.duplicate)
@@ -292,7 +292,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self._make_duplicate(outside_dupe, original)
 
         with impersonate(self.testuser):
-            prepare_duplicates_for_delete(test=self.test1)
+            prepare_duplicates_for_delete(self.test1)
 
         outside_dupe.refresh_from_db()
         found_by_ids = set(outside_dupe.found_by.values_list("id", flat=True))
@@ -337,7 +337,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         Action: delete the entire product via async_delete_crawl_task.
         Expected: product and all findings are deleted without errors.
         """
-        from dojo.utils import ASYNC_DELETE_MAPPING, async_delete_crawl_task
+        from dojo.utils import async_delete_crawl_task
 
         finding_a = self._create_finding(self.test1, "Original A")
         finding_a.active = True
@@ -351,9 +351,8 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         finding_a_id = finding_a.id
         finding_b_id = finding_b.id
 
-        model_list = ASYNC_DELETE_MAPPING["Product"]
         with impersonate(self.testuser):
-            async_delete_crawl_task(self.product, model_list)
+            async_delete_crawl_task(self.product)
 
         # Everything should be gone
         self.assertFalse(Product.objects.filter(id=product_id).exists())

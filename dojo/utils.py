@@ -2026,23 +2026,16 @@ def is_finding_groups_enabled():
     return get_system_setting("enable_finding_groups")
 
 
-# Mapping of object types to their related models for cascading deletes
-ASYNC_DELETE_MAPPING = {
-    "Product_Type": [
-        (Endpoint, "product__prod_type__id"),
-        (Finding, "test__engagement__product__prod_type__id"),
-        (Test, "engagement__product__prod_type__id"),
-        (Engagement, "product__prod_type__id"),
-        (Product, "prod_type__id")],
-    "Product": [
-        (Endpoint, "product__id"),
-        (Finding, "test__engagement__product__id"),
-        (Test, "engagement__product__id"),
-        (Engagement, "product__id")],
-    "Engagement": [
-        (Finding, "test__engagement__id"),
-        (Test, "engagement__id")],
-    "Test": [(Finding, "test__id")],
+# Supported object types for async cascade deletion
+ASYNC_DELETE_SUPPORTED_TYPES = (Product_Type, Product, Engagement, Test)
+
+# Finding scope filters per model type — used to build the finding queryset
+# for bulk deletion before cascade_delete handles the rest.
+FINDING_SCOPE_FILTERS = {
+    Product_Type: "test__engagement__product__prod_type",
+    Product: "test__engagement__product",
+    Engagement: "test__engagement",
+    Test: "test",
 }
 
 
@@ -2054,7 +2047,7 @@ def _get_object_name(obj):
 
 
 @app.task
-def async_delete_crawl_task(obj, model_list, **kwargs):
+def async_delete_crawl_task(obj, **kwargs):
     """
     Delete an object and all its related objects using the SQL cascade walker.
 
@@ -2083,26 +2076,14 @@ def async_delete_crawl_task(obj, model_list, **kwargs):
             product = obj.engagement.product
 
     # Step 1: Determine finding scope
-    finding_filter = None
-    for model, query_path in model_list:
-        if model is Finding:
-            finding_filter = {query_path: obj.id}
-            break
-
-    if finding_filter:
-        finding_qs = Finding.objects.filter(**finding_filter)
+    scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
+    if scope_field:
+        finding_qs = Finding.objects.filter(**{scope_field: obj})
 
         # Step 2: Prepare duplicate clusters (must happen before any deletion)
-        # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips deletion —
+        # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
         # we handle that below by expanding scope to include outside duplicates.
-        if isinstance(obj, Product_Type):
-            prepare_duplicates_for_delete(product_type=obj)
-        elif isinstance(obj, Product):
-            prepare_duplicates_for_delete(product=obj)
-        elif isinstance(obj, Engagement):
-            prepare_duplicates_for_delete(engagement=obj)
-        elif isinstance(obj, Test):
-            prepare_duplicates_for_delete(test=obj)
+        prepare_duplicates_for_delete(obj)
 
         # Step 3: Delete outside-scope duplicates first — these point to findings
         # in the main scope via duplicate_finding FK, so they must be removed before
@@ -2119,22 +2100,14 @@ def async_delete_crawl_task(obj, model_list, **kwargs):
         # Step 4: Delete the main scope findings
         bulk_delete_findings(finding_qs, chunk_size=chunk_size)
 
-        # Delete remaining non-Finding children (Tests, Engagements, Endpoints)
-        # These are now lightweight since their Findings are gone
-        for model, query_path in model_list:
-            if model is not Finding:
-                filter_dict = {query_path: obj.id}
-                qs = model.objects.filter(**filter_dict)
-                if qs.exists():
-                    with transaction.atomic():
-                        cascade_delete(model, qs, skip_relations={Finding})
-
-    # Step 6: Delete the top-level object itself
+    # Step 5: Delete the top-level object and all remaining children (Tests,
+    # Engagements, Endpoints, etc.) via cascade_delete. Findings are already
+    # gone, so skip_relations={Finding} avoids walking empty relations.
     pk_query = type(obj).objects.filter(pk=obj.pk)
     with transaction.atomic():
         cascade_delete(type(obj), pk_query, skip_relations={Finding})
 
-    # Step 7: Recalculate product grade once (not per-object)
+    # Step 6: Recalculate product grade once (not per-object)
     # The custom delete() methods on Finding/Test/Engagement each call
     # perform_product_grading — cascade_delete bypasses custom delete().
     if product:
@@ -2153,14 +2126,11 @@ def async_delete_task(obj, **kwargs):
     """
     from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-    logger.debug("ASYNC_DELETE: Deleting " + _get_object_name(obj) + ": " + str(obj))
-    model_list = ASYNC_DELETE_MAPPING.get(_get_object_name(obj))
-    if model_list:
-        # The object to be deleted was found in the object list
-        dojo_dispatch_task(async_delete_crawl_task, obj, model_list)
+    logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
+    if isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
+        dojo_dispatch_task(async_delete_crawl_task, obj)
     else:
-        # The object is not supported in async delete, delete normally
-        logger.debug("ASYNC_DELETE: " + _get_object_name(obj) + " async delete not supported. Deleteing normally: " + str(obj))
+        logger.debug("ASYNC_DELETE: %s async delete not supported. Deleting normally: %s", _get_object_name(obj), obj)
         obj.delete()
 
 
@@ -2177,10 +2147,6 @@ class async_delete:
     which properly handles user context injection and pghistory context.
     """
 
-    def __init__(self, *args, **kwargs):
-        # Keep mapping reference for backwards compatibility
-        self.mapping = ASYNC_DELETE_MAPPING
-
     def delete(self, obj, **kwargs):
         """
         Entry point to delete an object asynchronously.
@@ -2192,17 +2158,9 @@ class async_delete:
 
         dojo_dispatch_task(async_delete_task, obj, **kwargs)
 
-    # Keep helper methods for backwards compatibility and potential direct use
     @staticmethod
     def get_object_name(obj):
         return _get_object_name(obj)
-
-    @staticmethod
-    def chunk_list(model, full_list):
-        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-        chunk_list = [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
-        logger.debug("ASYNC_DELETE: Split " + _get_object_name(model) + " into " + str(len(chunk_list)) + " chunks of " + str(chunk_size))
-        return chunk_list
 
 
 @receiver(user_logged_in)

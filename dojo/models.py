@@ -1647,7 +1647,7 @@ class Engagement(BaseModel):
     def delete(self, *args, **kwargs):
         logger.debug("%d engagement delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 circular import
-        finding_helper.prepare_duplicates_for_delete(engagement=self)
+        finding_helper.prepare_duplicates_for_delete(self)
         super().delete(*args, **kwargs)
         with suppress(Engagement.DoesNotExist, Product.DoesNotExist):
             # Suppressing a potential issue created from async delete removing

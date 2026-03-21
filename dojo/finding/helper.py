@@ -615,33 +615,28 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 
-def prepare_duplicates_for_delete(test=None, engagement=None, product=None, product_type=None):
-    logger.debug(
-        "prepare duplicates for delete, test: %s, engagement: %s, product: %s, product_type: %s",
-        test.id if test else None,
-        engagement.id if engagement else None,
-        product.id if product else None,
-        product_type.id if product_type else None,
-    )
-    if test is None and engagement is None and product is None and product_type is None:
-        logger.warning("nothing to prepare as no scope object provided")
+def prepare_duplicates_for_delete(obj):
+    """Prepare duplicate clusters before deleting a Test, Engagement, Product, or Product_Type.
+
+    Resets inside-scope duplicate FKs and reconfigures outside-scope clusters
+    so that cascade_delete won't hit FK violations on the self-referential
+    duplicate_finding field.
+    """
+    from dojo.utils import FINDING_SCOPE_FILTERS  # noqa: PLC0415 circular import
+
+    scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
+    if scope_field is None:
+        logger.warning("prepare_duplicates_for_delete: unsupported object type %s", type(obj).__name__)
         return
+
+    logger.debug("prepare_duplicates_for_delete: %s %d", type(obj).__name__, obj.id)
 
     # should not be needed in normal healthy instances.
     # but in that case it's a cheap count query and we might as well run it to be safe
     fix_loop_duplicates()
 
     # Build scope as a subquery — never materialized into Python memory
-    if product_type:
-        scope_filter = {"test__engagement__product__prod_type": product_type}
-    elif product:
-        scope_filter = {"test__engagement__product": product}
-    elif engagement:
-        scope_filter = {"test__engagement": engagement}
-    else:
-        scope_filter = {"test": test}
-
-    scope_ids_subquery = Finding.objects.filter(**scope_filter).values_list("id", flat=True)
+    scope_ids_subquery = Finding.objects.filter(**{scope_field: obj}).values_list("id", flat=True)
 
     if not scope_ids_subquery.exists():
         logger.debug("no findings in scope, nothing to prepare")
@@ -679,7 +674,7 @@ def prepare_duplicates_for_delete(test=None, engagement=None, product=None, prod
 @receiver(pre_delete, sender=Test)
 def test_pre_delete(sender, instance, **kwargs):
     logger.debug("test pre_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-    prepare_duplicates_for_delete(test=instance)
+    prepare_duplicates_for_delete(instance)
 
 
 @receiver(post_delete, sender=Test)
@@ -690,7 +685,7 @@ def test_post_delete(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Engagement)
 def engagement_pre_delete(sender, instance, **kwargs):
     logger.debug("engagement pre_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-    prepare_duplicates_for_delete(engagement=instance)
+    prepare_duplicates_for_delete(instance)
 
 
 @receiver(post_delete, sender=Engagement)
