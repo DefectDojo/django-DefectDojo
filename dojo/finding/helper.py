@@ -50,7 +50,6 @@ from dojo.utils import (
     do_false_positive_history,
     get_current_user,
     get_object_or_none,
-    mass_model_updater,
     to_str_typed,
 )
 
@@ -577,20 +576,6 @@ def finding_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with suppress(Finding.DoesNotExist):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-
-
-def reset_duplicate_before_delete(dupe):
-    dupe.duplicate_finding = None
-    dupe.duplicate = False
-
-
-def reset_duplicates_before_delete(qs):
-    mass_model_updater(Finding, qs, reset_duplicate_before_delete, fields=["duplicate", "duplicate_finding"])
-
-
-def set_new_original(finding, new_original):
-    if finding.duplicate:
-        finding.duplicate_finding = new_original
 
 
 # can't use model to id here due to the queryset
