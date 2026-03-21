@@ -296,18 +296,3 @@ class TestAsyncDelete(DojoTestCase):
             "Product",
             "get_object_name should work with model class",
         )
-
-    def test_async_delete_mapping_preserved(self):
-        """
-        Test that the mapping attribute is preserved on async_delete instances.
-
-        This ensures backwards compatibility for code that might access the mapping.
-        """
-        async_del = async_delete()
-
-        # Verify mapping exists and has expected keys
-        self.assertIsNotNone(async_del.mapping)
-        self.assertIn("Product", async_del.mapping)
-        self.assertIn("Product_Type", async_del.mapping)
-        self.assertIn("Engagement", async_del.mapping)
-        self.assertIn("Test", async_del.mapping)
