@@ -340,7 +340,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         Action: delete the entire product via async_delete_crawl_task.
         Expected: product and all findings are deleted without errors.
         """
-        from dojo.utils import async_delete_crawl_task  # noqa: PLC0415
+        from dojo.utils import async_delete  # noqa: PLC0415
 
         finding_a = self._create_finding(self.test1, "Original A")
         finding_a.active = True
@@ -355,7 +355,8 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         finding_b_id = finding_b.id
 
         with impersonate(self.testuser):
-            async_delete_crawl_task(self.product)
+            async_del = async_delete()
+            async_del.delete(self.product)
 
         # Everything should be gone
         self.assertFalse(Product.objects.filter(id=product_id).exists())

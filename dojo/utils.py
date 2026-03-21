@@ -2047,7 +2047,7 @@ def _get_object_name(obj):
 
 
 @app.task
-def async_delete_crawl_task(obj, **kwargs):
+def async_delete_task(obj, **kwargs):
     """
     Delete an object and all its related objects using the SQL cascade walker.
 
@@ -2063,6 +2063,12 @@ def async_delete_crawl_task(obj, **kwargs):
         prepare_duplicates_for_delete,
     )
     from dojo.utils_cascade_delete import cascade_delete  # noqa: PLC0415 circular import
+
+    logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
+    if not isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
+        logger.debug("ASYNC_DELETE: %s async delete not supported. Deleting normally: %s", _get_object_name(obj), obj)
+        obj.delete()
+        return
 
     obj_name = _get_object_name(obj)
     logger.info("ASYNC_DELETE: Starting deletion of %s: %s", obj_name, obj)
@@ -2114,24 +2120,6 @@ def async_delete_crawl_task(obj, **kwargs):
         perform_product_grading(product)
 
     logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)
-
-
-@app.task
-def async_delete_task(obj, **kwargs):
-    """
-    Module-level Celery task to delete an object and its related objects.
-
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
-    """
-    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-    logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
-    if isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
-        dojo_dispatch_task(async_delete_crawl_task, obj)
-    else:
-        logger.debug("ASYNC_DELETE: %s async delete not supported. Deleting normally: %s", _get_object_name(obj), obj)
-        obj.delete()
 
 
 class async_delete:

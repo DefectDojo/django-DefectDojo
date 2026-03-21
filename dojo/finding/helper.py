@@ -751,7 +751,7 @@ def bulk_clear_finding_m2m(finding_qs):
 
 def bulk_delete_findings(finding_qs, chunk_size=1000):
     """
-    Delete findings and all related objects efficiently.
+    Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
 
     Sends the pre_bulk_delete signal, clears M2M through tables (not
     discovered by _meta.related_objects), then uses cascade_delete for

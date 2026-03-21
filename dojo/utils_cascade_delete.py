@@ -61,6 +61,8 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, base_mode
     recurses into CASCADE children first (bottom-up), then deletes at the
     current level. No query execution until recursion unwinds.
 
+    Includes any related object in Dojo-Pro
+
     Args:
         from_model: The model class to delete from.
         instance_pk_query: QuerySet selecting the records to delete.
