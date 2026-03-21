@@ -69,6 +69,7 @@ from dojo.models import (
     Languages,
     Notifications,
     Product,
+    Product_Type,
     System_Settings,
     Test,
     Test_Type,
@@ -2094,11 +2095,12 @@ def async_delete_crawl_task(obj, model_list, **kwargs):
         # Step 2: Prepare duplicate clusters (must happen before any deletion)
         # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips deletion —
         # we handle that below by expanding scope to include outside duplicates.
-        if isinstance(obj, Engagement):
-            prepare_duplicates_for_delete(engagement=obj)
+        if isinstance(obj, Product_Type):
+            prepare_duplicates_for_delete(product_type=obj)
         elif isinstance(obj, Product):
-            for engagement in obj.engagement_set.all():
-                prepare_duplicates_for_delete(engagement=engagement)
+            prepare_duplicates_for_delete(product=obj)
+        elif isinstance(obj, Engagement):
+            prepare_duplicates_for_delete(engagement=obj)
         elif isinstance(obj, Test):
             prepare_duplicates_for_delete(test=obj)
 

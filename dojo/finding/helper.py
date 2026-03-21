@@ -1,6 +1,7 @@
 import logging
 from contextlib import suppress
 from datetime import datetime
+from itertools import batched
 from time import strftime
 
 from django.conf import settings
@@ -563,8 +564,7 @@ def finding_delete(instance, **kwargs):
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
         if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-            # Delete the entire duplicate cluster efficiently via bulk_delete_findings
-            bulk_delete_findings(duplicate_cluster)
+            duplicate_cluster.order_by("-id").delete()
         else:
             reconfigure_duplicate_cluster(instance, duplicate_cluster)
     else:
@@ -615,53 +615,65 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 
-def prepare_duplicates_for_delete(test=None, engagement=None):
-    logger.debug("prepare duplicates for delete, test: %s, engagement: %s", test.id if test else None, engagement.id if engagement else None)
-    if test is None and engagement is None:
-        logger.warning("nothing to prepare as test and engagement are None")
+def prepare_duplicates_for_delete(test=None, engagement=None, product=None, product_type=None):
+    logger.debug(
+        "prepare duplicates for delete, test: %s, engagement: %s, product: %s, product_type: %s",
+        test.id if test else None,
+        engagement.id if engagement else None,
+        product.id if product else None,
+        product_type.id if product_type else None,
+    )
+    if test is None and engagement is None and product is None and product_type is None:
+        logger.warning("nothing to prepare as no scope object provided")
         return
 
     # should not be needed in normal healthy instances.
     # but in that case it's a cheap count query and we might as well run it to be safe
     fix_loop_duplicates()
 
-    # Build scope filter
-    scope_filter = {}
-    if engagement:
-        scope_filter["test__engagement"] = engagement
-    if test:
-        scope_filter["test"] = test
+    # Build scope as a subquery — never materialized into Python memory
+    if product_type:
+        scope_filter = {"test__engagement__product__prod_type": product_type}
+    elif product:
+        scope_filter = {"test__engagement__product": product}
+    elif engagement:
+        scope_filter = {"test__engagement": engagement}
+    else:
+        scope_filter = {"test": test}
 
-    scope_finding_ids = set(
-        Finding.objects.filter(**scope_filter).values_list("id", flat=True),
-    )
-    if not scope_finding_ids:
+    scope_ids_subquery = Finding.objects.filter(**scope_filter).values_list("id", flat=True)
+
+    if not scope_ids_subquery.exists():
         logger.debug("no findings in scope, nothing to prepare")
         return
 
     # Bulk-reset inside-scope duplicates: single UPDATE instead of per-original mass_model_updater.
-    # Clears the duplicate_finding FK so Django's Collector won't trip over dangling references
-    # when deleting findings in this scope.
+    # Clears the duplicate_finding FK so cascade_delete won't trip over dangling self-references.
     inside_reset_count = Finding.objects.filter(
         duplicate=True,
-        duplicate_finding_id__in=scope_finding_ids,
-        id__in=scope_finding_ids,
+        duplicate_finding_id__in=scope_ids_subquery,
+        id__in=scope_ids_subquery,
     ).update(duplicate_finding=None, duplicate=False)
     logger.debug("bulk-reset %d inside-scope duplicates", inside_reset_count)
 
     # Reconfigure outside-scope duplicates: still per-original because each cluster
     # needs a new original chosen, status copied, and found_by updated.
-    # Pre-filter to only originals that have at least one duplicate outside scope,
-    # avoiding a per-original .exists() check.
-    originals_with_outside_dupes = Finding.objects.filter(
-        id__in=scope_finding_ids,
-        original_finding__in=Finding.objects.exclude(id__in=scope_finding_ids),
-    ).distinct().prefetch_related("original_finding")
+    # Chunked with prefetch_related to bound memory while avoiding N+1 queries.
+    originals_ids = (
+        Finding.objects.filter(
+            id__in=scope_ids_subquery,
+            original_finding__in=Finding.objects.exclude(id__in=scope_ids_subquery),
+        )
+        .distinct()
+        .values_list("id", flat=True)
+        .iterator(chunk_size=500)
+    )
 
-    for original in originals_with_outside_dupes:
-        # Inside-scope duplicates were already unlinked by the bulk UPDATE above,
-        # so original_finding.all() now only contains outside-scope duplicates.
-        reconfigure_duplicate_cluster(original, original.original_finding.all())
+    for chunk_ids in batched(originals_ids, 500):
+        for original in Finding.objects.filter(id__in=chunk_ids).prefetch_related("original_finding"):
+            # Inside-scope duplicates were already unlinked by the bulk UPDATE above,
+            # so original_finding.all() now only contains outside-scope duplicates.
+            reconfigure_duplicate_cluster(original, original.original_finding.all())
 
 
 @receiver(pre_delete, sender=Test)

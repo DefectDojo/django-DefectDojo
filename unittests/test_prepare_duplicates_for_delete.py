@@ -224,20 +224,23 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertIsNone(outside_dupe.duplicate_finding)
 
     @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
-    def test_cascade_delete_setting(self):
-        """When DUPLICATE_CLUSTER_CASCADE_DELETE=True, outside duplicates are deleted."""
+    def test_cascade_delete_skips_outside_reconfigure(self):
+        """When DUPLICATE_CLUSTER_CASCADE_DELETE=True, outside duplicates are left untouched.
+
+        The caller (async_delete_crawl_task) handles deletion of outside-scope
+        duplicates separately via bulk_delete_findings.
+        """
         original = self._create_finding(self.test1, "Original")
         outside_dupe = self._create_finding(self.test2, "Outside Dupe")
         self._make_duplicate(outside_dupe, original)
-        outside_dupe_id = outside_dupe.id
 
         with impersonate(self.testuser):
             prepare_duplicates_for_delete(test=self.test1)
 
-        self.assertFalse(
-            Finding.objects.filter(id=outside_dupe_id).exists(),
-            "Outside duplicate should be cascade-deleted",
-        )
+        outside_dupe.refresh_from_db()
+        # Outside dupe is still a duplicate — not reconfigured or deleted
+        self.assertTrue(outside_dupe.duplicate)
+        self.assertEqual(outside_dupe.duplicate_finding_id, original.id)
 
     def test_multiple_originals(self):
         """Multiple originals in the same test each get their clusters handled."""
