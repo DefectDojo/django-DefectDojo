@@ -4,6 +4,7 @@ from datetime import datetime
 from time import strftime
 
 from django.conf import settings
+from django.db import transaction
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.db.utils import IntegrityError
@@ -561,7 +562,11 @@ def finding_delete(instance, **kwargs):
 
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
-        reconfigure_duplicate_cluster(instance, duplicate_cluster)
+        if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+            # Delete the entire duplicate cluster efficiently via bulk_delete_findings
+            bulk_delete_findings(duplicate_cluster)
+        else:
+            reconfigure_duplicate_cluster(instance, duplicate_cluster)
     else:
         logger.debug("no duplicate cluster found for finding: %d, so no need to reconfigure", instance.id)
 
@@ -588,24 +593,25 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         return
 
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-        cluster_outside.order_by("-id").delete()
-    else:
-        logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
-        # set new original to first finding in cluster (ordered by id)
-        new_original = cluster_outside.order_by("id").first()
-        if new_original:
-            logger.debug("changing original of duplicate cluster %d to: %s:%s", original.id, new_original.id, new_original.title)
+        # Don't delete here — the caller (async_delete_crawl_task or finding_delete)
+        # handles deletion of outside-scope duplicates efficiently via bulk_delete_findings.
+        return
+    logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
+    # set new original to first finding in cluster (ordered by id)
+    new_original = cluster_outside.order_by("id").first()
+    if new_original:
+        logger.debug("changing original of duplicate cluster %d to: %s:%s", original.id, new_original.id, new_original.title)
 
-            new_original.duplicate = False
-            new_original.duplicate_finding = None
-            new_original.active = original.active
-            new_original.is_mitigated = original.is_mitigated
-            new_original.save_no_options()
-            new_original.found_by.set(original.found_by.all())
+        new_original.duplicate = False
+        new_original.duplicate_finding = None
+        new_original.active = original.active
+        new_original.is_mitigated = original.is_mitigated
+        new_original.save_no_options()
+        new_original.found_by.set(original.found_by.all())
 
-        # Re-point remaining duplicates to the new original in a single query
-        if new_original and len(cluster_outside) > 1:
-            cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
+    # Re-point remaining duplicates to the new original in a single query
+    if new_original and len(cluster_outside) > 1:
+        cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 
 def prepare_duplicates_for_delete(test=None, engagement=None):
@@ -732,6 +738,32 @@ def bulk_clear_finding_m2m(finding_qs):
     # Delete orphaned Notes
     if note_ids:
         Notes.objects.filter(id__in=note_ids).delete()
+
+
+def bulk_delete_findings(finding_qs, chunk_size=1000):
+    """
+    Delete findings and all related objects efficiently.
+
+    Sends the pre_bulk_delete signal, clears M2M through tables (not
+    discovered by _meta.related_objects), then uses cascade_delete for
+    all FK relations via raw SQL.
+    Chunked with per-chunk transaction.atomic() for crash safety.
+    """
+    from dojo.signals import pre_bulk_delete_findings  # noqa: PLC0415 circular import
+    from dojo.utils_cascade_delete import cascade_delete  # noqa: PLC0415 circular import
+
+    pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
+    bulk_clear_finding_m2m(finding_qs)
+    finding_ids = list(finding_qs.values_list("id", flat=True).order_by("id"))
+    total_chunks = (len(finding_ids) + chunk_size - 1) // chunk_size
+    for i in range(0, len(finding_ids), chunk_size):
+        chunk = finding_ids[i:i + chunk_size]
+        with transaction.atomic():
+            cascade_delete(Finding, Finding.objects.filter(id__in=chunk), skip_relations={Finding})
+        logger.info(
+            "bulk_delete_findings: deleted chunk %d/%d (%d findings)",
+            i // chunk_size + 1, total_chunks, len(chunk),
+        )
 
 
 def fix_loop_duplicates():

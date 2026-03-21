@@ -2065,10 +2065,9 @@ def async_delete_crawl_task(obj, model_list, **kwargs):
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
     from dojo.finding.helper import (  # noqa: PLC0415 circular import
-        bulk_clear_finding_m2m,
+        bulk_delete_findings,
         prepare_duplicates_for_delete,
     )
-    from dojo.signals import pre_bulk_delete_findings  # noqa: PLC0415 circular import
     from dojo.utils_cascade_delete import cascade_delete  # noqa: PLC0415 circular import
 
     obj_name = _get_object_name(obj)
@@ -2093,6 +2092,8 @@ def async_delete_crawl_task(obj, model_list, **kwargs):
         finding_qs = Finding.objects.filter(**finding_filter)
 
         # Step 2: Prepare duplicate clusters (must happen before any deletion)
+        # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips deletion —
+        # we handle that below by expanding scope to include outside duplicates.
         if isinstance(obj, Engagement):
             prepare_duplicates_for_delete(engagement=obj)
         elif isinstance(obj, Product):
@@ -2101,37 +2102,20 @@ def async_delete_crawl_task(obj, model_list, **kwargs):
         elif isinstance(obj, Test):
             prepare_duplicates_for_delete(test=obj)
 
-        # Step 3: Send pre_bulk_delete signal (for Pro integrator dispatch, metering, etc.)
-        pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
-
-        # Step 4: Bulk-clear M2M through tables and clean up files/notes
-        # (M2M through tables are not discovered by _meta.related_objects)
-        bulk_clear_finding_m2m(finding_qs)
-
-    # Step 5: Delete findings in chunks using cascade_delete
-    # skip_relations={Finding} skips the duplicate_finding self-FK (handled in Step 2)
-    chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-
-    if finding_filter:
-        finding_ids = list(
-            Finding.objects.filter(**finding_filter)
-            .values_list("id", flat=True)
-            .order_by("id"),
+        # Step 3: Delete outside-scope duplicates first — these point to findings
+        # in the main scope via duplicate_finding FK, so they must be removed before
+        # the originals to avoid FK violations during chunked deletion.
+        outside_dupes_qs = (
+            Finding.objects.filter(duplicate_finding_id__in=finding_qs.values_list("id", flat=True))
+            .exclude(id__in=finding_qs.values_list("id", flat=True))
         )
+        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+        if outside_dupes_qs.exists():
+            logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_dupes_qs.count())
+            bulk_delete_findings(outside_dupes_qs, chunk_size=chunk_size)
 
-        total_chunks = (len(finding_ids) + chunk_size - 1) // chunk_size
-        for i in range(0, len(finding_ids), chunk_size):
-            chunk = finding_ids[i:i + chunk_size]
-            chunk_qs = Finding.objects.filter(id__in=chunk)
-            with transaction.atomic():
-                cascade_delete(
-                    Finding, chunk_qs,
-                    skip_relations={Finding},
-                )
-            logger.info(
-                "ASYNC_DELETE: Deleted finding chunk %d/%d (%d findings)",
-                i // chunk_size + 1, total_chunks, len(chunk),
-            )
+        # Step 4: Delete the main scope findings
+        bulk_delete_findings(finding_qs, chunk_size=chunk_size)
 
         # Delete remaining non-Finding children (Tests, Engagements, Endpoints)
         # These are now lightweight since their Findings are gone
