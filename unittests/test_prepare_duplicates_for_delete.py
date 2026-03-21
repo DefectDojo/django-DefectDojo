@@ -12,7 +12,6 @@ from crum import impersonate
 from django.test.utils import override_settings
 from django.utils import timezone
 
-from dojo.finding.deduplication import set_duplicate
 from dojo.finding.helper import prepare_duplicates_for_delete
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User, UserContactInfo
 
@@ -23,6 +22,7 @@ logger = logging.getLogger(__name__)
 
 @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=False)
 class TestPrepareDuplicatesForDelete(DojoTestCase):
+
     """Tests for prepare_duplicates_for_delete()."""
 
     def setUp(self):
