@@ -631,50 +631,45 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
     logger.debug("prepare duplicates for delete, test: %s, engagement: %s", test.id if test else None, engagement.id if engagement else None)
     if test is None and engagement is None:
         logger.warning("nothing to prepare as test and engagement are None")
+        return
 
     fix_loop_duplicates()
 
-    # get all originals in the test/engagement
-    originals = Finding.objects.filter(original_finding__isnull=False)
+    # Build scope filter
+    scope_filter = {}
     if engagement:
-        originals = originals.filter(test__engagement=engagement)
+        scope_filter["test__engagement"] = engagement
     if test:
-        originals = originals.filter(test=test)
+        scope_filter["test"] = test
 
-    # use distinct to flatten the join result
-    originals = originals.distinct()
-
-    if len(originals) == 0:
-        logger.debug("no originals found, so no duplicates to prepare for deletion of original")
+    scope_finding_ids = set(
+        Finding.objects.filter(**scope_filter).values_list("id", flat=True),
+    )
+    if not scope_finding_ids:
+        logger.debug("no findings in scope, nothing to prepare")
         return
 
-    # remove the link to the original from the duplicates inside the cluster so they can be safely deleted by the django framework
-    total = len(originals)
-    # logger.debug('originals: %s', [original.id for original in originals])
-    for i, original in enumerate(originals):
-        logger.debug("%d/%d: preparing duplicate cluster for deletion of original: %d", i + 1, total, original.id)
-        cluster_inside = original.original_finding.all()
-        if engagement:
-            cluster_inside = cluster_inside.filter(test__engagement=engagement)
+    # Bulk-reset inside-scope duplicates: single UPDATE instead of per-original mass_model_updater.
+    # Clears the duplicate_finding FK so Django's Collector won't trip over dangling references
+    # when deleting findings in this scope.
+    inside_reset_count = Finding.objects.filter(
+        duplicate=True,
+        duplicate_finding_id__in=scope_finding_ids,
+        id__in=scope_finding_ids,
+    ).update(duplicate_finding=None, duplicate=False)
+    logger.debug("bulk-reset %d inside-scope duplicates", inside_reset_count)
 
-        if test:
-            cluster_inside = cluster_inside.filter(test=test)
+    # Reconfigure outside-scope duplicates: still per-original because each cluster
+    # needs a new original chosen, status copied, and found_by updated.
+    originals_in_scope = Finding.objects.filter(
+        id__in=scope_finding_ids,
+        original_finding__isnull=False,
+    ).distinct()
 
-        if len(cluster_inside) > 0:
-            reset_duplicates_before_delete(cluster_inside)
-
-        # reconfigure duplicates outside test/engagement
-        cluster_outside = original.original_finding.all()
-        if engagement:
-            cluster_outside = cluster_outside.exclude(test__engagement=engagement)
-
-        if test:
-            cluster_outside = cluster_outside.exclude(test=test)
-
-        if len(cluster_outside) > 0:
+    for original in originals_in_scope.iterator():
+        cluster_outside = original.original_finding.exclude(id__in=scope_finding_ids)
+        if cluster_outside.exists():
             reconfigure_duplicate_cluster(original, cluster_outside)
-
-        logger.debug("done preparing duplicate cluster for deletion of original: %d", original.id)
 
 
 @receiver(pre_delete, sender=Test)
@@ -709,9 +704,10 @@ def fix_loop_duplicates():
     loop_count = loop_qs.count()
 
     if loop_count > 0:
-        deduplicationLogger.info(f"Identified {loop_count} Findings with Loops")
+        deduplicationLogger.warning("fix_loop_duplicates: found %d findings with duplicate loops", loop_count)
         # Stream IDs only in descending order to avoid loading full Finding rows
         for find_id in loop_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
+            deduplicationLogger.warning("fix_loop_duplicates: fixing loop for finding %d", find_id)
             removeLoop(find_id, 50)
 
         new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
@@ -726,6 +722,10 @@ def fix_loop_duplicates():
 
 
 def removeLoop(finding_id, counter):
+    # NOTE: This function is recursive and does per-finding DB queries without prefetching.
+    # It could be optimized to load the duplicate graph as ID pairs in memory and process
+    # in bulk, but loops are rare (only from past bugs or high parallel load) so the
+    # current implementation is acceptable.
     # get latest status
     finding = Finding.objects.get(id=finding_id)
     real_original = finding.duplicate_finding
