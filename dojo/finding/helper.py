@@ -661,15 +661,17 @@ def prepare_duplicates_for_delete(test=None, engagement=None):
 
     # Reconfigure outside-scope duplicates: still per-original because each cluster
     # needs a new original chosen, status copied, and found_by updated.
-    originals_in_scope = Finding.objects.filter(
+    # Pre-filter to only originals that have at least one duplicate outside scope,
+    # avoiding a per-original .exists() check.
+    originals_with_outside_dupes = Finding.objects.filter(
         id__in=scope_finding_ids,
-        original_finding__isnull=False,
-    ).distinct()
+        original_finding__in=Finding.objects.exclude(id__in=scope_finding_ids),
+    ).distinct().prefetch_related("original_finding")
 
-    for original in originals_in_scope.iterator():
-        cluster_outside = original.original_finding.exclude(id__in=scope_finding_ids)
-        if cluster_outside.exists():
-            reconfigure_duplicate_cluster(original, cluster_outside)
+    for original in originals_with_outside_dupes:
+        # Inside-scope duplicates were already unlinked by the bulk UPDATE above,
+        # so original_finding.all() now only contains outside-scope duplicates.
+        reconfigure_duplicate_cluster(original, original.original_finding.all())
 
 
 @receiver(pre_delete, sender=Test)
