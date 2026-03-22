@@ -1,6 +1,7 @@
 import logging
 
 from django.core.exceptions import MultipleObjectsReturned, ValidationError
+from django.db.models.query_utils import Q
 from django.urls import reverse
 from django.utils import timezone
 
@@ -147,6 +148,25 @@ class EndpointManager:
     ) -> None:
         dojo_dispatch_task(EndpointManager.mitigate_endpoint_status, endpoint_status_list, user, sync=True)
 
+    @staticmethod
+    def get_non_special_endpoint_statuses(
+        finding: Finding,
+    ) -> list[Endpoint_Status]:
+        """
+        Return the non-special (not false_positive, out_of_scope, or risk_accepted) endpoint
+        statuses for a finding.  Uses the prefetched ``status_finding_non_special`` attribute
+        when available (set by ``build_candidate_scope_queryset`` with ``mode="reimport"``),
+        and falls back to a database query otherwise — e.g. when the finding was created
+        during the same reimport batch and therefore never went through the prefetch queryset.
+        """
+        if hasattr(finding, "status_finding_non_special"):
+            return finding.status_finding_non_special
+        return list(
+            finding.status_finding.exclude(
+                Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
+            ).select_related("endpoint"),
+        )
+
     def update_endpoint_status(
         self,
         existing_finding: Finding,
@@ -158,8 +178,10 @@ class EndpointManager:
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
         # status_finding_non_special is prefetched by build_candidate_scope_queryset with the
-        # special-status exclusion and endpoint select_related already applied at the DB level
-        existing_finding_endpoint_status_list = existing_finding.status_finding_non_special
+        # special-status exclusion and endpoint select_related already applied at the DB level.
+        # Falls back to a DB query when the finding was not loaded through that queryset
+        # (e.g. a finding created during the same reimport batch).
+        existing_finding_endpoint_status_list = self.get_non_special_endpoint_statuses(existing_finding)
         new_finding_endpoints_list = new_finding.unsaved_endpoints
         if new_finding.is_mitigated:
             # New finding is mitigated, so mitigate all old endpoints
