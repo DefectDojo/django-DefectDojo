@@ -41,10 +41,14 @@ If any incoming Findings match Findings that already exist, the incoming Finding
 
 If there are any Findings that already exist in the Test but which are not present in the incoming report, you can choose to automatically set those Findings to Inactive and Mitigated (on the assumption that those vulnerabilities have been resolved since the previous import). The Test page will show these Findings as **Closed**.
 
-If you don’t want any Findings to be closed, you can disable this behavior on Reimport:
+If you **don’t** want any old Findings to be closed, you can disable this behavior on Reimport:
 
 * Uncheck the **Close Old Findings** checkbox if using the UI
-* Set **close\_old\_findings** to **False** if using the API
+* Set `close_old_findings` to `False` if using the API (on this endpoint, `close_old_findings` is `True` by default)
+
+**Scope note:** Unlike with Import, Reimport can never look at other Tests in the Engagement when considering Findings to close. The scope of Finding closure is always limited to the target Test.
+
+The `close_old_findings` feature will also respect the `service` field: only Findings with an identical `service` value (or no `service` value, if none was specified) will be considered for closure.
 
 ### Reopen Findings
 
