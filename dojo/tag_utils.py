@@ -164,27 +164,25 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
     return total_created
 
 
-def bulk_remove_all_tags(model_class, instance_ids_qs, tag_field_name: str = "tags"):
+def bulk_remove_all_tags(model_class, instance_ids_qs):
     """
     Remove all tags from instances identified by the given ID subquery.
 
-    Decrements tag counts correctly and deletes through-table rows.
+    Auto-discovers all TagFields on the model, decrements tag counts correctly,
+    and deletes through-table rows.
     Accepts a QuerySet of IDs (as a subquery) to avoid materializing large ID lists.
 
     Args:
         model_class: The model class (e.g. Finding, Product).
         instance_ids_qs: A QuerySet producing instance PKs (used as subquery).
-        tag_field_name: Name of the TagField (default: "tags").
 
     """
-    for field_name in [tag_field_name, "inherited_tags"]:
-        try:
-            tag_field = model_class._meta.get_field(field_name)
-        except Exception:  # noqa: S112
-            continue
+    tag_fields = [
+        field for field in model_class._meta.get_fields()
+        if hasattr(field, "tag_options")
+    ]
 
-        if not hasattr(tag_field, "tag_options"):
-            continue
+    for tag_field in tag_fields:
 
         tag_model = tag_field.related_model
         through_model = tag_field.remote_field.through
@@ -224,7 +222,7 @@ def bulk_remove_all_tags(model_class, instance_ids_qs, tag_field_name: str = "ta
         if count:
             logger.debug(
                 "bulk_remove_all_tags: removed %d %s.%s through-table rows",
-                count, model_class.__name__, field_name,
+                count, model_class.__name__, tag_field.name,
             )
 
 
