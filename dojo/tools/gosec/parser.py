@@ -47,7 +47,7 @@ class GosecParser:
             if cwe_data:
                 cwe_id_str = cwe_data.get("id")
                 if cwe_id_str:
-                    cwe_id = int(cwe_id_str)
+                    cwe_id = int(cwe_id_str) if cwe_id_str.isdigit() else None
                 cwe_url = cwe_data.get("url")
                 if cwe_url:
                     references = cwe_url
