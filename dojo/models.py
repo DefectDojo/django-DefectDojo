@@ -535,7 +535,6 @@ class System_Settings(models.Model):
         verbose_name=_("Allow Anonymous Survey Responses"),
         help_text=_("Enable anyone with a link to the survey to answer a survey"),
     )
-    credentials = models.TextField(max_length=3000, blank=True)
     disclaimer_notifications = models.TextField(max_length=3000, default="", blank=True,
                                   verbose_name=_("Custom Disclaimer for Notifications"),
                                   help_text=_("Include this custom disclaimer on all notifications"))
@@ -4487,7 +4486,7 @@ class Cred_Mapping(models.Model):
 
 
 class Language_Type(models.Model):
-    language = models.CharField(max_length=100, null=False)
+    language = models.CharField(max_length=100, null=False, unique=True)
     color = models.CharField(max_length=7, null=True, blank=True, verbose_name=_("HTML color"))
 
     def __str__(self):
