@@ -1,0 +1,74 @@
+{
+	"results": [
+		{
+			"id": "sha256:d9ec03301ac4f89e5e9564cc2979b7b00848f2cb4bb95e59f020a3bedb74bd07",
+			"name": "some-docker-image",
+			"distro": "Rocky Linux 9.5 (Blue Onyx)",
+			"distroRelease": "Blue Onyx",
+			"digest": "sha256:f7b40a71d2d16e91c35d32b10dbadab5ee8c1575b5216dedb11c841bed42eb0b",
+			"collections": [
+				"All"
+			],
+			"applications": [
+				{
+					"name": "python",
+					"version": "3.9.21",
+					"path": "/usr/bin/python3.9"
+				},
+				{
+					"name": "java",
+					"version": "17.0.12",
+					"path": "/usr/lib/jvm/jdk-17.0.12+7/bin/java"
+				}
+			],
+			"complianceDistribution": {
+				"critical": 0,
+				"high": 0,
+				"medium": 0,
+				"low": 0,
+				"total": 0
+			},
+			"complianceScanPassed": true,
+			"vulnerabilities": [
+				{
+					"id": "CVE-2025-48913",
+					"status": "fixed in 4.1.3, 4.0.9, 3.6.8",
+					"cvss": 9.8,
+					"vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+					"description": "If untrusted users are allowed to configure JMS for Apache CXF, previously they could use RMI or LDAP URLs, potentially leading to code execution capabilities.  This interface is now restricted to reject those protocols, removing this possibility.  Users are recommended to upgrade to versions 3.6.8, 4.0.9 or 4.1.3, which fix this issue.",
+					"severity": "critical",
+					"packageName": "org.apache.cxf_cxf-core",
+					"packageVersion": "3.5.11",
+					"link": "https://nvd.nist.gov/vuln/detail/CVE-2025-48913",
+					"riskFactors": [
+						"Critical severity",
+						"DoS - High",
+						"Has fix",
+						"Attack complexity: low",
+						"Attack vector: network"
+					],
+					"impactedVersions": [
+						"\u003c3.6.8"
+					],
+					"publishedDate": "2025-08-08T11:15:25+01:00",
+					"discoveredDate": "2026-03-18T10:58:10Z",
+					"graceDays": -214,
+					"fixDate": "2025-08-15T00:20:06+01:00",
+					"layerTime": "2025-05-22T16:49:57+01:00",
+					"packagePath": "/opt/vendor/component-kit/libs/cxf-core-3.5.11.jar",
+					"layerInstruction": "COPY / / # buildkit"
+				}
+            ],
+			"vulnerabilityDistribution": {
+				"critical": 1,
+				"high": 0,
+				"medium": 0,
+				"low": 0,
+				"total": 0
+			},
+			"vulnerabilityScanPassed": false,
+			"scanTime": "2026-03-18T10:58:13.491866Z",
+			"scanID": "69ba85458e283bde13680ff2"
+		}
+	]
+}
