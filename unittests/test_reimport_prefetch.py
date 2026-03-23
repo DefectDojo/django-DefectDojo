@@ -154,7 +154,7 @@ class TestReimportDuplicateFindingsEndpointHandling(ReimportDuplicateFindingsTes
         """
         # This previously raised:
         # AttributeError: 'Finding' object has no attribute 'status_finding_non_special'
-        test, _, len_new, len_closed, _, _, _ = self._reimport_with_overridden_hashcode()
+        _test, _, len_new, len_closed, _, _, _ = self._reimport_with_overridden_hashcode()
 
         # The first finding is new (empty test, no candidates). The second finding
         # matches the first (same hash_code) so it is not counted as new.
@@ -185,11 +185,13 @@ class TestReimportDuplicateFindingsEndpointHandling(ReimportDuplicateFindingsTes
         # gets mitigated. This is arguably wrong for batch-created findings — both
         # endpoints came from the same report — but it is the current behavior.
         self.assertEqual(
-            endpoint_statuses.filter(mitigated=False).count(), 1,
+            endpoint_statuses.filter(mitigated=False).count(),
+            1,
             "One endpoint status should be active (/app/dashboard from the matched finding)",
         )
         self.assertEqual(
-            endpoint_statuses.filter(mitigated=True).count(), 1,
+            endpoint_statuses.filter(mitigated=True).count(),
+            1,
             "One endpoint status should be mitigated (/app/login — mitigated by update_endpoint_status "
             "because it is not in the second finding's endpoint list)",
         )
@@ -217,7 +219,7 @@ class TestReimportDuplicateFindingsLocationHandling(ReimportDuplicateFindingsTes
         first finding is created as new and added to candidates. The second finding
         matches against it (a batch-created finding).
         """
-        test, _, len_new, len_closed, _, _, _ = self._reimport_with_overridden_hashcode()
+        _test, _, len_new, len_closed, _, _, _ = self._reimport_with_overridden_hashcode()
 
         # The first finding is new (empty test, no candidates). The second finding
         # matches the first (same hash_code) so it is not counted as new.
@@ -245,11 +247,13 @@ class TestReimportDuplicateFindingsLocationHandling(ReimportDuplicateFindingsTes
         # This is arguably wrong for batch-created findings — both locations came from
         # the same report — but it is the current behavior.
         self.assertEqual(
-            location_refs.filter(status=FindingLocationStatus.Active).count(), 1,
+            location_refs.filter(status=FindingLocationStatus.Active).count(),
+            1,
             "One location ref should be active (/app/dashboard from the matched finding)",
         )
         self.assertEqual(
-            location_refs.filter(status=FindingLocationStatus.Mitigated).count(), 1,
+            location_refs.filter(status=FindingLocationStatus.Mitigated).count(),
+            1,
             "One location ref should be mitigated (/app/login — mitigated by update_location_status "
             "because it is not in the second finding's location list)",
         )
