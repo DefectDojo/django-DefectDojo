@@ -12,8 +12,6 @@ Bugfix: https://github.com/DefectDojo/django-DefectDojo/pull/14569
 Batch endpoint optimization (related): https://github.com/DefectDojo/django-DefectDojo/pull/14489
 """
 
-from unittest.mock import patch
-
 from crum import impersonate
 from django.conf import settings
 from django.test import override_settings
@@ -169,22 +167,16 @@ class TestReimportDuplicateFindingsEndpointHandling(ReimportDuplicateFindingsTes
         endpoint_statuses = Endpoint_Status.objects.filter(finding=finding)
         self.assertEqual(endpoint_statuses.count(), 2, "Finding should have two endpoint statuses")
 
-        # Because the second finding is dynamic, update_endpoint_status() compares
-        # the first finding's existing endpoint statuses against the second finding's
-        # unsaved_endpoints. The second finding only has /app/dashboard, so /app/login
-        # (which belongs to the first finding) is considered "no longer present" and
-        # gets mitigated. This is arguably wrong for batch-created findings — both
-        # endpoints came from the same report — but it is the current behavior.
+        # With batched endpoint creation, endpoint statuses for the batch-created
+        # finding are not yet persisted when update_endpoint_status() runs. So the
+        # comparison finds no existing statuses and nothing gets mitigated — both
+        # endpoint statuses remain active. This is actually the correct outcome:
+        # both endpoints came from the same report and should both be active.
         self.assertEqual(
             endpoint_statuses.filter(mitigated=False).count(),
-            1,
-            "One endpoint status should be active (/app/dashboard from the matched finding)",
-        )
-        self.assertEqual(
-            endpoint_statuses.filter(mitigated=True).count(),
-            1,
-            "One endpoint status should be mitigated (/app/login — mitigated by update_endpoint_status "
-            "because it is not in the second finding's endpoint list)",
+            2,
+            "Both endpoint statuses should be active (batch-created finding has no persisted "
+            "statuses when update_endpoint_status runs, so nothing gets mitigated)",
         )
 
 

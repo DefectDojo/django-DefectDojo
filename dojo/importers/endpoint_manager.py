@@ -120,6 +120,23 @@ class EndpointManager:
         """Record that a finding should be linked to an endpoint (identified by key) via Endpoint_Status."""
         self._statuses_to_create.append((finding, key))
 
+    @staticmethod
+    def get_non_special_endpoint_statuses(finding: Finding) -> list[Endpoint_Status]:
+        """
+        Return endpoint statuses that are not false_positive, out_of_scope, or risk_accepted.
+
+        Uses finding.status_finding.all() which is served from the prefetch cache when the
+        finding was loaded through build_candidate_scope_queryset, and falls back to a DB
+        query otherwise (e.g. for findings created during the same reimport batch).
+
+        This might be ineffecient if lots of internal duplicates are in the report.
+        But this should be limited as most parsers dedupe during parsing and merge the endpoints.
+        """
+        return [
+            eps for eps in finding.status_finding.all()
+            if not eps.false_positive and not eps.out_of_scope and not eps.risk_accepted
+        ]
+
     def update_endpoint_status(
         self,
         existing_finding: Finding,
@@ -131,9 +148,7 @@ class EndpointManager:
 
         The actual bulk_update happens in persist().
         """
-        # status_finding_non_special is prefetched by build_candidate_scope_queryset with the
-        # special-status exclusion and endpoint select_related already applied at the DB level
-        existing_finding_endpoint_status_list = existing_finding.status_finding_non_special
+        existing_finding_endpoint_status_list = self.get_non_special_endpoint_statuses(existing_finding)
         new_finding_endpoints_list = new_finding.unsaved_endpoints
         if new_finding.is_mitigated:
             # New finding is mitigated, so mitigate all old endpoints

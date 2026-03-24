@@ -336,17 +336,18 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
         # Base prefetches for both modes
         prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
 
-        # Additional prefetches for reimport mode: fetch only non-special endpoint statuses with their
-        # endpoint joined in, so endpoint_manager can read status_finding_non_special directly without
-        # any extra DB queries
+        # Prefetch all endpoint statuses with their endpoint for reimport mode.
+        # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
+        # is done in Python by EndpointManager.get_non_special_endpoint_statuses().
+        # We avoid using to_attr here because findings created during the same reimport
+        # batch (via add_new_finding_to_candidates) are never loaded through this queryset
+        # and would lack the to_attr, causing an AttributeError.
+        # See: https://github.com/DefectDojo/django-DefectDojo/pull/14569
         if mode == "reimport":
             prefetch_list.append(
                 Prefetch(
                     "status_finding",
-                    queryset=Endpoint_Status.objects.exclude(
-                        Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
-                    ).select_related("endpoint"),
-                    to_attr="status_finding_non_special",
+                    queryset=Endpoint_Status.objects.select_related("endpoint"),
                 ),
             )
 

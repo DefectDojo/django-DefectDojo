@@ -772,8 +772,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         else:
             # TODO: Delete this after the move to Locations
             # Accumulate endpoint statuses for bulk reactivation in persist()
-            # status_finding_non_special is prefetched by build_candidate_scope_queryset
-            self.endpoint_manager.record_statuses_to_reactivate(existing_finding.status_finding_non_special)
+            self.endpoint_manager.record_statuses_to_reactivate(
+                self.endpoint_manager.get_non_special_endpoint_statuses(existing_finding),
+            )
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
