@@ -3985,6 +3985,33 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
                     self.assertEqual(counts["comment"], language.comment)
                     self.assertEqual(counts["code"], language.code)
 
+    def test_create_with_invalid_json(self):
+        """Invalid file content should return 400, not 500."""
+        self.payload = {
+            "product": 1,
+            "file": SimpleUploadedFile(
+                "bad.json",
+                b"this is not json",
+                content_type="application/json",
+            ),
+        }
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(400, response.status_code)
+
+    def test_create_idempotent(self):
+        """Importing the same file twice should succeed and produce identical results."""
+        base_data = json.loads(
+            Path("unittests/files/defectdojo_cloc.json").read_text(encoding="utf-8"),
+        )
+        for _ in range(2):
+            self.payload = self._build_payload(base_data)
+            response = self.client.post(self.url, self.payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+
+        languages = Languages.objects.filter(product=1)
+        # Should have exactly 2 languages (JSON and Python from the test file)
+        self.assertEqual(2, languages.count())
+
 
 @versioned_fixtures
 class NotificationsTest(BaseClass.BaseClassTest):
