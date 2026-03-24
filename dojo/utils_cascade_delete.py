@@ -10,7 +10,7 @@ Based on: https://dev.to/redhap/efficient-django-delete-cascade-43i5
 
 import logging
 
-from django.db import models, transaction
+from django.db import OperationalError, models, transaction
 from django.db.models.sql.compiler import SQLDeleteCompiler
 
 logger = logging.getLogger(__name__)
@@ -35,11 +35,19 @@ def get_update_sql(query, **updatespec):
     return q.get_compiler(query.db).as_sql()
 
 
+STATEMENT_TIMEOUT = "300s"
+
+
 def execute_compiled_sql(sql, params=None):
     """Execute compiled SQL directly via connection.cursor()."""
-    with transaction.get_connection().cursor() as cur:
-        cur.execute(sql, params or None)
-        return cur.rowcount
+    try:
+        with transaction.get_connection().cursor() as cur:
+            cur.execute(f"SET LOCAL statement_timeout = '{STATEMENT_TIMEOUT}'")
+            cur.execute(sql, params or None)
+            return cur.rowcount
+    except OperationalError:
+        logger.exception("cascade_delete SQL failed (possible deadlock or timeout): %s", sql[:200])
+        raise
 
 
 def execute_delete_sql(query):
@@ -52,7 +60,7 @@ def execute_update_sql(query, **updatespec):
     return execute_compiled_sql(*get_update_sql(query, **updatespec))
 
 
-def cascade_delete(from_model, instance_pk_query, skip_relations=None, base_model=None, level=0):
+def cascade_delete(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0):
     """
     Recursively walk Django model relations and execute compiled SQL
     to perform cascade DELETE / SET_NULL without the Collector.
@@ -67,6 +75,8 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, base_mode
         from_model: The model class to delete from.
         instance_pk_query: QuerySet selecting the records to delete.
         skip_relations: Set of model classes to skip (e.g. self-referential FKs).
+        skip_m2m_for: Set of model classes whose M2M cleanup was already done
+                      by the caller (avoids redundant tag count queries).
         base_model: Root model class (set automatically on first call).
         level: Recursion depth (for logging only).
 
@@ -76,6 +86,8 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, base_mode
     """
     if skip_relations is None:
         skip_relations = set()
+    if skip_m2m_for is None:
+        skip_m2m_for = set()
     if base_model is None:
         base_model = from_model
 
@@ -122,6 +134,7 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, base_mode
             cascade_delete(
                 related_model, related_pk_query,
                 skip_relations=skip_relations,
+                skip_m2m_for=skip_m2m_for,
                 base_model=base_model,
                 level=level + 1,
             )
@@ -139,14 +152,18 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, base_mode
             )
 
     # Clear M2M through tables before deleting (not discovered by _meta.related_objects).
-    # Tag fields are handled via bulk_remove_all_tags to maintain tag counts correctly.
-    from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+    # Skip if the caller already handled M2M cleanup for this model (e.g. bulk_clear_finding_m2m).
+    if from_model not in skip_m2m_for:
+        from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
 
-    bulk_remove_all_tags(from_model, instance_pk_query)
+        bulk_remove_all_tags(from_model, instance_pk_query)
 
     for m2m_field in from_model._meta.many_to_many:
-        # Skip tag fields — already handled above
+        # Skip tag fields — handled by bulk_remove_all_tags above
         if hasattr(m2m_field, "tag_options"):
+            continue
+        # Skip if caller already cleaned M2M for this model
+        if from_model in skip_m2m_for:
             continue
         through_model = m2m_field.remote_field.through
         fk_column = None

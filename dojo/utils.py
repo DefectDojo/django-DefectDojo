@@ -2094,13 +2094,15 @@ def async_delete_task(obj, **kwargs):
         # Step 3: Delete outside-scope duplicates first — these point to findings
         # in the main scope via duplicate_finding FK, so they must be removed before
         # the originals to avoid FK violations during chunked deletion.
+        scope_ids = finding_qs.values_list("id", flat=True)
         outside_dupes_qs = (
-            Finding.objects.filter(duplicate_finding_id__in=finding_qs.values_list("id", flat=True))
-            .exclude(id__in=finding_qs.values_list("id", flat=True))
+            Finding.objects.filter(duplicate_finding_id__in=scope_ids)
+            .exclude(id__in=scope_ids)
         )
         chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-        if outside_dupes_qs.exists():
-            logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_dupes_qs.count())
+        outside_count = outside_dupes_qs.count()
+        if outside_count:
+            logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_count)
             bulk_delete_findings(outside_dupes_qs, chunk_size=chunk_size)
 
         # Step 4: Delete the main scope findings
@@ -2109,6 +2111,8 @@ def async_delete_task(obj, **kwargs):
     # Step 5: Delete the top-level object and all remaining children (Tests,
     # Engagements, Endpoints, etc.) via cascade_delete. Findings are already
     # gone, so skip_relations={Finding} avoids walking empty relations.
+    # Single transaction is fine here — the heavy relations (Findings,
+    # Endpoint_Status) are already deleted; only lightweight rows remain.
     pk_query = type(obj).objects.filter(pk=obj.pk)
     with transaction.atomic():
         cascade_delete(type(obj), pk_query, skip_relations={Finding})

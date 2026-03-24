@@ -632,12 +632,12 @@ def prepare_duplicates_for_delete(obj):
 
     logger.debug("prepare_duplicates_for_delete: %s %d", type(obj).__name__, obj.id)
 
-    # should not be needed in normal healthy instances.
-    # but in that case it's a cheap count query and we might as well run it to be safe
-    fix_loop_duplicates()
-
     # Build scope as a subquery — never materialized into Python memory
     scope_ids_subquery = Finding.objects.filter(**{scope_field: obj}).values_list("id", flat=True)
+
+    # Fix any transitive duplicate loops within scope before reconfiguring clusters.
+    # Scoped to the deletion set to avoid a full-table self-join on large instances.
+    fix_loop_duplicates(scope_qs=Finding.objects.filter(**{scope_field: obj}))
 
     if not scope_ids_subquery.exists():
         logger.debug("no findings in scope, nothing to prepare")
@@ -747,7 +747,10 @@ def bulk_clear_finding_m2m(finding_qs):
                     count, through_model._meta.db_table,
                 )
 
-    # Delete FileUpload objects via ORM so custom delete() removes files from disk
+    # Delete FileUpload objects via ORM one-by-one so the custom
+    # FileUpload.delete() method fires and removes files from disk storage.
+    # Bulk deletion would orphan files on disk. File attachments are uncommon
+    # so the per-object overhead is negligible in practice.
     if file_ids:
         for file_upload in FileUpload.objects.filter(id__in=file_ids).iterator():
             file_upload.delete()
@@ -771,41 +774,52 @@ def bulk_delete_findings(finding_qs, chunk_size=1000):
 
     pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
     bulk_clear_finding_m2m(finding_qs)
-    finding_ids = list(finding_qs.values_list("id", flat=True).order_by("id"))
-    total_chunks = (len(finding_ids) + chunk_size - 1) // chunk_size
-    for i in range(0, len(finding_ids), chunk_size):
-        chunk = finding_ids[i:i + chunk_size]
+    for chunk_num, chunk_ids in enumerate(
+        batched(
+            finding_qs.values_list("id", flat=True).order_by("id").iterator(chunk_size=chunk_size),
+            chunk_size,
+            strict=False,
+        ),
+        start=1,
+    ):
         with transaction.atomic():
-            cascade_delete(Finding, Finding.objects.filter(id__in=chunk), skip_relations={Finding})
+            cascade_delete(Finding, Finding.objects.filter(id__in=chunk_ids), skip_relations={Finding}, skip_m2m_for={Finding})
         logger.info(
-            "bulk_delete_findings: deleted chunk %d/%d (%d findings)",
-            i // chunk_size + 1, total_chunks, len(chunk),
+            "bulk_delete_findings: deleted chunk %d (%d findings)",
+            chunk_num, len(chunk_ids),
         )
 
 
-def fix_loop_duplicates():
+def fix_loop_duplicates(scope_qs=None):
     """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
     # Build base queryset without selecting full rows to minimize memory
-    loop_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
+    base_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
+    if scope_qs is not None:
+        base_qs = base_qs.filter(id__in=scope_qs.values_list("id", flat=True))
 
     # Use COUNT(*) at the DB instead of materializing the queryset
-    loop_count = loop_qs.count()
+    loop_count = base_qs.count()
 
     if loop_count > 0:
         deduplicationLogger.warning("fix_loop_duplicates: found %d findings with duplicate loops", loop_count)
         # Stream IDs only in descending order to avoid loading full Finding rows
-        for find_id in loop_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
+        for find_id in base_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
             deduplicationLogger.warning("fix_loop_duplicates: fixing loop for finding %d", find_id)
             removeLoop(find_id, 50)
 
-        new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
-        for f in new_originals:
+        new_originals_qs = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
+        if scope_qs is not None:
+            new_originals_qs = new_originals_qs.filter(id__in=scope_qs.values_list("id", flat=True))
+        for f in new_originals_qs:
             deduplicationLogger.info(f"New Original: {f.id}")
             f.duplicate = False
             super(Finding, f).save(skip_validation=True)
 
-        loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+        recheck_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
+        if scope_qs is not None:
+            recheck_qs = recheck_qs.filter(id__in=scope_qs.values_list("id", flat=True))
+        loop_count = recheck_qs.count()
         deduplicationLogger.info(f"{loop_count} Finding found which still has Loops, please run fix loop duplicates again")
     return loop_count
 
