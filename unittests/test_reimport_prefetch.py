@@ -105,20 +105,11 @@ class ReimportDuplicateFindingsTestBase(DojoTestCase):
         self.product = product
 
     def _reimport_with_overridden_hashcode(self):
-        """
-        Reimport the two-finding scan file with overridden hash settings.
-
-        We mock get_custom_method to return None so that the OSS hash_code logic
-        is used (reads from django.settings, which override_settings can modify).
-        In Pro, compute_hash_code is overridden via FINDING_COMPUTE_HASH_METHOD to
-        read hash settings from the TunableSettings database model instead of
-        django.settings, which makes override_settings ineffective.
-        """
+        """Reimport the two-finding scan file with overridden hash settings."""
         hashcode_override = _hashcode_fields_without_vuln_id()
         with (
             impersonate(Dojo_User.objects.get(username="admin")),
             override_settings(HASHCODE_FIELDS_PER_SCANNER=hashcode_override),
-            patch("dojo.utils.get_custom_method", return_value=None),
             REIMPORT_SCAN.open(encoding="utf-8") as scan,
         ):
             reimporter = DefaultReImporter(
