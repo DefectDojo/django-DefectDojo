@@ -24,7 +24,7 @@ jobs:
         run: |
           scripts/fixture-updater.py dojo/fixtures/defect_dojo_sample_data.json
           mv output.json dojo/fixtures/defect_dojo_sample_data.json
-          ./fixture-updater dojo/fixtures/defect_dojo_sample_data_locations.json
+          scripts/fixture-updater.py dojo/fixtures/defect_dojo_sample_data_locations.json
           mv output.json dojo/fixtures/defect_dojo_sample_data_locations.json
 
       - name: Configure git
