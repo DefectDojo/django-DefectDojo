@@ -12,7 +12,6 @@ Bugfix: https://github.com/DefectDojo/django-DefectDojo/pull/14569
 Batch endpoint optimization (related): https://github.com/DefectDojo/django-DefectDojo/pull/14489
 """
 
-from unittest.mock import patch
 
 from crum import impersonate
 from django.conf import settings
