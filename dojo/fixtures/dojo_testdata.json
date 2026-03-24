@@ -2906,26 +2906,10 @@
     }
   },
   {
-    "model": "dojo.language_type",
-    "pk": 1,
-    "fields": {
-      "language": "JSON",
-      "color": "#882B0F"
-    }
-  },
-  {
-    "model": "dojo.language_type",
-    "pk": 2,
-    "fields": {
-      "language": "Python",
-      "color": "#3572A5"
-    }
-  },
-  {
     "model": "dojo.languages",
     "pk": 1,
     "fields": {
-      "language": 1,
+      "language": 94,
       "product": 1,
       "user": 1,
       "files": 2,

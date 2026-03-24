@@ -120,7 +120,7 @@ Configuration Permissions are not related to a specific Product or Product Type 
 * **Finding Templates:** Access to the Findings \> Finding Templates page
 * **Groups**: Access the 👤Users \> Groups page
 * **Jira Instances:** Access the ⚙️Configuration \> JIRA page
-* **Language Types**:Access the [Language Types](/open_source/languages/) API endpoint
+* **Language Types**:Access the [Language Types](/automation/api/languages/) API endpoint
 * **Login Banner**: Edit the ⚙️Configuration \> Login Banner page
 * **Announcements**: Access ⚙️Configuration \> Announcements
 * **Note Types:** Access the ⚙️Configuration \> Note Types page
