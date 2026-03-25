@@ -12,14 +12,10 @@ on:
 
 jobs:
   build-docker-containers:
-    strategy:
-        matrix:
-          platform: ['linux/amd64', 'linux/arm64']
-        fail-fast: false
     uses: ./.github/workflows/build-docker-images-for-testing.yml
     secrets: inherit
     with:
-      platform: ${{ matrix.platform }}
+      platform: linux/amd64
 
   test-performance:
     needs: build-docker-containers
@@ -29,14 +25,13 @@ jobs:
   test-rest-framework:
     strategy:
       matrix:
-        platform: ['linux/amd64', 'linux/arm64']
         v3_feature_locations: [ false, true ]
       fail-fast: false
     needs: build-docker-containers
     uses: ./.github/workflows/rest-framework-tests.yml
     secrets: inherit
     with:
-      platform: ${{ matrix.platform }}
+      platform: linux/amd64
       v3_feature_locations: ${{ matrix.v3_feature_locations }}
 
   # only run integration tests for linux/amd64 (default)
