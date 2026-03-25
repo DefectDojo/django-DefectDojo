@@ -1,4 +1,6 @@
+import json
 import logging
+from datetime import datetime
 from unittest.mock import patch
 
 from django.contrib.auth.models import User as DjangoUser
@@ -149,3 +151,29 @@ class UpdateImportHistoryTests(TransactionTestCase):
         expected = (len(new_findings) - 1) + (len(closed_findings) - 1)
         created = Test_Import_Finding_Action.objects.filter(test_import=test_import).count()
         self.assertEqual(created, expected)
+
+    def test_import_settings_scan_date_when_user_supplies_scan_date(self):
+        """When the user supplies a scan_date, import_settings should contain the ISO-formatted date."""
+        user_scan_date = datetime(2025, 6, 15, 12, 0, 0, tzinfo=timezone.utc)
+        self.importer.scan_date = user_scan_date
+        self.importer.scan_date_override = True
+
+        new_findings = self._create_findings(1)
+        test_import = self.importer.update_import_history(new_findings=new_findings)
+
+        settings = test_import.import_settings
+        # Verify import_settings is JSON-serializable (the original bug)
+        json.dumps(settings)
+        self.assertEqual(settings["scan_date"], user_scan_date.isoformat())
+
+    def test_import_settings_scan_date_when_no_scan_date_supplied(self):
+        """When no scan_date override is provided, import_settings should have scan_date as None."""
+        self.importer.scan_date_override = False
+
+        new_findings = self._create_findings(1)
+        test_import = self.importer.update_import_history(new_findings=new_findings)
+
+        settings = test_import.import_settings
+        # Verify import_settings is JSON-serializable
+        json.dumps(settings)
+        self.assertIsNone(settings["scan_date"])
