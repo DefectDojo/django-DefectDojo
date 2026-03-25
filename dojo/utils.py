@@ -2052,8 +2052,9 @@ def async_delete_task(obj, **kwargs):
     Delete an object and all its related objects using the SQL cascade walker.
 
     Handles Python-level concerns (duplicates, integrators, M2M, file cleanup,
-    product grading) explicitly, then uses cascade_delete() for efficient
-    bottom-up SQL deletion of all FK-related tables.
+    product grading) explicitly, then uses cascade_delete_related_objects() for
+    efficient bottom-up SQL deletion of all FK-related tables. The top-level
+    object is deleted via ORM obj.delete() to fire Django signals.
 
     Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
@@ -2062,7 +2063,7 @@ def async_delete_task(obj, **kwargs):
         bulk_delete_findings,
         prepare_duplicates_for_delete,
     )
-    from dojo.utils_cascade_delete import cascade_delete  # noqa: PLC0415 circular import
+    from dojo.utils_cascade_delete import cascade_delete_related_objects  # noqa: PLC0415 circular import
 
     logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
     if not isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
@@ -2108,18 +2109,21 @@ def async_delete_task(obj, **kwargs):
         # Step 4: Delete the main scope findings
         bulk_delete_findings(finding_qs, chunk_size=chunk_size)
 
-    # Step 5: Delete the top-level object and all remaining children (Tests,
-    # Engagements, Endpoints, etc.) via cascade_delete. Findings are already
-    # gone, so skip_relations={Finding} avoids walking empty relations.
+    # Step 5: Delete all remaining related objects (Tests, Engagements,
+    # Endpoints, etc.) via SQL cascade. Findings are already gone, so
+    # skip_relations={Finding} avoids walking empty relations.
     # Single transaction is fine here — the heavy relations (Findings,
     # Endpoint_Status) are already deleted; only lightweight rows remain.
     pk_query = type(obj).objects.filter(pk=obj.pk)
     with transaction.atomic():
-        cascade_delete(type(obj), pk_query, skip_relations={Finding})
+        cascade_delete_related_objects(type(obj), pk_query, skip_relations={Finding})
 
-    # Step 6: Recalculate product grade once (not per-object)
-    # The custom delete() methods on Finding/Test/Engagement each call
-    # perform_product_grading — cascade_delete bypasses custom delete().
+    # Step 6: Delete the top-level object via ORM to fire Django signals
+    # (post_delete notifications, pghistory audit, Pro signals).
+    # All children are already gone so this is a single-row DELETE.
+    obj.delete()
+
+    # Step 7: Recalculate product grade once (not per-object)
     if product:
         perform_product_grading(product)
 

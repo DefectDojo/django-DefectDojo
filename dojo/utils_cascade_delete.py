@@ -60,14 +60,15 @@ def execute_update_sql(query, **updatespec):
     return execute_compiled_sql(*get_update_sql(query, **updatespec))
 
 
-def cascade_delete(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0):
+def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0):
     """
     Recursively walk Django model relations and execute compiled SQL
-    to perform cascade DELETE / SET_NULL without the Collector.
+    to perform cascade DELETE / SET_NULL on related objects without the Collector.
 
-    Walks from_model._meta.related_objects to discover all FK relations,
-    recurses into CASCADE children first (bottom-up), then deletes at the
-    current level. No query execution until recursion unwinds.
+    At level 0 (the root), only related objects are deleted — the root records
+    themselves are NOT deleted. This allows the caller to use ORM obj.delete()
+    on the root to fire Django signals (notifications, audit, etc.).
+    At deeper levels, records are deleted after their children.
 
     Includes any related object in Dojo-Pro
 
@@ -81,7 +82,7 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, skip_m2m_
         level: Recursion depth (for logging only).
 
     Returns:
-        Number of records deleted at this level.
+        Number of records deleted at this level (0 at level 0 since root is not deleted).
 
     """
     if skip_relations is None:
@@ -131,7 +132,7 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, skip_m2m_
                 related_model._meta.pk.name,
             )
             # Recurse into children first (bottom-up deletion)
-            cascade_delete(
+            cascade_delete_related_objects(
                 related_model, related_pk_query,
                 skip_relations=skip_relations,
                 skip_m2m_for=skip_m2m_for,
@@ -180,16 +181,22 @@ def cascade_delete(from_model, instance_pk_query, skip_relations=None, skip_m2m_
                     m2m_count, through_model._meta.db_table,
                 )
 
-    # After all children and M2M are deleted, delete records at this level
+    # At level 0, do NOT delete root records — the caller handles that
+    # (e.g. via ORM obj.delete() to fire Django signals).
     if level == 0:
-        del_query = instance_pk_query
-    else:
-        filterspec = {f"{from_model._meta.pk.name}__in": models.Subquery(instance_pk_query)}
-        del_query = from_model.objects.filter(**filterspec)
+        logger.debug(
+            "cascade_delete_related_objects level 0: related objects deleted for %s (root not deleted)",
+            from_model.__name__,
+        )
+        return 0
+
+    # At deeper levels, delete records after their children are gone
+    filterspec = {f"{from_model._meta.pk.name}__in": models.Subquery(instance_pk_query)}
+    del_query = from_model.objects.filter(**filterspec)
 
     count = execute_delete_sql(del_query)
     logger.debug(
-        "cascade_delete level %d: deleted %d %s records",
+        "cascade_delete_related_objects level %d: deleted %d %s records",
         level, count, from_model.__name__,
     )
     return count

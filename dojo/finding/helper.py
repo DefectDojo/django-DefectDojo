@@ -770,7 +770,10 @@ def bulk_delete_findings(finding_qs, chunk_size=1000):
     Chunked with per-chunk transaction.atomic() for crash safety.
     """
     from dojo.signals import pre_bulk_delete_findings  # noqa: PLC0415 circular import
-    from dojo.utils_cascade_delete import cascade_delete  # noqa: PLC0415 circular import
+    from dojo.utils_cascade_delete import (  # noqa: PLC0415 circular import
+        cascade_delete_related_objects,
+        execute_delete_sql,
+    )
 
     pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
     bulk_clear_finding_m2m(finding_qs)
@@ -782,8 +785,10 @@ def bulk_delete_findings(finding_qs, chunk_size=1000):
         ),
         start=1,
     ):
+        chunk_qs = Finding.objects.filter(id__in=chunk_ids)
         with transaction.atomic():
-            cascade_delete(Finding, Finding.objects.filter(id__in=chunk_ids), skip_relations={Finding}, skip_m2m_for={Finding})
+            cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
+            execute_delete_sql(chunk_qs)
         logger.info(
             "bulk_delete_findings: deleted chunk %d (%d findings)",
             chunk_num, len(chunk_ids),
