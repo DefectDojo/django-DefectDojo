@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime, timezone as dt_timezone
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 from django.contrib.auth.models import User as DjangoUser
@@ -154,7 +154,7 @@ class UpdateImportHistoryTests(TransactionTestCase):
 
     def test_import_settings_scan_date_when_user_supplies_scan_date(self):
         """When the user supplies a scan_date, import_settings should contain the ISO-formatted date."""
-        user_scan_date = datetime(2025, 6, 15, 12, 0, 0, tzinfo=dt_timezone.utc)
+        user_scan_date = datetime(2025, 6, 15, 12, 0, 0, tzinfo=UTC)
         self.importer.scan_date = user_scan_date
         self.importer.scan_date_override = True
 
