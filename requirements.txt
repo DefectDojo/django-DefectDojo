@@ -21,7 +21,7 @@ django-permissions-policy==4.28.0
 django-prometheus==2.4.1
 Django==5.2.12
 django-single-session==0.2.0
-djangorestframework==3.17.0
+djangorestframework==3.17.1
 html2text==2025.4.15
 humanize==4.15.0
 jira==3.10.5
