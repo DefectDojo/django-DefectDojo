@@ -5,10 +5,9 @@
 &lt;h3 id="saas-includes-support--supports-the-project"&gt;SaaS (Includes Support &amp;amp; Supports the Project)&lt;/h3&gt;
 &lt;p&gt;&lt;a href="https://defectdojo.com/platform"&gt;SaaS link&lt;/a&gt;&lt;/p&gt;
 &lt;hr&gt;
-&lt;h2 id="options-for-the-brave-not-officially-supported"&gt;&lt;strong&gt;Options for the brave (not officially supported)&lt;/strong&gt;&lt;/h2&gt;
+&lt;h2 id="docker-image-variants"&gt;&lt;strong&gt;Docker Image Variants&lt;/strong&gt;&lt;/h2&gt;
 &lt;hr&gt;
-&lt;h3 id="kubernetes"&gt;Kubernetes&lt;/h3&gt;
-&lt;p&gt;See instructions in &lt;a href="https://github.com/DefectDojo/django-DefectDojo/blob/dev/readme-docs/KUBERNETES.md"&gt;KUBERNETES.md&lt;/a&gt;&lt;/p&gt;</description></item><item><title>System Architecture</title><link>https://docs.defectdojo.com/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/open_source/architecture/</guid><description>&lt;p&gt;
+&lt;p&gt;DefectDojo publishes Docker images in multiple variants:&lt;/p&gt;</description></item><item><title>System Architecture</title><link>https://docs.defectdojo.com/get_started/open_source/architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/open_source/architecture/</guid><description>&lt;p&gt;
 
 &lt;img
  src="https://docs.defectdojo.com/images/dd-architecture.png"
