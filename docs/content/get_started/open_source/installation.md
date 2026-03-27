@@ -19,6 +19,23 @@ See instructions in [DOCKER.md](<https://github.com/DefectDojo/django-DefectDojo
 [SaaS link](https://defectdojo.com/platform)
 
 ---
+## **Docker Image Variants**
+---
+
+DefectDojo publishes Docker images in multiple variants:
+
+| | AMD64 | ARM64 |
+|---|---|---|
+| **Debian** | ✅ Supported | ⚠️ Unit tested |
+| **Alpine** | ⚠️ Community | ⚠️ Community |
+
+**Debian on AMD64** is the officially supported and tested configuration. All CI tests (unit, integration, and performance) run against this combination.
+
+**Debian on ARM64** is built and covered by unit tests in CI, but integration and performance tests are not run against it.
+
+The **Alpine** variants are built and published but are not covered by any automated testing. Use them at your own risk.
+
+---
 ## **Options for the brave (not officially supported)**
 ---
 ### Kubernetes

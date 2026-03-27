@@ -23,13 +23,13 @@ jobs:
         uses: actions/download-artifact@70fc10c6e5e1ce46ad2ea6f2b72d43f7d47b13c3 # v8.0.0
         with:
           path: built-docker-image
-          pattern: built-docker-image-django-alpine-linux-amd64
+          pattern: built-docker-image-django-debian-linux-amd64
           merge-multiple: true
 
       - name: Load docker images
         timeout-minutes: 10
         run: |
-          docker load -i built-docker-image/django-alpine-linux-amd64_img
+          docker load -i built-docker-image/django-debian-linux-amd64_img
           docker images
 
       - name: Set unit-test mode
@@ -45,7 +45,7 @@ jobs:
             -f docker/docker-compose.override.performance_tests_cicd.yml \
             up -d --no-deps uwsgi
         env:
-          DJANGO_VERSION: alpine
+          DJANGO_VERSION: debian
 
       - name: Run performance tests (auto-update counts)
         timeout-minutes: 15

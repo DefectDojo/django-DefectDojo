@@ -76,7 +76,7 @@ jobs:
           # "tests/import_scanner_test.py",
           # "tests/zap.py",
         ]
-        os: [alpine, debian]
+        os: [debian]
         v3_feature_locations: [true, false]
         exclude:
           # standalone create endpoint page is gone in v3
