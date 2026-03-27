@@ -441,6 +441,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
                             jira_instance_id=getattr(self.jira_instance, "id", None),
+                            sync=kwargs.get("sync", False),
                         )
 
         # No chord: tasks are dispatched immediately above per batch
