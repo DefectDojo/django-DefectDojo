@@ -1,9 +1,11 @@
 import logging
 from contextlib import suppress
 from datetime import datetime
+from itertools import batched
 from time import strftime
 
 from django.conf import settings
+from django.db import transaction
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.db.utils import IntegrityError
@@ -31,6 +33,7 @@ from dojo.models import (
     Endpoint,
     Endpoint_Status,
     Engagement,
+    FileUpload,
     Finding,
     Finding_Group,
     JIRA_Instance,
@@ -49,7 +52,6 @@ from dojo.utils import (
     do_false_positive_history,
     get_current_user,
     get_object_or_none,
-    mass_model_updater,
     to_str_typed,
 )
 
@@ -561,7 +563,10 @@ def finding_delete(instance, **kwargs):
 
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
-        reconfigure_duplicate_cluster(instance, duplicate_cluster)
+        if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+            duplicate_cluster.order_by("-id").delete()
+        else:
+            reconfigure_duplicate_cluster(instance, duplicate_cluster)
     else:
         logger.debug("no duplicate cluster found for finding: %d, so no need to reconfigure", instance.id)
 
@@ -578,20 +583,6 @@ def finding_post_delete(sender, instance, **kwargs):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
 
 
-def reset_duplicate_before_delete(dupe):
-    dupe.duplicate_finding = None
-    dupe.duplicate = False
-
-
-def reset_duplicates_before_delete(qs):
-    mass_model_updater(Finding, qs, reset_duplicate_before_delete, fields=["duplicate", "duplicate_finding"])
-
-
-def set_new_original(finding, new_original):
-    if finding.duplicate:
-        finding.duplicate_finding = new_original
-
-
 # can't use model to id here due to the queryset
 # @dojo_async_task
 # @app.task
@@ -602,85 +593,89 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         return
 
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
-        cluster_outside.order_by("-id").delete()
-    else:
-        logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
-        # set new original to first finding in cluster (ordered by id)
-        new_original = cluster_outside.order_by("id").first()
-        if new_original:
-            logger.debug("changing original of duplicate cluster %d to: %s:%s", original.id, new_original.id, new_original.title)
+        # Don't delete here — the caller (async_delete_crawl_task or finding_delete)
+        # handles deletion of outside-scope duplicates efficiently via bulk_delete_findings.
+        return
+    logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
+    # set new original to first finding in cluster (ordered by id)
+    new_original = cluster_outside.order_by("id").first()
+    if new_original:
+        logger.debug("changing original of duplicate cluster %d to: %s:%s", original.id, new_original.id, new_original.title)
 
-            new_original.duplicate = False
-            new_original.duplicate_finding = None
-            new_original.active = original.active
-            new_original.is_mitigated = original.is_mitigated
-            new_original.save_no_options()
-            new_original.found_by.set(original.found_by.all())
+        # Use .update() to avoid triggering Finding.save() signals
+        Finding.objects.filter(id=new_original.id).update(
+            duplicate=False,
+            duplicate_finding=None,
+            active=original.active,
+            is_mitigated=original.is_mitigated,
+        )
+        new_original.found_by.set(original.found_by.all())
 
-        # if the cluster is size 1, there's only the new original left
-        if new_original and len(cluster_outside) > 1:
-            # for find in cluster_outside:
-            #     if find != new_original:
-            #         find.duplicate_finding = new_original
-            #         find.save_no_options()
-
-            mass_model_updater(Finding, cluster_outside, lambda f: set_new_original(f, new_original), fields=["duplicate_finding"])
+        # Re-point remaining duplicates to the new original in a single query
+        cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 
-def prepare_duplicates_for_delete(test=None, engagement=None):
-    logger.debug("prepare duplicates for delete, test: %s, engagement: %s", test.id if test else None, engagement.id if engagement else None)
-    if test is None and engagement is None:
-        logger.warning("nothing to prepare as test and engagement are None")
+def prepare_duplicates_for_delete(obj):
+    """
+    Prepare duplicate clusters before deleting a Test, Engagement, Product, or Product_Type.
 
-    fix_loop_duplicates()
+    Resets inside-scope duplicate FKs and reconfigures outside-scope clusters
+    so that cascade_delete won't hit FK violations on the self-referential
+    duplicate_finding field.
+    """
+    from dojo.utils import FINDING_SCOPE_FILTERS  # noqa: PLC0415 circular import
 
-    # get all originals in the test/engagement
-    originals = Finding.objects.filter(original_finding__isnull=False)
-    if engagement:
-        originals = originals.filter(test__engagement=engagement)
-    if test:
-        originals = originals.filter(test=test)
-
-    # use distinct to flatten the join result
-    originals = originals.distinct()
-
-    if len(originals) == 0:
-        logger.debug("no originals found, so no duplicates to prepare for deletion of original")
+    scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
+    if scope_field is None:
+        logger.warning("prepare_duplicates_for_delete: unsupported object type %s", type(obj).__name__)
         return
 
-    # remove the link to the original from the duplicates inside the cluster so they can be safely deleted by the django framework
-    total = len(originals)
-    # logger.debug('originals: %s', [original.id for original in originals])
-    for i, original in enumerate(originals):
-        logger.debug("%d/%d: preparing duplicate cluster for deletion of original: %d", i + 1, total, original.id)
-        cluster_inside = original.original_finding.all()
-        if engagement:
-            cluster_inside = cluster_inside.filter(test__engagement=engagement)
+    logger.debug("prepare_duplicates_for_delete: %s %d", type(obj).__name__, obj.id)
 
-        if test:
-            cluster_inside = cluster_inside.filter(test=test)
+    # Build scope as a subquery — never materialized into Python memory
+    scope_ids_subquery = Finding.objects.filter(**{scope_field: obj}).values_list("id", flat=True)
 
-        if len(cluster_inside) > 0:
-            reset_duplicates_before_delete(cluster_inside)
+    # Fix any transitive duplicate loops within scope before reconfiguring clusters.
+    # Scoped to the deletion set to avoid a full-table self-join on large instances.
+    fix_loop_duplicates(scope_qs=Finding.objects.filter(**{scope_field: obj}))
 
-        # reconfigure duplicates outside test/engagement
-        cluster_outside = original.original_finding.all()
-        if engagement:
-            cluster_outside = cluster_outside.exclude(test__engagement=engagement)
+    if not scope_ids_subquery.exists():
+        logger.debug("no findings in scope, nothing to prepare")
+        return
 
-        if test:
-            cluster_outside = cluster_outside.exclude(test=test)
+    # Bulk-reset inside-scope duplicates: single UPDATE instead of per-original mass_model_updater.
+    # Clears the duplicate_finding FK so cascade_delete won't trip over dangling self-references.
+    inside_reset_count = Finding.objects.filter(
+        duplicate=True,
+        duplicate_finding_id__in=scope_ids_subquery,
+        id__in=scope_ids_subquery,
+    ).update(duplicate_finding=None, duplicate=False)
+    logger.debug("bulk-reset %d inside-scope duplicates", inside_reset_count)
 
-        if len(cluster_outside) > 0:
-            reconfigure_duplicate_cluster(original, cluster_outside)
+    # Reconfigure outside-scope duplicates: still per-original because each cluster
+    # needs a new original chosen, status copied, and found_by updated.
+    # Chunked with prefetch_related to bound memory while avoiding N+1 queries.
+    originals_ids = (
+        Finding.objects.filter(
+            id__in=scope_ids_subquery,
+            original_finding__in=Finding.objects.exclude(id__in=scope_ids_subquery),
+        )
+        .distinct()
+        .values_list("id", flat=True)
+        .iterator(chunk_size=500)
+    )
 
-        logger.debug("done preparing duplicate cluster for deletion of original: %d", original.id)
+    for chunk_ids in batched(originals_ids, 500, strict=False):
+        for original in Finding.objects.filter(id__in=chunk_ids).prefetch_related("original_finding"):
+            # Inside-scope duplicates were already unlinked by the bulk UPDATE above,
+            # so original_finding.all() now only contains outside-scope duplicates.
+            reconfigure_duplicate_cluster(original, original.original_finding.all())
 
 
 @receiver(pre_delete, sender=Test)
 def test_pre_delete(sender, instance, **kwargs):
     logger.debug("test pre_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-    prepare_duplicates_for_delete(test=instance)
+    prepare_duplicates_for_delete(instance)
 
 
 @receiver(post_delete, sender=Test)
@@ -691,7 +686,7 @@ def test_post_delete(sender, instance, **kwargs):
 @receiver(pre_delete, sender=Engagement)
 def engagement_pre_delete(sender, instance, **kwargs):
     logger.debug("engagement pre_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
-    prepare_duplicates_for_delete(engagement=instance)
+    prepare_duplicates_for_delete(instance)
 
 
 @receiver(post_delete, sender=Engagement)
@@ -699,33 +694,146 @@ def engagement_post_delete(sender, instance, **kwargs):
     logger.debug("engagement post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
 
 
-def fix_loop_duplicates():
+def bulk_clear_finding_m2m(finding_qs):
+    """
+    Bulk-clear M2M through tables for a queryset of findings.
+
+    Must be called BEFORE cascade_delete since M2M through tables
+    are not discovered by _meta.related_objects.
+
+    Special handling for FileUpload: deletes via ORM so the custom
+    FileUpload.delete() fires and removes files from disk storage.
+    Tags are handled via bulk_remove_all_tags to maintain tag counts.
+    """
+    from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+
+    finding_ids = finding_qs.values_list("id", flat=True)
+
+    # Collect FileUpload IDs before deleting through table entries
+    file_ids = list(
+        Finding.files.through.objects.filter(
+            finding_id__in=finding_ids,
+        ).values_list("fileupload_id", flat=True),
+    )
+
+    # Collect Note IDs before deleting through table entries
+    note_ids = list(
+        Finding.notes.through.objects.filter(
+            finding_id__in=finding_ids,
+        ).values_list("notes_id", flat=True),
+    )
+
+    # Remove tags with proper count maintenance
+    bulk_remove_all_tags(Finding, finding_ids)
+
+    # Auto-discover and delete remaining (non-tag) M2M through tables
+    for m2m_field in Finding._meta.many_to_many:
+        if hasattr(m2m_field, "tag_options"):
+            continue
+        through_model = m2m_field.remote_field.through
+        # Find the FK column that points to Finding
+        fk_column = None
+        for field in through_model._meta.get_fields():
+            if hasattr(field, "related_model") and field.related_model is Finding:
+                fk_column = field.column
+                break
+        if fk_column:
+            count, _ = through_model.objects.filter(
+                **{f"{fk_column}__in": finding_ids},
+            ).delete()
+            if count:
+                logger.debug(
+                    "bulk_clear_finding_m2m: deleted %d rows from %s",
+                    count, through_model._meta.db_table,
+                )
+
+    # Delete FileUpload objects via ORM one-by-one so the custom
+    # FileUpload.delete() method fires and removes files from disk storage.
+    # Bulk deletion would orphan files on disk. File attachments are uncommon
+    # so the per-object overhead is negligible in practice.
+    if file_ids:
+        for file_upload in FileUpload.objects.filter(id__in=file_ids).iterator():
+            file_upload.delete()
+
+    # Delete orphaned Notes
+    if note_ids:
+        Notes.objects.filter(id__in=note_ids).delete()
+
+
+def bulk_delete_findings(finding_qs, chunk_size=1000):
+    """
+    Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
+
+    Sends the pre_bulk_delete signal, clears M2M through tables (not
+    discovered by _meta.related_objects), then uses cascade_delete for
+    all FK relations via raw SQL.
+    Chunked with per-chunk transaction.atomic() for crash safety.
+    """
+    from dojo.signals import pre_bulk_delete_findings  # noqa: PLC0415 circular import
+    from dojo.utils_cascade_delete import (  # noqa: PLC0415 circular import
+        cascade_delete_related_objects,
+        execute_delete_sql,
+    )
+
+    pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
+    bulk_clear_finding_m2m(finding_qs)
+    for chunk_num, chunk_ids in enumerate(
+        batched(
+            finding_qs.values_list("id", flat=True).order_by("id").iterator(chunk_size=chunk_size),
+            chunk_size,
+            strict=False,
+        ),
+        start=1,
+    ):
+        chunk_qs = Finding.objects.filter(id__in=chunk_ids)
+        with transaction.atomic():
+            cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
+            execute_delete_sql(chunk_qs)
+        logger.info(
+            "bulk_delete_findings: deleted chunk %d (%d findings)",
+            chunk_num, len(chunk_ids),
+        )
+
+
+def fix_loop_duplicates(scope_qs=None):
     """Due to bugs in the past and even currently when under high parallel load, there can be transitive duplicates."""
     """ i.e. A -> B -> C. This can lead to problems when deleting findingns, performing deduplication, etc """
     # Build base queryset without selecting full rows to minimize memory
-    loop_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
+    base_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
+    if scope_qs is not None:
+        base_qs = base_qs.filter(id__in=scope_qs.values_list("id", flat=True))
 
     # Use COUNT(*) at the DB instead of materializing the queryset
-    loop_count = loop_qs.count()
+    loop_count = base_qs.count()
 
     if loop_count > 0:
-        deduplicationLogger.info(f"Identified {loop_count} Findings with Loops")
+        deduplicationLogger.warning("fix_loop_duplicates: found %d findings with duplicate loops", loop_count)
         # Stream IDs only in descending order to avoid loading full Finding rows
-        for find_id in loop_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
+        for find_id in base_qs.order_by("-id").values_list("id", flat=True).iterator(chunk_size=1000):
+            deduplicationLogger.warning("fix_loop_duplicates: fixing loop for finding %d", find_id)
             removeLoop(find_id, 50)
 
-        new_originals = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
-        for f in new_originals:
+        new_originals_qs = Finding.objects.filter(duplicate_finding__isnull=True, duplicate=True)
+        if scope_qs is not None:
+            new_originals_qs = new_originals_qs.filter(id__in=scope_qs.values_list("id", flat=True))
+        for f in new_originals_qs:
             deduplicationLogger.info(f"New Original: {f.id}")
             f.duplicate = False
             super(Finding, f).save(skip_validation=True)
 
-        loop_count = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False).count()
+        recheck_qs = Finding.objects.filter(duplicate_finding__isnull=False, original_finding__isnull=False)
+        if scope_qs is not None:
+            recheck_qs = recheck_qs.filter(id__in=scope_qs.values_list("id", flat=True))
+        loop_count = recheck_qs.count()
         deduplicationLogger.info(f"{loop_count} Finding found which still has Loops, please run fix loop duplicates again")
     return loop_count
 
 
 def removeLoop(finding_id, counter):
+    # NOTE: This function is recursive and does per-finding DB queries without prefetching.
+    # It could be optimized to load the duplicate graph as ID pairs in memory and process
+    # in bulk, but loops are rare (only from past bugs or high parallel load) so the
+    # current implementation is acceptable.
     # get latest status
     finding = Finding.objects.get(id=finding_id)
     real_original = finding.duplicate_finding
