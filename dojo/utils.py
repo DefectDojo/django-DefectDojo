@@ -2,8 +2,10 @@ import binascii
 import calendar as tcalendar
 import hashlib
 import importlib
+import json
 import logging
 import mimetypes
+import operator
 import os
 import pathlib
 import random
@@ -1191,6 +1193,73 @@ def purge_celery_queue():
     from dojo.celery import app  # noqa: PLC0415 circular import
     with app.connection() as conn, conn.channel() as channel:
         return channel.queue_purge(queue="celery")
+
+
+def purge_celery_queue_by_task_name(task_name):
+    """Remove all queued tasks with the given task name. Returns count removed, or None on error."""
+    removed = 0
+    try:
+        with Connection(settings.CELERY_BROKER_URL) as conn, conn.channel() as channel:
+            client = channel.client
+            messages_raw = client.lrange("celery", 0, -1)
+            pipe = client.pipeline()
+            for msg_raw in messages_raw:
+                try:
+                    msg = json.loads(msg_raw)
+                    if msg.get("headers", {}).get("task") == task_name:
+                        pipe.lrem("celery", 1, msg_raw)
+                        removed += 1
+                except Exception:
+                    logger.exception("Failed to parse celery message during task-name purge")
+                    continue
+            pipe.execute()
+    except Exception:
+        return None
+    return removed
+
+
+def get_celery_queue_details():
+    """Per-task breakdown of the celery queue. O(N) — expensive for large queues."""
+    tasks = {}
+    try:
+        with Connection(settings.CELERY_BROKER_URL) as conn, conn.channel() as channel:
+            messages_raw = channel.client.lrange("celery", 0, -1)
+            for i, msg_raw in enumerate(messages_raw):
+                try:
+                    msg = json.loads(msg_raw)
+                    headers = msg.get("headers", {})
+                    task_name = headers.get("task", "unknown")
+                    eta = headers.get("eta")
+                    expires = headers.get("expires")
+                except Exception:
+                    task_name = "unknown"
+                    eta = None
+                    expires = None
+                if task_name not in tasks:
+                    tasks[task_name] = {
+                        "task_name": task_name,
+                        "count": 0,
+                        "oldest_position": i + 1,
+                        "newest_position": i + 1,
+                        "oldest_eta": eta,
+                        "newest_eta": eta,
+                        "earliest_expires": expires,
+                        "latest_expires": expires,
+                    }
+                else:
+                    tasks[task_name]["newest_position"] = i + 1
+                    tasks[task_name]["newest_eta"] = eta
+                    # ISO 8601 strings are lexicographically sortable
+                    if expires is not None:
+                        cur = tasks[task_name]
+                        if cur["earliest_expires"] is None or expires < cur["earliest_expires"]:
+                            cur["earliest_expires"] = expires
+                        if cur["latest_expires"] is None or expires > cur["latest_expires"]:
+                            cur["latest_expires"] = expires
+                tasks[task_name]["count"] += 1
+    except Exception:
+        return None
+    return sorted(tasks.values(), key=operator.itemgetter("oldest_position"))
 
 
 # Used to display the counts and enabled tabs in the product view

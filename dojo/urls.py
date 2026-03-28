@@ -15,7 +15,9 @@ from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
+    CeleryQueueDetailsView,
     CeleryQueuePurgeView,
+    CeleryQueueTaskPurgeView,
     CeleryStatusView,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
@@ -246,6 +248,8 @@ api_v2_urls = [
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
     re_path(r"^{}api/v2/celery/status/$".format(get_system_setting("url_prefix")), CeleryStatusView.as_view(), name="celery_status_api"),
     re_path(r"^{}api/v2/celery/queue/purge/$".format(get_system_setting("url_prefix")), CeleryQueuePurgeView.as_view(), name="celery_queue_purge_api"),
+    re_path(r"^{}api/v2/celery/queue/details/$".format(get_system_setting("url_prefix")), CeleryQueueDetailsView.as_view(), name="celery_queue_details_api"),
+    re_path(r"^{}api/v2/celery/queue/task/purge/$".format(get_system_setting("url_prefix")), CeleryQueueTaskPurgeView.as_view(), name="celery_queue_task_purge_api"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
