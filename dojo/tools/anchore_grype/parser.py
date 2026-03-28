@@ -198,7 +198,7 @@ class AnchoreGrypeParser:
             if self.mode == "detailed":
                 dupe_key = f"{vuln_id}|{artifact_name}|{artifact_version}|{file_path}"
             else:
-                dupe_key = finding_title
+                dupe_key = f"{vuln_id}|{artifact_name}|{artifact_version}"
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
                 finding.nb_occurences += 1
