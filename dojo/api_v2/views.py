@@ -12,8 +12,10 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -46,6 +48,7 @@ from dojo.api_v2 import (
     serializers,
 )
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.cred.queries import get_authorized_cred_mappings
@@ -166,6 +169,7 @@ from dojo.product_type.queries import (
     get_authorized_product_type_members,
     get_authorized_product_types,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.reports.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
@@ -348,14 +352,24 @@ class EndPointViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_endpoints(Permissions.Location_View).distinct()
+        active_finding_subquery = build_count_subquery(
+            Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+            group_field="endpoints",
+        )
+        return get_authorized_endpoints(Permissions.Location_View).annotate(
+            active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+        ).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         endpoint = self.get_object()
@@ -459,27 +473,31 @@ class EngagementViewSet(
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def close(self, request, pk=None):
         eng = self.get_object()
         close_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def reopen(self, request, pk=None):
         eng = self.get_object()
         reopen_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         engagement = self.get_object()
@@ -695,7 +713,8 @@ class EngagementViewSet(
         responses={status.HTTP_200_OK: serializers.EngagementUpdateJiraEpicSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission),
     )
     def update_jira_epic(self, request, pk=None):
         engagement = self.get_object()
@@ -756,6 +775,61 @@ class RiskAcceptanceViewSet(
     @extend_schema(
         methods=["GET"],
         responses={
+            status.HTTP_200_OK: serializers.RiskAcceptanceToNotesSerializer,
+        },
+    )
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.AddNewNoteOptionSerializer,
+        responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
+    )
+    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasRiskAcceptanceRelatedObjectPermission))
+    def notes(self, request, pk=None):
+        risk_acceptance = self.get_object()
+        if request.method == "POST":
+            new_note = serializers.AddNewNoteOptionSerializer(data=request.data)
+            if new_note.is_valid():
+                entry = new_note.validated_data["entry"]
+                private = new_note.validated_data.get("private", False)
+                note_type = new_note.validated_data.get("note_type", None)
+            else:
+                return Response(new_note.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            notes = risk_acceptance.notes.filter(note_type=note_type).first()
+            if notes and note_type and note_type.is_single:
+                return Response("Only one instance of this note_type allowed on a risk acceptance.", status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+            note = Notes(entry=entry, author=author, private=private, note_type=note_type)
+            note.save()
+            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
+            note.history.add(history)
+            risk_acceptance.notes.add(note)
+            engagement = risk_acceptance.engagement
+            if engagement:
+                process_tag_notifications(
+                    request=request,
+                    note=note,
+                    parent_url=request.build_absolute_uri(
+                        reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)),
+                    ),
+                    parent_title=f"Risk Acceptance: {risk_acceptance.name}",
+                )
+
+            serialized_note = serializers.NoteSerializer(
+                {"author": author, "entry": entry, "private": private},
+            )
+            return Response(serialized_note.data, status=status.HTTP_201_CREATED)
+
+        notes = risk_acceptance.notes.all()
+        serialized_notes = serializers.RiskAcceptanceToNotesSerializer(
+            {"risk_acceptance_id": risk_acceptance, "notes": notes},
+        )
+        return Response(serialized_notes.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        methods=["GET"],
+        responses={
             status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
         },
     )
@@ -771,6 +845,8 @@ class RiskAcceptanceViewSet(
             )
         # Get the path of the file in media root
         file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        # NOTE: FileResponse takes ownership of closing the file handle when the response is closed.
+        # Explicitly register the closer to avoid potential resource leaks and satisfy static analyzers.
         file_handle = file_path.open("rb")
         # send file
         response = FileResponse(
@@ -778,6 +854,8 @@ class RiskAcceptanceViewSet(
             content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
+        if hasattr(response, "_resource_closers"):
+            response._resource_closers.append(file_handle.close)
         response["Content-Length"] = file_object.size
         response[
             "Content-Disposition"
@@ -1016,6 +1094,32 @@ class FindingViewSet(
                     finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
         serialized_finding = serializers.FindingCloseSerializer(finding, context={"request": request})
+        return Response(serialized_finding.data)
+
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.FindingVerifySerializer,
+        responses={status.HTTP_200_OK: serializers.FindingSerializer},
+    )
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
+    def verify(self, request, pk=None):
+        finding = self.get_object()
+
+        serializer = serializers.FindingVerifySerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Remove prefetched tags to keep queryset state in sync
+        finding.tags._remove_prefetched_objects()
+
+        finding_helper.verify_finding(
+            finding=finding,
+            user=request.user,
+            note_entry=serializer.validated_data.get("note"),
+            note_type=serializer.validated_data.get("note_type"),
+        )
+
+        serialized_finding = serializers.FindingSerializer(finding, context={"request": request})
         return Response(serialized_finding.data)
 
     @extend_schema(
@@ -1387,7 +1491,11 @@ class FindingViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=False, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=False, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request):
         findings = self.get_queryset()
@@ -1732,38 +1840,55 @@ class DojoMetaViewSet(
         serialized_data = serializers.MetaMainSerializer(data=request.data)
         if serialized_data.is_valid(raise_exception=True):
             if request.method == "POST":
-                self.process_post(request.data)
+                self.process_post(request)
                 status_code = status.HTTP_201_CREATED
             if request.method == "PATCH":
-                self.process_patch(request.data)
+                self.process_patch(request)
                 status_code = status.HTTP_200_OK
 
         return Response(status=status_code, data=serialized_data.data)
 
-    def process_post(self: object, data: dict):
-        product = Product.objects.filter(id=data.get("product")).first()
-        finding = Finding.objects.filter(id=data.get("finding")).first()
-        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+    def _fetch_and_authorize_parents(self, request, permission_map):
+        """Fetch parent objects and verify the user has the required permissions."""
+        data = request.data
+        parents = {}
+        for field, (model, permission) in permission_map.items():
+            obj = model.objects.filter(id=data.get(field)).first()
+            if obj:
+                user_has_permission_or_403(request.user, obj, permission)
+            parents[field] = obj
+        return parents
+
+    def process_post(self, request):
+        data = request.data
+        parents = self._fetch_and_authorize_parents(request, {
+            "product": (Product, Permissions.Product_Edit),
+            "finding": (Finding, Permissions.Finding_Edit),
+            "endpoint": (Endpoint, Permissions.Location_Edit),
+        })
         metalist = data.get("metadata")
         for metadata in metalist:
             try:
                 DojoMeta.objects.create(
-                    product=product,
-                    finding=finding,
-                    endpoint=endpoint,
+                    product=parents["product"],
+                    finding=parents["finding"],
+                    endpoint=parents["endpoint"],
                     name=metadata.get("name"),
                     value=metadata.get("value"),
                     )
             except (IntegrityError) as ex:  # this should not happen as the data was validated in the batch call
                 raise ValidationError(str(ex))
 
-    def process_patch(self: object, data: dict):
-        product = Product.objects.filter(id=data.get("product")).first()
-        finding = Finding.objects.filter(id=data.get("finding")).first()
-        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+    def process_patch(self, request):
+        data = request.data
+        parents = self._fetch_and_authorize_parents(request, {
+            "product": (Product, Permissions.Product_Edit),
+            "finding": (Finding, Permissions.Finding_Edit),
+            "endpoint": (Endpoint, Permissions.Location_Edit),
+        })
         metalist = data.get("metadata")
         for metadata in metalist:
-            dojometa = DojoMeta.objects.filter(product=product, finding=finding, endpoint=endpoint, name=metadata.get("name"))
+            dojometa = DojoMeta.objects.filter(product=parents["product"], finding=parents["finding"], endpoint=parents["endpoint"], name=metadata.get("name"))
             if dojometa:
                 try:
                     dojometa.update(
@@ -1819,7 +1944,11 @@ class ProductViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         product = self.get_object()
@@ -1960,7 +2089,11 @@ class ProductTypeViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         product_type = self.get_object()
@@ -2147,7 +2280,11 @@ class TestsViewSet(
         responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
     )
     @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
+        detail=True, methods=["post"],
+        # IsAuthenticated only: report generation requires View permission,
+        # enforced by the permission-filtered get_queryset(). The viewset's
+        # permission_classes would check Edit (POST), which is too restrictive.
+        permission_classes=[IsAuthenticated],
     )
     def generate_report(self, request, pk=None):
         test = self.get_object()
@@ -3391,6 +3528,8 @@ class QuestionnaireEngagementSurveyViewSet(
         engagement_survey = self.get_object()
         # Safely get the engagement
         engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
+        # Verify the user has permission to edit the engagement
+        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_Edit)
         # Link the engagement
         answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
         # Send a favorable response

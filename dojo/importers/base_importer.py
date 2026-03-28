@@ -14,11 +14,10 @@ from django.utils.timezone import make_aware
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.importers.endpoint_manager import EndpointManager
-from dojo.importers.location_manager import LocationManager
+from dojo.importers.location_manager import LocationManager, UnsavedLocation
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
-from dojo.location.models import AbstractLocation, Location
+from dojo.location.models import Location
 from dojo.models import (
     # Import History States
     IMPORT_CLOSED_FINDING,
@@ -83,9 +82,6 @@ class BaseImporter(ImporterOptions):
         ImporterOptions.__init__(self, *args, **kwargs)
         if settings.V3_FEATURE_LOCATIONS:
             self.location_manager = LocationManager()
-        else:
-            # TODO: Delete this after the move to Locations
-            self.endpoint_manager = EndpointManager()
 
     def check_child_implementation_exception(self):
         """
@@ -283,27 +279,6 @@ class BaseImporter(ImporterOptions):
         elapsed_time = time.perf_counter() - start_time
         logger.info(f"Parsing findings took {elapsed_time:.2f} seconds ({len(parsed_findings) if parsed_findings else 0} findings parsed)")
         return parsed_findings
-
-    def sync_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
-        """
-        Processes findings in a synchronous manner such that all findings
-        will be processed in a worker/process/thread
-        """
-        return self.process_findings(parsed_findings, **kwargs)
-
-    def determine_process_method(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        return self.sync_process_findings(
-            parsed_findings,
-            **kwargs,
-        )
 
     def determine_deduplication_algorithm(self) -> str:
         """
@@ -813,7 +788,7 @@ class BaseImporter(ImporterOptions):
     def process_locations(
         self,
         finding: Finding,
-        locations_to_add: list[AbstractLocation],
+        locations_to_add: list[UnsavedLocation],
     ) -> None:
         """
         Process any locations to add to the finding. Locations could come from two places
@@ -846,12 +821,17 @@ class BaseImporter(ImporterOptions):
             msg = "BaseImporter#process_endpoints() method is deprecated when V3_FEATURE_LOCATIONS is enabled"
             raise NotImplementedError(msg)
 
-        # Save the unsaved endpoints
-        self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding.unsaved_endpoints)
-        # Check for any that were added in the form
+        # Clean and record unsaved endpoints from the report
+        self.endpoint_manager.clean_unsaved_endpoints(finding.unsaved_endpoints)
+        for endpoint in finding.unsaved_endpoints:
+            key = self.endpoint_manager.record_endpoint(endpoint)
+            self.endpoint_manager.record_status_for_create(finding, key)
+        # Record any endpoints added from the form
         if len(endpoints_to_add) > 0:
             logger.debug("endpoints_to_add: %s", endpoints_to_add)
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
+            for endpoint in endpoints_to_add:
+                key = self.endpoint_manager.record_endpoint(endpoint)
+                self.endpoint_manager.record_status_for_create(finding, key)
 
     def sanitize_vulnerability_ids(self, finding) -> None:
         """Remove undisired vulnerability id values"""
@@ -955,14 +935,8 @@ class BaseImporter(ImporterOptions):
             )
         else:
             # TODO: Delete this after the move to Locations
-            # Mitigate the endpoint statuses
-            dojo_dispatch_task(
-                EndpointManager.mitigate_endpoint_status,
-                finding.status_finding.all(),
-                self.user,
-                kwuser=self.user,
-                sync=True,
-            )
+            # Accumulate endpoint statuses for bulk mitigate in persist()
+            self.endpoint_manager.record_statuses_to_mitigate(finding.status_finding.all())
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing

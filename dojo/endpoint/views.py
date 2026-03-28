@@ -59,7 +59,13 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     else:
         endpoints = Endpoint.objects.all()
 
-    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
+    active_finding_subquery = build_count_subquery(
+        Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+        group_field="endpoints",
+    )
+    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").annotate(
+        active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+    ).distinct()
     endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_View, endpoints, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
@@ -398,7 +404,15 @@ def endpoint_status_bulk_update(request, fid):
         status_list = ["active", "false_positive", "mitigated", "out_of_scope", "risk_accepted"]
         enable = [item for item in status_list if item in list(post.keys())]
 
-        if endpoints_to_update and len(enable) > 0:
+        if request.POST.get("remove_from_finding") and endpoints_to_update:
+            Endpoint_Status.objects.filter(finding_id=fid, endpoint_id__in=endpoints_to_update).delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Selected endpoints have been removed from this finding.",
+                extra_tags="alert-success",
+            )
+        elif endpoints_to_update and len(enable) > 0:
             endpoints = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
             for endpoint in endpoints:
                 endpoint_status = Endpoint_Status.objects.get(

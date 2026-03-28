@@ -5,10 +5,9 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 __author__ = "dr3dd589"
-
-from dojo.url.models import URL
 
 # TODO: discuss this list as maintenance subject
 WEAK_CIPHER_LIST = [
@@ -157,7 +156,7 @@ class SSLyzeXMLParser:
                         if host is not None:
                             if settings.V3_FEATURE_LOCATIONS:
                                 finding.unsaved_locations.append(
-                                    URL(
+                                    LocationData.url(
                                         host=host, port=port, protocol=protocol,
                                     ),
                                 )

@@ -1,0 +1,62 @@
+[
+  {
+    "Title": "Low severity test finding",
+    "Labels": ["CSPM"],
+    "CreatedAt": "2025-01-01T08:00:00+00:00",
+    "Status": "open",
+    "Category": "Best practices",
+    "OrcaScore": 2.0,
+    "Source": "ResourceA",
+    "LastSeen": "2025-02-01T08:00:00+00:00",
+    "CloudAccount": {"Name": "account-dev"},
+    "Inventory": {"Name": "ResourceA"}
+  },
+  {
+    "Title": "Unused role with policy found",
+    "Labels": ["CSPM", "source: Orca Scan"],
+    "CreatedAt": "2025-01-15T10:30:00+00:00",
+    "Status": "open",
+    "Category": "IAM misconfigurations",
+    "OrcaScore": 5.1,
+    "Source": "TestRole_abc123",
+    "LastSeen": "2025-02-01T12:00:00+00:00",
+    "CloudAccount": {"Name": "account-test"},
+    "Inventory": {"Name": "TestRole_abc123"}
+  },
+  {
+    "Title": "Public S3 bucket detected",
+    "Labels": ["CSPM", "mitre: initial access"],
+    "CreatedAt": "2025-02-01T14:00:00+00:00",
+    "Status": "open",
+    "Category": "Data at risk",
+    "OrcaScore": 7.5,
+    "Source": "my-public-bucket",
+    "LastSeen": "2025-02-03T09:00:00+00:00",
+    "CloudAccount": {"Name": "account-prod"},
+    "Inventory": {"Name": "my-public-bucket"}
+  },
+  {
+    "Title": "Critical IAM root access key active",
+    "Labels": ["CSPM", "critical"],
+    "CreatedAt": "2025-02-02T16:00:00+00:00",
+    "Status": "open",
+    "Category": "IAM misconfigurations",
+    "OrcaScore": 9.5,
+    "Source": "root",
+    "LastSeen": "2025-02-03T16:00:00+00:00",
+    "CloudAccount": {"Name": "account-prod"},
+    "Inventory": {"Name": "root"}
+  },
+  {
+    "Title": "Informational security note",
+    "Labels": [],
+    "CreatedAt": "2024-12-01T00:00:00+00:00",
+    "Status": "closed",
+    "Category": "Best practices",
+    "OrcaScore": 0,
+    "Source": "InfoResource",
+    "LastSeen": "2025-01-01T00:00:00+00:00",
+    "CloudAccount": {"Name": "account-dev"},
+    "Inventory": {"Name": "InfoResource"}
+  }
+]

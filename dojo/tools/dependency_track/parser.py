@@ -1,14 +1,19 @@
 import json
 import logging
 
+from dateutil import parser
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
 
 class DependencyTrackParser:
 
-    """
+    r"""
     A class that can be used to parse the JSON Finding Packaging Format (FPF) export from OWASP Dependency Track.
 
     See here for more info on this JSON format: https://docs.dependencytrack.org/integrations/file-formats/
@@ -16,71 +21,95 @@ class DependencyTrackParser:
     A typical Finding Packaging Format (FPF) export looks like the following:
 
     {
+      "version": "1.3",
+      "meta" : {
+        "application": "Dependency-Track",
+        "version": "4.5.0",
+        "timestamp": "2022-02-18T23:31:42Z",
+        "baseUrl": "http://dtrack.example.org"
+      },
+      "project" : {
+        "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+        "name": "Acme Example",
         "version": "1.0",
-        "meta" : {
-            "application": "Dependency-Track",
-            "version": "3.4.0",
-            "timestamp": "2018-11-18T23:31:42Z",
-            "baseUrl": "http://dtrack.example.org"
+        "description": "A sample application"
+      },
+      "findings" : [
+      {
+        "component": {
+          "uuid": "b815b581-fec1-4374-a871-68862a8f8d52",
+          "name": "timespan",
+          "version": "2.3.0",
+          "purl": "pkg:npm/timespan@2.3.0",
+          "latestVersion": "3.2.0"
         },
-        "project" : {
-            "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
-            "name": "Acme Example",
-            "version": "1.0",
-            "description": "A sample application"
+        "vulnerability": {
+          "uuid": "115b80bb-46c4-41d1-9f10-8a175d4abb46",
+          "source": "NPM",
+          "vulnId": "533",
+          "title": "Regular Expression Denial of Service",
+          "subtitle": "timespan",
+          "severity": "LOW",
+          "severityRank": 3,
+          "cvssV2Vector": "CVSS:2.0/AV:N/AC:L/Au:N/C:P/I:P/A:P",
+          "cvssV3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+          "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+          "references": "* [https://example.com](https://example.com)\n* [https://example.org](https://example.org)",
+          "published": "2025-07-11 03:16:03.563",
+          "cweId": 400,
+          "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
+          "cwes": [
+            {
+              "cweId": 400,
+              "name": "Uncontrolled Resource Consumption ('Resource Exhaustion')"
+            }
+          ],
+          "description": "Affected versions of `timespan`...",
+          "recommendation": "No direct patch is available..."
         },
-        "findings" : [
+        "analysis": {
+          "state": "NOT_SET",
+          "isSuppressed": false
+        },
+        "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46"
+      },
+      {
+        "component": {
+          "uuid": "979f87f5-eaf5-4095-9d38-cde17bf9228e",
+          "name": "uglify-js",
+          "version": "2.4.24",
+          "purl": "pkg:npm/uglify-js@2.4.24"
+        },
+        "vulnerability": {
+          "uuid": "701a3953-666b-4b7a-96ca-e1e6a3e1def3",
+          "source": "NPM",
+          "vulnId": "48",
+          "aliases": [
             {
-                "component": {
-                    "uuid": "b815b581-fec1-4374-a871-68862a8f8d52",
-                    "name": "timespan",
-                    "version": "2.3.0",
-                    "purl": "pkg:npm/timespan@2.3.0"
-                },
-                "vulnerability": {
-                    "uuid": "115b80bb-46c4-41d1-9f10-8a175d4abb46",
-                    "source": "NPM",
-                    "vulnId": "533",
-                    "title": "Regular Expression Denial of Service",
-                    "subtitle": "timespan",
-                    "severity": "LOW",
-                    "severityRank": 3,
-                    "cweId": 400,
-                    "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
-                    "description": "Affected versions of `timespan`...",
-                    "recommendation": "No direct patch is available..."
-                },
-                "analysis": {
-                    "state": "NOT_SET",
-                    "isSuppressed": false
-                },
-                "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46"
-            },
+              "cveId": "CVE-2022-2053",
+              "ghsaId": "GHSA-95rf-557x-44g5"
+            }
+          ],
+          "title": "Regular Expression Denial of Service",
+          "subtitle": "uglify-js",
+          "severity": "LOW",
+          "severityRank": 3,
+          "cweId": 400,
+          "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
+          "cwes": [
             {
-                "component": {
-                    "uuid": "979f87f5-eaf5-4095-9d38-cde17bf9228e",
-                    "name": "uglify-js",
-                    "version": "2.4.24",
-                    "purl": "pkg:npm/uglify-js@2.4.24"
-                },
-                "vulnerability": {
-                    "uuid": "701a3953-666b-4b7a-96ca-e1e6a3e1def3",
-                    "source": "NPM",
-                    "vulnId": "48",
-                    "title": "Regular Expression Denial of Service",
-                    "subtitle": "uglify-js",
-                    "severity": "LOW",
-                    "severityRank": 3,
-                    "cweId": 400,
-                    "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
-                    "description": "Versions of `uglify-js` prior to...",
-                    "recommendation": "Update to version 2.6.0 or later."
-                },
-                "analysis": {
-                    "isSuppressed": false
-                },
-                "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:979f87f5-eaf5-4095-9d38-cde17bf9228e:701a3953-666b-4b7a-96ca-e1e6a3e1def3"
-            }]
+              "cweId": 400,
+              "name": "Uncontrolled Resource Consumption ('Resource Exhaustion')"
+            }
+          ],
+          "description": "Versions of `uglify-js` prior to...",
+          "recommendation": "Update to version 2.6.0 or later."
+        },
+        "analysis": {
+          "isSuppressed": false
+        },
+        "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:979f87f5-eaf5-4095-9d38-cde17bf9228e:701a3953-666b-4b7a-96ca-e1e6a3e1def3"
+      }]
     }
     """
 
@@ -196,8 +225,12 @@ class DependencyTrackParser:
             vulnerability_description += "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding["vulnerability"]["subtitle"])
         if "description" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["description"] is not None:
             vulnerability_description += "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
+        vuln_id_from_tool = None
+        unique_id_from_tool = dependency_track_finding.get("matrix")
         if "uuid" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["uuid"] is not None:
             vuln_id_from_tool = dependency_track_finding["vulnerability"]["uuid"]
+        if "matrix" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["matrix"] is not None:
+            unique_id_from_tool = dependency_track_finding["vulnerability"]["matrix"]
 
         # Get severity according to Dependency Track and convert it to a severity DefectDojo understands
         dependency_track_severity = dependency_track_finding["vulnerability"]["severity"]
@@ -209,6 +242,23 @@ class DependencyTrackParser:
         # Get the cvss score of the vulnerabililty
         cvss_score = dependency_track_finding["vulnerability"].get("cvssV3BaseScore")
 
+        cvssv3 = None
+        if "cvssV3Vector" in dependency_track_finding["vulnerability"]:
+            cvss_vector = dependency_track_finding["vulnerability"]["cvssV3Vector"]
+            cvss_data = parse_cvss_data(cvss_vector)
+            if cvss_data:
+                cvssv3 = cvss_data.get("cvssv3")
+                cvss_score = cvss_data.get("cvssv3_score")
+
+        cvssv4 = None
+        cvssv4_score = None
+        if "cvssV4Vector" in dependency_track_finding["vulnerability"]:
+            cvss_vector = dependency_track_finding["vulnerability"]["cvssV4Vector"]
+            cvss_data = parse_cvss_data(cvss_vector)
+            if cvss_data:
+                cvssv4 = cvss_data.get("cvssv4")
+                cvssv4_score = cvss_data.get("cvssv4_score")
+
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         analysis = dependency_track_finding.get("analysis")
         is_false_positive = bool(analysis is not None and analysis.get("state") == "FALSE_POSITIVE")
@@ -217,6 +267,13 @@ class DependencyTrackParser:
         epss_percentile = dependency_track_finding["vulnerability"].get("epssPercentile", None)
 
         epss_score = dependency_track_finding["vulnerability"].get("epssScore", None)
+
+        references = dependency_track_finding["vulnerability"].get("references")
+        if references:
+            if isinstance(references, list):
+                references = "\n".join(references)
+
+        published = dependency_track_finding["vulnerability"].get("published")
 
         # Build and return Finding model
         finding = Finding(
@@ -229,7 +286,9 @@ class DependencyTrackParser:
             component_name=component_name,
             component_version=component_version,
             file_path=file_path,
+            unique_id_from_tool=unique_id_from_tool,
             vuln_id_from_tool=vuln_id_from_tool,
+            references=references,
             static_finding=True,
             dynamic_finding=False)
 
@@ -242,11 +301,27 @@ class DependencyTrackParser:
 
         if cvss_score:
             finding.cvssv3_score = cvss_score
+        if cvssv3:
+            finding.cvssv3 = cvssv3
+
+        if cvssv4_score:
+            finding.cvssv4_score = cvssv4_score
+        if cvssv4:
+            finding.cvssv4 = cvssv4
+
+        if published:
+            finding.publish_date = parser.parse(published).date()
 
         if epss_score:
             finding.epss_score = epss_score
         if epss_percentile:
             finding.epss_percentile = epss_percentile
+
+        if settings.V3_FEATURE_LOCATIONS:
+            if component_purl := dependency_track_finding.get("component", {}).get("purl"):
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl=component_purl),
+                )
 
         return finding
 

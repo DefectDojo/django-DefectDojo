@@ -6,9 +6,11 @@ import re
 import dateutil
 from cpe import CPE
 from defusedxml import ElementTree
+from django.conf import settings
 from packageurl import PackageURL
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -109,7 +111,7 @@ class DependencyCheckParser:
             # analyzing identifier from the more generic to
             package_node = identifiers_node.find(".//" + namespace + "package")
             if package_node is not None:
-                pck_id = package_node.findtext(f"{namespace}id")
+                pck_id = package_node.findtext(f"{namespace}id").strip()
                 purl = PackageURL.from_string(pck_id)
                 purl_parts = purl.to_dict()
                 component_name = (
@@ -129,7 +131,7 @@ class DependencyCheckParser:
                     if purl_parts["version"] and len(purl_parts["version"]) > 0
                     else ""
                 )
-                return component_name, component_version
+                return component_name, component_version, pck_id
 
             # vulnerabilityIds_node = identifiers_node.find('.//' + namespace + 'vulnerabilityIds')
             # if vulnerabilityIds_node:
@@ -161,7 +163,7 @@ class DependencyCheckParser:
                     if len(cpe.get_version()) > 0
                     else None
                 )
-                return component_name, component_version
+                return component_name, component_version, None
 
             maven_node = identifiers_node.find(
                 ".//" + namespace + 'identifier[@type="maven"]',
@@ -174,7 +176,7 @@ class DependencyCheckParser:
                 if len(maven_parts) == 3:
                     component_name = maven_parts[0] + ":" + maven_parts[1]
                     component_version = maven_parts[2]
-                    return component_name, component_version
+                    return component_name, component_version, None
 
         # TODO: what happens when there multiple evidencecollectednodes with
         # product or version as type?
@@ -201,6 +203,7 @@ class DependencyCheckParser:
             )
             if product_node is not None:
                 component_name = product_node.findtext(f"{namespace}value")
+                component_version = None
                 version_node = evidence_collected_node.find(
                     ".//" + namespace + 'evidence[@type="version"]',
                 )
@@ -209,9 +212,9 @@ class DependencyCheckParser:
                         f"{namespace}value",
                     )
 
-                return component_name, component_version
+                return component_name, component_version, None
 
-        return None, None
+        return None, None, None
 
     def get_severity_and_cvss_meta(self, vulnerability, namespace) -> dict:
         # Get the base severity from the report
@@ -313,6 +316,7 @@ class DependencyCheckParser:
         (
             component_name,
             component_version,
+            component_purl,
         ) = self.get_component_name_and_version_from_dependency(
             dependency, related_dependency, namespace,
         )
@@ -395,6 +399,11 @@ class DependencyCheckParser:
             component_version=component_version,
             **self.get_severity_and_cvss_meta(vulnerability, namespace),
         )
+
+        if settings.V3_FEATURE_LOCATIONS and component_purl:
+            finding.unsaved_locations.append(
+                LocationData.dependency(purl=component_purl, file_path=dependency_filename),
+            )
 
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
@@ -490,5 +499,14 @@ class DependencyCheckParser:
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
+                elif settings.V3_FEATURE_LOCATIONS:
+                    # Collect product-level dependency locations
+                    _, _, component_purl = self.get_component_name_and_version_from_dependency(
+                        dependency, None, namespace,
+                    )
+                    if component_purl:
+                        test.unsaved_metadata.append(
+                            LocationData.dependency(purl=component_purl),
+                        )
 
         return list(dupes.values())

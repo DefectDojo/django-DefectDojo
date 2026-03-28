@@ -11,7 +11,7 @@ on:
     - cron: '0 0 1 1,4,7,10 *'
 
 jobs:
-  run-binary-and-create-pr:
+  run-script-and-create-pr:
     runs-on: ubuntu-latest
     steps:
       # Checkout the repository
@@ -20,34 +20,24 @@ jobs:
         with:
           ref: ${{ github.ref_name || 'dev'}}
 
-      - name: Run binary
+      - name: Run updater
         run: |
-          ./fixture-updater dojo/fixtures/defect_dojo_sample_data.json
+          scripts/fixture-updater.py dojo/fixtures/defect_dojo_sample_data.json
           mv output.json dojo/fixtures/defect_dojo_sample_data.json
+          scripts/fixture-updater.py dojo/fixtures/defect_dojo_sample_data_locations.json
+          mv output.json dojo/fixtures/defect_dojo_sample_data_locations.json
 
       - name: Configure git
         run: |
           git config --global user.name "${{ env.GIT_USERNAME }}"
           git config --global user.email "${{ env.GIT_EMAIL }}"
 
-      - name: Create and switch to a new branch
-        run: |
-          git checkout -b update-file-$(date +%Y%m%d%H%M%S)
-          git add dojo/fixtures/defect_dojo_sample_data.json
-          git commit -m "Update sample data"
-
-      - name: Push branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git push --set-upstream origin $(git rev-parse --abbrev-ref HEAD)
-
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Update sample data"
-          branch: ${{ github.ref_name || 'dev'}}
+          branch: update-sample-data
           base: dev
           title: "Update sample data"
-          body: "This pull request updates the sample data."
+          body: "This pull request updates the timestamps in the sample data to keep them up to date."

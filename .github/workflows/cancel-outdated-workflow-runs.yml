@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - uses: styfle/cancel-workflow-action@3155a141048f8f89c06b4cdae32e7853e97536bc # 0.13.0
+      - uses: styfle/cancel-workflow-action@d07a454dad7609a92316b57b23c9ccfd4f59af66 # 0.13.1
         with:
-          workflow_id: 'integration-tests.yml,k8s-testing.yml,unit-tests.yml'
+          workflow_id: 'integration-tests.yml,k8s-tests.yml,unit-tests.yml,validate_docs_build.yml,test-helm-chart.yml,ruff.yml,shellcheck.yml'
           access_token: ${{ github.token }}

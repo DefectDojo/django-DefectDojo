@@ -7,8 +7,8 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.qualys import csv_parser
-from dojo.url.models import URL
 from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
@@ -355,7 +355,7 @@ def parse_finding(host, tree):
         finding.verified = True
         # manage endpoint/location
         if settings.V3_FEATURE_LOCATIONS:
-            location = URL(host=issue_row["fqdn"]) if issue_row["fqdn"] else URL(host=issue_row["ip_address"])
+            location = LocationData.url(host=issue_row["fqdn"]) if issue_row["fqdn"] else LocationData.url(host=issue_row["ip_address"])
             finding.unsaved_locations = [location]
         else:
             # TODO: Delete this after the move to Locations

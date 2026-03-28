@@ -1011,7 +1011,108 @@ class FindingCloseAPITest(DojoAPITestCase):
             }
             response = self.client.post(self._close_url(finding.id), payload, format="json")
             self.assertEqual(200, response.status_code, response.content[:1000])
-            self.assertTrue(add_comment_mock.called)
+        self.assertTrue(add_comment_mock.called)
+
+
+@versioned_fixtures
+class FindingVerifyAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.admin = testuser
+
+    def _verify_url(self, finding_id: int) -> str:
+        return f"/api/v2/findings/{finding_id}/verify/"
+
+    def test_verify_finding_basic(self):
+        finding = Finding.objects.get(id=7)
+        response = self.client.post(self._verify_url(finding.id), {"note": "Marked verified"}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.verified)
+        self.assertEqual(finding.last_reviewed_by, self.admin)
+        self.assertTrue(finding.notes.filter(entry__icontains="Marked verified").exists())
+
+    def test_verify_finding_invalid_payload(self):
+        finding = Finding.objects.get(id=7)
+        # note_type specified but invalid id
+        response = self.client.post(self._verify_url(finding.id), {"note_type": 9999}, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
+
+
+@versioned_fixtures
+class EngagementCloseReopenAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+    def _close_url(self, engagement_id: int) -> str:
+        return reverse("engagement-close", args=[engagement_id])
+
+    def _reopen_url(self, engagement_id: int) -> str:
+        return reverse("engagement-reopen", args=[engagement_id])
+
+    def test_close_engagement_basic(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        response = self.client.post(self._close_url(eng.id))
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertFalse(eng.active)
+        self.assertEqual(eng.status, "Completed")
+
+    def test_close_engagement_empty_json_body(self):
+        """The exact failure case from Anduril: POST with empty JSON body."""
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        response = self.client.post(self._close_url(eng.id), {}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertFalse(eng.active)
+        self.assertEqual(eng.status, "Completed")
+
+    def test_reopen_engagement_basic(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        # Close first
+        self.client.post(self._close_url(eng.id))
+        eng.refresh_from_db()
+        self.assertFalse(eng.active)
+        # Reopen
+        response = self.client.post(self._reopen_url(eng.id))
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertTrue(eng.active)
+        self.assertEqual(eng.status, "In Progress")
+
+    def test_reopen_engagement_empty_json_body(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        self.client.post(self._close_url(eng.id))
+        response = self.client.post(self._reopen_url(eng.id), {}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        eng.refresh_from_db()
+        self.assertTrue(eng.active)
+
+    def test_close_nonexistent_engagement_returns_404(self):
+        response = self.client.post(self._close_url(999999))
+        self.assertEqual(404, response.status_code)
+
+    def test_close_engagement_unauthenticated(self):
+        eng = Engagement.objects.filter(active=True).first()
+        self.assertIsNotNone(eng, "Need an active engagement in test data")
+        unauthenticated_client = APIClient()
+        response = unauthenticated_client.post(self._close_url(eng.id))
+        self.assertEqual(403, response.status_code)
 
 
 @versioned_fixtures
@@ -3788,26 +3889,128 @@ class ImportLanguagesTest(BaseClass.BaseClassTest):
     def __del__(self: object):
         self.payload["file"].close()
 
+    def _build_payload(self, data):
+        return {
+            "product": 1,
+            "file": SimpleUploadedFile(
+                "defectdojo_cloc.json",
+                json.dumps(data).encode("utf-8"),
+                content_type="application/json",
+            ),
+        }
+
     def test_create(self):
-        BaseClass.CreateRequestTest.test_create(self)
+        self.payload["file"].close()
+        base_data = json.loads(
+            Path("unittests/files/defectdojo_cloc.json").read_text(
+                encoding="utf-8",
+            ),
+        )
+        updated_data = json.loads(json.dumps(base_data))
+        updated_data.pop("JSON", None)
+        updated_data["Python"]["code"] = 51057
+        updated_data["Go"] = {
+            "nFiles": 1,
+            "blank": 2,
+            "comment": 3,
+            "code": 4,
+        }
 
-        languages = Languages.objects.filter(product=1).order_by("language")
+        test_cases = [
+            (
+                "initial",
+                base_data,
+                {
+                    "JSON": {
+                        "files": 21,
+                        "blank": 7,
+                        "comment": 0,
+                        "code": 63996,
+                    },
+                    "Python": {
+                        "files": 432,
+                        "blank": 10813,
+                        "comment": 5054,
+                        "code": 51056,
+                    },
+                },
+            ),
+            (
+                "updated",
+                updated_data,
+                {
+                    "Go": {
+                        "files": 1,
+                        "blank": 2,
+                        "comment": 3,
+                        "code": 4,
+                    },
+                    "Python": {
+                        "files": 432,
+                        "blank": 10813,
+                        "comment": 5054,
+                        "code": 51057,
+                    },
+                },
+            ),
+        ]
 
-        self.assertEqual(2, len(languages))
+        product = Product.objects.get(id=1)
+        for case_name, payload_data, expected in test_cases:
+            with self.subTest(case=case_name):
+                self.payload = self._build_payload(payload_data)
+                response = self.client.post(self.url, self.payload)
+                self.assertEqual(201, response.status_code, response.content[:1000])
+                self.check_schema_response("post", "201", response)
 
-        self.assertEqual(languages[0].product, Product.objects.get(id=1))
-        self.assertEqual(languages[0].language, Language_Type.objects.get(id=1))
-        self.assertEqual(languages[0].files, 21)
-        self.assertEqual(languages[0].blank, 7)
-        self.assertEqual(languages[0].comment, 0)
-        self.assertEqual(languages[0].code, 63996)
+                languages = (
+                    Languages.objects.filter(product=1)
+                    .select_related("language")
+                    .order_by("language__language")
+                )
+                self.assertEqual(len(expected), languages.count())
 
-        self.assertEqual(languages[1].product, Product.objects.get(id=1))
-        self.assertEqual(languages[1].language, Language_Type.objects.get(id=2))
-        self.assertEqual(languages[1].files, 432)
-        self.assertEqual(languages[1].blank, 10813)
-        self.assertEqual(languages[1].comment, 5054)
-        self.assertEqual(languages[1].code, 51056)
+                languages_by_name = {
+                    language.language.language: language
+                    for language in languages
+                }
+                self.assertEqual(set(expected.keys()), set(languages_by_name.keys()))
+
+                for name, counts in expected.items():
+                    language = languages_by_name[name]
+                    self.assertEqual(product, language.product)
+                    self.assertEqual(name, language.language.language)
+                    self.assertEqual(counts["files"], language.files)
+                    self.assertEqual(counts["blank"], language.blank)
+                    self.assertEqual(counts["comment"], language.comment)
+                    self.assertEqual(counts["code"], language.code)
+
+    def test_create_with_invalid_json(self):
+        """Invalid file content should return 400, not 500."""
+        self.payload = {
+            "product": 1,
+            "file": SimpleUploadedFile(
+                "bad.json",
+                b"this is not json",
+                content_type="application/json",
+            ),
+        }
+        response = self.client.post(self.url, self.payload)
+        self.assertEqual(400, response.status_code)
+
+    def test_create_idempotent(self):
+        """Importing the same file twice should succeed and produce identical results."""
+        base_data = json.loads(
+            Path("unittests/files/defectdojo_cloc.json").read_text(encoding="utf-8"),
+        )
+        for _ in range(2):
+            self.payload = self._build_payload(base_data)
+            response = self.client.post(self.url, self.payload)
+            self.assertEqual(201, response.status_code, response.content[:1000])
+
+        languages = Languages.objects.filter(product=1)
+        # Should have exactly 2 languages (JSON and Python from the test file)
+        self.assertEqual(2, languages.count())
 
 
 @versioned_fixtures

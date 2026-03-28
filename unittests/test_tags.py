@@ -4,7 +4,7 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import Client
+from django.test import Client, override_settings
 from django.urls import reverse
 
 from dojo.models import Finding, Product, Test
@@ -279,6 +279,7 @@ class TagImportMixin:
         self.zap_sample5_filename = get_unit_tests_scans_path("zap") / "5_zap_sample_one.xml"
         self.generic_sample_with_tags_filename = get_unit_tests_scans_path("generic") / "generic_report1.json"
         self.generic_sample_with_more_tags_filename = get_unit_tests_scans_path("generic") / "generic_report1_more_tags.json"
+        self.trivy_filename = get_unit_tests_scans_path("trivy") / "scheme_2_many_vulns.json"
 
     def test_import_and_reimport_with_tags(self):
         """Test that tags passed as import parameter are applied to the test."""
@@ -303,6 +304,54 @@ class TagImportMixin:
         self.assertEqual(len(tags), len(response.get("tags")))
         for tag in tags:
             self.assertIn(tag, response["tags"])
+
+    def test_manually_set_tags_preserved_on_reimport(self):
+        """
+        Manually set tags on findings must survive a reimport.
+
+        Regression test for finding_post_processing() using tags.set() instead of
+        tags.add(), which caused manually-set tags to be silently wiped when reimporting
+        with parsers that populate unsaved_tags (Trivy, SARIF, SonarQube, etc.).
+        """
+        # 1. Import a Trivy scan
+        import0 = self.import_scan_with_params(
+            self.trivy_filename,
+            scan_type="Trivy Scan",
+            minimum_severity="Info",
+        )
+        test_id = import0["test"]
+
+        # 2. Fetch findings and manually tag each one with "bla_bla"
+        findings_before = self.get_test_findings_api(test_id)["results"]
+        self.assertGreater(len(findings_before), 0, "Expected findings from Trivy scan")
+        for finding in findings_before:
+            self.patch_finding_api(finding["id"], {"tags": ["bla_bla"]})
+
+        # 3. Confirm the tag was applied before reimport
+        findings_before = self.get_test_findings_api(test_id)["results"]
+        for finding in findings_before:
+            self.assertIn(
+                "bla_bla",
+                finding["tags"],
+                f"Tag 'bla_bla' was not set on finding {finding['id']} before reimport",
+            )
+
+        # 4. Reimport the same scan
+        self.reimport_scan_with_params(
+            test_id,
+            self.trivy_filename,
+            scan_type="Trivy Scan",
+            minimum_severity="Info",
+        )
+
+        # 5. Confirm manually set tags survived — reimport must not overwrite them
+        findings_after = self.get_test_findings_api(test_id)["results"]
+        for finding in findings_after:
+            self.assertIn(
+                "bla_bla",
+                finding["tags"],
+                f"Manually set tag 'bla_bla' was overwritten on finding {finding['id']} during reimport",
+            )
 
     def test_import_report_with_tags(self):
         """Test that parser-generated tags on findings are preserved during import/reimport."""
@@ -405,6 +454,7 @@ class TagImportTestUI(DojoAPITestCase, TagImportMixin):
             return {"test": new_test_id}
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @versioned_fixtures
 class InheritedTagsTests(DojoAPITestCase):
 
@@ -561,6 +611,7 @@ class InheritedTagsImportMixin:
         self.assertEqual(product_tags_post_addition, self._convert_instance_tags_to_list(objects.get("finding")))
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @versioned_fixtures
 class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
 
@@ -577,6 +628,7 @@ class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
         InheritedTagsImportMixin.setUp(self)
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 @versioned_fixtures
 class InheritedTagsImportTestUI(DojoAPITestCase, InheritedTagsImportMixin):
 

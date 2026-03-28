@@ -7,7 +7,7 @@ from dateutil.parser import parse
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class GenericCSVParser:
@@ -110,7 +110,7 @@ class GenericCSVParser:
             if row.get("Url"):
                 if settings.V3_FEATURE_LOCATIONS:
                     finding.unsaved_locations = [
-                        URL.from_value(row["Url"]) if "://" in row["Url"] else URL.from_value("//" + row["Url"]),
+                        LocationData.url(url=row["Url"]) if "://" in row["Url"] else LocationData.url(url="//" + row["Url"]),
                     ]
                 else:
                     # TODO: Delete this after the move to Locations

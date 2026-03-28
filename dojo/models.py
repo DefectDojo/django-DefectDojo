@@ -50,7 +50,8 @@ from dojo.base_models.base import BaseModel
 from dojo.validators import cvss3_validator, cvss4_validator
 
 if TYPE_CHECKING:
-    from dojo.location.models import AbstractLocation
+    from dojo.importers.location_manager import UnsavedLocation
+
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -534,7 +535,6 @@ class System_Settings(models.Model):
         verbose_name=_("Allow Anonymous Survey Responses"),
         help_text=_("Enable anyone with a link to the survey to answer a survey"),
     )
-    credentials = models.TextField(max_length=3000, blank=True)
     disclaimer_notifications = models.TextField(max_length=3000, default="", blank=True,
                                   verbose_name=_("Custom Disclaimer for Notifications"),
                                   help_text=_("Include this custom disclaimer on all notifications"))
@@ -2183,6 +2183,10 @@ class Test(models.Model):
             models.Index(fields=["engagement", "test_type"]),
         ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.unsaved_metadata: list = []
+
     def __str__(self):
         if self.title:
             return f"{self.title} ({self.test_type})"
@@ -2376,6 +2380,55 @@ class Test_Import_Finding_Action(TimeStampedModel):
 
 
 class Finding(BaseModel):
+    # Fields loaded when performing deduplication (used by get_finding_models_for_deduplication
+    # and build_candidate_scope_queryset to restrict the SELECT to only what is needed).
+    # Covers the union of all deduplication algorithms so that a single queryset works
+    # regardless of which algorithm is in use.  Large text fields (description, mitigation,
+    # impact, references, …) are intentionally excluded.
+    DEDUPLICATION_FIELDS = [
+        "id",
+        # FK required for select_related("test") — must not be deferred
+        "test",
+        # Fields written by set_duplicate
+        "duplicate",
+        "active",
+        "verified",
+        "duplicate_finding",
+        # Guard checks in set_duplicate
+        "is_mitigated",
+        "mitigated",
+        "out_of_scope",
+        "false_p",
+        # Accessed by status() (debug logging only)
+        "under_review",
+        "risk_accepted",
+        # Used by hash-code and legacy algorithms for endpoint/location matching
+        "dynamic_finding",
+        "static_finding",
+        # Algorithm-specific matching fields
+        "hash_code",            # hash_code, uid_or_hash, legacy
+        "unique_id_from_tool",  # unique_id, uid_or_hash
+        "title",                # legacy
+        "cwe",                  # legacy
+        "file_path",            # legacy
+        "line",                 # legacy
+    ]
+
+    # Large text fields deferred in build_candidate_scope_queryset.  These are
+    # never accessed during deduplication or reimport candidate matching, so
+    # excluding them reduces the data loaded for every candidate finding.
+    DEDUPLICATION_DEFERRED_FIELDS = [
+        "description",
+        "mitigation",
+        "impact",
+        "steps_to_reproduce",
+        "severity_justification",
+        "references",
+        "url",
+        "cvssv3",
+        "cvssv4",
+    ]
+
     title = models.CharField(max_length=511,
                              verbose_name=_("Title"),
                              help_text=_("A short description of the flaw."))
@@ -2770,9 +2823,8 @@ class Finding(BaseModel):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         if settings.V3_FEATURE_LOCATIONS:
-            self.unsaved_locations: list[AbstractLocation] = []
+            self.unsaved_locations: list[UnsavedLocation] = []
         else:
             # TODO: Delete this after the move to Locations
             self.unsaved_endpoints = []
@@ -3086,8 +3138,10 @@ class Finding(BaseModel):
             if len(finding.unsaved_locations) > 0:
                 deduplicationLogger.debug("get_locations before the finding was saved")
                 # convert list of unsaved locations to the list of their canonical representation
+                from dojo.importers.location_manager import LocationManager  # noqa: PLC0415
+                unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
                 # deduplicate (usually done upon saving finding) and sort locations
-                locations = sorted({location.get_location_value() for location in finding.unsaved_locations})
+                locations = sorted({location.get_location_value() for location in unsaved_locations})
                 return "".join(locations)
             # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
             # In this case, before saving the finding, both static_finding and dynamic_finding are True
@@ -3097,9 +3151,11 @@ class Finding(BaseModel):
 
         def _get_saved_locations(finding) -> str:
             if finding.id is not None:
-                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(finding.locations.count()))
+                from dojo.url.models import URL  # noqa: PLC0415
+                url_locations = finding.locations.filter(location__location_type=URL.get_location_type())
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(url_locations.count()))
                 # convert list of locations to the list of their canonical representation
-                locations = sorted({location_ref.location.get_location_value() for location_ref in finding.locations.all()})
+                locations = sorted({location_ref.location.get_location_value() for location_ref in url_locations.all()})
                 # sort locations strings
                 return "".join(sorted(locations))
             return ""
@@ -4479,7 +4535,7 @@ class Cred_Mapping(models.Model):
 
 
 class Language_Type(models.Model):
-    language = models.CharField(max_length=100, null=False)
+    language = models.CharField(max_length=100, null=False, unique=True)
     color = models.CharField(max_length=7, null=True, blank=True, verbose_name=_("HTML color"))
 
     def __str__(self):

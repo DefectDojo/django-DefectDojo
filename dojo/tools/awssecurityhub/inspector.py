@@ -3,7 +3,8 @@ import datetime
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
+from dojo.utils import parse_cvss_data
 
 SEVERITY_MAP = {
     "INFORMATIONAL": "Info",
@@ -31,6 +32,7 @@ class Inspector:
         references = []
         unsaved_vulnerability_ids = []
         epss_score = finding.get("EpssScore")
+        cvss_data = {}
         description = f"This is an Inspector Finding\n{finding.get('Description', '')}" + "\n"
         description += f"**AWS Finding ARN:** {finding_id}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
@@ -52,6 +54,10 @@ class Inspector:
                     references.append(vendor_url)
             if vulnerability.get("EpssScore") is not None:
                 epss_score = vulnerability.get("EpssScore")
+            # Extract and validate CVSS vectors using the common parse_cvss_data helper
+            for cvss_entry in vulnerability.get("Cvss", []):
+                if not cvss_data and cvss_entry.get("BaseVector"):
+                    cvss_data = parse_cvss_data(cvss_entry.get("BaseVector"))
         if finding.get("ProductFields", {}).get("aws/inspector/FindingStatus", "ACTIVE") == "ACTIVE":
             mitigated = None
             is_Mitigated = False
@@ -72,7 +78,7 @@ class Inspector:
             component_name = resource.get("Type")
             host_value = f"{component_name}_{resource.get('Id')}".replace(":", "_").replace("/", "_")
             if settings.V3_FEATURE_LOCATIONS:
-                locations.append(URL(host=host_value))
+                locations.append(LocationData.url(host=host_value))
             else:
                 # TODO: Delete this after the move to Locations
                 locations.append(Endpoint(host=host_value))
@@ -120,6 +126,22 @@ class Inspector:
             result.unsaved_endpoints = locations
         if epss_score is not None:
             result.epss_score = epss_score
+        if cvss_data:
+            if cvss_data.get("cvssv3"):
+                result.cvssv3 = cvss_data["cvssv3"]
+            if cvss_data.get("cvssv4"):
+                result.cvssv4 = cvss_data["cvssv4"]
+        # Build severity justification from available CVSS data
+        severity_parts = []
+        if cvss_data.get("cvssv3"):
+            severity_parts.append(f"CVSS v3 vector: {cvss_data['cvssv3']}")
+        if cvss_data.get("cvssv4"):
+            severity_parts.append(f"CVSS v4 vector: {cvss_data['cvssv4']}")
+        severity_label = finding.get("Severity", {}).get("Label", "")
+        if severity_label:
+            severity_parts.append(f"AWS severity: {severity_label}")
+        if severity_parts:
+            result.severity_justification = "\n".join(severity_parts)
         # Add the unsaved vulnerability ids
         result.unsaved_vulnerability_ids = unsaved_vulnerability_ids
         return result

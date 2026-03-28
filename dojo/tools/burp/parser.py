@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +300,7 @@ def get_item(item_node, test):
     finding.unsaved_req_resp = unsaved_req_resp
     # manage endpoint/location
     if settings.V3_FEATURE_LOCATIONS:
-        finding.unsaved_locations = [URL.from_value(url_host)]
+        finding.unsaved_locations = [LocationData.url(url=url_host)]
     else:
         # TODO: Delete this after the move to Locations
         finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]

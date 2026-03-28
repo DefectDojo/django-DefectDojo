@@ -8,9 +8,51 @@ aliases:
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
-For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/changelog/os_upgrading/upgrading_guide/).
+For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
-## Feb 2025: v2.55
+## Mar 2026: v2.56
+
+### Mar 12, 2026: v2.56.1
+
+* **(Pro UI)** Finding Groups can now be filtered by computed status: resolved, active, or risk-accepted.
+* **(Users)** Filters selected on the Users List are now included when exporting to CSV, so your export reflects the current view.
+* **(Jira)** Basic auth failures with Jira are now surfaced as warnings, making it easier to diagnose connection issues.
+
+### Mar 5, 2026: v2.56.0
+
+* **(API)** Restricted Note Types are now accessible via the API.
+* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
+* **(SAML)** SAML settings now support optional group attributes, allowing configurations that don't provide group mappings to work without errors.
+* **(SMTP)** Fixed an issue where DefectDojo would attempt SMTP authentication even when no credentials were configured, which could cause email delivery failures.
+* **(Universal Parser)** The Universal Parser now falls back to `clevercsv` for non-standard or malformed CSV files, improving compatibility with edge-case scanner outputs.
+
+
+## Feb 2026: v2.55
+
+### Feb 26, 2026: v2.55.5
+
+* **(Rules Engine)** Rules Engine now automatically retries when encountering database lock contention or serialization conflicts, reducing the likelihood of a rule run failing due to temporary load on the system.
+
+### Feb 24, 2026: v2.55.4
+
+* **(Connectors)** Added Akamai API Security, JFrog Xray to Connectors.
+* **(Surveys)** Anonymous surveys: users can now access surveys without logging in when anonymous surveys are enabled.
+* **(Pro UI)** The Pro UI editor now uses Markdown-based editing for text fields.  This resolves issues with HTML-string encoding, especially when Findings were manually entered or edited.
+* **(Rules Engine)** Added **Set Mitigation Policy** action type: Rules can now assign a pre-configured Mitigation Policy to matching Findings.
+* **(Rules Engine)** Added **Add to Risk Acceptance** action type: Rules can now add matching Findings to an existing Risk Acceptance record, automatically setting them as risk-accepted and inactive, and handling Jira integration and endpoint statuses.
+
+### Feb 17, 2026: v2.55.3
+
+* **(Pro UI)** Added “Scheduled” status to Engagements to enhances the tracking and management of Engagements.
+
+### Feb 10, 2026: v2.55.2
+
+* **(Pro UI)** Enhanced Organization addition permissions with configuration checks.
+
+### Feb 4, 2026: v2.55.1
+
+* **(Pro UI)** Findings: Added support for Custom Fields; key-value pairs that can be added to Findings.
+* **(Pro UI)** Fixed an issue where a date filter could throw a 500 error.
 
 ### Feb 2, 2026: v2.55.0
 
@@ -72,22 +114,22 @@ No significant UX changes.
 
 ## Nov 2025: v2.52
 
-### Nov 24, 2025: v2.52.3
+#### Nov 24, 2025: v2.52.3
 
 * **(Pro UI)** Improved error messaging for failed Imports.
 * **(Pro UI)** Added Engagement Tags column to Finding lists
 
 
-### Nov 17, 2025: v2.52.2
+#### Nov 17, 2025: v2.52.2
 
 * No significant feature changes.
 
-### Nov 10, 2025: v2.52.1
+#### Nov 10, 2025: v2.52.1
 
 * **(Pro UI)** Finding view now shows all associated Endpoints, not just Active Endpoints
 
 
-### Nov 3, 2025: v2.52.0
+#### Nov 3, 2025: v2.52.0
 
 * **(Pro UI)** In-app Contact Support form now requires a valid email address in your user profile.
 * **(Pro UI)** You can now Add Files to Findings through the Pro UI directly from Finding Lists.
@@ -107,6 +149,7 @@ No significant UX changes.
 #### Oct 20, 2025: v2.51.2
 
 * **(Connectors)** Added Anchore Enterprise Connector.
+* **(Rules Engine)** Rules can now be scheduled to run automatically on a recurring or one-time basis.  From the Rules list, use the **⋮** menu on any rule to open the **Schedule Rule** form.
 
 
 #### Oct 14, 2025: v2.51.1
@@ -607,7 +650,7 @@ configuration fields.
 - **(API)**  It is now possible to prefetch a Finding with attached files via API.
 - **(Login)**  A new "Forgot Username" link has been added to the login form.  The link will navigate to a page which requests the user's email address. The username will be sent to that address if it exists.
 - **Risk Acceptances**  Notes are now added to Findings when they are removed from Risk Acceptances.
-- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](/triage_findings/findings_workflows/risk_acceptances/) for more details.
+- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](/triage_findings/findings_workflows/pro__risk_acceptance/) for more details.
 - **Tools**  Qualys HackerGuardian parser added.
 - **Tools**  Semgrep Parser updated with new severity mappings. HackerOne parser updated and now supports bug bounty reports.
 - **Tools**  fixed an issue where certain tools would not process asyncronously: Whitehat_Sentinel, SSLyze, SSLscan, Qualys_Webapp, Mend, Intsights, H1, and Blackduck.

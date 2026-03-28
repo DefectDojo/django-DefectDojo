@@ -8,7 +8,7 @@ from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
@@ -100,6 +100,14 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
 
     """
     location = get_object_or_404(Location, id=location_id)
+    if location.location_type != URL.get_location_type():
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Viewing this object is only available in the Pro UI.",
+            extra_tags="alert-danger",
+        )
+        raise Http404
     host = location.url.host
     locations = None
     metadata = None
@@ -559,26 +567,25 @@ def finding_location_bulk_update(request, finding_id):
     if request.method == "POST":
         # Get the list of endpoint IDs to update and the statuses to enable
         finding_locations_to_update = request.POST.getlist("endpoints_to_update")
-        status_list = FindingLocationStatus.values
-        enable = [item for item in status_list if item in list(request.POST.keys())]
+        # Get the status
+        status = request.POST.get("bulk_status")
+        if request.POST.get("remove_from_finding") and finding_locations_to_update:
+            # Remove the selected location-finding associations without deleting the locations themselves
+            LocationFindingReference.objects.filter(
+                location__in=finding_locations_to_update, finding__id=finding_id,
+            ).delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Selected endpoints have been removed from this finding.",
+                extra_tags="alert-success",
+            )
         # Check that endpoints and statuses are selected before proceeding
-        if finding_locations_to_update and len(enable) > 0:
+        elif finding_locations_to_update and status in FindingLocationStatus:
             # Iterate over selected locations and update their finding location references
-            for location in Location.objects.filter(id__in=finding_locations_to_update):
-                finding_location = LocationFindingReference.objects.get(location=location, finding__id=finding_id)
-                for status in status_list:
-                    # Set the status attribute based on whether it is enabled in the POST request
-                    if status in enable:
-                        # Enable this status
-                        finding_location.__setattr__(status, True)  # noqa: PLC2801
-                        # If the status is 'Mitigated', record the auditor and audit time
-                        if status == FindingLocationStatus.Mitigated:
-                            finding_location.auditor = request.user
-                            finding_location.audit_time = timezone.now()
-                    else:
-                        # Disable this status
-                        finding_location.__setattr__(status, False)  # noqa: PLC2801
-                finding_location.save()
+            for location_ref in LocationFindingReference.objects.filter(location__in=finding_locations_to_update, finding__id=finding_id):
+                # Set the status
+                location_ref.set_status(FindingLocationStatus(status), request.user, timezone.now())
             # Add a success message after bulk editing endpoints
             messages.add_message(
                 request,

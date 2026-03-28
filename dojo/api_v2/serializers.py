@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
@@ -1139,6 +1140,13 @@ class EngagementToNotesSerializer(serializers.Serializer):
     notes = NoteSerializer(many=True)
 
 
+class RiskAcceptanceToNotesSerializer(serializers.Serializer):
+    risk_acceptance_id = serializers.PrimaryKeyRelatedField(
+        queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
+    )
+    notes = NoteSerializer(many=True)
+
+
 class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), many=False, allow_null=True,
@@ -1264,6 +1272,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
 
 class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    active_finding_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Endpoint
@@ -1420,6 +1429,12 @@ class JIRAProjectSerializer(serializers.ModelSerializer):
         if (engagement and product) or (not engagement and not product):
             msg = "Either engagement or product has to be set."
             raise serializers.ValidationError(msg)
+
+        if "custom_fields" in data and isinstance(data["custom_fields"], str):
+            try:
+                data["custom_fields"] = json.loads(data["custom_fields"])
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({"custom_fields": f"Invalid JSON: {e}"}) from e
 
         return data
 
@@ -1760,9 +1775,7 @@ class FindingSerializer(serializers.ModelSerializer):
     mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
-    accepted_risks = RiskAcceptanceSerializer(
-        many=True, read_only=True, source="risk_acceptance_set",
-    )
+    accepted_risks = serializers.SerializerMethodField()
     push_to_jira = serializers.BooleanField(default=False)
     found_by = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all(), many=True,
@@ -1805,6 +1818,17 @@ class FindingSerializer(serializers.ModelSerializer):
             self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
                 many=True, required=False, queryset=Endpoint.objects.all(),
             )
+
+    @extend_schema_field(RiskAcceptanceSerializer(many=True))
+    def get_accepted_risks(self, obj):
+        request = self.context.get("request")
+        if request is None:
+            return []
+        if not user_has_permission(request.user, obj, Permissions.Risk_Acceptance):
+            return []
+        return RiskAcceptanceSerializer(
+            obj.risk_acceptance_set.all(), many=True,
+        ).data
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_creation(self, obj):
@@ -2711,8 +2735,11 @@ class ReImportScanSerializer(CommonImportScanSerializer):
                 # Attempt to create an engagement
                 logger.debug("reimport for non-existing test, using import to create new test")
                 context["engagement"] = auto_create_manager.get_or_create_engagement(**context)
+                # Do not close old findings when creating a brand new test: there are no
+                # existing findings to compare against, and close_old_findings would
+                # incorrectly close findings from other tests in the same scope.
                 context["test"], _, _, _, _, _, _ = self.get_importer(
-                    **context,
+                    **{**context, "close_old_findings": False},
                 ).process_scan(
                     context.pop("scan", None),
                 )
@@ -2854,32 +2881,51 @@ class ImportLanguagesSerializer(serializers.Serializer):
                 deserialized = json.loads(data)
         except Exception:
             msg = "Invalid format"
-            raise Exception(msg)
+            raise serializers.ValidationError(msg)
 
-        Languages.objects.filter(product=product).delete()
-
-        for name in deserialized:
-            if name not in {"header", "SUM"}:
-                element = deserialized[name]
-
-                try:
-                    (
-                        language_type,
-                        _created,
-                    ) = Language_Type.objects.get_or_create(language=name)
-                except Language_Type.MultipleObjectsReturned:
-                    language_type = Language_Type.objects.filter(
-                        language=name,
-                    ).first()
-
-                language = Languages()
-                language.product = product
-                language.language = language_type
-                language.files = element.get("nFiles", 0)
-                language.blank = element.get("blank", 0)
-                language.comment = element.get("comment", 0)
-                language.code = element.get("code", 0)
-                language.save()
+        # Filter out ignored keys and deduplicate
+        language_names = list(dict.fromkeys(
+            name for name in deserialized if name not in {"header", "SUM"}
+        ))
+        # Ensure any new Language_Type records exist (ignore conflicts from
+        # concurrent requests or already-existing types)
+        Language_Type.objects.bulk_create(
+            [Language_Type(language=name) for name in language_names],
+            ignore_conflicts=True,
+        )
+        # Single query to fetch all Language_Type objects we need (indexed lookup)
+        language_types = {
+            lt.language: lt
+            for lt in Language_Type.objects.filter(language__in=language_names)
+        }
+        # Prepare Languages objects for upsert
+        languages_to_upsert = [
+            Languages(
+                product=product,
+                language=language_types[name],
+                files=deserialized[name].get("nFiles", 0),
+                blank=deserialized[name].get("blank", 0),
+                comment=deserialized[name].get("comment", 0),
+                code=deserialized[name].get("code", 0),
+            )
+            for name in language_names
+        ]
+        # Upsert Languages and remove stale ones atomically
+        try:
+            with transaction.atomic():
+                Languages.objects.bulk_create(
+                    languages_to_upsert,
+                    update_conflicts=True,
+                    unique_fields=["language", "product"],
+                    update_fields=["files", "blank", "comment", "code"],
+                )
+                # Remove languages no longer present in the file
+                Languages.objects.filter(product=product).exclude(
+                    language__in=language_types.values(),
+                ).delete()
+        except IntegrityError as e:
+            msg = f"Failed to import languages due to a data integrity issue: {e}"
+            raise serializers.ValidationError(msg)
 
     def validate(self, data):
         if is_scan_file_too_large(data["file"]):
@@ -2974,6 +3020,11 @@ class FindingCloseSerializer(serializers.ModelSerializer):
                 })
 
         return data
+
+
+class FindingVerifySerializer(serializers.Serializer):
+    note = serializers.CharField(required=False, allow_blank=True)
+    note_type = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Note_Type.objects.all())
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):

@@ -26,11 +26,14 @@ But everyone needs a starting point, and that's where Connectors come in. Connec
 
 We currently support Connectors for the following tools, with more on the way:
 
+* **Akamai API Security**
 * **Anchore**
 * **AWS Security Hub**
 * **BurpSuite**
 * **Checkmarx ONE**
-* **Dependency\-Track**
+* **Dependency-Track**
+* **IriusRisk**
+* **JFrog Xray**
 * **Probely**
 * **Semgrep**
 * **SonarQube**

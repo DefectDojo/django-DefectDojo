@@ -619,6 +619,16 @@ The left side of the ‘=’ sign represents the attribute you want to map from 
 
 * **Enable SAML Debugging** will log more detailed SAML output for debugging purposes.
 
+#### SAML Group Mapping
+
+DefectDojo can use the SAML assertion to automatically assign users to [User Groups](../create_user_group/).  Groups in DefectDojo can assign Permissions to all of their Group members, so using Group Mapping allows you to assign those permissions in bulk.  This is the only way to set permissions via SAML.
+
+The **Group Name Attribute** field specifies which attribute in the SAML assertion contains the user's group memberships. When a user logs in, DefectDojo reads this attribute and assigns the user to any matching groups. To limit which groups from the assertion are considered, use the **Group Limiter Regex Expression** field.
+
+If no Group with a matching name exists, DefectDojo will automatically create one. Note that this Group will not have any permissions at the time of creation, but those can be configured later by a DefectDojo user with appropriate permissions.
+
+To activate group mapping, check the **Enable Group Mapping** checkbox at the bottom of the form.
+
 ### Open-Source SAML
 
 1.  Navigate to your SAML IdP and find your metadata.

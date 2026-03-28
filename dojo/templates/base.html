@@ -670,6 +670,11 @@
                     {{ announcement.message|bleach_with_a_tags }}
                     </div>
                 {% endif %}
+                {% for banner in additional_banners %}
+                    <div role="alert" class="announcement-banner alert alert-{{ banner.style }} show">
+                        {{ banner.message }} <a href="{{ banner.url }}">{{ banner.link_text }}</a>
+                    </div>
+                {% endfor %}
                 <div class="container-fluid">
                     <!-- start of tabs -->
                     {% block tab_bar %}
