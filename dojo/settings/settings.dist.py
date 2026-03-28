@@ -299,6 +299,10 @@ env = environ.FileAwareEnv(
     DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE=(int, 1000),
     # Batch size for import/reimport deduplication processing
     DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
+    # Batch size for Redis pipeline when purging the Celery queue by task name
+    DD_CELERY_QUEUE_PURGE_BATCH_SIZE=(int, 1000),
+    # Maximum number of tasks to purge in a single per-task purge action
+    DD_CELERY_QUEUE_PURGE_MAX_TASKS=(int, 10000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Batch size for flushing audit logs per task run
@@ -1797,6 +1801,8 @@ DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
 IMPORT_REIMPORT_MATCH_BATCH_SIZE = env("DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE")
 IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_BATCH_SIZE = env("DD_CELERY_QUEUE_PURGE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_MAX_TASKS = env("DD_CELERY_QUEUE_PURGE_MAX_TASKS")
 
 # ------------------------------------------------------------------------------
 # JIRA

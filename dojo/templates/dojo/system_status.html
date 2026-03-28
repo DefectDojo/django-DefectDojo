@@ -51,7 +51,7 @@
                         <strong>Note:</strong> Purging the queue removes pending tasks that have not yet been executed,
                         including deduplication tasks. If deduplication tasks were in the queue, you may need to
                         re-run deduplication manually using the <code>dedupe</code> management command:
-                        <code>python manage.py dedupe</code>
+                        <code>python manage.py dedupe --dedupe_only</code>
                     </p>
                 </div>
                 <div class="panel-body text-left">
@@ -72,6 +72,10 @@
                         </table>
                         <p class="text-muted" style="font-size: 0.8em; margin-top: 4px;">
                             Position 1 = oldest task in queue. ETA shown in parentheses when set.
+                        </p>
+                        <p class="text-muted" style="font-size: 0.8em; margin-top: 4px;">
+                            Per-task purge is capped at <strong>10,000 tasks</strong> per action and processed in batches of <strong>1,000</strong>.
+                            Configure via <code>DD_CELERY_QUEUE_PURGE_MAX_TASKS</code> and <code>DD_CELERY_QUEUE_PURGE_BATCH_SIZE</code>.
                         </p>
                     </div>
                 </div>
@@ -178,6 +182,12 @@
                 });
             }
 
+            function loadQueueDetails() {
+                $.get(detailsUrl).done(renderQueueDetails).fail(function() {
+                    alert('Failed to load queue details. Check server logs.');
+                });
+            }
+
             var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
             function formatExpiry(isoStr) {
                 if (!isoStr) return '—';
@@ -235,7 +245,12 @@
             $(function() {
                 loadCeleryStatus();
 
-                $('#refresh-status-btn').on('click', loadCeleryStatus);
+                $('#refresh-status-btn').on('click', function() {
+                    loadCeleryStatus();
+                    if ($('#queue-details-container').is(':visible')) {
+                        loadQueueDetails();
+                    }
+                });
 
                 $('#purge-queue-btn').on('click', function() {
                     if (!confirm('Purge all pending tasks from the queue? This cannot be undone.')) return;
@@ -262,12 +277,9 @@
                         contentType: 'application/json',
                         data: JSON.stringify({task_name: taskName}),
                         headers: {'X-CSRFToken': '{{ csrf_token }}'},
-                    }).done(function(data) {
-                        btn.closest('tr').fadeOut(300, function() { $(this).remove(); });
-                        var remaining = parseInt($('#celery-queue-msg').text()) - data.purged;
-                        if (!isNaN(remaining)) {
-                            $('#celery-queue-msg').text(remaining + ' task(s) waiting to be processed.');
-                        }
+                    }).done(function() {
+                        loadCeleryStatus();
+                        loadQueueDetails();
                     }).fail(function() {
                         alert('Purge failed. Check server logs.');
                         btn.prop('disabled', false).text('Purge');
@@ -285,6 +297,7 @@
                         btn.prop('disabled', false).text('View Details');
                     });
                 });
+
             });
         })();
     </script>

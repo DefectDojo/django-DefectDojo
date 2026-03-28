@@ -21,6 +21,7 @@ from pathlib import Path
 import bleach
 import crum
 import cvss
+import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
 from auditlog.models import LogEntry
@@ -1195,27 +1196,37 @@ def purge_celery_queue():
         return channel.queue_purge(queue="celery")
 
 
+_PURGE_PIPELINE_BATCH_SIZE = 1000  # fallback; prefer DD_CELERY_QUEUE_PURGE_BATCH_SIZE
+_PURGE_MAX_TASKS = 10000  # fallback; prefer DD_CELERY_QUEUE_PURGE_MAX_TASKS
+
+
 def purge_celery_queue_by_task_name(task_name):
     """Remove all queued tasks with the given task name. Returns count removed, or None on error."""
-    removed = 0
     try:
-        with Connection(settings.CELERY_BROKER_URL) as conn, conn.channel() as channel:
-            client = channel.client
-            messages_raw = client.lrange("celery", 0, -1)
+        client = redis_lib.from_url(settings.CELERY_BROKER_URL)
+        matching = [
+            msg_raw
+            for msg_raw in client.lrange("celery", 0, -1)
+            if json.loads(msg_raw).get("headers", {}).get("task") == task_name
+        ]
+        purge_max_tasks = getattr(settings, "CELERY_QUEUE_PURGE_MAX_TASKS", _PURGE_MAX_TASKS)
+        purge_batch_size = getattr(settings, "CELERY_QUEUE_PURGE_BATCH_SIZE", _PURGE_PIPELINE_BATCH_SIZE)
+        if len(matching) > purge_max_tasks:
+            logger.warning("Capping purge of '%s' to %d tasks (%d found)", task_name, purge_max_tasks, len(matching))
+            matching = matching[:purge_max_tasks]
+        logger.info("Purging %d queued tasks for '%s'", len(matching), task_name)
+        for i in range(0, len(matching), purge_batch_size):
+            batch = matching[i:i + purge_batch_size]
+            logger.debug("Purging batch %d-%d of %d", i + 1, i + len(batch), len(matching))
             pipe = client.pipeline()
-            for msg_raw in messages_raw:
-                try:
-                    msg = json.loads(msg_raw)
-                    if msg.get("headers", {}).get("task") == task_name:
-                        pipe.lrem("celery", 1, msg_raw)
-                        removed += 1
-                except Exception:
-                    logger.exception("Failed to parse celery message during task-name purge")
-                    continue
+            for msg_raw in batch:
+                pipe.lrem("celery", 1, msg_raw)
             pipe.execute()
+        logger.info("Purged %d queued tasks for '%s'", len(matching), task_name)
+        return len(matching)
     except Exception:
+        logger.exception("Failed to purge celery queue by task name")
         return None
-    return removed
 
 
 def get_celery_queue_details():
