@@ -6,7 +6,6 @@
     <div class="row">
         <h3>Celery Status</h3>
         <br>
-        {% if show_celery_status %}
         <div id="celery-status-panel" class="col-md-5">
             <div class="panel panel-default">
                 <div class="panel-heading">
@@ -104,13 +103,11 @@
                 </div>
             </div>
         </div>
-        {% endif %}
     </div>
 {% endblock content %}
 
 {% block postscript %}
     {{ block.super }}
-    {% if show_celery_status %}
     <script>
         (function() {
             var purgeUrl = "{% url 'celery-queue-purge' %}";
@@ -305,5 +302,4 @@
             });
         })();
     </script>
-    {% endif %}
 {% endblock %}
