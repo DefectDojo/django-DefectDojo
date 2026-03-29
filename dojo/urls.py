@@ -15,10 +15,7 @@ from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
-    CeleryQueueDetailsView,
-    CeleryQueuePurgeView,
-    CeleryQueueTaskPurgeView,
-    CeleryStatusView,
+    CeleryViewSet,
     ConfigurationPermissionViewSet,
     CredentialsMappingViewSet,
     CredentialsViewSet,
@@ -198,6 +195,7 @@ if settings.V3_FEATURE_LOCATIONS:
 else:
     v2_api.register(r"endpoints", EndPointViewSet, basename="endpoint")
     v2_api.register(r"endpoint_status", EndpointStatusViewSet, basename="endpoint_status")
+v2_api.register(r"celery", CeleryViewSet, basename="celery")
 # V3
 add_asset_urls(v2_api)
 add_organization_urls(v2_api)
@@ -246,10 +244,6 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
-    re_path(r"^{}api/v2/celery/status/$".format(get_system_setting("url_prefix")), CeleryStatusView.as_view(), name="celery_status_api"),
-    re_path(r"^{}api/v2/celery/queue/purge/$".format(get_system_setting("url_prefix")), CeleryQueuePurgeView.as_view(), name="celery_queue_purge_api"),
-    re_path(r"^{}api/v2/celery/queue/details/$".format(get_system_setting("url_prefix")), CeleryQueueDetailsView.as_view(), name="celery_queue_details_api"),
-    re_path(r"^{}api/v2/celery/queue/task/purge/$".format(get_system_setting("url_prefix")), CeleryQueueTaskPurgeView.as_view(), name="celery_queue_task_purge_api"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):

@@ -120,12 +120,12 @@ class SystemSettingsView(View):
         return render(request, self.get_template(), context)
 
 
-class SystemStatusView(View):
+class CeleryStatusView(View):
     def get(
         self,
         request: HttpRequest,
     ) -> HttpResponse:
         if not request.user.is_superuser:
             raise PermissionDenied
-        add_breadcrumb(title="System status", top_level=False, request=request)
-        return render(request, "dojo/system_status.html")
+        add_breadcrumb(title="Celery status", top_level=False, request=request)
+        return render(request, "dojo/celery_status.html")

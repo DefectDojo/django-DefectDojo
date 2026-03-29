@@ -35,7 +35,6 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 import dojo.finding.helper as finding_helper
 import dojo.jira_link.helper as jira_helper
@@ -3266,20 +3265,21 @@ class SystemSettingsViewSet(
         return System_Settings.objects.all().order_by("id")
 
 
-@extend_schema(
-    responses=serializers.CeleryStatusSerializer,
-    summary="Get Celery worker and queue status",
-    description=(
-        "Returns Celery worker liveness, pending queue length, and the active task "
-        "timeout/expiry configuration. Uses the Celery control channel (pidbox) for "
-        "worker status so it works correctly even when the task queue is clogged."
-    ),
-)
-class CeleryStatusView(APIView):
+class CeleryViewSet(viewsets.ViewSet):
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     queryset = System_Settings.objects.none()
 
-    def get(self, request):
+    @extend_schema(
+        responses=serializers.CeleryStatusSerializer,
+        summary="Get Celery worker and queue status",
+        description=(
+            "Returns Celery worker liveness, pending queue length, and the active task "
+            "timeout/expiry configuration. Uses the Celery control channel (pidbox) for "
+            "worker status so it works correctly even when the task queue is clogged."
+        ),
+    )
+    @action(detail=False, methods=["get"], url_path="status")
+    def status(self, request):
         queue_length = get_celery_queue_length()
         data = {
             "worker_status": get_celery_worker_status(),
@@ -3291,56 +3291,44 @@ class CeleryStatusView(APIView):
         }
         return Response(serializers.CeleryStatusSerializer(data).data)
 
-
-@extend_schema(
-    request=None,
-    responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
-    summary="Purge all pending Celery tasks from the queue",
-    description=(
-        "Removes all pending tasks from the default Celery queue. Tasks already being "
-        "executed by workers are not affected. Note: if deduplication tasks were queued, "
-        "you may need to re-run deduplication manually via `python manage.py dedupe`."
-    ),
-)
-class CeleryQueuePurgeView(APIView):
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-    queryset = System_Settings.objects.none()
-
-    def post(self, request):
+    @extend_schema(
+        request=None,
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all pending Celery tasks from the queue",
+        description=(
+            "Removes all pending tasks from the default Celery queue. Tasks already being "
+            "executed by workers are not affected. Note: if deduplication tasks were queued, "
+            "you may need to re-run deduplication manually via `python manage.py dedupe`."
+        ),
+    )
+    @action(detail=False, methods=["post"], url_path="queue/purge")
+    def queue_purge(self, request):
         purged = purge_celery_queue()
         return Response({"purged": purged})
 
-
-@extend_schema(
-    responses=serializers.CeleryQueueTaskDetailSerializer(many=True),
-    summary="Get per-task breakdown of the Celery queue",
-    description=(
-        "Scans every message in the queue (O(N)) and returns task name, count, and "
-        "oldest/newest queue positions. May be slow for large queues."
-    ),
-)
-class CeleryQueueDetailsView(APIView):
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-    queryset = System_Settings.objects.none()
-
-    def get(self, request):
+    @extend_schema(
+        responses=serializers.CeleryQueueTaskDetailSerializer(many=True),
+        summary="Get per-task breakdown of the Celery queue",
+        description=(
+            "Scans every message in the queue (O(N)) and returns task name, count, and "
+            "oldest/newest queue positions. May be slow for large queues."
+        ),
+    )
+    @action(detail=False, methods=["get"], url_path="queue/details")
+    def queue_details(self, request):
         details = get_celery_queue_details()
         if details is None:
             return Response({"error": "Unable to read queue details."}, status=503)
         return Response(serializers.CeleryQueueTaskDetailSerializer(details, many=True).data)
 
-
-@extend_schema(
-    request={"application/json": {"type": "object", "properties": {"task_name": {"type": "string"}}, "required": ["task_name"]}},
-    responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
-    summary="Purge all queued tasks with a given task name",
-    description="Removes all pending tasks matching the given task name from the default Celery queue.",
-)
-class CeleryQueueTaskPurgeView(APIView):
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-    queryset = System_Settings.objects.none()
-
-    def post(self, request):
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"task_name": {"type": "string"}}, "required": ["task_name"]}},
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all queued tasks with a given task name",
+        description="Removes all pending tasks matching the given task name from the default Celery queue.",
+    )
+    @action(detail=False, methods=["post"], url_path="queue/task/purge")
+    def queue_task_purge(self, request):
         task_name = request.data.get("task_name", "").strip()
         if not task_name:
             return Response({"error": "task_name is required."}, status=400)
