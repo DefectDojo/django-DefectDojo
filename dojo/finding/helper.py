@@ -21,6 +21,8 @@ from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
     do_dedupe_finding_task_internal,
+    do_false_positive_history,
+    do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
@@ -46,7 +48,6 @@ from dojo.url.models import URL
 from dojo.utils import (
     calculate_grade,
     close_external_issue,
-    do_false_positive_history,
     get_current_user,
     get_object_or_none,
     mass_model_updater,
@@ -501,8 +502,7 @@ def post_process_findings_batch(
         if system_settings.enable_deduplication:
             deduplicationLogger.warning("skipping false positive history because deduplication is also enabled")
         else:
-            for finding in findings:
-                do_false_positive_history(finding, *args, **kwargs)
+            do_false_positive_history_batch(findings)
 
     # Non-status changing tasks
     if issue_updater_option:
@@ -1014,6 +1014,54 @@ def normalize_datetime(value):
     return value
 
 
+def _create_note_if_provided(
+    finding,
+    note_entry,
+    *,
+    user=None,
+    note_type=None,
+    note_date=None,
+):
+    """
+    Create a note for the finding when content is provided. Returns the note or None.
+    Note author defaults to finding.last_reviewed_by
+    """
+    if not note_entry:
+        return None
+
+    new_note = Notes.objects.create(
+        entry=note_entry,
+        author=user or finding.last_reviewed_by,
+        note_type=note_type,
+        date=note_date,
+    )
+    finding.notes.add(new_note)
+    return new_note
+
+
+def _save_finding_with_jira_sync(finding, *, new_note=None):
+    """Persist finding and apply JIRA sync behavior used by finding status actions."""
+    push_to_jira = False
+    finding_in_group = finding.has_finding_group
+    jira_issue_exists = finding.has_jira_issue or (
+        finding.finding_group and finding.finding_group.has_jira_issue
+    )
+    jira_instance = jira_helper.get_jira_instance(finding)
+    jira_project = jira_helper.get_jira_project(finding)
+
+    if jira_issue_exists:
+        push_to_jira = (
+            jira_helper.is_push_all_issues(finding)
+            or (jira_instance and jira_instance.finding_jira_sync)
+        )
+        if new_note and (getattr(jira_project, "push_notes", False) or push_to_jira) and not finding_in_group:
+            jira_helper.add_comment(finding, new_note, force_push=True)
+
+    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
+    if push_to_jira and finding_in_group:
+        jira_helper.push_to_jira(finding.finding_group)
+
+
 def close_finding(
     *,
     finding,
@@ -1048,15 +1096,12 @@ def close_finding(
     finding.last_reviewed_by = user
 
     # Create note if provided
-    new_note = None
-    if note_entry:
-        new_note = Notes.objects.create(
-            entry=note_entry,
-            author=user,
-            note_type=note_type,
-            date=mitigated_date,
-        )
-        finding.notes.add(new_note)
+    new_note = _create_note_if_provided(
+        finding,
+        note_entry,
+        note_type=note_type,
+        note_date=mitigated_date,
+    )
 
     if settings.V3_FEATURE_LOCATIONS:
         # Related locations
@@ -1078,26 +1123,7 @@ def close_finding(
     # External issues (best effort)
     close_external_issue(finding.id, "Closed by defectdojo", "github")
 
-    # JIRA sync
-    push_to_jira = False
-    finding_in_group = finding.has_finding_group
-    jira_issue_exists = finding.has_jira_issue or (
-        finding.finding_group and finding.finding_group.has_jira_issue
-    )
-    jira_instance = jira_helper.get_jira_instance(finding)
-    jira_project = jira_helper.get_jira_project(finding)
-    if jira_issue_exists:
-        push_to_jira = (
-            jira_helper.is_push_all_issues(finding)
-            or (jira_instance and jira_instance.finding_jira_sync)
-        )
-        if new_note and (getattr(jira_project, "push_notes", False) or push_to_jira) and not finding_in_group:
-            jira_helper.add_comment(finding, new_note, force_push=True)
-
-    # Persist and push JIRA if applicable
-    finding.save(push_to_jira=(push_to_jira and not finding_in_group))
-    if push_to_jira and finding_in_group:
-        jira_helper.push_to_jira(finding.finding_group)
+    _save_finding_with_jira_sync(finding, new_note=new_note)
 
     # Notification
     create_notification(
@@ -1107,3 +1133,28 @@ def close_finding(
         description=f'The finding "{finding.title}" was closed by {user}',
         url=reverse("view_finding", args=(finding.id,)),
     )
+
+
+def verify_finding(
+    *,
+    finding,
+    user,
+    note_entry=None,
+    note_type=None,
+) -> None:
+    """Shared verify logic used by UI and API."""
+    verification_time = now()
+
+    finding.verified = True
+    finding.last_reviewed = verification_time
+    finding.last_reviewed_by = user
+    finding.last_status_update = verification_time
+
+    new_note = _create_note_if_provided(
+        finding,
+        note_entry,
+        note_type=note_type,
+        note_date=verification_time,
+    )
+
+    _save_finding_with_jira_sync(finding, new_note=new_note)
