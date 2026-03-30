@@ -122,23 +122,21 @@ class EndpointManager:
         self._statuses_to_create.append((finding, key))
 
     @staticmethod
-    def get_non_special_endpoint_statuses(
-        finding: Finding,
-    ) -> list[Endpoint_Status]:
+    def get_non_special_endpoint_statuses(finding: Finding) -> list[Endpoint_Status]:
         """
-        Return the non-special (not false_positive, out_of_scope, or risk_accepted) endpoint
-        statuses for a finding.  Uses the prefetched ``status_finding_non_special`` attribute
-        when available (set by ``build_candidate_scope_queryset`` with ``mode="reimport"``),
-        and falls back to a database query otherwise — e.g. when the finding was created
-        during the same reimport batch and therefore never went through the prefetch queryset.
+        Return endpoint statuses that are not false_positive, out_of_scope, or risk_accepted.
+
+        Uses finding.status_finding.all() which is served from the prefetch cache when the
+        finding was loaded through build_candidate_scope_queryset, and falls back to a DB
+        query otherwise (e.g. for findings created during the same reimport batch).
+
+        This might be ineffecient if lots of internal duplicates are in the report.
+        But this should be limited as most parsers dedupe during parsing and merge the endpoints.
         """
-        if hasattr(finding, "status_finding_non_special"):
-            return finding.status_finding_non_special
-        return list(
-            finding.status_finding.exclude(
-                Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
-            ).select_related("endpoint"),
-        )
+        return [
+            eps for eps in finding.status_finding.all()
+            if not eps.false_positive and not eps.out_of_scope and not eps.risk_accepted
+        ]
 
     def update_endpoint_status(
         self,
