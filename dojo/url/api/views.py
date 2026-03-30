@@ -36,3 +36,6 @@ class URLViewSet(PrefetchDojoModelViewSet):
         return URL.objects.annotate(
             active_findings=Coalesce(active_finding_subquery, Value(0)),
         )
+
+    def perform_destroy(self, instance):
+        instance.location.delete()
