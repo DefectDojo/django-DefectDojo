@@ -148,6 +148,12 @@ class EndpointManager:
 
         The actual bulk_update happens in persist().
         """
+        # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
+        # So we only need to mitigate endpoints that are no longer present
+        # status_finding_non_special is prefetched by build_candidate_scope_queryset with the
+        # special-status exclusion and endpoint select_related already applied at the DB level.
+        # Falls back to a DB query when the finding was not loaded through that queryset
+        # (e.g. a finding created during the same reimport batch).
         existing_finding_endpoint_status_list = self.get_non_special_endpoint_statuses(existing_finding)
         new_finding_endpoints_list = new_finding.unsaved_endpoints
         if new_finding.is_mitigated:
