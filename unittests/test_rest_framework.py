@@ -1612,6 +1612,19 @@ class URLTest(BaseClass.BaseClassTest):
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
+    def test_delete_removes_location(self):
+        """Verify that deleting a URL via the API also deletes the associated Location."""
+        url_obj = URL.objects.get(pk=self.delete_id)
+        location_id = url_obj.location_id
+        self.assertTrue(Location.objects.filter(pk=location_id).exists())
+
+        relative_url = f"{self.url}{location_id}/"
+        response = self.client.delete(relative_url)
+        self.assertEqual(204, response.status_code, response.content[:1000])
+
+        self.assertFalse(Location.objects.filter(pk=location_id).exists())
+        self.assertFalse(URL.objects.filter(pk=self.delete_id).exists())
+
 
 @versioned_fixtures
 class EngagementTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
