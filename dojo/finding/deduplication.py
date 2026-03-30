@@ -329,22 +329,27 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
             )
         queryset = Finding.objects.filter(scope_q)
 
-    # Base prefetches for both modes
-    prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
+    if settings.V3_FEATURE_LOCATIONS:
+        prefetch_list = ["locations__location__url", "vulnerability_id_set", "found_by"]
+    else:
+        # TODO: Delete this after the move to Locations
+        # Base prefetches for both modes
+        prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
 
-    # Additional prefetches for reimport mode: fetch only non-special endpoint statuses with their
-    # endpoint joined in, so endpoint_manager can read status_finding_non_special directly without
-    # any extra DB queries
-    if mode == "reimport":
-        prefetch_list.append(
-            Prefetch(
-                "status_finding",
-                queryset=Endpoint_Status.objects.exclude(
-                    Q(false_positive=True) | Q(out_of_scope=True) | Q(risk_accepted=True),
-                ).select_related("endpoint"),
-                to_attr="status_finding_non_special",
-            ),
-        )
+        # Prefetch all endpoint statuses with their endpoint for reimport mode.
+        # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
+        # is done in Python by EndpointManager.get_non_special_endpoint_statuses().
+        # We avoid using to_attr here because findings created during the same reimport
+        # batch (via add_new_finding_to_candidates) are never loaded through this queryset
+        # and would lack the to_attr, causing an AttributeError.
+        # See: https://github.com/DefectDojo/django-DefectDojo/pull/14569
+        if mode == "reimport":
+            prefetch_list.append(
+                Prefetch(
+                    "status_finding",
+                    queryset=Endpoint_Status.objects.select_related("endpoint"),
+                ),
+            )
 
     return (
         queryset
@@ -697,24 +702,26 @@ def _flush_duplicate_changes(modified_new_findings):
     Persist duplicate field changes collected during a batch deduplication run.
 
     Bulk-updates all modified new findings in one round-trip instead of one
-    save() call per finding.  Uses bulk_update (no signals) which is consistent
-    with the original code that called super(Finding, ...).save(skip_validation=True),
-    bypassing Finding.save() in both cases.
+    save() call per finding.  Uses bulk_update to bypass Django signals.
+
+    Returns the list of modified findings so callers can perform any follow-up
+    processing (e.g. triggering prioritization) on the affected findings.
     """
     if modified_new_findings:
         Finding.objects.bulk_update(
             modified_new_findings,
             ["duplicate", "active", "verified", "duplicate_finding"],
         )
+    return modified_new_findings
 
 
 def _dedupe_batch_hash_code(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_hash = find_candidates_for_deduplication_hash(test, findings)
     if not candidates_by_hash:
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_HASH_CODE")
@@ -724,16 +731,16 @@ def _dedupe_batch_hash_code(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_unique_id(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_uid = find_candidates_for_deduplication_unique_id(test, findings)
     if not candidates_by_uid:
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL")
@@ -745,17 +752,17 @@ def _dedupe_batch_unique_id(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(f"Exception when deduplicating finding {new_finding.id} against candidate {match.id}: {e!s}")
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_uid_or_hash(findings):
     if not findings:
-        return
+        return []
 
     test = findings[0].test
     candidates_by_uid, existing_by_hash = find_candidates_for_deduplication_uid_or_hash(test, findings)
     if not (candidates_by_uid or existing_by_hash):
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE")
@@ -768,16 +775,16 @@ def _dedupe_batch_uid_or_hash(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def _dedupe_batch_legacy(findings):
     if not findings:
-        return
+        return []
     test = findings[0].test
     candidates_by_title, candidates_by_cwe = find_candidates_for_deduplication_legacy(test, findings)
     if not (candidates_by_title or candidates_by_cwe):
-        return
+        return []
     modified_new_findings = []
     for new_finding in findings:
         deduplicationLogger.debug(f"deduplication start for finding {new_finding.id} with DEDUPE_ALGO_LEGACY")
@@ -787,7 +794,7 @@ def _dedupe_batch_legacy(findings):
                 break
             except Exception as e:
                 deduplicationLogger.debug(str(e))
-    _flush_duplicate_changes(modified_new_findings)
+    return _flush_duplicate_changes(modified_new_findings)
 
 
 def dedupe_batch_of_findings(findings, *args, **kwargs):
@@ -800,7 +807,7 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
 
     if not findings:
         logger.debug("dedupe_batch_of_findings called with no findings")
-        return None
+        return []
 
     enabled = System_Settings.objects.get().enable_deduplication
 
@@ -813,19 +820,17 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
 
         if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_HASH_CODE - {len(findings)} findings")
-            _dedupe_batch_hash_code(findings)
-        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
+            return _dedupe_batch_hash_code(findings)
+        if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL - {len(findings)} findings")
-            _dedupe_batch_unique_id(findings)
-        elif dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
+            return _dedupe_batch_unique_id(findings)
+        if dedup_alg == settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE:
             logger.debug(f"deduplicating finding batch with DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE - {len(findings)} findings")
-            _dedupe_batch_uid_or_hash(findings)
-        else:
-            logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
-            _dedupe_batch_legacy(findings)
-    else:
-        deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
-    return None
+            return _dedupe_batch_uid_or_hash(findings)
+        logger.debug(f"deduplicating finding batch with LEGACY - {len(findings)} findings")
+        return _dedupe_batch_legacy(findings)
+    deduplicationLogger.debug("dedupe: skipping dedupe because it's disabled in system settings get()")
+    return []
 
 
 # ---------------------------------------------------------------------------
@@ -1012,8 +1017,7 @@ def do_false_positive_history_batch(findings):
             len(to_mark_as_fp_ids),
             sorted(to_mark_as_fp_ids),
         )
-        # QuerySet.update() bypasses Django signals — intentional, mimicking the previous
-        # super(Finding, find).save(skip_validation=True) calls that also skipped all post-save processing.
+        # QuerySet.update() bypasses Django signals — intentional as this code is called during (post) save processing.
         # Note: .only() does not constrain update() — Django generates the UPDATE SQL independently.
         Finding.objects.filter(id__in=to_mark_as_fp_ids).update(false_p=True, active=False, verified=False)
 

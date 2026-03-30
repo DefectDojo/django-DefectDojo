@@ -73,10 +73,10 @@ echo "Unit Tests"
 echo "------------------------------------------------------------"
 
 # Removing parallel and shuffle for now to maintain stability
-python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" || {
+python3 manage.py test unittests -v 3 --keepdb --no-input --exclude-tag="non-parallel" --exclude-tag="performance" || {
     exit 1;
 }
-python3 manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" || {
+python3 manage.py test unittests -v 3 --keepdb --no-input --tag="non-parallel" --exclude-tag="performance" || {
     exit 1;
 }
 

@@ -6,6 +6,8 @@ models while using the new URL and LocationFindingReference models underneath.
 """
 import datetime
 
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django_filters import BooleanFilter, CharFilter, NumberFilter
 from django_filters.rest_framework import DjangoFilterBackend, FilterSet
 from drf_spectacular.utils import extend_schema
@@ -32,6 +34,7 @@ from dojo.filters import CharFieldFilterANDExpression, CharFieldInFilter, Orderi
 from dojo.location.models import LocationFindingReference, LocationProductReference
 from dojo.location.queries import get_authorized_location_finding_reference, get_authorized_location_product_reference
 from dojo.location.status import FindingLocationStatus
+from dojo.query_utils import build_count_subquery
 from dojo.url.models import URL
 
 ##########
@@ -101,7 +104,11 @@ class V3EndpointCompatibleFilterSet(FilterSet):
             ("location__url__host", "host"),
             ("product__id", "product"),
             ("id", "id"),
+            ("active_finding_count", "active_finding_count"),
         ),
+        field_labels={
+            "active_finding_count": "Active Findings Count",
+        },
     )
 
 
@@ -118,6 +125,7 @@ class V3EndpointCompatibleSerializer(ModelSerializer):
     fragment = CharField(source="location.url.fragment")
     tags = TagListSerializerField(source="location.tags")
     location_id = IntegerField(source="location.id")
+    active_finding_count = IntegerField(read_only=True)
 
     class Meta:
         model = LocationProductReference
@@ -141,7 +149,18 @@ class V3EndpointCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin, view
 
     def get_queryset(self):
         """Get authorized URLs using Endpoint authorization logic."""
-        return get_authorized_location_product_reference(Permissions.Location_View).filter(location__location_type=URL.LOCATION_TYPE).distinct()
+        active_finding_subquery = build_count_subquery(
+            LocationFindingReference.objects.filter(
+                location=OuterRef("location"),
+                status=FindingLocationStatus.Active,
+            ),
+            group_field="location",
+        )
+        return get_authorized_location_product_reference(Permissions.Location_View).filter(
+            location__location_type=URL.LOCATION_TYPE,
+        ).annotate(
+            active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+        ).distinct()
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,

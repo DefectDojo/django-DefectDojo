@@ -1,0 +1,14 @@
+# Normalize line endings to LF
+*.sh     text eol=lf
+*.expect text eol=lf
+*.py     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.md     text eol=lf
+
+# Binary files — never touch line endings
+*.png    binary
+*.jpg    binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary

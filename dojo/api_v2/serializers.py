@@ -12,6 +12,7 @@ from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
@@ -1139,6 +1140,13 @@ class EngagementToNotesSerializer(serializers.Serializer):
     notes = NoteSerializer(many=True)
 
 
+class RiskAcceptanceToNotesSerializer(serializers.Serializer):
+    risk_acceptance_id = serializers.PrimaryKeyRelatedField(
+        queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
+    )
+    notes = NoteSerializer(many=True)
+
+
 class EngagementToFilesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), many=False, allow_null=True,
@@ -1264,6 +1272,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
 
 class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    active_finding_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Endpoint
@@ -1420,6 +1429,12 @@ class JIRAProjectSerializer(serializers.ModelSerializer):
         if (engagement and product) or (not engagement and not product):
             msg = "Either engagement or product has to be set."
             raise serializers.ValidationError(msg)
+
+        if "custom_fields" in data and isinstance(data["custom_fields"], str):
+            try:
+                data["custom_fields"] = json.loads(data["custom_fields"])
+            except json.JSONDecodeError as e:
+                raise serializers.ValidationError({"custom_fields": f"Invalid JSON: {e}"}) from e
 
         return data
 
@@ -2866,29 +2881,28 @@ class ImportLanguagesSerializer(serializers.Serializer):
                 deserialized = json.loads(data)
         except Exception:
             msg = "Invalid format"
-            raise Exception(msg)
+            raise serializers.ValidationError(msg)
 
-        # Filter out ignored keys
-        language_names = [name for name in deserialized if name not in {"header", "SUM"}]
-        # Prepopulate existing Language_Type objects
-        existing_types = {
+        # Filter out ignored keys and deduplicate
+        language_names = list(dict.fromkeys(
+            name for name in deserialized if name not in {"header", "SUM"}
+        ))
+        # Ensure any new Language_Type records exist (ignore conflicts from
+        # concurrent requests or already-existing types)
+        Language_Type.objects.bulk_create(
+            [Language_Type(language=name) for name in language_names],
+            ignore_conflicts=True,
+        )
+        # Single query to fetch all Language_Type objects we need (indexed lookup)
+        language_types = {
             lt.language: lt
             for lt in Language_Type.objects.filter(language__in=language_names)
         }
-        # Determine which Language_Type objects need to be created
-        new_language_names = [name for name in language_names if name not in existing_types]
-        new_types = [Language_Type(language=name) for name in new_language_names]
-        Language_Type.objects.bulk_create(new_types)
-        # Add newly created Language_Type objects to cache
-        for lt in Language_Type.objects.filter(language__in=new_language_names):
-            existing_types[lt.language] = lt
-        # Delete all Languages for this product
-        Languages.objects.filter(product=product).delete()
-        # Prepare Languages objects for bulk insert
-        languages_to_create = [
+        # Prepare Languages objects for upsert
+        languages_to_upsert = [
             Languages(
                 product=product,
-                language=existing_types[name],
+                language=language_types[name],
                 files=deserialized[name].get("nFiles", 0),
                 blank=deserialized[name].get("blank", 0),
                 comment=deserialized[name].get("comment", 0),
@@ -2896,8 +2910,22 @@ class ImportLanguagesSerializer(serializers.Serializer):
             )
             for name in language_names
         ]
-        # Bulk insert all Languages in one query
-        Languages.objects.bulk_create(languages_to_create)
+        # Upsert Languages and remove stale ones atomically
+        try:
+            with transaction.atomic():
+                Languages.objects.bulk_create(
+                    languages_to_upsert,
+                    update_conflicts=True,
+                    unique_fields=["language", "product"],
+                    update_fields=["files", "blank", "comment", "code"],
+                )
+                # Remove languages no longer present in the file
+                Languages.objects.filter(product=product).exclude(
+                    language__in=language_types.values(),
+                ).delete()
+        except IntegrityError as e:
+            msg = f"Failed to import languages due to a data integrity issue: {e}"
+            raise serializers.ValidationError(msg)
 
     def validate(self, data):
         if is_scan_file_too_large(data["file"]):

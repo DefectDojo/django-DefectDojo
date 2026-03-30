@@ -79,7 +79,7 @@
                                     {% if add_from_template %}
                                         <a href="{% url 'add_finding_from_template' tid finding.id %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
-                                           data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
+                                           data-trigger="hover" title="{{ finding.title|truncatechars:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
@@ -87,7 +87,7 @@
                                     {% elif apply_template %}
                                         <a href="{% url 'choose_finding_template_options' finding.id fid %}"
                                            class="template-popover" data-placement="auto bottom" data-toggle="popover"
-                                           data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
+                                           data-trigger="hover" title="{{ finding.title|truncatechars:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}

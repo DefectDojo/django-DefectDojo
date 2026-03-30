@@ -13,16 +13,16 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@75d2e84710de30f6ff7268e08f310b60ef14033f # v3.0.0
         with:
-          hugo-version: '0.153.4' # renovate: datasource=github-releases depName=gohugoio/hugo
+          hugo-version: '0.153.4'
           extended: true
 
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version: '24.14.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
+          node-version: '24.14.1' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
       - name: Cache dependencies
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -40,3 +40,10 @@ jobs:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && npm ci && hugo --minify --gc --config config/production/hugo.toml
+
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
+        with:
+          args: --offline --no-progress --root-dir docs/public './docs/public/**/*.html'
+          fail: true
+

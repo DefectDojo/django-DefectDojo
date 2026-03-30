@@ -569,8 +569,19 @@ def finding_location_bulk_update(request, finding_id):
         finding_locations_to_update = request.POST.getlist("endpoints_to_update")
         # Get the status
         status = request.POST.get("bulk_status")
+        if request.POST.get("remove_from_finding") and finding_locations_to_update:
+            # Remove the selected location-finding associations without deleting the locations themselves
+            LocationFindingReference.objects.filter(
+                location__in=finding_locations_to_update, finding__id=finding_id,
+            ).delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Selected endpoints have been removed from this finding.",
+                extra_tags="alert-success",
+            )
         # Check that endpoints and statuses are selected before proceeding
-        if finding_locations_to_update and status in FindingLocationStatus:
+        elif finding_locations_to_update and status in FindingLocationStatus:
             # Iterate over selected locations and update their finding location references
             for location_ref in LocationFindingReference.objects.filter(location__in=finding_locations_to_update, finding__id=finding_id):
                 # Set the status
