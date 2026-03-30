@@ -1,0 +1,77 @@
+{
+  "service": "StackHawk",
+  "scanCompleted": {
+    "scan": {
+      "id": "f3aa6752-8fef-58fa-c854-1d3g8e972f38",
+      "hawkscanVersion": "2.1.1",
+      "env": "Development",
+      "status": "COMPLETED",
+      "application": "Secured Application",
+      "startedTimestamp": "2022-02-16T23:07:19.575Z",
+      "scanURL": "https://app.stackhawk.com/scans/f3aa6752-8fef-58fa-c854-1d3g8e972f38"
+    },
+    "scanDuration": "21",
+    "spiderDuration": "45",
+    "completedScanStats": {
+      "urlsCount": "2",
+      "duration": "66",
+      "scanResultsStats": {
+        "totalCount": "2",
+        "lowCount": "0",
+        "mediumCount": "0",
+        "highCount": "2",
+        "lowTriagedCount": "0",
+        "mediumTriagedCount": "0",
+        "highTriagedCount": "0"
+      }
+    },
+    "findings": [
+      {
+        "pluginId": "90001",
+        "pluginName": "Insecure JSF ViewState",
+        "severity": "High",
+        "host": "https://localhost:9000",
+        "paths": [
+          {
+            "path": "/app/login",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/f3aa6752-8fef-58fa-c854-1d3g8e972f38/finding/90001/path/1/message/1"
+          }
+        ],
+        "pathStats": [
+          {
+            "status": "NEW",
+            "count": 1
+          }
+        ],
+        "totalCount": "1",
+        "category": "Security Misconfiguration",
+        "findingURL": "https://app.stackhawk.com/scans/f3aa6752-8fef-58fa-c854-1d3g8e972f38/finding/90001"
+      },
+      {
+        "pluginId": "90002",
+        "pluginName": "Insecure HTTP Header",
+        "severity": "High",
+        "host": "https://localhost:9000",
+        "paths": [
+          {
+            "path": "/app/dashboard",
+            "method": "GET",
+            "status": "NEW",
+            "pathURL": "https://app.stackhawk.com/scans/f3aa6752-8fef-58fa-c854-1d3g8e972f38/finding/90002/path/1/message/1"
+          }
+        ],
+        "pathStats": [
+          {
+            "status": "NEW",
+            "count": 1
+          }
+        ],
+        "totalCount": "1",
+        "category": "Security Misconfiguration",
+        "findingURL": "https://app.stackhawk.com/scans/f3aa6752-8fef-58fa-c854-1d3g8e972f38/finding/90002"
+      }
+    ]
+  }
+}

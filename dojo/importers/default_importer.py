@@ -273,6 +273,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     product_grading_option=True,
                     issue_updater_option=True,
                     push_to_jira=push_to_jira,
+                    sync=kwargs.get("sync", False),
                 )
 
             # No chord: tasks are dispatched immediately above per batch

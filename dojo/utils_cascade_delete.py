@@ -1,0 +1,202 @@
+"""
+Efficient cascade delete utility for Django models.
+
+Uses compiled SQL (via SQLDeleteCompiler/SQLUpdateCompiler) to perform cascade
+DELETE and SET_NULL operations by walking model._meta.related_objects recursively.
+This bypasses Django's Collector and per-object signal overhead.
+
+Based on: https://dev.to/redhap/efficient-django-delete-cascade-43i5
+"""
+
+import logging
+
+from django.db import OperationalError, models, transaction
+from django.db.models.sql.compiler import SQLDeleteCompiler
+
+logger = logging.getLogger(__name__)
+
+
+def get_delete_sql(query):
+    """Compile a DELETE SQL statement from a QuerySet."""
+    return SQLDeleteCompiler(
+        query.query, transaction.get_connection(), query.db,
+    ).as_sql()
+
+
+def get_update_sql(query, **updatespec):
+    """Compile an UPDATE SQL statement from a QuerySet with the given column values."""
+    if not query.query.can_filter():
+        msg = "Cannot filter this query"
+        raise ValueError(msg)
+    query.for_write = True
+    q = query.query.chain(models.sql.UpdateQuery)
+    q.add_update_values(updatespec)
+    q._annotations = None
+    return q.get_compiler(query.db).as_sql()
+
+
+STATEMENT_TIMEOUT = "300s"
+
+
+def execute_compiled_sql(sql, params=None):
+    """Execute compiled SQL directly via connection.cursor()."""
+    try:
+        with transaction.get_connection().cursor() as cur:
+            cur.execute(f"SET LOCAL statement_timeout = '{STATEMENT_TIMEOUT}'")
+            cur.execute(sql, params or None)
+            return cur.rowcount
+    except OperationalError:
+        logger.exception("cascade_delete SQL failed (possible deadlock or timeout): %s", sql[:200])
+        raise
+
+
+def execute_delete_sql(query):
+    """Compile and execute a DELETE statement from a QuerySet."""
+    return execute_compiled_sql(*get_delete_sql(query))
+
+
+def execute_update_sql(query, **updatespec):
+    """Compile and execute an UPDATE statement from a QuerySet."""
+    return execute_compiled_sql(*get_update_sql(query, **updatespec))
+
+
+def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0):
+    """
+    Recursively walk Django model relations and execute compiled SQL
+    to perform cascade DELETE / SET_NULL on related objects without the Collector.
+
+    At level 0 (the root), only related objects are deleted — the root records
+    themselves are NOT deleted. This allows the caller to use ORM obj.delete()
+    on the root to fire Django signals (notifications, audit, etc.).
+    At deeper levels, records are deleted after their children.
+
+    Includes any related object in Dojo-Pro
+
+    Args:
+        from_model: The model class to delete from.
+        instance_pk_query: QuerySet selecting the records to delete.
+        skip_relations: Set of model classes to skip (e.g. self-referential FKs).
+        skip_m2m_for: Set of model classes whose M2M cleanup was already done
+                      by the caller (avoids redundant tag count queries).
+        base_model: Root model class (set automatically on first call).
+        level: Recursion depth (for logging only).
+
+    Returns:
+        Number of records deleted at this level (0 at level 0 since root is not deleted).
+
+    """
+    if skip_relations is None:
+        skip_relations = set()
+    if skip_m2m_for is None:
+        skip_m2m_for = set()
+    if base_model is None:
+        base_model = from_model
+
+    instance_pk_query = instance_pk_query.values_list("pk").order_by()
+
+    logger.debug(
+        "cascade_delete level %d for %s: checking relations of %s",
+        level, base_model.__name__, from_model.__name__,
+    )
+
+    for relation in from_model._meta.related_objects:
+        related_model = relation.related_model
+        if related_model in skip_relations:
+            logger.debug("cascade_delete: skipping %s", related_model.__name__)
+            continue
+
+        on_delete = relation.on_delete
+        if on_delete is None:
+            logger.debug(
+                "cascade_delete: no on_delete for %s -> %s, skipping",
+                from_model.__name__, related_model.__name__,
+            )
+            continue
+
+        on_delete_name = on_delete.__name__
+        fk_column = relation.remote_field.column
+        filterspec = {f"{fk_column}__in": models.Subquery(instance_pk_query)}
+
+        if on_delete_name == "SET_NULL":
+            count = execute_update_sql(
+                related_model.objects.filter(**filterspec),
+                **{fk_column: None},
+            )
+            logger.debug(
+                "cascade_delete: SET NULL on %d %s records",
+                count, related_model.__name__,
+            )
+
+        elif on_delete_name == "CASCADE":
+            related_pk_query = related_model.objects.filter(**filterspec).values_list(
+                related_model._meta.pk.name,
+            )
+            # Recurse into children first (bottom-up deletion)
+            cascade_delete_related_objects(
+                related_model, related_pk_query,
+                skip_relations=skip_relations,
+                skip_m2m_for=skip_m2m_for,
+                base_model=base_model,
+                level=level + 1,
+            )
+
+        elif on_delete_name == "DO_NOTHING":
+            logger.debug(
+                "cascade_delete: DO_NOTHING for %s, skipping",
+                related_model.__name__,
+            )
+
+        else:
+            logger.warning(
+                "cascade_delete: unhandled on_delete=%s for %s -> %s, skipping",
+                on_delete_name, from_model.__name__, related_model.__name__,
+            )
+
+    # Clear M2M through tables before deleting (not discovered by _meta.related_objects).
+    # Skip if the caller already handled M2M cleanup for this model (e.g. bulk_clear_finding_m2m).
+    if from_model not in skip_m2m_for:
+        from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+
+        bulk_remove_all_tags(from_model, instance_pk_query)
+
+    for m2m_field in from_model._meta.many_to_many:
+        # Skip tag fields — handled by bulk_remove_all_tags above
+        if hasattr(m2m_field, "tag_options"):
+            continue
+        # Skip if caller already cleaned M2M for this model
+        if from_model in skip_m2m_for:
+            continue
+        through_model = m2m_field.remote_field.through
+        fk_column = None
+        for field in through_model._meta.get_fields():
+            if hasattr(field, "related_model") and field.related_model is from_model:
+                fk_column = field.column
+                break
+        if fk_column:
+            filterspec_m2m = {f"{fk_column}__in": models.Subquery(instance_pk_query)}
+            m2m_count = execute_delete_sql(through_model.objects.filter(**filterspec_m2m))
+            if m2m_count:
+                logger.debug(
+                    "cascade_delete: cleared %d rows from M2M %s",
+                    m2m_count, through_model._meta.db_table,
+                )
+
+    # At level 0, do NOT delete root records — the caller handles that
+    # (e.g. via ORM obj.delete() to fire Django signals).
+    if level == 0:
+        logger.debug(
+            "cascade_delete_related_objects level 0: related objects deleted for %s (root not deleted)",
+            from_model.__name__,
+        )
+        return 0
+
+    # At deeper levels, delete records after their children are gone
+    filterspec = {f"{from_model._meta.pk.name}__in": models.Subquery(instance_pk_query)}
+    del_query = from_model.objects.filter(**filterspec)
+
+    count = execute_delete_sql(del_query)
+    logger.debug(
+        "cascade_delete_related_objects level %d: deleted %d %s records",
+        level, count, from_model.__name__,
+    )
+    return count
