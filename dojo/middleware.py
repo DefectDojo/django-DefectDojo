@@ -76,6 +76,7 @@ class LoginRequiredMiddleware:
                 uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
+                request.META["REMOTE_USER"] = str(request.user)
         return response
 
 
