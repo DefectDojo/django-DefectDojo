@@ -21,7 +21,7 @@ DefectDojo is meant to be the central source of truth for your organization's se
 
 - Allowing users to identify duplicate findings across scans and tools, minimizing alert fatigue.
 - Enforcing SLAs on vulnerabilities, ensuring that your organization handles each Finding within an appropriate timeframe.
-- Sending tickets to [Jira](/issue_tracking/jira/jira_guide/), ServiceNow or other Project Tracking software, allowing your development team to integrate issue remediation into their standard release process without requiring them to learn another project management tool.
+- [Sending tickets](/issue_tracking/intro/intro/) to Jira, ServiceNow or other Project Tracking software, allowing your development team to integrate issue remediation into their standard release process without requiring them to learn another project management tool.
 - Integrating into automated [CI/CD pipelines](/import_data/import_scan_files/api_pipeline_modelling/) to automatically ingest report data from repositories, even down to the branch level.
 - Creating [reports](/metrics_reports/reports/using_the_report_builder/) on any set of vulnerabilities or software context, to quickly share scan results or status updates with stakeholders.
 - Establishing acceptance and mitigation workflows, supporting formal risk-management tracking.
@@ -129,6 +129,6 @@ DefectDojo Pro users also have access to [executive-level Metrics dashboards](/g
 
 ### How can I integrate a project management tool with DefectDojo?
 
-In both Pro and Open-Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.  We have a [complete guide to Jira](/issue_tracking/jira/jira_guide/) written which describes the process in detail.
+In both Pro and Open-Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.
 
 DefectDojo Pro adds support for [Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab.
