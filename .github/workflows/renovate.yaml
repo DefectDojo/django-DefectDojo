@@ -18,7 +18,7 @@ jobs:
           persist-credentials: false
 
       - name: validate
-        uses: suzuki-shunsuke/github-action-renovate-config-validator@ca480cb7ec89a9e1cd8c214ad33bda1617184027 # v2.0.0
+        uses: suzuki-shunsuke/github-action-renovate-config-validator@ee9f69e1f683ed0d08225086482b34fc9abe9300 # v2.1.0
         with:
           strict: "true"
-          validator_version: 43.31.7 # renovate: datasource=github-releases depName=renovatebot/renovate
+          validator_version: 43.91.2 # renovate: datasource=github-releases depName=renovatebot/renovate

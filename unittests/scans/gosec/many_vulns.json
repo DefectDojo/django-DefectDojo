@@ -3,6 +3,10 @@
 		{
 			"severity": "LOW",
 			"confidence": "HIGH",
+			"cwe": {
+				"id": "252",
+				"url": "https://cwe.mitre.org/data/definitions/252.html"
+			},
 			"rule_id": "G104",
 			"details": "Errors unhandled.",
 			"file": "/vagrant/go/src/govwa/app.go",
@@ -12,6 +16,10 @@
 		{
 			"severity": "LOW",
 			"confidence": "HIGH",
+			"cwe": {
+				"id": "252",
+				"url": "https://cwe.mitre.org/data/definitions/252.html"
+			},
 			"rule_id": "G104",
 			"details": "Errors unhandled.",
 			"file": "/vagrant/go/src/govwa/setting/setting.go",
@@ -30,6 +38,10 @@
 		{
 			"severity": "MEDIUM",
 			"confidence": "HIGH",
+			"cwe": {
+				"id": "327",
+				"url": "https://cwe.mitre.org/data/definitions/327.html"
+			},
 			"rule_id": "G501",
 			"details": "Blacklisted import crypto/md5: weak cryptographic primitive",
 			"file": "/vagrant/go/src/govwa/user/user.go",
@@ -39,6 +51,10 @@
 		{
 			"severity": "MEDIUM",
 			"confidence": "HIGH",
+			"cwe": {
+				"id": "327",
+				"url": "https://cwe.mitre.org/data/definitions/327.html"
+			},
 			"rule_id": "G401",
 			"details": "Use of weak cryptographic primitive",
 			"file": "/vagrant/go/src/govwa/user/user.go",
@@ -84,6 +100,10 @@
 		{
 			"severity": "MEDIUM",
 			"confidence": "LOW",
+			"cwe": {
+				"id": "79",
+				"url": "https://cwe.mitre.org/data/definitions/79.html"
+			},
 			"rule_id": "G203",
 			"details": "this method will not auto-escape HTML. Verify data is well formed.",
 			"file": "/vagrant/go/src/govwa/util/template.go",
@@ -201,6 +221,10 @@
 		{
 			"severity": "MEDIUM",
 			"confidence": "HIGH",
+			"cwe": {
+				"id": "89",
+				"url": "https://cwe.mitre.org/data/definitions/89.html"
+			},
 			"rule_id": "G201",
 			"details": "SQL string formatting",
 			"file": "/vagrant/go/src/govwa/vulnerability/sqli/function.go",

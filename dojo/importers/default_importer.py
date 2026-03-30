@@ -9,6 +9,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.models import (
@@ -56,6 +57,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             import_type=Test_Import.IMPORT_TYPE,
             **kwargs,
         )
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager = EndpointManager(self.engagement.product)
 
     def create_test(
         self,
@@ -109,6 +112,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         parser = self.get_parser()
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
+        # Note: for fresh imports, parse_findings() calls create_test() internally,
+        # so self.test is guaranteed to be set after this call.
         parsed_findings = self.parse_findings(scan, parser) or []
         new_findings = self.process_findings(parsed_findings, **kwargs)
         # Close any old findings in the processed list if the the user specified for that
@@ -259,8 +264,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
 
-            # If batch is full or we're at the end, dispatch one batched task
+            # If batch is full or we're at the end, persist endpoints and dispatch
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
+                if not settings.V3_FEATURE_LOCATIONS:
+                    self.endpoint_manager.persist(user=self.user)
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
@@ -379,6 +386,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,
             )
+        # Persist any accumulated endpoint status mitigations
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager.persist(user=self.user)
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
