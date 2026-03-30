@@ -3,7 +3,6 @@ from typing import NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import Q
 from django.utils import timezone
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
