@@ -3,6 +3,7 @@ from typing import NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
@@ -119,23 +120,6 @@ class EndpointManager:
     def record_status_for_create(self, finding: Finding, key: EndpointUniqueKey) -> None:
         """Record that a finding should be linked to an endpoint (identified by key) via Endpoint_Status."""
         self._statuses_to_create.append((finding, key))
-
-    @staticmethod
-    def get_non_special_endpoint_statuses(finding: Finding) -> list[Endpoint_Status]:
-        """
-        Return endpoint statuses that are not false_positive, out_of_scope, or risk_accepted.
-
-        Uses finding.status_finding.all() which is served from the prefetch cache when the
-        finding was loaded through build_candidate_scope_queryset, and falls back to a DB
-        query otherwise (e.g. for findings created during the same reimport batch).
-
-        This might be ineffecient if lots of internal duplicates are in the report.
-        But this should be limited as most parsers dedupe during parsing and merge the endpoints.
-        """
-        return [
-            eps for eps in finding.status_finding.all()
-            if not eps.false_positive and not eps.out_of_scope and not eps.risk_accepted
-        ]
 
     @staticmethod
     def get_non_special_endpoint_statuses(
