@@ -17,6 +17,7 @@ from pathlib import Path
 import environ
 import pghistory
 from celery.schedules import crontab
+
 from dojo import __version__
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ except ImportError:
     pass
 
 # reference: https://pypi.org/project/django-environ/
-env = environ.FileAwareEnv(**{**dict(
+env = environ.FileAwareEnv(**{**dict(  # noqa: C408
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),

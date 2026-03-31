@@ -128,7 +128,7 @@ def api_v2_key(request):
 @dojo_ratelimit(key="post:password")
 def login_view(request):
     try:
-        from dojo.sso.views import get_sso_auto_redirect
+        from dojo.sso.views import get_sso_auto_redirect  # noqa: PLC0415
         redirect_response = get_sso_auto_redirect(request)
         if redirect_response is not None:
             return redirect_response

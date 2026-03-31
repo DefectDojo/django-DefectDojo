@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 SSO_ENV_SCHEMA = {
@@ -108,7 +107,7 @@ def _saml2_attrib_map_format(din):
 
 def apply_sso_settings(env, globs):
     """Apply all SSO-related settings. Called from settings.dist.py inside a try/except ImportError block."""
-    from netaddr import IPNetwork, IPSet
+    from netaddr import IPNetwork, IPSet  # noqa: PLC0415
 
     SITE_URL = globs["SITE_URL"]
     URL_PREFIX = globs.get("URL_PREFIX", "")
@@ -283,7 +282,7 @@ def apply_sso_settings(env, globs):
     # --------------------------------------------------------------------------
     # INSTALLED_APPS
     # --------------------------------------------------------------------------
-    globs["INSTALLED_APPS"] = globs["INSTALLED_APPS"] + ("social_django",)
+    globs["INSTALLED_APPS"] += ("social_django",)
 
     # --------------------------------------------------------------------------
     # MIDDLEWARE
@@ -292,7 +291,7 @@ def apply_sso_settings(env, globs):
     if isinstance(MIDDLEWARE, list):
         MIDDLEWARE.append("dojo.sso.middleware.CustomSocialAuthExceptionMiddleware")
     else:
-        globs["MIDDLEWARE"] = list(MIDDLEWARE) + ["dojo.sso.middleware.CustomSocialAuthExceptionMiddleware"]
+        globs["MIDDLEWARE"] = [*MIDDLEWARE, "dojo.sso.middleware.CustomSocialAuthExceptionMiddleware"]
         MIDDLEWARE = globs["MIDDLEWARE"]
 
     # --------------------------------------------------------------------------
@@ -302,7 +301,7 @@ def apply_sso_settings(env, globs):
     context_processors.append("social_django.context_processors.backends")
     context_processors.append("social_django.context_processors.login_redirect")
     context_processors.append("dojo.sso.context_processors.sso_context")
-    sso_template_dir = os.path.join(os.path.dirname(__file__), "templates")
+    sso_template_dir = str(Path(__file__).parent / "templates")
     globs["TEMPLATES"][0]["DIRS"].append(sso_template_dir)
 
     # --------------------------------------------------------------------------
@@ -312,18 +311,18 @@ def apply_sso_settings(env, globs):
     globs["SAML2_LOGIN_BUTTON_TEXT"] = env("DD_SAML2_LOGIN_BUTTON_TEXT")
     globs["SAML2_LOGOUT_URL"] = env("DD_SAML2_LOGOUT_URL")
     if globs["SAML2_ENABLED"]:
-        import saml2
-        import saml2.saml
+        import saml2  # noqa: PLC0415
+        import saml2.saml  # noqa: PLC0415
 
         SAML_METADATA = {}
         if len(env("DD_SAML2_METADATA_AUTO_CONF_URL")) > 0:
             SAML_METADATA["remote"] = [{"url": env("DD_SAML2_METADATA_AUTO_CONF_URL")}]
         if len(env("DD_SAML2_METADATA_LOCAL_FILE_PATH")) > 0:
             SAML_METADATA["local"] = [env("DD_SAML2_METADATA_LOCAL_FILE_PATH")]
-        globs["INSTALLED_APPS"] = globs["INSTALLED_APPS"] + ("djangosaml2",)
+        globs["INSTALLED_APPS"] += ("djangosaml2",)
         MIDDLEWARE.append("djangosaml2.middleware.SamlSessionMiddleware")
-        globs["AUTHENTICATION_BACKENDS"] = globs["AUTHENTICATION_BACKENDS"] + (env("DD_SAML2_AUTHENTICATION_BACKENDS"),)
-        globs["LOGIN_EXEMPT_URLS"] = globs["LOGIN_EXEMPT_URLS"] + (rf"^{URL_PREFIX}saml2/",)
+        globs["AUTHENTICATION_BACKENDS"] += (env("DD_SAML2_AUTHENTICATION_BACKENDS"),)
+        globs["LOGIN_EXEMPT_URLS"] += (rf"^{URL_PREFIX}saml2/",)
         globs["SAML_LOGOUT_REQUEST_PREFERRED_BINDING"] = saml2.BINDING_HTTP_POST
         globs["SAML_IGNORE_LOGOUT_ERRORS"] = True
         globs["SAML_DJANGO_USER_MAIN_ATTRIBUTE"] = "username"
