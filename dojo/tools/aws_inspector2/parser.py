@@ -1,3 +1,4 @@
+import contextlib
 import json
 from datetime import UTC, datetime
 
@@ -114,6 +115,7 @@ class AWSInspector2Parser:
 
     def get_package_vulnerability(self, finding: Finding, raw_finding: dict) -> Finding:
         vulnerability_details = raw_finding.get("packageVulnerabilityDetails", {})
+        vulnerable_packages = vulnerability_details.get("vulnerablePackages", [])
         vulnerability_packages_descriptions = "\n".join(
             [
                 (
@@ -123,14 +125,32 @@ class AWSInspector2Parser:
                     f"\tfixed version: {vulnerability_package.get('fixedInVersion', 'N/A')}\n"
                     f"\tremediation: {vulnerability_package.get('remediation', 'N/A')}\n"
                 )
-                for vulnerability_package in vulnerability_details.get("vulnerablePackages", [])
+                for vulnerability_package in vulnerable_packages
             ],
         )
         if (vulnerability_id := vulnerability_details.get("vulnerabilityId", None)) is not None:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
         vulnerability_source = vulnerability_details.get("source")
         vulnerability_source_url = vulnerability_details.get("sourceUrl")
-        # populate fields
+        # component name/version/file_path from the first vulnerable package
+        if vulnerable_packages:
+            finding.component_name = vulnerable_packages[0].get("name")
+            finding.component_version = vulnerable_packages[0].get("version")
+            finding.file_path = vulnerable_packages[0].get("filePath")
+        # reference URLs from the advisory
+        reference_urls = vulnerability_details.get("referenceUrls", [])
+        if reference_urls:
+            finding.references = "\n".join(reference_urls)
+        # publish date from when the vendor first created the advisory
+        if vendor_created_at := vulnerability_details.get("vendorCreatedAt"):
+            with contextlib.suppress(ValueError):
+                finding.publish_date = date_parser.parse(vendor_created_at).date()
+        # CVSS v3 base score from the vendor-supplied CVSS entries
+        for cvss_entry in vulnerability_details.get("cvss", []):
+            if str(cvss_entry.get("version", "")).startswith("3") and cvss_entry.get("baseScore") is not None:
+                finding.cvssv3_score = float(cvss_entry["baseScore"])
+                break
+        # populate description fields
         if vulnerability_source is not None and vulnerability_source_url is not None:
             finding.url = vulnerability_source_url
             finding.description += (
@@ -149,8 +169,8 @@ class AWSInspector2Parser:
         file_path_info = raw_finding.get("filePath", {})
         file_name = file_path_info.get("fileName", "N/A")
         file_path = file_path_info.get("filePath", "N/A")
-        start_line = file_path_info.get("startLine", "N/A")
-        end_line = file_path_info.get("endLine", "N/A")
+        start_line = file_path_info.get("startLine", None)
+        end_line = file_path_info.get("endLine", None)
         detector_tags = ", ".join(raw_finding.get("detectorTags", []))
         reference_urls = ", ".join(raw_finding.get("referenceUrls", []))
         rule_id = raw_finding.get("ruleId", "N/A")
