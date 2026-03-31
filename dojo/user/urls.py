@@ -1,13 +1,10 @@
 from django.conf import settings
-from django.conf.urls import include
 from django.contrib.auth import views as auth_views
 from django.urls import re_path, reverse_lazy
 
 from dojo.user import views
 
 urlpatterns = [
-    # social-auth-django required url package
-    re_path("", include("social_django.urls", namespace="social")),
     #  user specific
     re_path(r"^login$", views.login_view, name="login"),
     re_path(r"^logout$", views.logout_view, name="logout"),

@@ -22,7 +22,6 @@ from django.db.models.deletion import RestrictedError
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils.http import urlencode
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from rest_framework.authtoken.models import Token
@@ -128,42 +127,14 @@ def api_v2_key(request):
 @dojo_ratelimit(key="post:username")
 @dojo_ratelimit(key="post:password")
 def login_view(request):
-    if not settings.SHOW_LOGIN_FORM and settings.SOCIAL_LOGIN_AUTO_REDIRECT and sum([
-        settings.GOOGLE_OAUTH_ENABLED,
-        settings.OKTA_OAUTH_ENABLED,
-        settings.AZUREAD_TENANT_OAUTH2_ENABLED,
-        settings.GITLAB_OAUTH2_ENABLED,
-        settings.AUTH0_OAUTH2_ENABLED,
-        settings.KEYCLOAK_OAUTH2_ENABLED,
-        settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED,
-        settings.OIDC_AUTH_ENABLED,
-        settings.SAML2_ENABLED,
-    ]) == 1 and "force_login_form" not in request.GET:
-        if settings.GOOGLE_OAUTH_ENABLED:
-            social_auth = "google-oauth2"
-        elif settings.OKTA_OAUTH_ENABLED:
-            social_auth = "okta-oauth2"
-        elif settings.AZUREAD_TENANT_OAUTH2_ENABLED:
-            social_auth = "azuread-tenant-oauth2"
-        elif settings.GITLAB_OAUTH2_ENABLED:
-            social_auth = "gitlab"
-        elif settings.KEYCLOAK_OAUTH2_ENABLED:
-            social_auth = "keycloak"
-        elif settings.OIDC_AUTH_ENABLED:
-            social_auth = "oidc"
-        elif settings.AUTH0_OAUTH2_ENABLED:
-            social_auth = "auth0"
-        elif settings.GITHUB_ENTERPRISE_OAUTH2_ENABLED:
-            social_auth = "github-enterprise"
-        else:
-            return HttpResponseRedirect("/saml2/login")
-        try:
-            return HttpResponseRedirect("{}?{}".format(reverse("social:begin", args=[social_auth]),
-                                                   urlencode({"next": request.GET.get("next", "/dashboard")})))
-        except:
-            return HttpResponseRedirect(reverse("social:begin", args=[social_auth]))
-    else:
-        return DojoLoginView.as_view(template_name="dojo/login.html", authentication_form=AuthenticationForm)(request)
+    try:
+        from dojo.sso.views import get_sso_auto_redirect
+        redirect_response = get_sso_auto_redirect(request)
+        if redirect_response is not None:
+            return redirect_response
+    except ImportError:
+        pass
+    return DojoLoginView.as_view(template_name="dojo/login.html", authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
