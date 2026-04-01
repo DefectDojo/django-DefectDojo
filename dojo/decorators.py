@@ -3,6 +3,7 @@ import threading
 from functools import wraps
 
 from django.conf import settings
+from django.contrib import messages
 from django.http import Http404
 from django_ratelimit import UNSAFE
 from django_ratelimit.core import is_ratelimited
@@ -159,6 +160,29 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
             return fn(request, *args, **kw)
         return _wrapped
 
+    return decorator
+
+
+def deprecated_view(feature_name, removal_version="2.59.0", removal_date="June 1, 2026"):
+    """
+    Decorator that adds a deprecation warning message to a view.
+
+    Only adds the message on GET requests to avoid duplicate warnings
+    when POST requests redirect.
+    """
+    def decorator(func):
+        @wraps(func)
+        def _wrapped(request, *args, **kwargs):
+            if request.method == "GET":
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"{feature_name} is deprecated and will be removed in DefectDojo v{removal_version} "
+                    f"({removal_date}). Please plan to migrate away from this feature.",
+                    extra_tags="alert-warning",
+                )
+            return func(request, *args, **kwargs)
+        return _wrapped
     return decorator
 
 
