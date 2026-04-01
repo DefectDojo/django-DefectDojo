@@ -163,9 +163,6 @@ def update_finding_status(new_state_finding, user, changed_fields=None):
             # finding is being deactivated
             pass
 
-    if is_new_finding or "verified" in changed_fields:
-        pass
-
     if is_new_finding or "false_p" in changed_fields or "out_of_scope" in changed_fields:
         # existing behaviour is that false_p or out_of_scope implies mitigated
         if new_state_finding.false_p or new_state_finding.out_of_scope:
