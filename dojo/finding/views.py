@@ -2001,7 +2001,7 @@ def add_stub_finding(request, tid):
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Delete, "fid")
-@deprecated_view("Stub Findings")
+@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
 
@@ -2028,7 +2028,7 @@ def delete_stub_finding(request, fid):
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
-@deprecated_view("Stub Findings")
+@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
 def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test

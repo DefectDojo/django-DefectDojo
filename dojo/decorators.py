@@ -163,7 +163,7 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
     return decorator
 
 
-def deprecated_view(feature_name, removal_version="2.59.0", removal_date="June 1, 2026"):
+def deprecated_view(feature_name, removal_version="X.Y.Z", removal_date="some time in the future"):
     """
     Decorator that adds a deprecation warning message to a view.
 
