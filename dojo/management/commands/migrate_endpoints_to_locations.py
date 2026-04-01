@@ -88,10 +88,11 @@ class Command(BaseCommand):
             location.associate_with_product(product)
 
     def handle(self, *args, **options):
-        # Start off with the endpoint objects - it should everything we need
-        for endpoint in Endpoint.objects.all().iterator():
-            # Get the URL object first
-            location = self._endpoint_to_url(endpoint)
-            # Associate the URL with the findings associated with the Findings
-            # the association to a finding will also apply to a product automatically
-            self._associate_location_with_findings(endpoint, location)
+        with Endpoint.allow_endpoint_init():
+            # Start off with the endpoint objects - it should contain everything we need
+            for endpoint in Endpoint.objects.all().iterator():
+                # Get the URL object first
+                location = self._endpoint_to_url(endpoint)
+                # Associate the URL with the findings associated with the Findings
+                # the association to a finding will also apply to a product automatically
+                self._associate_location_with_findings(endpoint, location)
