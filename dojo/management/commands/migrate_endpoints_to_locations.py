@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 # Chunk size for DB cursor and progress report
 CHUNK_SIZE = 1000
 
+
 class Command(BaseCommand):
 
     """
@@ -105,8 +106,8 @@ class Command(BaseCommand):
                 if not i % CHUNK_SIZE:
                     self.stdout.write(
                         self.style.SUCCESS(
-                            f"Migrated {i}/{endpoint_count} endpoints..."
-                        )
+                            f"Migrated {i}/{endpoint_count} endpoints...",
+                        ),
                     )
                 # Get the URL object first
                 location = self._endpoint_to_url(endpoint)
@@ -115,6 +116,6 @@ class Command(BaseCommand):
                 self._associate_location_with_findings(endpoint, location)
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Migrated {i} total endpoints."
-                )
+                    f"Migrated {i} total endpoints.",
+                ),
             )
