@@ -416,6 +416,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding = self.finding_post_processing(
                         finding,
                         unsaved_finding,
+                        is_matched_finding=bool(matched_findings),
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
@@ -973,6 +974,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         finding: Finding,
         finding_from_report: Finding,
+        *,
+        is_matched_finding: bool = False,
     ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
@@ -991,19 +994,22 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 for endpoint in self.endpoints_to_add:
                     key = self.endpoint_manager.record_endpoint(endpoint)
                     self.endpoint_manager.record_status_for_create(finding, key)
-        # Parsers shouldn't use the tags field, and use unsaved_tags instead.
-        # Merge any tags set by parser into unsaved_tags
-        tags_from_parser = finding_from_report.tags if isinstance(finding_from_report.tags, list) else []
-        unsaved_tags_from_parser = finding_from_report.unsaved_tags if isinstance(finding_from_report.unsaved_tags, list) else []
-        merged_tags = unsaved_tags_from_parser + tags_from_parser
-        if merged_tags:
-            finding_from_report.unsaved_tags = merged_tags
-        if finding_from_report.unsaved_tags:
-            cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
-            if isinstance(cleaned_tags, list):
-                finding.tags.add(*cleaned_tags)
-            elif isinstance(cleaned_tags, str):
-                finding.tags.add(cleaned_tags)
+        # For matched/existing findings, do not update tags from the report,
+        # consistent with how other fields are handled on reimport.
+        if not is_matched_finding:
+            # Parsers shouldn't use the tags field, and use unsaved_tags instead.
+            # Merge any tags set by parser into unsaved_tags
+            tags_from_parser = finding_from_report.tags if isinstance(finding_from_report.tags, list) else []
+            unsaved_tags_from_parser = finding_from_report.unsaved_tags if isinstance(finding_from_report.unsaved_tags, list) else []
+            merged_tags = unsaved_tags_from_parser + tags_from_parser
+            if merged_tags:
+                finding_from_report.unsaved_tags = merged_tags
+            if finding_from_report.unsaved_tags:
+                cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
+                if isinstance(cleaned_tags, list):
+                    finding.tags.add(*cleaned_tags)
+                elif isinstance(cleaned_tags, str):
+                    finding.tags.add(cleaned_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
