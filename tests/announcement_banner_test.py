@@ -141,11 +141,11 @@ class AnnouncementBannerTest(BaseTestCase):
         driver.get(self.base_url)
         self.assertFalse(self.is_element_by_css_selector_present(".announcement-banner"))
 
-        text = "Links in announcements? <a href='https://github.com/DefectDojo/django-DefectDojo' style='color: #224477;' target='_blank'>you bet!</a>"
+        text = "Links in announcements? <a href='https://github.com/DefectDojo/django-DefectDojo' target='_blank'>you bet!</a>"
         self.enable_announcement(text, dismissable=False, style=self.type)
         self.assertTrue(self.is_success_message_present("Announcement updated successfully."))
 
-        driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a[@href='https://github.com/DefectDojo/django-DefectDojo' and @style='color: #224477;' and @target='_blank']")
+        driver.find_element(By.XPATH, "//div[contains(@class, 'announcement-banner')]/a[@href='https://github.com/DefectDojo/django-DefectDojo' and @target='_blank']")
         self.disable_announcement()
         self.assertTrue(self.is_success_message_present("Announcement removed for everyone."))
 
