@@ -11,6 +11,8 @@ from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
 
+# Chunk size for DB cursor and progress report
+CHUNK_SIZE = 1000
 
 class Command(BaseCommand):
 
@@ -88,11 +90,31 @@ class Command(BaseCommand):
             location.associate_with_product(product)
 
     def handle(self, *args, **options):
+        # Allow endpoints to work with V3/Locations enabled
         with Endpoint.allow_endpoint_init():
+            # Progress counter
+            i = 0
             # Start off with the endpoint objects - it should contain everything we need
-            for endpoint in Endpoint.objects.all().iterator():
+            queryset = Endpoint.objects.all()
+            # Grab the total count so we can communicate progress
+            endpoint_count = queryset.count()
+
+            # Process each endpoint
+            for i, endpoint in enumerate(queryset.iterator(chunk_size=CHUNK_SIZE), 1):
+                # Progress report every chunk
+                if not i % CHUNK_SIZE:
+                    self.stdout.write(
+                        self.style.SUCCESS(
+                            f"Migrated {i}/{endpoint_count} endpoints..."
+                        )
+                    )
                 # Get the URL object first
                 location = self._endpoint_to_url(endpoint)
                 # Associate the URL with the findings associated with the Findings
                 # the association to a finding will also apply to a product automatically
                 self._associate_location_with_findings(endpoint, location)
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Migrated {i} total endpoints."
+                )
+            )
