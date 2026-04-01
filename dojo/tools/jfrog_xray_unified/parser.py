@@ -9,7 +9,6 @@ from dojo.utils import parse_cvss_data
 
 
 class JFrogXrayUnifiedParser:
-
     """JFrog Xray JSON reports"""
 
     def get_scan_types(self):
@@ -49,9 +48,7 @@ def get_item(vulnerability, test):
         # not all cves have cvssv3 scores, so skip these. If no v3 scores,
         # we'll default to index 0
         if "cvss_v3_score" in vulnerability["cves"][thisCveIndex]:
-            thisCvssV3Score = vulnerability["cves"][thisCveIndex][
-                "cvss_v3_score"
-            ]
+            thisCvssV3Score = vulnerability["cves"][thisCveIndex]["cvss_v3_score"]
             if thisCvssV3Score > highestCvssV3Score:
                 highestCvssV3Index = thisCveIndex
                 highestCvssV3Score = thisCvssV3Score
@@ -84,23 +81,13 @@ def get_item(vulnerability, test):
             cvss_v2 = worstCve["cvss_v2_vector"]
 
     fix_available = False
-    if (
-        "fixed_versions" in vulnerability
-        and len(vulnerability["fixed_versions"]) > 0
-    ):
+    if "fixed_versions" in vulnerability and len(vulnerability["fixed_versions"]) > 0:
         mitigation = "Versions containing a fix:\n"
         mitigation += "\n".join(vulnerability["fixed_versions"])
         fix_available = True
 
-    if (
-        "external_advisory_source" in vulnerability
-        and "external_advisory_severity" in vulnerability
-    ):
-        extra_desc = (
-            vulnerability["external_advisory_source"]
-            + ": "
-            + vulnerability["external_advisory_severity"]
-        )
+    if "external_advisory_source" in vulnerability and "external_advisory_severity" in vulnerability:
+        extra_desc = vulnerability["external_advisory_source"] + ": " + vulnerability["external_advisory_severity"]
 
     if vulnerability["issue_id"]:
         title = vulnerability["issue_id"] + " - " + vulnerability["summary"]
@@ -108,10 +95,15 @@ def get_item(vulnerability, test):
         title = vulnerability["summary"]
 
     references_str = vulnerability.get("references")
-    references = "\n".join(references_str) if isinstance(references_str, list) else (references_str if isinstance(references_str, str) else "")
+    references = (
+        "\n".join(references_str)
+        if isinstance(references_str, list)
+        else (references_str if isinstance(references_str, str) else "")
+    )
 
     scan_time = datetime.strptime(
-        vulnerability["artifact_scan_time"], "%Y-%m-%dT%H:%M:%S%z",
+        vulnerability["artifact_scan_time"],
+        "%Y-%m-%dT%H:%M:%S%z",
     )
 
     # component has several parts separated by colons. Last part is the
@@ -132,9 +124,7 @@ def get_item(vulnerability, test):
         title=title,
         test=test,
         severity=severity,
-        description=(
-            vulnerability.get("description", vulnerability.get("summary")) + "\n\n" + extra_desc
-        ).strip(),
+        description=(vulnerability.get("description", vulnerability.get("summary")) + "\n\n" + extra_desc).strip(),
         mitigation=mitigation,
         component_name=component_name,
         component_version=component_version,
@@ -146,9 +136,10 @@ def get_item(vulnerability, test):
         impact=severity,
         date=scan_time,
         unique_id_from_tool=vulnerability["issue_id"],
-        tags=tags,
         fix_available=fix_available,
     )
+
+    finding.unsaved_tags = tags
 
     cvss_data = parse_cvss_data(cvssv3)
     if cvss_data:
@@ -161,7 +152,9 @@ def get_item(vulnerability, test):
     if settings.V3_FEATURE_LOCATIONS and package_type and component_name:
         purl_type = package_type.lower()
         finding.unsaved_locations.append(
-            LocationData.dependency(purl_type=purl_type, name=component_name, version=component_version, file_path=vulnerability["path"]),
+            LocationData.dependency(
+                purl_type=purl_type, name=component_name, version=component_version, file_path=vulnerability["path"]
+            ),
         )
 
     return finding

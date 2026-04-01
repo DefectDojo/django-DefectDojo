@@ -8,7 +8,6 @@ from dojo.tools.locations import LocationData
 
 
 class CargoAuditParser:
-
     """A class that can be used to parse the cargo audit JSON report file"""
 
     def get_fields(self) -> list[str]:
@@ -80,24 +79,13 @@ class CargoAuditParser:
                 vuln_id = advisory.get("id")
                 vulnerability_ids = [advisory.get("id")]
                 categories = f"**Categories:** {', '.join(advisory['categories'])}" if "categories" in advisory else ""
-                description = (
-                    categories
-                    + f"\n**Description:** `{advisory.get('description')}`"
-                )
+                description = categories + f"\n**Description:** `{advisory.get('description')}`"
 
-                if (
-                    item["affected"] is not None
-                    and "functions" in item["affected"]
-                ):
+                if item["affected"] is not None and "functions" in item["affected"]:
                     affected_func = [
-                        f'{func}: {", ".join(versions)}'
-                        for func, versions in item["affected"][
-                            "functions"
-                        ].items()
+                        f"{func}: {', '.join(versions)}" for func, versions in item["affected"]["functions"].items()
                     ]
-                    description += (
-                        f"\n**Affected functions**: {', '.join(affected_func)}"
-                    )
+                    description += f"\n**Affected functions**: {', '.join(affected_func)}"
 
                 references = f"{advisory.get('url')}\n" + "\n".join(
                     advisory["references"],
@@ -130,7 +118,6 @@ class CargoAuditParser:
                         title=title,
                         test=test,
                         severity=severity,
-                        tags=tags,
                         description=description,
                         component_name=package_name,
                         component_version=package_version,
@@ -140,6 +127,7 @@ class CargoAuditParser:
                         references=references,
                         mitigation=mitigation,
                     )
+                    finding.unsaved_tags = tags
                     finding.unsaved_vulnerability_ids = vulnerability_ids
                     if settings.V3_FEATURE_LOCATIONS and package_name:
                         finding.unsaved_locations.append(

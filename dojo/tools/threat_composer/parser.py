@@ -6,7 +6,6 @@ from dojo.models import Finding
 
 
 class ThreatComposerParser:
-
     """Threat Composer JSON can be imported. See here for more info on this JSON format."""
 
     PRIORITY_VALUES = ["Low", "Medium", "High"]
@@ -66,7 +65,6 @@ class ThreatComposerParser:
                     mitigation_links[linked_id].append(mitigations[mitigation_id])
 
         for threat in data["threats"]:
-
             if "threatAction" in threat:
                 title = threat["threatAction"]
                 severity, impact, comments = self.parse_threat_metadata(threat.get("metadata", []))
@@ -84,10 +82,11 @@ class ThreatComposerParser:
                     unique_id_from_tool=unique_id_from_tool,
                     mitigation=mitigation,
                     impact=impact,
-                    tags=tags,
                     static_finding=True,
                     dynamic_finding=False,
                 )
+
+                finding.unsaved_tags = tags
 
                 match threat.get("status", "threatIdentified"):
                     case "threatResolved":
