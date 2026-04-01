@@ -182,6 +182,10 @@ class AWSInspector2Parser:
         finding.sast_source_file_path = f"{file_path}{file_name}"
         finding.line = start_line
         finding.sast_source_line = start_line
+        if start_line is None:
+            start_line = "N/A"
+        if end_line is None:
+            end_line = "N/A"
         finding.description += (
             "\n**Additional info**\n"
             f"CWEs: {string_cwes}\n"
