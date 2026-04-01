@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class AnchoreGrypeParser:
+
     """
     Anchore Grype JSON report format generated with `-o json` option.
 

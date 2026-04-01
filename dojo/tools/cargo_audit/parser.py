@@ -8,6 +8,7 @@ from dojo.tools.locations import LocationData
 
 
 class CargoAuditParser:
+
     """A class that can be used to parse the cargo audit JSON report file"""
 
     def get_fields(self) -> list[str]:

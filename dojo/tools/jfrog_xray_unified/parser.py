@@ -9,6 +9,7 @@ from dojo.utils import parse_cvss_data
 
 
 class JFrogXrayUnifiedParser:
+
     """JFrog Xray JSON reports"""
 
     def get_scan_types(self):
@@ -153,7 +154,7 @@ def get_item(vulnerability, test):
         purl_type = package_type.lower()
         finding.unsaved_locations.append(
             LocationData.dependency(
-                purl_type=purl_type, name=component_name, version=component_version, file_path=vulnerability["path"]
+                purl_type=purl_type, name=component_name, version=component_version, file_path=vulnerability["path"],
             ),
         )
 
