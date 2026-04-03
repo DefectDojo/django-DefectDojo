@@ -3102,6 +3102,26 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
         return data
 
 
+class CeleryStatusSerializer(serializers.Serializer):
+    worker_status = serializers.BooleanField(read_only=True)
+    broker_status = serializers.BooleanField(read_only=True)
+    queue_length = serializers.IntegerField(allow_null=True, read_only=True)
+    task_time_limit = serializers.IntegerField(allow_null=True, read_only=True)
+    task_soft_time_limit = serializers.IntegerField(allow_null=True, read_only=True)
+    task_default_expires = serializers.IntegerField(allow_null=True, read_only=True)
+
+
+class CeleryQueueTaskDetailSerializer(serializers.Serializer):
+    task_name = serializers.CharField(read_only=True)
+    count = serializers.IntegerField(read_only=True)
+    oldest_position = serializers.IntegerField(read_only=True)
+    newest_position = serializers.IntegerField(read_only=True)
+    oldest_eta = serializers.CharField(allow_null=True, read_only=True)
+    newest_eta = serializers.CharField(allow_null=True, read_only=True)
+    earliest_expires = serializers.CharField(allow_null=True, read_only=True)
+    latest_expires = serializers.CharField(allow_null=True, read_only=True)
+
+
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
 

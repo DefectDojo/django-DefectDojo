@@ -2,8 +2,10 @@ import binascii
 import calendar as tcalendar
 import hashlib
 import importlib
+import json
 import logging
 import mimetypes
+import operator
 import os
 import pathlib
 import re
@@ -18,6 +20,7 @@ from pathlib import Path
 import bleach
 import crum
 import cvss
+import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
 from cryptography.hazmat.backends import default_backend
@@ -1162,13 +1165,14 @@ def perform_product_grading(product):
 
 
 def get_celery_worker_status():
-    from .tasks import celery_status  # noqa: PLC0415 circular import
-    res = celery_status.apply_async()
-
-    # Wait 5 seconds for a response from Celery
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    # Use the control channel (celery.pidbox) instead of dispatching a task.
+    # This bypasses the task queue entirely, so it works correctly even when
+    # the queue is clogged with pending tasks.
     try:
-        return res.get(timeout=5)
-    except:
+        result = app.control.ping(timeout=3)
+        return len(result) > 0
+    except Exception:
         return False
 
 
@@ -1180,8 +1184,90 @@ def get_celery_queue_length():
         if "NOT_FOUND" in str(e):
             return 0
         return None
-    except:
+    except Exception:
         return None
+
+
+def purge_celery_queue():
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    with app.connection() as conn, conn.channel() as channel:
+        return channel.queue_purge(queue="celery")
+
+
+_PURGE_PIPELINE_BATCH_SIZE = 1000  # fallback; prefer DD_CELERY_QUEUE_PURGE_BATCH_SIZE
+_PURGE_MAX_TASKS = 10000  # fallback; prefer DD_CELERY_QUEUE_PURGE_MAX_TASKS
+
+
+def purge_celery_queue_by_task_name(task_name):
+    """Remove all queued tasks with the given task name. Returns count removed, or None on error."""
+    try:
+        client = redis_lib.from_url(settings.CELERY_BROKER_URL)
+        matching = [
+            msg_raw
+            for msg_raw in client.lrange("celery", 0, -1)
+            if json.loads(msg_raw).get("headers", {}).get("task") == task_name
+        ]
+        purge_max_tasks = getattr(settings, "CELERY_QUEUE_PURGE_MAX_TASKS", _PURGE_MAX_TASKS)
+        purge_batch_size = getattr(settings, "CELERY_QUEUE_PURGE_BATCH_SIZE", _PURGE_PIPELINE_BATCH_SIZE)
+        if len(matching) > purge_max_tasks:
+            logger.warning("Capping purge of '%s' to %d tasks (%d found)", task_name, purge_max_tasks, len(matching))
+            matching = matching[:purge_max_tasks]
+        logger.info("Purging %d queued tasks for '%s'", len(matching), task_name)
+        for i in range(0, len(matching), purge_batch_size):
+            batch = matching[i:i + purge_batch_size]
+            logger.debug("Purging batch %d-%d of %d", i + 1, i + len(batch), len(matching))
+            pipe = client.pipeline()
+            for msg_raw in batch:
+                pipe.lrem("celery", 1, msg_raw)
+            pipe.execute()
+        logger.info("Purged %d queued tasks for '%s'", len(matching), task_name)
+        return len(matching)
+    except Exception:
+        logger.exception("Failed to purge celery queue by task name")
+        return None
+
+
+def get_celery_queue_details():
+    """Per-task breakdown of the celery queue. O(N) — expensive for large queues."""
+    tasks = {}
+    try:
+        client = redis_lib.from_url(settings.CELERY_BROKER_URL)
+        for i, msg_raw in enumerate(client.lrange("celery", 0, -1)):
+            try:
+                msg = json.loads(msg_raw)
+                headers = msg.get("headers", {})
+                task_name = headers.get("task", "unknown")
+                eta = headers.get("eta")
+                expires = headers.get("expires")
+            except Exception:
+                task_name = "unknown"
+                eta = None
+                expires = None
+            if task_name not in tasks:
+                tasks[task_name] = {
+                    "task_name": task_name,
+                    "count": 0,
+                    "oldest_position": i + 1,
+                    "newest_position": i + 1,
+                    "oldest_eta": eta,
+                    "newest_eta": eta,
+                    "earliest_expires": expires,
+                    "latest_expires": expires,
+                }
+            else:
+                tasks[task_name]["newest_position"] = i + 1
+                tasks[task_name]["newest_eta"] = eta
+                # ISO 8601 strings are lexicographically sortable
+                if expires is not None:
+                    cur = tasks[task_name]
+                    if cur["earliest_expires"] is None or expires < cur["earliest_expires"]:
+                        cur["earliest_expires"] = expires
+                    if cur["latest_expires"] is None or expires > cur["latest_expires"]:
+                        cur["latest_expires"] = expires
+            tasks[task_name]["count"] += 1
+    except Exception:
+        return None
+    return sorted(tasks.values(), key=operator.itemgetter("oldest_position"))
 
 
 # Used to display the counts and enabled tabs in the product view

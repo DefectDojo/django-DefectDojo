@@ -8,4 +8,9 @@ urlpatterns = [
         views.SystemSettingsView.as_view(),
         name="system_settings",
     ),
+    re_path(
+        r"^celery_status$",
+        views.CeleryStatusView.as_view(),
+        name="celery_status",
+    ),
 ]
