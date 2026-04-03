@@ -317,7 +317,7 @@ env = environ.FileAwareEnv(
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
-    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False),
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(bool, True),
     # Enable Rate Limiting for the login page
     DD_RATE_LIMITER_ENABLED=(bool, False),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
@@ -1448,6 +1448,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
+    "JFrog Xray API Summary Artifact Scan": ["title", "description", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
@@ -1541,6 +1542,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AnchoreCTL Policies Report": True,
     "Anchore Enterprise Policy Check": True,
     "Anchore Grype": True,
+    "Anchore Grype detailed": True,
     "AWS Prowler Scan": True,
     "AWS Prowler V3": True,
     "Checkmarx Scan": False,
@@ -1638,6 +1640,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
     "Anchore Enterprise Policy Check": DEDUPE_ALGO_HASH_CODE,
     "Anchore Grype": DEDUPE_ALGO_HASH_CODE,
+    "Anchore Grype detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Aqua Scan": DEDUPE_ALGO_HASH_CODE,
     "AuditJS Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Prowler Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1699,6 +1702,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "SpotBugs Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray Unified Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray On Demand Binary Scan": DEDUPE_ALGO_HASH_CODE,
+    "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_HASH_CODE,
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
@@ -2144,14 +2148,7 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
 
     MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
 
-# Linear migrations for development
-# Helps avoid merge migration conflicts by tracking the latest migration
 if DEBUG:
-    INSTALLED_APPS = (
-        "django_linear_migrations",  # Must be before dojo to override makemigrations
-        *INSTALLED_APPS,
-    )
-
     def show_toolbar(request):
         return True
 
