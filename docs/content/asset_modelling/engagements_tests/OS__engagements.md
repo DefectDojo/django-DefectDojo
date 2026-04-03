@@ -56,11 +56,11 @@ As the containers that organize testing activity, Engagements can store or track
 
 Engagements are accessible via the sidebar. The submenu provides access to Active Engagements and All Engagements, as well as the option to view Engagements as organized by Product, Test types, and Environments. 
 
-![image](images/Engagements_ss17.png)
+![image](images/engagement_ss17.png)
 
 Alternatively, Engagements within a particular Product can be accessed from the submenu of the Engagements option in the top bar.
 
-![image](images/Engagements_ss18.png)
+![image](images/engagement_ss18.png)
 
 ### Permissions 
 
@@ -74,7 +74,7 @@ There are multiple approaches to creating an Engagement. Each approach requires 
 
 Once you’ve created a Product, you can add a new Interactive or CI/CD Engagement in the Engagements section of the Product’s navigation bar.
 
-![image](images/Engagement_ss4.png)
+![image](images/engagement_ss4.png)
 
 Every Engagement must have the following fields defined:
 - Type (Interactive or CI/CD)
@@ -108,25 +108,23 @@ Engagements can be edited by clicking the **Edit** button within the Engagement�
 
 You can easily duplicate Engagements by navigating to the list of Engagements within a Product and clicking the **Copy** button from within the ⋮ kebab menu next to the Engagement to be copied. This will create an exact copy of the original Engagement within the parent Product, including the metadata, Tests, and Findings within it.
 
-![image](images/Engagements_ss19.png)
+![image](images/engagement_ss19.png)
 
 ### Close Engagements 
 
 Engagements can be closed by navigating to the list of Engagements within a Product and clicking “Close” from within the ⋮ kebab menu of the chosen Engagement. 
 
-![image](images/Engagements_ss20.png)
+![image](images/engagement_ss20.png)
 
 Once closed, the Engagement’s status will be changed to “Completed.” Nevertheless, most write operations (e.g., adding tests, importing scans) will remain available. 
 
 Closing an Engagement does not change the status of the Findings within any of the Engagement’s Tests. Findings remain open, mitigated, or risk accepted according to their own lifecycle, and remain accessible for viewing and reporting.
 
-@paulOsinski Add additional details about Jira here — If the Engagement is linked to a Jira Epic, closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic.
-
 ### Reopen Engagements 
 
 If an Engagement is closed, it can be reopened by clicking **Reopen** from within its ⋮ kebab menu in the Closed Engagements table. This will make the Engagement active again and return its status to “In Progress.”
 
-![image](images/Engagements_ss21.png)
+![image](images/engagement_ss21.png)
 
 ### Expired Engagements 
 
@@ -138,7 +136,7 @@ Once expired, a red “X days overdue” notification will appear in the Engagem
 
 While it is not enabled by default, there is an option within the system settings to auto-close an Engagement once it has been expired for a certain number of days. 
 
-![image](images/Engagements_ss22.png)
+![image](images/engagement_ss22.png)
 
 ### Delete Engagements 
 

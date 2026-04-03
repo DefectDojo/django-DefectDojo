@@ -56,11 +56,11 @@ As the containers that organize testing activity, Engagements can store or track
 
 Engagements are accessible via the sidebar. The submenu provides access to Active Engagements and All Engagements, as well as the option to create new Engagements.
 
-![image](images/Engagement_ss13.png)
+![image](images/engagement_ss13.png)
 
 Alternatively, Engagements within an Asset can be accessed in the window at the bottom of the Asset’s view.
 
-![image](images/Engagement_ss14.png)
+![image](images/engagement_ss14.png)
 
 ### Permissions 
 
@@ -77,19 +77,19 @@ There are several ways to create an Engagement:
 - Within the Engagements dropdown in the Manage section of the sidebar
     - You will have to select the Asset to which to attribute the Engagement when completing the New Engagement form
 
-![image](images/Engagement_ss1.png)
+![image](images/engagement_ss1.png)
 
 - The gear icon located at the top right corner of an Asset view
 
-![image](images/Engagement_ss9.png)
+![image](images/engagement_ss9.png)
 
 - The “+ New Engagement” button found in the list of Engagements within an Asset
 
-![image](images/Engagement_ss2.png)
+![image](images/engagement_ss2.png)
 
 - If you haven’t already created an Engagement within an Asset, you can do so while importing a scan. 
 
-![image](images/Engagement_ss3.png)
+![image](images/engagement_ss3.png)
 
 Every Engagement must have the following fields defined:
 - Type (Interactive or CI/CD)
