@@ -1,7 +1,5 @@
 import datetime
 
-import requests
-
 from dojo.models import Test
 from dojo.tools.risk_recon.parser import RiskReconParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -11,7 +9,7 @@ class TestRiskReconAPIParser(DojoTestCase):
 
     def test_api_with_bad_url(self):
         with (get_unit_tests_scans_path("risk_recon") / "bad_url.json").open(encoding="utf-8") as testfile, \
-          self.assertRaises(requests.exceptions.ConnectionError):
+          self.assertRaises(Exception):  # noqa: B017  # SSRFError is caught and re-raised as Exception in api.py
             parser = RiskReconParser()
             parser.get_findings(testfile, Test())
 
