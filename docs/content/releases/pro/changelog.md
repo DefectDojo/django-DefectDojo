@@ -12,6 +12,30 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Mar 2026: v2.56
 
+### Mar 30, 2026: v2.56.4
+
+* **(Deduplication)** Fixed an issue where cross-tool deduplication could silently fail to match duplicates when findings were imported across different scan tools.
+* **(Pro UI)** Audit Log table now supports global search and query parameter–based filtering.
+* **(Pro UI)** Improved page load performance for large listing tables (Findings, Endpoints, etc.) by reducing unnecessary computation during pagination.
+
+### Mar 23, 2026: v2.56.3
+
+* **(MFA)** All authenticated users can now access their own MFA settings page, regardless of role.
+* **(Pro UI)** Alerts table now uses server-side filtering, sorting, and pagination for improved performance.
+* **(Pro UI)** Removed the deprecated Credentials section from System Settings.
+* **(Pro UI)** Fixed boolean filters on the Product Types table for the Critical and Key Asset columns.
+* **(Pro UI)** Fixed a filter alignment issue on the Engagements table.
+* **(Pro UI)** Standardized the Test field label to "Title" across all screens.
+* **(Rules Engine)** Fixed a timeout (502 error) that could occur when previewing rules against a large number of Findings.
+
+### Mar 16, 2026: v2.56.2
+
+* **(API)** Added pagination limit enforcement and deprecation warnings for unpaginated API requests.
+* **(Jira)** Custom field values are now properly encoded and decoded as JSON, with validation errors shown for invalid input.
+* **(Pro UI)** The New Risk Acceptance form now pre-fills the expiration date using the system default number of days.
+* **(Pro UI)** Improved handling of Group membership and permissions in the UI.
+* **(SBOM)** SBOM imports are now processed asynchronously, improving upload responsiveness for large files.
+
 ### Mar 12, 2026: v2.56.1
 
 * **(Pro UI)** Finding Groups can now be filtered by computed status: resolved, active, or risk-accepted.
