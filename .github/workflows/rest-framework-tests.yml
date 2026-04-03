@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ inputs.platform ==  'linux/arm64' && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     strategy:
       matrix:
-        os: [alpine, debian]
+        os: [debian]
 
     steps:
       # Replace slashes so we can use this in filenames

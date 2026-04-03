@@ -463,6 +463,7 @@ class BaseImporter(ImporterOptions):
         import_settings["close_old_findings"] = self.close_old_findings_toggle
         import_settings["push_to_jira"] = self.push_to_jira
         import_settings["tags"] = self.tags
+        import_settings["scan_date"] = self.scan_date.isoformat() if self.scan_date_override else None
         if settings.V3_FEATURE_LOCATIONS:
             # Add the list of locations that were added exclusively at import time
             if len(self.endpoints_to_add) > 0:

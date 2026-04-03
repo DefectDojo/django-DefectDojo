@@ -171,7 +171,11 @@ class Command(BaseCommand):
         logger.info(f"Processing {total_findings} findings in batches of max {batch_max_size} per test ({mode_str})")
 
         # Group findings by test_id to process them in batches per test
-        test_ids = findings_queryset.values_list("test_id", flat=True).distinct()
+        # Use order_by("test_id") to override the Finding model's default ordering
+        # (numerical_severity, date, title, ...). Without this, Django includes those
+        # ordering columns in the SELECT for DISTINCT, making test_ids non-unique and
+        # causing the same test to be processed multiple times.
+        test_ids = findings_queryset.order_by("test_id").values_list("test_id", flat=True).distinct()
         total_tests = len(test_ids)
         total_processed = 0
 
