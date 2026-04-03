@@ -1706,7 +1706,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
-    "Github SAST Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
