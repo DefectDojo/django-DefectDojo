@@ -1526,7 +1526,7 @@ class Engagement(BaseModel):
     preset = models.ForeignKey(Engagement_Presets, null=True, blank=True, help_text=_("Settings and notes for performing this engagement."), on_delete=models.CASCADE)
     reason = models.CharField(max_length=2000, null=True, blank=True)
     report_type = models.ForeignKey(Report_Type, null=True, blank=True, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, editable=False, on_delete=models.CASCADE)
     active = models.BooleanField(default=True, editable=False)
     tracker = models.URLField(max_length=200, help_text=_("Link to epic or ticket system with changes to version."), editable=True, blank=True, null=True)
     test_strategy = models.URLField(editable=True, blank=True, null=True)
