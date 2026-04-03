@@ -16,6 +16,7 @@ from dojo.api_v2.views import (
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
     CeleryViewSet,
+    CICDInfrastructureViewSet,
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
     DojoMetaViewSet,
@@ -152,6 +153,7 @@ v2_api.register(r"technologies", AppAnalysisViewSet, basename="app_analysis")
 v2_api.register(r"tests", TestsViewSet, basename="test")
 v2_api.register(r"test_types", TestTypesViewSet, basename="test_type")
 v2_api.register(r"test_imports", TestImportViewSet, basename="test_imports")
+v2_api.register(r"cicd_infrastructure", CICDInfrastructureViewSet, basename="cicd_infrastructure")
 v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
 v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")

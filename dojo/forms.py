@@ -1058,10 +1058,10 @@ class EngForm(forms.ModelForm):
             del self.fields["build_id"]
             del self.fields["commit_hash"]
             del self.fields["branch_tag"]
-            del self.fields["build_server"]
-            del self.fields["source_code_management_server"]
+            del self.fields["cicd_build_server"]
+            del self.fields["cicd_scm_server"]
             # del self.fields['source_code_management_uri']
-            del self.fields["orchestration_engine"]
+            del self.fields["cicd_orchestration_engine"]
         else:
             del self.fields["test_strategy"]
             del self.fields["status"]

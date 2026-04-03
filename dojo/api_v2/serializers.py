@@ -49,6 +49,7 @@ from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
     Check_List,
+    CICDInfrastructure,
     Development_Environment,
     Dojo_User,
     DojoMeta,
@@ -808,6 +809,12 @@ class AppAnalysisSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = App_Analysis
+        fields = "__all__"
+
+
+class CICDInfrastructureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CICDInfrastructure
         fields = "__all__"
 
 
