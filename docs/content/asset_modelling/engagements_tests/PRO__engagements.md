@@ -129,7 +129,7 @@ Engagements are closed by selecting **Close Engagement** within the Engagement�
 
 Closing an Engagement does not change the status of the Findings within any of the Engagement’s Tests. Findings remain open, mitigated, or risk accepted according to their own lifecycle, and remain accessible for viewing and reporting.
 
-@paulOsinski Add additional details about Jira here — If the Engagement is linked to a Jira Epic, closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic.
+If the Engagement is linked to a Jira Epic (see **[Jira Integration: Enable Engagement Epic Mapping](issue_tracking/jira/jira_guide#enable-engagement-epic-mapping-for-products)**), closing the Engagement will trigger an asynchronous task that closes the associated Jira Epic in your connected Jira Space.
 
 ### Reopen Engagements 
 
@@ -147,20 +147,42 @@ While it is not enabled by default, there is an option within the system setting
 
 ![image](images/engagement_ss15.png)
 
-### Delete Engagements 
+### Delete Engagements
 
-Deleting an Engagement can be performed by selecting **Delete Engagement** from the Engagement’s settings. This action can’t be undone. 
+Deleting an Engagement can be performed by selecting **Delete Engagement** from the Engagement’s settings. This action can’t be undone.
 
-Deleting an Engagement will also delete the following: 
-Any Tests associated with the Engagement 
-All Findings within those Tests 
-Any linked Jira Epics
-All notes and file uploads associated with the Engagement 
+Deleting an Engagement will also delete the following:
+Any Tests associated with the Engagement
+All Findings within those Tests
+Any linked Jira Epic mappings (the Epic itself will remain in Jira, but the link between DefectDojo and Jira will be removed)
+All notes and file uploads associated with the Engagement
 
-For auditing purposes, it is recommended to close any completed Engagements, rather than deleting them. 
+For auditing purposes, it is recommended to close any completed Engagements, rather than deleting them.
 
 | **Operation** | **Results** | **Reversible** |
 |----------|---------|------------|
 | **Close** | Marks as inactive; data remains; can be reopened | Yes (reopen) |
 | **Expire** | Visual warning only; optional auto-close; notifications | N/A |
-| **Delete** | Permanently removes Engagement, Tests, Findings, notes, files, and any linked Epics in Jira | No |
+| **Delete** | Permanently removes Engagement, Tests, Findings, notes, files, and any Jira Epic mappings (Epics remain in Jira) | No |
+
+## Jira Integration
+
+Engagements can be linked to a connected Jira Space, allowing Findings within the Engagement to be pushed to Jira as Issues. For a complete guide to setting up Jira, see **[Connecting DefectDojo to Jira](issue_tracking/jira/jira_guide)**.
+
+### Engagement Epic Mapping
+
+When **Enable Engagement Epic Mapping** is checked in a Product’s Jira settings, Engagements will be pushed to Jira as Epics. Findings within the Engagement are pushed as child Issues underneath the Epic, mirroring DefectDojo’s Engagement → Findings hierarchy in Jira’s Epic → Issue structure.
+
+For more information on this setting, see **[Enable Engagement Epic Mapping](issue_tracking/jira/jira_guide#enable-engagement-epic-mapping-for-products)**.
+
+### Engagement-Level Jira Settings
+
+By default, Engagements inherit their Jira settings from their parent Asset (Product). However, individual Engagements can override these settings to use different Jira configurations. The following settings can be customized per-Engagement:
+
+- **Project Key** — route Findings to a different Jira Space
+- **Issue Template** — use a different template for Issues created from this Engagement
+- **Custom Fields** — apply different custom field mappings
+- **Jira Labels** — tag Issues with Engagement-specific labels
+- **Default Assignee** — assign Issues to a different team member
+
+These settings are accessible from the **Edit Engagement** page. For more details, see **[Engagement-Level Jira Settings](issue_tracking/jira/jira_guide#engagement-level-jira-settings)**.
