@@ -1442,9 +1442,10 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     "Since you are not the note's author, it was not deleted.",
                     extra_tags="alert-danger")
 
-        if "remove_finding" in request.POST:
+        if edit_mode and "remove_finding" in request.POST:
             finding = get_object_or_404(
-                Finding, pk=request.POST["remove_finding_id"])
+                risk_acceptance.accepted_findings,
+                pk=request.POST["remove_finding_id"])
 
             ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
