@@ -1,4 +1,5 @@
 import logging
+from itertools import batched
 
 from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
@@ -29,6 +30,9 @@ from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+# Bound IN-list size when bulk-loading status fields for close_old_findings.
+_CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK = 1000
 
 
 class DefaultReImporterOptions(ImporterOptions):
@@ -471,32 +475,36 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         These can change during reimport (e.g. false positive) while the in-memory instances
         are stale. Per-finding refresh_from_db in close_old_findings was added in
         https://github.com/DefectDojo/django-DefectDojo/pull/12291. A naive refresh per
-        finding issues one SELECT each; we batch one query for all primary keys and fall
+        finding issues one SELECT each; we batch one query per chunk of primary keys and fall
         back to refresh_from_db only when needed.
-        """
-        ids = [f.pk for f in findings if f.pk is not None]
-        if not ids:
-            for finding in findings:
-                finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
-            return
 
-        fresh_by_id = {
-            row["id"]: row
-            for row in Finding.objects.filter(pk__in=ids).values(
-                "id",
-                "false_p",
-                "risk_accepted",
-                "out_of_scope",
-            )
-        }
-        for finding in findings:
-            row = fresh_by_id.get(finding.pk)
-            if row is not None:
-                finding.false_p = row["false_p"]
-                finding.risk_accepted = row["risk_accepted"]
-                finding.out_of_scope = row["out_of_scope"]
-            else:
-                finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
+        This really should be fixed differently, but for now we at least optimize it to be done in bulk.
+        """
+        findings_without_pk = [f for f in findings if f.pk is None]
+        findings_with_pk = [f for f in findings if f.pk is not None]
+
+        for finding in findings_without_pk:
+            finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
+
+        for chunk in batched(findings_with_pk, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
+            ids = [f.pk for f in chunk]
+            fresh_by_id = {
+                row["id"]: row
+                for row in Finding.objects.filter(pk__in=ids).values(
+                    "id",
+                    "false_p",
+                    "risk_accepted",
+                    "out_of_scope",
+                )
+            }
+            for finding in chunk:
+                row = fresh_by_id.get(finding.pk)
+                if row is not None:
+                    finding.false_p = row["false_p"]
+                    finding.risk_accepted = row["risk_accepted"]
+                    finding.out_of_scope = row["out_of_scope"]
+                else:
+                    finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
 
     def close_old_findings(
         self,
