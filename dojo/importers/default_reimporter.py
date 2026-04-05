@@ -469,8 +469,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Refresh false_p, risk_accepted, and out_of_scope from the DB for each finding.
 
         These can change during reimport (e.g. false positive) while the in-memory instances
-        are stale. A naive refresh_from_db per finding issues one SELECT each; we batch one
-        query for all primary keys and fall back to refresh_from_db only when needed.
+        are stale. Per-finding refresh_from_db in close_old_findings was added in
+        https://github.com/DefectDojo/django-DefectDojo/pull/12291. A naive refresh per
+        finding issues one SELECT each; we batch one query for all primary keys and fall
+        back to refresh_from_db only when needed.
         """
         ids = [f.pk for f in findings if f.pk is not None]
         if not ids:
@@ -515,7 +517,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # reimport makes this change in the database. However, the findings here
         # are calculated based from the original values before the reimport, so
         # any updates made during reimport are discarded without first getting the
-        # state of the finding as it stands at this moment
+        # state of the finding as it stands at this moment (django-DefectDojo #12291).
         self._sync_close_old_finding_status_fields(findings)
         # Determine if pushing to jira or if the finding groups are enabled
         mitigated_findings = []
