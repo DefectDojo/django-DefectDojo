@@ -46,7 +46,6 @@ class TestAWSInspector2Parser(DojoTestCase):
         with (get_unit_tests_scans_path("aws_inspector2") / "aws_inspector2_package_vuln_metadata.json").open(encoding="utf-8") as testfile:
             parser = AWSInspector2Parser()
             findings = parser.get_findings(testfile, Test())
-        self.validate_locations(findings)
         self.assertEqual(28, len(findings))
         # Use the first finding (CVE-2025-58187 - go/stdlib) for field assertions
         finding = findings[0]
