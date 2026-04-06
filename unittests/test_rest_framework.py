@@ -1011,7 +1011,38 @@ class FindingCloseAPITest(DojoAPITestCase):
             }
             response = self.client.post(self._close_url(finding.id), payload, format="json")
             self.assertEqual(200, response.status_code, response.content[:1000])
-            self.assertTrue(add_comment_mock.called)
+        self.assertTrue(add_comment_mock.called)
+
+
+@versioned_fixtures
+class FindingVerifyAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+        self.admin = testuser
+
+    def _verify_url(self, finding_id: int) -> str:
+        return f"/api/v2/findings/{finding_id}/verify/"
+
+    def test_verify_finding_basic(self):
+        finding = Finding.objects.get(id=7)
+        response = self.client.post(self._verify_url(finding.id), {"note": "Marked verified"}, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.verified)
+        self.assertEqual(finding.last_reviewed_by, self.admin)
+        self.assertTrue(finding.notes.filter(entry__icontains="Marked verified").exists())
+
+    def test_verify_finding_invalid_payload(self):
+        finding = Finding.objects.get(id=7)
+        # note_type specified but invalid id
+        response = self.client.post(self._verify_url(finding.id), {"note_type": 9999}, format="json")
+        self.assertEqual(400, response.status_code, response.content[:1000])
 
 
 @versioned_fixtures
@@ -1611,6 +1642,19 @@ class URLTest(BaseClass.BaseClassTest):
         self.assertEqual(403, response.status_code, response.content[:1000])
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
+
+    def test_delete_removes_location(self):
+        """Verify that deleting a URL via the API also deletes the associated Location."""
+        url_obj = URL.objects.get(pk=self.delete_id)
+        location_id = url_obj.location_id
+        self.assertTrue(Location.objects.filter(pk=location_id).exists())
+
+        relative_url = f"{self.url}{location_id}/"
+        response = self.client.delete(relative_url)
+        self.assertEqual(204, response.status_code, response.content[:1000])
+
+        self.assertFalse(Location.objects.filter(pk=location_id).exists())
+        self.assertFalse(URL.objects.filter(pk=self.delete_id).exists())
 
 
 @versioned_fixtures

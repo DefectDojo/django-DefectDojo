@@ -159,27 +159,32 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
 
         bulk_remove_all_tags(from_model, instance_pk_query)
 
-    for m2m_field in from_model._meta.many_to_many:
-        # Skip tag fields — handled by bulk_remove_all_tags above
-        if hasattr(m2m_field, "tag_options"):
-            continue
-        # Skip if caller already cleaned M2M for this model
-        if from_model in skip_m2m_for:
-            continue
-        through_model = m2m_field.remote_field.through
-        fk_column = None
-        for field in through_model._meta.get_fields():
-            if hasattr(field, "related_model") and field.related_model is from_model:
-                fk_column = field.column
-                break
-        if fk_column:
-            filterspec_m2m = {f"{fk_column}__in": models.Subquery(instance_pk_query)}
-            m2m_count = execute_delete_sql(through_model.objects.filter(**filterspec_m2m))
-            if m2m_count:
-                logger.debug(
-                    "cascade_delete: cleared %d rows from M2M %s",
-                    m2m_count, through_model._meta.db_table,
-                )
+    # Clear all M2M through tables — both forward (from_model._meta.many_to_many)
+    # and reverse (other models with ManyToManyField pointing to from_model).
+    # Forward M2M fields use field.remote_field.through, reverse use field.through.
+    if from_model not in skip_m2m_for:
+        m2m_through_models = set()
+        for field_info in from_model._meta.get_fields():
+            if hasattr(field_info, "tag_options"):
+                continue
+            through = getattr(field_info, "through", None) or getattr(getattr(field_info, "remote_field", None), "through", None)
+            if through is not None:
+                m2m_through_models.add(through)
+
+        for through_model in m2m_through_models:
+            fk_column = None
+            for field in through_model._meta.get_fields():
+                if hasattr(field, "related_model") and field.related_model is from_model:
+                    fk_column = field.column
+                    break
+            if fk_column:
+                filterspec_m2m = {f"{fk_column}__in": models.Subquery(instance_pk_query)}
+                m2m_count = execute_delete_sql(through_model.objects.filter(**filterspec_m2m))
+                if m2m_count:
+                    logger.debug(
+                        "cascade_delete: cleared %d rows from M2M %s",
+                        m2m_count, through_model._meta.db_table,
+                    )
 
     # At level 0, do NOT delete root records — the caller handles that
     # (e.g. via ORM obj.delete() to fire Django signals).

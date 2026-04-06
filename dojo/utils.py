@@ -2,8 +2,10 @@ import binascii
 import calendar as tcalendar
 import hashlib
 import importlib
+import json
 import logging
 import mimetypes
+import operator
 import os
 import pathlib
 import re
@@ -18,6 +20,7 @@ from pathlib import Path
 import bleach
 import crum
 import cvss
+import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
 from cryptography.hazmat.backends import default_backend
@@ -91,154 +94,6 @@ Helper functions for DefectDojo
 def get_visible_scan_types():
     """Returns a QuerySet of active Test_Type objects."""
     return Test_Type.objects.filter(active=True)
-
-
-def do_false_positive_history(finding, *args, **kwargs):
-    """
-    Replicate false positives across product.
-
-    Mark finding as false positive if the same finding was previously marked
-    as false positive in the same product, beyond that, retroactively mark
-    all equal findings in the product as false positive (if they weren't already).
-    The retroactively replication will be also trigerred if the finding passed as
-    an argument already is a false positive. With this feature we can assure that
-    on each call of this method all findings in the product complies to the rule
-    (if one finding is a false positive, all equal findings in the same product also are).
-
-    Args:
-        finding (:model:`dojo.Finding`): Finding to be replicated
-
-    """
-    to_mark_as_fp = set()
-
-    existing_findings = match_finding_to_existing_findings(finding, product=finding.test.engagement.product)
-    deduplicationLogger.debug(
-        "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product",
-        len(existing_findings),
-    )
-
-    existing_fp_findings = existing_findings.filter(false_p=True)
-    deduplicationLogger.debug(
-        (
-            "FALSE_POSITIVE_HISTORY: Found %i existing findings in the same product "
-            "that were previously marked as false positive"
-        ),
-        len(existing_fp_findings),
-    )
-
-    if existing_fp_findings:
-        finding.false_p = True
-        to_mark_as_fp.add(finding)
-
-    system_settings = System_Settings.objects.get()
-    if system_settings.retroactive_false_positive_history:
-        # Retroactively mark all active existing findings as false positive if this one
-        # is being (or already was) marked as a false positive
-        if finding.false_p:
-            existing_non_fp_findings = existing_findings.filter(active=True).exclude(false_p=True)
-            to_mark_as_fp.update(set(existing_non_fp_findings))
-
-    for find in to_mark_as_fp:
-        deduplicationLogger.debug(
-            "FALSE_POSITIVE_HISTORY: Marking Finding %i:%s from %s as false positive",
-            find.id, find.title, find.test.engagement,
-        )
-        try:
-            find.false_p = True
-            find.active = False
-            find.verified = False
-            super(Finding, find).save(skip_validation=True, *args, **kwargs)
-        except Exception as e:
-            deduplicationLogger.debug(str(e))
-
-
-def match_finding_to_existing_findings(finding, product=None, engagement=None, test=None):
-    """
-    Customizable lookup that returns all existing findings for a given finding.
-
-    Takes one finding as an argument and returns all findings that are equal to it
-    on the same product, engagement or test. For now, only one custom filter can
-    be used, so you should choose between product, engagement or test.
-    The lookup is done based on the deduplication_algorithm of the given finding test.
-
-    Args:
-        finding (:model:`dojo.Finding`): Finding to be matched
-        product (:model:`dojo.Product`, optional): Product to filter findings by
-        engagement (:model:`dojo.Engagement`, optional): Engagement to filter findings by
-        test (:model:`dojo.Test`, optional): Test to filter findings by
-
-    """
-    if product:
-        custom_filter_type = "product"
-        custom_filter = {"test__engagement__product": product}
-
-    elif engagement:
-        custom_filter_type = "engagement"
-        custom_filter = {"test__engagement": engagement}
-
-    elif test:
-        custom_filter_type = "test"
-        custom_filter = {"test": test}
-
-    else:
-        msg = "No product, engagement or test provided as argument."
-        raise ValueError(msg)
-
-    deduplication_algorithm = finding.test.deduplication_algorithm
-
-    deduplicationLogger.debug(
-        "Matching finding %i:%s to existing findings in %s %s using %s as deduplication algorithm.",
-        finding.id, finding.title, custom_filter_type, list(custom_filter.values())[0], deduplication_algorithm,
-    )
-
-    if deduplication_algorithm == "hash_code":
-        return (
-            Finding.objects.filter(
-                **custom_filter,
-                hash_code=finding.hash_code,
-            ).exclude(hash_code=None)
-            .exclude(id=finding.id)
-            .order_by("id")
-        )
-
-    if deduplication_algorithm == "unique_id_from_tool":
-        return (
-            Finding.objects.filter(
-                **custom_filter,
-                unique_id_from_tool=finding.unique_id_from_tool,
-            ).exclude(unique_id_from_tool=None)
-            .exclude(id=finding.id)
-            .order_by("id")
-        )
-
-    if deduplication_algorithm == "unique_id_from_tool_or_hash_code":
-        query = Finding.objects.filter(
-            Q(**custom_filter),
-            (
-                (Q(hash_code__isnull=False) & Q(hash_code=finding.hash_code))
-                | (Q(unique_id_from_tool__isnull=False) & Q(unique_id_from_tool=finding.unique_id_from_tool))
-            ),
-        ).exclude(id=finding.id).order_by("id")
-        deduplicationLogger.debug(query.query)
-        return query
-
-    if deduplication_algorithm == "legacy":
-        # This is the legacy reimport behavior. Although it's pretty flawed and
-        # doesn't match the legacy algorithm for deduplication, this is left as is for simplicity.
-        # Re-writing the legacy deduplication here would be complicated and counter-productive.
-        # If you have use cases going through this section, you're advised to create a deduplication configuration for your parser
-        logger.debug("Legacy dedupe. In case of issue, you're advised to create a deduplication configuration in order not to go through this section")
-        return (
-            Finding.objects.filter(
-                **custom_filter,
-                title__iexact=finding.title,
-                severity=finding.severity,
-                numerical_severity=Finding.get_numerical_severity(finding.severity),
-            ).order_by("id")
-        )
-
-    logger.error("Internal error: unexpected deduplication_algorithm: '%s' ", deduplication_algorithm)
-    return None
 
 
 def count_findings(findings: QuerySet) -> tuple[dict["Product", list[int]], dict[str, int]]:
@@ -1310,13 +1165,14 @@ def perform_product_grading(product):
 
 
 def get_celery_worker_status():
-    from .tasks import celery_status  # noqa: PLC0415 circular import
-    res = celery_status.apply_async()
-
-    # Wait 5 seconds for a response from Celery
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    # Use the control channel (celery.pidbox) instead of dispatching a task.
+    # This bypasses the task queue entirely, so it works correctly even when
+    # the queue is clogged with pending tasks.
     try:
-        return res.get(timeout=5)
-    except:
+        result = app.control.ping(timeout=3)
+        return len(result) > 0
+    except Exception:
         return False
 
 
@@ -1328,8 +1184,90 @@ def get_celery_queue_length():
         if "NOT_FOUND" in str(e):
             return 0
         return None
-    except:
+    except Exception:
         return None
+
+
+def purge_celery_queue():
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    with app.connection() as conn, conn.channel() as channel:
+        return channel.queue_purge(queue="celery")
+
+
+_PURGE_PIPELINE_BATCH_SIZE = 1000  # fallback; prefer DD_CELERY_QUEUE_PURGE_BATCH_SIZE
+_PURGE_MAX_TASKS = 10000  # fallback; prefer DD_CELERY_QUEUE_PURGE_MAX_TASKS
+
+
+def purge_celery_queue_by_task_name(task_name):
+    """Remove all queued tasks with the given task name. Returns count removed, or None on error."""
+    try:
+        client = redis_lib.from_url(settings.CELERY_BROKER_URL)
+        matching = [
+            msg_raw
+            for msg_raw in client.lrange("celery", 0, -1)
+            if json.loads(msg_raw).get("headers", {}).get("task") == task_name
+        ]
+        purge_max_tasks = getattr(settings, "CELERY_QUEUE_PURGE_MAX_TASKS", _PURGE_MAX_TASKS)
+        purge_batch_size = getattr(settings, "CELERY_QUEUE_PURGE_BATCH_SIZE", _PURGE_PIPELINE_BATCH_SIZE)
+        if len(matching) > purge_max_tasks:
+            logger.warning("Capping purge of '%s' to %d tasks (%d found)", task_name, purge_max_tasks, len(matching))
+            matching = matching[:purge_max_tasks]
+        logger.info("Purging %d queued tasks for '%s'", len(matching), task_name)
+        for i in range(0, len(matching), purge_batch_size):
+            batch = matching[i:i + purge_batch_size]
+            logger.debug("Purging batch %d-%d of %d", i + 1, i + len(batch), len(matching))
+            pipe = client.pipeline()
+            for msg_raw in batch:
+                pipe.lrem("celery", 1, msg_raw)
+            pipe.execute()
+        logger.info("Purged %d queued tasks for '%s'", len(matching), task_name)
+        return len(matching)
+    except Exception:
+        logger.exception("Failed to purge celery queue by task name")
+        return None
+
+
+def get_celery_queue_details():
+    """Per-task breakdown of the celery queue. O(N) — expensive for large queues."""
+    tasks = {}
+    try:
+        client = redis_lib.from_url(settings.CELERY_BROKER_URL)
+        for i, msg_raw in enumerate(client.lrange("celery", 0, -1)):
+            try:
+                msg = json.loads(msg_raw)
+                headers = msg.get("headers", {})
+                task_name = headers.get("task", "unknown")
+                eta = headers.get("eta")
+                expires = headers.get("expires")
+            except Exception:
+                task_name = "unknown"
+                eta = None
+                expires = None
+            if task_name not in tasks:
+                tasks[task_name] = {
+                    "task_name": task_name,
+                    "count": 0,
+                    "oldest_position": i + 1,
+                    "newest_position": i + 1,
+                    "oldest_eta": eta,
+                    "newest_eta": eta,
+                    "earliest_expires": expires,
+                    "latest_expires": expires,
+                }
+            else:
+                tasks[task_name]["newest_position"] = i + 1
+                tasks[task_name]["newest_eta"] = eta
+                # ISO 8601 strings are lexicographically sortable
+                if expires is not None:
+                    cur = tasks[task_name]
+                    if cur["earliest_expires"] is None or expires < cur["earliest_expires"]:
+                        cur["earliest_expires"] = expires
+                    if cur["latest_expires"] is None or expires > cur["latest_expires"]:
+                        cur["latest_expires"] = expires
+            tasks[task_name]["count"] += 1
+    except Exception:
+        return None
+    return sorted(tasks.values(), key=operator.itemgetter("oldest_position"))
 
 
 # Used to display the counts and enabled tabs in the product view

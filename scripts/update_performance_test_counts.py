@@ -422,6 +422,8 @@ def update_test_file(counts: list[TestCount]):
         "reimport1_async_tasks": "expected_num_async_tasks2",
         "reimport2_queries": "expected_num_queries3",
         "reimport2_async_tasks": "expected_num_async_tasks3",
+        "reimport3_queries": "expected_num_queries4",
+        "reimport3_async_tasks": "expected_num_async_tasks4",
     }
     param_map_deduplication = {
         "first_import_queries": "expected_num_queries1",

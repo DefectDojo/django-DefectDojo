@@ -1,9 +1,8 @@
 ---
 title: "📋 Jira Integration Guide"
 description: "Work with the Jira integration"
-weight: 1
-aliases:
-  - /en/share_your_findings/jira_guide
+weight: 2
+audience: opensource
 ---
 DefectDojo's Jira integration can be used to push Finding data to one or more Jira Spaces.  By doing so, you can integrate DefectDojo into your standard development workflow.  Here are some examples of how this can work:
 
@@ -19,11 +18,11 @@ Setting Up Jira requires the following steps:
 
 ## Step 1: Connect a Jira Instance
 
-Connecting a Jira Instance is the first step to take when setting up DefectDojo’s Jira integration.  Please note Jira Service Management is currently not supported.
+Connecting a Jira Instance is the first step to take when setting up DefectDojo's Jira integration.  Please note Jira Service Management is currently not supported.
 
 #### Required information from Jira
 
-Atlassian uses different ways of authentication between Jira Cloud and Jira Data Center.
+Atlassian uses different methods of authentication between Jira Cloud and Jira Data Center.
 
 for **Jira Cloud**, you will need:
 * a Jira URL, i.e. https://yourcompany.atlassian.net/
@@ -35,7 +34,6 @@ for **Jira Data Center (or Server)**, you will need:
 * a Jira URL, i.e. https://jira.yourcompany.com
 * an account with permissions to create and update issues in your Jira instance.  This can be:
     * A standard **username / password** combination
-    * A **emailaddress / Personal Access Token** combination (not supported in Defect Dojo Open-Source)
 
 Optionally, you can map:
 * Jira Transitions to trigger Re-Opening and Closing Findings
@@ -43,45 +41,7 @@ Optionally, you can map:
 
 Multiple Jira Spaces can be handled by a single Jira Instance connection, as long as the Jira account / token used by DefectDojo has permission to create Issues in the associated Jira Space.
 
-### Add a Jira Instance (Pro UI)
-
-1. If you have not already done so, navigate to the System Settings page and check the box on **Enable Jira Integration**.
-
-2. Navigate to the  **Enterprise Settings \> Jira Instances \> + New Jira Instance**  page from the DefectDojo sidebar.
-
-![image](images/jira-instance-beta.png)
-
-3. Select a **Configuration Name** for this Jira Instance to use in DefectDojo. This name is simply a label for the Instance connection in DefectDojo, and does not need to be related to any Jira data.
-
-4. Select the URL for your company’s Jira instance \- likely similar to `https://**yourcompany**.atlassian.net` if you’re using a Jira Cloud installation.
-
-5. Enter an appropriate authetication method in the Username / Password fields for Jira:
-    * For standard **username / password Jira authentication**, enter a Jira Username and corresponding Password in these fields.
-    * For authentication with a **user's API token (Jira Cloud)** enter the Username with the corresponding **API token** in the password field.
-    * For authentication with a Jira **Personal Access Token (aka PAT, used in Jira Data Center and Jira Server only)**, enter the PAT in the password field.  Username is not used for authentication with a Jira PAT, but the field is still required in this form, so you can use a placeholder value here to identify your PAT.
-
-Note that the user associated with this connection have permission to create Issues and access data in your Jira instance.
-
-6. You will need to provide values for an Epic Name ID, Re-open Transition ID and Close Transition ID.  These values can be changed later.  While logged into Jira, you can access these values from the following URLs:
-- **Epic Name ID**: visit `https://<YOUR JIRA URL>/rest/api/2/field` and search for Epic Name. Copy the number out of `number` and paste it here.  If you do not have an Epic Name ID associated with your Space in Jira (due to using a Team-Managed Space, for example), enter 0 on this field.
-- **Re-open Transition ID**: visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Reopen Transition ID field.
-- **Close Transition ID**: Visit `https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand-transitions.fields` to find the ID for your Jira instance. Paste it in the Close Transition ID field.
-
-7. Select the Default issue type which you want to create Issues as in Jira. The options for this are **Bug, Task, Story** and **Epic** (which are standard Jira issue types) as well as **Spike** and **Security**, which are custom issue types. If you have a different Issue Type which you want to use, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for assistance.
-
-8. Select your Issue Template, which will determine the Issue Description when Issues are created in Jira.
-
-The two types are:
-- **Jira\_full**, which will include all Finding information in Jira Issues
-- **Jira\_limited**, which will include a smaller amount of Finding information and metadata.
-
-If you leave this field blank, it will default to **Jira\_full.**  If you need a different kind of template, Pro users can reach out to [support@defectdojo.com](mailto:support@defectdojo.com)
-
-9. If you wish, enter the name of a Jira Resolution which will change the status of a Finding to Accepted or to False Positive (when the Resolution is triggered on the Issue).
-
-The form can be submitted from here.  If you wish, you can further customize your Jira integration under Optional Fields.  Clicking this button will allow you to apply generic text to Jira Issues or change the mapping of Jira Severity Mappings.
-
-### Add a Jira Instance (Classic UI / Open-Source)
+### Add a Jira Instance
 
 1. If you have not already done so, navigate to the System Settings page and check the box on **Enable Jira Integration**. You will need to do this before the ⚙️ **Configuration \> JIRA** option shows up on the sidebar.
 ​
@@ -93,13 +53,13 @@ The form can be submitted from here.  If you wish, you can further customize you
 
 #### Add Jira Configuration (Express)
 
-The Express method allows for a quicker method of linking a Space. Use the Express method if you simply want to connect a Jira Space quickly, and you aren’t dealing with a complex Jira workflow.
+The Express method allows for a quicker method of linking a Space. Use the Express method if you simply want to connect a Jira Space quickly, and you aren't dealing with a complex Jira workflow.
 
 ![image](images/Connect_DefectDojo_to_Jira_2.png)
 
 1. Select a name for this Jira Configuration to use in DefectDojo. This name is simply a label for the Instance connection in DefectDojo, and does not need to be related to any Jira data.
 ​
-2. Select the URL for your company’s Jira instance \- likely similar to `https://**yourcompany**.atlassian.net` if you’re using a Jira Cloud installation.
+2. Select the URL for your company's Jira instance \- likely similar to `https://**yourcompany**.atlassian.net` if you're using a Jira Cloud installation.
 ​
 3. Enter an appropriate authetication method in the Username / Password fields for Jira:
     * For standard **username / password Jira authentication**, enter a Jira Username and corresponding Password in these fields.
@@ -115,15 +75,15 @@ The two types are:
 
 If you leave this field blank, it will default to **Jira\_full.**
 
-6. Select one or more Jira Resolution types which will change the status of a Finding to Accepted (when the Resolution is triggered on the Issue). If you don’t wish to use this automation, you can leave the field blank.
+6. Select one or more Jira Resolution types which will change the status of a Finding to Accepted (when the Resolution is triggered on the Issue). If you don't wish to use this automation, you can leave the field blank.
 ​
-7. Select one or more Jira Resolution types which will change the status of a Finding to False Positive (when the Resolution is triggered on the Issue). If you don’t wish to use this automation, you can leave the field blank.
+7. Select one or more Jira Resolution types which will change the status of a Finding to False Positive (when the Resolution is triggered on the Issue). If you don't wish to use this automation, you can leave the field blank.
 ​
 8. Decide whether you wish to send SLA Notifications as a comment on a Jira issue.
 ​
 9. Decide whether you wish to automatically sync Findings with Jira. If this is enabled, Jira Issues will automatically be kept in sync with the related Findings. If this is not enabled, you will need to manually push any changes made to a Finding after the Issue has been created in Jira.
 ​
-10. Select your Issue key. In Jira, this is the string associated with an Issue (e.g. the word **‘EXAMPLE’** in an issue called **EXAMPLE\-123**). If you don’t know your issue key, create a new Issue in the Jira Space. In the screenshot below, we can see that the issue key on our Jira Space is **DEF**.
+10. Select your Issue key. In Jira, this is the string associated with an Issue (e.g. the word **'EXAMPLE'** in an issue called **EXAMPLE\-123**). If you don't know your issue key, create a new Issue in the Jira Space. In the screenshot below, we can see that the issue key on our Jira Space is **DEF**.
 ​
 ![image](images/Connect_DefectDojo_to_Jira_3.png)
 ​
@@ -157,65 +117,7 @@ Comments (in Jira) and Notes (in DefectDojo) can be kept in sync. This setting c
 
 Each Product or Engagement in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated Jira Space and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
 
-### Add Jira to a Product or Engagement (Pro UI)
-
-You can find this page by clicking the Gear menu on a Product or Engagement - ⚙️ and opening the Jira Space Settings page.
-
-![image](images/jira-project-settings.png)
-
-#### Jira Instance
-
-If you have multiple instances of Jira set up, for separate products or teams within your organization, you can indicate which Jira Space you want DefectDojo to create Issues in. Select a Space from the drop\-down menu.
-
-If this menu doesn't list any Jira instances, confirm that those Space are connected in your global Jira Configuration for DefectDojo \- yourcompany.defectdojo.com/jira.
-
-#### Project key
-
-This is the key of the Space that you want to use with DefectDojo.  The Space Key for a given Space can be found in the URL.  (This was previously referred to as a **Jira Project Key**, but as of Sepetember 2025, this is now referred to in Jira as the **Space Key**).
-
-![image](images/Add_a_Connected_Jira_Project_to_a_Product_3.png)
-
-#### Issue template
-
-Here you can determine how much DefectDojo metadata you want to send to Jira. Select one of two options:
-
-* **jira\_full**: Issues will track all of the parameters from DefectDojo \- a full Description, CVE, Severity, etc. Useful if you need complete Finding context in Jira (for example, if someone is working on this Issue who doesn't have access to DefectDojo).
-
-Here is an example of a **jira\_full** Issue:
-​
-![image](images/Add_a_Connected_Jira_Project_to_a_Product_4.png)
-
-* **Jira\_limited:** Issues will only track the DefectDojo link, the Product/Engagement/Test links, the Reporter and Environment fields. All other fields are tracked in DefectDojo only. Useful if you don't require full Finding context in Jira (for example, if someone is working on this Issue who mainly works in DefectDojo, and doesn't need the full picture in JIRA as well.)
-
-​Here is an example of a **jira\_limited** Issue:
-
-![image](images/Add_a_Connected_Jira_Project_to_a_Product_5.png)
-
-#### Component
-
-If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here.
-
-**Custom fields**
-
-If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’.
-
-However, if your Jira Space Settings **require you** to use Custom Fields on new Issues, you will need to hard-code these mappings.
-
-Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, only a default value. This section should only be set up if your Jira Space **requires that these Custom Fields exist** in every Issue in your Space.
-
-Follow **[this guide](#custom-fields-in-jira)** to get started working with Custom Fields.
-
-**Jira labels**
-
-Select the relevant labels that you want the Issue to be created with in Jira, e.g. **DefectDojo**, **YourProductName..**
-
-![image](images/Add_a_Connected_Jira_Project_to_a_Product_6.png)
-
-#### Default assignee
-
-The name of the default assignee in Jira. If left blank, DefectDojo will follow the default behaviour in your Jira Space when creating Issues.
-
-### Add Jira to a Product or Engagement (Classic UI / Open-Source)
+### Add Jira to a Product or Engagement
 
 In the Classic UI, you can find Jira settings by opening the Edit Product or Edit Engagement form. "**📝 Edit**" button under **Settings** on the page:
 
@@ -261,7 +163,7 @@ If you manage your Jira Space using Components, you can assign the appropriate C
 
 **Custom fields**
 
-If you don’t need to use Custom Fields with DefectDojo issues, you can leave this field as ‘null’.
+If you don't need to use Custom Fields with DefectDojo issues, you can leave this field as 'null'.
 
 However, if your Jira Space Settings **require you** to use Custom Fields on new Issues, you will need to hard\-code these mappings.
 
@@ -314,7 +216,7 @@ If enabled, Jira comments will populate on the associated Finding in DefectDojo,
 
 #### Send SLA Notifications As Comments
 
-If enabled, any Issue which breaches DefectDojo’s Service Level Agreement rules will have comments added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
+If enabled, any Issue which breaches DefectDojo's Service Level Agreement rules will have comments added to the Jira issue indicating this. These comments will be posted daily until the Issue is resolved.
 
 Service Level Agreements can be configured under **Configuration \> SLA Configuration** in DefectDojo and assigned to each Product.
 
@@ -360,7 +262,7 @@ DefectDojo's Jira Webhook only accepts requests from the Jira API.
 
 Once you have one or more Issues created from DefectDojo Findings, you can test the Webhook by adding a Comment to one of those Findings. The Comment should be received by the Jira webhook as a note.
 
-If this doesn’t work correctly, it could be due to a Firewall issue on your Jira instance blocking the Webhook.
+If this doesn't work correctly, it could be due to a Firewall issue on your Jira instance blocking the Webhook.
 
 * DefectDojo's Firewall Rules include a checkbox for **Jira Cloud,** which needs to be enabled before DefectDojo can receive Webhook messages from Jira.
 
@@ -370,7 +272,7 @@ If this doesn’t work correctly, it could be due to a Firewall issue on your Ji
 
 In order to test that the Jira integration is working properly, you can add a new blank Finding to the Product associated with Jira in DefectDojo. **Product \> Findings \> Add New Finding.**
 
-Add whatever title severity and description you wish, and then click “Finished”. The Finding should appear as an Issue in Jira with all of the relevant metadata.
+Add whatever title severity and description you wish, and then click "Finished". The Finding should appear as an Issue in Jira with all of the relevant metadata.
 
 If Jira Issues are not being created correctly, check your Notifications for error codes.
 
@@ -382,7 +284,7 @@ In order to test the Jira webhooks, add a Note to a Finding which also exists in
 
 If the webhooks are configured correctly, you should see the Note in Jira as a Comment on the issue.
 
-If this doesn’t work correctly, it could be due to a Firewall issue on your Jira instance blocking the Webhook.
+If this doesn't work correctly, it could be due to a Firewall issue on your Jira instance blocking the Webhook.
 
 * DefectDojo's Firewall Rules include a checkbox for **Jira Cloud,** which needs to be enabled before DefectDojo can receive Webhook messages from Jira.
 
@@ -390,7 +292,7 @@ If this doesn’t work correctly, it could be due to a Firewall issue on your Ji
 
 Jira integrations can be removed from your instance only if no related Issues have been created.  If Issues have been created, there is no way to completely remove a Jira Instance from DefectDojo.
 
-However, you can disable your Jira integration by disabling it at the Product level.  From the **Edit Product** form (Classic UI) or from the **Jira Product Settings** (Pro UI) you can uncheck the "Enable Connection With Jira Space" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
+However, you can disable your Jira integration by disabling it at the Product level.  From the **Edit Product** form you can uncheck the "Enable Connection With Jira Space" option.  This will not delete or change any existing Jira tickets created by DefectDojo, but will disable any further updates.
 
 # Pushing Findings To Jira
 
@@ -454,7 +356,7 @@ DefectDojo's built\-in Jira Issue Types (**Bug, Task, Story** and **Epic)** are 
 
 Some Jira configurations require additional custom fields to be accounted for before an issue can be created. This process will allow you to account for these custom fields in your DefectDojo \-\> Jira integration, ensuring that issues are created successfully. These custom fields will be added to any API calls sent from DefectDojo to a linked Jira instance.
 
-If you don’t already use Custom Fields in Jira, there is no need to follow this process.
+If you don't already use Custom Fields in Jira, there is no need to follow this process.
 
 1. Recording the names of your Custom Fields in Jira (**Jira UI**)
 2. Determine the Key values for the new Custom Fields (Jira Field Spec Endpoint)
@@ -485,46 +387,46 @@ Here is an example of a Field Spec URL:
 
 The API will return a long string of JSON, which should be formatted into readable text (using a code editor, browser extension or <https://jsonformatter.org/>).
 
-The JSON returned from this URL will contain all of your Jira custom fields, most of which are irrelevant to DefectDojo and have values of `“Null”`. Each object in this API response corresponds to a different field in Jira. You will need to search for the objects that have `“name”` attributes which match the names of each Custom Field you created in the Jira UI, and then note the value of their “key” attribute.
+The JSON returned from this URL will contain all of your Jira custom fields, most of which are irrelevant to DefectDojo and have values of `"Null"`. Each object in this API response corresponds to a different field in Jira. You will need to search for the objects that have `"name"` attributes which match the names of each Custom Field you created in the Jira UI, and then note the value of their "key" attribute.
 
 ![image](images/Using_Custom_Fields.png)
 
-Once you’ve found the matching object in the JSON output, you can determine the “key” value \- in this case, it's `customfield_10050`.
+Once you've found the matching object in the JSON output, you can determine the "key" value \- in this case, it's `customfield_10050`.
 
 Jira generates different key values for each Custom Field, but these key values do not change once created. If you create another Custom Field in the future, it will have a new key value.
 
 **Expanding our Custom Field list:**
 
-* “DefectDojo Custom URL Field” \= customfield\_10050
-* “Another example of a Custom Field” \= customfield\_12345
+* "DefectDojo Custom URL Field" \= customfield\_10050
+* "Another example of a Custom Field" \= customfield\_12345
 * ...
 
 #### Step 3 \- Finding the Custom Fields on a Jira Issue
 
-Locate an Issue in Jira that contains the Custom Fields which you recorded in Step 2\. Copy the Issue Key for the title (should look similar to “`EXAMPLE-123`”) and navigate to the following URL:
+Locate an Issue in Jira that contains the Custom Fields which you recorded in Step 2\. Copy the Issue Key for the title (should look similar to "`EXAMPLE-123`") and navigate to the following URL:
 
 `https://yourcompany-example.atlassian.net/rest/api/2/issue/EXAMPLE-123`
 
 This will return another string of JSON.
 
-As before, API output will contain lots of `customfield_##` object parameters with `null` values \- these are custom fields that Jira adds by default, which aren’t relevant to this issue. It will also contain `customfield_##` values that match the Custom Field Key values that you found in the previous step. Unlike with the Field Spec output, you won’t see names identifying any of these custom fields, which is why you needed to record the key values in Step 2\.
+As before, API output will contain lots of `customfield_##` object parameters with `null` values \- these are custom fields that Jira adds by default, which aren't relevant to this issue. It will also contain `customfield_##` values that match the Custom Field Key values that you found in the previous step. Unlike with the Field Spec output, you won't see names identifying any of these custom fields, which is why you needed to record the key values in Step 2\.
 
 ![image](images/Using_Custom_Fields_2.png)
 
 **Example:**
-We know that `customfield_10050` represents the DefectDojo Custom URL Field because we recorded it in Step 2\. We can now see that `customfield_10050` contains a value of `“https://google.com”` in the `EXAMPLE-123` issue.
+We know that `customfield_10050` represents the DefectDojo Custom URL Field because we recorded it in Step 2\. We can now see that `customfield_10050` contains a value of `"https://google.com"` in the `EXAMPLE-123` issue.
 
 #### Step 4 \- Creating a JSON Field Reference from each Jira Custom Field Key
 
-You’ll now need to take the value of each of the Custom Fields from your list and store them in a JSON object (to use as a reference). You can ignore any Custom Fields that don’t correspond to your list.
+You'll now need to take the value of each of the Custom Fields from your list and store them in a JSON object (to use as a reference). You can ignore any Custom Fields that don't correspond to your list.
 
-This JSON object will contain all of the default values for new Jira Issues. We recommend using names that are easy for your team to recognize as ‘default’ values that need to be changed: ‘`change-me.com`’, ‘`Change this paragraph.`’ etc.
+This JSON object will contain all of the default values for new Jira Issues. We recommend using names that are easy for your team to recognize as 'default' values that need to be changed: '`change-me.com`', '`Change this paragraph.`' etc.
 
 **Example:**
 
-From step 3, we now know that Jira expects a URL string for "`customfield_10050`”. We can use this to build our example JSON object.
+From step 3, we now know that Jira expects a URL string for "`customfield_10050`". We can use this to build our example JSON object.
 
-Say we had also located a DefectDojo\-related short text field, which we identified as "`customfield_67890`”. We would look at this field in our second API output, look at the associated value, and reference the stored value in our example JSON object as well.
+Say we had also located a DefectDojo\-related short text field, which we identified as "`customfield_67890`". We would look at this field in our second API output, look at the associated value, and reference the stored value in our example JSON object as well.
 ​
 Your JSON object will start to look like this as you add more Custom Fields to it.
 
@@ -539,7 +441,7 @@ Repeat this process until all of the DefectDojo\-relevant custom fields from Jir
 
 #### Data types \& Jira Syntax
 
-Some fields, such as Date fields, may relate to multiple custom fields in Jira. If that is the case, you’ll need to add both fields to your JSON Field Reference.
+Some fields, such as Date fields, may relate to multiple custom fields in Jira. If that is the case, you'll need to add both fields to your JSON Field Reference.
 
 ```
   "customfield_10040": "1970-01-01",
@@ -557,7 +459,7 @@ Other fields, such as the Label field, may be tracked as a list of strings \- pl
   ],
 ```
 
-Other custom fields may contain additional, contextual information that should be removed from the Field Reference. For example, the Custom Multichoice Field contains an extra block in the API output, which you’ll need to remove, as this block stores the current value of the field.
+Other custom fields may contain additional, contextual information that should be removed from the Field Reference. For example, the Custom Multichoice Field contains an extra block in the API output, which you'll need to remove, as this block stores the current value of the field.
 
 * you should remove the extra object from this field:
 
@@ -642,10 +544,10 @@ You can now add these custom fields to the associated DefectDojo Product, in the
 
 * Navigate to Edit Product \- defectdojo.com/product/ID/edit .
 * Navigate to Custom fields and paste the JSON Field Reference as plain text in the Custom Fields box.
-* Click ‘Submit’.
+* Click 'Submit'.
 
 #### Step 6 \- Testing your Jira Custom Fields from a new Finding:
 
-Now, when you create a new Finding in the Jira\-associated Product, Jira will automatically create all of these Custom Fields in Jira according to the JSON block contained within. These Custom Fields will be created with the default (“change\-me\-please”, etc.) values.
+Now, when you create a new Finding in the Jira\-associated Product, Jira will automatically create all of these Custom Fields in Jira according to the JSON block contained within. These Custom Fields will be created with the default ("change\-me\-please", etc.) values.
 
 Within the Product on DefectDojo, navigate to the Findings \> Add New Finding page. Make sure the Finding is both Active and Verified to ensure that it pushes to Jira, and then confirm on the Jira side that the Custom Fields are successfully created without any inconsistencies.

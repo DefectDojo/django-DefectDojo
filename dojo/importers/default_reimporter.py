@@ -1,4 +1,5 @@
 import logging
+from itertools import batched
 
 from django.conf import settings
 from django.core.files.uploadedfile import TemporaryUploadedFile
@@ -14,6 +15,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_reimport_legacy,
 )
 from dojo.importers.base_importer import BaseImporter, Parser
+from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.location.status import FindingLocationStatus
@@ -29,6 +31,9 @@ from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+
+# Bound IN-list size when bulk-loading status fields for close_old_findings.
+_CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK = 1000
 
 
 class DefaultReImporterOptions(ImporterOptions):
@@ -76,6 +81,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             import_type=Test_Import.REIMPORT_TYPE,
             **kwargs,
         )
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager = EndpointManager(self.test.engagement.product)
 
     def process_scan(
         self,
@@ -409,6 +416,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     finding = self.finding_post_processing(
                         finding,
                         unsaved_finding,
+                        is_matched_finding=bool(matched_findings),
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
@@ -430,6 +438,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
+                        if not settings.V3_FEATURE_LOCATIONS:
+                            self.endpoint_manager.persist(user=self.user)
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
                         dojo_dispatch_task(
@@ -464,6 +474,44 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
+    def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> None:
+        """
+        Refresh false_p, risk_accepted, and out_of_scope from the DB for each finding.
+
+        These can change during reimport (e.g. false positive) while the in-memory instances
+        are stale. Per-finding refresh_from_db in close_old_findings was added in
+        https://github.com/DefectDojo/django-DefectDojo/pull/12291. A naive refresh per
+        finding issues one SELECT each; we batch one query per chunk of primary keys and fall
+        back to refresh_from_db only when needed.
+
+        This really should be fixed differently, but for now we at least optimize it to be done in bulk.
+        """
+        findings_without_pk = [f for f in findings if f.pk is None]
+        findings_with_pk = [f for f in findings if f.pk is not None]
+
+        for finding in findings_without_pk:
+            finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
+
+        for chunk in batched(findings_with_pk, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
+            ids = [f.pk for f in chunk]
+            fresh_by_id = {
+                row["id"]: row
+                for row in Finding.objects.filter(pk__in=ids).values(
+                    "id",
+                    "false_p",
+                    "risk_accepted",
+                    "out_of_scope",
+                )
+            }
+            for finding in chunk:
+                row = fresh_by_id.get(finding.pk)
+                if row is not None:
+                    finding.false_p = row["false_p"]
+                    finding.risk_accepted = row["risk_accepted"]
+                    finding.out_of_scope = row["out_of_scope"]
+                else:
+                    finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
+
     def close_old_findings(
         self,
         findings: list[Finding],
@@ -477,17 +525,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.close_old_findings_toggle is False:
             return []
         logger.debug("REIMPORT_SCAN: Closing findings no longer present in scan report")
+        # Get any status changes that could have occurred earlier in the process
+        # for special statuses only.
+        # An example of such is a finding being reported as false positive, and
+        # reimport makes this change in the database. However, the findings here
+        # are calculated based from the original values before the reimport, so
+        # any updates made during reimport are discarded without first getting the
+        # state of the finding as it stands at this moment (django-DefectDojo #12291).
+        self._sync_close_old_finding_status_fields(findings)
         # Determine if pushing to jira or if the finding groups are enabled
         mitigated_findings = []
         for finding in findings:
-            # Get any status changes that could have occurred earlier in the process
-            # for special statuses only.
-            # An example of such is a finding being reported as false positive, and
-            # reimport makes this change in the database. However, the findings here
-            # are calculated based from the original values before the reimport, so
-            # any updates made during reimport are discarded without first getting the
-            # state of the finding as it stands at this moment
-            finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
             # Ensure the finding is not already closed
             if not finding.mitigated or not finding.is_mitigated:
                 logger.debug("mitigating finding: %i:%s", finding.id, finding)
@@ -498,6 +546,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     product_grading_option=False,
                 )
                 mitigated_findings.append(finding)
+        # Persist any accumulated endpoint status mitigations
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.endpoint_manager.persist(user=self.user)
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
@@ -764,11 +815,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self.location_manager.chunk_locations_and_reactivate(mitigated_locations)
         else:
             # TODO: Delete this after the move to Locations
-            # Reactivate mitigated endpoints that are not false positives, out of scope, or risk accepted
-            # status_finding_non_special is prefetched by build_candidate_scope_queryset.
-            # Falls back to a DB query when the finding was not loaded through that queryset
-            # (e.g. a finding created during the same reimport batch).
-            self.endpoint_manager.chunk_endpoints_and_reactivate(
+            # Accumulate endpoint statuses for bulk reactivation in persist()
+            self.endpoint_manager.record_statuses_to_reactivate(
                 self.endpoint_manager.get_non_special_endpoint_statuses(existing_finding),
             )
         existing_finding.notes.add(note)
@@ -926,6 +974,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self,
         finding: Finding,
         finding_from_report: Finding,
+        *,
+        is_matched_finding: bool = False,
     ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
@@ -937,22 +987,29 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 self.location_manager.chunk_locations_and_disperse(finding, self.endpoints_to_add)
         else:
             # TODO: Delete this after the move to Locations
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding_from_report.unsaved_endpoints)
+            for endpoint in finding_from_report.unsaved_endpoints:
+                key = self.endpoint_manager.record_endpoint(endpoint)
+                self.endpoint_manager.record_status_for_create(finding, key)
             if len(self.endpoints_to_add) > 0:
-                self.endpoint_manager.chunk_endpoints_and_disperse(finding, self.endpoints_to_add)
-        # Parsers shouldn't use the tags field, and use unsaved_tags instead.
-        # Merge any tags set by parser into unsaved_tags
-        tags_from_parser = finding_from_report.tags if isinstance(finding_from_report.tags, list) else []
-        unsaved_tags_from_parser = finding_from_report.unsaved_tags if isinstance(finding_from_report.unsaved_tags, list) else []
-        merged_tags = unsaved_tags_from_parser + tags_from_parser
-        if merged_tags:
-            finding_from_report.unsaved_tags = merged_tags
-        if finding_from_report.unsaved_tags:
-            cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
-            if isinstance(cleaned_tags, list):
-                finding.tags.add(*cleaned_tags)
-            elif isinstance(cleaned_tags, str):
-                finding.tags.add(cleaned_tags)
+                for endpoint in self.endpoints_to_add:
+                    key = self.endpoint_manager.record_endpoint(endpoint)
+                    self.endpoint_manager.record_status_for_create(finding, key)
+        # For matched/existing findings, do not update tags from the report,
+        # consistent with how other fields are handled on reimport.
+        if not is_matched_finding:
+            # Parsers shouldn't use the tags field, and use unsaved_tags instead.
+            # Merge any tags set by parser into unsaved_tags
+            tags_from_parser = finding_from_report.tags if isinstance(finding_from_report.tags, list) else []
+            unsaved_tags_from_parser = finding_from_report.unsaved_tags if isinstance(finding_from_report.unsaved_tags, list) else []
+            merged_tags = unsaved_tags_from_parser + tags_from_parser
+            if merged_tags:
+                finding_from_report.unsaved_tags = merged_tags
+            if finding_from_report.unsaved_tags:
+                cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
+                if isinstance(cleaned_tags, list):
+                    finding.tags.add(*cleaned_tags)
+                elif isinstance(cleaned_tags, str):
+                    finding.tags.add(cleaned_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files

@@ -90,6 +90,17 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    # Hard ceiling on task runtime. When reached, the worker process is sent SIGKILL — no cleanup
+    # code runs. Always set higher than DD_CELERY_TASK_SOFT_TIME_LIMIT. (0 = disabled, no limit)
+    DD_CELERY_TASK_TIME_LIMIT=(int, 43200),        # default: 12 hours
+    # Raises SoftTimeLimitExceeded inside the task, giving it a chance to clean up before the hard
+    # kill. Set a few seconds below DD_CELERY_TASK_TIME_LIMIT so cleanup has time to finish.
+    # (0 = disabled, no limit)
+    DD_CELERY_TASK_SOFT_TIME_LIMIT=(int, 0),
+    # If a task sits in the broker queue for longer than this without being picked up by a worker,
+    # Celery silently discards it — it is never executed and no exception is raised. Does not
+    # affect tasks that are already running. (0 = disabled, no limit)
+    DD_CELERY_TASK_DEFAULT_EXPIRES=(int, 43200),   # default: 12 hours
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
@@ -288,6 +299,10 @@ env = environ.FileAwareEnv(
     DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE=(int, 1000),
     # Batch size for import/reimport deduplication processing
     DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
+    # Batch size for Redis pipeline when purging the Celery queue by task name
+    DD_CELERY_QUEUE_PURGE_BATCH_SIZE=(int, 1000),
+    # Maximum number of tasks to purge in a single per-task purge action
+    DD_CELERY_QUEUE_PURGE_MAX_TASKS=(int, 10000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Batch size for flushing audit logs per task run
@@ -1249,6 +1264,13 @@ CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
 
+if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
+    CELERY_TASK_TIME_LIMIT = env("DD_CELERY_TASK_TIME_LIMIT")
+if env("DD_CELERY_TASK_SOFT_TIME_LIMIT") > 0:
+    CELERY_TASK_SOFT_TIME_LIMIT = env("DD_CELERY_TASK_SOFT_TIME_LIMIT")
+if env("DD_CELERY_TASK_DEFAULT_EXPIRES") > 0:
+    CELERY_TASK_DEFAULT_EXPIRES = env("DD_CELERY_TASK_DEFAULT_EXPIRES")
+
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
 
@@ -1489,6 +1511,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
     "OpenReports": ["vulnerability_ids", "component_name", "component_version", "severity"],
     "n0s1 Scanner": ["description"],
+    "IriusRisk Threats Scan": ["title", "component_name"],
+    "Orca Security Alerts": ["title", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1518,6 +1542,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AnchoreCTL Policies Report": True,
     "Anchore Enterprise Policy Check": True,
     "Anchore Grype": True,
+    "Anchore Grype detailed": True,
     "AWS Prowler Scan": True,
     "AWS Prowler V3": True,
     "Checkmarx Scan": False,
@@ -1615,6 +1640,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
     "Anchore Enterprise Policy Check": DEDUPE_ALGO_HASH_CODE,
     "Anchore Grype": DEDUPE_ALGO_HASH_CODE,
+    "Anchore Grype detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Aqua Scan": DEDUPE_ALGO_HASH_CODE,
     "AuditJS Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Prowler Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1680,7 +1706,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
-    "Github SAST Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1754,6 +1780,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
     "OpenReports": DEDUPE_ALGO_HASH_CODE,
+    "IriusRisk Threats Scan": DEDUPE_ALGO_HASH_CODE,
+    "Orca Security Alerts": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1777,6 +1805,8 @@ DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
 IMPORT_REIMPORT_MATCH_BATCH_SIZE = env("DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE")
 IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_BATCH_SIZE = env("DD_CELERY_QUEUE_PURGE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_MAX_TASKS = env("DD_CELERY_QUEUE_PURGE_MAX_TASKS")
 
 # ------------------------------------------------------------------------------
 # JIRA

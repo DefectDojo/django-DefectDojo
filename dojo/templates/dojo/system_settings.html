@@ -10,29 +10,6 @@
 
 {% block content %}
     {{ block.super }}
-    {% block status %}
-        <div class="row">
-            <h3> System Status </h3>
-            <br>
-            <div id="test-strategy" class="col-md-4">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        {% if celery_bool %}
-                        <h4> Celery <span class="label label-success">{{celery_status}}</span> </h4>
-                        {% else %}
-                        <h4> Celery <span class="label label-danger">{{celery_status}}</span> </h4>
-                        {% endif %}
-                    </div>
-                    <div class="panel-body text-left">
-                        {{celery_msg}}
-                    </div>
-                    <div class="panel-body text-left">
-                        {{celery_q_len}}
-                    </div>
-                </div>
-            </div>
-        </div>
-    {% endblock status %}
     <hr>
     {% block settings %}
     <div class="row">
