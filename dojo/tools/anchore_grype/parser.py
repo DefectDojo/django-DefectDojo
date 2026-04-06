@@ -76,8 +76,7 @@ class AnchoreGrypeParser:
                 rel_epss = related_vulnerability.get("epss")
                 rel_vuln_id = related_vulnerability.get("id")
             vulnerability_ids = self.get_vulnerability_ids(
-                vuln_id,
-                related_vulnerabilities,
+                vuln_id, related_vulnerabilities,
             )
 
             matches = item["matchDetails"]
@@ -88,7 +87,11 @@ class AnchoreGrypeParser:
             artifact_purl = artifact.get("purl")
             artifact_location = artifact.get("locations")
             file_path = None
-            if artifact_location and len(artifact_location) > 0 and artifact_location[0].get("path"):
+            if (
+                artifact_location
+                and len(artifact_location) > 0
+                and artifact_location[0].get("path")
+            ):
                 file_path = artifact_location[0].get("path")
 
             finding_title = f"{vuln_id} in {artifact_name}:{artifact_version}"
@@ -96,17 +99,25 @@ class AnchoreGrypeParser:
             finding_tags = None
             finding_description = ""
             if vuln_namespace:
-                finding_description += f"**Vulnerability Namespace:** {vuln_namespace}"
+                finding_description += (
+                    f"**Vulnerability Namespace:** {vuln_namespace}"
+                )
             if vuln_description:
-                finding_description += f"\n**Vulnerability Description:** {vuln_description}"
+                finding_description += (
+                    f"\n**Vulnerability Description:** {vuln_description}"
+                )
             if rel_description and rel_description != vuln_description:
                 finding_description += f"\n**Related Vulnerability Description:** {rel_description}"
             if matches:
                 if isinstance(item["matchDetails"], dict):
-                    finding_description += f"\n**Matcher:** {matches['matcher']}"
+                    finding_description += (
+                        f"\n**Matcher:** {matches['matcher']}"
+                    )
                     finding_tags = [matches["matcher"].replace("-matcher", "")]
                 elif len(matches) == 1:
-                    finding_description += f"\n**Matcher:** {matches[0]['matcher']}"
+                    finding_description += (
+                        f"\n**Matcher:** {matches[0]['matcher']}"
+                    )
                     finding_tags = [
                         matches[0]["matcher"].replace("-matcher", ""),
                     ]
@@ -137,22 +148,30 @@ class AnchoreGrypeParser:
 
             finding_references = ""
             if vuln_datasource:
-                finding_references += f"**Vulnerability Datasource:** {vuln_datasource}\n"
+                finding_references += (
+                    f"**Vulnerability Datasource:** {vuln_datasource}\n"
+                )
             if vuln_urls:
                 if len(vuln_urls) == 1:
                     if vuln_urls[0] != vuln_datasource:
-                        finding_references += f"**Vulnerability URL:** {vuln_urls[0]}\n"
+                        finding_references += (
+                            f"**Vulnerability URL:** {vuln_urls[0]}\n"
+                        )
                 else:
                     finding_references += "**Vulnerability URLs:**\n"
                     for url in vuln_urls:
                         if url != vuln_datasource:
                             finding_references += f"- {url}\n"
             if rel_datasource:
-                finding_references += f"**Related Vulnerability Datasource:** {rel_datasource}\n"
+                finding_references += (
+                    f"**Related Vulnerability Datasource:** {rel_datasource}\n"
+                )
             if rel_urls:
                 if len(rel_urls) == 1:
                     if rel_urls[0] != vuln_datasource:
-                        finding_references += f"**Related Vulnerability URL:** {rel_urls[0]}\n"
+                        finding_references += (
+                            f"**Related Vulnerability URL:** {rel_urls[0]}\n"
+                        )
                 else:
                     finding_references += "**Related Vulnerability URLs:**\n"
                     for url in rel_urls:
@@ -209,7 +228,6 @@ class AnchoreGrypeParser:
 
                 dupes[dupe_key].unsaved_tags = finding_tags
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
-
                 if settings.V3_FEATURE_LOCATIONS and artifact_purl:
                     dupes[dupe_key].unsaved_locations.append(
                         LocationData.dependency(purl=artifact_purl, file_path=file_path),
@@ -228,8 +246,7 @@ class AnchoreGrypeParser:
                 vector = cvss_item["vector"]
                 cvss_objects = cvss_parser.parse_cvss_from_text(vector)
                 if len(cvss_objects) > 0 and isinstance(
-                    cvss_objects[0],
-                    CVSS3,
+                    cvss_objects[0], CVSS3,
                 ):
                     return vector
         return None
@@ -259,11 +276,8 @@ class AnchoreGrypeParser:
         if vuln_id:
             vulnerability_ids.append(vuln_id)
         if related_vulnerabilities:
-            vulnerability_ids.extend(
-                related_vulnerability_id
-                for related_vulnerability in related_vulnerabilities
-                if (related_vulnerability_id := related_vulnerability.get("id"))
-            )
+            vulnerability_ids.extend(related_vulnerability_id for related_vulnerability in related_vulnerabilities
+                if (related_vulnerability_id := related_vulnerability.get("id")))
         if vulnerability_ids:
             return vulnerability_ids
         return None

@@ -66,6 +66,7 @@ class ThreatComposerParser:
                     mitigation_links[linked_id].append(mitigations[mitigation_id])
 
         for threat in data["threats"]:
+
             if "threatAction" in threat:
                 title = threat["threatAction"]
                 severity, impact, comments = self.parse_threat_metadata(threat.get("metadata", []))
