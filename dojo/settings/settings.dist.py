@@ -90,6 +90,17 @@ env = environ.FileAwareEnv(
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
     DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    # Hard ceiling on task runtime. When reached, the worker process is sent SIGKILL — no cleanup
+    # code runs. Always set higher than DD_CELERY_TASK_SOFT_TIME_LIMIT. (0 = disabled, no limit)
+    DD_CELERY_TASK_TIME_LIMIT=(int, 43200),        # default: 12 hours
+    # Raises SoftTimeLimitExceeded inside the task, giving it a chance to clean up before the hard
+    # kill. Set a few seconds below DD_CELERY_TASK_TIME_LIMIT so cleanup has time to finish.
+    # (0 = disabled, no limit)
+    DD_CELERY_TASK_SOFT_TIME_LIMIT=(int, 0),
+    # If a task sits in the broker queue for longer than this without being picked up by a worker,
+    # Celery silently discards it — it is never executed and no exception is raised. Does not
+    # affect tasks that are already running. (0 = disabled, no limit)
+    DD_CELERY_TASK_DEFAULT_EXPIRES=(int, 43200),   # default: 12 hours
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
@@ -288,6 +299,10 @@ env = environ.FileAwareEnv(
     DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE=(int, 1000),
     # Batch size for import/reimport deduplication processing
     DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
+    # Batch size for Redis pipeline when purging the Celery queue by task name
+    DD_CELERY_QUEUE_PURGE_BATCH_SIZE=(int, 1000),
+    # Maximum number of tasks to purge in a single per-task purge action
+    DD_CELERY_QUEUE_PURGE_MAX_TASKS=(int, 10000),
     # Delete Auditlogs older than x month; -1 to keep all logs
     DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
     # Batch size for flushing audit logs per task run
@@ -302,7 +317,7 @@ env = environ.FileAwareEnv(
     # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
     # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
     # Set to True to revert to the old behaviour where all duplicates are deleted
-    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False),
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(bool, True),
     # Enable Rate Limiting for the login page
     DD_RATE_LIMITER_ENABLED=(bool, False),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
@@ -1249,6 +1264,13 @@ CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
 
+if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
+    CELERY_TASK_TIME_LIMIT = env("DD_CELERY_TASK_TIME_LIMIT")
+if env("DD_CELERY_TASK_SOFT_TIME_LIMIT") > 0:
+    CELERY_TASK_SOFT_TIME_LIMIT = env("DD_CELERY_TASK_SOFT_TIME_LIMIT")
+if env("DD_CELERY_TASK_DEFAULT_EXPIRES") > 0:
+    CELERY_TASK_DEFAULT_EXPIRES = env("DD_CELERY_TASK_DEFAULT_EXPIRES")
+
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
 
@@ -1426,6 +1448,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
+    "JFrog Xray API Summary Artifact Scan": ["title", "description", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
@@ -1519,6 +1542,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AnchoreCTL Policies Report": True,
     "Anchore Enterprise Policy Check": True,
     "Anchore Grype": True,
+    "Anchore Grype detailed": True,
     "AWS Prowler Scan": True,
     "AWS Prowler V3": True,
     "Checkmarx Scan": False,
@@ -1616,6 +1640,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
     "Anchore Enterprise Policy Check": DEDUPE_ALGO_HASH_CODE,
     "Anchore Grype": DEDUPE_ALGO_HASH_CODE,
+    "Anchore Grype detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Aqua Scan": DEDUPE_ALGO_HASH_CODE,
     "AuditJS Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Prowler Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1677,10 +1702,11 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "SpotBugs Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray Unified Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray On Demand Binary Scan": DEDUPE_ALGO_HASH_CODE,
+    "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_HASH_CODE,
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
-    "Github SAST Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1779,6 +1805,8 @@ DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
 IMPORT_REIMPORT_MATCH_BATCH_SIZE = env("DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE")
 IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_BATCH_SIZE = env("DD_CELERY_QUEUE_PURGE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_MAX_TASKS = env("DD_CELERY_QUEUE_PURGE_MAX_TASKS")
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -2120,14 +2148,7 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
 
     MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
 
-# Linear migrations for development
-# Helps avoid merge migration conflicts by tracking the latest migration
 if DEBUG:
-    INSTALLED_APPS = (
-        "django_linear_migrations",  # Must be before dojo to override makemigrations
-        *INSTALLED_APPS,
-    )
-
     def show_toolbar(request):
         return True
 

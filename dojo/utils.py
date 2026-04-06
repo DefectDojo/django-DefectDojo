@@ -2,15 +2,16 @@ import binascii
 import calendar as tcalendar
 import hashlib
 import importlib
+import json
 import logging
 import mimetypes
+import operator
 import os
 import pathlib
-import random
 import re
-import time
 from calendar import monthrange
 from collections.abc import Callable
+from contextlib import suppress
 from datetime import date, datetime, timedelta
 from functools import cached_property
 from math import pi, sqrt
@@ -19,9 +20,9 @@ from pathlib import Path
 import bleach
 import crum
 import cvss
+import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
-from auditlog.models import LogEntry
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cvss import CVSS2, CVSS3, CVSS4
@@ -30,9 +31,8 @@ from dateutil.relativedelta import MO, SU, relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
-from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
-from django.db import OperationalError
+from django.db import transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -72,6 +72,7 @@ from dojo.models import (
     Languages,
     Notifications,
     Product,
+    Product_Type,
     System_Settings,
     Test,
     Test_Type,
@@ -1164,13 +1165,14 @@ def perform_product_grading(product):
 
 
 def get_celery_worker_status():
-    from .tasks import celery_status  # noqa: PLC0415 circular import
-    res = celery_status.apply_async()
-
-    # Wait 5 seconds for a response from Celery
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    # Use the control channel (celery.pidbox) instead of dispatching a task.
+    # This bypasses the task queue entirely, so it works correctly even when
+    # the queue is clogged with pending tasks.
     try:
-        return res.get(timeout=5)
-    except:
+        result = app.control.ping(timeout=3)
+        return len(result) > 0
+    except Exception:
         return False
 
 
@@ -1182,8 +1184,90 @@ def get_celery_queue_length():
         if "NOT_FOUND" in str(e):
             return 0
         return None
-    except:
+    except Exception:
         return None
+
+
+def purge_celery_queue():
+    from dojo.celery import app  # noqa: PLC0415 circular import
+    with app.connection() as conn, conn.channel() as channel:
+        return channel.queue_purge(queue="celery")
+
+
+_PURGE_PIPELINE_BATCH_SIZE = 1000  # fallback; prefer DD_CELERY_QUEUE_PURGE_BATCH_SIZE
+_PURGE_MAX_TASKS = 10000  # fallback; prefer DD_CELERY_QUEUE_PURGE_MAX_TASKS
+
+
+def purge_celery_queue_by_task_name(task_name):
+    """Remove all queued tasks with the given task name. Returns count removed, or None on error."""
+    try:
+        client = redis_lib.from_url(settings.CELERY_BROKER_URL)
+        matching = [
+            msg_raw
+            for msg_raw in client.lrange("celery", 0, -1)
+            if json.loads(msg_raw).get("headers", {}).get("task") == task_name
+        ]
+        purge_max_tasks = getattr(settings, "CELERY_QUEUE_PURGE_MAX_TASKS", _PURGE_MAX_TASKS)
+        purge_batch_size = getattr(settings, "CELERY_QUEUE_PURGE_BATCH_SIZE", _PURGE_PIPELINE_BATCH_SIZE)
+        if len(matching) > purge_max_tasks:
+            logger.warning("Capping purge of '%s' to %d tasks (%d found)", task_name, purge_max_tasks, len(matching))
+            matching = matching[:purge_max_tasks]
+        logger.info("Purging %d queued tasks for '%s'", len(matching), task_name)
+        for i in range(0, len(matching), purge_batch_size):
+            batch = matching[i:i + purge_batch_size]
+            logger.debug("Purging batch %d-%d of %d", i + 1, i + len(batch), len(matching))
+            pipe = client.pipeline()
+            for msg_raw in batch:
+                pipe.lrem("celery", 1, msg_raw)
+            pipe.execute()
+        logger.info("Purged %d queued tasks for '%s'", len(matching), task_name)
+        return len(matching)
+    except Exception:
+        logger.exception("Failed to purge celery queue by task name")
+        return None
+
+
+def get_celery_queue_details():
+    """Per-task breakdown of the celery queue. O(N) — expensive for large queues."""
+    tasks = {}
+    try:
+        client = redis_lib.from_url(settings.CELERY_BROKER_URL)
+        for i, msg_raw in enumerate(client.lrange("celery", 0, -1)):
+            try:
+                msg = json.loads(msg_raw)
+                headers = msg.get("headers", {})
+                task_name = headers.get("task", "unknown")
+                eta = headers.get("eta")
+                expires = headers.get("expires")
+            except Exception:
+                task_name = "unknown"
+                eta = None
+                expires = None
+            if task_name not in tasks:
+                tasks[task_name] = {
+                    "task_name": task_name,
+                    "count": 0,
+                    "oldest_position": i + 1,
+                    "newest_position": i + 1,
+                    "oldest_eta": eta,
+                    "newest_eta": eta,
+                    "earliest_expires": expires,
+                    "latest_expires": expires,
+                }
+            else:
+                tasks[task_name]["newest_position"] = i + 1
+                tasks[task_name]["newest_eta"] = eta
+                # ISO 8601 strings are lexicographically sortable
+                if expires is not None:
+                    cur = tasks[task_name]
+                    if cur["earliest_expires"] is None or expires < cur["earliest_expires"]:
+                        cur["earliest_expires"] = expires
+                    if cur["latest_expires"] is None or expires > cur["latest_expires"]:
+                        cur["latest_expires"] = expires
+            tasks[task_name]["count"] += 1
+    except Exception:
+        return None
+    return sorted(tasks.values(), key=operator.itemgetter("oldest_position"))
 
 
 # Used to display the counts and enabled tabs in the product view
@@ -1880,23 +1964,16 @@ def is_finding_groups_enabled():
     return get_system_setting("enable_finding_groups")
 
 
-# Mapping of object types to their related models for cascading deletes
-ASYNC_DELETE_MAPPING = {
-    "Product_Type": [
-        (Endpoint, "product__prod_type__id"),
-        (Finding, "test__engagement__product__prod_type__id"),
-        (Test, "engagement__product__prod_type__id"),
-        (Engagement, "product__prod_type__id"),
-        (Product, "prod_type__id")],
-    "Product": [
-        (Endpoint, "product__id"),
-        (Finding, "test__engagement__product__id"),
-        (Test, "engagement__product__id"),
-        (Engagement, "product__id")],
-    "Engagement": [
-        (Finding, "test__engagement__id"),
-        (Test, "engagement__id")],
-    "Test": [(Finding, "test__id")],
+# Supported object types for async cascade deletion
+ASYNC_DELETE_SUPPORTED_TYPES = (Product_Type, Product, Engagement, Test)
+
+# Finding scope filters per model type — used to build the finding queryset
+# for bulk deletion before cascade_delete handles the rest.
+FINDING_SCOPE_FILTERS = {
+    Product_Type: "test__engagement__product__prod_type",
+    Product: "test__engagement__product",
+    Engagement: "test__engagement",
+    Test: "test",
 }
 
 
@@ -1908,117 +1985,87 @@ def _get_object_name(obj):
 
 
 @app.task
-def async_delete_chunk_task(objects, **kwargs):
-    """
-    Module-level Celery task to delete a chunk of objects.
-
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
-    """
-    max_retries = 3
-    for obj in objects:
-        retry_count = 0
-        while retry_count < max_retries:
-            try:
-                obj.delete()
-                break  # Success, exit retry loop
-            except OperationalError as e:
-                error_msg = str(e)
-                if "deadlock detected" in error_msg.lower():
-                    retry_count += 1
-                    if retry_count < max_retries:
-                        # Exponential backoff with jitter
-                        wait_time = (2 ** retry_count) + random.uniform(0, 1)  # noqa: S311
-                        logger.warning(
-                            f"ASYNC_DELETE: Deadlock detected deleting {_get_object_name(obj)} {obj.pk}, "
-                            f"retrying ({retry_count}/{max_retries}) after {wait_time:.2f}s",
-                        )
-                        time.sleep(wait_time)
-                        # Refresh object from DB before retry
-                        obj.refresh_from_db()
-                    else:
-                        logger.error(
-                            f"ASYNC_DELETE: Deadlock persisted after {max_retries} retries for {_get_object_name(obj)} {obj.pk}: {e}",
-                        )
-                        raise
-                else:
-                    # Not a deadlock, re-raise
-                    raise
-            except AssertionError:
-                logger.debug("ASYNC_DELETE: object has already been deleted elsewhere. Skipping")
-                # The id must be None
-                # The object has already been deleted elsewhere
-                break
-            except LogEntry.MultipleObjectsReturned:
-                # Delete the log entrys first, then delete
-                LogEntry.objects.filter(
-                    content_type=ContentType.objects.get_for_model(obj.__class__),
-                    object_pk=str(obj.pk),
-                    action=LogEntry.Action.DELETE,
-                ).delete()
-                # Now delete the object again (no retry needed for this case)
-                obj.delete()
-                break
-
-
-@app.task
-def async_delete_crawl_task(obj, model_list, **kwargs):
-    """
-    Module-level Celery task to crawl and delete related objects.
-
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
-    """
-    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
-
-    logger.debug("ASYNC_DELETE: Crawling " + _get_object_name(obj) + ": " + str(obj))
-    for model_info in model_list:
-        task_results = []
-        model = model_info[0]
-        model_query = model_info[1]
-        filter_dict = {model_query: obj.id}
-        # Only fetch the IDs since we will make a list of IDs in the following function call
-        objects_to_delete = model.objects.only("id").filter(**filter_dict).distinct().order_by("id")
-        logger.debug("ASYNC_DELETE: Deleting " + str(len(objects_to_delete)) + " " + _get_object_name(model) + "s in chunks")
-        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-        chunks = [objects_to_delete[i:i + chunk_size] for i in range(0, len(objects_to_delete), chunk_size)]
-        logger.debug("ASYNC_DELETE: Split " + _get_object_name(model) + " into " + str(len(chunks)) + " chunks of " + str(chunk_size))
-        for chunk in chunks:
-            logger.debug(f"deleting {len(chunk)} {_get_object_name(model)}")
-            result = dojo_dispatch_task(async_delete_chunk_task, list(chunk))
-            # Collect async task results to wait for them all at once
-            if hasattr(result, "get"):
-                task_results.append(result)
-        # Wait for all chunk deletions to complete (they run in parallel)
-        for task_result in task_results:
-            task_result.get(timeout=300)  # 5 minute timeout per chunk
-    # Now delete the main object after all chunks are done
-    result = dojo_dispatch_task(async_delete_chunk_task, [obj])
-    # Wait for final deletion to complete
-    if hasattr(result, "get"):
-        result.get(timeout=300)  # 5 minute timeout
-    logger.debug("ASYNC_DELETE: Successfully deleted " + _get_object_name(obj) + ": " + str(obj))
-
-
-@app.task
 def async_delete_task(obj, **kwargs):
     """
-    Module-level Celery task to delete an object and its related objects.
+    Delete an object and all its related objects using the SQL cascade walker.
+
+    Handles Python-level concerns (duplicates, integrators, M2M, file cleanup,
+    product grading) explicitly, then uses cascade_delete_related_objects() for
+    efficient bottom-up SQL deletion of all FK-related tables. The top-level
+    object is deleted via ORM obj.delete() to fire Django signals.
 
     Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
-    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+    from dojo.finding.helper import (  # noqa: PLC0415 circular import
+        bulk_delete_findings,
+        prepare_duplicates_for_delete,
+    )
+    from dojo.utils_cascade_delete import cascade_delete_related_objects  # noqa: PLC0415 circular import
 
-    logger.debug("ASYNC_DELETE: Deleting " + _get_object_name(obj) + ": " + str(obj))
-    model_list = ASYNC_DELETE_MAPPING.get(_get_object_name(obj))
-    if model_list:
-        # The object to be deleted was found in the object list
-        dojo_dispatch_task(async_delete_crawl_task, obj, model_list)
-    else:
-        # The object is not supported in async delete, delete normally
-        logger.debug("ASYNC_DELETE: " + _get_object_name(obj) + " async delete not supported. Deleteing normally: " + str(obj))
+    logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
+    if not isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
+        logger.debug("ASYNC_DELETE: %s async delete not supported. Deleting normally: %s", _get_object_name(obj), obj)
         obj.delete()
+        return
+
+    obj_name = _get_object_name(obj)
+    logger.info("ASYNC_DELETE: Starting deletion of %s: %s", obj_name, obj)
+
+    # Capture product reference before deletion for product grading at the end
+    product = None
+    with suppress(Product.DoesNotExist, Engagement.DoesNotExist, Test.DoesNotExist):
+        if isinstance(obj, Engagement):
+            product = obj.product
+        elif isinstance(obj, Test):
+            product = obj.engagement.product
+
+    # Step 1: Determine finding scope
+    scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
+    if scope_field:
+        finding_qs = Finding.objects.filter(**{scope_field: obj})
+
+        # Step 2: Prepare duplicate clusters (must happen before any deletion)
+        # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
+        # we handle that below by expanding scope to include outside duplicates.
+        prepare_duplicates_for_delete(obj)
+
+        # Step 3: Delete outside-scope duplicates first — these point to findings
+        # in the main scope via duplicate_finding FK, so they must be removed before
+        # the originals to avoid FK violations during chunked deletion.
+        scope_ids = finding_qs.values_list("id", flat=True)
+        outside_dupes_qs = (
+            Finding.objects.filter(duplicate_finding_id__in=scope_ids)
+            .exclude(id__in=scope_ids)
+        )
+        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+        outside_count = outside_dupes_qs.count()
+        if outside_count:
+            logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_count)
+            bulk_delete_findings(outside_dupes_qs, chunk_size=chunk_size)
+
+        # Step 4: Delete the main scope findings
+        bulk_delete_findings(finding_qs, chunk_size=chunk_size)
+
+    # Step 5: Delete all remaining related objects (Tests, Engagements,
+    # Endpoints, etc.) via SQL cascade. Findings are already gone, so
+    # skip_relations={Finding} avoids walking empty relations.
+    # Single transaction is fine here — the heavy relations (Findings,
+    # Endpoint_Status) are already deleted; only lightweight rows remain.
+    pk_query = type(obj).objects.filter(pk=obj.pk)
+    with transaction.atomic():
+        cascade_delete_related_objects(type(obj), pk_query, skip_relations={Finding})
+
+    # Step 6: Delete the top-level object via ORM to fire Django signals
+    # (post_delete notifications, pghistory audit, Pro signals).
+    # All children are already gone so this is a single-row DELETE.
+    obj.delete()
+
+    # Step 7: Recalculate product grade once (not per-object)
+    if product:
+        perform_product_grading(product)
+
+    logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)
 
 
 class async_delete:
@@ -2034,10 +2081,6 @@ class async_delete:
     which properly handles user context injection and pghistory context.
     """
 
-    def __init__(self, *args, **kwargs):
-        # Keep mapping reference for backwards compatibility
-        self.mapping = ASYNC_DELETE_MAPPING
-
     def delete(self, obj, **kwargs):
         """
         Entry point to delete an object asynchronously.
@@ -2049,17 +2092,9 @@ class async_delete:
 
         dojo_dispatch_task(async_delete_task, obj, **kwargs)
 
-    # Keep helper methods for backwards compatibility and potential direct use
     @staticmethod
     def get_object_name(obj):
         return _get_object_name(obj)
-
-    @staticmethod
-    def chunk_list(model, full_list):
-        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-        chunk_list = [full_list[i:i + chunk_size] for i in range(0, len(full_list), chunk_size)]
-        logger.debug("ASYNC_DELETE: Split " + _get_object_name(model) + " into " + str(len(chunk_list)) + " chunks of " + str(chunk_size))
-        return chunk_list
 
 
 @receiver(user_logged_in)
