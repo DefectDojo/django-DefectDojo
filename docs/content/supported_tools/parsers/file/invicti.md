@@ -118,7 +118,7 @@ For teams running Invicti Enterprise across multiple applications:
 
 ---
 
-## Sample Scan Data
+### Sample Scan Data
 
 Sample Invicti scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/invicti).
 
