@@ -723,11 +723,18 @@ def bulk_clear_finding_m2m(finding_qs):
     # Remove tags with proper count maintenance
     bulk_remove_all_tags(Finding, finding_ids)
 
-    # Auto-discover and delete remaining (non-tag) M2M through tables
-    for m2m_field in Finding._meta.many_to_many:
-        if hasattr(m2m_field, "tag_options"):
+    # Auto-discover and delete M2M through tables — both forward (Finding._meta.many_to_many)
+    # and reverse (other models with ManyToManyField pointing to Finding, e.g. Finding_Group.findings).
+    # Forward M2M fields use field.remote_field.through, reverse use field.through.
+    m2m_through_models = set()
+    for field_info in Finding._meta.get_fields():
+        if hasattr(field_info, "tag_options"):
             continue
-        through_model = m2m_field.remote_field.through
+        through = getattr(field_info, "through", None) or getattr(getattr(field_info, "remote_field", None), "through", None)
+        if through is not None:
+            m2m_through_models.add(through)
+
+    for through_model in m2m_through_models:
         # Find the FK column that points to Finding
         fk_column = None
         for field in through_model._meta.get_fields():
