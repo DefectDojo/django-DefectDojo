@@ -46,6 +46,7 @@ class TestAWSInspector2Parser(DojoTestCase):
         with (get_unit_tests_scans_path("aws_inspector2") / "aws_inspector2_package_vuln_metadata.json").open(encoding="utf-8") as testfile:
             parser = AWSInspector2Parser()
             findings = parser.get_findings(testfile, Test())
+        self.validate_locations(findings)
         self.assertEqual(28, len(findings))
         # Use the first finding (CVE-2025-58187 - go/stdlib) for field assertions
         finding = findings[0]
@@ -65,6 +66,12 @@ class TestAWSInspector2Parser(DojoTestCase):
         self.assertEqual(7.5, finding.cvssv3_score)
         # vulnerability ID still populated
         self.assertIn("CVE-2025-58187", finding.unsaved_vulnerability_ids)
+        # LocationData.dependency populated for package vulnerability findings
+        dependency_locations = [loc for loc in finding.unsaved_locations if loc.type == "dependency"]
+        self.assertEqual(1, len(dependency_locations))
+        self.assertEqual("go/stdlib", dependency_locations[0].data["name"])
+        self.assertEqual("1.24.4", dependency_locations[0].data["version"])
+        self.assertEqual("extensions/collector", dependency_locations[0].data["file_path"])
 
     def test_aws_inspector2_parser_empty_with_error(self):
         with self.assertRaises(TypeError) as context, \

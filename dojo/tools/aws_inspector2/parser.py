@@ -137,6 +137,14 @@ class AWSInspector2Parser:
             finding.component_name = vulnerable_packages[0].get("name")
             finding.component_version = vulnerable_packages[0].get("version")
             finding.file_path = vulnerable_packages[0].get("filePath")
+            if settings.V3_FEATURE_LOCATIONS and finding.component_name:
+                finding.unsaved_locations.append(
+                    LocationData.dependency(
+                        name=finding.component_name,
+                        version=finding.component_version or "",
+                        file_path=finding.file_path or "",
+                    ),
+                )
         # reference URLs from the advisory
         reference_urls = vulnerability_details.get("referenceUrls", [])
         if reference_urls:
@@ -294,9 +302,9 @@ class AWSInspector2Parser:
                 endpoints.append(Endpoint(host=endpoint_host))
         finding.impact = "\n".join(impact)
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations = endpoints
+            finding.unsaved_locations.extend(endpoints)
         else:
             # TODO: Delete this after the move to Locations
-            finding.unsaved_endpoints = endpoints
+            finding.unsaved_endpoints.extend(endpoints)
 
         return finding
