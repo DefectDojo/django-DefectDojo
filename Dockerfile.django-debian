@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.12-slim-trixie@sha256:f50f56f1471fc430b394ee75fc826be2d212e35d85ed1171ac79abbba485dce9 AS base
+FROM python:3.13.12-slim-trixie@sha256:8bc60ca09afaa8ea0d6d1220bde073bacfedd66a4bf8129cbdc8ef0e16c8a952 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -80,7 +80,7 @@ COPY \
   docker/reach_broker.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py ./
+COPY manage.py ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer

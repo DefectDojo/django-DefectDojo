@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block content %}
+    {{ block.super }}
+    <h3>{% trans "Verify Finding" %}</h3>
+    <h4>{{ finding.title }}</h4>
+    <p>{% trans "Use this form to mark the finding as verified. Adding a comment is optional." %}</p>
+    <form class="form-horizontal" action="{% url 'verify_finding' finding.id %}" method="post">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" value="{% trans "Verify Finding" %}" aria-label="{% trans "Verify Finding" %}"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
