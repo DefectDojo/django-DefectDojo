@@ -20,16 +20,26 @@ class AnchoreGrypeParser:
     """
 
     def get_scan_types(self):
-        return ["Anchore Grype"]
+        return ["Anchore Grype", "Anchore Grype detailed"]
 
     def get_label_for_scan_types(self, scan_type):
-        return "Anchore Grype"
+        return scan_type
 
     def get_description_for_scan_types(self, scan_type):
-        return (
+        if scan_type == "Anchore Grype":
+            return (
             "A vulnerability scanner for container images, filesystems, and SBOMs. "
             "JSON report generated with '--output=json' format."
         )
+        return "Detailed Report. Import all vulnerabilities from Anchore Grype without aggregation, creating a separate finding per file path."
+
+    # mode:
+    # None (default): aggregates findings per CVE, component name and version (legacy behavior)
+    # 'detailed': no aggregation - creates separate findings per file_path
+    mode = None
+
+    def set_mode(self, mode):
+        self.mode = mode
 
     def get_findings(self, file, test):
         logger.debug("file: %s", file)
@@ -185,7 +195,10 @@ class AnchoreGrypeParser:
                 if finding_epss_score is None and rel_vuln_id:
                     finding_epss_score, finding_epss_percentile = self.get_epss_values(vuln_id, vuln_epss)
 
-            dupe_key = finding_title
+            if self.mode == "detailed":
+                dupe_key = f"{vuln_id}|{artifact_name}|{artifact_version}|{file_path}"
+            else:
+                dupe_key = f"{vuln_id}|{artifact_name}|{artifact_version}"
             if dupe_key in dupes:
                 finding = dupes[dupe_key]
                 finding.nb_occurences += 1
@@ -210,6 +223,8 @@ class AnchoreGrypeParser:
                     fix_available=fix_available,
                     fix_version=fix_version,
                 )
+                if self.mode == "detailed":
+                    dupes[dupe_key].unique_id_from_tool = dupe_key
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
                 if settings.V3_FEATURE_LOCATIONS and artifact_purl:
                     dupes[dupe_key].unsaved_locations.append(

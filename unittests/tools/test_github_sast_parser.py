@@ -30,6 +30,7 @@ class TestGithubSASTParser(DojoTestCase):
             self.assertEqual("src/file.py", finding.file_path)
             self.assertEqual(42, finding.line)
             self.assertEqual("py/clear-text-storage-sensitive-data", finding.vuln_id_from_tool)
+            self.assertEqual("35", finding.unique_id_from_tool)
             self.assertEqual("High", finding.severity)
             self.assertEqual("https://github.com/OWASP/test-repository/security/code-scanning/35", finding.url)
             self.assertIn("This expression stores sensitive data", finding.description)
