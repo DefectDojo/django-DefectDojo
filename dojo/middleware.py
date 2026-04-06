@@ -76,6 +76,7 @@ class LoginRequiredMiddleware:
                 uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
+                request.META["REMOTE_USER"] = str(request.user)
         return response
 
 
@@ -338,3 +339,4 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             for i, batch in enumerate(batches, 1):
                 logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
                 update_watson_search_index_for_model(model_name, batch)
+
