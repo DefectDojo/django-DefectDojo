@@ -2,6 +2,8 @@ from datetime import date, datetime
 
 from dateutil.tz import tzoffset
 
+from django.conf import settings
+
 from dojo.models import Test
 from dojo.tools.aws_inspector2.parser import AWSInspector2Parser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -66,11 +68,12 @@ class TestAWSInspector2Parser(DojoTestCase):
         # vulnerability ID still populated
         self.assertIn("CVE-2025-58187", finding.unsaved_vulnerability_ids)
         # LocationData.dependency populated for package vulnerability findings
-        dependency_locations = [loc for loc in finding.unsaved_locations if loc.type == "dependency"]
-        self.assertEqual(1, len(dependency_locations))
-        self.assertEqual("go/stdlib", dependency_locations[0].data["name"])
-        self.assertEqual("1.24.4", dependency_locations[0].data["version"])
-        self.assertEqual("extensions/collector", dependency_locations[0].data["file_path"])
+        if settings.V3_FEATURE_LOCATIONS:
+            dependency_locations = [loc for loc in finding.unsaved_locations if loc.type == "dependency"]
+            self.assertEqual(1, len(dependency_locations))
+            self.assertEqual("go/stdlib", dependency_locations[0].data["name"])
+            self.assertEqual("1.24.4", dependency_locations[0].data["version"])
+            self.assertEqual("extensions/collector", dependency_locations[0].data["file_path"])
 
     def test_aws_inspector2_parser_empty_with_error(self):
         with self.assertRaises(TypeError) as context, \
