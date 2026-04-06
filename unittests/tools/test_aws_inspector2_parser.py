@@ -1,7 +1,6 @@
 from datetime import date, datetime
 
 from dateutil.tz import tzoffset
-
 from django.conf import settings
 
 from dojo.models import Test
