@@ -93,7 +93,7 @@ jobs:
           grep -H version helm/defectdojo/Chart.yaml
 
       - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@6f957579ac122ecc167bf515fe84e828686c9a15 # v1.7.1
+        uses: losisin/helm-docs-github-action@2ccf3e77eb70dc80d62f8cc26f15d0a96b75fef4 # v1.8.0
         with:
           chart-search-root: "helm/defectdojo"
 

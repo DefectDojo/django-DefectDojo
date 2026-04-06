@@ -39,6 +39,7 @@ from dojo.authorization.authorization_decorators import (
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.decorators import deprecated_view
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -49,6 +50,11 @@ from dojo.filters import (
     TemplateFindingFilter,
     TestImportFilter,
     TestImportFindingActionFilter,
+)
+from dojo.finding.deduplication import (
+    _fetch_fp_candidates_for_batch,
+    do_false_positive_history_batch,
+    match_finding_to_existing_findings,
 )
 from dojo.finding.queries import get_authorized_findings, get_authorized_findings_for_queryset, prefetch_for_findings
 from dojo.forms import (
@@ -112,14 +118,12 @@ from dojo.utils import (
     add_field_errors_to_response,
     add_success_message_to_response,
     calculate_grade,
-    do_false_positive_history,
     get_page_items,
     get_page_items_and_count,
     get_return_url,
     get_system_setting,
     get_visible_scan_types,
     get_words_for_field,
-    match_finding_to_existing_findings,
     process_tag_notifications,
     redirect,
     redirect_to_return_url_or_else,
@@ -880,26 +884,27 @@ class EditFinding(View):
                     status.last_modified = timezone.now()
                     status.save()
 
-    def process_false_positive_history(self, finding: Finding):
+    def process_false_positive_history(self, finding: Finding, *, old_false_p: bool = False):
         if get_system_setting("false_positive_history", False):
             # If the finding is being marked as a false positive we dont need to call the
-            # fp history function because it will be called by the save function
-            # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
-            if finding.false_p and not finding.false_p and get_system_setting("retroactive_false_positive_history"):
+            # fp history function because it will be called by the save function.
+            # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings.
+            # old_false_p must be captured before form.save(commit=False) mutates the finding in place.
+            if old_false_p and not finding.false_p and get_system_setting("retroactive_false_positive_history"):
                 logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", finding)
-
-                existing_fp_findings = match_finding_to_existing_findings(
+                # QuerySet.update() bypasses Django signals, which is intentional here — it mirrors
+                # the previous save_no_options() calls that also disabled all post-save processing.
+                # match_finding_to_existing_findings returns a lazy QS with no .only() applied,
+                # so any field can be added here without needing a corresponding .only() change in deduplication.py#_fetch_fp_candidates_for_batch.
+                match_finding_to_existing_findings(
                     finding, product=finding.test.engagement.product,
-                ).filter(false_p=True)
-
-                for fp in existing_fp_findings:
-                    logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
-                    fp.active = finding.active
-                    fp.verified = finding.verified
-                    fp.false_p = False
-                    fp.out_of_scope = finding.out_of_scope
-                    fp.is_mitigated = finding.is_mitigated
-                    fp.save_no_options()
+                ).filter(false_p=True).update(
+                    false_p=False,
+                    active=finding.active,
+                    verified=finding.verified,
+                    out_of_scope=finding.out_of_scope,
+                    is_mitigated=finding.is_mitigated,
+                )
 
     def process_burp_request_response(self, finding: Finding, context: dict):
         if "request" in context["form"].cleaned_data or "response" in context["form"].cleaned_data:
@@ -919,6 +924,9 @@ class EditFinding(View):
     def process_finding_form(self, request: HttpRequest, finding: Finding, context: dict):
         if context["form"].is_valid():
             # process some of the easy stuff first
+            # Capture false_p before form.save(commit=False) mutates the finding in place,
+            # so process_false_positive_history can detect a false-positive → active transition.
+            old_false_p = finding.false_p
             new_finding = context["form"].save(commit=False)
             new_finding.test = finding.test
             new_finding.numerical_severity = Finding.get_numerical_severity(new_finding.severity)
@@ -950,7 +958,7 @@ class EditFinding(View):
                         endpoint_status.delete()
             # Handle some of the other steps
             self.process_mitigated_data(request, new_finding, context)
-            self.process_false_positive_history(new_finding)
+            self.process_false_positive_history(new_finding, old_false_p=old_false_p)
             self.process_burp_request_response(new_finding, context)
             # Save the vulnerability IDs
             finding_helper.save_vulnerability_ids(new_finding, context["form"].cleaned_data["vulnerability_ids"].split())
@@ -1222,6 +1230,65 @@ def close_finding(request, fid):
             "user": request.user,
             "form": form,
             "note_types": missing_note_types,
+        },
+    )
+
+
+@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
+def verify_finding(request, fid):
+    finding = get_object_or_404(Finding, id=fid)
+
+    if finding.verified:
+        messages.add_message(
+            request,
+            messages.INFO,
+            "Finding already verified.",
+            extra_tags="alert-info",
+        )
+        return redirect_to_return_url_or_else(
+            request,
+            reverse("view_finding", args=(finding.id,)),
+        )
+
+    form = NoteForm(data=request.POST or None)
+    form.fields["entry"].required = False
+    form.fields["entry"].label = _("Comment (optional)")
+
+    if request.method == "POST" and form.is_valid():
+        entry = form.cleaned_data.get("entry", "")
+        finding_helper.verify_finding(
+            finding=finding,
+            user=request.user,
+            note_entry=entry,
+        )
+
+        messages.add_message(
+            request,
+            messages.SUCCESS,
+            "Finding verified.",
+            extra_tags="alert-success",
+        )
+
+        return redirect_to_return_url_or_else(
+            request,
+            reverse("view_finding", args=(finding.id,)),
+        )
+
+    product_tab = Product_Tab(
+        finding.test.engagement.product,
+        title="Verify Finding",
+        tab="findings",
+    )
+
+    return render(
+        request,
+        "dojo/verify_finding.html",
+        {
+            "finding": finding,
+            "product_tab": product_tab,
+            "user": request.user,
+            "form": form,
+            "active_tab": "findings",
         },
     )
 
@@ -2000,6 +2067,7 @@ def add_stub_finding(request, tid):
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Delete, "fid")
+@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
 
@@ -2026,6 +2094,7 @@ def delete_stub_finding(request, fid):
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
+@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
 def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test
@@ -2699,6 +2768,10 @@ def _bulk_update_finding_status_and_severity(finds, form, request, system_settin
     actually_updated_count = 0
 
     if form.cleaned_data["severity"] or form.cleaned_data["status"]:
+        # Accumulate findings for batched FP-history processing after the per-finding loop
+        fp_findings = []            # findings being marked as FP
+        reactivation_findings = []  # findings being un-FP'd (retroactive reactivation)
+
         for find in finds:
             old_find = copy.deepcopy(find)
 
@@ -2738,27 +2811,70 @@ def _bulk_update_finding_status_and_severity(finds, form, request, system_settin
             actually_updated_count += 1
 
             if system_settings.false_positive_history:
-                # If finding is being marked as false positive
                 if find.false_p:
-                    do_false_positive_history(find)
-
-                # If finding was a false positive and is being reactivated: retroactively reactivates all equal findings
+                    fp_findings.append(find)
                 elif old_find.false_p and not find.false_p:
-                    if system_settings.retroactive_false_positive_history:
-                        logger.debug("FALSE_POSITIVE_HISTORY: Reactivating existing findings based on: %s", find)
+                    reactivation_findings.append(find)
 
-                        existing_fp_findings = match_finding_to_existing_findings(
-                            find, product=find.test.engagement.product,
-                        ).filter(false_p=True)
+        # --- Batch FP history: one DB query per (product, algorithm) group instead of one per finding ---
+        if system_settings.false_positive_history and fp_findings:
+            groups: dict = defaultdict(list)
+            for find in fp_findings:
+                groups[find.test.engagement.product_id, find.test.deduplication_algorithm].append(find)
+            for group_findings in groups.values():
+                do_false_positive_history_batch(group_findings)
 
-                        for fp in existing_fp_findings:
-                            logger.debug("FALSE_POSITIVE_HISTORY: Reactivating false positive %i: %s", fp.id, fp)
-                            fp.active = find.active
-                            fp.verified = find.verified
-                            fp.false_p = False
-                            fp.out_of_scope = find.out_of_scope
-                            fp.is_mitigated = find.is_mitigated
-                            fp.save_no_options()
+        # --- Batch retroactive reactivation ---
+        if (
+            system_settings.false_positive_history
+            and system_settings.retroactive_false_positive_history
+            and reactivation_findings
+        ):
+            all_fp_ids_to_reactivate: set = set()
+            groups = defaultdict(list)
+            for find in reactivation_findings:
+                groups[find.test.engagement.product_id, find.test.deduplication_algorithm].append(find)
+            for (_, dedup_alg), group_findings in groups.items():
+                product = group_findings[0].test.engagement.product
+                candidates = _fetch_fp_candidates_for_batch(group_findings, product, dedup_alg)
+                for find in group_findings:
+                    if dedup_alg == "unique_id_from_tool_or_hash_code":
+                        by_uid, by_hash = candidates
+                        uid_matches = by_uid.get(find.unique_id_from_tool, []) if find.unique_id_from_tool else []
+                        hash_matches = by_hash.get(find.hash_code, []) if find.hash_code else []
+                        seen: dict = {}
+                        for ef in uid_matches + hash_matches:
+                            seen.setdefault(ef.id, ef)
+                        existing = list(seen.values())
+                    elif dedup_alg == "hash_code":
+                        existing = candidates.get(find.hash_code, []) if find.hash_code else []
+                    elif dedup_alg == "unique_id_from_tool":
+                        existing = candidates.get(find.unique_id_from_tool, []) if find.unique_id_from_tool else []
+                    elif dedup_alg == "legacy":
+                        lookup_key = (find.title.lower(), find.severity) if find.title else None
+                        existing = candidates.get(lookup_key, []) if lookup_key else []
+                    else:
+                        existing = []
+                    for ef in existing:
+                        if ef.false_p:
+                            all_fp_ids_to_reactivate.add(ef.id)
+
+            if all_fp_ids_to_reactivate:
+                logger.debug(
+                    "FALSE_POSITIVE_HISTORY: Reactivating %i finding(s): %s",
+                    len(all_fp_ids_to_reactivate),
+                    sorted(all_fp_ids_to_reactivate),
+                )
+                # All reactivation findings received the same form values, so a single bulk update covers all.
+                # QuerySet.update() bypasses Django signals, which is intentional here — it mirrors
+                # the previous save_no_options() calls that also disabled all post-save processing.
+                Finding.objects.filter(id__in=all_fp_ids_to_reactivate).update(
+                    false_p=False,
+                    active=form.cleaned_data["active"],
+                    verified=form.cleaned_data["verified"],
+                    out_of_scope=form.cleaned_data["out_of_scope"],
+                    is_mitigated=form.cleaned_data["is_mitigated"],
+                )
 
         for prod in prods:
             calculate_grade(prod.id)

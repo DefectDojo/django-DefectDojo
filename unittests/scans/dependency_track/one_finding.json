@@ -31,7 +31,11 @@
         "cweId": 400,
         "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
         "description": "Affected versions of `timespan`...",
-        "recommendation": "No direct patch is available..."
+        "recommendation": "No direct patch is available...",
+        "cvssV3Vector": "CVSS:3.0/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N",
+        "references": "* [https://example.com](https://example.com)\n* [https://example.org](https://example.org)",
+        "published": "2025-07-11 03:16:03.563"
       },
       "analysis": {
         "state": "NOT_SET",
