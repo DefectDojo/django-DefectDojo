@@ -68,10 +68,7 @@ class NetsparkerParser:
             dupe_key = title
             request = item["HttpRequest"].get("Content", None)
             response = item["HttpResponse"].get("Content", None)
-            if settings.USE_FIRST_SEEN:
-                finding_date = _parse_date(item.get("FirstSeenDate")) or scan_date
-            else:
-                finding_date = scan_date
+            finding_date = (_parse_date(item.get("FirstSeenDate")) or scan_date) if settings.USE_FIRST_SEEN else scan_date
 
             finding = Finding(
                 title=title,
