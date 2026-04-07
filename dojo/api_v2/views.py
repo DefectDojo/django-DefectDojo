@@ -183,9 +183,14 @@ from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     async_delete,
     generate_file_response,
+    get_celery_queue_details,
+    get_celery_queue_length,
+    get_celery_worker_status,
     get_setting,
     get_system_setting,
     process_tag_notifications,
+    purge_celery_queue,
+    purge_celery_queue_by_task_name,
 )
 
 logger = logging.getLogger(__name__)
@@ -841,6 +846,8 @@ class RiskAcceptanceViewSet(
             )
         # Get the path of the file in media root
         file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        # NOTE: FileResponse takes ownership of closing the file handle when the response is closed.
+        # Explicitly register the closer to avoid potential resource leaks and satisfy static analyzers.
         file_handle = file_path.open("rb")
         # send file
         response = FileResponse(
@@ -848,6 +855,8 @@ class RiskAcceptanceViewSet(
             content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
+        if hasattr(response, "_resource_closers"):
+            response._resource_closers.append(file_handle.close)
         response["Content-Length"] = file_object.size
         response[
             "Content-Disposition"
@@ -880,7 +889,10 @@ class AppAnalysisViewSet(
 @extend_schema_view(**schema_with_prefetch())
 class CredentialsViewSet(
     PrefetchDojoModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.CredentialSerializer
     queryset = Cred_User.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -889,13 +901,58 @@ class CredentialsViewSet(
     def get_queryset(self):
         return Cred_User.objects.all().order_by("id")
 
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
 
 # Authorization: configuration
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
 class CredentialsMappingViewSet(
     PrefetchDojoModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.CredentialMappingSerializer
     queryset = Cred_Mapping.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -908,6 +965,48 @@ class CredentialsMappingViewSet(
 
     def get_queryset(self):
         return get_authorized_cred_mappings(Permissions.Credential_View)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
 
 # Authorization: configuration
@@ -1086,6 +1185,32 @@ class FindingViewSet(
                     finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
         serialized_finding = serializers.FindingCloseSerializer(finding, context={"request": request})
+        return Response(serialized_finding.data)
+
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.FindingVerifySerializer,
+        responses={status.HTTP_200_OK: serializers.FindingSerializer},
+    )
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
+    def verify(self, request, pk=None):
+        finding = self.get_object()
+
+        serializer = serializers.FindingVerifySerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Remove prefetched tags to keep queryset state in sync
+        finding.tags._remove_prefetched_objects()
+
+        finding_helper.verify_finding(
+            finding=finding,
+            user=request.user,
+            note_entry=serializer.validated_data.get("note"),
+            note_type=serializer.validated_data.get("note_type"),
+        )
+
+        serialized_finding = serializers.FindingSerializer(finding, context={"request": request})
         return Response(serialized_finding.data)
 
     @extend_schema(
@@ -2167,7 +2292,10 @@ class ProductTypeGroupViewSet(
 # Nested models with prefetch make the response schema too long for Swagger UI
 class StubFindingsViewSet(
     PrefetchDojoModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -2186,6 +2314,48 @@ class StubFindingsViewSet(
         if self.request and self.request.method == "POST":
             return serializers.StubFindingCreateSerializer
         return serializers.StubFindingSerializer
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
 
 # Authorization: authenticated, configuration
@@ -3228,6 +3398,79 @@ class SystemSettingsViewSet(
 
     def get_queryset(self):
         return System_Settings.objects.all().order_by("id")
+
+
+class CeleryViewSet(viewsets.ViewSet):
+    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    queryset = System_Settings.objects.none()
+
+    @extend_schema(
+        responses=serializers.CeleryStatusSerializer,
+        summary="Get Celery worker and queue status",
+        description=(
+            "Returns Celery worker liveness, pending queue length, and the active task "
+            "timeout/expiry configuration. Uses the Celery control channel (pidbox) for "
+            "worker status so it works correctly even when the task queue is clogged."
+        ),
+    )
+    @action(detail=False, methods=["get"], url_path="status")
+    def status(self, request):
+        queue_length = get_celery_queue_length()
+        data = {
+            "worker_status": get_celery_worker_status(),
+            "broker_status": queue_length is not None,
+            "queue_length": queue_length,
+            "task_time_limit": getattr(settings, "CELERY_TASK_TIME_LIMIT", None),
+            "task_soft_time_limit": getattr(settings, "CELERY_TASK_SOFT_TIME_LIMIT", None),
+            "task_default_expires": getattr(settings, "CELERY_TASK_DEFAULT_EXPIRES", None),
+        }
+        return Response(serializers.CeleryStatusSerializer(data).data)
+
+    @extend_schema(
+        request=None,
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all pending Celery tasks from the queue",
+        description=(
+            "Removes all pending tasks from the default Celery queue. Tasks already being "
+            "executed by workers are not affected. Note: if deduplication tasks were queued, "
+            "you may need to re-run deduplication manually via `python manage.py dedupe`."
+        ),
+    )
+    @action(detail=False, methods=["post"], url_path="queue/purge")
+    def queue_purge(self, request):
+        purged = purge_celery_queue()
+        return Response({"purged": purged})
+
+    @extend_schema(
+        responses=serializers.CeleryQueueTaskDetailSerializer(many=True),
+        summary="Get per-task breakdown of the Celery queue",
+        description=(
+            "Scans every message in the queue (O(N)) and returns task name, count, and "
+            "oldest/newest queue positions. May be slow for large queues."
+        ),
+    )
+    @action(detail=False, methods=["get"], url_path="queue/details")
+    def queue_details(self, request):
+        details = get_celery_queue_details()
+        if details is None:
+            return Response({"error": "Unable to read queue details."}, status=503)
+        return Response(serializers.CeleryQueueTaskDetailSerializer(details, many=True).data)
+
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"task_name": {"type": "string"}}, "required": ["task_name"]}},
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all queued tasks with a given task name",
+        description="Removes all pending tasks matching the given task name from the default Celery queue.",
+    )
+    @action(detail=False, methods=["post"], url_path="queue/task/purge")
+    def queue_task_purge(self, request):
+        task_name = request.data.get("task_name", "").strip()
+        if not task_name:
+            return Response({"error": "task_name is required."}, status=400)
+        purged = purge_celery_queue_by_task_name(task_name)
+        if purged is None:
+            return Response({"error": "Unable to purge tasks."}, status=503)
+        return Response({"purged": purged})
 
 
 # Authorization: superuser

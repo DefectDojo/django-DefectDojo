@@ -326,6 +326,7 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
         # Import here to avoid circular import
         from django.conf import settings  # noqa: PLC0415 circular import
 
+        from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
         from dojo.tasks import update_watson_search_index_for_model  # noqa: PLC0415 circular import
 
         # Create tasks per model type, chunking large lists into configurable batches
@@ -337,4 +338,4 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             # Create tasks for each batch and log each one
             for i, batch in enumerate(batches, 1):
                 logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
-                update_watson_search_index_for_model(model_name, batch)
+                dojo_dispatch_task(update_watson_search_index_for_model, model_name, batch)

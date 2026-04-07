@@ -369,12 +369,12 @@ class TagImportMixin:
         findings = response["results"]
         # Make sure we have what we are looking for
         assert_tags_in_findings(findings, 2, ["security", "network"])
-        # Reimport with a different report that has more tags
+        # Reimport with a different report that has more tags — matched findings should retain their original tags
         self.reimport_scan_with_params(test_id, self.generic_sample_with_more_tags_filename, scan_type="Generic Findings Import")
         response = self.get_test_findings_api(test_id)
         findings = response["results"]
-        # Make sure we have what we are looking for
-        assert_tags_in_findings(findings, 2, ["security", "network", "hardened"])
+        # Tags from the report are not applied to matched findings on reimport, consistent with other fields
+        assert_tags_in_findings(findings, 2, ["security", "network"])
 
 
 @versioned_fixtures
