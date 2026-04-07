@@ -31,6 +31,23 @@ In `Add API Scan Configuration`
 -   If using SonarCloud, the organization ID can be used from step 1, but it
     can be overridden by supplying a different organization ID in the `Service key 2` input field.
 
+## Disabling Hotspot Imports
+
+By default, the SonarQube API Import includes both security issues and security hotspots. To import only security issues and exclude hotspots, set the following environment variable on your DefectDojo instance:
+
+```
+DD_SONARQUBE_API_PARSER_HOTSPOTS=False
+```
+
+For on-premise installations using the dojo-compose-cli:
+
+```bash
+dojo-compose-cli environment add --key DD_SONARQUBE_API_PARSER_HOTSPOTS --value "False"
+dojo-compose-cli app stop && dojo-compose-cli app start
+```
+
+Note that this setting is instance-wide and affects all SonarQube API imports. There is currently no per-tool-configuration or per-import toggle for hotspots. If you need hotspots for some projects but not others, you will need to build a custom middleware to filter results before importing.
+
 ## Multiple SonarQube API Configurations
 
 In the import or re-import dialog, you can select which `API Scan
