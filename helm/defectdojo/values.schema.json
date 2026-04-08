@@ -532,6 +532,23 @@
                         }
                     }
                 },
+                "httpRoute": {
+                    "description": "Expose the Django service via Gateway API HTTPRoute. For more info follow https://gateway-api.sigs.k8s.io/guides/http-routing/",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "annotations": {
+                            "description": "Annotations for the HTTPRoute resource",
+                            "type": "object"
+                        },
+                        "parentRefs": {
+                            "description": "Parent gateway references for the HTTPRoute",
+                            "type": "array"
+                        }
+                    }
+                },
                 "mediaPersistentVolume": {
                     "description": "This feature needs more preparation before can be enabled, please visit KUBERNETES.md#media-persistent-volume",
                     "type": "object",

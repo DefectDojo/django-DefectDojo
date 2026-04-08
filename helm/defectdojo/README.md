@@ -618,6 +618,9 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.extraInitContainers | list | `[]` | A list of additional initContainers to run before the uwsgi and nginx containers. |
 | django.extraVolumeMounts | list | `[]` | Array of additional volume mount points common to all containers and initContainers. |
 | django.extraVolumes | list | `[]` | A list of extra volumes to mount. |
+| django.httpRoute | object | `{"annotations":{},"enabled":false,"parentRefs":[]}` | Expose the Django service via Gateway API HTTPRoute |
+| django.httpRoute.annotations | object | `{}` | Annotations for the HTTPRoute resource |
+| django.httpRoute.parentRefs | list | `[]` | Parent gateway references for the HTTPRoute parentRefs: - name: my-gateway   namespace: default |
 | django.ingress.activateTLS | bool | `true` |  |
 | django.ingress.annotations | object | `{}` | Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...) `kubernetes.io/ingress.class: nginx` Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts `nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"` `nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"` |
 | django.ingress.enabled | bool | `true` |  |
