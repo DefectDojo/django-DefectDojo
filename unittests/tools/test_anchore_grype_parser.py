@@ -341,3 +341,28 @@ class TestAnchoreGrypeParser(DojoTestCase):
                 self.assertAlmostEqual(epss_score, finding.epss_score, places=5)
                 self.assertIsNotNone(finding.epss_percentile)
                 self.assertAlmostEqual(epss_percentile, finding.epss_percentile, places=5)
+
+    def test_parser_scan_types(self):
+        parser = AnchoreGrypeParser()
+        scan_types = parser.get_scan_types()
+        self.assertIn("Anchore Grype", scan_types)
+        self.assertIn("Anchore Grype detailed", scan_types)
+
+    def test_default_mode_deduplicates_same_cve_different_paths(self):
+        """In default mode, same CVE/component/version at different file paths should be merged into one finding."""
+        with (get_unit_tests_scans_path("anchore_grype") / "same_cve_different_paths.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            self.assertEqual(findings[0].nb_occurences, 2)
+
+    def test_detailed_mode_separates_same_cve_different_paths(self):
+        """In detailed mode, same CVE/component/version at different file paths should produce separate findings."""
+        with (get_unit_tests_scans_path("anchore_grype") / "same_cve_different_paths.json").open(encoding="utf-8") as testfile:
+            parser = AnchoreGrypeParser()
+            parser.set_mode("detailed")
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            file_paths = {f.file_path for f in findings}
+            self.assertIn("/usr/lib/x86_64-linux-gnu/libc.so.6", file_paths)
+            self.assertIn("/lib/x86_64-linux-gnu/libc.so.6", file_paths)

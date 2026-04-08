@@ -24,7 +24,8 @@ class Command(BaseCommand):
             ctype_id = row[0]
         # Find the current id in the surveys file
         path = Path(__file__).parent.parent.parent / "fixtures" / "initial_surveys.json"
-        contents = path.open(encoding="utf-8").readlines()
+        with path.open(encoding="utf-8") as fin:
+            contents = fin.readlines()
         for line in contents:
             if '"polymorphic_ctype": ' in line:
                 matchedLine = line

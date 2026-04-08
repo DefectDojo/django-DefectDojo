@@ -83,7 +83,7 @@
                                         </li>
                                     </ul>
                                 </td>
-                                <td><a href="{% url 'view_group' g.id %}">{{ g.name }}</a></td>
+                                <td><a href="{% url 'view_group' g.id %}">{{ g.name }}</a>{% if g.social_provider %} <div class="tag-label tag-color">{{ g.social_provider }}</div>{% endif %}</td>
                                 <td>{{ g.description }}</td>
                                 <td>{{ g.users.all|length }}</td>
                                 <td>{% if g.global_role.role %} {{ g.global_role.role }} {% endif %}</td>

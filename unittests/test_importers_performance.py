@@ -51,6 +51,7 @@ logger = logging.getLogger(__name__)
 
 STACK_HAWK_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings.json"
 STACK_HAWK_SUBSET_FILENAME = get_unit_tests_scans_path("stackhawk") / "stackhawk_many_vul_without_duplicated_findings_subset.json"
+STACK_HAWK_EMPTY = get_unit_tests_scans_path("stackhawk") / "stackhawk_empty.json"
 STACK_HAWK_SCAN_TYPE = "StackHawk HawkScan"
 
 
@@ -126,12 +127,17 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         expected_num_async_tasks2,
         expected_num_queries3,
         expected_num_async_tasks3,
+        expected_num_queries4,
+        expected_num_async_tasks4,
         scan_file1,
         scan_file2,
         scan_file3,
+        scan_file4,
         scan_type,
         product_name,
         engagement_name,
+        *,
+        close_old_findings4=False,
     ):
         """
         Test import/reimport/reimport performance with specified scan files and scan type.
@@ -195,6 +201,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                                 "verified": True,
                                 "sync": True,
                                 "scan_type": scan_type,
+                                "service": "Secured Application",
                                 "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
                                 "apply_tags_to_findings": True,
                             }
@@ -224,9 +231,43 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                                 "verified": True,
                                 "sync": True,
                                 "scan_type": scan_type,
+                                "service": "Secured Application",
                             }
                             reimporter = DefaultReImporter(**reimport_options)
                             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+
+        # Fourth import (reimport again, empty report)
+        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+        # This allows us to see all count mismatches in a single test run, making it easier to fix
+        # all incorrect expected values at once rather than fixing them one at a time.
+        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+        with (  # noqa: SIM117
+            self.subTest("reimport3"), impersonate(Dojo_User.objects.get(username="admin")),
+            scan_file4.open(encoding="utf-8") as scan,
+        ):
+            with self.subTest(step="reimport3", metric="queries"):
+                with self.assertNumQueries(expected_num_queries4):
+                    with self.subTest(step="reimport3", metric="async_tasks"):
+                        with self._assertNumAsyncTask(expected_num_async_tasks4):
+                            reimport_options = {
+                                "test": test,
+                                "user": lead,
+                                "lead": lead,
+                                "scan_date": None,
+                                "minimum_severity": "Info",
+                                "active": True,
+                                "verified": True,
+                                "sync": True,
+                                "scan_type": scan_type,
+                                # StackHawk parser sets the service field causing close old findings to fail if we do not specify the service field
+                                # This is a big problem that needs fixing. Parsers should not set the service field.
+                                "service": "Secured Application",
+                                "close_old_findings": close_old_findings4,
+                            }
+                            reimporter = DefaultReImporter(**reimport_options)
+                            test, _, len_new_findings4, len_closed_findings4, _, _, _ = reimporter.process_scan(scan)
+        logger.info("Step 4: new=%s closed=%s", len_new_findings4, len_closed_findings4)
+        self.assertGreater(len_closed_findings4, 0, "Step 4 (empty reimport with close_old_findings=True) should close findings")
 
 
 @tag("performance")
@@ -235,7 +276,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     """Performance tests using small sample files (StackHawk, ~6 findings)."""
 
-    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
+    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3, expected_num_queries4, expected_num_async_tasks4):
         """
         Log output can be quite large as when the assertNumQueries fails, all queries are printed.
         It could be usefule to capture the output in `less`:
@@ -251,36 +292,40 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_async_tasks2,
             expected_num_queries3,
             expected_num_async_tasks3,
+            expected_num_queries4,
+            expected_num_async_tasks4,
             scan_file1=STACK_HAWK_SUBSET_FILENAME,
             scan_file2=STACK_HAWK_FILENAME,
             scan_file3=STACK_HAWK_SUBSET_FILENAME,
+            scan_file4=STACK_HAWK_EMPTY,
             scan_type=STACK_HAWK_SCAN_TYPE,
             product_name="TestDojoDefaultImporter",
             engagement_name="Test Create Engagement",
+            close_old_findings4=True,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_async(self):
         """
-        This test checks the performance of the importers when using django-pghistory with async enabled.
+        This test checks the performance of the importers when using django-pghistory and celery tasks in sync mode
         Query counts will need to be determined by running the test initially.
         """
         configure_audit_system()
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=295,
-            expected_num_async_tasks1=6,
-            expected_num_queries2=226,
-            expected_num_async_tasks2=17,
-            expected_num_queries3=108,
-            expected_num_async_tasks3=16,
+            expected_num_queries1=139,
+            expected_num_async_tasks1=1,
+            expected_num_queries2=115,
+            expected_num_async_tasks2=1,
+            expected_num_queries3=29,
+            expected_num_async_tasks3=1,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
     def test_import_reimport_reimport_performance_pghistory_no_async(self):
         """
-        This test checks the performance of the importers when using django-pghistory with async disabled.
+        This test checks the performance of the importers when using django-pghistory and celery tasks in sync mode.
         Query counts will need to be determined by running the test initially.
         """
         configure_audit_system()
@@ -291,12 +336,12 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=302,
-            expected_num_async_tasks1=6,
-            expected_num_queries2=233,
-            expected_num_async_tasks2=17,
-            expected_num_queries3=115,
-            expected_num_async_tasks3=16,
+            expected_num_queries1=146,
+            expected_num_async_tasks1=1,
+            expected_num_queries2=122,
+            expected_num_async_tasks2=1,
+            expected_num_queries3=36,
+            expected_num_async_tasks3=1,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -314,12 +359,12 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=309,
-            expected_num_async_tasks1=8,
-            expected_num_queries2=240,
-            expected_num_async_tasks2=19,
-            expected_num_queries3=119,
-            expected_num_async_tasks3=18,
+            expected_num_queries1=153,
+            expected_num_async_tasks1=3,
+            expected_num_queries2=129,
+            expected_num_async_tasks2=3,
+            expected_num_queries3=40,
+            expected_num_async_tasks3=3,
         )
 
     # Deduplication is enabled in the tests above, but to properly test it we must run the same import twice and capture the results.
@@ -437,16 +482,16 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=264,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=175,
-            expected_num_async_tasks2=7,
+            expected_num_queries1=74,
+            expected_num_async_tasks1=1,
+            expected_num_queries2=69,
+            expected_num_async_tasks2=1,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
     def test_deduplication_performance_pghistory_no_async(self):
-        """Test deduplication performance with django-pghistory and async tasks disabled."""
+        """Test deduplication performance with django-pghistory and celery tasks in sync mode."""
         configure_audit_system()
         configure_pghistory_triggers()
 
@@ -458,10 +503,10 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=271,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=236,
-            expected_num_async_tasks2=7,
+            expected_num_queries1=81,
+            expected_num_async_tasks1=1,
+            expected_num_queries2=77,
+            expected_num_async_tasks2=1,
         )
 
 
@@ -486,7 +531,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         for model in [Location, LocationFindingReference]:
             ContentType.objects.get_for_model(model)
 
-    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3):
+    def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3, expected_num_queries4, expected_num_async_tasks4):
         r"""
         Log output can be quite large as when the assertNumQueries fails, all queries are printed.
         It could be useful to capture the output in `less`:
@@ -502,12 +547,16 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2,
             expected_num_queries3,
             expected_num_async_tasks3,
+            expected_num_queries4,
+            expected_num_async_tasks4,
             scan_file1=STACK_HAWK_SUBSET_FILENAME,
             scan_file2=STACK_HAWK_FILENAME,
             scan_file3=STACK_HAWK_SUBSET_FILENAME,
+            scan_file4=STACK_HAWK_EMPTY,
             scan_type=STACK_HAWK_SCAN_TYPE,
             product_name="TestDojoDefaultImporterLocations",
             engagement_name="Test Create Engagement Locations",
+            close_old_findings4=True,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -520,12 +569,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=1225,
+            expected_num_queries1=1191,
             expected_num_async_tasks1=6,
             expected_num_queries2=716,
             expected_num_async_tasks2=17,
             expected_num_queries3=346,
             expected_num_async_tasks3=16,
+            expected_num_queries4=212,
+            expected_num_async_tasks4=6,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -542,12 +593,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=1234,
+            expected_num_queries1=1200,
             expected_num_async_tasks1=6,
             expected_num_queries2=725,
             expected_num_async_tasks2=17,
             expected_num_queries3=355,
             expected_num_async_tasks3=16,
+            expected_num_queries4=212,
+            expected_num_async_tasks4=6,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -565,12 +618,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=1244,
+            expected_num_queries1=1210,
             expected_num_async_tasks1=8,
             expected_num_queries2=735,
             expected_num_async_tasks2=19,
             expected_num_queries3=359,
             expected_num_async_tasks3=18,
+            expected_num_queries4=222,
+            expected_num_async_tasks4=8,
         )
 
     def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
@@ -663,7 +718,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=1445,
+            expected_num_queries1=1411,
             expected_num_async_tasks1=7,
             expected_num_queries2=1016,
             expected_num_async_tasks2=7,
@@ -683,8 +738,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=1454,
+            expected_num_queries1=1420,
             expected_num_async_tasks1=7,
-            expected_num_queries2=1185,
+            expected_num_queries2=1132,
             expected_num_async_tasks2=7,
         )

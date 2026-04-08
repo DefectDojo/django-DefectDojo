@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <h3>Celery Status</h3>
+        <br>
+        <div id="celery-status-panel" class="col-md-5">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Celery Status</h4>
+                </div>
+                <div class="panel-body text-left">
+                    <table class="table table-condensed" style="margin-bottom: 0">
+                        <tbody>
+                            <tr>
+                                <td>Redis Broker</td>
+                                <td>
+                                    <i id="broker-loading" class="fa-solid fa-spinner fa-spin text-muted"></i>
+                                    <span id="broker-status-badge" class="label label-default" style="display:none"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Celery Worker</td>
+                                <td>
+                                    <i id="worker-loading" class="fa-solid fa-spinner fa-spin text-muted"></i>
+                                    <span id="worker-status-badge" class="label label-default" style="display:none"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="panel-body text-left">
+                    <span id="celery-queue-msg"><i class="fa-solid fa-spinner fa-spin text-muted"></i></span>
+                    <div style="margin-top: 8px;">
+                        <button id="purge-queue-btn" class="btn btn-danger btn-xs" disabled title="Loading...">
+                            Purge queue
+                        </button>
+                        <button id="refresh-status-btn" class="btn btn-default btn-xs" style="margin-left: 6px;">
+                            <span class="glyphicon glyphicon-refresh"></span> Refresh
+                        </button>
+                        <button id="view-details-btn" class="btn btn-default btn-xs" disabled title="Loading..." style="margin-left: 6px;">
+                            View Details
+                        </button>
+                        <span class="text-muted" style="font-size: 0.85em; margin-left: 6px;">
+                            Inspects every message in the queue &mdash; may be slow for large queues.
+                        </span>
+                    </div>
+                    <p class="text-muted" style="margin-top: 8px; font-size: 0.9em">
+                        <strong>Note:</strong> Purging the queue removes pending tasks that have not yet been executed,
+                        including deduplication tasks. If deduplication tasks were in the queue, you may need to
+                        re-run deduplication manually using the <code>dedupe</code> management command:
+                        <code>python manage.py dedupe --dedupe_only</code>
+                    </p>
+                </div>
+                <div class="panel-body text-left">
+                    <div id="queue-details-container" style="display: none;">
+                        <table class="table table-condensed table-bordered table-hover" style="margin-bottom: 0; font-size: 0.9em;">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Task name</th>
+                                    <th>Count</th>
+                                    <th>Oldest (queue pos.)</th>
+                                    <th>Newest (queue pos.)</th>
+                                    <th>Expires</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="queue-details-tbody"></tbody>
+                        </table>
+                        <p class="text-muted" style="font-size: 0.8em; margin-top: 4px;">
+                            Position 1 = oldest task in queue. ETA shown in parentheses when set.
+                        </p>
+                        <p class="text-muted" style="font-size: 0.8em; margin-top: 4px;">
+                            Per-task purge is capped at <strong>10,000 tasks</strong> per action and processed in batches of <strong>1,000</strong>.
+                            Configure via <code>DD_CELERY_QUEUE_PURGE_MAX_TASKS</code> and <code>DD_CELERY_QUEUE_PURGE_BATCH_SIZE</code>.
+                        </p>
+                        <p>If you want more advanced Celery management and monitoring, consider using the <a href="https://docs.celeryq.dev/en/main/userguide/monitoring.html#flower-real-time-celery-web-monitor" target="_blank">Flower</a>.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h4>Celery Settings</h4>
+                </div>
+                <div class="panel-body text-left">
+                    <table class="table table-condensed" style="margin-bottom: 0">
+                        <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+                        <tbody id="celery-config-tbody"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="2" class="text-muted" style="font-size: 0.9em; border-top: 1px solid #ddd; padding-top: 6px">
+                                    Read-only. Configured via environment variables:
+                                    <code>DD_CELERY_TASK_TIME_LIMIT</code>,
+                                    <code>DD_CELERY_TASK_SOFT_TIME_LIMIT</code>,
+                                    <code>DD_CELERY_TASK_DEFAULT_EXPIRES</code>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block postscript %}
+    {{ block.super }}
+    <script>
+        (function() {
+            var purgeUrl = "{% url 'celery-queue-purge' %}";
+            var statusUrl = "{% url 'celery-status' %}";
+            var detailsUrl = "{% url 'celery-queue-details' %}";
+            var taskPurgeUrl = "{% url 'celery-queue-task-purge' %}";
+
+            function setStatusBadge(loadingId, badgeId, isOk, okText, failText) {
+                $('#' + loadingId).hide();
+                var badge = $('#' + badgeId).show();
+                if (isOk) {
+                    badge.text(okText).removeClass('label-default label-danger').addClass('label-success');
+                } else {
+                    badge.text(failText).removeClass('label-default label-success').addClass('label-danger');
+                }
+            }
+
+            function renderCeleryStatus(data) {
+                setStatusBadge('broker-loading', 'broker-status-badge', data.broker_status, 'Reachable', 'Unreachable');
+                setStatusBadge('worker-loading', 'worker-status-badge', data.worker_status, 'Running', 'Not Running');
+
+                var qLen = data.queue_length;
+                if (qLen === null) {
+                    $('#celery-queue-msg').text('It is not possible to identify the number of waiting tasks.');
+                    $('#purge-queue-btn').prop('disabled', true).attr('title', 'Broker unreachable');
+                    $('#view-details-btn').prop('disabled', true).attr('title', 'Broker unreachable');
+                } else {
+                    $('#celery-queue-msg').text(qLen + ' task(s) waiting to be processed.');
+                    $('#purge-queue-btn').prop('disabled', false).removeAttr('title');
+                    $('#view-details-btn').prop('disabled', false).removeAttr('title');
+                }
+
+                function humanDuration(seconds) {
+                    if (seconds === null) return '<em>Not set</em>';
+                    var d = Math.floor(seconds / 86400);
+                    var h = Math.floor((seconds % 86400) / 3600);
+                    var m = Math.floor((seconds % 3600) / 60);
+                    var s = seconds % 60;
+                    var parts = [];
+                    if (d) parts.push(d + 'd');
+                    if (h) parts.push(h + 'h');
+                    if (m) parts.push(m + 'm');
+                    if (s || parts.length === 0) parts.push(s + 's');
+                    return parts.join(' ') + ' <span class="text-muted">(' + seconds + 's)</span>';
+                }
+
+                var cfgRows = [
+                    ['Task time limit (hard kill)', data.task_time_limit],
+                    ['Task soft time limit', data.task_soft_time_limit],
+                    ['Default task expiry (queue)', data.task_default_expires],
+                ];
+                var tbody = $('#celery-config-tbody').empty();
+                cfgRows.forEach(function(row) {
+                    tbody.append('<tr><td>' + row[0] + '</td><td>' + humanDuration(row[1]) + '</td></tr>');
+                });
+            }
+
+            function resetToLoadingState() {
+                ['broker-loading', 'worker-loading'].forEach(function(id) { $('#' + id).show(); });
+                ['broker-status-badge', 'worker-status-badge'].forEach(function(id) { $('#' + id).hide(); });
+                $('#celery-queue-msg').html('<i class="fa-solid fa-spinner fa-spin text-muted"></i>');
+                $('#purge-queue-btn').prop('disabled', true).attr('title', 'Loading...');
+                $('#view-details-btn').prop('disabled', true).attr('title', 'Loading...');
+            }
+
+            function loadCeleryStatus() {
+                resetToLoadingState();
+                $.get(statusUrl).done(renderCeleryStatus).fail(function() {
+                    ['broker-loading', 'worker-loading'].forEach(function(id) { $('#' + id).hide(); });
+                    setStatusBadge('broker-loading', 'broker-status-badge', false, '', 'Error');
+                    setStatusBadge('worker-loading', 'worker-status-badge', false, '', 'Error');
+                    $('#celery-queue-msg').text('Failed to load Celery status.');
+                });
+            }
+
+            function loadQueueDetails() {
+                $.get(detailsUrl).done(renderQueueDetails).fail(function() {
+                    alert('Failed to load queue details. Check server logs.');
+                });
+            }
+
+            var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            function formatExpiry(isoStr) {
+                if (!isoStr) return '—';
+                var d = new Date(isoStr);
+                var hh = ('0' + d.getHours()).slice(-2);
+                var mm = ('0' + d.getMinutes()).slice(-2);
+                var ss = ('0' + d.getSeconds()).slice(-2);
+                return d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + hh + ':' + mm + ':' + ss;
+            }
+
+            function timeLeft(isoStr) {
+                if (!isoStr) return '';
+                var ms = new Date(isoStr) - Date.now();
+                if (ms <= 0) return ' <span class="label label-danger">expired</span>';
+                var s = Math.floor(ms / 1000);
+                var parts = [];
+                var d = Math.floor(s / 86400); if (d) { parts.push(d + 'd'); s -= d * 86400; }
+                var h = Math.floor(s / 3600);  if (h) { parts.push(h + 'h'); s -= h * 3600; }
+                var m = Math.floor(s / 60);    if (m) { parts.push(('0' + m).slice(-2) + 'm'); s -= m * 60; }
+                if (!parts.length) parts.push(s + 's');
+                return ' <span class="text-muted">(' + parts.join(' ') + ' left)</span>';
+            }
+
+            function renderQueueDetails(tasks) {
+                var tbody = $('#queue-details-tbody').empty();
+                if (tasks.length === 0) {
+                    tbody.append('<tr><td colspan="7" class="text-muted text-center">Queue is empty.</td></tr>');
+                } else {
+                    tasks.forEach(function(t, idx) {
+                        var oldest = '#' + t.oldest_position + (t.oldest_eta ? ' <span class="text-muted">(' + t.oldest_eta + ')</span>' : '');
+                        var newest = '#' + t.newest_position + (t.newest_eta ? ' <span class="text-muted">(' + t.newest_eta + ')</span>' : '');
+                        var expires = '—';
+                        if (t.earliest_expires || t.latest_expires) {
+                            expires = '<span class="text-muted">Oldest:</span> ' + formatExpiry(t.earliest_expires) + timeLeft(t.earliest_expires) +
+                                      '<br><span class="text-muted">Newest:</span> ' + formatExpiry(t.latest_expires) + timeLeft(t.latest_expires);
+                        }
+                        var safeTaskName = $('<span>').text(t.task_name).html();
+                        var purgeBtn = '<button class="btn btn-danger btn-xs task-purge-btn" data-task-name="' + safeTaskName + '">Purge</button>';
+                        tbody.append(
+                            '<tr>' +
+                            '<td>' + (idx + 1) + '</td>' +
+                            '<td><code>' + safeTaskName + '</code></td>' +
+                            '<td>' + t.count + '</td>' +
+                            '<td>' + oldest + '</td>' +
+                            '<td>' + newest + '</td>' +
+                            '<td>' + expires + '</td>' +
+                            '<td>' + purgeBtn + '</td>' +
+                            '</tr>'
+                        );
+                    });
+                }
+                $('#queue-details-container').show();
+            }
+
+            $(function() {
+                loadCeleryStatus();
+
+                $('#refresh-status-btn').on('click', function() {
+                    loadCeleryStatus();
+                    if ($('#queue-details-container').is(':visible')) {
+                        loadQueueDetails();
+                    }
+                });
+
+                $('#purge-queue-btn').on('click', function() {
+                    if (!confirm('Purge all pending tasks from the queue? This cannot be undone.')) return;
+                    $.ajax({
+                        url: purgeUrl,
+                        method: 'POST',
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    }).done(function(data) {
+                        location.reload();
+                    }).fail(function() {
+                        alert('Purge failed. Check server logs.');
+                        loadCeleryStatus();
+                    });
+                });
+
+                $('#queue-details-tbody').on('click', '.task-purge-btn', function() {
+                    var btn = $(this);
+                    var taskName = btn.data('task-name');
+                    if (!confirm('Purge all pending "' + taskName + '" tasks from the queue? This cannot be undone.')) return;
+                    btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+                    $.ajax({
+                        url: taskPurgeUrl,
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify({task_name: taskName}),
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    }).done(function() {
+                        loadCeleryStatus();
+                        loadQueueDetails();
+                    }).fail(function() {
+                        alert('Purge failed. Check server logs.');
+                        btn.prop('disabled', false).text('Purge');
+                    });
+                });
+
+                $('#view-details-btn').on('click', function() {
+                    var btn = $(this);
+                    btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Loading...');
+                    $.get(detailsUrl).done(function(data) {
+                        renderQueueDetails(data);
+                        btn.prop('disabled', false).text('View Details');
+                    }).fail(function() {
+                        alert('Failed to load queue details. Check server logs.');
+                        btn.prop('disabled', false).text('View Details');
+                    });
+                });
+
+            });
+        })();
+    </script>
+{% endblock %}

@@ -1643,6 +1643,7 @@ class ApiFindingFilter(DojoFilter):
     steps_to_reproduce = CharFilter(lookup_expr="icontains")
     unique_id_from_tool = CharFilter(lookup_expr="icontains")
     title = CharFilter(lookup_expr="icontains")
+    exact_title = CharFilter(field_name="title", lookup_expr="iexact", help_text="Finding title exact match (case-insensitive)")
     product_name = CharFilter(lookup_expr="engagement__product__name__iexact", field_name="test", label=labels.ASSET_FILTERS_NAME_EXACT_LABEL)
     product_name_contains = CharFilter(lookup_expr="engagement__product__name__icontains", field_name="test", label=labels.ASSET_FILTERS_NAME_CONTAINS_LABEL)
     product_lifecycle = CharFilter(method=custom_filter, lookup_expr="engagement__product__lifecycle",
