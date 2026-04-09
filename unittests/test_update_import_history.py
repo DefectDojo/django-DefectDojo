@@ -177,3 +177,26 @@ class UpdateImportHistoryTests(TransactionTestCase):
         # Verify import_settings is JSON-serializable
         json.dumps(settings)
         self.assertIsNone(settings["scan_date"])
+
+    def test_import_settings_contains_scope_and_group_fields(self):
+        """import_settings should persist the seven scope/tag/group-by importer options."""
+        self.importer.service = "my-service"
+        self.importer.close_old_findings_product_scope = True
+        self.importer.do_not_reactivate = True
+        self.importer.apply_tags_to_findings = True
+        self.importer.apply_tags_to_endpoints = True
+        self.importer.group_by = "component_name"
+        self.importer.create_finding_groups_for_all_findings = True
+
+        new_findings = self._create_findings(1)
+        test_import = self.importer.update_import_history(new_findings=new_findings)
+
+        s = test_import.import_settings
+        json.dumps(s)
+        self.assertEqual(s["service"], "my-service")
+        self.assertTrue(s["close_old_findings_product_scope"])
+        self.assertTrue(s["do_not_reactivate"])
+        self.assertTrue(s["apply_tags_to_findings"])
+        self.assertTrue(s["apply_tags_to_endpoints"])
+        self.assertEqual(s["group_by"], "component_name")
+        self.assertTrue(s["create_finding_groups_for_all_findings"])
