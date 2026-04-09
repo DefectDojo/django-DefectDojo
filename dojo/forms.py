@@ -2653,6 +2653,11 @@ class CICDInfrastructureForm(forms.ModelForm):
         model = CICDInfrastructure
         fields = ["name", "description", "url", "infrastructure_type"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            self.fields["infrastructure_type"].disabled = True
+
 
 class SLAConfigForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
