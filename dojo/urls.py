@@ -86,6 +86,7 @@ from dojo.reports.urls import urlpatterns as reports_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.cicd_infrastructure.urls import urlpatterns as cicd_infrastructure_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
 from dojo.test.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
@@ -193,6 +194,7 @@ ur += github_urls
 ur += tool_type_urls
 ur += tool_config_urls
 ur += tool_product_urls
+ur += cicd_infrastructure_urls
 ur += sla_urls
 ur += system_settings_urls
 ur += notifications_urls

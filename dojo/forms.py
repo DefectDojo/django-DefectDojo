@@ -65,6 +65,7 @@ from dojo.models import (
     Benchmark_Product,
     Benchmark_Product_Summary,
     Benchmark_Requirement,
+    CICDInfrastructure,
     Check_List,
     Choice,
     ChoiceAnswer,
@@ -2645,6 +2646,12 @@ class ToolConfigForm(forms.ModelForm):
             raise forms.ValidationError(msg, code="invalid")
 
         return form_data
+
+
+class CICDInfrastructureForm(forms.ModelForm):
+    class Meta:
+        model = CICDInfrastructure
+        fields = ["name", "description", "url", "infrastructure_type"]
 
 
 class SLAConfigForm(forms.ModelForm):
