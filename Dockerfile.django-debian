@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.12-slim-trixie@sha256:739e7213785e88c0f702dcdc12c0973afcbd606dbf021a589cab77d6b00b579d AS base
+FROM python:3.14.4-slim-trixie@sha256:13c5640e79ce15c280f6a3d63c6e17d14420d26821e406c211a7cc332e9782b2 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
