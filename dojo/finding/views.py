@@ -39,6 +39,7 @@ from dojo.authorization.authorization_decorators import (
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.decorators import deprecated_view
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -2066,6 +2067,7 @@ def add_stub_finding(request, tid):
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Delete, "fid")
+@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_stub_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
 
@@ -2092,6 +2094,7 @@ def delete_stub_finding(request, fid):
 
 
 @user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
+@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
 def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test

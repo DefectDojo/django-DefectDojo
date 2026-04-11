@@ -13,7 +13,19 @@ from django.test.utils import override_settings
 from django.utils import timezone
 
 from dojo.finding.helper import prepare_duplicates_for_delete
-from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User, UserContactInfo
+from dojo.models import (
+    Dojo_User,
+    Engagement,
+    Finding,
+    Finding_Group,
+    Product,
+    Product_Type,
+    Risk_Acceptance,
+    Test,
+    Test_Type,
+    User,
+    UserContactInfo,
+)
 
 from .dojo_test_case import DojoTestCase
 
@@ -409,3 +421,52 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertEqual(product_shared_tag.count, 0)
         finding_shared_tag.refresh_from_db()
         self.assertEqual(finding_shared_tag.count, 0)
+
+    def test_delete_product_with_reverse_m2m_relations(self):
+        """
+        Deleting a product with findings that have reverse M2M relations succeeds.
+
+        Reverse M2M through tables (M2M fields on other models pointing to Finding)
+        must be cleared before findings are deleted. This tests:
+        - Finding_Group.findings (dojo_finding_group_findings)
+        - Risk_Acceptance.accepted_findings (dojo_risk_acceptance_accepted_findings)
+        """
+        from dojo.utils import async_delete  # noqa: PLC0415
+
+        finding_a = self._create_finding(self.test1, "Grouped Finding A")
+        finding_b = self._create_finding(self.test1, "Grouped Finding B")
+        finding_c = self._create_finding(self.test1, "Risk Accepted Finding")
+
+        # Finding_Group with findings
+        creator = Dojo_User.objects.first() or Dojo_User.objects.create(username="testcreator")
+        group = Finding_Group.objects.create(
+            name="Test Group",
+            test=self.test1,
+            creator=creator,
+        )
+        group.findings.add(finding_a, finding_b)
+
+        # Risk_Acceptance with accepted findings
+        ra = Risk_Acceptance.objects.create(
+            name="Test RA",
+            owner=self.testuser,
+        )
+        ra.accepted_findings.add(finding_c)
+        # Link to engagement so we can verify it survives
+        self.engagement1.risk_acceptance.add(ra)
+
+        product_id = self.product.id
+        group_id = group.id
+        ra_id = ra.id
+
+        with impersonate(self.testuser):
+            async_del = async_delete()
+            async_del.delete(self.product)
+
+        self.assertFalse(Product.objects.filter(id=product_id).exists())
+        self.assertFalse(Finding_Group.objects.filter(id=group_id).exists())
+        self.assertFalse(Finding.objects.filter(id__in=[finding_a.id, finding_b.id, finding_c.id]).exists())
+        # Risk_Acceptance itself survives (no FK to product/engagement),
+        # but its accepted_findings M2M entries should be gone
+        self.assertTrue(Risk_Acceptance.objects.filter(id=ra_id).exists())
+        self.assertEqual(Risk_Acceptance.objects.get(id=ra_id).accepted_findings.count(), 0)

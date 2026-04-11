@@ -23,6 +23,6 @@ This is the essence of DefectDojo - import security data, organize it, and prese
 All of these features can be automated, and because DefectDojo can handle over 200 tools (at time of writing) you should be all set to create a functional security inventory of your entire organizational output.
 
 ### Open-Source Features
-- Does your organization use Jira? Learn how to use our [Jira integration](/issue_tracking/jira/jira_guide/) to create Jira tickets from the data you ingest.
+- Does your organization use Jira? Learn how to use our [Jira integration](/issue_tracking/jira/os__jira_guide/) to create Jira tickets from the data you ingest.
 - Are you expecting to share DefectDojo with many users in your organization? Check out our guides to [user management](/admin/user_management/about_perms_and_roles/) and set up role-based access control (RBAC).
 - Ready to dive into automation? Learn how to use the [DefectDojo API](/import_data/import_scan_files/api_pipeline_modelling/) to automatically import new data, and build a robust CI/CD pipeline.

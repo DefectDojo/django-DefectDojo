@@ -889,7 +889,10 @@ class AppAnalysisViewSet(
 @extend_schema_view(**schema_with_prefetch())
 class CredentialsViewSet(
     PrefetchDojoModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.CredentialSerializer
     queryset = Cred_User.objects.all()
     filter_backends = (DjangoFilterBackend,)
@@ -898,13 +901,58 @@ class CredentialsViewSet(
     def get_queryset(self):
         return Cred_User.objects.all().order_by("id")
 
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
 
 # Authorization: configuration
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
 class CredentialsMappingViewSet(
     PrefetchDojoModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.CredentialMappingSerializer
     queryset = Cred_Mapping.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -917,6 +965,48 @@ class CredentialsMappingViewSet(
 
     def get_queryset(self):
         return get_authorized_cred_mappings(Permissions.Credential_View)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
 
 # Authorization: configuration
@@ -2202,7 +2292,10 @@ class ProductTypeGroupViewSet(
 # Nested models with prefetch make the response schema too long for Swagger UI
 class StubFindingsViewSet(
     PrefetchDojoModelViewSet,
+    DeprecationNoticeMixin,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 6, 1)
     serializer_class = serializers.StubFindingSerializer
     queryset = Stub_Finding.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -2221,6 +2314,48 @@ class StubFindingsViewSet(
         if self.request and self.request.method == "POST":
             return serializers.StubFindingCreateSerializer
         return serializers.StubFindingSerializer
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        deprecated=True,
+        description="This endpoint is deprecated and will be removed on 2026-06-01.",
+    )
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
 
 
 # Authorization: authenticated, configuration

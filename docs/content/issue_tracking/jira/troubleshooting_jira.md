@@ -65,7 +65,7 @@ Using the 'Push To Jira' workflow triggers an asynchronous process, however an I
 
 Common reasons issues are not created:
 * The Default Issue Type you have selected is not usable with the Jira Space
-* Issues in the Space have required attributes that prevent them from being created via DefectDojo (see our guide to [Custom Fields](../jira_guide/#custom-fields-in-jira))
+* Issues in the Space have required attributes that prevent them from being created via DefectDojo (which can be handled via Custom Fields in Jira)
 
 
 ## Error: Product Misconfigured or no permissions in Jira?
@@ -77,11 +77,11 @@ This error message can appear when attempting to add a created Jira configuratio
 
 ## Changes made to Jira issues are not updating Findings in DefectDojo
 
-* Start by confirming that the [DefectDojo webhook receiver](../jira_guide/#step-3-configure-bidirectional-sync-jira-webhook) is configured correctly and can successfully receive updates.
+* Start by confirming that the DefectDojo webhook receiver is configured correctly and can successfully receive updates.
 
 * Ensure the SSL certificate used by Defect Dojo is trusted by JIRA. For JIRA Cloud you must use [a valid SSL/TLS certificate, signed by a globally trusted certificate authority](https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-registering-webhooks-with-non-secure-urls/)
 
-* If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close [Transition IDs](../jira_guide/#step-3-configure-bidirectional-sync-jira-webhook)).
+* If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close Transition IDs).
 
 * [Test](https://support.atlassian.com/jira/kb/testing-webhooks-in-jira-cloud/) your JIRA webhook using a public endpoint such as Pipedream or Beeceptor:
 
