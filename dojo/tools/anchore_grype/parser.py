@@ -203,9 +203,11 @@ class AnchoreGrypeParser:
                     fix_available=fix_available,
                     fix_version=fix_version,
                 )
-                dupes[dupe_key].unsaved_tags = finding_tags
+
                 if self.mode == "detailed":
                     dupes[dupe_key].unique_id_from_tool = dupe_key
+
+                dupes[dupe_key].unsaved_tags = finding_tags
                 dupes[dupe_key].unsaved_vulnerability_ids = vulnerability_ids
                 if settings.V3_FEATURE_LOCATIONS and artifact_purl:
                     dupes[dupe_key].unsaved_locations.append(

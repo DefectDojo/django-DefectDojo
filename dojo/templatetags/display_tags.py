@@ -1083,6 +1083,13 @@ def import_settings_tag(test_import, *, autoescape=True):
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
             <b>Endpoints:</b> %s<br/>
+            <b>Service:</b> %s<br/>
+            <b>Close Old Findings (Product Scope):</b> %s<br/>
+            <b>Do Not Reactivate:</b> %s<br/>
+            <b>Apply Tags to Findings:</b> %s<br/>
+            <b>Apply Tags to Endpoints:</b> %s<br/>
+            <b>Group By:</b> %s<br/>
+            <b>Create Finding Groups for All Findings:</b> %s<br/>
         "
     </i>
     """
@@ -1090,26 +1097,31 @@ def import_settings_tag(test_import, *, autoescape=True):
     icon = "fa-info-circle"
     color = ""
 
+    s = test_import.import_settings
+    common_fields = (
+        esc(test_import.id),
+        esc(s.get("active", None)),
+        esc(s.get("verified", None)),
+        esc(s.get("minimum_severity", None)),
+        esc(s.get("close_old_findings", None)),
+        esc(s.get("push_to_jira", None)),
+        esc(s.get("tags", None)),
+    )
+    extra_fields = (
+        esc(s.get("service", None)),
+        esc(s.get("close_old_findings_product_scope", None)),
+        esc(s.get("do_not_reactivate", None)),
+        esc(s.get("apply_tags_to_findings", None)),
+        esc(s.get("apply_tags_to_endpoints", None)),
+        esc(s.get("group_by", None)),
+        esc(s.get("create_finding_groups_for_all_findings", None)),
+    )
+
     if not settings.V3_FEATURE_LOCATIONS:
         # TODO: Delete this after the move to Locations
-        return mark_safe(html % (icon, color, icon,
-                                    esc(test_import.id),
-                                    esc(test_import.import_settings.get("active", None)),
-                                    esc(test_import.import_settings.get("verified", None)),
-                                    esc(test_import.import_settings.get("minimum_severity", None)),
-                                    esc(test_import.import_settings.get("close_old_findings", None)),
-                                    esc(test_import.import_settings.get("push_to_jira", None)),
-                                    esc(test_import.import_settings.get("tags", None)),
-                                    esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None)))))
-    return mark_safe(html % (icon, color, icon,
-                             esc(test_import.id),
-                             esc(test_import.import_settings.get("active", None)),
-                             esc(test_import.import_settings.get("verified", None)),
-                             esc(test_import.import_settings.get("minimum_severity", None)),
-                             esc(test_import.import_settings.get("close_old_findings", None)),
-                             esc(test_import.import_settings.get("push_to_jira", None)),
-                             esc(test_import.import_settings.get("tags", None)),
-                             esc(test_import.import_settings.get("locations", None))))
+        endpoints = esc(s.get("endpoints", s.get("endpoint", None)))
+        return mark_safe(html % (icon, color, icon, *common_fields, endpoints, *extra_fields))
+    return mark_safe(html % (icon, color, icon, *common_fields, esc(s.get("locations", None)), *extra_fields))
 
 
 @register.filter(needs_autoescape=True)
