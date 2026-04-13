@@ -2012,6 +2012,7 @@ VULNERABILITY_URLS = {
     "CERTFR-": "https://www.cert.ssi.gouv.fr/alerte/",  # e.g. https://www.cert.ssi.gouv.fr/alerte/CERTFR-2025-ALE-012"
     "CGA-": "https://images.chainguard.dev/security/",  # e.g. https://images.chainguard.dev/security/CGA-24pq-h5fw-43v3
     "CISCO-SA-": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/",  # e.g. https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-umbrella-tunnel-gJw5thgE
+    "CNNVD-": "https://vulners.com/cnnvd/",  # e.g. https://vulners.com/cnnvd/CNNVD-202601-2391
     "CONFSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/CONFSERVER-93361
     "CVE-": "https://nvd.nist.gov/vuln/detail/",  # e.g. https://nvd.nist.gov/vuln/detail/cve-2022-22965
     "CWE": "https://cwe.mitre.org/data/definitions/&&.html",  # e.g. https://cwe.mitre.org/data/definitions/79.html

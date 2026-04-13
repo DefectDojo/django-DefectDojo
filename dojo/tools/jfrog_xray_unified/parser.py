@@ -146,9 +146,10 @@ def get_item(vulnerability, test):
         impact=severity,
         date=scan_time,
         unique_id_from_tool=vulnerability["issue_id"],
-        tags=tags,
         fix_available=fix_available,
     )
+
+    finding.unsaved_tags = tags
 
     cvss_data = parse_cvss_data(cvssv3)
     if cvss_data:

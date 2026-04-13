@@ -127,3 +127,9 @@ class TestGovulncheckParser(DojoTestCase):
                 self.assertIsNotNone(finding.impact)
                 self.assertIsNotNone(finding.description)
                 self.assertIsNotNone(finding.references)
+
+    def test_parse_issue_14642(self):
+        with (get_unit_tests_scans_path("govulncheck") / "issue_14642.json").open(encoding="utf-8") as testfile:
+            parser = GovulncheckParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(201, len(findings))
