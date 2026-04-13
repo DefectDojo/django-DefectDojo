@@ -1,5 +1,8 @@
+from __future__ import annotations
+
 import logging
-from typing import TypeVar
+from itertools import groupby
+from typing import TYPE_CHECKING, TypeVar
 
 from django.core.exceptions import ValidationError
 from django.db.models import QuerySet
@@ -7,14 +10,17 @@ from django.utils import timezone
 
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.location.models import AbstractLocation, LocationFindingReference
-from dojo.location.status import FindingLocationStatus
+from dojo.location.models import AbstractLocation, LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     Dojo_User,
     Finding,
 )
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
+
+if TYPE_CHECKING:
+    from dojo.models import Product
 
 logger = logging.getLogger(__name__)
 
@@ -35,16 +41,22 @@ class LocationManager:
         return None
 
     @classmethod
+    def get_supported_location_types(cls) -> dict[str, type[AbstractLocation]]:
+        """Return a mapping of location type string to AbstractLocation subclass."""
+        return {URL.get_location_type(): URL}
+
+    @classmethod
     def make_abstract_locations(cls, locations: list[UnsavedLocation]) -> list[AbstractLocation]:
         """Converts the list of unsaved locations (AbstractLocation/LocationData objects) to a list of AbstractLocations."""
+        supported_types = cls.get_supported_location_types()
         abstract_locations = []
 
         for location in locations:
             if isinstance(location, AbstractLocation):
                 abstract_locations.append(location)
-            elif isinstance(location, LocationData) and location.type == URL.get_location_type():
+            elif isinstance(location, LocationData) and (loc_cls := supported_types.get(location.type)):
                 try:
-                    abstract_locations.append(URL.from_location_data(location))
+                    abstract_locations.append(loc_cls.from_location_data(location))
                 except (ValidationError, ValueError):
                     logger.debug("Skipping invalid location data: %s", location)
             else:
@@ -53,32 +65,126 @@ class LocationManager:
         return abstract_locations
 
     @classmethod
+    def bulk_get_or_create_locations(cls, locations: list[UnsavedLocation]) -> list[AbstractLocation]:
+        """Bulk get-or-create a (possibly heterogeneous) list of AbstractLocations."""
+        locations = cls.clean_unsaved_locations(locations)
+        if not locations:
+            return []
+
+        # Util method for sorting/keying; returns the (Python) identity of the location entry's Type
+        def type_id(x: tuple[int, AbstractLocation]) -> int:
+            return id(type(x[1]))
+
+        saved = []
+        # Group by actual AbstractLocation subtype, tracking the original ordering (hence the `enumerate`)
+        locations_with_idx = sorted(enumerate(locations), key=type_id)
+        locations_by_type = groupby(locations_with_idx, key=type_id)
+        for _, grouped_locations_with_idx in locations_by_type:
+            # Split into two lists: indices and homogenous location types
+            indices, grouped_locations = zip(*grouped_locations_with_idx)
+            # Determine the correct AbstractLocation class to use for bulk get/create
+            loc_cls = type(grouped_locations[0])
+            # `.bulk_get_or_create` is expected to return the saved items in the order they were submitted
+            saved_locations = loc_cls.bulk_get_or_create(grouped_locations)
+            # Zip 'em back together: associate the saved instance with its original index in the `locations` list
+            saved.extend((idx, saved_loc) for idx, saved_loc in zip(indices, saved_locations))
+
+        # Sort by index to return in original order
+        saved.sort(key=lambda x: x[0])
+        return [loc for _, loc in saved]
+
+    @classmethod
+    def bulk_create_refs(
+        cls,
+        locations: list[AbstractLocation],
+        *,
+        finding: Finding | None = None,
+        product: Product | None = None,
+    ) -> None:
+        """Bulk create LocationFindingReference and/or LocationProductReference rows.
+
+        Iterates the unsaved/saved pairs once, building both finding and product
+        refs in a single pass. Skips refs that already exist in the DB.
+        """
+        if not locations:
+            return
+
+        if not finding and not product:
+            error_message = "One of 'finding' or 'product' must be provided."
+            raise ValueError(error_message)
+
+        if finding:
+            # If associating with a finding, use its product regardless of whatever's set. Keeps in line with the
+            # original intended purpose: this is a bulk version of Location.(associate_with_finding|associate_with_product)
+            product = finding.test.engagement.product
+
+        location_ids = [loc.location_id for loc in locations]
+
+        # Pre-fetch existing refs to avoid duplicates
+        existing_finding_refs = set()
+        existing_product_refs = set()
+        if finding is not None:
+            existing_finding_refs = set(
+                LocationFindingReference.objects.filter(
+                    location_id__in=location_ids,
+                    finding=finding,
+                ).values_list("location_id", flat=True)
+            )
+        if product is not None:
+            existing_product_refs = set(
+                LocationProductReference.objects.filter(
+                    location_id__in=location_ids,
+                    product=product,
+                ).values_list("location_id", flat=True)
+            )
+
+        new_finding_refs = []
+        new_product_refs = []
+        # Process locations (unsaved, with possible association data) alongside their corresponding saved versions,
+        # which do not contain that information. We can do this because the bulk get/create operations are stable.
+        for location in locations:
+            assoc = location.get_association_data()
+
+            if finding is not None and location.location_id not in existing_finding_refs:
+                new_finding_refs.append(LocationFindingReference(
+                    location_id=location.location_id,
+                    finding=finding,
+                    status=FindingLocationStatus.Active,
+                    relationship=assoc.relationship_type,
+                    relationship_data=assoc.relationship_data,
+                ))
+                existing_finding_refs.add(location.location_id)
+
+            if product is not None and location.location_id not in existing_product_refs:
+                new_product_refs.append(LocationProductReference(
+                    location_id=location.location_id,
+                    product=product,
+                    status=ProductLocationStatus.Active,
+                    relationship=assoc.relationship_type,
+                    relationship_data=assoc.relationship_data,
+                ))
+                existing_product_refs.add(location.location_id)
+
+        if new_finding_refs:
+            LocationFindingReference.objects.bulk_create(
+                new_finding_refs, batch_size=1000, ignore_conflicts=True,
+            )
+        if new_product_refs:
+            LocationProductReference.objects.bulk_create(
+                new_product_refs, batch_size=1000, ignore_conflicts=True,
+            )
+
+    @classmethod
     def _add_locations_to_unsaved_finding(
         cls,
         finding: Finding,
         locations: list[UnsavedLocation],
         **kwargs: dict,  # noqa: ARG003
     ) -> None:
-        """Creates AbstractLocation objects from the given list and links them to the given finding."""
-        locations = cls.clean_unsaved_locations(locations)
-
-        logger.debug(f"IMPORT_SCAN: Adding {len(locations)} locations to finding: {finding}")
-
-        # LOCATION LOCATION LOCATION
-        # TODO: bulk create the finding/product refs...
-        locations_saved = 0
-        for unsaved_location in locations:
-            if saved_location := cls.get_or_create_location(unsaved_location):
-                locations_saved += 1
-                association_data = unsaved_location.get_association_data()
-                saved_location.location.associate_with_finding(
-                    finding,
-                    status=FindingLocationStatus.Active,
-                    relationship=association_data.relationship_type,
-                    relationship_data=association_data.relationship_data,
-                )
-
-        logger.debug(f"IMPORT_SCAN: {locations_saved} locations imported")
+        """Creates AbstractLocation objects from the given list and links them to the given Finding and its Product."""
+        locations = cls.bulk_get_or_create_locations(locations)
+        cls.bulk_create_refs(locations, finding=finding, product=finding.test.engagement.product)
+        logger.debug(f"LocationManager: {len(locations)} locations associated with {finding}")
 
     @app.task
     def add_locations_to_unsaved_finding(

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Self, TypeVar
+import hashlib
+from typing import TYPE_CHECKING, Self, TypeVar, Iterable
 
+from django.core.validators import MinLengthValidator
 from django.db import transaction
 from django.db.models import (
     CASCADE,
@@ -263,9 +265,23 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         null=False,
         related_name="%(class)s",
     )
+    identity_hash = CharField(
+        null=False,
+        blank=False,
+        max_length=64,
+        editable=False,
+        unique=True,
+        db_index=True,
+        validators=[MinLengthValidator(64)],
+        help_text=_("The hash of the location for uniqueness"),
+    )
 
     class Meta:
         abstract = True
+
+    def clean(self, *args: list, **kwargs: dict) -> None:
+        self.set_identity_hash()
+        super().clean(*args, **kwargs)
 
     @classmethod
     def get_location_type(cls) -> str:
@@ -286,6 +302,9 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         """
         msg = "Subclasses must implement create_location_from_value"
         raise NotImplementedError(msg)
+
+    def set_identity_hash(self):
+        self.identity_hash = hashlib.blake2b(str(self).encode(), digest_size=32).hexdigest()
 
     def pre_save_logic(self):
         """Automatically create or update the associated Location."""
@@ -332,6 +351,78 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         """Given an object of this type, this method should get/create the object and return it."""
         msg = "Subclasses must implement get_or_create_from_object"
         raise NotImplementedError(msg)
+
+    @classmethod
+    def bulk_get_or_create(cls: type[T], locations: Iterable[T]) -> list[T]:
+        """Get or create multiple locations in bulk.
+
+        For each location, looks up by identity_hash. Creates missing ones using
+        bulk_create for both the parent Location rows and the subtype rows.
+        Returns the full list of saved instances (existing + newly created),
+        in the same order as the input. Duplicate inputs map to the same saved instance.
+        """
+        if not locations:
+            return []
+
+        # Create the list of hashes of the supplied locations; we will also use this to reconstruct the initial ordering
+        # of locations we return (which would otherwise be lost if duplicates are represented in `locations`).
+        hashes = []
+        for loc in locations:
+            # Sanity check the given locations list is homogenous
+            if not isinstance(loc, cls):
+                error_message = f"Invalid location type; expected {cls} but got {type(loc)}"
+                raise ValueError(error_message)
+            # Set .identity_hash if not present
+            if not loc.identity_hash:
+                loc.clean()
+            hashes.append(loc.identity_hash)
+
+        # Look up existing objects, grouping by hash
+        existing_by_hash = {
+            obj.identity_hash: obj
+            for obj in cls.objects.filter(identity_hash__in=hashes).select_related("location")
+        }
+
+        # Create the list of new locations to create
+        new_locations = []
+        for loc in locations:
+            if loc.identity_hash not in existing_by_hash:
+                new_locations.append(loc)
+                # Mark it so we don't try to create duplicates within the same batch
+                existing_by_hash[loc.identity_hash] = loc
+            else:
+                # Preserve association data from the input onto the existing saved object
+                saved = existing_by_hash[loc.identity_hash]
+                if hasattr(loc, "_association_data") and not hasattr(saved, "_association_data"):
+                    saved._association_data = loc._association_data
+
+            # Create 'em
+        if new_locations:
+            location_type = cls.get_location_type()
+            with transaction.atomic():
+                # Bulk create parent Locations
+                parents = [
+                    Location(
+                        location_type=location_type,
+                        location_value=loc.get_location_value(),
+                    )
+                    for loc in new_locations
+                ]
+                Location.objects.bulk_create(parents, batch_size=1000)
+
+                # Assign Location FKs to the subtypes, then bulk create them.
+                for loc, parent in zip(new_locations, parents):
+                    loc.location_id = parent.id
+                    loc.location = parent
+                # Note there is a subtle race condition here, if somehow one of our newly-created locations conflicts
+                # with an existing one (e.g. from a separate thread that commits while this is running). Setting
+                # `ignore_conflicts=True` here would prevent this step from raising an IntegrityError, but would leave
+                # dangling parent Location objects that were created above. Rather than performing a cleanup in that
+                # (unlikely?) case, just allow the transaction to rollback.
+                cls.objects.bulk_create(new_locations, batch_size=1000)
+
+        # Return in input order (minus dupes)
+        return [existing_by_hash[h] for h in hashes]
 
 
 class ReferenceDataMixin(Model):

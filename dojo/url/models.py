@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import hashlib
 import ipaddress
 from contextlib import suppress
 from dataclasses import dataclass
@@ -9,7 +8,7 @@ from urllib.parse import unquote_plus, urlsplit
 
 import idna
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinLengthValidator, MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import IntegrityError, transaction
 from django.db.models import (
     BooleanField,
@@ -185,15 +184,6 @@ class URL(AbstractLocation):
         blank=False,
         help_text="Dictates whether the endpoint was found to have host validation issues during creation",
     )
-    identity_hash = CharField(
-        null=False,
-        blank=False,
-        max_length=64,
-        editable=False,
-        unique=True,
-        validators=[MinLengthValidator(64)],
-        help_text="The hash of the URL for uniqueness",
-    )
 
     objects = URLManager().from_queryset(URLQueryset)()
 
@@ -262,7 +252,6 @@ class URL(AbstractLocation):
         self.clean_path()
         self.clean_query()
         self.clean_fragment()
-        self.set_identity_hash()
         super().clean(*args, **kwargs)
 
     def clean_protocol(self) -> None:
@@ -322,9 +311,6 @@ class URL(AbstractLocation):
             self.query = ""
         else:
             self.query = self.replace_null_bytes(self.query.strip().removeprefix("?"))
-
-    def set_identity_hash(self):
-        self.identity_hash = hashlib.blake2b(str(self).encode(), digest_size=32).hexdigest()
 
     def replace_null_bytes(self, value: str) -> str:
         return value.replace("\x00", "%00")
