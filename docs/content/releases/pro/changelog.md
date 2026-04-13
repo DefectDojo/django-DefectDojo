@@ -10,6 +10,20 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## Apr 2026: v2.57
+
+### Apr 7, 2026: v2.57.0
+
+* **(Custom Enrichment)** On-prem administrators can now configure custom URLs for EPSS and KEV enrichment data sources under **Settings → Finding Enrichment Settings**. Each source (EPSS scores and CISA Known Exploited Vulnerabilities) can be independently enabled and pointed to an internal mirror or proxy. A **Test Configuration** button validates connectivity before saving. Findings with CVE IDs are automatically enriched with EPSS score/percentile and KEV status during enrichment runs.
+* **(Performance)** Optimized API response times across all endpoints with selective field loading and conditional prefetches.
+* **(Performance)** Improved Dashboard load times by eliminating redundant authorization queries and caching license lookups.
+* **(Performance)** Improved deduplication performance by batching duplicate marking and deferring large text fields.
+* **(Performance)** Improved false-positive history processing performance during async imports by using batch operations.
+* **(Pro UI)** Asset hierarchy filter dropdowns now only show relevant options (e.g., Parent filter shows only assets that have children).
+* **(Security)** Hardened container configurations for improved runtime security.
+* **(Universal Parser)** Added a list view and field mappings modal to the Pro UI for managing Universal Parser configurations.
+* **(Universal Parser)** Added support for 7 new fields: `file_path`, `component_name`, `component_version`, `line`, `steps_to_reproduce`, `severity_justification`, and CVSSv4 vectors.
+
 ## Mar 2026: v2.56
 
 ### Mar 30, 2026: v2.56.4
@@ -107,23 +121,23 @@ No significant UX changes.
 
 ## Dec 2025: v2.53
 
-### Dec 29, 2025: v2.53.5
+#### Dec 29, 2025: v2.53.5
 
 * **(Pro UI)** Added Finding count columns to Engagement table.
 * **(Pro UI)** Enter/Return no longer automatically submits forms.
 
-### Dec 22, 2025: v2.53.4
+#### Dec 22, 2025: v2.53.4
 
 * **(Pro UI)** Asset Hierarchy now uses separate tabs for Asset selection and for the rendered Asset tree:
 ![image](images/asset-hierarchy-2.53.4.png)
 
-### Dec 15, 2025: v2.53.3
+#### Dec 15, 2025: v2.53.3
 
 *DefectDojo v2.53.2 does not have a corresponding Pro release.*
 
 * **(Connectors)** Support for private CA certificates has been added to Connectors to assist with connectivity.
 
-### Dec 8, 2025: v2.53.1
+#### Dec 8, 2025: v2.53.1
 
 * **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/asset_modelling/hierarchy/pro__assets_organizations/) for details, and information on opting in to the Beta.
 * **(Findings)** Added new KEV fields for ransomware, exploits, and date handling.
@@ -131,7 +145,7 @@ No significant UX changes.
 
 ![image](images/pro_tablepreferences.png)
 
-### Dec 1, 2025: v2.53.0
+#### Dec 1, 2025: v2.53.0
 
 * **(Pro UI)** Added Asset Hierarchy.
 * **(Priority)** Priority and Risk can now be overridden manually, or through Rules Engine.

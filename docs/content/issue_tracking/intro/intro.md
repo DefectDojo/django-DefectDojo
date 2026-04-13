@@ -10,8 +10,8 @@ The DefectDojo issue tracking integrations connect your vulnerability management
 
 | Edition      | Supported Issue Tracking Integrations |
 |--------------|---------------------------------------|
-| Community Edition  | * Jira                          |
-| Pro          | * Jira<br>* Azure DevOps<br>* GitHub<br>* GitLab Boards<br>* ServiceNow |
+| Community Edition  | * [Jira](/issue_tracking/jira/os__jira_guide/)                          |
+| Pro          | * [Jira](/issue_tracking/jira/pro__jira_guide/)<br>* [Azure DevOps](/issue_tracking/pro_integration/integrations_toolreference/#azure-devops-boards)<br>* [GitHub](/issue_tracking/pro_integration/integrations_toolreference/#github)<br>* [GitLab Boards](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)<br>* [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow) |
 
 
 When enabled, DefectDojo can create issues automatically, or selectively from Products or Engagement. As Findings are updated in DefectDojo—resolved, mitigated, or reactivated—the corresponding issues can be kept in sync, ensuring both systems reflect the current state of risk.

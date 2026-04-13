@@ -1,2 +1,2 @@
 __author__ = "Aaron Weaver"
-__contributor__ = "Daniel Loureiro - https://dkade.com"  # noqa: RUF067
+__contributor__ = "Daniel Loureiro - https://dkade.com"
