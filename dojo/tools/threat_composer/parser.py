@@ -84,10 +84,11 @@ class ThreatComposerParser:
                     unique_id_from_tool=unique_id_from_tool,
                     mitigation=mitigation,
                     impact=impact,
-                    tags=tags,
                     static_finding=True,
                     dynamic_finding=False,
                 )
+
+                finding.unsaved_tags = tags
 
                 match threat.get("status", "threatIdentified"):
                     case "threatResolved":
