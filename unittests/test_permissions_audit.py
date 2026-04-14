@@ -1563,7 +1563,8 @@ class TestEngagementMovePermission(DojoTestCase):
         self.assertEqual(self.engagement.product, self.product_c)
 
     def test_ui_move_to_unauthorized_product(self):
-        """Edit engagement form moving to unauthorized product should be denied.
+        """
+        Edit engagement form moving to unauthorized product should be denied.
 
         The form's product queryset is filtered to authorized products, so
         submitting an unauthorized product fails form validation (200 with
