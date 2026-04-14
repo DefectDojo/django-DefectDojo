@@ -455,11 +455,6 @@ class EngagementViewSet(
     def risk_application_model_class(self):
         return Engagement
 
-    def get_serializer_class(self):
-        if self.request and self.request.method == "POST":
-            return serializers.EngagementCreateSerializer
-        return serializers.EngagementSerializer
-
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if get_setting("ASYNC_OBJECT_DELETE"):

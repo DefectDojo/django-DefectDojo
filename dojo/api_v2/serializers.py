@@ -1119,34 +1119,10 @@ class EngagementSerializer(serializers.ModelSerializer):
         exclude = ("inherited_tags",)
 
     def validate(self, data):
-        if data.get("target_start") and data.get("target_end"):
+        if self.context["request"].method == "POST":
             if data.get("target_start") > data.get("target_end"):
                 msg = "Your target start date exceeds your target end date"
                 raise serializers.ValidationError(msg)
-        return data
-
-    def build_relational_field(self, field_name, relation_info):
-        if field_name == "notes":
-            return NoteSerializer, {"many": True, "read_only": True}
-        if field_name == "files":
-            return FileSerializer, {"many": True, "read_only": True}
-        return super().build_relational_field(field_name, relation_info)
-
-
-class EngagementCreateSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(),
-    )
-    tags = TagListSerializerField(required=False)
-
-    class Meta:
-        model = Engagement
-        exclude = ("inherited_tags",)
-
-    def validate(self, data):
-        if data.get("target_start") > data.get("target_end"):
-            msg = "Your target start date exceeds your target end date"
-            raise serializers.ValidationError(msg)
         return data
 
     def build_relational_field(self, field_name, relation_info):
