@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import hashlib
-from typing import TYPE_CHECKING, Self, TypeVar, Iterable
+from typing import TYPE_CHECKING, Self
 
 from django.core.validators import MinLengthValidator
 from django.db import transaction
@@ -38,6 +38,7 @@ from dojo.models import Dojo_User, Finding, Product, _manage_inherited_tags, cop
 from dojo.tools.locations import LocationAssociationData
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from datetime import datetime
 
     from dojo.tools.locations import LocationData
@@ -253,10 +254,6 @@ class Location(BaseModel):
         ]
 
 
-# TypeVar to help linting in AbstractLocation child classes
-T = TypeVar("T", bound="AbstractLocation")
-
-
 class AbstractLocation(BaseModelWithoutTimeMeta):
     location = OneToOneField(
         Location,
@@ -295,7 +292,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         raise NotImplementedError(msg)
 
     @staticmethod
-    def create_location_from_value(value: str) -> T:
+    def create_location_from_value(value: str) -> Self:
         """
         Dynamically create a Location and subclass instance based on location_type
         and location_value. Uses parse_string_value from the correct subclass.
@@ -322,7 +319,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             self.location.save(update_fields=["location_type", "location_value"])
 
     @classmethod
-    def from_location_data(cls: T, location_data: LocationData) -> T:
+    def from_location_data(cls, location_data: LocationData) -> Self:
         """
         Checks that the given LocationData object represents this type, then calls #_from_location_data_impl() to build
         one based on its contents. Saving boilerplate checking is all.
@@ -333,7 +330,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         return cls._from_location_data_impl(location_data)
 
     @classmethod
-    def _from_location_data_impl(cls: T, location_data: LocationData) -> T:
+    def _from_location_data_impl(cls, location_data: LocationData) -> Self:
         """Given a LocationData object trusted to represent this type, build a Location object from its contents."""
         msg = "Subclasses must implement _from_location_data_impl"
         raise NotImplementedError(msg)
@@ -347,14 +344,15 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
         return getattr(self, "_association_data", LocationAssociationData())
 
     @classmethod
-    def get_or_create_from_object(cls: T, location: T) -> T:
+    def get_or_create_from_object(cls, location: Self) -> Self:
         """Given an object of this type, this method should get/create the object and return it."""
         msg = "Subclasses must implement get_or_create_from_object"
         raise NotImplementedError(msg)
 
     @classmethod
-    def bulk_get_or_create(cls: type[T], locations: Iterable[T]) -> list[T]:
-        """Get or create multiple locations in bulk.
+    def bulk_get_or_create(cls, locations: Iterable[Self]) -> list[Self]:
+        """
+        Get or create multiple locations in bulk.
 
         For each location, looks up by identity_hash. Creates missing ones using
         bulk_create for both the parent Location rows and the subtype rows.
@@ -371,7 +369,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             # Sanity check the given locations list is homogenous
             if not isinstance(loc, cls):
                 error_message = f"Invalid location type; expected {cls} but got {type(loc)}"
-                raise ValueError(error_message)
+                raise TypeError(error_message)
             # Set .identity_hash if not present
             if not loc.identity_hash:
                 loc.clean()
@@ -412,7 +410,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
                 Location.objects.bulk_create(parents, batch_size=1000)
 
                 # Assign Location FKs to the subtypes, then bulk create them.
-                for loc, parent in zip(new_locations, parents):
+                for loc, parent in zip(new_locations, parents, strict=True):
                     loc.location_id = parent.id
                     loc.location = parent
                 # Note there is a subtle race condition here, if somehow one of our newly-created locations conflicts

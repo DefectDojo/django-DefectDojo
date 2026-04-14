@@ -2,25 +2,23 @@ from __future__ import annotations
 
 import logging
 from itertools import groupby
+from operator import itemgetter
 from typing import TYPE_CHECKING, TypeVar
 
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
 from django.utils import timezone
 
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import AbstractLocation, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import (
-    Dojo_User,
-    Finding,
-)
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 
 if TYPE_CHECKING:
-    from dojo.models import Product
+    from django.db.models import QuerySet
+
+    from dojo.models import Dojo_User, Finding, Product
 
 logger = logging.getLogger(__name__)
 
@@ -81,16 +79,16 @@ class LocationManager:
         locations_by_type = groupby(locations_with_idx, key=type_id)
         for _, grouped_locations_with_idx in locations_by_type:
             # Split into two lists: indices and homogenous location types
-            indices, grouped_locations = zip(*grouped_locations_with_idx)
+            indices, grouped_locations = zip(*grouped_locations_with_idx, strict=True)
             # Determine the correct AbstractLocation class to use for bulk get/create
             loc_cls = type(grouped_locations[0])
             # `.bulk_get_or_create` is expected to return the saved items in the order they were submitted
             saved_locations = loc_cls.bulk_get_or_create(grouped_locations)
             # Zip 'em back together: associate the saved instance with its original index in the `locations` list
-            saved.extend((idx, saved_loc) for idx, saved_loc in zip(indices, saved_locations))
+            saved.extend((idx, saved_loc) for idx, saved_loc in zip(indices, saved_locations, strict=True))
 
         # Sort by index to return in original order
-        saved.sort(key=lambda x: x[0])
+        saved.sort(key=itemgetter(0))
         return [loc for _, loc in saved]
 
     @classmethod
@@ -101,7 +99,8 @@ class LocationManager:
         finding: Finding | None = None,
         product: Product | None = None,
     ) -> None:
-        """Bulk create LocationFindingReference and/or LocationProductReference rows.
+        """
+        Bulk create LocationFindingReference and/or LocationProductReference rows.
 
         Iterates the unsaved/saved pairs once, building both finding and product
         refs in a single pass. Skips refs that already exist in the DB.
@@ -128,14 +127,14 @@ class LocationManager:
                 LocationFindingReference.objects.filter(
                     location_id__in=location_ids,
                     finding=finding,
-                ).values_list("location_id", flat=True)
+                ).values_list("location_id", flat=True),
             )
         if product is not None:
             existing_product_refs = set(
                 LocationProductReference.objects.filter(
                     location_id__in=location_ids,
                     product=product,
-                ).values_list("location_id", flat=True)
+                ).values_list("location_id", flat=True),
             )
 
         new_finding_refs = []

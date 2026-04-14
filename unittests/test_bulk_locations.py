@@ -1,4 +1,5 @@
-"""Tests for bulk location creation and association (open-source, URL-only).
+"""
+Tests for bulk location creation and association (open-source, URL-only).
 
 Covers:
 - AbstractLocation.bulk_get_or_create (on URL)
@@ -10,15 +11,18 @@ Covers:
 
 from unittest.mock import patch
 
+from django.contrib.auth import get_user_model
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
 from dojo.importers.location_manager import LocationManager
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.models import Product, Product_Type, Test_Type
+from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tools.locations import LocationAssociationData, LocationData
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoTestCase, skip_unless_v3
+
+User = get_user_model()
 
 
 def _make_url(host, path=""):
@@ -28,10 +32,6 @@ def _make_url(host, path=""):
 
 
 def _make_finding():
-    from django.contrib.auth import get_user_model
-    from dojo.models import Engagement, Finding, Test
-
-    User = get_user_model()
     user, _ = User.objects.get_or_create(username="bulk_test_user", defaults={"is_active": True})
     pt, _ = Product_Type.objects.get_or_create(name="Bulk Test Type")
     product = Product.objects.create(name="Bulk Test Product", description="test", prod_type=pt)
@@ -126,9 +126,9 @@ class TestBulkGetOrCreateURL(DojoTestCase):
         initial_count = Location.objects.count()
         urls = [_make_url("oss-atomic.example.com")]
 
-        with patch.object(URL.objects, "bulk_create", side_effect=Exception("boom")):
-            with self.assertRaisesMessage(Exception, "boom"):
-                URL.bulk_get_or_create(urls)
+        with patch.object(URL.objects, "bulk_create", side_effect=Exception("boom")), \
+             self.assertRaisesMessage(Exception, "boom"):
+            URL.bulk_get_or_create(urls)
 
         self.assertEqual(Location.objects.count(), initial_count)
 
