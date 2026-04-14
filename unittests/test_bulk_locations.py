@@ -1,0 +1,290 @@
+"""Tests for bulk location creation and association (open-source, URL-only).
+
+Covers:
+- AbstractLocation.bulk_get_or_create (on URL)
+- LocationManager.bulk_get_or_create_locations (URL-only)
+- LocationManager.bulk_create_refs (finding + product refs)
+- LocationManager._add_locations_to_unsaved_finding (end-to-end)
+- Query efficiency
+"""
+
+from unittest.mock import patch
+
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
+
+from dojo.importers.location_manager import LocationManager
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.models import Product, Product_Type, Test_Type
+from dojo.tools.locations import LocationAssociationData, LocationData
+from dojo.url.models import URL
+from unittests.dojo_test_case import DojoTestCase, skip_unless_v3
+
+
+def _make_url(host, path=""):
+    url = URL(protocol="https", host=host, path=path)
+    url.clean()
+    return url
+
+
+def _make_finding():
+    from django.contrib.auth import get_user_model
+    from dojo.models import Engagement, Finding, Test
+
+    User = get_user_model()
+    user, _ = User.objects.get_or_create(username="bulk_test_user", defaults={"is_active": True})
+    pt, _ = Product_Type.objects.get_or_create(name="Bulk Test Type")
+    product = Product.objects.create(name="Bulk Test Product", description="test", prod_type=pt)
+    eng = Engagement.objects.create(product=product, target_start="2026-01-01", target_end="2026-12-31")
+    tt, _ = Test_Type.objects.get_or_create(name="Bulk Test")
+    test = Test.objects.create(engagement=eng, test_type=tt, target_start="2026-01-01", target_end="2026-12-31")
+    return Finding.objects.create(test=test, title="Bulk Test Finding", severity="Medium", reporter=user)
+
+
+# ---------------------------------------------------------------------------
+# AbstractLocation.bulk_get_or_create (URL)
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestBulkGetOrCreateURL(DojoTestCase):
+
+    def test_all_new(self):
+        urls = [_make_url(f"oss-new-{i}.example.com") for i in range(5)]
+        saved = URL.bulk_get_or_create(urls)
+
+        self.assertEqual(len(saved), 5)
+        self.assertTrue(all(s.pk is not None for s in saved))
+        self.assertTrue(all(s.location_id is not None for s in saved))
+        self.assertEqual(URL.objects.filter(pk__in=[s.pk for s in saved]).count(), 5)
+
+    def test_all_existing(self):
+        originals = [URL.get_or_create_from_object(_make_url(f"oss-existing-{i}.example.com")) for i in range(3)]
+
+        urls = [_make_url(f"oss-existing-{i}.example.com") for i in range(3)]
+        saved = URL.bulk_get_or_create(urls)
+
+        self.assertEqual(len(saved), 3)
+        self.assertEqual({s.pk for s in saved}, {o.pk for o in originals})
+
+    def test_mixed_new_and_existing(self):
+        existing = URL.get_or_create_from_object(_make_url("oss-mixed-existing.example.com"))
+
+        urls = [
+            _make_url("oss-mixed-existing.example.com"),
+            _make_url("oss-mixed-new.example.com"),
+        ]
+        saved = URL.bulk_get_or_create(urls)
+
+        self.assertEqual(len(saved), 2)
+        self.assertEqual(saved[0].pk, existing.pk)
+        self.assertIsNotNone(saved[1].pk)
+
+    def test_duplicates_in_input(self):
+        urls = [
+            _make_url("oss-dupe.example.com"),
+            _make_url("oss-dupe.example.com"),
+            _make_url("oss-unique.example.com"),
+        ]
+        saved = URL.bulk_get_or_create(urls)
+
+        self.assertEqual(len(saved), 3)
+        self.assertEqual(saved[0].pk, saved[1].pk)
+        self.assertNotEqual(saved[2].pk, saved[0].pk)
+        self.assertEqual(URL.objects.filter(host__in=["oss-dupe.example.com", "oss-unique.example.com"]).count(), 2)
+
+    def test_preserves_association_data_on_new(self):
+        url = _make_url("oss-assoc-new.example.com")
+        url._association_data = LocationAssociationData(
+            relationship_type="owned_by",
+            relationship_data={"file_path": "/src/main.py"},
+        )
+
+        saved = URL.bulk_get_or_create([url])
+
+        self.assertEqual(saved[0].get_association_data().relationship_type, "owned_by")
+
+    def test_copies_association_data_to_existing(self):
+        URL.get_or_create_from_object(_make_url("oss-assoc-existing.example.com"))
+
+        url = _make_url("oss-assoc-existing.example.com")
+        url._association_data = LocationAssociationData(relationship_type="used_by")
+
+        saved = URL.bulk_get_or_create([url])
+
+        self.assertEqual(saved[0].get_association_data().relationship_type, "used_by")
+
+    def test_empty_input(self):
+        self.assertEqual(URL.bulk_get_or_create([]), [])
+
+    def test_parent_location_created(self):
+        saved = URL.bulk_get_or_create([_make_url("oss-parent.example.com")])
+
+        loc = Location.objects.get(pk=saved[0].location_id)
+        self.assertEqual(loc.location_type, "url")
+        self.assertIn("oss-parent.example.com", loc.location_value)
+
+    def test_transaction_atomicity(self):
+        initial_count = Location.objects.count()
+        urls = [_make_url("oss-atomic.example.com")]
+
+        with patch.object(URL.objects, "bulk_create", side_effect=Exception("boom")):
+            with self.assertRaisesMessage(Exception, "boom"):
+                URL.bulk_get_or_create(urls)
+
+        self.assertEqual(Location.objects.count(), initial_count)
+
+
+# ---------------------------------------------------------------------------
+# LocationManager.bulk_get_or_create_locations (URL-only)
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestBulkGetOrCreateLocations(DojoTestCase):
+
+    def test_url_only(self):
+        urls = [_make_url("oss-loc-mgr.example.com")]
+        saved = LocationManager.bulk_get_or_create_locations(urls)
+
+        self.assertEqual(len(saved), 1)
+        self.assertIsInstance(saved[0], URL)
+
+    def test_cleans_location_data(self):
+        loc_data = LocationData(type="url", data={"url": "https://oss-from-data.example.com/api"})
+        saved = LocationManager.bulk_get_or_create_locations([loc_data])
+
+        self.assertEqual(len(saved), 1)
+        self.assertIsInstance(saved[0], URL)
+        self.assertEqual(saved[0].host, "oss-from-data.example.com")
+
+    def test_empty_input(self):
+        self.assertEqual(LocationManager.bulk_get_or_create_locations([]), [])
+
+
+# ---------------------------------------------------------------------------
+# LocationManager.bulk_create_refs
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestBulkCreateRefs(DojoTestCase):
+
+    def test_creates_finding_and_product_refs(self):
+        finding = _make_finding()
+        product = finding.test.engagement.product
+
+        saved = URL.bulk_get_or_create([_make_url("oss-refs-both.example.com")])
+        LocationManager.bulk_create_refs(saved, finding=finding)
+
+        self.assertTrue(LocationFindingReference.objects.filter(
+            location_id=saved[0].location_id, finding=finding,
+        ).exists())
+        self.assertTrue(LocationProductReference.objects.filter(
+            location_id=saved[0].location_id, product=product,
+        ).exists())
+
+    def test_creates_product_refs_only(self):
+        pt, _ = Product_Type.objects.get_or_create(name="Refs Test Type")
+        product = Product.objects.create(name="Refs Test Product", description="test", prod_type=pt)
+
+        saved = URL.bulk_get_or_create([_make_url("oss-refs-product.example.com")])
+        LocationManager.bulk_create_refs(saved, product=product)
+
+        self.assertTrue(LocationProductReference.objects.filter(
+            location_id=saved[0].location_id, product=product,
+        ).exists())
+        self.assertFalse(LocationFindingReference.objects.filter(
+            location_id=saved[0].location_id,
+        ).exists())
+
+    def test_skips_existing_refs(self):
+        finding = _make_finding()
+        saved = URL.bulk_get_or_create([_make_url("oss-refs-existing.example.com")])
+
+        LocationManager.bulk_create_refs(saved, finding=finding)
+        LocationManager.bulk_create_refs(saved, finding=finding)
+
+        self.assertEqual(LocationFindingReference.objects.filter(
+            location_id=saved[0].location_id, finding=finding,
+        ).count(), 1)
+
+    def test_uses_association_data(self):
+        finding = _make_finding()
+        url = _make_url("oss-refs-assoc.example.com")
+        url._association_data = LocationAssociationData(
+            relationship_type="owned_by",
+            relationship_data={"file_path": "/app/main.py"},
+        )
+        saved = URL.bulk_get_or_create([url])
+        LocationManager.bulk_create_refs(saved, finding=finding)
+
+        ref = LocationFindingReference.objects.get(
+            location_id=saved[0].location_id, finding=finding,
+        )
+        self.assertEqual(ref.relationship, "owned_by")
+        self.assertEqual(ref.relationship_data, {"file_path": "/app/main.py"})
+
+    def test_raises_without_finding_or_product(self):
+        saved = URL.bulk_get_or_create([_make_url("oss-refs-error.example.com")])
+        with self.assertRaises(ValueError):
+            LocationManager.bulk_create_refs(saved)
+
+    def test_empty_locations(self):
+        LocationManager.bulk_create_refs([], finding=_make_finding())
+
+    def test_finding_implies_product(self):
+        finding = _make_finding()
+        product = finding.test.engagement.product
+        saved = URL.bulk_get_or_create([_make_url("oss-refs-implied.example.com")])
+
+        LocationManager.bulk_create_refs(saved, finding=finding)
+
+        self.assertTrue(LocationProductReference.objects.filter(
+            location_id=saved[0].location_id, product=product,
+        ).exists())
+
+
+# ---------------------------------------------------------------------------
+# End-to-end: _add_locations_to_unsaved_finding
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestAddLocationsToUnsavedFinding(DojoTestCase):
+
+    def test_full_pipeline(self):
+        finding = _make_finding()
+        product = finding.test.engagement.product
+
+        loc_data = [
+            LocationData(type="url", data={"url": "https://oss-e2e-1.example.com/api"}),
+            LocationData(type="url", data={"url": "https://oss-e2e-2.example.com/api"}),
+        ]
+
+        LocationManager._add_locations_to_unsaved_finding(finding, loc_data)
+
+        self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 2)
+        self.assertEqual(LocationProductReference.objects.filter(product=product).count(), 2)
+
+    def test_empty_locations(self):
+        finding = _make_finding()
+        LocationManager._add_locations_to_unsaved_finding(finding, [])
+        self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 0)
+
+    def test_idempotent(self):
+        finding = _make_finding()
+        loc_data = [LocationData(type="url", data={"url": "https://oss-idempotent.example.com"})]
+
+        LocationManager._add_locations_to_unsaved_finding(finding, loc_data)
+        LocationManager._add_locations_to_unsaved_finding(finding, loc_data)
+
+        self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 1)
+
+
+# ---------------------------------------------------------------------------
+# Query efficiency
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestBulkQueryEfficiency(DojoTestCase):
+
+    def test_bulk_fewer_queries_than_locations(self):
+        urls = [_make_url(f"oss-perf-{i}.example.com") for i in range(50)]
+
+        with CaptureQueriesContext(connection) as ctx:
+            URL.bulk_get_or_create(urls)
+
+        # Expected: ~3 queries (SELECT existing, INSERT parents, INSERT subtypes)
+        self.assertLess(len(ctx.captured_queries), 10)
