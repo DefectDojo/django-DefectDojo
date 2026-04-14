@@ -1563,7 +1563,13 @@ class TestEngagementMovePermission(DojoTestCase):
         self.assertEqual(self.engagement.product, self.product_c)
 
     def test_ui_move_to_unauthorized_product(self):
-        """Edit engagement form moving to unauthorized product should be denied."""
+        """Edit engagement form moving to unauthorized product should be denied.
+
+        The form's product queryset is filtered to authorized products, so
+        submitting an unauthorized product fails form validation (200 with
+        errors) before the view-level permission check runs.  Either way the
+        engagement must NOT move.
+        """
         client = self._ui_client()
         url = reverse("edit_engagement", args=(self.engagement.id,))
         form_data = {
@@ -1574,6 +1580,6 @@ class TestEngagementMovePermission(DojoTestCase):
             "status": "Not Started",
         }
         response = client.post(url, form_data)
-        self.assertEqual(response.status_code, 403)
+        self.assertIn(response.status_code, [200, 403])
         self.engagement.refresh_from_db()
         self.assertEqual(self.engagement.product, self.product_a)
