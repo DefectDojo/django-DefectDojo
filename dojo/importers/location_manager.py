@@ -82,7 +82,6 @@ class LocationManager:
             indices, grouped_locations = zip(*grouped_locations_with_idx, strict=True)
             # Determine the correct AbstractLocation class to use for bulk get/create
             loc_cls = type(grouped_locations[0])
-            # `.bulk_get_or_create` is expected to return the saved items in the order they were submitted
             saved_locations = loc_cls.bulk_get_or_create(grouped_locations)
             # Zip 'em back together: associate the saved instance with its original index in the `locations` list
             saved.extend((idx, saved_loc) for idx, saved_loc in zip(indices, saved_locations, strict=True))
@@ -139,8 +138,6 @@ class LocationManager:
 
         new_finding_refs = []
         new_product_refs = []
-        # Process locations (unsaved, with possible association data) alongside their corresponding saved versions,
-        # which do not contain that information. We can do this because the bulk get/create operations are stable.
         for location in locations:
             assoc = location.get_association_data()
 
