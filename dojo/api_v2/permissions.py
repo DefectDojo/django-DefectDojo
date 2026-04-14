@@ -473,7 +473,10 @@ class UserHasImportPermission(permissions.BasePermission):
             # Raise an explicit drf exception here
             raise ValidationError(e)
         if engagement := converted_dict.get("engagement"):
-            # existing engagement, nothing special to check
+            # Validate the resolved engagement's parent chain matches any provided names
+            if (product_name := converted_dict.get("product_name")) and engagement.product.name != product_name:
+                msg = f'The resolved engagement is associated with product "{engagement.product.name}", not with product "{product_name}"'
+                raise ValidationError(msg)
             return user_has_permission(
                 request.user, engagement, Permissions.Import_Scan_Result,
             )
@@ -774,7 +777,13 @@ class UserHasReimportPermission(permissions.BasePermission):
             raise ValidationError(e)
 
         if test := converted_dict.get("test"):
-            # existing test, nothing special to check
+            # Validate the resolved test's parent chain matches any provided names
+            if (product_name := converted_dict.get("product_name")) and test.engagement.product.name != product_name:
+                msg = f'The resolved test is associated with product "{test.engagement.product.name}", not with product "{product_name}"'
+                raise ValidationError(msg)
+            if (engagement_name := converted_dict.get("engagement_name")) and test.engagement.name != engagement_name:
+                msg = f'The resolved test is associated with engagement "{test.engagement.name}", not with engagement "{engagement_name}"'
+                raise ValidationError(msg)
             return user_has_permission(
                 request.user, test, Permissions.Import_Scan_Result,
             )
@@ -1181,7 +1190,10 @@ def check_auto_create_permission(
         raise ValidationError(msg)
 
     if engagement:
-        # existing engagement, nothing special to check
+        # Validate the resolved engagement's parent chain matches any provided names
+        if product is not None and engagement.product_id != product.id:
+            msg = f'The resolved engagement is associated with product "{engagement.product.name}", not with product "{product_name}"'
+            raise ValidationError(msg)
         return user_has_permission(
             user, engagement, Permissions.Import_Scan_Result,
         )
