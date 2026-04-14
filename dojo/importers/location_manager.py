@@ -28,16 +28,7 @@ logger = logging.getLogger(__name__)
 UnsavedLocation = TypeVar("UnsavedLocation", LocationData, AbstractLocation)
 
 
-# test_notifications.py: Implement Locations
 class LocationManager:
-    @classmethod
-    def get_or_create_location(cls, unsaved_location: AbstractLocation) -> AbstractLocation | None:
-        """Gets/creates the given AbstractLocation."""
-        if isinstance(unsaved_location, URL):
-            return URL.get_or_create_from_object(unsaved_location)
-        logger.debug(f"IMPORT_SCAN: Unsupported location type: {type(unsaved_location)}")
-        return None
-
     @classmethod
     def get_supported_location_types(cls) -> dict[str, type[AbstractLocation]]:
         """Return a mapping of location type string to AbstractLocation subclass."""

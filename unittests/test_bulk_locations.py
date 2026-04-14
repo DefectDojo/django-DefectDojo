@@ -14,6 +14,7 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
+from django.utils import timezone
 
 from dojo.importers.location_manager import LocationManager
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -32,12 +33,13 @@ def _make_url(host, path=""):
 
 
 def _make_finding():
+    now = timezone.now()
     user, _ = User.objects.get_or_create(username="bulk_test_user", defaults={"is_active": True})
     pt, _ = Product_Type.objects.get_or_create(name="Bulk Test Type")
     product = Product.objects.create(name="Bulk Test Product", description="test", prod_type=pt)
-    eng = Engagement.objects.create(product=product, target_start="2026-01-01", target_end="2026-12-31")
+    eng = Engagement.objects.create(product=product, target_start=now, target_end=now)
     tt, _ = Test_Type.objects.get_or_create(name="Bulk Test")
-    test = Test.objects.create(engagement=eng, test_type=tt, target_start="2026-01-01", target_end="2026-12-31")
+    test = Test.objects.create(engagement=eng, test_type=tt, target_start=now, target_end=now)
     return Finding.objects.create(test=test, title="Bulk Test Finding", severity="Medium", reporter=user)
 
 
@@ -138,6 +140,11 @@ class TestBulkGetOrCreateURL(DojoTestCase):
 # ---------------------------------------------------------------------------
 @skip_unless_v3
 class TestBulkGetOrCreateLocations(DojoTestCase):
+
+    def test_supported_location_types_includes_url(self):
+        supported = LocationManager.get_supported_location_types()
+        self.assertIn("url", supported)
+        self.assertIs(supported["url"], URL)
 
     def test_url_only(self):
         urls = [_make_url("oss-loc-mgr.example.com")]

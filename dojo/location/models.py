@@ -395,7 +395,7 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
                 if hasattr(loc, "_association_data") and not hasattr(saved, "_association_data"):
                     saved._association_data = loc._association_data
 
-            # Create 'em
+        # Create 'em
         if new_locations:
             location_type = cls.get_location_type()
             with transaction.atomic():
