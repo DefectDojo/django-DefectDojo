@@ -8,7 +8,24 @@ aliases:
 ---
 DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.
 
-Currently, this feature is in Beta. Pro users who are interested in opting in can do so by emailing [support@defectdojo.com](mailto:support@defectdojo.com).
+Currently, this feature is in Beta.
+
+## Enabling the Hierarchy Feature
+
+Hierarchy features ship with new versions of DefectDojo Pro by default, but existing customers who wish to migrate these features can do so using the following methods
+
+### Cloud Customers
+
+The hierarchy feature and label changes must be enabled by DefectDojo Support. Email [support@defectdojo.com](mailto:support@defectdojo.com) with your instance URL and request:
+
+1. **Asset Hierarchy** — enables parent/child relationships between Assets. Once enabled, the hierarchy can be viewed and managed from the **Product** tab in the navigation.
+2. **Label Changes** (optional) — renames "Product Type" to "Organization" and "Product" to "Asset" throughout the UI. This is a separate step from enabling the hierarchy and can be requested at the same time or later.
+
+Note that label changes are cosmetic only: API endpoints and field names remain unchanged, so existing automation will continue to work.
+
+### On-Premise Customers
+
+ Contact Support for guidance on enabling these features via your instance configuration.
 
 ## Significant Changes
 

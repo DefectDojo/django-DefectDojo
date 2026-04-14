@@ -132,7 +132,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual("libgssapi-krb5-2", finding.component_name)
             self.assertEqual("1.17-3+deb10u3", finding.component_version)
             self.assertEqual("CVE-2004-0971", finding.vuln_id_from_tool)
-            self.assertEqual(["dpkg"], finding.tags)
+            self.assertEqual(["dpkg"], finding.unsaved_tags)
             self.assertEqual(1, finding.nb_occurences)
 
             finding = findings[1]
@@ -167,7 +167,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual("redis", finding.component_name)
             self.assertEqual("4.0.2", finding.component_version)
             self.assertEqual("CVE-2021-32626", finding.vuln_id_from_tool)
-            self.assertEqual(["python", "python2"], finding.tags)
+            self.assertEqual(["python", "python2"], finding.unsaved_tags)
             self.assertEqual(1, finding.nb_occurences)
 
             finding = findings[2]
@@ -197,7 +197,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual("libc-bin", finding.component_name)
             self.assertEqual("2.28-10", finding.component_version)
             self.assertEqual("CVE-2021-33574", finding.vuln_id_from_tool)
-            self.assertEqual(["dpkg"], finding.tags)
+            self.assertEqual(["dpkg"], finding.unsaved_tags)
             self.assertEqual(1, finding.nb_occurences)
 
             finding = findings[3]
@@ -227,7 +227,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual("libc6", finding.component_name)
             self.assertEqual("2.28-10", finding.component_version)
             self.assertEqual("CVE-2021-33574", finding.vuln_id_from_tool)
-            self.assertEqual(["dpkg"], finding.tags)
+            self.assertEqual(["dpkg"], finding.unsaved_tags)
             self.assertEqual(1, finding.nb_occurences)
 
             finding = findings[4]
@@ -257,7 +257,7 @@ class TestAnchoreGrypeParser(DojoTestCase):
             self.assertEqual("Django", finding.component_name)
             self.assertEqual("3.2.9", finding.component_version)
             self.assertEqual("GHSA-v6rh-hp5x-86rv", finding.vuln_id_from_tool)
-            self.assertEqual(["python"], finding.tags)
+            self.assertEqual(["python"], finding.unsaved_tags)
             self.assertEqual(2, finding.nb_occurences)
 
     def test_grype_issue_9618(self):

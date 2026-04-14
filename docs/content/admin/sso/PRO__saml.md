@@ -45,6 +45,20 @@ If no group with a matching name exists, DefectDojo will automatically create on
 
 To activate group mapping, check the **Enable Group Mapping** checkbox at the bottom of the form.
 
+## Cloud vs On-Premise Differences
+
+DefectDojo Cloud does not have the same level of SAML customization as DefectDojo On-Prem.  The only variables that can be set are through the UI.  Here are some of the key differences:
+
+| Capability | Cloud | On-Premise |
+|---|---|---|
+| **Username matching** | NameID only | NameID only (the `SAML_USE_NAME_ID_AS_USERNAME` env var applies to Open Source only, not Pro) |
+| **SAML assertion encryption** | Not currently supported | Not currently supported |
+| **SAML login logs** | Not available in the UI. Contact Support to request logs. | Available via application container logs (`docker logs dojo`) |
+| **Configuration method** | Enterprise Settings UI only | Enterprise Settings UI, Django Admin, or Django Shell |
+| **Environment variables** | Cannot be set by customers directly. Contact Support for changes. | Can be set via `dojo-compose-cli environment add` |
+
+If you need to match users on an attribute other than NameID (such as `uid` or `email`), configure your Identity Provider to send the desired value as the NameID rather than adjusting DefectDojo settings.
+
 ## Additional Options
 
 * **Create Unknown User** — automatically create a new DefectDojo user if they are not found in the SAML response.
