@@ -121,6 +121,7 @@ class TestBulkRiskAcceptanceApi(APITestCase):
 
 
 class TestBulkRiskAcceptanceRbac(APITestCase):
+
     """Tests that accept_risks endpoints use RBAC (Permissions.Risk_Acceptance) instead of is_staff."""
 
     @classmethod
