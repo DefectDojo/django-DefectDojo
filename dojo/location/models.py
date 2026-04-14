@@ -391,7 +391,8 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
                 # Mark it so we don't try to create duplicates within the same batch
                 existing_by_hash[loc.identity_hash] = loc
             else:
-                # Preserve association data from the input onto the existing saved object
+                # Preserve association data from the input onto the existing saved object, in case we're associating
+                # existing locations with findings/products
                 saved = existing_by_hash[loc.identity_hash]
                 if hasattr(loc, "_association_data") and not hasattr(saved, "_association_data"):
                     saved._association_data = loc._association_data
