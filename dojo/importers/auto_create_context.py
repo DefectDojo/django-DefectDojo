@@ -182,7 +182,7 @@ class AutoCreateContextManager:
         if engagement := get_object_or_none(Engagement, pk=engagement_id):
             logger.debug("Using existing engagement by id: %s", engagement_id)
             if product is not None and engagement.product_id != product.id:
-                msg = f"Engagement \"{engagement_id}\" does not belong to product \"{product}\""
+                msg = f'Engagement "{engagement_id}" does not belong to product "{product}"'
                 raise ValueError(msg)
             return engagement
         # if there's no product, then for sure there's no engagement either
@@ -207,7 +207,7 @@ class AutoCreateContextManager:
         if test := get_object_or_none(Test, pk=test_id):
             logger.debug("Using existing Test by id: %s", test_id)
             if engagement is not None and test.engagement_id != engagement.id:
-                msg = f"Test \"{test_id}\" does not belong to engagement \"{engagement}\""
+                msg = f'Test "{test_id}" does not belong to engagement "{engagement}"'
                 raise ValueError(msg)
             return test
         # If the engagement is not supplied, we cannot do anything

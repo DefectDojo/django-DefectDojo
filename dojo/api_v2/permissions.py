@@ -473,9 +473,12 @@ class UserHasImportPermission(permissions.BasePermission):
             # Raise an explicit drf exception here
             raise ValidationError(e)
         if engagement := converted_dict.get("engagement"):
-            # Validate the resolved engagement's parent chain matches any provided names
-            if (product_name := converted_dict.get("product_name")) and engagement.product.name != product_name:
-                msg = f'The resolved engagement is associated with product "{engagement.product.name}", not with product "{product_name}"'
+            # Validate the resolved engagement's parent chain matches any provided identifiers
+            if (product := converted_dict.get("product")) and engagement.product_id != product.id:
+                msg = f'The resolved engagement is associated with product "{engagement.product.name}", not with product "{converted_dict.get("product_name")}"'
+                raise ValidationError(msg)
+            if (engagement_name := converted_dict.get("engagement_name")) and engagement.name != engagement_name:
+                msg = f'The resolved engagement is named "{engagement.name}", not "{engagement_name}"'
                 raise ValidationError(msg)
             return user_has_permission(
                 request.user, engagement, Permissions.Import_Scan_Result,
@@ -777,11 +780,18 @@ class UserHasReimportPermission(permissions.BasePermission):
             raise ValidationError(e)
 
         if test := converted_dict.get("test"):
-            # Validate the resolved test's parent chain matches any provided names
-            if (product_name := converted_dict.get("product_name")) and test.engagement.product.name != product_name:
+            # Validate the resolved test's parent chain matches any provided identifiers
+            if (product := converted_dict.get("product")) and test.engagement.product_id != product.id:
+                msg = f'The resolved test is associated with product "{test.engagement.product.name}", not with product "{converted_dict.get("product_name")}"'
+                raise ValidationError(msg)
+            if (engagement := converted_dict.get("engagement")) and test.engagement_id != engagement.id:
+                msg = f'The resolved test is associated with engagement "{test.engagement.name}", not with engagement "{converted_dict.get("engagement_name")}"'
+                raise ValidationError(msg)
+            # Also validate by name when the objects were not resolved (e.g. names that match no existing record)
+            if not converted_dict.get("product") and (product_name := converted_dict.get("product_name")) and test.engagement.product.name != product_name:
                 msg = f'The resolved test is associated with product "{test.engagement.product.name}", not with product "{product_name}"'
                 raise ValidationError(msg)
-            if (engagement_name := converted_dict.get("engagement_name")) and test.engagement.name != engagement_name:
+            if not converted_dict.get("engagement") and (engagement_name := converted_dict.get("engagement_name")) and test.engagement.name != engagement_name:
                 msg = f'The resolved test is associated with engagement "{test.engagement.name}", not with engagement "{engagement_name}"'
                 raise ValidationError(msg)
             return user_has_permission(
