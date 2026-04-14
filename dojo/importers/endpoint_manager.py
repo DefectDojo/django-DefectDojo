@@ -300,3 +300,45 @@ class EndpointManager:
                     batch_size=1000,
                 )
             self._statuses_to_reactivate.clear()
+
+    # ------------------------------------------------------------------
+    # Unified interface (shared with LocationManager)
+    # ------------------------------------------------------------------
+
+    def clean_unsaved(self, finding: Finding) -> None:
+        """Clean the unsaved endpoints on this finding."""
+        self.clean_unsaved_endpoints(finding.unsaved_endpoints)
+
+    def record_for_finding(self, finding: Finding, extra_items: list[Endpoint] | None = None) -> None:
+        """Record endpoints from the finding + any form-added extras for later batch creation."""
+        for endpoint in finding.unsaved_endpoints:
+            key = self.record_endpoint(endpoint)
+            self.record_status_for_create(finding, key)
+        if extra_items:
+            for endpoint in extra_items:
+                key = self.record_endpoint(endpoint)
+                self.record_status_for_create(finding, key)
+
+    def update_status(self, existing_finding: Finding, new_finding: Finding, user: Dojo_User) -> None:
+        """Accumulate status changes (mitigate/reactivate) based on old vs new finding."""
+        self.update_endpoint_status(existing_finding, new_finding, user)
+
+    def record_reactivations_for_finding(self, finding: Finding) -> None:
+        """Record endpoint statuses on this finding for reactivation."""
+        self.record_statuses_to_reactivate(self.get_non_special_endpoint_statuses(finding))
+
+    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User | None = None) -> None:
+        """Record endpoint statuses on this finding for mitigation."""
+        self.record_statuses_to_mitigate(finding.status_finding.all())
+
+    def get_items_for_tagging(self, findings: list[Finding]):
+        """Return queryset of items to apply tags to."""
+        return Endpoint.objects.filter(finding__in=findings).distinct()
+
+    def get_item_tag_fallback(self, finding: Finding):
+        """Return iterable of taggable items for per-instance fallback."""
+        return finding.endpoints.all()
+
+    def serialize_extra_items(self, items: list) -> dict:
+        """Serialize extra items for import history."""
+        return {"endpoints": [str(ep) for ep in items]} if items else {}

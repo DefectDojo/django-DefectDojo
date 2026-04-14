@@ -3,9 +3,8 @@ Tests for bulk location creation and association (open-source, URL-only).
 
 Covers:
 - AbstractLocation.bulk_get_or_create (on URL)
-- LocationManager.bulk_get_or_create_locations (URL-only)
-- LocationManager.bulk_create_refs (finding + product refs)
-- LocationManager.add_locations_to_finding (end-to-end)
+- LocationManager._bulk_get_or_create_locations (URL-only)
+- LocationManager.record_locations_for_finding + persist (accumulator pattern)
 - Query efficiency
 """
 
@@ -32,11 +31,16 @@ def _make_url(host, path=""):
     return url
 
 
+_finding_counter = 0
+
+
 def _make_finding():
+    global _finding_counter  # noqa: PLW0603
+    _finding_counter += 1
     now = timezone.now()
     user, _ = User.objects.get_or_create(username="bulk_test_user", defaults={"is_active": True})
     pt, _ = Product_Type.objects.get_or_create(name="Bulk Test Type")
-    product = Product.objects.create(name="Bulk Test Product", description="test", prod_type=pt)
+    product = Product.objects.create(name=f"Bulk Test Product {_finding_counter}", description="test", prod_type=pt)
     eng = Engagement.objects.create(product=product, target_start=now, target_end=now)
     tt, _ = Test_Type.objects.get_or_create(name="Bulk Test")
     test = Test.objects.create(engagement=eng, test_type=tt, target_start=now, target_end=now)
@@ -136,7 +140,7 @@ class TestBulkGetOrCreateURL(DojoTestCase):
 
 
 # ---------------------------------------------------------------------------
-# LocationManager.bulk_get_or_create_locations (URL-only)
+# LocationManager._bulk_get_or_create_locations (URL-only)
 # ---------------------------------------------------------------------------
 @skip_unless_v3
 class TestBulkGetOrCreateLocations(DojoTestCase):
@@ -148,109 +152,64 @@ class TestBulkGetOrCreateLocations(DojoTestCase):
 
     def test_url_only(self):
         urls = [_make_url("oss-loc-mgr.example.com")]
-        saved = LocationManager.bulk_get_or_create_locations(urls)
+        saved = LocationManager._bulk_get_or_create_locations(urls)
 
         self.assertEqual(len(saved), 1)
         self.assertIsInstance(saved[0], URL)
 
-    def test_cleans_location_data(self):
+    def test_handles_cleaned_location_data(self):
         loc_data = LocationData(type="url", data={"url": "https://oss-from-data.example.com/api"})
-        saved = LocationManager.bulk_get_or_create_locations([loc_data])
+        cleaned = LocationManager.clean_unsaved_locations([loc_data])
+        saved = LocationManager._bulk_get_or_create_locations(cleaned)
 
         self.assertEqual(len(saved), 1)
         self.assertIsInstance(saved[0], URL)
         self.assertEqual(saved[0].host, "oss-from-data.example.com")
 
     def test_empty_input(self):
-        self.assertEqual(LocationManager.bulk_get_or_create_locations([]), [])
+        self.assertEqual(LocationManager._bulk_get_or_create_locations([]), [])
 
 
 # ---------------------------------------------------------------------------
-# LocationManager.bulk_create_refs
+# LocationManager.persist — ref creation details
 # ---------------------------------------------------------------------------
 @skip_unless_v3
-class TestBulkCreateRefs(DojoTestCase):
-
-    def test_creates_finding_and_product_refs(self):
-        finding = _make_finding()
-        product = finding.test.engagement.product
-
-        saved = URL.bulk_get_or_create([_make_url("oss-refs-both.example.com")])
-        LocationManager.bulk_create_refs(saved, finding=finding)
-
-        self.assertTrue(LocationFindingReference.objects.filter(
-            location_id=saved[0].location_id, finding=finding,
-        ).exists())
-        self.assertTrue(LocationProductReference.objects.filter(
-            location_id=saved[0].location_id, product=product,
-        ).exists())
-
-    def test_creates_product_refs_only(self):
-        pt, _ = Product_Type.objects.get_or_create(name="Refs Test Type")
-        product = Product.objects.create(name="Refs Test Product", description="test", prod_type=pt)
-
-        saved = URL.bulk_get_or_create([_make_url("oss-refs-product.example.com")])
-        LocationManager.bulk_create_refs(saved, product=product)
-
-        self.assertTrue(LocationProductReference.objects.filter(
-            location_id=saved[0].location_id, product=product,
-        ).exists())
-        self.assertFalse(LocationFindingReference.objects.filter(
-            location_id=saved[0].location_id,
-        ).exists())
-
-    def test_skips_existing_refs(self):
-        finding = _make_finding()
-        saved = URL.bulk_get_or_create([_make_url("oss-refs-existing.example.com")])
-
-        LocationManager.bulk_create_refs(saved, finding=finding)
-        LocationManager.bulk_create_refs(saved, finding=finding)
-
-        self.assertEqual(LocationFindingReference.objects.filter(
-            location_id=saved[0].location_id, finding=finding,
-        ).count(), 1)
+class TestPersistRefCreation(DojoTestCase):
 
     def test_uses_association_data(self):
         finding = _make_finding()
+        product = finding.test.engagement.product
         url = _make_url("oss-refs-assoc.example.com")
         url._association_data = LocationAssociationData(
             relationship_type="owned_by",
             relationship_data={"file_path": "/app/main.py"},
         )
-        saved = URL.bulk_get_or_create([url])
-        LocationManager.bulk_create_refs(saved, finding=finding)
 
-        ref = LocationFindingReference.objects.get(
-            location_id=saved[0].location_id, finding=finding,
-        )
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(finding, [url])
+        mgr.persist()
+
+        ref = LocationFindingReference.objects.get(finding=finding)
         self.assertEqual(ref.relationship, "owned_by")
         self.assertEqual(ref.relationship_data, {"file_path": "/app/main.py"})
 
-    def test_raises_without_finding_or_product(self):
-        saved = URL.bulk_get_or_create([_make_url("oss-refs-error.example.com")])
-        with self.assertRaises(ValueError):
-            LocationManager.bulk_create_refs(saved)
+    def test_product_only_locations(self):
+        pt, _ = Product_Type.objects.get_or_create(name="Refs Test Type")
+        product = Product.objects.create(name="Refs Product Only", description="test", prod_type=pt)
 
-    def test_empty_locations(self):
-        LocationManager.bulk_create_refs([], finding=_make_finding())
+        mgr = LocationManager(product)
+        mgr._product_locations.extend([_make_url("oss-product-only.example.com")])
+        mgr.persist()
 
-    def test_finding_implies_product(self):
-        finding = _make_finding()
-        product = finding.test.engagement.product
-        saved = URL.bulk_get_or_create([_make_url("oss-refs-implied.example.com")])
-
-        LocationManager.bulk_create_refs(saved, finding=finding)
-
-        self.assertTrue(LocationProductReference.objects.filter(
-            location_id=saved[0].location_id, product=product,
-        ).exists())
+        self.assertTrue(LocationProductReference.objects.filter(product=product).exists())
+        self.assertFalse(LocationFindingReference.objects.exists())
 
 
 # ---------------------------------------------------------------------------
-# End-to-end: add_locations_to_finding
+# End-to-end: record + persist
 # ---------------------------------------------------------------------------
 @skip_unless_v3
-class TestAddLocationsToUnsavedFinding(DojoTestCase):
+class TestRecordAndPersist(DojoTestCase):
 
     def test_full_pipeline(self):
         finding = _make_finding()
@@ -261,24 +220,56 @@ class TestAddLocationsToUnsavedFinding(DojoTestCase):
             LocationData(type="url", data={"url": "https://oss-e2e-2.example.com/api"}),
         ]
 
-        LocationManager.add_locations_to_finding(finding, loc_data)
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(finding, loc_data)
+        mgr.persist()
 
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 2)
         self.assertEqual(LocationProductReference.objects.filter(product=product).count(), 2)
 
     def test_empty_locations(self):
         finding = _make_finding()
-        LocationManager.add_locations_to_finding(finding, [])
+        product = finding.test.engagement.product
+
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(finding, [])
+        mgr.persist()
+
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 0)
 
     def test_idempotent(self):
         finding = _make_finding()
+        product = finding.test.engagement.product
         loc_data = [LocationData(type="url", data={"url": "https://oss-idempotent.example.com"})]
 
-        LocationManager.add_locations_to_finding(finding, loc_data)
-        LocationManager.add_locations_to_finding(finding, loc_data)
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(finding, loc_data)
+        mgr.persist()
+        mgr.record_locations_for_finding(finding, loc_data)
+        mgr.persist()
 
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 1)
+
+    def test_multiple_findings_single_persist(self):
+        finding1 = _make_finding()
+        product = finding1.test.engagement.product
+        # Create second finding on the same product/engagement/test
+        finding2 = Finding.objects.create(
+            test=finding1.test, title="Bulk Test Finding 2", severity="High", reporter=finding1.reporter,
+        )
+
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(finding1, [
+            LocationData(type="url", data={"url": "https://oss-multi-1.example.com"}),
+        ])
+        mgr.record_locations_for_finding(finding2, [
+            LocationData(type="url", data={"url": "https://oss-multi-2.example.com"}),
+        ])
+        mgr.persist()
+
+        self.assertEqual(LocationFindingReference.objects.filter(finding=finding1).count(), 1)
+        self.assertEqual(LocationFindingReference.objects.filter(finding=finding2).count(), 1)
+        self.assertEqual(LocationProductReference.objects.filter(product=product).count(), 2)
 
 
 # ---------------------------------------------------------------------------
