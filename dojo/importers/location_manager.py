@@ -183,7 +183,7 @@ class LocationManager:
     ) -> None:
         """Creates AbstractLocation objects from the given list and links them to the given Finding and its Product."""
         locations = cls.bulk_get_or_create_locations(locations)
-        cls.bulk_create_refs(locations, finding=finding, product=finding.test.engagement.product)
+        cls.bulk_create_refs(locations, finding=finding)
         logger.debug(f"LocationManager: {len(locations)} locations associated with {finding}")
 
     @app.task
