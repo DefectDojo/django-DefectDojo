@@ -5,7 +5,7 @@ Covers:
 - AbstractLocation.bulk_get_or_create (on URL)
 - LocationManager.bulk_get_or_create_locations (URL-only)
 - LocationManager.bulk_create_refs (finding + product refs)
-- LocationManager._add_locations_to_unsaved_finding (end-to-end)
+- LocationManager.add_locations_to_finding (end-to-end)
 - Query efficiency
 """
 
@@ -247,7 +247,7 @@ class TestBulkCreateRefs(DojoTestCase):
 
 
 # ---------------------------------------------------------------------------
-# End-to-end: _add_locations_to_unsaved_finding
+# End-to-end: add_locations_to_finding
 # ---------------------------------------------------------------------------
 @skip_unless_v3
 class TestAddLocationsToUnsavedFinding(DojoTestCase):
@@ -261,22 +261,22 @@ class TestAddLocationsToUnsavedFinding(DojoTestCase):
             LocationData(type="url", data={"url": "https://oss-e2e-2.example.com/api"}),
         ]
 
-        LocationManager._add_locations_to_unsaved_finding(finding, loc_data)
+        LocationManager.add_locations_to_finding(finding, loc_data)
 
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 2)
         self.assertEqual(LocationProductReference.objects.filter(product=product).count(), 2)
 
     def test_empty_locations(self):
         finding = _make_finding()
-        LocationManager._add_locations_to_unsaved_finding(finding, [])
+        LocationManager.add_locations_to_finding(finding, [])
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 0)
 
     def test_idempotent(self):
         finding = _make_finding()
         loc_data = [LocationData(type="url", data={"url": "https://oss-idempotent.example.com"})]
 
-        LocationManager._add_locations_to_unsaved_finding(finding, loc_data)
-        LocationManager._add_locations_to_unsaved_finding(finding, loc_data)
+        LocationManager.add_locations_to_finding(finding, loc_data)
+        LocationManager.add_locations_to_finding(finding, loc_data)
 
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding).count(), 1)
 

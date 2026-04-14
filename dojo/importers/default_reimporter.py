@@ -821,7 +821,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if settings.V3_FEATURE_LOCATIONS:
             # Reactivate mitigated locations
             mitigated_locations = existing_finding.locations.filter(status=FindingLocationStatus.Mitigated)
-            self.location_manager.chunk_locations_and_reactivate(mitigated_locations)
+            self.location_manager.reactivate_location_status(mitigated_locations)
         else:
             # TODO: Delete this after the move to Locations
             # Accumulate endpoint statuses for bulk reactivation in persist()
@@ -992,9 +992,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         for the purpose of foreign key restrictions
         """
         if settings.V3_FEATURE_LOCATIONS:
-            self.location_manager.chunk_locations_and_disperse(finding, finding_from_report.unsaved_locations)
+            self.location_manager.add_locations_to_finding(finding, finding_from_report.unsaved_locations)
             if len(self.endpoints_to_add) > 0:
-                self.location_manager.chunk_locations_and_disperse(finding, self.endpoints_to_add)
+                self.location_manager.add_locations_to_finding(finding, self.endpoints_to_add)
         else:
             # TODO: Delete this after the move to Locations
             for endpoint in finding_from_report.unsaved_endpoints:

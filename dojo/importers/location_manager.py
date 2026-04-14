@@ -8,8 +8,6 @@ from typing import TYPE_CHECKING, TypeVar
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
-from dojo.celery import app
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import AbstractLocation, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.tools.locations import LocationData
@@ -162,49 +160,33 @@ class LocationManager:
             )
 
     @classmethod
-    def _add_locations_to_unsaved_finding(
+    def add_locations_to_finding(
         cls,
         finding: Finding,
         locations: list[UnsavedLocation],
-        **kwargs: dict,  # noqa: ARG003
     ) -> None:
         """Creates AbstractLocation objects from the given list and links them to the given Finding and its Product."""
         locations = cls.bulk_get_or_create_locations(locations)
         cls.bulk_create_refs(locations, finding=finding)
         logger.debug(f"LocationManager: {len(locations)} locations associated with {finding}")
 
-    @app.task
-    def add_locations_to_unsaved_finding(
-        manager_cls_path: str,  # noqa: N805
-        finding: Finding,
-        locations: list[UnsavedLocation],
-        **kwargs: dict,
-    ) -> None:
-        """Celery task that resolves the LocationManager class and delegates to _add_locations_to_unsaved_finding."""
-        from django.utils.module_loading import import_string  # noqa: PLC0415
-
-        manager_cls = import_string(manager_cls_path)
-        manager_cls._add_locations_to_unsaved_finding(finding, locations, **kwargs)
-
-    @app.task
+    @staticmethod
     def mitigate_location_status(
-        location_refs: QuerySet[LocationFindingReference],  # noqa: N805
+        location_refs: QuerySet[LocationFindingReference],
         user: Dojo_User,
-        **kwargs: dict,
     ) -> None:
-        """Mitigate all given (non-mitigated) location refs"""
+        """Mitigate all given (non-mitigated) location refs."""
         location_refs.exclude(status=FindingLocationStatus.Mitigated).update(
             auditor=user,
             audit_time=timezone.now(),
             status=FindingLocationStatus.Mitigated,
         )
 
-    @app.task
+    @staticmethod
     def reactivate_location_status(
-        location_refs: QuerySet[LocationFindingReference],  # noqa: N805
-        **kwargs: dict,
+        location_refs: QuerySet[LocationFindingReference],
     ) -> None:
-        """Reactivate all given (mitigated) locations refs"""
+        """Reactivate all given (mitigated) location refs."""
         location_refs.filter(status=FindingLocationStatus.Mitigated).update(
             auditor=None,
             audit_time=timezone.now(),
@@ -235,7 +217,7 @@ class LocationManager:
         user: Dojo_User,
         **kwargs: dict,
     ) -> None:
-        """Update the list of locations from the new finding with the list that is in the old finding"""
+        """Update the list of locations from the new finding with the list that is in the old finding."""
         # New endpoints are already added in serializers.py / views.py (see comment "# for existing findings: make sure endpoints are present or created")
         # So we only need to mitigate endpoints that are no longer present
         existing_location_refs: QuerySet[LocationFindingReference] = existing_finding.locations.exclude(
@@ -247,7 +229,7 @@ class LocationManager:
         )
         if new_finding.is_mitigated:
             # New finding is mitigated, so mitigate all existing location refs
-            self.chunk_locations_and_mitigate(existing_location_refs, user)
+            self.mitigate_location_status(existing_location_refs, user)
         else:
             new_locations_values = [str(location) for location in type(self).clean_unsaved_locations(new_finding.unsaved_locations)]
             # Reactivate endpoints in the old finding that are in the new finding
@@ -255,31 +237,5 @@ class LocationManager:
             # Mitigate endpoints in the existing finding not in the new finding
             location_refs_to_mitigate = existing_location_refs.exclude(location__location_value__in=new_locations_values)
 
-            self.chunk_locations_and_reactivate(location_refs_to_reactivate)
-            self.chunk_locations_and_mitigate(location_refs_to_mitigate, user)
-
-    def chunk_locations_and_disperse(
-        self,
-        finding: Finding,
-        locations: list[UnsavedLocation],
-        **kwargs: dict,
-    ) -> None:
-        if not locations:
-            return
-        cls_path = f"{type(self).__module__}.{type(self).__qualname__}"
-        dojo_dispatch_task(self.add_locations_to_unsaved_finding, cls_path, finding, locations, sync=True)
-
-    def chunk_locations_and_reactivate(
-        self,
-        location_refs: QuerySet[LocationFindingReference],
-        **kwargs: dict,
-    ) -> None:
-        dojo_dispatch_task(self.reactivate_location_status, location_refs, sync=True)
-
-    def chunk_locations_and_mitigate(
-        self,
-        location_refs: QuerySet[LocationFindingReference],
-        user: Dojo_User,
-        **kwargs: dict,
-    ) -> None:
-        dojo_dispatch_task(self.mitigate_location_status, location_refs, user, sync=True)
+            self.reactivate_location_status(location_refs_to_reactivate)
+            self.mitigate_location_status(location_refs_to_mitigate, user)

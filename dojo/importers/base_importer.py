@@ -806,11 +806,11 @@ class BaseImporter(ImporterOptions):
         finding and product
         """
         # Save the unsaved locations
-        self.location_manager.chunk_locations_and_disperse(finding, finding.unsaved_locations)
+        self.location_manager.add_locations_to_finding(finding, finding.unsaved_locations)
         # Check for any that were added in the form
         if len(locations_to_add) > 0:
             logger.debug("locations_to_add: %s", locations_to_add)
-            self.location_manager.chunk_locations_and_disperse(finding, locations_to_add)
+            self.location_manager.add_locations_to_finding(finding, locations_to_add)
 
     # TODO: Delete this after the move to Locations
     def process_endpoints(
