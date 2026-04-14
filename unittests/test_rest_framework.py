@@ -3433,8 +3433,13 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    def test_reimport_with_engagement_id_mismatched_product_name_is_rejected(self, importer_mock, reimporter_mock):
-        """Sending engagement ID from one product with product_name from another must be rejected."""
+    @patch("dojo.api_v2.permissions.user_has_permission")
+    def test_reimport_engagement_param_ignored_permission_checked_on_name_resolved_target(self, mock, importer_mock, reimporter_mock):
+        """
+        Engagement is not a declared field on ReImportScanSerializer — verify
+        the permission check uses the name-resolved target, not the engagement param.
+        """
+        mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
         reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
 
@@ -3445,15 +3450,20 @@ class ReimportScanTest(DojoAPITestCase):
                 "verified": True,
                 "scan_type": "ZAP Scan",
                 "file": testfile,
-                # Engagement 1 belongs to Product 2 ("Security How-to")
+                # engagement=1 belongs to Product 2 Engagement 1, but it should be ignored
                 "engagement": 1,
-                # But product_name points to Product 1 ("Python How-to")
-                "product_name": "Python How-to",
+                # These names resolve to Product 2's Engagement 4 -> Test 4
+                "product_name": "Security How-to",
                 "engagement_name": "April monthly engagement",
                 "version": "1.0.0",
             }
             response = self.client.post(self.url, payload)
-            self.assertEqual(400, response.status_code, response.content[:1000])
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            # Permission must be checked on name-resolved Test 4 (in Engagement 4),
+            # NOT on Test 3 (which belongs to the engagement=1 param)
+            mock.assert_called_with(User.objects.get(username="admin"),
+                Test.objects.get(id=4),
+                Permissions.Import_Scan_Result)
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 

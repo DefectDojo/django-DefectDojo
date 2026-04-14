@@ -770,6 +770,11 @@ class UserHasReimportPermission(permissions.BasePermission):
         try:
             converted_dict = auto_create.convert_querydict_to_dict(request.data)
             auto_create.process_import_meta_data_from_dict(converted_dict)
+            # engagement is not a declared field on ReImportScanSerializer and will be
+            # stripped during validation — don't use it in the permission check either,
+            # so the permission check resolves targets the same way execution does
+            converted_dict.pop("engagement", None)
+            converted_dict.pop("engagement_id", None)
             # Get an existing product
             converted_dict["product_type"] = auto_create.get_target_product_type_if_exists(**converted_dict)
             converted_dict["product"] = auto_create.get_target_product_if_exists(**converted_dict)
