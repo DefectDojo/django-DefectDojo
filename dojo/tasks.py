@@ -6,6 +6,7 @@ from celery import Task
 from celery.utils.log import get_task_logger
 from django.apps import apps
 from django.conf import settings
+from django.core.exceptions import SuspiciousOperation
 from django.core.management import call_command
 from django.db.models import Count, Prefetch
 from django.urls import reverse
@@ -293,7 +294,37 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
                 continue
 
         # Let watson handle the bulk indexing
-        context_manager.end()
+        try:
+            context_manager.end()
+        except SuspiciousOperation:
+            # Some finding content (e.g. a very long tag-like string) triggered
+            # Django's strip_tags SuspiciousOperation guard.  Fall back to
+            # per-instance indexing so we can skip the offending object(s)
+            # instead of silently dropping the entire batch.
+            # https://www.djangoproject.com/weblog/2025/may/07/security-releases/
+            # https://github.com/DefectDojo/django-DefectDojo/issues/14649
+            logger.warning(
+                f"Batch watson index update for {model_name} hit SuspiciousOperation; "
+                "falling back to per-instance indexing",
+            )
+            instances_added = 0
+            instances_skipped = 0
+            for instance in instances:
+                single_ctx = SearchContextManager()
+                single_ctx.start()
+                try:
+                    single_ctx.add_to_context(engine, instance)
+                    single_ctx.end()
+                    instances_added += 1
+                except SuspiciousOperation:
+                    logger.warning(
+                        f"Skipping watson index update for {model_name}:{instance.pk} "
+                        "— content triggered SuspiciousOperation in strip_tags",
+                    )
+                    instances_skipped += 1
+                except Exception as e:
+                    logger.warning(f"Skipping watson index update for {model_name}:{instance.pk} - {e}")
+                    instances_skipped += 1
 
         logger.debug(f"Completed async watson index update: {instances_added} updated, {instances_skipped} skipped")
 

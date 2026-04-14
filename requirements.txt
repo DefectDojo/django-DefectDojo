@@ -19,7 +19,7 @@ django-slack==5.19.0
 django-watson==1.6.3
 django-permissions-policy==4.29.0
 django-prometheus==2.4.1
-Django==5.2.12
+Django==5.2.13
 django-single-session==0.2.0
 djangorestframework==3.17.1
 html2text==2025.4.15
@@ -31,7 +31,7 @@ Markdown==3.10.2
 openpyxl==3.1.5
 Pillow==12.2.0  # required by django-imagekit
 psycopg[c]==3.3.3
-cryptography==46.0.6
+cryptography==46.0.7
 python-dateutil==2.9.0.post0
 redis==7.4.0
 requests==2.33.1

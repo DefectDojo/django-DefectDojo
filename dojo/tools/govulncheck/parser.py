@@ -74,7 +74,23 @@ class GovulncheckParser:
     def get_findings(self, scan_file, test):
         findings = []
         try:
-            data = json.load(scan_file)
+            try:
+                data = json.load(scan_file)
+            except json.JSONDecodeError:
+                scan_file.seek(0)
+                data = []
+                buf = ""
+                for line in scan_file:
+                    if not line.strip():
+                        continue
+                    buf += line.decode("utf-8") if isinstance(line, bytes) else line
+                    try:
+                        data.append(json.loads(buf))
+                        buf = ""
+                    except json.JSONDecodeError:
+                        continue
+                if not data:
+                    raise ValueError
         except Exception:
             msg = "Invalid JSON format"
             raise ValueError(msg)
@@ -160,7 +176,7 @@ class GovulncheckParser:
                         range_info = "\n ".join(formatted_ranges)
 
                         vuln_functions = ", ".join(
-                            set(osv_data["affected"][0]["ecosystem_specific"]["imports"][0].get("symbols", [])),
+                            set(osv_data["affected"][0].get("ecosystem_specific", {}).get("imports", [{}])[0].get("symbols", [])),
                         )
 
                         description = (
@@ -172,7 +188,7 @@ class GovulncheckParser:
                             f"**Traces found :**\n{self.get_finding_trace_info(data, osv_data['id'])}"
                         )
 
-                        references = [f"{ref['type']}: {ref['url']}" for ref in osv_data["references"]]
+                        references = [f"{ref['type']}: {ref['url']}" for ref in osv_data.get("references", [])]
                         db_specific_url = osv_data["database_specific"].get("url", "Unknown")
                         if db_specific_url:
                             references.append(f"Database: {db_specific_url}")

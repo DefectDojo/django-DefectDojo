@@ -130,7 +130,6 @@ class CargoAuditParser:
                         title=title,
                         test=test,
                         severity=severity,
-                        tags=tags,
                         description=description,
                         component_name=package_name,
                         component_version=package_version,
@@ -140,6 +139,7 @@ class CargoAuditParser:
                         references=references,
                         mitigation=mitigation,
                     )
+                    finding.unsaved_tags = tags
                     finding.unsaved_vulnerability_ids = vulnerability_ids
                     if settings.V3_FEATURE_LOCATIONS and package_name:
                         finding.unsaved_locations.append(
