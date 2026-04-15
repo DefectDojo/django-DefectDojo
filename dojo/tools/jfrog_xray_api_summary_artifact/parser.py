@@ -43,9 +43,9 @@ class JFrogXrayApiSummaryArtifactParser:
                     service = decode_service(artifact_general["name"])
                     item = get_item(
                         node,
-                        str(service),
                         test,
                         artifact.name,
+                        str(service),
                         artifact.version,
                         artifact.sha256,
                     )
@@ -56,9 +56,9 @@ class JFrogXrayApiSummaryArtifactParser:
 # Retrieve the findings of the affected 1st level component (Artifact)
 def get_item(
     vulnerability,
-    service,
     test,
     artifact_name,
+    artifact_service,
     artifact_version,
     artifact_sha256,
 ):
@@ -114,7 +114,6 @@ def get_item(
 
     finding = Finding(
         vuln_id_from_tool=vuln_id_from_tool,
-        service=service,
         title=vulnerability["summary"],
         cwe=cwe,
         cvssv3=cvssv3,
@@ -126,7 +125,7 @@ def get_item(
         + vulnerability["description"],
         test=test,
         file_path=impact_paths[0],
-        component_name=artifact_name,
+        component_name=artifact_name or artifact_service,
         component_version=artifact_version,
         static_finding=True,
         dynamic_finding=False,
