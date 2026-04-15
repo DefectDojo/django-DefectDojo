@@ -201,7 +201,6 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                                 "verified": True,
                                 "sync": True,
                                 "scan_type": scan_type,
-                                "service": "Secured Application",
                                 "tags": ["performance-test-reimport", "reimport-tag-in-param", "reimport-go-faster"],
                                 "apply_tags_to_findings": True,
                             }
@@ -231,7 +230,6 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                                 "verified": True,
                                 "sync": True,
                                 "scan_type": scan_type,
-                                "service": "Secured Application",
                             }
                             reimporter = DefaultReImporter(**reimport_options)
                             test, _, _len_new_findings, _len_closed_findings, _, _, _ = reimporter.process_scan(scan)
@@ -259,9 +257,6 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
                                 "verified": True,
                                 "sync": True,
                                 "scan_type": scan_type,
-                                # StackHawk parser sets the service field causing close old findings to fail if we do not specify the service field
-                                # This is a big problem that needs fixing. Parsers should not set the service field.
-                                "service": "Secured Application",
                                 "close_old_findings": close_old_findings4,
                             }
                             reimporter = DefaultReImporter(**reimport_options)
