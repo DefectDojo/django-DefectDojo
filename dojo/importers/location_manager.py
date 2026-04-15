@@ -13,10 +13,9 @@ from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.tags_signals import inherit_instance_tags
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
+from dojo.utils import get_system_setting
 
 if TYPE_CHECKING:
-    from django.db.models import QuerySet
-
     from dojo.models import Dojo_User, Finding, Product
 
 logger = logging.getLogger(__name__)
@@ -33,8 +32,32 @@ class LocationManager:
         self._product = product
         self._locations_by_finding: dict[int, tuple[Finding, list[UnsavedLocation]]] = {}
         self._product_locations: list[UnsavedLocation] = []
-        self._refs_to_mitigate: list[tuple[QuerySet[LocationFindingReference], Dojo_User]] = []
-        self._refs_to_reactivate: list[QuerySet[LocationFindingReference]] = []
+        # Status update inputs (deferred). All entries are processed in a single bulk pass by persist().
+        # (existing_finding, new_finding, user): classified partial mitigate/reactivate
+        self._status_updates: list[tuple[Finding, Finding, Dojo_User]] = []
+        # finding_id: fully reactivate (all mitigated refs on this finding become active)
+        self._finding_ids_to_fully_reactivate: list[int] = []
+        # (finding_id, user): fully mitigate (all non-special refs on this finding become mitigated by user)
+        self._finding_ids_to_fully_mitigate: list[tuple[int, Dojo_User | None]] = []
+        # Cached result of _should_inherit_product_tags() — lazily computed and reused across persist() calls
+        self._cached_should_inherit_product_tags: bool | None = None
+
+    def _should_inherit_product_tags(self) -> bool:
+        """
+        Return True if new LocationFindingReference/LocationProductReference creations
+        should trigger inherit_instance_tags on the affected locations.
+
+        inherit_instance_tags() runs a complex JOIN query per location (via all_related_products()),
+        which is O(N) per bulk persist. We short-circuit when neither the product nor the system
+        setting has tag inheritance enabled — in that case, adding a new ref for self._product
+        cannot change any location's inherited tags.
+        """
+        if self._cached_should_inherit_product_tags is None:
+            self._cached_should_inherit_product_tags = bool(
+                getattr(self._product, "enable_product_tag_inheritance", False)
+                or get_system_setting("enable_product_tag_inheritance"),
+            )
+        return self._cached_should_inherit_product_tags
 
     # ------------------------------------------------------------------
     # Accumulation methods (no DB hits)
@@ -55,31 +78,8 @@ class LocationManager:
         new_finding: Finding,
         user: Dojo_User,
     ) -> None:
-        """Accumulate mitigate/reactivate operations for persist()."""
-        existing_location_refs: QuerySet[LocationFindingReference] = existing_finding.locations.exclude(
-            status__in=[
-                FindingLocationStatus.FalsePositive,
-                FindingLocationStatus.RiskAccepted,
-                FindingLocationStatus.OutOfScope,
-            ],
-        )
-        if new_finding.is_mitigated:
-            self._refs_to_mitigate.append((existing_location_refs, user))
-        else:
-            new_locations_values = [
-                str(location) for location in type(self).clean_unsaved_locations(new_finding.unsaved_locations)
-            ]
-            self._refs_to_reactivate.append(
-                existing_location_refs.filter(location__location_value__in=new_locations_values),
-            )
-            self._refs_to_mitigate.append((
-                existing_location_refs.exclude(location__location_value__in=new_locations_values),
-                user,
-            ))
-
-    def record_reactivations(self, location_refs: QuerySet[LocationFindingReference]) -> None:
-        """Record location refs to reactivate. Flushed by persist()."""
-        self._refs_to_reactivate.append(location_refs)
+        """Defer status update to persist(). No DB access at record time."""
+        self._status_updates.append((existing_finding, new_finding, user))
 
     # ------------------------------------------------------------------
     # Unified interface (shared with EndpointManager)
@@ -100,13 +100,12 @@ class LocationManager:
         self.update_location_status(existing_finding, new_finding, user)
 
     def record_reactivations_for_finding(self, finding: Finding) -> None:
-        """Record mitigated location refs on this finding for reactivation."""
-        mitigated = finding.locations.filter(status=FindingLocationStatus.Mitigated)
-        self._refs_to_reactivate.append(mitigated)
+        """Defer reactivation to persist(). No DB access at record time."""
+        self._finding_ids_to_fully_reactivate.append(finding.id)
 
     def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User | None = None) -> None:
-        """Record all location refs on this finding for mitigation."""
-        self._refs_to_mitigate.append((finding.locations.all(), user))
+        """Defer mitigation to persist(). No DB access at record time."""
+        self._finding_ids_to_fully_mitigate.append((finding.id, user))
 
     def get_items_for_tagging(self, findings: list[Finding]):
         """Return queryset of items to apply tags to."""
@@ -146,31 +145,36 @@ class LocationManager:
                 # Build all refs across all findings in one pass
                 all_finding_refs = []
                 all_product_refs = []
+                # Track locations that got new refs — only those need tag inheritance
+                # (mirrors original post_save signal behavior on LocationFindingReference/LocationProductReference)
+                locations_needing_inherit: dict[int, AbstractLocation] = {}
 
-                # Pre-fetch existing product refs for this product across all locations
+                # Pre-fetch existing product refs for this product across all locations (one query)
                 all_location_ids = [loc.location_id for loc in saved]
-                existing_product_refs = set(
+                existing_product_refs: set[int] = set(
                     LocationProductReference.objects.filter(
                         location_id__in=all_location_ids,
                         product=self._product,
                     ).values_list("location_id", flat=True),
                 )
 
+                # Pre-fetch existing finding refs across ALL findings in one query (avoids N+1)
+                all_finding_ids = [finding.id for finding, _, _ in finding_ranges]
+                existing_finding_ref_keys: set[tuple[int, int]] = set(
+                    LocationFindingReference.objects.filter(
+                        location_id__in=all_location_ids,
+                        finding_id__in=all_finding_ids,
+                    ).values_list("finding_id", "location_id"),
+                )
+
                 for finding, start, end in finding_ranges:
                     finding_locations = saved[start:end]
-                    finding_location_ids = [loc.location_id for loc in finding_locations]
-
-                    existing_finding_refs = set(
-                        LocationFindingReference.objects.filter(
-                            location_id__in=finding_location_ids,
-                            finding=finding,
-                        ).values_list("location_id", flat=True),
-                    )
 
                     for location in finding_locations:
                         assoc = location.get_association_data()
+                        finding_ref_key = (finding.id, location.location_id)
 
-                        if location.location_id not in existing_finding_refs:
+                        if finding_ref_key not in existing_finding_ref_keys:
                             all_finding_refs.append(LocationFindingReference(
                                 location_id=location.location_id,
                                 finding=finding,
@@ -178,7 +182,8 @@ class LocationManager:
                                 relationship=assoc.relationship_type,
                                 relationship_data=assoc.relationship_data,
                             ))
-                            existing_finding_refs.add(location.location_id)
+                            existing_finding_ref_keys.add(finding_ref_key)
+                            locations_needing_inherit[location.location_id] = location
 
                         if location.location_id not in existing_product_refs:
                             all_product_refs.append(LocationProductReference(
@@ -189,6 +194,7 @@ class LocationManager:
                                 relationship_data=assoc.relationship_data,
                             ))
                             existing_product_refs.add(location.location_id)
+                            locations_needing_inherit[location.location_id] = location
 
                 if all_finding_refs:
                     LocationFindingReference.objects.bulk_create(
@@ -199,11 +205,12 @@ class LocationManager:
                         all_product_refs, batch_size=1000, ignore_conflicts=True,
                     )
 
-                # bulk_create bypasses post_save signals, so manually trigger tag inheritance on each unique Location
-                seen_location_ids: set[int] = set()
-                for loc in saved:
-                    if loc.location_id not in seen_location_ids:
-                        seen_location_ids.add(loc.location_id)
+                # bulk_create bypasses post_save signals; trigger tag inheritance only on locations
+                # that got new refs (matches original signal-based behavior). Short-circuit if the
+                # product has no tag inheritance enabled — calling inherit_instance_tags per location
+                # is expensive (each fires a complex JOIN on Product via all_related_products()).
+                if self._should_inherit_product_tags():
+                    for loc in locations_needing_inherit.values():
                         inherit_instance_tags(loc.location)
 
             self._locations_by_finding.clear()
@@ -221,6 +228,8 @@ class LocationManager:
                     ).values_list("location_id", flat=True),
                 )
                 new_refs = []
+                # Track locations that got new refs — only those need tag inheritance
+                locations_needing_inherit: dict[int, AbstractLocation] = {}
                 for location in saved:
                     if location.location_id not in existing:
                         assoc = location.get_association_data()
@@ -232,33 +241,123 @@ class LocationManager:
                             relationship_data=assoc.relationship_data,
                         ))
                         existing.add(location.location_id)
+                        locations_needing_inherit[location.location_id] = location
                 if new_refs:
                     LocationProductReference.objects.bulk_create(
                         new_refs, batch_size=1000, ignore_conflicts=True,
                     )
 
-                # bulk_create bypasses post_save signals; manually trigger tag inheritance
-                for loc in saved:
-                    inherit_instance_tags(loc.location)
+                # bulk_create bypasses post_save signals; trigger tag inheritance only on
+                # locations that got new product refs (short-circuited if the product has no
+                # tag inheritance enabled — see _should_inherit_product_tags())
+                if self._should_inherit_product_tags():
+                    for loc in locations_needing_inherit.values():
+                        inherit_instance_tags(loc.location)
             self._product_locations.clear()
 
-        # Step 2: Mitigate accumulated refs
-        for refs, mitigate_user in self._refs_to_mitigate:
-            refs.exclude(status=FindingLocationStatus.Mitigated).update(
-                auditor=mitigate_user,
-                audit_time=timezone.now(),
-                status=FindingLocationStatus.Mitigated,
-            )
-        self._refs_to_mitigate.clear()
+        # Steps 2 & 3: Bulk status updates — classify refs, then execute in minimal queries
+        self._flush_status_updates()
 
-        # Step 3: Reactivate accumulated refs
-        for refs in self._refs_to_reactivate:
-            refs.filter(status=FindingLocationStatus.Mitigated).update(
+    def _flush_status_updates(self) -> None:
+        """
+        Resolve all accumulated status-update inputs and execute them as bulk UPDATEs.
+
+        Produces ~3-4 queries total regardless of the number of findings processed:
+        1 SELECT to fetch relevant location refs for partial-status updates,
+        1 UPDATE for reactivations,
+        1 UPDATE per unique mitigation user (typically 1).
+        """
+        # Short-circuit if nothing to do
+        if not (self._status_updates or self._finding_ids_to_fully_reactivate or self._finding_ids_to_fully_mitigate):
+            return
+
+        special_statuses = [
+            FindingLocationStatus.FalsePositive,
+            FindingLocationStatus.RiskAccepted,
+            FindingLocationStatus.OutOfScope,
+        ]
+
+        # Collect ref IDs to reactivate / mitigate across all accumulated inputs
+        ref_ids_to_reactivate: set[int] = set()
+        # Grouped by user since auditor differs per entry
+        ref_ids_to_mitigate_by_user: dict[Dojo_User | None, set[int]] = {}
+
+        # Partial status updates (from update_location_status): need per-finding classification
+        if self._status_updates:
+            finding_ids_for_partial = {upd[0].id for upd in self._status_updates}
+            # Single fetch of all candidate refs with their location values
+            refs_by_finding: dict[int, list[LocationFindingReference]] = {}
+            for ref in (
+                LocationFindingReference.objects
+                .filter(finding_id__in=finding_ids_for_partial)
+                .exclude(status__in=special_statuses)
+                .select_related("location")
+            ):
+                refs_by_finding.setdefault(ref.finding_id, []).append(ref)
+
+            for existing_finding, new_finding, user in self._status_updates:
+                finding_refs = refs_by_finding.get(existing_finding.id, [])
+                if new_finding.is_mitigated:
+                    # All non-special refs on this finding get mitigated
+                    ref_ids_to_mitigate_by_user.setdefault(user, set()).update(r.id for r in finding_refs)
+                else:
+                    new_loc_values = {
+                        str(loc) for loc in type(self).clean_unsaved_locations(new_finding.unsaved_locations)
+                    }
+                    for ref in finding_refs:
+                        if ref.location.location_value in new_loc_values:
+                            ref_ids_to_reactivate.add(ref.id)
+                        else:
+                            ref_ids_to_mitigate_by_user.setdefault(user, set()).add(ref.id)
+
+        # Full reactivations (from record_reactivations_for_finding): all mitigated refs for these findings
+        if self._finding_ids_to_fully_reactivate:
+            ref_ids_to_reactivate.update(
+                LocationFindingReference.objects.filter(
+                    finding_id__in=self._finding_ids_to_fully_reactivate,
+                    status=FindingLocationStatus.Mitigated,
+                ).values_list("id", flat=True),
+            )
+
+        # Full mitigations (from record_mitigations_for_finding): all non-special refs for these findings, per user
+        if self._finding_ids_to_fully_mitigate:
+            # Group finding_ids by user to do one SELECT per user
+            ids_by_user: dict[Dojo_User | None, list[int]] = {}
+            for finding_id, user in self._finding_ids_to_fully_mitigate:
+                ids_by_user.setdefault(user, []).append(finding_id)
+            for user, finding_ids in ids_by_user.items():
+                ref_ids_to_mitigate_by_user.setdefault(user, set()).update(
+                    LocationFindingReference.objects.filter(
+                        finding_id__in=finding_ids,
+                    ).exclude(status__in=special_statuses).values_list("id", flat=True),
+                )
+
+        # Execute bulk updates
+        now = timezone.now()
+        if ref_ids_to_reactivate:
+            LocationFindingReference.objects.filter(
+                id__in=ref_ids_to_reactivate,
+                status=FindingLocationStatus.Mitigated,
+            ).update(
                 auditor=None,
-                audit_time=timezone.now(),
+                audit_time=now,
                 status=FindingLocationStatus.Active,
             )
-        self._refs_to_reactivate.clear()
+
+        for user, ref_ids in ref_ids_to_mitigate_by_user.items():
+            if ref_ids:
+                LocationFindingReference.objects.filter(
+                    id__in=ref_ids,
+                ).exclude(status=FindingLocationStatus.Mitigated).update(
+                    auditor=user,
+                    audit_time=now,
+                    status=FindingLocationStatus.Mitigated,
+                )
+
+        # Clear accumulators
+        self._status_updates.clear()
+        self._finding_ids_to_fully_reactivate.clear()
+        self._finding_ids_to_fully_mitigate.clear()
 
     # ------------------------------------------------------------------
     # Type registry

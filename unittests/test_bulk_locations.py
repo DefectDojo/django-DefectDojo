@@ -17,6 +17,7 @@ from django.utils import timezone
 
 from dojo.importers.location_manager import LocationManager
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tools.locations import LocationAssociationData, LocationData
 from dojo.url.models import URL
@@ -311,3 +312,70 @@ class TestTagInheritanceOnPersist(DojoTestCase):
         loc = Location.objects.get(url__host="oss-tag-inherit.example.com")
         inherited = sorted(t.name for t in loc.inherited_tags.all())
         self.assertEqual(inherited, ["inherit", "tags", "these"])
+
+
+# ---------------------------------------------------------------------------
+# Status update query efficiency
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestStatusUpdateQueryEfficiency(DojoTestCase):
+
+    """
+    Verify that persist() flushes status updates with a bounded number of queries,
+    regardless of how many findings were recorded (not O(n)).
+    """
+
+    def _setup_findings_with_mitigated_refs(self, count: int):
+        """Create `count` findings in a single product, each with a mitigated LocationFindingReference."""
+        # Single product for all findings
+        first_finding = _make_finding()
+        product = first_finding.test.engagement.product
+        test = first_finding.test
+        reporter = first_finding.reporter
+
+        findings = [first_finding]
+        findings.extend(
+            Finding.objects.create(
+                test=test, title=f"Status Test Finding {i}", severity="Medium", reporter=reporter,
+            )
+            for i in range(count - 1)
+        )
+
+        # Create one mitigated LocationFindingReference per finding
+        for i, finding in enumerate(findings):
+            saved = URL.bulk_get_or_create([_make_url(f"oss-status-{i}.example.com")])
+            LocationFindingReference.objects.create(
+                location=saved[0].location,
+                finding=finding,
+                status=FindingLocationStatus.Mitigated,
+            )
+        return findings, product
+
+    def test_reactivate_for_many_findings_is_bulk(self):
+        findings, product = self._setup_findings_with_mitigated_refs(count=20)
+        mgr = LocationManager(product)
+        for finding in findings:
+            mgr.record_reactivations_for_finding(finding)
+
+        with CaptureQueriesContext(connection) as ctx:
+            mgr.persist()
+
+        # Expected: 1 SELECT (gather ref IDs) + 1 UPDATE (reactivate). Allow tiny overhead.
+        self.assertLess(len(ctx.captured_queries), 5, ctx.captured_queries)
+
+    def test_update_location_status_for_many_findings_is_bulk(self):
+        findings, product = self._setup_findings_with_mitigated_refs(count=20)
+        reporter = findings[0].reporter
+        mgr = LocationManager(product)
+
+        # Simulate reimport "matched finding" flow: new finding with no unsaved locations => mitigate all
+        for finding in findings:
+            new_finding = Finding(title=finding.title, severity=finding.severity, test=finding.test, is_mitigated=True)
+            new_finding.unsaved_locations = []
+            mgr.update_location_status(finding, new_finding, reporter)
+
+        with CaptureQueriesContext(connection) as ctx:
+            mgr.persist()
+
+        # Expected: 1 SELECT (partial-status fetch) + 1 UPDATE (mitigate for the single user).
+        self.assertLess(len(ctx.captured_queries), 5, ctx.captured_queries)
