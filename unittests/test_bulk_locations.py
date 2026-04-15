@@ -313,6 +313,73 @@ class TestTagInheritanceOnPersist(DojoTestCase):
         inherited = sorted(t.name for t in loc.inherited_tags.all())
         self.assertEqual(inherited, ["inherit", "tags", "these"])
 
+    def test_bulk_inherit_is_no_op_when_already_in_sync(self):
+        """Calling persist() again with the same data should not re-inherit (no mutation queries)."""
+        finding = _make_finding()
+        product = finding.test.engagement.product
+        product.enable_product_tag_inheritance = True
+        product.save()
+        product.tags.add("a", "b")
+
+        loc_data = [LocationData(type="url", data={"url": "https://oss-nosync.example.com"})]
+        # First import — mutations expected
+        mgr1 = LocationManager(product)
+        mgr1.record_locations_for_finding(finding, loc_data)
+        mgr1.persist()
+
+        # Second import — tags already inherited, should be a fast no-op
+        mgr2 = LocationManager(product)
+        mgr2.record_locations_for_finding(finding, loc_data)
+        with CaptureQueriesContext(connection) as ctx:
+            mgr2.persist()
+
+        # Verify no INSERT or UPDATE queries fired in the inheritance path
+        mutation_queries = [q for q in ctx.captured_queries if q["sql"].startswith(("INSERT", "UPDATE"))]
+        # There may still be refs check INSERTs if we're creating the LocationFindingReference again,
+        # but inherited_tags mutation should be absent.
+        for q in mutation_queries:
+            self.assertNotIn("inherited_tags", q["sql"].lower(), f"Unexpected inherited_tags mutation: {q['sql']}")
+
+    def test_bulk_inherit_already_synced_is_constant_time(self):
+        """
+        The main win from the bulk variant is skipping the per-instance mutation path when
+        locations are already in sync with their product's tags. This test verifies that
+        repeated persist() calls don't re-do the expensive tagulous work.
+        """
+        finding = _make_finding()
+        product = finding.test.engagement.product
+        product.enable_product_tag_inheritance = True
+        product.save()
+        product.tags.add("p-tag-1", "p-tag-2")
+
+        loc_data = [
+            LocationData(type="url", data={"url": f"https://oss-sync-{i}.example.com"})
+            for i in range(10)
+        ]
+        # First import to populate inherited_tags
+        mgr1 = LocationManager(product)
+        mgr1.record_locations_for_finding(finding, loc_data)
+        mgr1.persist()
+
+        # Second import — same data, already in sync; should do zero mutation queries
+        mgr2 = LocationManager(product)
+        mgr2.record_locations_for_finding(finding, loc_data)
+        with CaptureQueriesContext(connection) as ctx:
+            mgr2.persist()
+
+        # No UPDATEs or INSERTs on inherited_tags / tags through tables should fire
+        tag_through = Location.tags.through._meta.db_table
+        inherited_through = Location.inherited_tags.through._meta.db_table
+        for q in ctx.captured_queries:
+            sql = q["sql"].lower()
+            if sql.startswith(("insert", "update", "delete")):
+                self.assertNotIn(
+                    tag_through.lower(), sql, f"Unexpected tags mutation: {q['sql']}",
+                )
+                self.assertNotIn(
+                    inherited_through.lower(), sql, f"Unexpected inherited_tags mutation: {q['sql']}",
+                )
+
 
 # ---------------------------------------------------------------------------
 # Status update query efficiency

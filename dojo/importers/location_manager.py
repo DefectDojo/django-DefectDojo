@@ -10,7 +10,7 @@ from django.utils import timezone
 
 from dojo.location.models import AbstractLocation, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.tags_signals import inherit_instance_tags
+from dojo.tags_signals import bulk_inherit_location_tags
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 from dojo.utils import get_system_setting
@@ -207,11 +207,13 @@ class LocationManager:
 
                 # bulk_create bypasses post_save signals; trigger tag inheritance only on locations
                 # that got new refs (matches original signal-based behavior). Short-circuit if the
-                # product has no tag inheritance enabled — calling inherit_instance_tags per location
-                # is expensive (each fires a complex JOIN on Product via all_related_products()).
-                if self._should_inherit_product_tags():
-                    for loc in locations_needing_inherit.values():
-                        inherit_instance_tags(loc.location)
+                # product has no tag inheritance enabled, and use the bulk variant otherwise to
+                # avoid O(N) expensive JOINs via Location.all_related_products().
+                if self._should_inherit_product_tags() and locations_needing_inherit:
+                    bulk_inherit_location_tags(
+                        (loc.location for loc in locations_needing_inherit.values()),
+                        known_product=self._product,
+                    )
 
             self._locations_by_finding.clear()
 
@@ -249,10 +251,12 @@ class LocationManager:
 
                 # bulk_create bypasses post_save signals; trigger tag inheritance only on
                 # locations that got new product refs (short-circuited if the product has no
-                # tag inheritance enabled — see _should_inherit_product_tags())
-                if self._should_inherit_product_tags():
-                    for loc in locations_needing_inherit.values():
-                        inherit_instance_tags(loc.location)
+                # tag inheritance enabled — see _should_inherit_product_tags()).
+                if self._should_inherit_product_tags() and locations_needing_inherit:
+                    bulk_inherit_location_tags(
+                        (loc.location for loc in locations_needing_inherit.values()),
+                        known_product=self._product,
+                    )
             self._product_locations.clear()
 
         # Steps 2 & 3: Bulk status updates — classify refs, then execute in minimal queries
