@@ -26,6 +26,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.tag_utils import bulk_apply_parser_tags
 from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 
@@ -310,6 +311,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             cleaned_findings.append(sanitized)
 
         batch_finding_ids: list[int] = []
+        findings_with_parser_tags: list[tuple] = []
         # Batch size for deduplication/post-processing (only new findings)
         dedupe_batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
         # Batch size for candidate matching (all findings, before matching)
@@ -417,6 +419,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         finding,
                         unsaved_finding,
                         is_matched_finding=bool(matched_findings),
+                        tag_accumulator=findings_with_parser_tags,
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
@@ -440,6 +443,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
                         if not settings.V3_FEATURE_LOCATIONS:
                             self.endpoint_manager.persist(user=self.user)
+
+                        # Apply parser-supplied tags for this batch before post-processing starts,
+                        # so rules/deduplication tasks see the tags already on the findings.
+                        bulk_apply_parser_tags(findings_with_parser_tags)
+                        findings_with_parser_tags.clear()
+
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
                         dojo_dispatch_task(
@@ -976,6 +985,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding_from_report: Finding,
         *,
         is_matched_finding: bool = False,
+        tag_accumulator: list | None = None,
     ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
@@ -1006,10 +1016,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 finding_from_report.unsaved_tags = merged_tags
             if finding_from_report.unsaved_tags:
                 cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
-                if isinstance(cleaned_tags, list):
-                    finding.tags.add(*cleaned_tags)
-                elif isinstance(cleaned_tags, str):
-                    finding.tags.add(cleaned_tags)
+                if tag_accumulator is not None:
+                    if isinstance(cleaned_tags, list):
+                        tag_accumulator.append((finding, cleaned_tags))
+                    elif isinstance(cleaned_tags, str):
+                        tag_accumulator.append((finding, [cleaned_tags]))
+                else:
+                    if isinstance(cleaned_tags, list):
+                        finding.tags.add(*cleaned_tags)
+                    elif isinstance(cleaned_tags, str):
+                        finding.tags.add(cleaned_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files

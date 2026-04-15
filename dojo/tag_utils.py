@@ -164,6 +164,27 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
     return total_created
 
 
+def bulk_apply_parser_tags(findings_with_tags: list) -> None:
+    """Bulk-apply per-finding parser tags collected during an import loop.
+
+    Reduces O(N·T) per-finding ``finding.tags.add()`` calls to O(unique_tags) queries
+    by grouping findings by tag name and calling ``bulk_add_tags_to_instances`` once per tag.
+
+    Args:
+        findings_with_tags: list of ``(finding, [tag_str, ...])`` pairs accumulated
+            during the import loop (only for findings whose parser supplied tags).
+    """
+    from collections import defaultdict  # noqa: PLC0415
+
+    tag_to_findings: dict = defaultdict(list)
+    for finding, tag_list in findings_with_tags:
+        for tag in tag_list:
+            if tag:
+                tag_to_findings[tag].append(finding)
+    for tag_name, findings_for_tag in tag_to_findings.items():
+        bulk_add_tags_to_instances(tag_or_tags=tag_name, instances=findings_for_tag)
+
+
 def bulk_remove_all_tags(model_class, instance_ids_qs):
     """
     Remove all tags from instances identified by the given ID subquery.
@@ -226,4 +247,4 @@ def bulk_remove_all_tags(model_class, instance_ids_qs):
             )
 
 
-__all__ = ["bulk_add_tags_to_instances", "bulk_remove_all_tags"]
+__all__ = ["bulk_add_tags_to_instances", "bulk_apply_parser_tags", "bulk_remove_all_tags"]

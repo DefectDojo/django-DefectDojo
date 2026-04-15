@@ -20,6 +20,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import create_notification
 from dojo.utils import get_full_url, perform_product_grading
+from dojo.tag_utils import bulk_apply_parser_tags
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)
@@ -179,6 +180,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         at import time
         """
         new_findings = []
+        findings_with_parser_tags: list[tuple] = []
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
@@ -245,12 +247,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 # TODO: Delete this after the move to Locations
                 # Process any endpoints on the finding, or added on the form
                 self.process_endpoints(finding, self.endpoints_to_add)
-            # Parsers must use unsaved_tags to store tags, so we can clean them
+            # Parsers must use unsaved_tags to store tags, so we can clean them.
+            # Accumulate for bulk application after the loop (O(unique_tags) instead of O(N·T)).
             cleaned_tags = clean_tags(finding.unsaved_tags)
             if isinstance(cleaned_tags, list):
-                finding.tags.add(*cleaned_tags)
+                findings_with_parser_tags.append((finding, cleaned_tags))
             elif isinstance(cleaned_tags, str):
-                finding.tags.add(cleaned_tags)
+                findings_with_parser_tags.append((finding, [cleaned_tags]))
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
@@ -268,6 +271,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
                 if not settings.V3_FEATURE_LOCATIONS:
                     self.endpoint_manager.persist(user=self.user)
+
+                # Apply parser-supplied tags for this batch before post-processing starts,
+                # so rules/deduplication tasks see the tags already on the findings.
+                bulk_apply_parser_tags(findings_with_parser_tags)
+                findings_with_parser_tags.clear()
+
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
