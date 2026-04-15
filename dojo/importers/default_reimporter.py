@@ -1021,11 +1021,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         tag_accumulator.append((finding, cleaned_tags))
                     elif isinstance(cleaned_tags, str):
                         tag_accumulator.append((finding, [cleaned_tags]))
-                else:
-                    if isinstance(cleaned_tags, list):
-                        finding.tags.add(*cleaned_tags)
-                    elif isinstance(cleaned_tags, str):
-                        finding.tags.add(cleaned_tags)
+                elif isinstance(cleaned_tags, list):
+                    finding.tags.add(*cleaned_tags)
+                elif isinstance(cleaned_tags, str):
+                    finding.tags.add(cleaned_tags)
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files

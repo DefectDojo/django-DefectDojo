@@ -19,8 +19,8 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
-from dojo.utils import get_full_url, perform_product_grading
 from dojo.tag_utils import bulk_apply_parser_tags
+from dojo.utils import get_full_url, perform_product_grading
 from dojo.validators import clean_tags
 
 logger = logging.getLogger(__name__)

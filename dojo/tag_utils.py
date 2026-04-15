@@ -165,7 +165,8 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
 
 
 def bulk_apply_parser_tags(findings_with_tags: list) -> None:
-    """Bulk-apply per-finding parser tags collected during an import loop.
+    """
+    Bulk-apply per-finding parser tags collected during an import loop.
 
     Reduces O(N·T) per-finding ``finding.tags.add()`` calls to O(unique_tags) queries
     by grouping findings by tag name and calling ``bulk_add_tags_to_instances`` once per tag.
@@ -173,6 +174,7 @@ def bulk_apply_parser_tags(findings_with_tags: list) -> None:
     Args:
         findings_with_tags: list of ``(finding, [tag_str, ...])`` pairs accumulated
             during the import loop (only for findings whose parser supplied tags).
+
     """
     from collections import defaultdict  # noqa: PLC0415
 
