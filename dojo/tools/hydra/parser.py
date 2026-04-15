@@ -74,6 +74,7 @@ class HydraParser:
         ):
             msg = "Vital information is missing for this finding! Skipping this finding!"
             raise ValueError(msg)
+
         finding = Finding(
             test=test,
             title="Weak username / password combination found for " + host,

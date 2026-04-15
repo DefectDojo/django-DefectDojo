@@ -17,9 +17,6 @@ class TrivyChecksHandler:
         resource_kind = labels.get("trivy-operator.resource.kind", "")
         resource_name = labels.get("trivy-operator.resource.name", "")
         container_name = labels.get("trivy-operator.container.name", "")
-        service = f"{resource_namespace}/{resource_kind}/{resource_name}"
-        if container_name:
-            service = f"{service}/{container_name}"
         for check in checks:
             check_title = check.get("title")
             check_severity = TRIVY_SEVERITIES[check.get("severity")]
@@ -55,7 +52,6 @@ class TrivyChecksHandler:
                 description=check_description,
                 static_finding=True,
                 dynamic_finding=False,
-                service=service,
                 fix_available=True,
             )
             finding_tags = [resource_namespace, check_category]
