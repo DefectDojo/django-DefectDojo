@@ -198,6 +198,14 @@ class LocationManager:
                         all_product_refs, batch_size=1000, ignore_conflicts=True,
                     )
 
+                # bulk_create bypasses post_save signals, so manually trigger tag inheritance on each unique Location
+                from dojo.tags_signals import inherit_instance_tags  # noqa: PLC0415
+                seen_location_ids: set[int] = set()
+                for loc in saved:
+                    if loc.location_id not in seen_location_ids:
+                        seen_location_ids.add(loc.location_id)
+                        inherit_instance_tags(loc.location)
+
             self._locations_by_finding.clear()
 
         # Step 1b: Product-level locations (not tied to a finding)
@@ -228,6 +236,11 @@ class LocationManager:
                     LocationProductReference.objects.bulk_create(
                         new_refs, batch_size=1000, ignore_conflicts=True,
                     )
+
+                # bulk_create bypasses post_save signals; manually trigger tag inheritance
+                from dojo.tags_signals import inherit_instance_tags  # noqa: PLC0415
+                for loc in saved:
+                    inherit_instance_tags(loc.location)
             self._product_locations.clear()
 
         # Step 2: Mitigate accumulated refs

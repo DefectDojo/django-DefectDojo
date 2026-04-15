@@ -286,3 +286,28 @@ class TestBulkQueryEfficiency(DojoTestCase):
 
         # Expected: ~3 queries (SELECT existing, INSERT parents, INSERT subtypes)
         self.assertLess(len(ctx.captured_queries), 10)
+
+
+# ---------------------------------------------------------------------------
+# Tag inheritance after bulk persist
+# ---------------------------------------------------------------------------
+@skip_unless_v3
+class TestTagInheritanceOnPersist(DojoTestCase):
+
+    def test_locations_inherit_product_tags(self):
+        """Locations should inherit tags from their associated product after persist."""
+        finding = _make_finding()
+        product = finding.test.engagement.product
+        # Enable tag inheritance at the product level and add some product tags
+        product.enable_product_tag_inheritance = True
+        product.save()
+        product.tags.add("inherit", "tags", "these")
+
+        loc_data = [LocationData(type="url", data={"url": "https://oss-tag-inherit.example.com"})]
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(finding, loc_data)
+        mgr.persist()
+
+        loc = Location.objects.get(url__host="oss-tag-inherit.example.com")
+        inherited = sorted(t.name for t in loc.inherited_tags.all())
+        self.assertEqual(inherited, ["inherit", "tags", "these"])
