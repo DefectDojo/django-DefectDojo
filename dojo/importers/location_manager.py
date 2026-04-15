@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from dojo.location.models import AbstractLocation, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
+from dojo.tags_signals import inherit_instance_tags
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 
@@ -199,7 +200,6 @@ class LocationManager:
                     )
 
                 # bulk_create bypasses post_save signals, so manually trigger tag inheritance on each unique Location
-                from dojo.tags_signals import inherit_instance_tags  # noqa: PLC0415
                 seen_location_ids: set[int] = set()
                 for loc in saved:
                     if loc.location_id not in seen_location_ids:
@@ -238,7 +238,6 @@ class LocationManager:
                     )
 
                 # bulk_create bypasses post_save signals; manually trigger tag inheritance
-                from dojo.tags_signals import inherit_instance_tags  # noqa: PLC0415
                 for loc in saved:
                     inherit_instance_tags(loc.location)
             self._product_locations.clear()
