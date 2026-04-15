@@ -69,7 +69,7 @@ jobs:
         # we cannot set any tags here, those are set on the merged digest in release-x-manual-merge-container-digests.yml
       - name: Build and push images
         id: build
-        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7.0.0
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f # v7.1.0
         env:
           DOCKER_BUILD_CHECKS_ANNOTATIONS: false
         with:
