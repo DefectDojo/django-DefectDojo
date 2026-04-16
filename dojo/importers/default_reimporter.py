@@ -81,7 +81,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             import_type=Test_Import.REIMPORT_TYPE,
             **kwargs,
         )
-        self.location_manager = LocationHandler(self.test.engagement.product)
+        self.location_handler = LocationHandler(self.test.engagement.product)
 
     def process_scan(
         self,
@@ -336,7 +336,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 # Set the service supplied at import time
                 if self.service is not None:
                     unsaved_finding.service = self.service
-                self.location_manager.clean_unsaved(unsaved_finding)
+                self.location_handler.clean_unsaved(unsaved_finding)
                 # Calculate the hash code to be used to identify duplicates
                 unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
                 deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
@@ -376,7 +376,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             "Re-import found an existing dynamic finding for this new "
                             "finding. Checking the status of locations/endpoints",
                         )
-                        self.location_manager.update_status(
+                        self.location_handler.update_status(
                             existing_finding,
                             unsaved_finding,
                             self.user,
@@ -421,7 +421,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
-                        self.location_manager.persist(user=self.user)
+                        self.location_handler.persist(user=self.user)
                         # Apply parser-supplied tags for this batch before post-processing starts,
                         # so rules/deduplication tasks see the tags already on the findings.
                         bulk_apply_parser_tags(findings_with_parser_tags)
@@ -533,7 +533,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 mitigated_findings.append(finding)
         # Persist any accumulated location/endpoint status changes
-        self.location_manager.persist(user=self.user)
+        self.location_handler.persist(user=self.user)
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
@@ -794,7 +794,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
-        self.location_manager.record_reactivations_for_finding(existing_finding)
+        self.location_handler.record_reactivations_for_finding(existing_finding)
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
@@ -961,7 +961,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Copy unsaved items from the parser output onto the saved finding so record_for_finding can read them
         finding.unsaved_locations = getattr(finding_from_report, "unsaved_locations", [])
         finding.unsaved_endpoints = getattr(finding_from_report, "unsaved_endpoints", [])
-        self.location_manager.record_for_finding(finding, self.endpoints_to_add or None)
+        self.location_handler.record_for_finding(finding, self.endpoints_to_add or None)
         # For matched/existing findings, do not update tags from the report,
         # consistent with how other fields are handled on reimport.
         if not is_matched_finding:

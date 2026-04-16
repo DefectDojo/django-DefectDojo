@@ -389,7 +389,7 @@ class BaseImporter(ImporterOptions):
 
         # Add any tags to any locations/endpoints of the findings imported if necessary
         if self.apply_tags_to_endpoints and self.tags:
-            locations_qs = self.location_manager.get_locations_for_tagging(findings_to_tag)
+            locations_qs = self.location_handler.get_locations_for_tagging(findings_to_tag)
             try:
                 bulk_add_tags_to_instances(
                     tag_or_tags=self.tags,
@@ -398,7 +398,7 @@ class BaseImporter(ImporterOptions):
                 )
             except IntegrityError:
                 for finding in findings_to_tag:
-                    for location in self.location_manager.get_location_tag_fallback(finding):
+                    for location in self.location_handler.get_location_tag_fallback(finding):
                         for tag in self.tags:
                             self.add_tags_safe(location, tag)
 
@@ -448,7 +448,7 @@ class BaseImporter(ImporterOptions):
         import_settings["group_by"] = self.group_by
         import_settings["create_finding_groups_for_all_findings"] = self.create_finding_groups_for_all_findings
         if len(self.endpoints_to_add) > 0:
-            import_settings.update(self.location_manager.serialize_extra_locations(self.endpoints_to_add))
+            import_settings.update(self.location_handler.serialize_extra_locations(self.endpoints_to_add))
         # Create the test import object
         test_import = Test_Import.objects.create(
             test=self.test,
@@ -774,9 +774,9 @@ class BaseImporter(ImporterOptions):
     ) -> None:
         """
         Record locations/endpoints from the finding + any form-added extras.
-        Flushed to DB by location_manager.persist().
+        Flushed to DB by location_handler.persist().
         """
-        self.location_manager.record_for_finding(finding, extra_locations_to_add)
+        self.location_handler.record_for_finding(finding, extra_locations_to_add)
 
     def sanitize_vulnerability_ids(self, finding) -> None:
         """Remove undisired vulnerability id values"""
@@ -869,7 +869,7 @@ class BaseImporter(ImporterOptions):
         # Remove risk acceptance if present (vulnerability is now fixed)
         # risk_unaccept will check if finding.risk_accepted is True before proceeding
         ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
-        self.location_manager.record_mitigations_for_finding(finding, self.user)
+        self.location_handler.record_mitigations_for_finding(finding, self.user)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing
