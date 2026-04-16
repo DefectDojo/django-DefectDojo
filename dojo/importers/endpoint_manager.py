@@ -312,6 +312,7 @@ class EndpointManager(BaseLocationManager):
 
     def record_for_finding(self, finding: Finding, extra_locations: list[Endpoint] | None = None) -> None:
         """Record endpoints from the finding + any form-added extras for later batch creation."""
+        self.clean_unsaved_endpoints(finding.unsaved_endpoints)
         for endpoint in finding.unsaved_endpoints:
             key = self.record_endpoint(endpoint)
             self.record_status_for_create(finding, key)
