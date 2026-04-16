@@ -286,6 +286,12 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get("status")
+            if form.cleaned_data.get("product") != engagement.product:
+                user_has_permission_or_403(
+                    request.user,
+                    form.cleaned_data.get("product"),
+                    Permissions.Engagement_Edit,
+                )
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
             if (new_status in {"Cancelled", "Completed"}):

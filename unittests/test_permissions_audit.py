@@ -1686,3 +1686,162 @@ class TestRelatedObjectPermissions(DojoTestCase):
 
         # Clean up uploaded file
         self.risk_acceptance.path.delete(save=True)
+
+
+class TestEngagementMovePermission(DojoTestCase):
+
+    """Moving an engagement to another product requires Engagement_Edit on the destination."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.owner_role = Role.objects.get(name="Owner")
+        cls.product_type = Product_Type.objects.create(name="Eng Move Test PT")
+
+        cls.product_a = Product.objects.create(
+            name="Eng Move Product A", description="Test", prod_type=cls.product_type,
+        )
+        cls.product_b = Product.objects.create(
+            name="Eng Move Product B", description="Test", prod_type=cls.product_type,
+        )
+        cls.product_c = Product.objects.create(
+            name="Eng Move Product C", description="Test", prod_type=cls.product_type,
+        )
+
+        cls.user = Dojo_User.objects.create_user(
+            username="eng_move_owner",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+        Product_Member.objects.create(product=cls.product_a, user=cls.user, role=cls.owner_role)
+        # No membership on product_b -- user cannot move engagements there
+        Product_Member.objects.create(product=cls.product_c, user=cls.user, role=cls.owner_role)
+
+    def setUp(self):
+        self.engagement = Engagement.objects.create(
+            name="Move Test Engagement",
+            product=self.product_a,
+            target_start=datetime.date.today(),
+            target_end=datetime.date.today(),
+        )
+
+    def _api_client(self):
+        token, _ = Token.objects.get_or_create(user=self.user)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        return client
+
+    def _ui_client(self):
+        client = Client()
+        client.login(username="eng_move_owner", password="testTEST1234!@#$")  # noqa: S106
+        return client
+
+    # ── API: PATCH ────────────────────────────────────────────────────
+
+    def test_api_patch_move_to_authorized_product(self):
+        """PATCH with product the user has access to should succeed."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"product": self.product_c.id}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_c)
+
+    def test_api_patch_move_to_unauthorized_product(self):
+        """PATCH with product the user lacks access to should be denied."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"product": self.product_b.id}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_a)
+
+    def test_api_patch_same_product(self):
+        """PATCH with the same product should succeed without extra permission check."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"product": self.product_a.id}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_api_patch_without_product_field(self):
+        """PATCH without product field should succeed (no spurious check)."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"version": "1.0"}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    # ── API: PUT ──────────────────────────────────────────────────────
+
+    def test_api_put_move_to_authorized_product(self):
+        """PUT with product the user has access to should succeed."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        payload = {
+            "name": "Move Test Engagement",
+            "product": self.product_c.id,
+            "target_start": str(datetime.date.today()),
+            "target_end": str(datetime.date.today()),
+            "engagement_type": "Interactive",
+            "status": "Not Started",
+        }
+        response = client.put(url, payload, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_c)
+
+    def test_api_put_move_to_unauthorized_product(self):
+        """PUT with product the user lacks access to should be denied."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        payload = {
+            "name": "Move Test Engagement",
+            "product": self.product_b.id,
+            "target_start": str(datetime.date.today()),
+            "target_end": str(datetime.date.today()),
+            "engagement_type": "Interactive",
+            "status": "Not Started",
+        }
+        response = client.put(url, payload, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_a)
+
+    # ── UI ────────────────────────────────────────────────────────────
+
+    def test_ui_move_to_authorized_product(self):
+        """Edit engagement form moving to authorized product should succeed."""
+        client = self._ui_client()
+        url = reverse("edit_engagement", args=(self.engagement.id,))
+        form_data = {
+            "product": self.product_c.id,
+            "target_start": datetime.date.today().strftime("%Y-%m-%d"),
+            "target_end": datetime.date.today().strftime("%Y-%m-%d"),
+            "lead": self.user.id,
+            "status": "Not Started",
+        }
+        response = client.post(url, form_data)
+        self.assertIn(response.status_code, [200, 302], response.content[:500])
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_c)
+
+    def test_ui_move_to_unauthorized_product(self):
+        """
+        Edit engagement form moving to unauthorized product should be denied.
+
+        The form's product queryset is filtered to authorized products, so
+        submitting an unauthorized product fails form validation (200 with
+        errors) before the view-level permission check runs.  Either way the
+        engagement must NOT move.
+        """
+        client = self._ui_client()
+        url = reverse("edit_engagement", args=(self.engagement.id,))
+        form_data = {
+            "product": self.product_b.id,
+            "target_start": datetime.date.today().strftime("%Y-%m-%d"),
+            "target_end": datetime.date.today().strftime("%Y-%m-%d"),
+            "lead": self.user.id,
+            "status": "Not Started",
+        }
+        response = client.post(url, form_data)
+        self.assertIn(response.status_code, [200, 403])
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_a)
