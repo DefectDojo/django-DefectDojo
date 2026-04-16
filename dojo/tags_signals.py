@@ -150,8 +150,11 @@ def bulk_inherit_location_tags(locations, *, known_product=None):
     # chain per location, and defeats the point of the bulk path.
     from dojo.models import _manage_inherited_tags  # noqa: PLC0415 circular import
 
-    signals.m2m_changed.disconnect(make_inherited_tags_sticky, sender=tags_through)
-    signals.m2m_changed.disconnect(make_inherited_tags_sticky, sender=inherited_through)
+    # Only disconnect/reconnect for senders where the signal is actually registered
+    # (tags.through). inherited_tags.through is not a registered sender — attempting
+    # to connect it after disconnect() would incorrectly add a new registration,
+    # causing recursion on subsequent calls.
+    disconnected = signals.m2m_changed.disconnect(make_inherited_tags_sticky, sender=tags_through)
     try:
         for location in locations:
             target_tag_names: set[str] = set()
@@ -169,8 +172,8 @@ def bulk_inherit_location_tags(locations, *, known_product=None):
                 potentially_existing_tags=existing_tags_by_location[location.id],
             )
     finally:
-        signals.m2m_changed.connect(make_inherited_tags_sticky, sender=tags_through)
-        signals.m2m_changed.connect(make_inherited_tags_sticky, sender=inherited_through)
+        if disconnected:
+            signals.m2m_changed.connect(make_inherited_tags_sticky, sender=tags_through)
 
 
 def inherit_linked_instance_tags(instance: LocationFindingReference | LocationProductReference):
