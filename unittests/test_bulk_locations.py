@@ -21,7 +21,7 @@ from dojo.location.status import FindingLocationStatus
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tools.locations import LocationAssociationData, LocationData
 from dojo.url.models import URL
-from unittests.dojo_test_case import DojoTestCase, skip_unless_v3
+from unittests.dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
 User = get_user_model()
 
@@ -260,6 +260,71 @@ class TestRecordAndPersist(DojoTestCase):
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding1).count(), 1)
         self.assertEqual(LocationFindingReference.objects.filter(finding=finding2).count(), 1)
         self.assertEqual(LocationProductReference.objects.filter(product=product).count(), 2)
+
+    def test_locations_are_cleaned_during_persist(self):
+        """
+        Verify that locations go through clean() normalization when persisted.
+
+        URL.clean() normalizes protocol/host to lowercase and sets default ports.
+        If clean isn't called, the raw input values would be stored as-is.
+        """
+        finding = _make_finding()
+        product = finding.test.engagement.product
+
+        # Create a URL with uppercase protocol and host — clean() should normalize these
+        loc_data = [LocationData(type="url", data={
+            "protocol": "HTTPS",
+            "host": "UPPERCASE.EXAMPLE.COM",
+            "path": "api/v1",
+        })]
+        mgr = LocationManager(product)
+        mgr.record_locations_for_finding(finding, loc_data)
+        mgr.persist()
+
+        saved_url = URL.objects.get(host="uppercase.example.com")
+        # Protocol should be lowercased
+        self.assertEqual(saved_url.protocol, "https")
+        # Host should be lowercased
+        self.assertEqual(saved_url.host, "uppercase.example.com")
+        # Default HTTPS port should be set
+        self.assertEqual(saved_url.port, 443)
+
+
+# ---------------------------------------------------------------------------
+# EndpointManager: verify clean is called during record_for_finding
+# ---------------------------------------------------------------------------
+@skip_unless_v2
+class TestEndpointCleanOnRecord(DojoTestCase):
+
+    def test_endpoints_are_cleaned_during_record_for_finding(self):
+        """
+        Verify that EndpointManager.record_for_finding() runs clean() on endpoints.
+
+        Endpoint.clean() validates format (not normalize case). An endpoint with
+        an invalid protocol should trigger a warning log but still be recorded
+        (DefectDojo stores broken endpoints with a warning). An endpoint with a
+        valid protocol should pass through clean() without error.
+        """
+        # Keep imports here for reasy removal of this entire test in the future, once endpoints is gone
+        from dojo.importers.endpoint_manager import EndpointManager  # noqa: PLC0415
+        from dojo.models import Endpoint  # noqa: PLC0415
+
+        pt, _ = Product_Type.objects.get_or_create(name="EP Clean Test Type")
+        product = Product.objects.create(name="EP Clean Test Product", description="t", prod_type=pt)
+
+        mgr = EndpointManager(product)
+
+        finding = _make_finding()
+        # Valid endpoint + one with empty protocol (clean sets it to None)
+        ep_valid = Endpoint(protocol="https", host="good.example.com")
+        ep_empty_proto = Endpoint(protocol="", host="empty-proto.example.com")
+        finding.unsaved_endpoints = [ep_valid, ep_empty_proto]
+
+        mgr.record_for_finding(finding)
+
+        # clean() should have set empty protocol to None
+        self.assertEqual(ep_valid.protocol, "https")
+        self.assertIsNone(ep_empty_proto.protocol)
 
 
 # ---------------------------------------------------------------------------

@@ -359,7 +359,7 @@ class URL(AbstractLocation):
         query=None,
         fragment=None,
     ) -> URL:
-        url = URL(
+        return URL(
             protocol=protocol,
             user_info=user_info,
             host=host,
@@ -368,8 +368,6 @@ class URL(AbstractLocation):
             query=query,
             fragment=fragment,
         )
-        url.clean()
-        return url
 
     @staticmethod
     def create_location_from_value(value: str) -> URL:
