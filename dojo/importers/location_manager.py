@@ -378,21 +378,36 @@ class LocationManager(BaseLocationManager):
 
     @classmethod
     def _bulk_get_or_create_locations(cls, locations: list[AbstractLocation]) -> list[AbstractLocation]:
-        """Bulk get-or-create a (possibly heterogeneous) list of AbstractLocations."""
+        """
+        Bulk get-or-create a (possibly heterogeneous) list of AbstractLocations.
+
+        The input list may contain a mix of AbstractLocation instances. This method
+        groups them by concrete type, delegates each group to that type's bulk_get_or_create,
+        then reassembles results in the original input order.
+        """
         if not locations:
             return []
 
+        # Keying function: group by the (Python) identity of the concrete class (e.g., URL vs Dependency).
+        # Using id() because class objects aren't sortable.
         def type_id(x: tuple[int, AbstractLocation]) -> int:
             return id(type(x[1]))
 
         saved = []
+        # Sort by type, tracking the original index via enumerate so we can restore order later
         locations_with_idx = sorted(enumerate(locations), key=type_id)
+        # Now group by type
         locations_by_type = groupby(locations_with_idx, key=type_id)
         for _, grouped_locations_with_idx in locations_by_type:
+            # Split into parallel lists: original indices and the homogeneous location objects
             indices, grouped_locations = zip(*grouped_locations_with_idx, strict=True)
+            # Determine the concrete AbstractLocation subclass (URL, Dependency, etc.)
             loc_cls = type(grouped_locations[0])
+            # Delegate to the per-type bulk_get_or_create on AbstractLocation
             saved_locations = loc_cls.bulk_get_or_create(grouped_locations)
+            # Pair each result back with its original index
             saved.extend((idx, saved_loc) for idx, saved_loc in zip(indices, saved_locations, strict=True))
 
+        # Restore the original input ordering
         saved.sort(key=itemgetter(0))
         return [loc for _, loc in saved]
