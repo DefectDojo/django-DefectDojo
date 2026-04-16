@@ -190,6 +190,7 @@ def bulk_add_tag_mapping(
 
     Returns:
         Total number of new tag relationships created.
+
     """
     from collections import defaultdict  # noqa: PLC0415
 

@@ -261,6 +261,7 @@ class BulkTagUtilsTest(TestCase):
 
 
 class BulkTagMappingTest(TestCase):
+
     """Tests for bulk_add_tag_mapping — the multi-tag, ~5-query variant."""
 
     LOCATION_CLASS = Location if settings.V3_FEATURE_LOCATIONS else Endpoint
@@ -369,6 +370,7 @@ class BulkTagMappingTest(TestCase):
 
 
 class BulkApplyParserTagsTest(TestCase):
+
     """Tests for bulk_apply_parser_tags — the import-loop accumulator path."""
 
     def setUp(self):
