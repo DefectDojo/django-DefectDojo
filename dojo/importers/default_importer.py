@@ -9,8 +9,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
-from dojo.importers.endpoint_manager import EndpointManager
-from dojo.importers.location_manager import LocationManager
+from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.models import (
@@ -59,10 +58,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             import_type=Test_Import.IMPORT_TYPE,
             **kwargs,
         )
-        if settings.V3_FEATURE_LOCATIONS:
-            self.location_manager = LocationManager(self.engagement.product)
-        else:
-            self.location_manager = EndpointManager(self.engagement.product)
+        self.location_manager = LocationHandler(self.engagement.product)
 
     def create_test(
         self,

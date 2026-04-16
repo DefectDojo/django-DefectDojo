@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
+from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.models import (
     Dojo_User,
     Endpoint,
@@ -30,7 +31,7 @@ class EndpointUniqueKey(NamedTuple):
 
 
 # TODO: Delete this after the move to Locations
-class EndpointManager:
+class EndpointManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
         self._product = product

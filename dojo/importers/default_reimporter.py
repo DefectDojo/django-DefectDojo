@@ -15,8 +15,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_reimport_legacy,
 )
 from dojo.importers.base_importer import BaseImporter, Parser
-from dojo.importers.endpoint_manager import EndpointManager
-from dojo.importers.location_manager import LocationManager
+from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.models import (
@@ -82,10 +81,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             import_type=Test_Import.REIMPORT_TYPE,
             **kwargs,
         )
-        if settings.V3_FEATURE_LOCATIONS:
-            self.location_manager = LocationManager(self.test.engagement.product)
-        else:
-            self.location_manager = EndpointManager(self.test.engagement.product)
+        self.location_manager = LocationHandler(self.test.engagement.product)
 
     def process_scan(
         self,

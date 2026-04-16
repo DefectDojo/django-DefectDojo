@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, TypeVar
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.location.models import AbstractLocation, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.tags_signals import bulk_inherit_location_tags
@@ -26,12 +27,11 @@ logger = logging.getLogger(__name__)
 UnsavedLocation = TypeVar("UnsavedLocation", LocationData, AbstractLocation)
 
 
-class LocationManager:
+class LocationManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
-        self._product = product
+        super().__init__(product)
         self._locations_by_finding: dict[int, tuple[Finding, list[UnsavedLocation]]] = {}
-        self._product_locations: list[UnsavedLocation] = []
         # Status update inputs (deferred). All entries are processed in a single bulk pass by persist().
         # (existing_finding, new_finding, user): classified partial mitigate/reactivate
         self._status_updates: list[tuple[Finding, Finding, Dojo_User]] = []
@@ -126,141 +126,101 @@ class LocationManager:
 
     def persist(self, user: Dojo_User | None = None) -> None:
         """Flush all accumulated location operations to the database."""
-        # Step 1: Collect all locations across all findings, bulk get/create, bulk create refs
-        if self._locations_by_finding:
-            all_locations: list[AbstractLocation] = []
-            finding_ranges: list[tuple[Finding, int, int]] = []
+        self._persist_finding_locations()
+        self._flush_status_updates()
 
-            for finding, locations in self._locations_by_finding.values():
-                cleaned = type(self).clean_unsaved_locations(locations)
-                start = len(all_locations)
-                all_locations.extend(cleaned)
-                end = len(all_locations)
-                if start < end:
-                    finding_ranges.append((finding, start, end))
+    def _persist_finding_locations(self) -> None:
+        """Bulk get/create locations and their finding+product refs."""
+        if not self._locations_by_finding:
+            return
 
-            if all_locations:
-                saved = type(self)._bulk_get_or_create_locations(all_locations)
+        all_locations: list[AbstractLocation] = []
+        finding_ranges: list[tuple[Finding, int, int]] = []
 
-                # Build all refs across all findings in one pass
-                all_finding_refs = []
-                all_product_refs = []
-                # Track locations that got new refs — only those need tag inheritance
-                # (mirrors original post_save signal behavior on LocationFindingReference/LocationProductReference)
-                locations_needing_inherit: dict[int, AbstractLocation] = {}
+        for finding, locations in self._locations_by_finding.values():
+            cleaned = type(self).clean_unsaved_locations(locations)
+            start = len(all_locations)
+            all_locations.extend(cleaned)
+            end = len(all_locations)
+            if start < end:
+                finding_ranges.append((finding, start, end))
 
-                # Pre-fetch existing product refs for this product across all locations (one query)
-                all_location_ids = [loc.location_id for loc in saved]
-                existing_product_refs: set[int] = set(
-                    LocationProductReference.objects.filter(
-                        location_id__in=all_location_ids,
-                        product=self._product,
-                    ).values_list("location_id", flat=True),
-                )
+        if all_locations:
+            saved = type(self)._bulk_get_or_create_locations(all_locations)
 
-                # Pre-fetch existing finding refs across ALL findings in one query (avoids N+1)
-                all_finding_ids = [finding.id for finding, _, _ in finding_ranges]
-                existing_finding_ref_keys: set[tuple[int, int]] = set(
-                    LocationFindingReference.objects.filter(
-                        location_id__in=all_location_ids,
-                        finding_id__in=all_finding_ids,
-                    ).values_list("finding_id", "location_id"),
-                )
+            # Build all refs across all findings in one pass
+            all_finding_refs = []
+            all_product_refs = []
+            # Track locations that got new refs — only those need tag inheritance
+            locations_needing_inherit: dict[int, AbstractLocation] = {}
 
-                for finding, start, end in finding_ranges:
-                    finding_locations = saved[start:end]
+            # Pre-fetch existing product refs for this product across all locations (one query)
+            all_location_ids = [loc.location_id for loc in saved]
+            existing_product_refs: set[int] = set(
+                LocationProductReference.objects.filter(
+                    location_id__in=all_location_ids,
+                    product=self._product,
+                ).values_list("location_id", flat=True),
+            )
 
-                    for location in finding_locations:
-                        assoc = location.get_association_data()
-                        finding_ref_key = (finding.id, location.location_id)
+            # Pre-fetch existing finding refs across ALL findings in one query (avoids N+1)
+            all_finding_ids = [finding.id for finding, _, _ in finding_ranges]
+            existing_finding_ref_keys: set[tuple[int, int]] = set(
+                LocationFindingReference.objects.filter(
+                    location_id__in=all_location_ids,
+                    finding_id__in=all_finding_ids,
+                ).values_list("finding_id", "location_id"),
+            )
 
-                        if finding_ref_key not in existing_finding_ref_keys:
-                            all_finding_refs.append(LocationFindingReference(
-                                location_id=location.location_id,
-                                finding=finding,
-                                status=FindingLocationStatus.Active,
-                                relationship=assoc.relationship_type,
-                                relationship_data=assoc.relationship_data,
-                            ))
-                            existing_finding_ref_keys.add(finding_ref_key)
-                            locations_needing_inherit[location.location_id] = location
+            for finding, start, end in finding_ranges:
+                finding_locations = saved[start:end]
 
-                        if location.location_id not in existing_product_refs:
-                            all_product_refs.append(LocationProductReference(
-                                location_id=location.location_id,
-                                product=self._product,
-                                status=ProductLocationStatus.Active,
-                                relationship=assoc.relationship_type,
-                                relationship_data=assoc.relationship_data,
-                            ))
-                            existing_product_refs.add(location.location_id)
-                            locations_needing_inherit[location.location_id] = location
+                for location in finding_locations:
+                    assoc = location.get_association_data()
+                    finding_ref_key = (finding.id, location.location_id)
 
-                if all_finding_refs:
-                    LocationFindingReference.objects.bulk_create(
-                        all_finding_refs, batch_size=1000, ignore_conflicts=True,
-                    )
-                if all_product_refs:
-                    LocationProductReference.objects.bulk_create(
-                        all_product_refs, batch_size=1000, ignore_conflicts=True,
-                    )
+                    if finding_ref_key not in existing_finding_ref_keys:
+                        all_finding_refs.append(LocationFindingReference(
+                            location_id=location.location_id,
+                            finding=finding,
+                            status=FindingLocationStatus.Active,
+                            relationship=assoc.relationship_type,
+                            relationship_data=assoc.relationship_data,
+                        ))
+                        existing_finding_ref_keys.add(finding_ref_key)
+                        locations_needing_inherit[location.location_id] = location
 
-                # bulk_create bypasses post_save signals; trigger tag inheritance only on locations
-                # that got new refs (matches original signal-based behavior). Short-circuit if the
-                # product has no tag inheritance enabled, and use the bulk variant otherwise to
-                # avoid O(N) expensive JOINs via Location.all_related_products().
-                if self._should_inherit_product_tags() and locations_needing_inherit:
-                    bulk_inherit_location_tags(
-                        (loc.location for loc in locations_needing_inherit.values()),
-                        known_product=self._product,
-                    )
-
-            self._locations_by_finding.clear()
-
-        # Step 1b: Product-level locations (not tied to a finding)
-        if self._product_locations:
-            cleaned = type(self).clean_unsaved_locations(self._product_locations)
-            if cleaned:
-                saved = type(self)._bulk_get_or_create_locations(cleaned)
-                location_ids = [loc.location_id for loc in saved]
-                existing = set(
-                    LocationProductReference.objects.filter(
-                        location_id__in=location_ids,
-                        product=self._product,
-                    ).values_list("location_id", flat=True),
-                )
-                new_refs = []
-                # Track locations that got new refs — only those need tag inheritance
-                locations_needing_inherit: dict[int, AbstractLocation] = {}
-                for location in saved:
-                    if location.location_id not in existing:
-                        assoc = location.get_association_data()
-                        new_refs.append(LocationProductReference(
+                    if location.location_id not in existing_product_refs:
+                        all_product_refs.append(LocationProductReference(
                             location_id=location.location_id,
                             product=self._product,
                             status=ProductLocationStatus.Active,
                             relationship=assoc.relationship_type,
                             relationship_data=assoc.relationship_data,
                         ))
-                        existing.add(location.location_id)
+                        existing_product_refs.add(location.location_id)
                         locations_needing_inherit[location.location_id] = location
-                if new_refs:
-                    LocationProductReference.objects.bulk_create(
-                        new_refs, batch_size=1000, ignore_conflicts=True,
-                    )
 
-                # bulk_create bypasses post_save signals; trigger tag inheritance only on
-                # locations that got new product refs (short-circuited if the product has no
-                # tag inheritance enabled — see _should_inherit_product_tags()).
-                if self._should_inherit_product_tags() and locations_needing_inherit:
-                    bulk_inherit_location_tags(
-                        (loc.location for loc in locations_needing_inherit.values()),
-                        known_product=self._product,
-                    )
-            self._product_locations.clear()
+            if all_finding_refs:
+                LocationFindingReference.objects.bulk_create(
+                    all_finding_refs, batch_size=1000, ignore_conflicts=True,
+                )
+            if all_product_refs:
+                LocationProductReference.objects.bulk_create(
+                    all_product_refs, batch_size=1000, ignore_conflicts=True,
+                )
 
-        # Steps 2 & 3: Bulk status updates — classify refs, then execute in minimal queries
-        self._flush_status_updates()
+            # bulk_create bypasses post_save signals; trigger tag inheritance only on locations
+            # that got new refs (matches original signal-based behavior). Short-circuit if the
+            # product has no tag inheritance enabled, and use the bulk variant otherwise to
+            # avoid O(N) expensive JOINs via Location.all_related_products().
+            if self._should_inherit_product_tags() and locations_needing_inherit:
+                bulk_inherit_location_tags(
+                    (loc.location for loc in locations_needing_inherit.values()),
+                    known_product=self._product,
+                )
+
+        self._locations_by_finding.clear()
 
     def _flush_status_updates(self) -> None:
         """

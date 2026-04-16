@@ -194,17 +194,6 @@ class TestPersistRefCreation(DojoTestCase):
         self.assertEqual(ref.relationship, "owned_by")
         self.assertEqual(ref.relationship_data, {"file_path": "/app/main.py"})
 
-    def test_product_only_locations(self):
-        pt, _ = Product_Type.objects.get_or_create(name="Refs Test Type")
-        product = Product.objects.create(name="Refs Product Only", description="test", prod_type=pt)
-
-        mgr = LocationManager(product)
-        mgr._product_locations.extend([_make_url("oss-product-only.example.com")])
-        mgr.persist()
-
-        self.assertTrue(LocationProductReference.objects.filter(product=product).exists())
-        self.assertFalse(LocationFindingReference.objects.exists())
-
 
 # ---------------------------------------------------------------------------
 # End-to-end: record + persist
