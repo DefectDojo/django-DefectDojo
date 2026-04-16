@@ -540,20 +540,22 @@ class DojoTestUtilsMixin:
         return model.objects.order_by("id").last()
 
     def get_unsaved_locations(self, finding):
-        if settings.V3_FEATURE_LOCATIONS:
-            locations = LocationManager.make_abstract_locations(finding.unsaved_locations)
+        if not hasattr(finding, "_cached_unsaved_locations"):
+            if settings.V3_FEATURE_LOCATIONS:
+                locations = LocationManager.make_abstract_locations(finding.unsaved_locations)
+            else:
+                # TODO: Delete this after the move to Locations
+                locations = finding.unsaved_endpoints
             for loc in locations:
                 loc.clean()
-            return locations
-        # TODO: Delete this after the move to Locations
-        return finding.unsaved_endpoints
+            finding._cached_unsaved_locations = locations
+        return finding._cached_unsaved_locations
 
     def validate_locations(self, findings):
         for finding in findings:
-            # AND SEVERITY HAHAHAHA
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            for location in self.get_unsaved_locations(finding):
-                location.clean()
+            # get_unsaved_locations handles conversion + cleaning + caching
+            self.get_unsaved_locations(finding)
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
