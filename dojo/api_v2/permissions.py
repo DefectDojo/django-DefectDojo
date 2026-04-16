@@ -475,10 +475,10 @@ class UserHasImportPermission(permissions.BasePermission):
         if engagement := converted_dict.get("engagement"):
             # Validate the resolved engagement's parent chain matches any provided identifiers
             if (product := converted_dict.get("product")) and engagement.product_id != product.id:
-                msg = f'The resolved engagement is associated with product "{engagement.product.name}", not with product "{converted_dict.get("product_name")}"'
+                msg = "The provided identifiers are inconsistent — the engagement does not belong to the specified product."
                 raise ValidationError(msg)
             if (engagement_name := converted_dict.get("engagement_name")) and engagement.name != engagement_name:
-                msg = f'The resolved engagement is named "{engagement.name}", not "{engagement_name}"'
+                msg = "The provided identifiers are inconsistent — the engagement name does not match the specified engagement."
                 raise ValidationError(msg)
             return user_has_permission(
                 request.user, engagement, Permissions.Import_Scan_Result,
@@ -787,17 +787,17 @@ class UserHasReimportPermission(permissions.BasePermission):
         if test := converted_dict.get("test"):
             # Validate the resolved test's parent chain matches any provided identifiers
             if (product := converted_dict.get("product")) and test.engagement.product_id != product.id:
-                msg = f'The resolved test is associated with product "{test.engagement.product.name}", not with product "{converted_dict.get("product_name")}"'
+                msg = "The provided identifiers are inconsistent — the test does not belong to the specified product."
                 raise ValidationError(msg)
             if (engagement := converted_dict.get("engagement")) and test.engagement_id != engagement.id:
-                msg = f'The resolved test is associated with engagement "{test.engagement.name}", not with engagement "{converted_dict.get("engagement_name")}"'
+                msg = "The provided identifiers are inconsistent — the test does not belong to the specified engagement."
                 raise ValidationError(msg)
             # Also validate by name when the objects were not resolved (e.g. names that match no existing record)
             if not converted_dict.get("product") and (product_name := converted_dict.get("product_name")) and test.engagement.product.name != product_name:
-                msg = f'The resolved test is associated with product "{test.engagement.product.name}", not with product "{product_name}"'
+                msg = "The provided identifiers are inconsistent — the test does not belong to the specified product."
                 raise ValidationError(msg)
             if not converted_dict.get("engagement") and (engagement_name := converted_dict.get("engagement_name")) and test.engagement.name != engagement_name:
-                msg = f'The resolved test is associated with engagement "{test.engagement.name}", not with engagement "{engagement_name}"'
+                msg = "The provided identifiers are inconsistent — the test does not belong to the specified engagement."
                 raise ValidationError(msg)
             return user_has_permission(
                 request.user, test, Permissions.Import_Scan_Result,
@@ -1207,7 +1207,7 @@ def check_auto_create_permission(
     if engagement:
         # Validate the resolved engagement's parent chain matches any provided names
         if product is not None and engagement.product_id != product.id:
-            msg = f'The resolved engagement is associated with product "{engagement.product.name}", not with product "{product_name}"'
+            msg = "The provided identifiers are inconsistent — the engagement does not belong to the specified product."
             raise ValidationError(msg)
         return user_has_permission(
             user, engagement, Permissions.Import_Scan_Result,
