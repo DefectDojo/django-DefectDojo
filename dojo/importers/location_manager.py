@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from dojo.importers.base_location_manager import BaseLocationManager
-from dojo.location.models import AbstractLocation, LocationFindingReference, LocationProductReference
+from dojo.location.models import AbstractLocation, Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.tags_signals import bulk_inherit_location_tags
 from dojo.tools.locations import LocationData
@@ -109,7 +109,6 @@ class LocationManager(BaseLocationManager):
 
     def get_locations_for_tagging(self, findings: list[Finding]):
         """Return queryset of locations to apply tags to."""
-        from dojo.location.models import Location  # noqa: PLC0415
         return Location.objects.filter(findings__finding__in=findings).distinct()
 
     def get_location_tag_fallback(self, finding: Finding):
