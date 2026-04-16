@@ -87,7 +87,7 @@ class LocationManager(BaseLocationManager):
 
     def clean_unsaved(self, finding: Finding) -> None:
         """Clean the unsaved locations on this finding."""
-        type(self).clean_unsaved_locations(finding.unsaved_locations)
+        self.clean_unsaved_locations(finding.unsaved_locations)
 
     def record_for_finding(self, finding: Finding, extra_locations: list[UnsavedLocation] | None = None) -> None:
         """Record locations from the finding + any form-added extras for later batch creation."""
@@ -138,7 +138,7 @@ class LocationManager(BaseLocationManager):
         finding_ranges: list[tuple[Finding, int, int]] = []
 
         for finding, locations in self._locations_by_finding.values():
-            cleaned = type(self).clean_unsaved_locations(locations)
+            cleaned = self.clean_unsaved_locations(locations)
             start = len(all_locations)
             all_locations.extend(cleaned)
             end = len(all_locations)
@@ -146,7 +146,7 @@ class LocationManager(BaseLocationManager):
                 finding_ranges.append((finding, start, end))
 
         if all_locations:
-            saved = type(self)._bulk_get_or_create_locations(all_locations)
+            saved = self._bulk_get_or_create_locations(all_locations)
 
             # Build all refs across all findings in one pass
             all_finding_refs = []
@@ -266,7 +266,7 @@ class LocationManager(BaseLocationManager):
                     ref_ids_to_mitigate_by_user.setdefault(user, set()).update(r.id for r in finding_refs)
                 else:
                     new_loc_values = {
-                        str(loc) for loc in type(self).clean_unsaved_locations(new_finding.unsaved_locations)
+                        str(loc) for loc in self.clean_unsaved_locations(new_finding.unsaved_locations)
                     }
                     for ref in finding_refs:
                         if ref.location.location_value in new_loc_values:
