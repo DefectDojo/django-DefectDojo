@@ -60,9 +60,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             **kwargs,
         )
         if settings.V3_FEATURE_LOCATIONS:
-            self.item_manager = LocationManager(self.engagement.product)
+            self.location_manager = LocationManager(self.engagement.product)
         else:
-            self.item_manager = EndpointManager(self.engagement.product)
+            self.location_manager = EndpointManager(self.engagement.product)
 
     def create_test(
         self,
@@ -243,7 +243,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             # Process any request/response pairs
             self.process_request_response_pairs(finding)
-            self.process_items(finding, self.endpoints_to_add)
+            self.process_locations(finding, self.endpoints_to_add)
             # Parsers must use unsaved_tags to store tags, so we can clean them.
             # Accumulate for bulk application after the loop (O(unique_tags) instead of O(N·T)).
             cleaned_tags = clean_tags(finding.unsaved_tags)
@@ -266,7 +266,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # If batch is full or we're at the end, persist locations/endpoints and dispatch
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
-                self.item_manager.persist(user=self.user)
+                self.location_manager.persist(user=self.user)
                 # Apply parser-supplied tags for this batch before post-processing starts,
                 # so rules/deduplication tasks see the tags already on the findings.
                 bulk_apply_parser_tags(findings_with_parser_tags)
@@ -399,7 +399,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 product_grading_option=False,
             )
         # Persist any accumulated location/endpoint status changes
-        self.item_manager.persist(user=self.user)
+        self.location_manager.persist(user=self.user)
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far

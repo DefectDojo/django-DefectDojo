@@ -89,11 +89,11 @@ class LocationManager:
         """Clean the unsaved locations on this finding."""
         type(self).clean_unsaved_locations(finding.unsaved_locations)
 
-    def record_for_finding(self, finding: Finding, extra_items: list[UnsavedLocation] | None = None) -> None:
+    def record_for_finding(self, finding: Finding, extra_locations: list[UnsavedLocation] | None = None) -> None:
         """Record locations from the finding + any form-added extras for later batch creation."""
         self.record_locations_for_finding(finding, finding.unsaved_locations)
-        if extra_items:
-            self.record_locations_for_finding(finding, extra_items)
+        if extra_locations:
+            self.record_locations_for_finding(finding, extra_locations)
 
     def update_status(self, existing_finding: Finding, new_finding: Finding, user: Dojo_User) -> None:
         """Accumulate status changes (mitigate/reactivate) based on old vs new finding."""
@@ -107,18 +107,18 @@ class LocationManager:
         """Defer mitigation to persist(). No DB access at record time."""
         self._finding_ids_to_fully_mitigate.append((finding.id, user))
 
-    def get_items_for_tagging(self, findings: list[Finding]):
-        """Return queryset of items to apply tags to."""
+    def get_locations_for_tagging(self, findings: list[Finding]):
+        """Return queryset of locations to apply tags to."""
         from dojo.location.models import Location  # noqa: PLC0415
         return Location.objects.filter(findings__finding__in=findings).distinct()
 
-    def get_item_tag_fallback(self, finding: Finding):
-        """Return iterable of taggable items for per-instance fallback."""
+    def get_location_tag_fallback(self, finding: Finding):
+        """Return iterable of taggable locations for per-instance fallback."""
         return [ref.location for ref in finding.locations.all()]
 
-    def serialize_extra_items(self, items: list) -> dict:
-        """Serialize extra items for import history."""
-        return {"locations": [str(loc) for loc in items]} if items else {}
+    def serialize_extra_locations(self, locations: list) -> dict:
+        """Serialize extra locations for import history."""
+        return {"locations": [str(loc) for loc in locations]} if locations else {}
 
     # ------------------------------------------------------------------
     # Persist — flush all accumulated operations to DB

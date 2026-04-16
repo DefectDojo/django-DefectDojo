@@ -309,13 +309,13 @@ class EndpointManager:
         """Clean the unsaved endpoints on this finding."""
         self.clean_unsaved_endpoints(finding.unsaved_endpoints)
 
-    def record_for_finding(self, finding: Finding, extra_items: list[Endpoint] | None = None) -> None:
+    def record_for_finding(self, finding: Finding, extra_locations: list[Endpoint] | None = None) -> None:
         """Record endpoints from the finding + any form-added extras for later batch creation."""
         for endpoint in finding.unsaved_endpoints:
             key = self.record_endpoint(endpoint)
             self.record_status_for_create(finding, key)
-        if extra_items:
-            for endpoint in extra_items:
+        if extra_locations:
+            for endpoint in extra_locations:
                 key = self.record_endpoint(endpoint)
                 self.record_status_for_create(finding, key)
 
@@ -331,14 +331,14 @@ class EndpointManager:
         """Record endpoint statuses on this finding for mitigation."""
         self.record_statuses_to_mitigate(finding.status_finding.all())
 
-    def get_items_for_tagging(self, findings: list[Finding]):
-        """Return queryset of items to apply tags to."""
+    def get_locations_for_tagging(self, findings: list[Finding]):
+        """Return queryset of locations to apply tags to."""
         return Endpoint.objects.filter(finding__in=findings).distinct()
 
-    def get_item_tag_fallback(self, finding: Finding):
-        """Return iterable of taggable items for per-instance fallback."""
+    def get_location_tag_fallback(self, finding: Finding):
+        """Return iterable of taggable locations for per-instance fallback."""
         return finding.endpoints.all()
 
-    def serialize_extra_items(self, items: list) -> dict:
-        """Serialize extra items for import history."""
-        return {"endpoints": [str(ep) for ep in items]} if items else {}
+    def serialize_extra_locations(self, locations: list) -> dict:
+        """Serialize extra locations for import history."""
+        return {"endpoints": [str(ep) for ep in locations]} if locations else {}
