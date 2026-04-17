@@ -1236,12 +1236,12 @@ def issue_from_jira_is_active(issue_from_jira):
                 logger.debug("Jira issue status category is 'undefined', no decision possible")
             case _:
                 logger.warning("Unknown Jira status category key '%s', falling back to resolution check", key)
-        
+
     # the statusCategory is not specified or "undefined", fallback: checking if a resolution is set and evaluate it
     if not hasattr(issue_from_jira.fields, "resolution") or not issue_from_jira.fields.resolution:
         logger.debug("No resolution found, treating as active")
         return True
-    
+
     # some kind of resolution is present that is not None
     return False
 
