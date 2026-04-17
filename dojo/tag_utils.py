@@ -238,6 +238,9 @@ def bulk_add_tag_mapping(
 
     all_tag_names = list(tag_to_instances.keys())
 
+    def _key(name: str) -> str:
+        return name if case_sensitive else name.lower()
+
     # --- Query 1: fetch existing tag objects ---
     if case_sensitive:
         existing_tags: dict[str, object] = {
@@ -255,28 +258,16 @@ def bulk_add_tag_mapping(
         }
         missing_names = [n for n in all_tag_names if n.lower() not in existing_tags]
 
-    # --- Query 2: create missing tag objects then re-fetch to get their PKs ---
+    # --- Query 2: create missing tag objects ---
+    # Use get_or_create to call model.save(), which lets tagulous generate the slug field.
+    # bulk_create bypasses save() so slug is never set, causing unique constraint failures.
     if missing_names:
-        tag_model.objects.bulk_create(
-            [tag_model(name=n, protected=False) for n in missing_names],
-            ignore_conflicts=True,
-        )
-        if case_sensitive:
-            existing_tags.update(
-                {t.name: t for t in tag_model.objects.filter(name__in=missing_names)},
-            )
-        else:
-            existing_tags.update(
-                {
-                    t.name_lower: t
-                    for t in tag_model.objects.annotate(name_lower=Lower("name")).filter(
-                        name_lower__in=[n.lower() for n in missing_names],
-                    )
-                },
-            )
-
-    def _key(name: str) -> str:
-        return name if case_sensitive else name.lower()
+        for n in missing_names:
+            if case_sensitive:
+                tag, _ = tag_model.objects.get_or_create(name=n, defaults={"protected": False})
+            else:
+                tag, _ = tag_model.objects.get_or_create(name__iexact=n, defaults={"name": n, "protected": False})
+            existing_tags[_key(n)] = tag
 
     # --- Query 3: fetch all pre-existing (instance, tag) through-model rows ---
     all_instance_ids = {inst.pk for inst in all_instances}
@@ -307,14 +298,13 @@ def bulk_add_tag_mapping(
         return 0
 
     # --- Query 4: bulk-create all new relationships (batched for memory) ---
-    total_created = 0
+    # Use len(new_relationships) for the count: existing pairs were already filtered out above,
+    # so every entry here is new. bulk_create return value is unreliable with ignore_conflicts.
+    total_created = len(new_relationships)
     with transaction.atomic():
         for i in range(0, len(new_relationships), batch_size):
             batch = new_relationships[i : i + batch_size]
-            actually_created = through_model.objects.bulk_create(batch, ignore_conflicts=True)
-            total_created += (
-                len(actually_created) if hasattr(actually_created, "__len__") else len(batch)
-            )
+            through_model.objects.bulk_create(batch, ignore_conflicts=True)
 
     # --- Query 5: update all tag counts in one UPDATE … CASE WHEN … ---
     tag_model.objects.filter(pk__in=list(created_per_tag.keys())).update(
