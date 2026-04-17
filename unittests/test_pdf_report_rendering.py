@@ -192,10 +192,9 @@ class TestPdfReportTextWrapping(DojoTestCase):
     def test_report_base_css_has_overflow_wrap(self):
         """The report base template must include overflow-wrap for text wrapping."""
         template = self.django_engine.get_template("report_base.html")
-        # Render with minimal context to get the CSS
-        html = template.render({"report_name": "Test"})
+        source = template.template.source
 
-        self.assertIn("overflow-wrap: break-word", html)
+        self.assertIn("overflow-wrap: break-word", source)
 
     def test_report_base_css_styles_nested_pre(self):
         """
@@ -203,10 +202,10 @@ class TestPdfReportTextWrapping(DojoTestCase):
         nested <pre> elements from breaking out of margins.
         """
         template = self.django_engine.get_template("report_base.html")
-        html = template.render({"report_name": "Test"})
+        source = template.template.source
 
-        self.assertIn(".report-field pre", html)
-        self.assertIn("overflow-wrap: break-word", html)
+        self.assertIn(".report-field pre", source)
+        self.assertIn("overflow-wrap: break-word", source)
 
     def test_raw_request_pre_tags_preserved(self):
         """
