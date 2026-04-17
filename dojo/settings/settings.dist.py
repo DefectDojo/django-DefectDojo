@@ -356,8 +356,6 @@ env = environ.FileAwareEnv(
     DD_HASHCODE_FIELDS_PER_SCANNER=(str, ""),
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
-    # Dictates whether cloud banner is created or not
-    DD_CREATE_CLOUD_BANNER=(bool, True),
     # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Products, ...)
     # If you run big import you may want to disable this because there's a performance hit during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
@@ -1339,13 +1337,6 @@ CELERY_BEAT_SCHEDULE = {
             "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
         },
     },
-    "trigger_evaluate_pro_proposition": {
-        "task": "dojo.tasks.evaluate_pro_proposition",
-        "schedule": timedelta(hours=8),
-        "options": {
-            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
-        },
-    },
     "clear_sessions": {
         "task": "dojo.tasks.clear_sessions",
         "schedule": crontab(hour=0, minute=0, day_of_week=0),
@@ -2082,9 +2073,6 @@ FILE_IMPORT_TYPES = env("DD_FILE_IMPORT_TYPES")
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
-# Dictates whether cloud banner is created or not
-CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
-
 # ------------------------------------------------------------------------------
 # Auditlog
 # ------------------------------------------------------------------------------

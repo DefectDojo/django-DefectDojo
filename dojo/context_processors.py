@@ -36,19 +36,30 @@ def globalize_vars(request):
         "DOCUMENTATION_URL": settings.DOCUMENTATION_URL,
         "API_TOKENS_ENABLED": settings.API_TOKENS_ENABLED,
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
-        "CREATE_CLOUD_BANNER": settings.CREATE_CLOUD_BANNER,
+        "SHOW_PLG_LINK": True,
         # V3 Feature Flags
         "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
     }
 
+    additional_banners = []
+
     if (os_banner := get_os_banner()) is not None:
-        context["additional_banners"] = [{
+        additional_banners.append({
+            "source": "os",
             "message": os_banner["message"],
             "style": "info",
             "url": "",
             "link_text": "",
             "expanded_html": os_banner["expanded_html"],
-        }]
+        })
+
+    if hasattr(request, "session"):
+        for banner in request.session.pop("_product_banners", []):
+            additional_banners.append(banner)
+
+    if additional_banners:
+        context["additional_banners"] = additional_banners
+
     return context
 
 

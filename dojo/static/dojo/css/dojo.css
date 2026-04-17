@@ -1124,9 +1124,20 @@ div.custom-search-form {
 .announcement-banner {
     margin: 0px -15px;
     border-radius: 0px 0px 4px 4px;
+    color: #000;
 }
 
-.os-banner-toggle {
+.announcement-banner a {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
+.announcement-banner strong,
+.announcement-banner b {
+    color: #222;
+}
+
+.banner-toggle {
     background: transparent;
     border: 0;
     padding: 0;
@@ -1136,17 +1147,17 @@ div.custom-search-form {
     line-height: 1;
 }
 
-.os-banner-toggle:focus,
-.os-banner-toggle:active {
+.banner-toggle:focus,
+.banner-toggle:active {
     outline: none;
     box-shadow: none;
 }
 
-.os-banner-toggle:not(.collapsed) .fa-caret-down {
+.banner-toggle:not(.collapsed) .fa-caret-down {
     transform: rotate(180deg);
 }
 
-.os-banner-expanded {
+.banner-expanded {
     margin-top: 8px;
 }
 

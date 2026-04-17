@@ -177,6 +177,7 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
             result = context_processors.globalize_vars(self.request)
         self.assertIn("additional_banners", result)
         entry = result["additional_banners"][0]
+        self.assertEqual(entry["source"], "os")
         self.assertEqual(entry["message"], "<strong>Hi</strong>")
         self.assertEqual(entry["expanded_html"], "<p>body</p>")
         self.assertEqual(entry["style"], "info")
@@ -188,6 +189,16 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
             result = context_processors.globalize_vars(self.request)
         self.assertNotIn("additional_banners", result)
 
+    def test_show_plg_link_is_true_by_default(self):
+        with patch.object(context_processors, "get_os_banner", return_value=None):
+            result = context_processors.globalize_vars(self.request)
+        self.assertTrue(result["SHOW_PLG_LINK"])
+
+    def test_create_cloud_banner_not_in_context(self):
+        with patch.object(context_processors, "get_os_banner", return_value=None):
+            result = context_processors.globalize_vars(self.request)
+        self.assertNotIn("CREATE_CLOUD_BANNER", result)
+
     def test_template_renders_bleached_message(self):
         banner = {"message": "<strong>Hi</strong>", "expanded_html": None}
         with patch.object(context_processors, "get_os_banner", return_value=banner):
@@ -196,3 +207,37 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
             "{% for b in additional_banners %}{{ b.message|safe }}{% endfor %}",
         ).render(Context(ctx))
         self.assertIn("<strong>Hi</strong>", rendered)
+
+    def test_session_product_banners_merged_into_additional_banners(self):
+        session_banner = {
+            "source": "product_announcement",
+            "message": "Pro has async imports!",
+            "style": "info",
+            "url": "",
+            "link_text": "",
+            "expanded_html": None,
+        }
+        self.request.session = {"_product_banners": [session_banner]}
+        with patch.object(context_processors, "get_os_banner", return_value=None):
+            result = context_processors.globalize_vars(self.request)
+        self.assertIn("additional_banners", result)
+        self.assertEqual(len(result["additional_banners"]), 1)
+        self.assertEqual(result["additional_banners"][0]["source"], "product_announcement")
+        self.assertEqual(self.request.session.get("_product_banners"), None)
+
+    def test_os_and_session_banners_combined(self):
+        os_banner = {"message": "<strong>OS msg</strong>", "expanded_html": None}
+        session_banner = {
+            "source": "product_announcement",
+            "message": "Pro msg",
+            "style": "info",
+            "url": "",
+            "link_text": "",
+            "expanded_html": None,
+        }
+        self.request.session = {"_product_banners": [session_banner]}
+        with patch.object(context_processors, "get_os_banner", return_value=os_banner):
+            result = context_processors.globalize_vars(self.request)
+        self.assertEqual(len(result["additional_banners"]), 2)
+        self.assertEqual(result["additional_banners"][0]["source"], "os")
+        self.assertEqual(result["additional_banners"][1]["source"], "product_announcement")
