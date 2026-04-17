@@ -305,8 +305,10 @@ class LocationManager(BaseLocationManager):
                     ).exclude(status__in=special_statuses).values_list("id", flat=True),
                 )
 
-        # Execute bulk updates
+        # Execute bulk finding ref updates
         now = timezone.now()
+        all_affected_ref_ids: set[int] = set()
+
         if ref_ids_to_reactivate:
             LocationFindingReference.objects.filter(
                 id__in=ref_ids_to_reactivate,
@@ -316,6 +318,7 @@ class LocationManager(BaseLocationManager):
                 audit_time=now,
                 status=FindingLocationStatus.Active,
             )
+            all_affected_ref_ids |= ref_ids_to_reactivate
 
         for user, ref_ids in ref_ids_to_mitigate_by_user.items():
             if ref_ids:
@@ -325,6 +328,38 @@ class LocationManager(BaseLocationManager):
                     auditor=user,
                     audit_time=now,
                     status=FindingLocationStatus.Mitigated,
+                )
+                all_affected_ref_ids |= ref_ids
+
+        # Propagate to product refs: if any finding ref is active, product ref is active; otherwise mitigated.
+        if all_affected_ref_ids:
+            affected_location_ids = set(
+                LocationFindingReference.objects.filter(
+                    id__in=all_affected_ref_ids,
+                ).values_list("location_id", flat=True),
+            )
+            locations_still_active = set(
+                LocationFindingReference.objects.filter(
+                    location_id__in=affected_location_ids,
+                    finding__test__engagement__product=self._product,
+                    status=FindingLocationStatus.Active,
+                ).values_list("location_id", flat=True),
+            )
+            locations_now_mitigated = affected_location_ids - locations_still_active
+
+            if locations_still_active:
+                LocationProductReference.objects.filter(
+                    location_id__in=locations_still_active,
+                    product=self._product,
+                ).exclude(status=ProductLocationStatus.Active).update(
+                    status=ProductLocationStatus.Active,
+                )
+            if locations_now_mitigated:
+                LocationProductReference.objects.filter(
+                    location_id__in=locations_now_mitigated,
+                    product=self._product,
+                ).exclude(status=ProductLocationStatus.Mitigated).update(
+                    status=ProductLocationStatus.Mitigated,
                 )
 
         # Clear accumulators

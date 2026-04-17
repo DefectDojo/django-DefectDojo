@@ -17,7 +17,7 @@ from django.utils import timezone
 
 from dojo.importers.location_manager import LocationManager
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
-from dojo.location.status import FindingLocationStatus
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tools.locations import LocationAssociationData, LocationData
 from dojo.url.models import URL
@@ -481,8 +481,9 @@ class TestStatusUpdateQueryEfficiency(DojoTestCase):
         with CaptureQueriesContext(connection) as ctx:
             mgr.persist()
 
-        # Expected: 1 SELECT (gather ref IDs) + 1 UPDATE (reactivate). Allow tiny overhead.
-        self.assertLess(len(ctx.captured_queries), 5, ctx.captured_queries)
+        # Expected: 1 SELECT (gather ref IDs) + 1 UPDATE (reactivate)
+        #         + 1 SELECT (affected location_ids) + 1 SELECT (still-active check) + up to 1 UPDATE (product refs)
+        self.assertLess(len(ctx.captured_queries), 8, ctx.captured_queries)
 
     def test_update_location_status_for_many_findings_is_bulk(self):
         findings, product = self._setup_findings_with_mitigated_refs(count=20)
@@ -498,8 +499,9 @@ class TestStatusUpdateQueryEfficiency(DojoTestCase):
         with CaptureQueriesContext(connection) as ctx:
             mgr.persist()
 
-        # Expected: 1 SELECT (partial-status fetch) + 1 UPDATE (mitigate for the single user).
-        self.assertLess(len(ctx.captured_queries), 5, ctx.captured_queries)
+        # Expected: 1 SELECT (partial-status fetch) + 1 UPDATE (mitigate)
+        #         + 1 SELECT (affected location_ids) + 1 SELECT (still-active check) + up to 1 UPDATE (product refs)
+        self.assertLess(len(ctx.captured_queries), 8, ctx.captured_queries)
 
     def test_partial_status_update_reactivates_matching_mitigates_rest(self):
         """
@@ -548,3 +550,84 @@ class TestStatusUpdateQueryEfficiency(DojoTestCase):
         self.assertEqual(refs[1].status, FindingLocationStatus.Active)
         # The location no longer in the report should be mitigated
         self.assertEqual(refs[2].status, FindingLocationStatus.Mitigated)
+
+    def test_product_ref_mitigated_when_all_finding_refs_mitigated(self):
+        """When all finding refs for a location are mitigated, the product ref should become mitigated."""
+        finding = _make_finding()
+        product = finding.test.engagement.product
+
+        url = _make_url("product-status-test.example.com")
+        saved = URL.bulk_get_or_create([url])
+        loc = saved[0]
+
+        # Create active finding ref and active product ref
+        LocationFindingReference.objects.create(
+            location=loc.location, finding=finding, status=FindingLocationStatus.Active,
+        )
+        product_ref = LocationProductReference.objects.create(
+            location=loc.location, product=product, status=ProductLocationStatus.Active,
+        )
+
+        # Mitigate the finding
+        mgr = LocationManager(product)
+        mgr.record_mitigations_for_finding(finding, finding.reporter)
+        mgr.persist()
+
+        product_ref.refresh_from_db()
+        self.assertEqual(product_ref.status, ProductLocationStatus.Mitigated)
+
+    def test_product_ref_stays_active_when_some_finding_refs_still_active(self):
+        """When at least one finding ref is active, the product ref should stay active."""
+        finding1 = _make_finding()
+        product = finding1.test.engagement.product
+        finding2 = Finding.objects.create(
+            test=finding1.test, title="Second Finding", severity="Medium", reporter=finding1.reporter,
+        )
+
+        url = _make_url("shared-location.example.com")
+        saved = URL.bulk_get_or_create([url])
+        loc = saved[0]
+
+        # Two findings share the same location, both active
+        LocationFindingReference.objects.create(
+            location=loc.location, finding=finding1, status=FindingLocationStatus.Active,
+        )
+        LocationFindingReference.objects.create(
+            location=loc.location, finding=finding2, status=FindingLocationStatus.Active,
+        )
+        product_ref = LocationProductReference.objects.create(
+            location=loc.location, product=product, status=ProductLocationStatus.Active,
+        )
+
+        # Mitigate only the first finding — second is still active
+        mgr = LocationManager(product)
+        mgr.record_mitigations_for_finding(finding1, finding1.reporter)
+        mgr.persist()
+
+        product_ref.refresh_from_db()
+        self.assertEqual(product_ref.status, ProductLocationStatus.Active)
+
+    def test_product_ref_reactivated_when_finding_ref_reactivated(self):
+        """When a finding ref is reactivated, the product ref should become active."""
+        finding = _make_finding()
+        product = finding.test.engagement.product
+
+        url = _make_url("reactivate-product.example.com")
+        saved = URL.bulk_get_or_create([url])
+        loc = saved[0]
+
+        # Start with everything mitigated
+        LocationFindingReference.objects.create(
+            location=loc.location, finding=finding, status=FindingLocationStatus.Mitigated,
+        )
+        product_ref = LocationProductReference.objects.create(
+            location=loc.location, product=product, status=ProductLocationStatus.Mitigated,
+        )
+
+        # Reactivate the finding
+        mgr = LocationManager(product)
+        mgr.record_reactivations_for_finding(finding)
+        mgr.persist()
+
+        product_ref.refresh_from_db()
+        self.assertEqual(product_ref.status, ProductLocationStatus.Active)
