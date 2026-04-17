@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from itertools import groupby
 from operator import itemgetter
-from typing import TYPE_CHECKING, TypeVar
+from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
 from django.db.models import signals
@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-# TypeVar to represent unsaved locations coming from parsers. These might be existing AbstractLocations (when linking
+# Unsaved locations coming from parsers. These might be existing AbstractLocations (when linking
 # existing endpoints) or LocationData objects sent by the parser.
-UnsavedLocation = TypeVar("UnsavedLocation", LocationData, AbstractLocation)
+UnsavedLocation = LocationData | AbstractLocation
 
 
 class LocationManager(BaseLocationManager):
