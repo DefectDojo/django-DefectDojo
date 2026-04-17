@@ -1126,6 +1126,25 @@ div.custom-search-form {
     border-radius: 0px 0px 4px 4px;
 }
 
+.os-banner-toggle {
+    margin-left: 6px;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+}
+
+.os-banner-toggle .fa-caret-down {
+    transition: transform 0.15s ease-in-out;
+}
+
+.os-banner-toggle:not(.collapsed) .fa-caret-down {
+    transform: rotate(180deg);
+}
+
+.os-banner-expanded {
+    margin-top: 8px;
+}
+
 @media (min-width: 795px) {
     div.custom-search-form {
         height: 21px;

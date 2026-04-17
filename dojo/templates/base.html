@@ -672,7 +672,17 @@
                 {% endif %}
                 {% for banner in additional_banners %}
                     <div role="alert" class="announcement-banner alert alert-{{ banner.style }} show">
-                        {{ banner.message }} <a href="{{ banner.url }}">{{ banner.link_text }}</a>
+                        {{ banner.message|safe }}{% if banner.url %} <a href="{{ banner.url }}">{{ banner.link_text }}</a>{% endif %}
+                        {% if banner.expanded_html %}
+                            <a role="button" data-toggle="collapse" href="#os-banner-expanded-{{ forloop.counter }}"
+                               aria-expanded="false" aria-controls="os-banner-expanded-{{ forloop.counter }}"
+                               class="os-banner-toggle collapsed">
+                                <i class="fa-solid fa-caret-down"></i>
+                            </a>
+                            <div id="os-banner-expanded-{{ forloop.counter }}" class="collapse os-banner-expanded">
+                                {{ banner.expanded_html|safe }}
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
                 <div class="container-fluid">

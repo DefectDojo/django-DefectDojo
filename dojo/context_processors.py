@@ -5,13 +5,14 @@ import time
 from django.conf import settings
 from django.contrib import messages
 
+from dojo.announcements.os_message import get_os_banner
 from dojo.labels import get_labels
 from dojo.models import Alerts, System_Settings, UserAnnouncement
 
 
 def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
-    return {
+    context = {
         "SHOW_LOGIN_FORM": settings.SHOW_LOGIN_FORM,
         "FORGOT_PASSWORD": settings.FORGOT_PASSWORD,
         "FORGOT_USERNAME": settings.FORGOT_USERNAME,
@@ -39,6 +40,16 @@ def globalize_vars(request):
         # V3 Feature Flags
         "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
     }
+    os_banner = get_os_banner()
+    if os_banner is not None:
+        context["additional_banners"] = [{
+            "message": os_banner["message"],
+            "style": "info",
+            "url": "",
+            "link_text": "",
+            "expanded_html": os_banner["expanded_html"],
+        }]
+    return context
 
 
 def bind_system_settings(request):
