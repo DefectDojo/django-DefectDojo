@@ -376,7 +376,7 @@ class BulkApplyParserTagsTest(TestCase):
 
     def setUp(self):
         self.tag_model = Finding.tags.tag_model
-        self.reporter = User.objects.create_user(username="parser-test-user", password="x")
+        self.reporter = User.objects.create_user(username="parser-test-user")
         pt = Product_Type.objects.create(name="PT-Parser")
         product = Product.objects.create(name="Parser Product", description="x", prod_type=pt)
         engagement = Engagement.objects.create(
