@@ -516,13 +516,14 @@ class TestStatusUpdateQueryEfficiency(DojoTestCase):
         url_gone = _make_url("gone.example.com")
         saved = URL.bulk_get_or_create([url_kept, url_also_kept, url_gone])
 
-        refs = []
-        for loc in saved:
-            refs.append(LocationFindingReference.objects.create(
+        refs = [
+            LocationFindingReference.objects.create(
                 location=loc.location,
                 finding=finding,
                 status=FindingLocationStatus.Mitigated,
-            ))
+            )
+            for loc in saved
+        ]
 
         # Simulate a reimport where the new finding is active and only has two of the three locations
         new_finding = Finding(
