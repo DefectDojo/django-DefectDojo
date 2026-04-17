@@ -37,7 +37,6 @@ dojo/{module}/
 
 ### Architecture Principles
 
-**Long-term goal**: Remove the classic Django template UI and make the app fully API-based. The `ui/` subdirectory should be deletable with zero impact on `api/` or shared business logic.
 
 **services.py is the critical layer**: Both `ui/views.py` and `api/views.py` call `services.py` for business logic. Services accept domain objects and primitives — never request/response objects, forms, or serializers.
 
