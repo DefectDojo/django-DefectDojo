@@ -10,9 +10,10 @@ from dojo.models import (
     Test_Type,
     User,
 )
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
+@versioned_fixtures
 class TestPdfReportTextWrapping(DojoTestCase):
 
     """
