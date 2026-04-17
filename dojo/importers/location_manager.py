@@ -6,6 +6,7 @@ from operator import itemgetter
 from typing import TYPE_CHECKING
 
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import signals
 from django.utils import timezone
 
@@ -130,8 +131,9 @@ class LocationManager(BaseLocationManager):
 
     def persist(self, user: Dojo_User | None = None) -> None:
         """Persist all accumulated location operations to the database."""
-        self._persist_locations()
-        self._persist_status_updates()
+        with transaction.atomic():
+            self._persist_locations()
+            self._persist_status_updates()
 
     def _persist_locations(self) -> None:
         """Bulk get/create all locations and their finding/product refs."""
