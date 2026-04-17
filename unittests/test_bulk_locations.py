@@ -500,3 +500,50 @@ class TestStatusUpdateQueryEfficiency(DojoTestCase):
 
         # Expected: 1 SELECT (partial-status fetch) + 1 UPDATE (mitigate for the single user).
         self.assertLess(len(ctx.captured_queries), 5, ctx.captured_queries)
+
+    def test_partial_status_update_reactivates_matching_mitigates_rest(self):
+        """
+        When a reimported finding is NOT mitigated, locations still present in
+        the report should be reactivated, and locations absent from the report
+        should be mitigated.
+        """
+        finding = _make_finding()
+        product = finding.test.engagement.product
+
+        # Create three locations, all currently mitigated on this finding
+        url_kept = _make_url("kept.example.com")
+        url_also_kept = _make_url("also-kept.example.com")
+        url_gone = _make_url("gone.example.com")
+        saved = URL.bulk_get_or_create([url_kept, url_also_kept, url_gone])
+
+        refs = []
+        for loc in saved:
+            refs.append(LocationFindingReference.objects.create(
+                location=loc.location,
+                finding=finding,
+                status=FindingLocationStatus.Mitigated,
+            ))
+
+        # Simulate a reimport where the new finding is active and only has two of the three locations
+        new_finding = Finding(
+            title=finding.title, severity=finding.severity,
+            test=finding.test, is_mitigated=False,
+        )
+        new_finding.unsaved_locations = [
+            LocationData(type="url", data={"url": "https://kept.example.com"}),
+            LocationData(type="url", data={"url": "https://also-kept.example.com"}),
+        ]
+
+        mgr = LocationManager(product)
+        mgr.update_location_status(finding, new_finding, finding.reporter)
+        mgr.persist()
+
+        # Refresh from DB
+        for ref in refs:
+            ref.refresh_from_db()
+
+        # The two locations still in the report should be reactivated
+        self.assertEqual(refs[0].status, FindingLocationStatus.Active)
+        self.assertEqual(refs[1].status, FindingLocationStatus.Active)
+        # The location no longer in the report should be mitigated
+        self.assertEqual(refs[2].status, FindingLocationStatus.Mitigated)
