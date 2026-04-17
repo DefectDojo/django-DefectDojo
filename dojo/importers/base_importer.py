@@ -460,6 +460,13 @@ class BaseImporter(ImporterOptions):
         import_settings["push_to_jira"] = self.push_to_jira
         import_settings["tags"] = self.tags
         import_settings["scan_date"] = self.scan_date.isoformat() if self.scan_date_override else None
+        import_settings["service"] = self.service
+        import_settings["close_old_findings_product_scope"] = self.close_old_findings_product_scope
+        import_settings["do_not_reactivate"] = self.do_not_reactivate
+        import_settings["apply_tags_to_findings"] = self.apply_tags_to_findings
+        import_settings["apply_tags_to_endpoints"] = self.apply_tags_to_endpoints
+        import_settings["group_by"] = self.group_by
+        import_settings["create_finding_groups_for_all_findings"] = self.create_finding_groups_for_all_findings
         if settings.V3_FEATURE_LOCATIONS:
             # Add the list of locations that were added exclusively at import time
             if len(self.endpoints_to_add) > 0:

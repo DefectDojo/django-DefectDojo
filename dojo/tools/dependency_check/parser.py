@@ -390,7 +390,6 @@ class DependencyCheckParser:
             mitigation=mitigation,
             mitigated=mitigated,
             is_mitigated=is_Mitigated,
-            tags=tags,
             active=active,
             dynamic_finding=False,
             static_finding=True,
@@ -399,6 +398,8 @@ class DependencyCheckParser:
             component_version=component_version,
             **self.get_severity_and_cvss_meta(vulnerability, namespace),
         )
+
+        finding.unsaved_tags = tags
 
         if settings.V3_FEATURE_LOCATIONS and component_purl:
             finding.unsaved_locations.append(

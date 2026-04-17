@@ -55,6 +55,12 @@ For example:
 curl -H "Authorization: Bearer ATATT1234567890abcdefghijklmnopqrstuvwxyz" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
 ```
 
+## Jira Service Accounts Are Not Supported
+
+Jira Cloud Service Accounts (created via Atlassian's admin console) use a different API host than standard user accounts and are **not currently supported** by DefectDojo's Jira integration. Attempting to use a Service Account API token or OAuth 2.0 credentials from a Service Account will result in HTTP 403 errors.
+
+To set up the Jira integration, create a standard Jira user account (with a valid email address) and generate an API token from that account. If you want to clearly identify issues created by DefectDojo, create a dedicated user named something like "DefectDojo" and use its API token for the integration.
+
 ## I can't find an Epic Name ID for my Space
 Certain Spaces in Jira, such as Team-Managed Spaces, do not use Epics and therefore will not have an Epic Name ID.  In this case, set Epic Name ID to 0 in DefectDojo.
 
