@@ -262,7 +262,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
             # If batch is full or we're at the end, persist locations/endpoints and dispatch
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
-                self.location_handler.persist(user=self.user)
+                self.location_handler.persist()
                 # Apply parser-supplied tags for this batch before post-processing starts,
                 # so rules/deduplication tasks see the tags already on the findings.
                 bulk_apply_parser_tags(findings_with_parser_tags)
@@ -395,7 +395,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 product_grading_option=False,
             )
         # Persist any accumulated location/endpoint status changes
-        self.location_handler.persist(user=self.user)
+        self.location_handler.persist()
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far

@@ -50,7 +50,7 @@ class BaseLocationManager(ABC):
         """Record items on this finding for reactivation."""
 
     @abstractmethod
-    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User | None = None) -> None:
+    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         """Record items on this finding for mitigation."""
 
     @abstractmethod
@@ -66,7 +66,7 @@ class BaseLocationManager(ABC):
         """Serialize extra locations/endpoints for import history settings."""
 
     @abstractmethod
-    def persist(self, user: Dojo_User | None = None) -> None:
+    def persist(self) -> None:
         """Flush all accumulated operations to the database."""
 
 
@@ -114,7 +114,7 @@ class LocationHandler:
     def record_reactivations_for_finding(self, finding: Finding) -> None:
         return self._manager.record_reactivations_for_finding(finding)
 
-    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User | None = None) -> None:
+    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         return self._manager.record_mitigations_for_finding(finding, user)
 
     def get_locations_for_tagging(self, findings: list[Finding]):
@@ -126,5 +126,5 @@ class LocationHandler:
     def serialize_extra_locations(self, locations: list) -> dict:
         return self._manager.serialize_extra_locations(locations)
 
-    def persist(self, user: Dojo_User | None = None) -> None:
-        return self._manager.persist(user)
+    def persist(self) -> None:
+        return self._manager.persist()

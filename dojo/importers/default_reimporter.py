@@ -421,7 +421,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
-                        self.location_handler.persist(user=self.user)
+                        self.location_handler.persist()
                         # Apply parser-supplied tags for this batch before post-processing starts,
                         # so rules/deduplication tasks see the tags already on the findings.
                         bulk_apply_parser_tags(findings_with_parser_tags)
@@ -533,7 +533,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 )
                 mitigated_findings.append(finding)
         # Persist any accumulated location/endpoint status changes
-        self.location_handler.persist(user=self.user)
+        self.location_handler.persist()
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far

@@ -43,7 +43,7 @@ class LocationManager(BaseLocationManager):
         self._finding_ids_to_fully_reactivate: list[int] = []
         # finding_id -> user: fully mitigate (all non-special refs on this finding become mitigated by user).
         # If recorded multiple times for the same finding, last user wins.
-        self._finding_ids_to_fully_mitigate: dict[int, Dojo_User | None] = {}
+        self._finding_ids_to_fully_mitigate: dict[int, Dojo_User] = {}
         # Cached result of _should_inherit_product_tags() — lazily computed and reused across persist() calls
         self._cached_should_inherit_product_tags: bool | None = None
 
@@ -109,7 +109,7 @@ class LocationManager(BaseLocationManager):
         """Defer reactivation to persist(). No DB access at record time."""
         self._finding_ids_to_fully_reactivate.append(finding.id)
 
-    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User | None = None) -> None:
+    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         """Defer mitigation to persist(). No DB access at record time."""
         self._finding_ids_to_fully_mitigate[finding.id] = user
 
@@ -129,7 +129,7 @@ class LocationManager(BaseLocationManager):
     # Persist — flush all accumulated operations to DB
     # ------------------------------------------------------------------
 
-    def persist(self, user: Dojo_User | None = None) -> None:
+    def persist(self) -> None:
         """Persist all accumulated location operations to the database."""
         with transaction.atomic():
             self._persist_locations()
