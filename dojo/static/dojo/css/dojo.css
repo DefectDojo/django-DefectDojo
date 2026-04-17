@@ -1127,14 +1127,19 @@ div.custom-search-form {
 }
 
 .os-banner-toggle {
+    background: transparent;
+    border: 0;
+    padding: 0;
     margin-left: 6px;
-    cursor: pointer;
     color: inherit;
-    text-decoration: none;
+    cursor: pointer;
+    line-height: 1;
 }
 
-.os-banner-toggle .fa-caret-down {
-    transition: transform 0.15s ease-in-out;
+.os-banner-toggle:focus,
+.os-banner-toggle:active {
+    outline: none;
+    box-shadow: none;
 }
 
 .os-banner-toggle:not(.collapsed) .fa-caret-down {
