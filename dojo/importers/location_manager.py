@@ -360,12 +360,16 @@ class LocationManager(BaseLocationManager):
         locations: list[UnsavedLocation],
     ) -> list[AbstractLocation]:
         """
-        Convert locations represented as LocationData dataclasses to the appropriate
-        AbstractLocation type and deduplicate them. Cleaning (validation + normalization)
-        is deferred to bulk_get_or_create which calls clean() on each location before
-        DB access.
+        Convert locations represented as LocationData dataclasses to the appropriate AbstractLocation type, then clean
+        them. For any endpoints that fail this validation process, log a message that broken locations are being stored.
         """
-        return list(set(cls.make_abstract_locations(locations)))
+        locations = list(set(cls.make_abstract_locations(locations)))
+        for location in locations:
+            try:
+                location.clean()
+            except ValidationError as e:
+                logger.warning("DefectDojo is storing broken locations because cleaning wasn't successful: %s", e)
+        return locations
 
     # ------------------------------------------------------------------
     # Bulk internals
