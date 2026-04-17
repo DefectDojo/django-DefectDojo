@@ -40,8 +40,9 @@ class LocationManager(BaseLocationManager):
         self._status_updates: list[tuple[Finding, Finding, Dojo_User]] = []
         # finding_id: fully reactivate (all mitigated refs on this finding become active)
         self._finding_ids_to_fully_reactivate: list[int] = []
-        # (finding_id, user): fully mitigate (all non-special refs on this finding become mitigated by user)
-        self._finding_ids_to_fully_mitigate: list[tuple[int, Dojo_User | None]] = []
+        # finding_id -> user: fully mitigate (all non-special refs on this finding become mitigated by user).
+        # If recorded multiple times for the same finding, last user wins.
+        self._finding_ids_to_fully_mitigate: dict[int, Dojo_User | None] = {}
         # Cached result of _should_inherit_product_tags() — lazily computed and reused across persist() calls
         self._cached_should_inherit_product_tags: bool | None = None
 
@@ -109,7 +110,7 @@ class LocationManager(BaseLocationManager):
 
     def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User | None = None) -> None:
         """Defer mitigation to persist(). No DB access at record time."""
-        self._finding_ids_to_fully_mitigate.append((finding.id, user))
+        self._finding_ids_to_fully_mitigate[finding.id] = user
 
     def get_locations_for_tagging(self, findings: list[Finding]):
         """Return queryset of locations to apply tags to."""
@@ -128,9 +129,9 @@ class LocationManager(BaseLocationManager):
     # ------------------------------------------------------------------
 
     def persist(self, user: Dojo_User | None = None) -> None:
-        """Flush all accumulated location operations to the database."""
+        """Persist all accumulated location operations to the database."""
         self._persist_locations()
-        self._flush_status_updates()
+        self._persist_status_updates()
 
     def _persist_locations(self) -> None:
         """Bulk get/create all locations and their finding/product refs."""
@@ -233,18 +234,12 @@ class LocationManager(BaseLocationManager):
                 known_product=self._product,
             )
 
+        # Clear accumulators
         self._locations_by_finding.clear()
         self._product_locations.clear()
 
-    def _flush_status_updates(self) -> None:
-        """
-        Resolve all accumulated status-update inputs and execute them as bulk UPDATEs.
-
-        Produces ~3-4 queries total regardless of the number of findings processed:
-        1 SELECT to fetch relevant location refs for partial-status updates,
-        1 UPDATE for reactivations,
-        1 UPDATE per unique mitigation user (typically 1).
-        """
+    def _persist_status_updates(self) -> None:
+        """Bulk persist recorded finding/product ref statuses."""
         # Short-circuit if nothing to do
         if not (self._status_updates or self._finding_ids_to_fully_reactivate or self._finding_ids_to_fully_mitigate):
             return
@@ -288,7 +283,7 @@ class LocationManager(BaseLocationManager):
                         else:
                             ref_ids_to_mitigate_by_user.setdefault(user, set()).add(ref.id)
 
-        # Full reactivations (from record_reactivations_for_finding): all mitigated refs for these findings
+        # Reactivate all mitigated refs for these findings
         if self._finding_ids_to_fully_reactivate:
             ref_ids_to_reactivate.update(
                 LocationFindingReference.objects.filter(
@@ -297,11 +292,11 @@ class LocationManager(BaseLocationManager):
                 ).values_list("id", flat=True),
             )
 
-        # Full mitigations (from record_mitigations_for_finding): all non-special refs for these findings, per user
+        # Mitigate all non-special refs for these findings, per user
         if self._finding_ids_to_fully_mitigate:
             # Group finding_ids by user to do one SELECT per user
             ids_by_user: dict[Dojo_User | None, list[int]] = {}
-            for finding_id, user in self._finding_ids_to_fully_mitigate:
+            for finding_id, user in self._finding_ids_to_fully_mitigate.items():
                 ids_by_user.setdefault(user, []).append(finding_id)
             for user, finding_ids in ids_by_user.items():
                 ref_ids_to_mitigate_by_user.setdefault(user, set()).update(
