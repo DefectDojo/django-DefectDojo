@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
 
@@ -375,6 +376,7 @@ class BulkApplyParserTagsTest(TestCase):
 
     def setUp(self):
         self.tag_model = Finding.tags.tag_model
+        self.reporter = User.objects.create_user(username="parser-test-user", password="x")
         pt = Product_Type.objects.create(name="PT-Parser")
         product = Product.objects.create(name="Parser Product", description="x", prod_type=pt)
         engagement = Engagement.objects.create(
@@ -389,7 +391,7 @@ class BulkApplyParserTagsTest(TestCase):
         self.test = test
 
     def _make_finding(self, title):
-        return Finding.objects.create(title=title, severity="Low", test=self.test)
+        return Finding.objects.create(title=title, severity="Low", test=self.test, reporter=self.reporter)
 
     def test_applies_tags_correctly(self):
         f1 = self._make_finding("F1")
