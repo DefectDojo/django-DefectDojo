@@ -370,9 +370,6 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             if not isinstance(loc, cls):
                 error_message = f"Invalid location type; expected {cls} but got {type(loc)}"
                 raise TypeError(error_message)
-            # Set .identity_hash if not present
-            if not loc.identity_hash:
-                loc.clean()
             hashes.append(loc.identity_hash)
 
         # Look up existing objects, grouping by hash
