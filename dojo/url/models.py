@@ -225,12 +225,6 @@ class URL(AbstractLocation):
             return URL.URL_PARSING_CLASS().unparse(self)
         return self.manual_str()
 
-    def __hash__(self) -> int:
-        return hash(str(self))
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, URL) and str(self) == str(other)
-
     @classmethod
     def get_location_type(cls) -> str:
         return cls.LOCATION_TYPE

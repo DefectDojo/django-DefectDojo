@@ -276,6 +276,12 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
     class Meta:
         abstract = True
 
+    def __hash__(self) -> int:
+        return hash(str(self))
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, type(self)) and str(self) == str(other)
+
     def clean(self, *args: list, **kwargs: dict) -> None:
         self.set_identity_hash()
         super().clean(*args, **kwargs)
