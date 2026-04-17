@@ -32,7 +32,7 @@ class LocationManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
         super().__init__(product)
-        self._locations_by_finding: dict[int, tuple[Finding, list[UnsavedLocation]]] = {}
+        self._locations_by_finding: dict[Finding, list[UnsavedLocation]] = {}
         # Product-only locations (not tied to a finding). Appended to by record_locations_for_product.
         self._product_locations: list[UnsavedLocation] = []
         # Status update inputs (deferred). All entries are processed in a single bulk pass by persist().
@@ -73,7 +73,7 @@ class LocationManager(BaseLocationManager):
     ) -> None:
         """Record locations to be associated with a finding (and its product). Flushed by persist()."""
         if locations:
-            self._locations_by_finding.setdefault(finding.id, (finding, []))[1].extend(locations)
+            self._locations_by_finding.setdefault(finding, []).extend(locations)
             self._product_locations.extend(locations)
 
     def update_location_status(
@@ -133,76 +133,44 @@ class LocationManager(BaseLocationManager):
         self._flush_status_updates()
 
     def _persist_locations(self) -> None:
-        """Bulk get/create all locations and their finding + product refs."""
+        """Bulk get/create all locations and their finding/product refs."""
+        # _product_locations contains all locations to persist: associate with finding -> associate with product
         if not self._product_locations:
             return
 
-        # --- Phase 1: Build finding ranges, then clean all product locations at once ---
-        # _product_locations contains everything: finding-associated locations are appended by
-        # record_locations_for_finding, product-only locations by record_locations_for_product.
-        # Build finding ranges first (indexing into the per-finding sublists), then clean the
-        # full _product_locations list in one pass.
-        finding_ranges: list[tuple[Finding, list[UnsavedLocation]]] = []
-        for finding, locations in self._locations_by_finding.values():
-            if locations:
-                finding_ranges.append((finding, locations))
-
+        # Convert all UnsavedLocation objects (possibly a mix of AbstractLocation and LocationData objects) to cleaned
+        # concrete location objects
         all_locations = self.clean_unsaved_locations(self._product_locations)
         if not all_locations:
             self._locations_by_finding.clear()
             self._product_locations.clear()
             return
 
-        # --- Phase 2: Bulk get/create ---
+        # Bulk persist all locations to the database
         saved = self._bulk_get_or_create_locations(all_locations)
 
-        # Build a lookup from identity_hash -> saved location for finding ref creation
-        saved_by_hash: dict[str, AbstractLocation] = {loc.identity_hash: loc for loc in saved}
+        # Build a lookup from (type, identity_hash) -> saved location for finding ref creation.
+        # identity_hash is only unique per concrete type, so we key by both.
+        #
+        # Finding/location mapping was tracked separately in _locations_by_finding which are still the raw
+        # UnsavedLocation objects; we'll need to line them up with the persisted locations.
+        saved_by_key: dict[tuple[type, str], AbstractLocation] = {
+            (type(loc), loc.identity_hash): loc for loc in saved
+        }
 
-        # --- Phase 3: Create refs ---
+        # Lists for bulk creation
         all_finding_refs = []
         all_product_refs = []
-        locations_needing_inherit: dict[int, AbstractLocation] = {}
-
-        # Pre-fetch existing product refs for this product across all locations (one query)
+        # List of all location IDs, for querying existing refs
         all_location_ids = [loc.location_id for loc in saved]
+
+        # Determine necessary product refs to create
         existing_product_refs: set[int] = set(
             LocationProductReference.objects.filter(
                 location_id__in=all_location_ids,
                 product=self._product,
             ).values_list("location_id", flat=True),
         )
-
-        # Pre-fetch existing finding refs in one query (avoids N+1)
-        if finding_ranges:
-            all_finding_ids = [finding.id for finding, _ in finding_ranges]
-            existing_finding_ref_keys: set[tuple[int, int]] = set(
-                LocationFindingReference.objects.filter(
-                    location_id__in=all_location_ids,
-                    finding_id__in=all_finding_ids,
-                ).values_list("finding_id", "location_id"),
-            )
-
-            for finding, unsaved_locations in finding_ranges:
-                # Re-clean per-finding locations to get the same AbstractLocations with identity_hashes
-                for location in self.clean_unsaved_locations(unsaved_locations):
-                    saved_loc = saved_by_hash.get(location.identity_hash)
-                    if saved_loc is None:
-                        continue
-                    finding_ref_key = (finding.id, saved_loc.location_id)
-                    if finding_ref_key not in existing_finding_ref_keys:
-                        assoc = saved_loc.get_association_data()
-                        all_finding_refs.append(LocationFindingReference(
-                            location_id=saved_loc.location_id,
-                            finding=finding,
-                            status=FindingLocationStatus.Active,
-                            relationship=assoc.relationship_type,
-                            relationship_data=assoc.relationship_data,
-                        ))
-                        existing_finding_ref_keys.add(finding_ref_key)
-                        locations_needing_inherit[saved_loc.location_id] = saved_loc
-
-        # Product refs for all locations
         for location in saved:
             if location.location_id not in existing_product_refs:
                 assoc = location.get_association_data()
@@ -214,9 +182,41 @@ class LocationManager(BaseLocationManager):
                     relationship_data=assoc.relationship_data,
                 ))
                 existing_product_refs.add(location.location_id)
-                locations_needing_inherit[location.location_id] = location
 
-        # --- Phase 4: Bulk create refs ---
+        # Determine necessary finding refs to create
+        if self._locations_by_finding:
+            all_finding_ids = [finding.id for finding in self._locations_by_finding]
+            # Strictly speaking this returns more rows than we need (it's the cross of the location/finding lists rather
+            # than scoped per-finding), but more straightforward than constructing a per-finding lookup. We won't create
+            # any unwanted associations below anyway.
+            existing_finding_ref_keys: set[tuple[int, int]] = set(
+                LocationFindingReference.objects.filter(
+                    location_id__in=all_location_ids,
+                    finding_id__in=all_finding_ids,
+                ).values_list("finding_id", "location_id"),
+            )
+
+            for finding, unsaved_locations in self._locations_by_finding.items():
+                # Clean per-finding UnsavedLocations to get cleaned AbstractLocations with identity_hashes. The
+                # identity_hash uniquely defines the location per type, so using these we can match up with actual
+                # persisted locations from above, all of which will be represented in saved_by_key. (Keep in mind,
+                # _locations_by_finding contains a subset of the locations across all its values in
+                # _locations_by_finding.)
+                for location in self.clean_unsaved_locations(unsaved_locations):
+                    saved_loc = saved_by_key[type(location), location.identity_hash]
+                    finding_ref_key = (finding.id, saved_loc.location_id)
+                    if finding_ref_key not in existing_finding_ref_keys:
+                        assoc = saved_loc.get_association_data()
+                        all_finding_refs.append(LocationFindingReference(
+                            location_id=saved_loc.location_id,
+                            finding=finding,
+                            status=FindingLocationStatus.Active,
+                            relationship=assoc.relationship_type,
+                            relationship_data=assoc.relationship_data,
+                        ))
+                        existing_finding_ref_keys.add(finding_ref_key)
+
+        # Bulk create references
         if all_finding_refs:
             LocationFindingReference.objects.bulk_create(
                 all_finding_refs, batch_size=1000, ignore_conflicts=True,
@@ -226,10 +226,10 @@ class LocationManager(BaseLocationManager):
                 all_product_refs, batch_size=1000, ignore_conflicts=True,
             )
 
-        # --- Phase 5: Tag inheritance ---
-        if self._should_inherit_product_tags() and locations_needing_inherit:
+        # Trigger bulk tag inheritance
+        if self._should_inherit_product_tags():
             self._bulk_inherit_tags(
-                (loc.location for loc in locations_needing_inherit.values()),
+                (loc.location for loc in saved),
                 known_product=self._product,
             )
 

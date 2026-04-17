@@ -412,19 +412,18 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
                     for loc in new_locations
                 ]
                 Location.objects.bulk_create(parents, batch_size=1000)
-
                 # Assign Location FKs to the subtypes, then bulk create them.
                 for loc, parent in zip(new_locations, parents, strict=True):
                     loc.location_id = parent.id
                     loc.location = parent
-                # Note there is a subtle race condition here, if somehow one of our newly-created locations conflicts
-                # with an existing one (e.g. from a separate thread that commits while this is running). Setting
+                # Note: there is a subtle potential race condition here, if somehow one of the locations to be created
+                # has already been created, e.g. by a separate thread that commits while this thread is running. Setting
                 # `ignore_conflicts=True` here would prevent this step from raising an IntegrityError, but would leave
                 # dangling parent Location objects that were created above. Rather than performing a cleanup in that
                 # (unlikely?) case, just allow the transaction to rollback.
                 cls.objects.bulk_create(new_locations, batch_size=1000)
 
-        # Return in input order (minus dupes)
+        # Return in input order
         return [existing_by_hash[h] for h in hashes]
 
 
