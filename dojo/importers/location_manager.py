@@ -6,12 +6,13 @@ from operator import itemgetter
 from typing import TYPE_CHECKING, TypeVar
 
 from django.core.exceptions import ValidationError
+from django.db.models import signals
 from django.utils import timezone
 
 from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.location.models import AbstractLocation, Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.tags_signals import bulk_inherit_location_tags
+from dojo.tags_signals import make_inherited_tags_sticky
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 from dojo.utils import get_system_setting
@@ -214,7 +215,7 @@ class LocationManager(BaseLocationManager):
             # product has no tag inheritance enabled, and use the bulk variant otherwise to
             # avoid O(N) expensive JOINs via Location.all_related_products().
             if self._should_inherit_product_tags() and locations_needing_inherit:
-                bulk_inherit_location_tags(
+                self._bulk_inherit_tags(
                     (loc.location for loc in locations_needing_inherit.values()),
                     known_product=self._product,
                 )
@@ -410,3 +411,130 @@ class LocationManager(BaseLocationManager):
         # Restore the original input ordering
         saved.sort(key=itemgetter(0))
         return [loc for _, loc in saved]
+
+    # ------------------------------------------------------------------
+    # Tag inheritance
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _bulk_inherit_tags(locations, *, known_product=None):
+        """
+        Bulk equivalent of calling inherit_instance_tags(loc) for many Locations.
+
+        Uses aggressive prefetching to produce O(1) queries for the "decide what needs
+        to change" phase, and only runs per-instance mutation queries (~3 each) for
+        locations that are actually out of sync with their product tags.
+
+        Compared to the per-instance path, this avoids the N expensive JOINs in
+        Location.all_related_products() (~50ms each).
+
+        Args:
+            locations: iterable of Location instances to update
+            known_product: optional hint — if provided, used as the minimum product
+                set for locations not already associated elsewhere. Not strictly
+                required for correctness, but lets us skip the fetch-related-products
+                query in the common case.
+
+        """
+        from dojo.models import Product, _manage_inherited_tags  # noqa: PLC0415
+
+        locations = list(locations)
+        if not locations:
+            return
+
+        system_wide_inherit = bool(get_system_setting("enable_product_tag_inheritance"))
+
+        # --- Bulk query: map location_id -> set[product_id] for every related product
+        location_ids = [loc.id for loc in locations]
+        product_ids_by_location: dict[int, set[int]] = {loc.id: set() for loc in locations}
+
+        # Path 1: via LocationProductReference (direct association)
+        for loc_id, prod_id in LocationProductReference.objects.filter(
+            location_id__in=location_ids,
+        ).values_list("location_id", "product_id"):
+            product_ids_by_location[loc_id].add(prod_id)
+
+        # Path 2: via LocationFindingReference -> Finding -> Test -> Engagement -> Product
+        for loc_id, prod_id in (
+            LocationFindingReference.objects
+            .filter(location_id__in=location_ids)
+            .values_list("location_id", "finding__test__engagement__product_id")
+        ):
+            if prod_id is not None:
+                product_ids_by_location[loc_id].add(prod_id)
+
+        # Seed with known_product so callers don't have to rely on refs being persisted before this call
+        if known_product is not None:
+            for loc_id in location_ids:
+                product_ids_by_location[loc_id].add(known_product.id)
+
+        # --- Bulk query: fetch the unique products with their tags and inheritance flag
+        all_product_ids = {pid for pids in product_ids_by_location.values() for pid in pids}
+        if not all_product_ids:
+            return
+
+        products = {
+            p.id: p
+            for p in Product.objects.filter(id__in=all_product_ids).prefetch_related("tags")
+        }
+
+        # Products that contribute to inheritance (either opted in themselves or system-wide on)
+        contributing_product_ids = {
+            pid for pid, p in products.items()
+            if p.enable_product_tag_inheritance or system_wide_inherit
+        }
+        if not contributing_product_ids:
+            return
+
+        # Pre-compute the tag names each contributing product contributes
+        tags_by_product: dict[int, set[str]] = {
+            pid: {t.name for t in products[pid].tags.all()}
+            for pid in contributing_product_ids
+        }
+
+        # --- Bulk query: existing inherited_tags per location
+        inherited_through = Location.inherited_tags.through
+        inherited_fk = Location.inherited_tags.field.m2m_reverse_field_name()
+        existing_inherited_by_location: dict[int, set[str]] = {loc.id: set() for loc in locations}
+        for loc_id, tag_name in inherited_through.objects.filter(
+            location_id__in=location_ids,
+        ).values_list("location_id", f"{inherited_fk}__name"):
+            existing_inherited_by_location[loc_id].add(tag_name)
+
+        # --- Bulk query: existing user tags per location (needed by _manage_inherited_tags)
+        tags_through = Location.tags.through
+        tags_fk = Location.tags.field.m2m_reverse_field_name()
+        existing_tags_by_location: dict[int, list[str]] = {loc.id: [] for loc in locations}
+        for loc_id, tag_name in tags_through.objects.filter(
+            location_id__in=location_ids,
+        ).values_list("location_id", f"{tags_fk}__name"):
+            existing_tags_by_location[loc_id].append(tag_name)
+
+        # --- Determine which locations are out of sync and call _manage_inherited_tags directly.
+        # Must disconnect make_inherited_tags_sticky while we mutate — otherwise each
+        # tags.set() / inherited_tags.set() fires m2m_changed, re-enters the whole expensive
+        # chain per location, and defeats the point of the bulk path.
+        # Only disconnect/reconnect for senders where the signal is actually registered
+        # (tags.through). inherited_tags.through is not a registered sender — attempting
+        # to connect it after disconnect() would incorrectly add a new registration,
+        # causing recursion on subsequent calls.
+        disconnected = signals.m2m_changed.disconnect(make_inherited_tags_sticky, sender=tags_through)
+        try:
+            for location in locations:
+                target_tag_names: set[str] = set()
+                for pid in product_ids_by_location[location.id]:
+                    if pid in contributing_product_ids:
+                        target_tag_names |= tags_by_product[pid]
+
+                existing = existing_inherited_by_location[location.id]
+                if target_tag_names == existing:
+                    continue
+
+                _manage_inherited_tags(
+                    location,
+                    list(target_tag_names),
+                    potentially_existing_tags=existing_tags_by_location[location.id],
+                )
+        finally:
+            if disconnected:
+                signals.m2m_changed.connect(make_inherited_tags_sticky, sender=tags_through)
