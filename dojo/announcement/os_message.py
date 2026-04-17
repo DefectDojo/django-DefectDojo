@@ -7,7 +7,7 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
-BUCKET_URL = "https://storage.googleapis.com/defectdojo-os-messages-prod/open_source_message.md"
+BUCKET_URL = "https://storage.googleapis.com/defectdojo-os-messages-dev/open_source_message.md"
 CACHE_SECONDS = 3600
 HTTP_TIMEOUT_SECONDS = 2
 CACHE_KEY = "os_message:v1"
@@ -96,7 +96,7 @@ def parse_os_message(text):
         if expanded_source:
             expanded_rendered = markdown.markdown(
                 expanded_source,
-                extensions=["extra", "fenced_code"],
+                extensions=["extra", "fenced_code", "nl2br"],
             )
             expanded_html = bleach.clean(
                 expanded_rendered,

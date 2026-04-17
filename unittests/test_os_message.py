@@ -6,7 +6,7 @@ from django.template import Context, Template
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from dojo import context_processors
-from dojo.announcements import os_message
+from dojo.announcement import os_message
 
 
 class _Resp:
@@ -105,44 +105,44 @@ class TestFetchOsMessage(SimpleTestCase):
 
     def test_200_with_body_caches_body(self):
         body = "# headline\n"
-        with patch("dojo.announcements.os_message.requests.get", return_value=_Resp(200, body)) as mock_get:
+        with patch("dojo.announcement.os_message.requests.get", return_value=_Resp(200, body)) as mock_get:
             result = os_message.fetch_os_message()
         self.assertEqual(result, body)
         self.assertEqual(cache.get(os_message.CACHE_KEY), body)
         mock_get.assert_called_once()
 
     def test_404_caches_none(self):
-        with patch("dojo.announcements.os_message.requests.get", return_value=_Resp(404, "not found")):
+        with patch("dojo.announcement.os_message.requests.get", return_value=_Resp(404, "not found")):
             result = os_message.fetch_os_message()
         self.assertIsNone(result)
         self.assertIsNone(cache.get(os_message.CACHE_KEY, default="sentinel"))
 
     def test_timeout_caches_none(self):
-        with patch("dojo.announcements.os_message.requests.get", side_effect=requests.exceptions.Timeout):
+        with patch("dojo.announcement.os_message.requests.get", side_effect=requests.exceptions.Timeout):
             result = os_message.fetch_os_message()
         self.assertIsNone(result)
         self.assertIsNone(cache.get(os_message.CACHE_KEY, default="sentinel"))
 
     def test_connection_error_caches_none(self):
-        with patch("dojo.announcements.os_message.requests.get", side_effect=requests.exceptions.ConnectionError):
+        with patch("dojo.announcement.os_message.requests.get", side_effect=requests.exceptions.ConnectionError):
             result = os_message.fetch_os_message()
         self.assertIsNone(result)
         self.assertIsNone(cache.get(os_message.CACHE_KEY, default="sentinel"))
 
     def test_empty_body_caches_none(self):
-        with patch("dojo.announcements.os_message.requests.get", return_value=_Resp(200, "   \n\n")):
+        with patch("dojo.announcement.os_message.requests.get", return_value=_Resp(200, "   \n\n")):
             result = os_message.fetch_os_message()
         self.assertIsNone(result)
         self.assertIsNone(cache.get(os_message.CACHE_KEY, default="sentinel"))
 
     def test_second_call_hits_cache(self):
-        with patch("dojo.announcements.os_message.requests.get", return_value=_Resp(200, "# h\n")) as mock_get:
+        with patch("dojo.announcement.os_message.requests.get", return_value=_Resp(200, "# h\n")) as mock_get:
             os_message.fetch_os_message()
             os_message.fetch_os_message()
         self.assertEqual(mock_get.call_count, 1)
 
     def test_second_call_after_failure_also_hits_cache(self):
-        with patch("dojo.announcements.os_message.requests.get", side_effect=requests.exceptions.Timeout) as mock_get:
+        with patch("dojo.announcement.os_message.requests.get", side_effect=requests.exceptions.Timeout) as mock_get:
             os_message.fetch_os_message()
             os_message.fetch_os_message()
         self.assertEqual(mock_get.call_count, 1)
@@ -155,12 +155,12 @@ class TestGetOsBanner(SimpleTestCase):
         cache.clear()
 
     def test_returns_none_when_fetch_returns_none(self):
-        with patch("dojo.announcements.os_message.fetch_os_message", return_value=None):
+        with patch("dojo.announcement.os_message.fetch_os_message", return_value=None):
             self.assertIsNone(os_message.get_os_banner())
 
     def test_swallows_parse_exception(self):
-        with patch("dojo.announcements.os_message.fetch_os_message", return_value="# ok\n"), \
-             patch("dojo.announcements.os_message.parse_os_message", side_effect=RuntimeError("boom")):
+        with patch("dojo.announcement.os_message.fetch_os_message", return_value="# ok\n"), \
+             patch("dojo.announcement.os_message.parse_os_message", side_effect=RuntimeError("boom")):
             self.assertIsNone(os_message.get_os_banner())
 
 
