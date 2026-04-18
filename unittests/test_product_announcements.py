@@ -1,4 +1,3 @@
-from unittest.mock import MagicMock
 
 from django.http import HttpRequest, HttpResponse
 from django.test import SimpleTestCase
@@ -7,12 +6,12 @@ from dojo.product_announcements import (
     ErrorPageProductAnnouncement,
     LargeScanSizeProductAnnouncement,
     LongRunningRequestProductAnnouncement,
-    ProductAnnouncementManager,
     ScanTypeProductAnnouncement,
 )
 
 
 class _SessionDict(dict):
+
     """Minimal session stand-in that supports .get/.pop/[] like Django sessions."""
 
 
@@ -188,6 +187,7 @@ class TestScanTypeProductAnnouncement(SimpleTestCase):
 
 
 class TestBannerDictSchema(SimpleTestCase):
+
     """Verify every banner stored in the session has the expected keys."""
 
     EXPECTED_KEYS = {"source", "message", "style", "url", "link_text", "expanded_html"}
