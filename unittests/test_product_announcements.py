@@ -1,3 +1,4 @@
+from collections import UserDict
 
 from django.http import HttpRequest, HttpResponse
 from django.test import SimpleTestCase
@@ -10,7 +11,7 @@ from dojo.product_announcements import (
 )
 
 
-class _SessionDict(dict):
+class _SessionDict(UserDict):
 
     """Minimal session stand-in that supports .get/.pop/[] like Django sessions."""
 
