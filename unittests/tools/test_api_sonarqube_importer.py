@@ -53,6 +53,11 @@ def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
         return json.load(json_file)
 
 
+def dummy_sca_risks(self, *args, **kwargs):
+    with (get_unit_tests_scans_path("api_sonarqube") / "sca_risks.json").open(encoding="utf-8") as json_file:
+        return json.load(json_file)
+
+
 def empty_list(self, *args, **kwargs):
     return []
 
@@ -513,3 +518,78 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
         self.assertEqual(findings[0].static_finding, True)
         self.assertEqual(findings[0].scanner_confidence, 1)
         self.assertEqual(str(findings[0].sonarqube_issue), "AXgm6Z-ophPPY0C1qhRq")
+
+
+class TestSonarqubeImporterSCASupport(DojoTestCase):
+    # Test SCA risk import
+    fixtures = [
+        "unit_sonarqube_toolType.json",
+        "unit_sonarqube_toolConfig1.json",
+        "unit_sonarqube_sqcWithKey.json",
+        "unit_sonarqube_product.json",
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name="product")
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", dummy_sca_risks)
+    def test_sca_import_count(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        # Only OPEN risks should be imported (33 out of 49 total risks)
+        self.assertEqual(33, len(findings))
+
+
+class TestSonarqubeImporterValidateSCAData(DojoTestCase):
+    # Test SCA data mapping
+    fixtures = [
+        "unit_sonarqube_toolType.json",
+        "unit_sonarqube_toolConfig1.json",
+        "unit_sonarqube_sqcWithKey.json",
+        "unit_sonarqube_product.json",
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name="product")
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", dummy_sca_risks)
+    def test_sca_data_mapping(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        # Find the CVE-2020-35490 finding
+        cve_finding = next((f for f in findings if "CVE-2020-35490" in f.title), None)
+        self.assertIsNotNone(cve_finding)
+        self.assertEqual("CVE-2020-35490 - Deserialization of Untrusted Data", cve_finding.title)
+        self.assertEqual(502, cve_finding.cwe)
+        self.assertEqual("Medium", cve_finding.severity)
+        self.assertEqual(8.1, cve_finding.cvssv3_score)
+        self.assertEqual("com.fasterxml.jackson.core/jackson-databind", cve_finding.component_name)
+        self.assertEqual("2.9.10.7", cve_finding.component_version)
+        self.assertEqual(True, cve_finding.verified)
+        self.assertEqual(False, cve_finding.false_p)
+        self.assertEqual(False, cve_finding.duplicate)
+        self.assertEqual(False, cve_finding.out_of_scope)
+        self.assertEqual(True, cve_finding.static_finding)
+        # Verify description contains expected content
+        self.assertIn("CVE-2020-35490", cve_finding.description)
+        self.assertIn("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7", cve_finding.description)
+        self.assertIn("8.1", cve_finding.description)
+        self.assertIn("CWE-502", cve_finding.description)
+        # Verify vulnerability_ids
+        self.assertEqual(["CVE-2020-35490"], cve_finding.unsaved_vulnerability_ids)
+        # Verify unique_id_from_tool
+        self.assertEqual("sca:CVE-2020-35490:pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7", cve_finding.unique_id_from_tool)

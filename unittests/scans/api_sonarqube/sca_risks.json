@@ -1,0 +1,1781 @@
+[
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license CC-BY-2.5 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "INFO",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.google.code.findbugs/jsr305@1.3.9",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/98065346-607f-48de-b058-d43106ef5ba2/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.0.0.M2a",
+        "pkg:maven/com.google.guava/guava@10.0.1",
+        "pkg:maven/com.google.code.findbugs/jsr305@1.3.9"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license CDDL-1.1 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "Known Licence issue",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-06-12T10:47:06.541Z"
+      }
+    ],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/javax.servlet/javax.servlet-api@3.1.0",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/8b5282f0-c0b5-48ea-bf2d-5acdd6dd3c3c/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/javax.servlet/javax.servlet-api@3.1.0"
+      ]
+    ],
+    "scope": "provided",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license CDDL-1.1 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/javax.servlet.jsp/javax.servlet.jsp-api@2.3.3",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/fddf0e3a-f301-4288-a206-f0beed62db6f/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/javax.servlet.jsp/javax.servlet.jsp-api@2.3.3"
+      ]
+    ],
+    "scope": "provided",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license EPL-1.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-26T15:09:36.241Z"
+      },
+      {
+        "comment": "We have commercial overwrite for this: http://......",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-10-23T09:35:57.563Z"
+      }
+    ],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.eclipse.aether/aether-api@0.9.0.M2",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/1eceff80-42ff-4543-8cec-1b83a619052d/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.eclipse.aether/aether-api@0.9.0.M2"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license EPL-1.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "We own commercial license : INSERT LINK HERE",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-10-15T12:52:20.810Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-09-19T13:50:23.912Z"
+      },
+      {
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-09-12T13:45:16.720Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-09-12T13:45:11.834Z"
+      },
+      {
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-07-02T15:35:02.989Z"
+      }
+    ],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.0.0.M2a",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/3b39a93a-a849-4cd5-9cd3-fca5e9354cbb/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.0.0.M2a"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license EPL-1.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/junit/junit@4.13.2",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/40abc564-9636-492f-806c-daa031bd0073/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/junit/junit@4.13.2"
+      ]
+    ],
+    "scope": "test",
+    "productionScope": false
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license EPL-1.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "Commercial license purchased",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-11-26T15:09:23.385Z"
+      }
+    ],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.inject@0.0.0.M2a",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4e671b5e-d09c-4a56-812f-971409da2066/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.0.0.M2a",
+        "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.inject@0.0.0.M2a"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license EPL-1.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.eclipse.aether/aether-spi@0.9.0.M2",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/72b92a83-c07f-4e9a-9719-1648972480a8/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.apache.maven/maven-core@3.1.0",
+        "pkg:maven/org.apache.maven/maven-aether-provider@3.1.0",
+        "pkg:maven/org.eclipse.aether/aether-spi@0.9.0.M2"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license EPL-1.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.eclipse.aether/aether-impl@0.9.0.M2",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/904d8541-dcb8-4826-beef-4a56c63ef635/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.apache.maven/maven-core@3.1.0",
+        "pkg:maven/org.eclipse.aether/aether-impl@0.9.0.M2"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license EPL-1.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.eclipse.aether/aether-util@0.9.0.M2",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/f4e2ea03-165c-4981-b317-e7c1ee450e1f/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.apache.maven/maven-core@3.1.0",
+        "pkg:maven/org.eclipse.aether/aether-util@0.9.0.M2"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license GPL-2.0-only-WITH-Classpath-exception-2.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "accepted",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-12-17T14:30:14.082Z"
+      }
+    ],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/javax.servlet/javax.servlet-api@3.1.0",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/06c24b9b-bf6a-470b-96a5-89a5f88e0614/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/javax.servlet/javax.servlet-api@3.1.0"
+      ]
+    ],
+    "scope": "provided",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license GPL-2.0-only-WITH-Classpath-exception-2.0 should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/javax.servlet.jsp/javax.servlet.jsp-api@2.3.3",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/84b12265-0b40-4ab0-93d0-06237370ac12/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/javax.servlet.jsp/javax.servlet.jsp-api@2.3.3"
+      ]
+    ],
+    "scope": "provided",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license LicenseRef-sonar-public-domain-other should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.tukaani/xz@1.8",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4346df1d-3c57-4513-889d-c07fbc2bb81b/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+        "pkg:maven/org.tukaani/xz@1.8"
+      ]
+    ],
+    "scope": "runtime",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "Dependencies with license LicenseRef-sonar-public-domain-other should not be used",
+    "riskType": "PROHIBITED_LICENSE",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "-",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/aopalliance/aopalliance@1.0",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/c541ca44-971b-4a22-8506-e50e413f3adb/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.0.0.M2a",
+        "pkg:maven/org.sonatype.sisu/sisu-guice@3.1.0",
+        "pkg:maven/aopalliance/aopalliance@1.0"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-35490 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:57:53.612Z"
+      },
+      {
+        "comment": "This is ok",
+        "newStatus": "SAFE",
+        "createdAt": "2025-09-04T11:29:01.869Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-09-04T11:28:14.418Z"
+      },
+      {
+        "comment": "This does not affect us",
+        "newStatus": "SAFE",
+        "createdAt": "2025-06-11T12:19:04.965Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-35490",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2020-12-17",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/ec3c6c25-acc1-45b8-860a-0af2fa221f32/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-35491 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2026-01-19T14:23:02.183Z"
+      },
+      {
+        "comment": "We are not using default settings which the only vulnerable condition",
+        "newStatus": "SAFE",
+        "createdAt": "2026-01-19T14:22:42.984Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:57:22.812Z"
+      },
+      {
+        "comment": "ok as seen today with the team",
+        "newStatus": "SAFE",
+        "createdAt": "2025-07-02T15:15:55.213Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-06-27T12:59:46.181Z"
+      },
+      {
+        "comment": "Comme vu avec l'�quipe RSSI ce jour",
+        "newStatus": "SAFE",
+        "createdAt": "2025-06-12T14:45:02.928Z"
+      },
+      {
+        "comment": "Know issue we need to fix",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-06-02T09:19:24.359Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-35491",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2020-12-17",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4700ae11-5d0d-43f9-9a7c-c133a92a94f4/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-35728 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:57:39.716Z"
+      },
+      {
+        "comment": "Not affected",
+        "newStatus": "SAFE",
+        "createdAt": "2025-06-12T14:25:26.692Z"
+      },
+      {
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-06-10T18:26:58.972Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-35728",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2020-12-27",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/e338c099-a525-41c6-8346-b902adbecc53/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36179 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-12-03T14:12:44.667Z"
+      },
+      {
+        "comment": "Not going to fix today",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-06-16T14:23:21.906Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36179",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-07",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/68e99d9c-6eb4-4c9e-a2c4-2b2ab57a104f/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36180 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2026-03-30T13:34:25.925Z"
+      },
+      {
+        "comment": "Using default settings",
+        "newStatus": "SAFE",
+        "createdAt": "2026-03-30T13:34:05.922Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-12-11T14:18:43.739Z"
+      },
+      {
+        "comment": "Using default settings",
+        "newStatus": "SAFE",
+        "createdAt": "2025-12-11T14:18:28.590Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:57:59.067Z"
+      },
+      {
+        "comment": "We don't use HTTP 2",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-14T13:27:25.204Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-08-12T13:29:20.339Z"
+      },
+      {
+        "comment": "Using default setup",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-12T13:29:07.685Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-08-07T09:34:00.952Z"
+      },
+      {
+        "comment": "We are using default settings",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-08-07T09:33:39.202Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36180",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-07",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4021c338-d83f-4b2f-b097-e5a50c7051a5/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36181 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:57:43.150Z"
+      },
+      {
+        "comment": "Theres no risk here",
+        "newStatus": "SAFE",
+        "createdAt": "2025-06-17T11:40:30.796Z"
+      },
+      {
+        "comment": "This is known and needs to be changed",
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-06-17T07:42:45.858Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36181",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-06",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/fa79ca21-4140-428f-b7cd-6d07302a0846/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36182 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:58:09.202Z"
+      },
+      {
+        "comment": "Airgapped environment",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-19T10:33:12.191Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-08-13T09:25:04.122Z"
+      },
+      {
+        "comment": "Using default setting, not vulnerable",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-13T09:24:50.522Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-07-23T12:21:31.494Z"
+      },
+      {
+        "comment": "khbdfksbdf",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-07-23T12:21:11.214Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36182",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-07",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4c4f1896-708e-4f79-af31-ad4e8ed35e00/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36183 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:58:15.257Z"
+      },
+      {
+        "comment": "Airgapped, we don't use the HTTP / 2 protocol",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-20T10:27:09.659Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-07-31T08:26:29.317Z"
+      },
+      {
+        "comment": "No vulnerable condition met in our environmet",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-07-31T08:26:13.610Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36183",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-07",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/77f21f23-14de-4e36-99aa-6f8c7ad5573b/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36184 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:57:49.238Z"
+      },
+      {
+        "comment": "ok, this is fine here",
+        "newStatus": "SAFE",
+        "createdAt": "2025-06-26T07:36:03.216Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36184",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-06",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/3bfccbfe-b1b4-40af-8771-c1903cbe1a0f/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36185 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "SAFE",
+    "statusChanges": [
+      {
+        "comment": "Not meeting vulnerable conditions",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-18T13:33:07.289Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36185",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-06",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/290ccdba-53c5-4081-a8be-91d9bbd7df0a/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36186 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "SAFE",
+    "statusChanges": [
+      {
+        "comment": "This is not a vuln.",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-22T14:35:51.259Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36186",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-06",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/ce2cc785-9633-4db8-a2ed-bec8bbf5a3de/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36187 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-12T14:28:08.161Z"
+      },
+      {
+        "comment": "Safe in our context",
+        "newStatus": "SAFE",
+        "createdAt": "2025-11-12T14:27:51.573Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-04T16:34:42.852Z"
+      },
+      {
+        "comment": "no resolution yet",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-11-04T16:34:35.032Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-31T10:42:45.792Z"
+      },
+      {
+        "comment": "Review configuration, all safe",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-10-31T10:42:28.150Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-22T09:43:32.282Z"
+      },
+      {
+        "comment": "Not impacting us after research",
+        "newStatus": "SAFE",
+        "createdAt": "2025-10-22T09:40:34.628Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-21T12:15:43.702Z"
+      },
+      {
+        "comment": "My reason goes here",
+        "newStatus": "SAFE",
+        "createdAt": "2025-10-21T12:15:23.505Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-16T14:27:28.999Z"
+      },
+      {
+        "comment": "Using the default settings",
+        "newStatus": "SAFE",
+        "createdAt": "2025-10-16T14:27:02.253Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-03T09:26:57.752Z"
+      },
+      {
+        "comment": "Known issues change package.",
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-10-03T09:26:44.684Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-02T09:45:28.043Z"
+      },
+      {
+        "comment": "We use default settings",
+        "newStatus": "SAFE",
+        "createdAt": "2025-10-02T09:45:21.313Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36187",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-06",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/73cd191e-b27b-4b30-bbe9-baf29c48be79/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36188 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "Currently no fix, will flag for review next week",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-08-13T10:01:36.537Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-07-31T10:13:09.379Z"
+      },
+      {
+        "comment": "Need to fix.",
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-07-25T15:48:46.332Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-07-03T12:56:03.717Z"
+      },
+      {
+        "comment": "dsdsds",
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-07-02T15:33:38.176Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-06-20T12:26:11.079Z"
+      },
+      {
+        "comment": "Accepted for demo",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-06-20T12:25:57.210Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36188",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-06",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/03859ad2-e778-4036-8a2f-5c84bf9294cc/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36189 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "Airgapped environment, not worth fixing",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-09-10T15:23:16.489Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-08-18T14:40:35.806Z"
+      },
+      {
+        "comment": "Using default settings",
+        "newStatus": "SAFE",
+        "createdAt": "2025-08-18T14:40:26.316Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36189",
+    "cvssScore": 8.1,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2021-01-06",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4fe96d98-2c9e-444b-bfd3-eb676a9b5239/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-36518 - Out-of-bounds Write",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "Not an issue for us today, airgapped application",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-09-29T12:24:00.349Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-09-09T14:28:34.083Z"
+      },
+      {
+        "comment": "justification goes here",
+        "newStatus": "SAFE",
+        "createdAt": "2025-09-09T14:28:23.914Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-36518",
+    "cvssScore": 7.5,
+    "cweIds": [
+      "CWE-787"
+    ],
+    "publishedOn": "2022-03-11",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4cdf4b93-385a-48c6-bc5d-0463681e5cc6/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2020-8908 - Creation of Temporary File With Insecure Permissions",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "because i said so",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-07-22T13:09:12.495Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2020-8908",
+    "cvssScore": 3.3,
+    "cweIds": [
+      "CWE-378",
+      "CWE-732"
+    ],
+    "publishedOn": "2020-12-10",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.google.guava/guava@10.0.1",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/f7d19ade-fb88-43f1-a5e8-73aa80c0cc37/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.0.0.M2a",
+        "pkg:maven/com.google.guava/guava@10.0.1"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2021-26291 - Origin Validation Error",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "comment": "reopen",
+        "newStatus": "OPEN",
+        "createdAt": "2025-12-18T19:13:12.341Z"
+      },
+      {
+        "comment": "Suppressing until 11/Jun/2025",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-06-04T12:32:59.620Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2021-26291",
+    "cvssScore": 9.1,
+    "cweIds": [
+      "CWE-346"
+    ],
+    "publishedOn": "2021-04-23",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.maven/maven-core@3.1.0",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/a63dd22a-fa2b-43f0-a5c8-dbab864cdda5/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.apache.maven/maven-core@3.1.0"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2021-26291 - Origin Validation Error",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "Testing here,",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-07-04T08:39:37.782Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2021-26291",
+    "cvssScore": 9.1,
+    "cweIds": [
+      "CWE-346"
+    ],
+    "publishedOn": "2021-04-23",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.maven/maven-repository-metadata@3.1.0",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/24f80cc4-4221-40cc-8cae-8dc91877a07e/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.apache.maven/maven-core@3.1.0",
+        "pkg:maven/org.apache.maven/maven-repository-metadata@3.1.0"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2021-35515 - Excessive Iteration",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "testing api",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-12-18T15:51:54.163Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2021-35515",
+    "cvssScore": 7.5,
+    "cweIds": [
+      "CWE-834",
+      "CWE-835"
+    ],
+    "publishedOn": "2021-07-13",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.commons/commons-compress@1.20",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/c23a6343-6065-48e0-9c8f-046b706df550/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+        "pkg:maven/org.apache.commons/commons-compress@1.20"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2021-35516 - Improper Handling of Length Parameter Inconsistency",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "SAFE",
+    "statusChanges": [
+      {
+        "comment": "Safe",
+        "newStatus": "SAFE",
+        "createdAt": "2025-11-27T18:25:05.685Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2021-35516",
+    "cvssScore": 7.5,
+    "cweIds": [
+      "CWE-130",
+      "CWE-770"
+    ],
+    "publishedOn": "2021-07-13",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.commons/commons-compress@1.20",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/31a55485-480a-44c2-a7de-96de13399e29/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+        "pkg:maven/org.apache.commons/commons-compress@1.20"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2021-35517 - Improper Handling of Length Parameter Inconsistency",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2021-35517",
+    "cvssScore": 7.5,
+    "cweIds": [
+      "CWE-130",
+      "CWE-770"
+    ],
+    "publishedOn": "2021-07-13",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.commons/commons-compress@1.20",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/1dba016d-4a1e-4a9a-9aac-967ff6a7281a/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+        "pkg:maven/org.apache.commons/commons-compress@1.20"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2021-36090 - Improper Handling of Length Parameter Inconsistency",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2021-36090",
+    "cvssScore": 7.5,
+    "cweIds": [
+      "CWE-130"
+    ],
+    "publishedOn": "2021-07-13",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.commons/commons-compress@1.20",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/ab048e64-9b08-4c94-a4ae-e3610d0a7914/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+        "pkg:maven/org.apache.commons/commons-compress@1.20"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2022-29599 - Improper Encoding or Escaping of Output",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "Demo",
+        "newStatus": "ACCEPT",
+        "createdAt": "2026-02-17T16:52:30.812Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-18T14:56:41.626Z"
+      },
+      {
+        "comment": "Please fix",
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-10-02T16:23:39.485Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2022-29599",
+    "cvssScore": 9.8,
+    "cweIds": [
+      "CWE-116"
+    ],
+    "publishedOn": "2022-05-23",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.maven.shared/maven-shared-utils@3.2.1",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/3af52fd3-6d5f-4fa0-9c1e-e9d4fe65dbe0/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.apache.maven.shared/maven-shared-utils@3.2.1"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2022-42003 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2022-42003",
+    "cvssScore": 7.5,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2022-10-02",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/458bf669-cfb8-4394-ae43-fa77f7b6500b/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2022-42004 - Deserialization of Untrusted Data",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2022-42004",
+    "cvssScore": 7.5,
+    "cweIds": [
+      "CWE-502"
+    ],
+    "publishedOn": "2022-10-02",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/515bbf0c-adb0-4bfb-bd0f-630730eaa14f/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2023-2976 - Files or Directories Accessible to External Parties",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2023-2976",
+    "cvssScore": 7.1,
+    "cweIds": [
+      "CWE-552"
+    ],
+    "publishedOn": "2023-06-14",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.google.guava/guava@10.0.1",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/a1ec770c-9cdc-42a9-a428-e0e08249db19/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.eclipse.sisu/org.eclipse.sisu.plexus@0.0.0.M2a",
+        "pkg:maven/com.google.guava/guava@10.0.1"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2023-35116 - Allocation of Resources Without Limits or Throttling",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "INFO",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2023-35116",
+    "cvssScore": 4.7,
+    "cweIds": [
+      "CWE-770"
+    ],
+    "publishedOn": "2023-06-14",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/4f7beb7d-2444-4ffa-85bd-1a80f03d541b/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2023-37460 - Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "HIGH",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "comment": "reopened",
+        "newStatus": "OPEN",
+        "createdAt": "2025-12-17T15:19:39.690Z"
+      },
+      {
+        "comment": "safe for now",
+        "newStatus": "SAFE",
+        "createdAt": "2025-12-17T15:19:10.668Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-11-17T20:57:17.640Z"
+      },
+      {
+        "comment": "Test",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-11-12T13:27:39.116Z"
+      },
+      {
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-11-12T13:27:20.608Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-29T19:18:57.500Z"
+      },
+      {
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-10-21T07:51:20.189Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-08T22:02:12.743Z"
+      },
+      {
+        "comment": "test",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-09-02T10:43:04.007Z"
+      },
+      {
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-09-02T10:42:54.984Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-08-05T04:34:06.207Z"
+      },
+      {
+        "comment": "No current fix, we accwept for now but will fix when available",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-06-20T11:50:33.970Z"
+      },
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-05-30T17:29:46.620Z"
+      },
+      {
+        "comment": "This is a known issue",
+        "newStatus": "CONFIRM",
+        "createdAt": "2025-05-29T11:27:42.952Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2023-37460",
+    "cvssScore": 9.8,
+    "cweIds": [
+      "CWE-22",
+      "CWE-61"
+    ],
+    "publishedOn": "2023-07-25",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/080bb1bc-328d-4883-aaaa-a5bd803cd45a/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2024-25710 - Loop with Unreachable Exit Condition ('Infinite Loop')",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2024-25710",
+    "cvssScore": 5.5,
+    "cweIds": [
+      "CWE-835"
+    ],
+    "publishedOn": "2024-02-19",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.apache.commons/commons-compress@1.20",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/8127b285-ee0c-456a-8b72-a17c9f0bef12/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+        "pkg:maven/org.apache.commons/commons-compress@1.20"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2024-36124 - Out-of-bounds Read",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2024-36124",
+    "cvssScore": 5.3,
+    "cweIds": [
+      "CWE-125"
+    ],
+    "publishedOn": "2024-06-03",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/org.iq80.snappy/snappy@0.4",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/3185bdd2-082b-4b92-b50a-3941b517a23f/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-archiver@4.2.2",
+        "pkg:maven/org.iq80.snappy/snappy@0.4"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2024-47554 - Uncontrolled Resource Consumption",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2024-47554",
+    "cvssScore": 4.3,
+    "cweIds": [
+      "CWE-400"
+    ],
+    "publishedOn": "2024-10-03",
+    "createdAt": "2025-05-28T12:10:52.765Z",
+    "packageUrl": "pkg:maven/commons-io/commons-io@2.11.0",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/c75d4760-5e31-487e-9449-b03596248d82/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/commons-io/commons-io@2.11.0"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2025-48734 - Improper Access Control",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "MEDIUM",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "My reason goes here",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-09-29T11:21:52.200Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2025-48734",
+    "cvssScore": 8.8,
+    "cweIds": [
+      "CWE-284"
+    ],
+    "publishedOn": "2025-05-28",
+    "createdAt": "2025-06-03T03:37:50.871Z",
+    "packageUrl": "pkg:maven/commons-beanutils/commons-beanutils@1.9.4",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/750aa3b9-7dae-4d25-a8fe-6658e5c85f28/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/commons-beanutils/commons-beanutils@1.9.4"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2025-49128 - Generation of Error Message Containing Sensitive Information",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "ACCEPT",
+    "statusChanges": [
+      {
+        "comment": "2025-08-24 waiver",
+        "newStatus": "ACCEPT",
+        "createdAt": "2025-08-05T04:31:59.061Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2025-49128",
+    "cvssScore": 4.0,
+    "cweIds": [
+      "CWE-209"
+    ],
+    "publishedOn": "2025-06-06",
+    "createdAt": "2025-06-11T16:20:18.770Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.9.10",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/0fcc0ab0-799f-4738-a82c-5211e5e6998b/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+        "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.9.10"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2025-52999 - Stack-based Buffer Overflow",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [
+      {
+        "newStatus": "OPEN",
+        "createdAt": "2025-10-03T14:32:01.655Z"
+      },
+      {
+        "comment": "Not affecting us because ...",
+        "newStatus": "SAFE",
+        "createdAt": "2025-10-03T14:31:44.997Z"
+      }
+    ],
+    "vulnerabilityId": "CVE-2025-52999",
+    "cvssScore": 8.7,
+    "cweIds": [
+      "CWE-121"
+    ],
+    "publishedOn": "2025-06-25",
+    "createdAt": "2025-07-08T09:53:45.719Z",
+    "packageUrl": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.9.10",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/f9f8de7f-78a5-43fa-bbb8-a3cc2be17f53/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7",
+        "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.9.10"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  },
+  {
+    "projectKey": "demo:java-security",
+    "projectName": "Java Web App",
+    "branchKey": "main",
+    "riskTitle": "CVE-2025-67030 - Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+    "riskType": "VULNERABILITY",
+    "riskSeverity": "LOW",
+    "riskStatus": "OPEN",
+    "statusChanges": [],
+    "vulnerabilityId": "CVE-2025-67030",
+    "cvssScore": 8.8,
+    "cweIds": [
+      "CWE-22"
+    ],
+    "publishedOn": "2026-03-25",
+    "createdAt": "2026-03-27T19:26:11.635Z",
+    "packageUrl": "pkg:maven/org.codehaus.plexus/plexus-utils@3.3.0",
+    "riskUrl": "https://nautilus.sonarqube.org/dependency-risks/0c44486e-7ab2-4577-9de3-44b89c70be5d/what?id=demo%3Ajava-security",
+    "dependencyChains": [
+      [
+        "pkg:maven/org.apache.maven.plugins/maven-war-plugin@3.3.2",
+        "pkg:maven/org.codehaus.plexus/plexus-utils@3.3.0"
+      ]
+    ],
+    "scope": "compile",
+    "productionScope": true
+  }
+]
