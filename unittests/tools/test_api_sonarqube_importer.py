@@ -55,7 +55,16 @@ def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
 
 def dummy_sca_risks(self, *args, **kwargs):
     with (get_unit_tests_scans_path("api_sonarqube") / "sca_risks.json").open(encoding="utf-8") as json_file:
-        return json.load(json_file)
+        risks = json.load(json_file)
+        # Wrap in paginated response structure
+        return {
+            "page": {
+                "pageIndex": 1,
+                "pageSize": 500,
+                "total": len(risks)
+            },
+            "issuesReleases": risks
+        }
 
 
 def empty_list(self, *args, **kwargs):

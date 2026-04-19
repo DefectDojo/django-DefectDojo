@@ -243,32 +243,54 @@ class SonarQubeAPI:
         :param component_key: component key
         :return:
         """
-        request_filter = {"component": component_key}
+        page = 1
+        max_page = 100
+        risks = []
 
-        if branch:
-            request_filter["branch"] = branch
+        while page <= max_page:
+            request_filter = {
+                "component": component_key,
+                "pageIndex": page,
+                "pageSize": 500,
+            }
 
-        if organization:
-            request_filter["organization"] = organization
-        elif self.org_id:
-            request_filter["organization"] = self.org_id
+            if branch:
+                request_filter["branch"] = branch
 
-        response = self.session.get(
-            url=f"{self.sonar_api_url.replace('/api', '/api/v2')}/sca/risk-reports",
-            params=request_filter,
-            headers=self.default_headers,
-            timeout=settings.REQUESTS_TIMEOUT,
-        )
+            if organization:
+                request_filter["organization"] = organization
+            elif self.org_id:
+                request_filter["organization"] = self.org_id
 
-        if not response.ok:
-            msg = (
-                f"Unable to find SCA risks for component {component_key} "
-                f"due to {response.status_code} - {response.content}"
+            response = self.session.get(
+                url=f"{self.sonar_api_url.replace('/api', '/api/v2')}/sca/risk-reports",
+                params=request_filter,
+                headers=self.default_headers,
+                timeout=settings.REQUESTS_TIMEOUT,
             )
-            raise Exception(msg)
 
-        # SCA API returns array directly
-        return response.json()
+            if not response.ok:
+                msg = (
+                    f"Unable to find SCA risks for component {component_key} "
+                    f"due to {response.status_code} - {response.content}"
+                )
+                raise Exception(msg)
+
+            response_data = response.json()
+            # SCA API v2 may return paginated response or flat array
+            if isinstance(response_data, list):
+                # Flat array response (no pagination metadata)
+                risks.extend(response_data)
+                break
+            else:
+                # Paginated response with issuesReleases array
+                risks_page = response_data.get("issuesReleases", [])
+                if not risks_page:
+                    break
+                risks.extend(risks_page)
+                page += 1
+
+        return risks
 
     def get_issue(self, issue_key):
         """
