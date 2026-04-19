@@ -237,6 +237,39 @@ class SonarQubeAPI:
 
         return hotspots
 
+    def find_sca_risks(self, component_key, organization=None, branch=None):
+        """
+        Search for SCA dependency risks.
+        :param component_key: component key
+        :return:
+        """
+        request_filter = {"component": component_key}
+
+        if branch:
+            request_filter["branch"] = branch
+
+        if organization:
+            request_filter["organization"] = organization
+        elif self.org_id:
+            request_filter["organization"] = self.org_id
+
+        response = self.session.get(
+            url=f"{self.sonar_api_url.replace('/api', '/api/v2')}/sca/risk-reports",
+            params=request_filter,
+            headers=self.default_headers,
+            timeout=settings.REQUESTS_TIMEOUT,
+        )
+
+        if not response.ok:
+            msg = (
+                f"Unable to find SCA risks for component {component_key} "
+                f"due to {response.status_code} - {response.content}"
+            )
+            raise Exception(msg)
+
+        # SCA API returns array directly
+        return response.json()
+
     def get_issue(self, issue_key):
         """
         Search for issues.
