@@ -90,7 +90,7 @@ class ContrastParser:
                 )
 
             dupe_key = hashlib.sha256(
-                f"{finding.vuln_id_from_tool}".encode(),
+                f"{finding.unique_id_from_tool}".encode(),
             ).digest()
 
             if dupe_key in dupes:
