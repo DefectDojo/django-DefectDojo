@@ -1,5 +1,6 @@
-import requests
 from django.conf import settings
+
+from dojo.utils_ssrf import SSRFError, make_ssrf_safe_session, validate_url_for_ssrf
 
 
 class RiskReconAPI:
@@ -26,7 +27,14 @@ class RiskReconAPI:
             raise Exception(msg)
         if self.url.endswith("/"):
             self.url = endpoint[:-1]
-        self.session = requests.Session()
+
+        try:
+            validate_url_for_ssrf(self.url)
+        except SSRFError as exc:
+            msg = f"Invalid Risk Recon API url: {exc}"
+            raise Exception(msg) from exc
+
+        self.session = make_ssrf_safe_session()
         self.map_toes()
         self.get_findings()
 
@@ -54,7 +62,7 @@ class RiskReconAPI:
                     filters = comps.get(name)
                     self.toe_map[toe_id] = filters or self.data
         else:
-            msg = f"Unable to query Target of Evaluations due to {response.status_code} - {response.content}"
+            msg = f"Unable to query Target of Evaluations due to {response.status_code}"
             raise Exception(msg)   # TODO: when implementing ruff BLE001, please fix also TODO in unittests/test_risk_recon.py
 
     def filter_finding(self, finding):
@@ -86,5 +94,5 @@ class RiskReconAPI:
                     if not self.filter_finding(finding):
                         self.findings.append(finding)
             else:
-                msg = f"Unable to collect findings from toe: {toe} due to {response.status_code} - {response.content}"
+                msg = f"Unable to collect findings from toe: {toe} due to {response.status_code}"
                 raise Exception(msg)
