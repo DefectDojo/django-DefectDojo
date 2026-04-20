@@ -282,13 +282,12 @@ class SonarQubeAPI:
                 # Flat array response (no pagination metadata)
                 risks.extend(response_data)
                 break
-            else:
-                # Paginated response with issuesReleases array
-                risks_page = response_data.get("issuesReleases", [])
-                if not risks_page:
-                    break
-                risks.extend(risks_page)
-                page += 1
+            # Paginated response with issuesReleases array
+            risks_page = response_data.get("issuesReleases", [])
+            if not risks_page:
+                break
+            risks.extend(risks_page)
+            page += 1
 
         return risks
 

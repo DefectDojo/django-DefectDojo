@@ -61,9 +61,9 @@ def dummy_sca_risks(self, *args, **kwargs):
             "page": {
                 "pageIndex": 1,
                 "pageSize": 500,
-                "total": len(risks)
+                "total": len(risks),
             },
-            "issuesReleases": risks
+            "issuesReleases": risks,
         }
 
 
