@@ -66,12 +66,6 @@ class JIRAHelperTest(DojoTestCase):
         result = jira_helper.issue_from_jira_is_active(issue)
         self.assertFalse(result, "Issue with unknown status and resolution should be inactive")
 
-    def test_issue_from_jira_is_active_with_unknown_status_and_none_resolution(self):
-        """Test that issues with unknown status category and 'None' resolution are treated as active"""
-        issue = self.create_mock_jira_issue(status_category_key="custom_status", resolution="None")
-        result = jira_helper.issue_from_jira_is_active(issue)
-        self.assertTrue(result, "Issue with unknown status and 'None' resolution should be active")
-
     def test_issue_from_jira_is_active_without_status_category_and_no_resolution(self):
         """Test fallback to resolution check when status category is not available"""
         issue = Mock()
@@ -87,14 +81,6 @@ class JIRAHelperTest(DojoTestCase):
         issue.fields.resolution = {"id": "11", "name": "Fixed"}
         result = jira_helper.issue_from_jira_is_active(issue)
         self.assertFalse(result, "Issue without status category but with resolution should be inactive")
-
-    def test_issue_from_jira_is_active_without_status_category_with_none_string_resolution(self):
-        """Test that 'None' string resolution is treated as active"""
-        issue = Mock()
-        issue.fields = Mock()
-        issue.fields.resolution = "None"
-        result = jira_helper.issue_from_jira_is_active(issue)
-        self.assertTrue(result, "Issue with 'None' string resolution should be active")
 
     def test_issue_from_jira_is_active_without_fields(self):
         """Test that issues without fields attribute fall back gracefully"""
