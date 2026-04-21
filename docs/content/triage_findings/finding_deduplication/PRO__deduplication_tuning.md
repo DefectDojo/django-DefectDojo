@@ -34,7 +34,7 @@ To adjust Same Tool Deduplication:
 
 ### Available Deduplication Algorithms
 
-DefectDojo Pro offers three deduplication methods for same-tool deduplication:
+DefectDojo Pro offers the following deduplication methods for same-tool deduplication:
 
 #### Hash Code
 Uses a combination of selected fields to generate a unique hash. When selected, a third dropdown will appear showing the fields being used to calculate the hash.
@@ -46,6 +46,9 @@ This algorithm can be useful when working with SAST scanners, or situations wher
 
 #### Unique ID From Tool or Hash Code
 Attempts to use the tool's unique ID first, then falls back to the hash code if no unique ID is available. This provides the most flexible deduplication option.
+
+#### Global Component
+Matches findings by component name and version across **all Products** in the instance, rather than within a single Product or Engagement. Intended for SCA tools where the same vulnerable dependency appears in many Products. This algorithm is off by default and must be enabled by DefectDojo Support. See [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) for details.
 
 ## Cross Tool Deduplication
 
@@ -59,7 +62,7 @@ To enable Cross Tool Deduplication:
 2. Change the **Deduplication Algorithm** from "Disabled" to "Hash Code"
 3. Select which fields should be used for generating the hash in the **Hash Code Fields** dropdown
 
-Unlike Same Tool Deduplication, Cross Tool Deduplication only supports the Hash Code algorithm, as different tools rarely share compatible unique identifiers.
+Cross Tool Deduplication supports the Hash Code algorithm, which is suitable for most workflows, as different tools rarely share compatible unique identifiers. For SCA tools reporting the same dependencies, [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) is also available as a cross-tool option (off by default).
 
 ## Reimport Deduplication
 
