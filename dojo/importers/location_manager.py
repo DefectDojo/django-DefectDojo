@@ -43,10 +43,10 @@ class LocationManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
         super().__init__(product)
-        # Maps findings to a list of locations
-        self._locations_by_finding: dict[Finding, list[UnsavedLocation]] = {}
-        # Product-only locations (not tied to a finding)
-        self._product_locations: list[UnsavedLocation] = []
+        # Maps findings to a list of cleaned locations
+        self._locations_by_finding: dict[Finding, list[AbstractLocation]] = {}
+        # All locations needing product refs (finding-associated + product-only), cleaned at record time
+        self._product_locations: list[AbstractLocation] = []
         # Status update entries, which we'll use at persist-time to determine Location statuses by comparing
         # existing vs new finding entries.
         self._status_updates: list[StatusUpdateEntry] = []
@@ -66,8 +66,9 @@ class LocationManager(BaseLocationManager):
     ) -> None:
         """Record locations to be associated with a finding (and its product). Flushed by persist()."""
         if locations:
-            self._locations_by_finding.setdefault(finding, []).extend(locations)
-            self._product_locations.extend(locations)
+            cleaned = self.clean_unsaved_locations(locations)
+            self._locations_by_finding.setdefault(finding, []).extend(cleaned)
+            self._product_locations.extend(cleaned)
 
     def update_location_status(
         self,
@@ -132,10 +133,9 @@ class LocationManager(BaseLocationManager):
         if not self._product_locations:
             return
 
-        # Convert all UnsavedLocation objects (possibly a mix of AbstractLocation and LocationData objects) to cleaned
-        # concrete location objects. _product_locations is the superset of all locations (finding-associated +
-        # product-only), so cleaning it once covers everything.
-        all_locations = self.clean_unsaved_locations(self._product_locations)
+        # Locations are already cleaned at record time (in record_locations_for_finding). Deduplicate the
+        # full set — _product_locations is the superset of all locations (finding-associated + product-only).
+        all_locations = list({(type(loc), loc.identity_hash): loc for loc in self._product_locations}.values())
         if not all_locations:
             self._locations_by_finding.clear()
             self._product_locations.clear()
@@ -146,9 +146,6 @@ class LocationManager(BaseLocationManager):
 
         # Build a lookup from (type, identity_hash) -> saved location for finding ref creation.
         # identity_hash is only unique per concrete type, so we key by both.
-        #
-        # Finding/location mapping was tracked separately in _locations_by_finding which are still the raw
-        # UnsavedLocation objects; we'll need to line them up with the persisted locations.
         saved_by_key: dict[tuple[type, str], AbstractLocation] = {
             (type(loc), loc.identity_hash): loc for loc in saved
         }
@@ -191,13 +188,10 @@ class LocationManager(BaseLocationManager):
                 ).values_list("finding_id", "location_id"),
             )
 
-            for finding, unsaved_locations in self._locations_by_finding.items():
-                # Clean per-finding UnsavedLocations to get cleaned AbstractLocations with identity_hashes. The
-                # identity_hash uniquely defines the location per type, so using these we can match up with actual
-                # persisted locations from above, all of which will be represented in saved_by_key. (Keep in mind,
-                # _locations_by_finding contains a subset of the locations across all its values in
-                # _product_locations.)
-                for location in self.clean_unsaved_locations(unsaved_locations):
+            for finding, cleaned_locations in self._locations_by_finding.items():
+                # Locations were already cleaned at record time — identity_hash is set, so we can
+                # look up the persisted location directly.
+                for location in cleaned_locations:
                     saved_loc = saved_by_key[type(location), location.identity_hash]
                     finding_ref_key = (finding.id, saved_loc.location_id)
                     if finding_ref_key not in existing_finding_ref_keys:
