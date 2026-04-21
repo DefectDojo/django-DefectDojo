@@ -178,15 +178,15 @@
 
                     {% if finding.cvssv3 %}
                         <h6>CVSS v3</h6>
-                        <pre>{{ finding.cvssv3|markdown_render }}</pre>
+                        <div class="report-field">{{ finding.cvssv3|markdown_render }}</div>
                     {% endif %}
 
                     <h6>Description</h6>
-                    <pre>{{ finding.description|markdown_render }}</pre>
+                    <div class="report-field">{{ finding.description|markdown_render }}</div>
 
                     {% if finding.mitigation %}
                         <h6>Mitigation</h6>
-                        <pre>{{ finding.mitigation|markdown_render }}</pre>
+                        <div class="report-field">{{ finding.mitigation|markdown_render }}</div>
                     {% endif %}
 
                     {% if finding.get_report_requests %}
@@ -203,22 +203,22 @@
 
                     {% if finding.impact %}
                         <h6>Impact</h6>
-                        <pre>{{ finding.impact|markdown_render }}</pre>
+                        <div class="report-field">{{ finding.impact|markdown_render }}</div>
                     {% endif %}
                     
                     {% if finding.steps_to_reproduce %}
                         <h6>Steps to Reproduce</h6>
-                        <pre>{{ finding.steps_to_reproduce|markdown_render }}</pre>
+                        <div class="report-field">{{ finding.steps_to_reproduce|markdown_render }}</div>
                     {% endif %}
 
                     {% if finding.severity_justification %}
                         <h6>Severity Justification</h6>
-                        <pre>{{ finding.severity_justification|markdown_render }}</pre>
+                        <div class="report-field">{{ finding.severity_justification|markdown_render }}</div>
                     {% endif %}
 
                     {% if finding.references %}
                         <h6>References</h6>
-                        <pre>{{ finding.references|markdown_render }}</pre>
+                        <div class="report-field">{{ finding.references|markdown_render }}</div>
                     {% endif %}
                     
                     {% if include_finding_images %}

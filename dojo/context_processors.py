@@ -5,13 +5,14 @@ import time
 from django.conf import settings
 from django.contrib import messages
 
+from dojo.announcement.os_message import get_os_banner
 from dojo.labels import get_labels
 from dojo.models import Alerts, System_Settings, UserAnnouncement
 
 
 def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
-    return {
+    context = {
         "SHOW_LOGIN_FORM": settings.SHOW_LOGIN_FORM,
         "FORGOT_PASSWORD": settings.FORGOT_PASSWORD,
         "FORGOT_USERNAME": settings.FORGOT_USERNAME,
@@ -35,10 +36,31 @@ def globalize_vars(request):
         "DOCUMENTATION_URL": settings.DOCUMENTATION_URL,
         "API_TOKENS_ENABLED": settings.API_TOKENS_ENABLED,
         "API_TOKEN_AUTH_ENDPOINT_ENABLED": settings.API_TOKEN_AUTH_ENDPOINT_ENABLED,
-        "CREATE_CLOUD_BANNER": settings.CREATE_CLOUD_BANNER,
+        "SHOW_PLG_LINK": True,
         # V3 Feature Flags
         "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
     }
+
+    additional_banners = []
+
+    if (os_banner := get_os_banner()) is not None:
+        additional_banners.append({
+            "source": "os",
+            "message": os_banner["message"],
+            "style": "info",
+            "url": "",
+            "link_text": "",
+            "expanded_html": os_banner["expanded_html"],
+        })
+
+    if hasattr(request, "session"):
+        for banner in request.session.pop("_product_banners", []):
+            additional_banners.append(banner)
+
+    if additional_banners:
+        context["additional_banners"] = additional_banners
+
+    return context
 
 
 def bind_system_settings(request):
