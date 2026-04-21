@@ -13,13 +13,16 @@ from django.utils import timezone
 from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.location.models import AbstractLocation, Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
+from dojo.models import Product, _manage_inherited_tags
 from dojo.tags_signals import make_inherited_tags_sticky
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 from dojo.utils import get_system_setting
 
 if TYPE_CHECKING:
-    from dojo.models import Dojo_User, Finding, Product
+    from tagulous.models import TagField
+
+    from dojo.models import Dojo_User, Finding
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +32,7 @@ logger = logging.getLogger(__name__)
 UnsavedLocation = LocationData | AbstractLocation
 
 
+# Entry for status update; status will be determined by comparing locations between existing and new findings
 class StatusUpdateEntry(NamedTuple):
     existing_finding: Finding
     new_finding: Finding
@@ -39,36 +43,17 @@ class LocationManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
         super().__init__(product)
+        # Maps findings to a list of locations
         self._locations_by_finding: dict[Finding, list[UnsavedLocation]] = {}
-        # Product-only locations (not tied to a finding). Appended to by record_locations_for_product.
+        # Product-only locations (not tied to a finding)
         self._product_locations: list[UnsavedLocation] = []
-        # Status update inputs (deferred). All entries are processed in a single bulk pass by persist().
-        # (existing_finding, new_finding, user): classified partial mitigate/reactivate
+        # Status update entries, which we'll use at persist-time to determine Location statuses by comparing
+        # existing vs new finding entries.
         self._status_updates: list[StatusUpdateEntry] = []
-        # finding_id: fully reactivate (all mitigated refs on this finding become active)
-        self._findings_to_reactivate: list[int] = []
-        # finding_id -> user: fully mitigate (all non-special refs on this finding become mitigated by user).
-        # If recorded multiple times for the same finding, last user wins.
-        self._findings_to_mitigate: dict[int, Dojo_User] = {}
-        # Cached result of _should_inherit_product_tags() — lazily computed and reused across persist() calls
-        self._cached_should_inherit_product_tags: bool | None = None
-
-    def _should_inherit_product_tags(self) -> bool:
-        """
-        Return True if new LocationFindingReference/LocationProductReference creations
-        should trigger inherit_instance_tags on the affected locations.
-
-        inherit_instance_tags() runs a complex JOIN query per location (via all_related_products()),
-        which is O(N) per bulk persist. We short-circuit when neither the product nor the system
-        setting has tag inheritance enabled — in that case, adding a new ref for self._product
-        cannot change any location's inherited tags.
-        """
-        if self._cached_should_inherit_product_tags is None:
-            self._cached_should_inherit_product_tags = bool(
-                getattr(self._product, "enable_product_tag_inheritance", False)
-                or get_system_setting("enable_product_tag_inheritance"),
-            )
-        return self._cached_should_inherit_product_tags
+        # IDs of finding refs to reactivate
+        self._refs_to_reactivate: list[int] = []
+        # IDs of finding refs to mitigate, by the associated user
+        self._refs_to_mitigate: dict[int, Dojo_User] = {}
 
     # ------------------------------------------------------------------
     # Accumulation methods (no DB hits)
@@ -113,11 +98,11 @@ class LocationManager(BaseLocationManager):
 
     def record_reactivations_for_finding(self, finding: Finding) -> None:
         """Defer reactivation to persist(). No DB access at record time."""
-        self._findings_to_reactivate.append(finding.id)
+        self._refs_to_reactivate.append(finding.id)
 
     def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         """Defer mitigation to persist(). No DB access at record time."""
-        self._findings_to_mitigate[finding.id] = user
+        self._refs_to_mitigate[finding.id] = user
 
     def get_locations_for_tagging(self, findings: list[Finding]):
         """Return queryset of locations to apply tags to."""
@@ -236,11 +221,7 @@ class LocationManager(BaseLocationManager):
             )
 
         # Trigger bulk tag inheritance
-        if self._should_inherit_product_tags():
-            self._bulk_inherit_tags(
-                (loc.location for loc in saved),
-                known_product=self._product,
-            )
+        self._bulk_inherit_tags(loc.location for loc in saved)
 
         # Clear accumulators
         self._locations_by_finding.clear()
@@ -266,7 +247,7 @@ class LocationManager(BaseLocationManager):
         the LocationProductReference object is set to Active; otherwise, it is set to Mitigated.
         """
         # Short-circuit if nothing to do
-        if not (self._status_updates or self._findings_to_reactivate or self._findings_to_mitigate):
+        if not (self._status_updates or self._refs_to_reactivate or self._refs_to_mitigate):
             return
 
         # List of statuses we'll skip processing changes for
@@ -313,21 +294,21 @@ class LocationManager(BaseLocationManager):
                             ref_ids_to_mitigate[ref.id] = user
 
         # Update the "reactivate set" with the IDs of existing LocationFindingReference objects we need to reactivate
-        if self._findings_to_reactivate:
+        if self._refs_to_reactivate:
             ref_ids_to_reactivate.update(
                 LocationFindingReference.objects.filter(
-                    finding_id__in=self._findings_to_reactivate,
+                    finding_id__in=self._refs_to_reactivate,
                     status=FindingLocationStatus.Mitigated,
                 ).values_list("id", flat=True),
             )
 
         # Update the "mitigate set" with the IDs of existing LocationFindingReference objects we need to mitigate.
         # Note we exclude LocationFindingReferences that currently have one of the special statuses.
-        if self._findings_to_mitigate:
+        if self._refs_to_mitigate:
             ref_ids_to_mitigate.update({
-                ref_id: self._findings_to_mitigate[finding_id]
+                ref_id: self._refs_to_mitigate[finding_id]
                 for ref_id, finding_id in LocationFindingReference.objects.filter(
-                    finding_id__in=self._findings_to_mitigate.keys(),
+                    finding_id__in=self._refs_to_mitigate.keys(),
                 ).exclude(status__in=special_statuses).values_list("id", "finding_id")
             })
 
@@ -411,8 +392,8 @@ class LocationManager(BaseLocationManager):
 
         # Clear accumulators
         self._status_updates.clear()
-        self._findings_to_reactivate.clear()
-        self._findings_to_mitigate.clear()
+        self._refs_to_reactivate.clear()
+        self._refs_to_mitigate.clear()
 
     # ------------------------------------------------------------------
     # Type registry
@@ -507,120 +488,91 @@ class LocationManager(BaseLocationManager):
     # Tag inheritance
     # ------------------------------------------------------------------
 
-    @staticmethod
-    def _bulk_inherit_tags(locations, *, known_product=None):
+    def _bulk_inherit_tags(self, locations):
         """
-        Bulk equivalent of calling inherit_instance_tags(loc) for many Locations.
+        Bulk equivalent of calling inherit_instance_tags(loc) for many Locations. Actually persisting updates is handled
+        by a per-location call to _manage_inherited_tags(), but at least determining what the tags are is more efficient
+        (plus we can skip locations that don't need an update at all).
 
-        Uses aggressive prefetching to produce O(1) queries for the "decide what needs
-        to change" phase, and only runs per-instance mutation queries (~3 each) for
-        locations that are actually out of sync with their product tags.
-
-        Compared to the per-instance path, this avoids the N expensive JOINs in
-        Location.all_related_products() (~50ms each).
-
-        Args:
-            locations: iterable of Location instances to update
-            known_product: optional hint — if provided, used as the minimum product
-                set for locations not already associated elsewhere. Not strictly
-                required for correctness, but lets us skip the fetch-related-products
-                query in the common case.
-
+        When tag inheritance is enabled, computes the target inherited tags for each location from all related products
+        and updates only locations that are out of sync.
         """
-        from dojo.models import Product, _manage_inherited_tags  # noqa: PLC0415
-
         locations = list(locations)
         if not locations:
             return
 
+        # Check whether tag inheritance is enabled at either the product level or system-wide; quit early if neither
+        product_inherit = getattr(self._product, "enable_product_tag_inheritance", False)
         system_wide_inherit = bool(get_system_setting("enable_product_tag_inheritance"))
+        if not system_wide_inherit and not product_inherit:
+            return
 
-        # --- Bulk query: map location_id -> set[product_id] for every related product
+        # A location can be shared across multiple products. Its inherited tags should be the union of
+        # tags from ALL contributing products, not just the one running this import.
         location_ids = [loc.id for loc in locations]
         product_ids_by_location: dict[int, set[int]] = {loc.id: set() for loc in locations}
 
-        # Path 1: via LocationProductReference (direct association)
+        # Find associations through LocationProductReference entries
         for loc_id, prod_id in LocationProductReference.objects.filter(
             location_id__in=location_ids,
         ).values_list("location_id", "product_id"):
             product_ids_by_location[loc_id].add(prod_id)
 
-        # Path 2: via LocationFindingReference -> Finding -> Test -> Engagement -> Product
+        # Find associations through LocationFindingReference entries and the finding.test.engagement.product chain.
+        # This shouldn't add anything new, but just in case.
         for loc_id, prod_id in (
             LocationFindingReference.objects
             .filter(location_id__in=location_ids)
             .values_list("location_id", "finding__test__engagement__product_id")
         ):
-            if prod_id is not None:
-                product_ids_by_location[loc_id].add(prod_id)
+            product_ids_by_location[loc_id].add(prod_id)
 
-        # Seed with known_product so callers don't have to rely on refs being persisted before this call
-        if known_product is not None:
-            for loc_id in location_ids:
-                product_ids_by_location[loc_id].add(known_product.id)
-
-        # --- Bulk query: fetch the unique products with their tags and inheritance flag
+        # Fetch all products that will contribute to tag inheritance, and their tags
         all_product_ids = {pid for pids in product_ids_by_location.values() for pid in pids}
-        if not all_product_ids:
-            return
-
-        products = {
-            p.id: p
-            for p in Product.objects.filter(id__in=all_product_ids).prefetch_related("tags")
-        }
-
-        # Products that contribute to inheritance (either opted in themselves or system-wide on)
-        contributing_product_ids = {
-            pid for pid, p in products.items()
-            if p.enable_product_tag_inheritance or system_wide_inherit
-        }
-        if not contributing_product_ids:
-            return
-
-        # Pre-compute the tag names each contributing product contributes
+        product_qs = Product.objects.filter(id__in=all_product_ids).prefetch_related("tags")
+        if not system_wide_inherit:
+            # Product-level inheritance only
+            product_qs = product_qs.filter(enable_product_tag_inheritance=True)
+        # Materialize into a dict for ease of use
+        products: dict[int, Product] = {p.id: p for p in product_qs}
+        # Get distinct tags, per-product
         tags_by_product: dict[int, set[str]] = {
-            pid: {t.name for t in products[pid].tags.all()}
-            for pid in contributing_product_ids
+            pid: {t.name for t in p.tags.all()}
+            for pid, p in products.items()
         }
 
-        # --- Bulk query: existing inherited_tags per location
-        inherited_through = Location.inherited_tags.through
-        inherited_fk = Location.inherited_tags.field.m2m_reverse_field_name()
-        existing_inherited_by_location: dict[int, set[str]] = {loc.id: set() for loc in locations}
-        for loc_id, tag_name in inherited_through.objects.filter(
-            location_id__in=location_ids,
-        ).values_list("location_id", f"{inherited_fk}__name"):
-            existing_inherited_by_location[loc_id].add(tag_name)
+        # Helper method for getting all tags from the given TagField
+        def _get_tags(tags_field: TagField) -> dict[int, set[str]]:
+            through_model = tags_field.through
+            fk_name = tags_field.field.m2m_reverse_field_name()
+            tags_by_location: dict[int, set[str]] = {loc.id: set() for loc in locations}
+            for l_id, t_name in through_model.objects.filter(
+                location_id__in=location_ids,
+            ).values_list("location_id", f"{fk_name}__name"):
+                tags_by_location[l_id].add(t_name)
+            return tags_by_location
 
-        # --- Bulk query: existing user tags per location (needed by _manage_inherited_tags)
-        tags_through = Location.tags.through
-        tags_fk = Location.tags.field.m2m_reverse_field_name()
-        existing_tags_by_location: dict[int, list[str]] = {loc.id: [] for loc in locations}
-        for loc_id, tag_name in tags_through.objects.filter(
-            location_id__in=location_ids,
-        ).values_list("location_id", f"{tags_fk}__name"):
-            existing_tags_by_location[loc_id].append(tag_name)
+        # Gather inherited and 'regular' tags per location
+        existing_inherited_by_location: dict[int, set[str]] = _get_tags(Location.inherited_tags)
+        existing_tags_by_location: dict[int, set[str]] = _get_tags(Location.tags)
 
-        # --- Determine which locations are out of sync and call _manage_inherited_tags directly.
-        # Must disconnect make_inherited_tags_sticky while we mutate — otherwise each
-        # tags.set() / inherited_tags.set() fires m2m_changed, re-enters the whole expensive
-        # chain per location, and defeats the point of the bulk path.
-        # Only disconnect/reconnect for senders where the signal is actually registered
-        # (tags.through). inherited_tags.through is not a registered sender — attempting
-        # to connect it after disconnect() would incorrectly add a new registration,
-        # causing recursion on subsequent calls.
-        disconnected = signals.m2m_changed.disconnect(make_inherited_tags_sticky, sender=tags_through)
+        # Perform the bulk updates. First, though, disconnect the make_inherited_tags_sticky signal on Location.tags
+        # while updating, otherwise each (inherited_)tags.set() will trigger, defeating the purpose of this bulk update.
+        disconnected = signals.m2m_changed.disconnect(make_inherited_tags_sticky, sender=Location.tags.through)
         try:
             for location in locations:
                 target_tag_names: set[str] = set()
                 for pid in product_ids_by_location[location.id]:
-                    if pid in contributing_product_ids:
+                    # product_ids_by_location may contain products that shouldn't to contribute to tag inheritance (we
+                    # didn't filter either location ref lookups to check), so do a last-minute check here
+                    if pid in products:
                         target_tag_names |= tags_by_product[pid]
 
-                existing = existing_inherited_by_location[location.id]
-                if target_tag_names == existing:
+                if target_tag_names == existing_inherited_by_location[location.id]:
+                    # The existing set matches the expected set, so nothing more to do for this location
                     continue
 
+                # Update tags for this location
                 _manage_inherited_tags(
                     location,
                     list(target_tag_names),
@@ -628,4 +580,4 @@ class LocationManager(BaseLocationManager):
                 )
         finally:
             if disconnected:
-                signals.m2m_changed.connect(make_inherited_tags_sticky, sender=tags_through)
+                signals.m2m_changed.connect(make_inherited_tags_sticky, sender=Location.tags.through)
