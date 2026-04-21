@@ -137,7 +137,7 @@ class TestQualysVMDRParser(DojoTestCase):
         ) as testfile:
             parser = QualysVMDRParser()
             findings = parser.get_findings(testfile, Test())
-            endpoints = findings[0].unsaved_endpoints
+            endpoints = self.get_unsaved_locations(findings[0])
             self.assertEqual(1, len(endpoints))
             self.assertEqual("10.0.0.1", endpoints[0].host)
 
@@ -148,7 +148,7 @@ class TestQualysVMDRParser(DojoTestCase):
             parser = QualysVMDRParser()
             findings = parser.get_findings(testfile, Test())
             multi_ip_finding = [f for f in findings if f.unique_id_from_tool == "100003"][0]
-            endpoints = multi_ip_finding.unsaved_endpoints
+            endpoints = self.get_unsaved_locations(multi_ip_finding)
             self.assertEqual(2, len(endpoints))
             hosts = [e.host for e in endpoints]
             self.assertIn("10.0.0.20", hosts)
@@ -161,7 +161,7 @@ class TestQualysVMDRParser(DojoTestCase):
             parser = QualysVMDRParser()
             findings = parser.get_findings(testfile, Test())
             ipv6_finding = [f for f in findings if f.unique_id_from_tool == "100005"][0]
-            endpoints = ipv6_finding.unsaved_endpoints
+            endpoints = self.get_unsaved_locations(ipv6_finding)
             self.assertEqual(1, len(endpoints))
             self.assertEqual("2001:db8::1", endpoints[0].host)
 
@@ -288,5 +288,4 @@ class TestQualysVMDRParser(DojoTestCase):
         ) as testfile:
             parser = QualysVMDRParser()
             findings = parser.get_findings(testfile, Test())
-            for endpoint in findings[0].unsaved_endpoints:
-                endpoint.clean()
+            self.validate_locations(findings)

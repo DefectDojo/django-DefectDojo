@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from dojo.models import Finding
 from dojo.tools.qualys_vmdr.helpers import (
     build_description_cve,
@@ -6,6 +8,7 @@ from dojo.tools.qualys_vmdr.helpers import (
     map_qualys_severity,
     parse_cvss_score,
     parse_endpoints,
+    parse_locations,
     parse_qualys_csv_content,
     parse_qualys_date,
     parse_tags,
@@ -54,10 +57,17 @@ class QualysVMDRCVEParser:
         if cvss_score is not None:
             finding.cvssv3_score = cvss_score
 
-        finding.unsaved_endpoints = parse_endpoints(
-            row.get("Asset IPV4", ""),
-            row.get("Asset IPV6", ""),
-        )
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = parse_locations(
+                row.get("Asset IPV4", ""),
+                row.get("Asset IPV6", ""),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = parse_endpoints(
+                row.get("Asset IPV4", ""),
+                row.get("Asset IPV6", ""),
+            )
         finding.unsaved_tags = parse_tags(row.get("Asset Tags", ""))
 
         if not is_qualys_null(cve):

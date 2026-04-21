@@ -1,9 +1,12 @@
+from django.conf import settings
+
 from dojo.models import Finding
 from dojo.tools.qualys_vmdr.helpers import (
     build_description_qid,
     build_severity_justification,
     map_qualys_severity,
     parse_endpoints,
+    parse_locations,
     parse_qualys_csv_content,
     parse_qualys_date,
     parse_tags,
@@ -45,10 +48,17 @@ class QualysVMDRQIDParser:
             dynamic_finding=False,
         )
 
-        finding.unsaved_endpoints = parse_endpoints(
-            row.get("Asset IPV4", ""),
-            row.get("Asset IPV6", ""),
-        )
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = parse_locations(
+                row.get("Asset IPV4", ""),
+                row.get("Asset IPV6", ""),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = parse_endpoints(
+                row.get("Asset IPV4", ""),
+                row.get("Asset IPV6", ""),
+            )
         finding.unsaved_tags = parse_tags(row.get("Asset Tags", ""))
 
         return finding

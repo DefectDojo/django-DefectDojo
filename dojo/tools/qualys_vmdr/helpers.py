@@ -5,6 +5,7 @@ import re
 from dateutil import parser as dateutil_parser
 
 from dojo.models import Endpoint
+from dojo.tools.locations import LocationData
 
 SEVERITY_MAPPING = {
     "1": "Info",
@@ -143,16 +144,21 @@ def build_description_cve(row):
     return "\n\n".join(parts) if parts else "No details available."
 
 
-def parse_endpoints(ipv4_field, ipv6_field):
-    endpoints = []
-
+def _extract_hosts(ipv4_field, ipv6_field):
     if ipv4_field and ipv4_field.strip():
-        ips = [ip.strip() for ip in ipv4_field.split(",") if ip.strip()]
-        endpoints.extend(Endpoint(host=ip) for ip in ips)
-    elif ipv6_field and ipv6_field.strip():
-        endpoints.append(Endpoint(host=ipv6_field.strip()))
+        return [ip.strip() for ip in ipv4_field.split(",") if ip.strip()]
+    if ipv6_field and ipv6_field.strip():
+        return [ipv6_field.strip()]
+    return []
 
-    return endpoints
+
+# TODO: Delete this after the move to Locations
+def parse_endpoints(ipv4_field, ipv6_field):
+    return [Endpoint(host=host) for host in _extract_hosts(ipv4_field, ipv6_field)]
+
+
+def parse_locations(ipv4_field, ipv6_field):
+    return [LocationData.url(host=host) for host in _extract_hosts(ipv4_field, ipv6_field)]
 
 
 def parse_tags(tags_field):
