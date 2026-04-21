@@ -30,7 +30,6 @@ from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 from dojo.authorization.authorization_decorators import (
@@ -79,6 +78,7 @@ from dojo.forms import (
     StubFindingForm,
     TypedNoteForm,
 )
+from dojo.jira import services as jira_services
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
@@ -329,7 +329,7 @@ class ListFindings(View, BaseListFindings):
             user_has_permission_or_403(request.user, product, Permissions.Product_View)
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(product, title="Findings", tab="findings")
-            context["jira_project"] = jira_helper.get_jira_project(product)
+            context["jira_project"] = jira_services.get_project(product)
             if github_config := GITHUB_PKey.objects.filter(product=product).first():
                 context["github_config"] = github_config.git_conf_id
         elif engagement_id := self.get_engagement_id():
@@ -337,7 +337,7 @@ class ListFindings(View, BaseListFindings):
             user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
-            context["jira_project"] = jira_helper.get_jira_project(engagement)
+            context["jira_project"] = jira_services.get_project(engagement)
             if github_config := GITHUB_PKey.objects.filter(product__engagement=engagement).first():
                 context["github_config"] = github_config.git_conf_id
 
@@ -592,7 +592,7 @@ class ViewFinding(View):
             can_be_pushed_to_jira,
             can_be_pushed_to_jira_error,
             error_code,
-        ) = jira_helper.can_be_pushed_to_jira(finding)
+        ) = jira_services.can_be_pushed(finding)
         # Check the error code
         if error_code:
             logger.debug(error_code)
@@ -647,9 +647,9 @@ class ViewFinding(View):
             finding.save()
             # Determine if the note should be sent to jira
             if finding.has_jira_issue:
-                jira_helper.add_comment(finding, new_note)
+                jira_services.add_comment(finding, new_note)
             elif finding.has_jira_group_issue:
-                jira_helper.add_comment(finding.finding_group, new_note)
+                jira_services.add_comment(finding.finding_group, new_note)
             # Send the notification of the note being added
             url = request.build_absolute_uri(
                 reverse("view_finding", args=(finding.id,)),
@@ -765,9 +765,9 @@ class EditFinding(View):
 
     def get_jira_form(self, request: HttpRequest, finding: Finding, finding_form: FindingForm = None):
         # Determine if jira should be used
-        if (jira_project := jira_helper.get_jira_project(finding)) is not None:
+        if (jira_project := jira_services.get_project(finding)) is not None:
             # Determine if push all findings is enabled
-            push_all_findings = jira_helper.is_push_all_issues(finding)
+            push_all_findings = jira_services.is_push_all_issues(finding)
             # Set up the args for the form
             args = [request.POST] if request.method == "POST" else []
             # Set the initial form args
@@ -987,8 +987,8 @@ class EditFinding(View):
             logger.debug(JFORM_PUSH_TO_JIRA_MESSAGE, context["jform"].cleaned_data.get("push_to_jira"))
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
             push_to_jira_checkbox = context["jform"].cleaned_data.get("push_to_jira")
-            push_all_jira_issues = jira_helper.is_push_all_issues(finding)
-            push_to_jira = push_all_jira_issues or push_to_jira_checkbox or jira_helper.is_keep_in_sync_with_jira(finding)
+            push_all_jira_issues = jira_services.is_push_all_issues(finding)
+            push_to_jira = push_all_jira_issues or push_to_jira_checkbox or jira_services.is_keep_in_sync(finding)
             logger.debug("push_to_jira: %s", push_to_jira)
             logger.debug("push_all_jira_issues: %s", push_all_jira_issues)
             logger.debug("has_jira_group_issue: %s", finding.has_jira_group_issue)
@@ -1005,14 +1005,14 @@ class EditFinding(View):
                     which is already checked in the validation of the form
                     """
                     if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, finding)
+                        jira_services.unlink_finding(request, finding)
                         jira_message = "Link to JIRA issue removed successfully."
                     elif new_jira_issue_key != finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, finding)
-                        jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                        jira_services.unlink_finding(request, finding)
+                        jira_services.link_finding(request, finding, new_jira_issue_key)
                         jira_message = "Changed JIRA link successfully."
                 elif new_jira_issue_key:
-                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_services.link_finding(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # any existing finding should be updated
             # Determine if a message should be added
@@ -1069,7 +1069,7 @@ class EditFinding(View):
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding.finding_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
         return request, all_forms_valid
 
@@ -1337,8 +1337,8 @@ def defect_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
-                jira_instance = jira_helper.get_jira_instance(finding)
-                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                jira_instance = jira_services.get_instance(finding)
+                push_to_jira = jira_services.is_push_all_issues(finding) \
                     or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
@@ -1346,14 +1346,14 @@ def defect_finding_review(request, fid):
                     new_note.entry += "\nJira issue set to resolved."
                 else:
                     new_note.entry += "\nJira issue re-opened."
-                jira_helper.add_comment(finding, new_note, force_push=True)
+                jira_services.add_comment(finding, new_note, force_push=True)
             # Save the finding
             finding.save(push_to_jira=(push_to_jira and not finding_in_group))
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
             messages.add_message(
                 request, messages.SUCCESS, "Defect Reviewed", extra_tags="alert-success",
@@ -1407,8 +1407,8 @@ def reopen_finding(request, fid):
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
     finding.save(dedupe_option=False, push_to_jira=False)
-    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
-        jira_helper.push_to_jira(finding)
+    if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
+        jira_services.push(finding)
 
     reopen_external_issue(finding.id, "re-opened by defectdojo", "github")
 
@@ -1609,19 +1609,19 @@ def request_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
-                jira_instance = jira_helper.get_jira_instance(finding)
-                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                jira_instance = jira_services.get_instance(finding)
+                push_to_jira = jira_services.is_push_all_issues(finding) \
                     or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
-                jira_helper.add_comment(finding, new_note, force_push=True)
+                jira_services.add_comment(finding, new_note, force_push=True)
             # Save the finding
             finding.save(push_to_jira=(push_to_jira and not finding_in_group))
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
             reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
@@ -1704,19 +1704,19 @@ def clear_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
-                jira_instance = jira_helper.get_jira_instance(finding)
-                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                jira_instance = jira_services.get_instance(finding)
+                push_to_jira = jira_services.is_push_all_issues(finding) \
                     or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
-                jira_helper.add_comment(finding, new_note, force_push=True)
+                jira_services.add_comment(finding, new_note, force_push=True)
             # Save the finding
             finding.save(push_to_jira=(push_to_jira and not finding_in_group))
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
             messages.add_message(
                 request,
@@ -2099,9 +2099,9 @@ def promote_to_finding(request, fid):
     finding = get_object_or_404(Stub_Finding, id=fid)
     test = finding.test
     form_error = False
-    push_all_jira_issues = jira_helper.is_push_all_issues(finding)
+    push_all_jira_issues = jira_services.is_push_all_issues(finding)
     jform = None
-    use_jira = jira_helper.get_jira_project(finding) is not None
+    use_jira = jira_services.get_project(finding) is not None
     product_tab = Product_Tab(
         finding.test.engagement.product, title="Promote Finding", tab="findings",
     )
@@ -2114,7 +2114,7 @@ def promote_to_finding(request, fid):
                 instance=finding,
                 prefix="jiraform",
                 push_all=push_all_jira_issues,
-                jira_project=jira_helper.get_jira_project(finding),
+                jira_project=jira_services.get_project(finding),
             )
 
         if form.is_valid() and (jform is None or jform.is_valid()):
@@ -2166,11 +2166,11 @@ def promote_to_finding(request, fid):
                     """
 
                     if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
+                        jira_services.unlink_finding(request, new_finding)
 
                     elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_helper.finding_link_jira(
+                        jira_services.unlink_finding(request, new_finding)
+                        jira_services.link_finding(
                             request, new_finding, new_jira_issue_key,
                         )
                 else:
@@ -2178,7 +2178,7 @@ def promote_to_finding(request, fid):
                     if new_jira_issue_key:
                         logger.debug(
                             "finding has no jira issue yet, but jira issue specified in request. trying to link.")
-                        jira_helper.finding_link_jira(
+                        jira_services.link_finding(
                             request, new_finding, new_jira_issue_key,
                         )
 
@@ -2231,8 +2231,8 @@ def promote_to_finding(request, fid):
         if use_jira:
             jform = JIRAFindingForm(
                 prefix="jiraform",
-                push_all=jira_helper.is_push_all_issues(test),
-                jira_project=jira_helper.get_jira_project(test),
+                push_all=jira_services.is_push_all_issues(test),
+                jira_project=jira_services.get_project(test),
             )
 
     return render(
@@ -3066,8 +3066,8 @@ def _bulk_push_to_jira(finds, form, note):
         for finding in finds
         if finding.has_finding_group
         and (
-            jira_helper.is_push_all_issues(finding)
-            or jira_helper.is_keep_in_sync_with_jira(finding)
+            jira_services.is_push_all_issues(finding)
+            or jira_services.is_keep_in_sync(finding)
             or form.cleaned_data.get("push_to_jira")
         )
     )
@@ -3075,22 +3075,22 @@ def _bulk_push_to_jira(finds, form, note):
     for group in finding_groups:
         if (
             form.cleaned_data.get("push_to_jira")
-            or jira_helper.is_push_all_issues(group)
-            or jira_helper.is_keep_in_sync_with_jira(group)
+            or jira_services.is_push_all_issues(group)
+            or jira_services.is_keep_in_sync(group)
         ):
             (
                 can_be_pushed_to_jira,
                 error_message,
                 _error_code,
-            ) = jira_helper.can_be_pushed_to_jira(group)
+            ) = jira_services.can_be_pushed(group)
             if not can_be_pushed_to_jira:
                 error_counts[error_message] += 1
-                jira_helper.log_jira_cannot_be_pushed_reason(error_message, group)
+                jira_services.log_cannot_be_pushed_reason(error_message, group)
             else:
                 logger.debug(
                     "pushing to jira from finding.finding_bulk_update_all()",
                 )
-                jira_helper.push_to_jira(group)
+                jira_services.push(group)
                 success_count += 1
 
     for error_message, error_count in error_counts.items():
@@ -3110,40 +3110,40 @@ def _bulk_push_to_jira(finds, form, note):
         # not sure yet if we want to support bulk unlink, so leave as commented out for now
         # if form.cleaned_data['unlink_from_jira']:
         #     if finding.has_jira_issue:
-        #         jira_helper.finding_unlink_jira(request, finding)
+        #         jira_services.unlink_finding(request, finding)
 
         # Because we never call finding.save() in a bulk update, we need to actually
         # push the JIRA stuff here, rather than in finding.save()
         # can't use helper as when push_all_jira_issues is True,
         # the checkbox gets disabled and is always false
-        # push_to_jira = jira_helper.is_push_to_jira(new_finding,
+        # push_to_jira = jira_services.is_push_to_jira(new_finding,
         # form.cleaned_data.get('push_to_jira'))
         if (
             form.cleaned_data.get("push_to_jira")
-            or jira_helper.is_push_all_issues(finding)
-            or jira_helper.is_keep_in_sync_with_jira(finding)
+            or jira_services.is_push_all_issues(finding)
+            or jira_services.is_keep_in_sync(finding)
         ) and not finding.has_finding_group:
             (
                 can_be_pushed_to_jira,
                 error_message,
                 _error_code,
-            ) = jira_helper.can_be_pushed_to_jira(finding)
+            ) = jira_services.can_be_pushed(finding)
             if finding.has_jira_group_issue and not finding.has_jira_issue:
                 error_message = (
                     "finding already pushed as part of Finding Group"
                 )
                 error_counts[error_message] += 1
-                jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+                jira_services.log_cannot_be_pushed_reason(error_message, finding)
             elif not can_be_pushed_to_jira:
                 error_counts[error_message] += 1
-                jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+                jira_services.log_cannot_be_pushed_reason(error_message, finding)
             else:
                 logger.debug(
                     "pushing to jira from finding.finding_bulk_update_all()",
                 )
-                jira_helper.push_to_jira(finding)
+                jira_services.push(finding)
                 if note is not None and isinstance(note, Notes):
-                    jira_helper.add_comment(finding, note)
+                    jira_services.add_comment(finding, note)
                 success_count += 1
 
     for error_message, error_count in error_counts.items():
@@ -3500,7 +3500,7 @@ def unlink_jira(request, fid):
     )
     if finding.has_jira_issue:
         try:
-            jira_helper.finding_unlink_jira(request, finding)
+            jira_services.unlink_finding(request, finding)
 
             messages.add_message(
                 request,
@@ -3543,7 +3543,7 @@ def push_to_jira(request, fid):
         # but cant't change too much now without having a test suite,
         # so leave as is for now with the addition warning message
         # to check alerts for background errors.
-        if jira_helper.push_to_jira(finding):
+        if jira_services.push(finding):
             messages.add_message(
                 request,
                 messages.SUCCESS,

@@ -8,7 +8,7 @@ from django.urls import reverse
 # from dojo.models import JIRA_Project
 from django.utils.http import urlencode
 
-from dojo.jira_link import helper as jira_helper
+from dojo.jira import helper as jira_helper
 from dojo.models import Engagement, Product
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
@@ -260,7 +260,7 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         product = Product.objects.get(id=self.product_id)
         self.assertIsNone(jira_helper.get_jira_project(product))
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_add_jira_project_to_engagement_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         # TODO: add engagement also via API, but let's focus on JIRA here
@@ -268,7 +268,7 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         self.edit_jira_project_for_engagement(engagement, expected_delta_jira_project_db=1)
         self.assertEqual(jira_mock.call_count, 1)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_add_empty_jira_project_to_engagement_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         # Prevent the exception from being raised here so that the test can be ran in parallel
@@ -277,14 +277,14 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
             self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0)
             self.assertEqual(jira_mock.call_count, 0)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_edit_jira_project_to_engagement_with_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
         self.edit_jira_project_for_engagement2(engagement, expected_delta_jira_project_db=0)
         self.assertEqual(jira_mock.call_count, 2)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_edit_empty_jira_project_to_engagement_with_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         # Prevent the exception from being raised here so that the test can be ran in parallel
@@ -299,14 +299,14 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
             self.empty_jira_project_for_engagement(engagement, expected_delta_jira_project_db=0, expect_error=True)
             self.assertEqual(jira_mock.call_count, 1)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_add_jira_project_to_engagement_without_jira_project_invalid_project(self, jira_mock):
         jira_mock.return_value = False  # cannot set return_value in decorated AND have the mock into the method
         # errors means it won't redirect to view_engagement, but returns a 200 and redisplays the edit engagement page
         self.edit_jira_project_for_engagement(Engagement.objects.get(id=3), expected_delta_jira_project_db=0, expect_200=True)
         self.assertEqual(jira_mock.call_count, 1)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_edit_jira_project_to_engagement_with_jira_project_invalid_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
@@ -315,14 +315,14 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         self.edit_jira_project_for_engagement2(engagement, expected_delta_jira_project_db=0, expect_200=True)
         self.assertEqual(jira_mock.call_count, 2)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_add_engagement_with_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=1)
         self.assertIsNotNone(engagement)
         self.assertEqual(jira_mock.call_count, 1)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_add_engagement_with_jira_project_invalid_jira_project(self, jira_mock):
         jira_mock.return_value = False  # cannot set return_value in decorated AND have the mock into the method
         engagement = self.add_engagement_with_jira_project(expected_delta_jira_project_db=0, expect_redirect_to="/engagement/%i/edit")
@@ -330,7 +330,7 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         self.assertIsNotNone(engagement)
         self.assertEqual(jira_mock.call_count, 1)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def test_add_engagement_without_jira_project(self, jira_mock):
         jira_mock.return_value = True  # cannot set return_value in decorated AND have the mock into the method
         engagement = self.add_engagement_without_jira_project(expected_delta_jira_project_db=0)
@@ -362,7 +362,7 @@ class JIRAConfigEngagementTest_Inheritance(JIRAConfigEngagementTest):
     def __init__(self, *args, **kwargs):
         JIRAConfigEngagementTest.__init__(self, *args, **kwargs)
 
-    @patch("dojo.jira_link.views.jira_helper.is_jira_project_valid")
+    @patch("dojo.jira.views.jira_helper.is_jira_project_valid")
     def setUp(self, jira_mock, *args, **kwargs):
         jira_mock.return_value = True
         JIRAConfigEngagementTest.setUp(self, *args, **kwargs)

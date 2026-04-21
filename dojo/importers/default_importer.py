@@ -5,13 +5,12 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
-import dojo.jira_link.helper as jira_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.endpoint_manager import EndpointManager
 from dojo.importers.options import ImporterOptions
-from dojo.jira_link.helper import is_keep_in_sync_with_jira
+from dojo.jira import services as jira_services
 from dojo.models import (
     Engagement,
     Finding,
@@ -304,9 +303,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             if self.push_to_jira:
                 if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
+                    jira_services.push(findings[0].finding_group)
                 else:
-                    jira_helper.push_to_jira(findings[0])
+                    jira_services.push(findings[0])
             else:
                 logger.debug("push_to_jira is False, not pushing to JIRA")
 
@@ -413,8 +412,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
-                if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):
-                    jira_helper.push_to_jira(finding_group)
+                if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
+                    jira_services.push(finding_group)
 
         # Calculate grade once after all findings have been closed
         if old_findings:

@@ -4,8 +4,8 @@ import logging
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
-import dojo.jira_link.helper as jira_helper
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.jira import services as jira_services
 from dojo.models import Engagement
 
 logger = logging.getLogger(__name__)
@@ -16,8 +16,10 @@ def close_engagement(eng):
     eng.status = "Completed"
     eng.save()
 
-    if jira_helper.get_jira_project(eng):
-        dojo_dispatch_task(jira_helper.close_epic, eng.id, push_to_jira=True)
+    if jira_services.get_project(eng):
+        task = jira_services.get_epic_task("close_epic")
+        if task:
+            dojo_dispatch_task(task, eng.id, push_to_jira=True)
 
 
 def reopen_engagement(eng):

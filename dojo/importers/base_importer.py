@@ -16,7 +16,7 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.importers.location_manager import LocationManager, UnsavedLocation
 from dojo.importers.options import ImporterOptions
-from dojo.jira_link.helper import is_keep_in_sync_with_jira
+from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
 from dojo.models import (
     # Import History States
@@ -950,7 +950,7 @@ class BaseImporter(ImporterOptions):
             # don't try to dedupe findings that we are closing
             finding.save(dedupe_option=False, product_grading_option=product_grading_option)
         else:
-            finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync_with_jira(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
+            finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
 
     def notify_scan_added(
         self,
