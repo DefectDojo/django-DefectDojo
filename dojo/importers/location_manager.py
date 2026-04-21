@@ -361,7 +361,7 @@ class LocationManager(BaseLocationManager):
                 LocationFindingReference.objects.filter(
                     id__in=ref_ids,
                 ).exclude(
-                    status=FindingLocationStatus.Mitigated
+                    status=FindingLocationStatus.Mitigated,
                 ).update(
                     auditor=user,
                     audit_time=now,
