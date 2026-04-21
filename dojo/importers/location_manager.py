@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from itertools import groupby
 from operator import itemgetter
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
@@ -29,6 +29,12 @@ logger = logging.getLogger(__name__)
 UnsavedLocation = LocationData | AbstractLocation
 
 
+class StatusUpdateEntry(NamedTuple):
+    existing_finding: Finding
+    new_finding: Finding
+    user: Dojo_User
+
+
 class LocationManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
@@ -38,12 +44,12 @@ class LocationManager(BaseLocationManager):
         self._product_locations: list[UnsavedLocation] = []
         # Status update inputs (deferred). All entries are processed in a single bulk pass by persist().
         # (existing_finding, new_finding, user): classified partial mitigate/reactivate
-        self._status_updates: list[tuple[Finding, Finding, Dojo_User]] = []
+        self._status_updates: list[StatusUpdateEntry] = []
         # finding_id: fully reactivate (all mitigated refs on this finding become active)
-        self._finding_ids_to_fully_reactivate: list[int] = []
+        self._findings_to_reactivate: list[int] = []
         # finding_id -> user: fully mitigate (all non-special refs on this finding become mitigated by user).
         # If recorded multiple times for the same finding, last user wins.
-        self._finding_ids_to_fully_mitigate: dict[int, Dojo_User] = {}
+        self._findings_to_mitigate: dict[int, Dojo_User] = {}
         # Cached result of _should_inherit_product_tags() — lazily computed and reused across persist() calls
         self._cached_should_inherit_product_tags: bool | None = None
 
@@ -85,7 +91,7 @@ class LocationManager(BaseLocationManager):
         user: Dojo_User,
     ) -> None:
         """Defer status update to persist(). No DB access at record time."""
-        self._status_updates.append((existing_finding, new_finding, user))
+        self._status_updates.append(StatusUpdateEntry(existing_finding, new_finding, user))
 
     # ------------------------------------------------------------------
     # Unified interface (shared with EndpointManager)
@@ -107,11 +113,11 @@ class LocationManager(BaseLocationManager):
 
     def record_reactivations_for_finding(self, finding: Finding) -> None:
         """Defer reactivation to persist(). No DB access at record time."""
-        self._finding_ids_to_fully_reactivate.append(finding.id)
+        self._findings_to_reactivate.append(finding.id)
 
     def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
         """Defer mitigation to persist(). No DB access at record time."""
-        self._finding_ids_to_fully_mitigate[finding.id] = user
+        self._findings_to_mitigate[finding.id] = user
 
     def get_locations_for_tagging(self, findings: list[Finding]):
         """Return queryset of locations to apply tags to."""
@@ -241,41 +247,62 @@ class LocationManager(BaseLocationManager):
         self._product_locations.clear()
 
     def _persist_status_updates(self) -> None:
-        """Bulk persist recorded finding/product ref statuses."""
+        """
+        Bulk persist finding/product ref statuses.
+
+        Throughout the (re)import process, we've tracked three types of status changes: locations to mitigate, locations
+        to reactivate, and locations whose statuses need to be evaluated at this time by comparing locations between
+        existing findings and new findings.
+
+        To start, this method processes the comparisons between existing/new findings. If the new finding is Mitigated,
+        then all existing locations are added to the 'to mitigate' set. Otherwise, locations that are in both the new
+        finding and existing finding are added to the 'to reactivate' set, and locations that are on the existing
+        finding but not the new finding are added to the 'to mitigate' set.
+
+        Next, all locations in the 'to reactivate' set are bulk set to Active, and all locations in the 'to mitigate'
+        set are bulk set to Mitigated.
+
+        Finally, product associations are updated: if any location associated with a finding on this product is Active,
+        the LocationProductReference object is set to Active; otherwise, it is set to Mitigated.
+        """
         # Short-circuit if nothing to do
-        if not (self._status_updates or self._finding_ids_to_fully_reactivate or self._finding_ids_to_fully_mitigate):
+        if not (self._status_updates or self._findings_to_reactivate or self._findings_to_mitigate):
             return
 
+        # List of statuses we'll skip processing changes for
         special_statuses = [
             FindingLocationStatus.FalsePositive,
             FindingLocationStatus.RiskAccepted,
             FindingLocationStatus.OutOfScope,
         ]
 
-        # Collect ref IDs to reactivate / mitigate across all accumulated inputs
+        # The set of LocationFindingReference IDs to reactivate
         ref_ids_to_reactivate: set[int] = set()
-        # Grouped by user since auditor differs per entry
-        ref_ids_to_mitigate_by_user: dict[Dojo_User | None, set[int]] = {}
+        # The set of LocationFindingReference IDs to mitigate, and the user to associate with it
+        ref_ids_to_mitigate: dict[int, Dojo_User] = {}
 
-        # Partial status updates (from update_location_status): need per-finding classification
+        # Process status updates determined by comparing existing/new findings
         if self._status_updates:
-            finding_ids_for_partial = {upd[0].id for upd in self._status_updates}
-            # Single fetch of all candidate refs with their location values
+            # Look up all the existing LocationFindingReference objects and store per-Finding
+            existing_finding_ids = {upd.existing_finding.id for upd in self._status_updates}
             refs_by_finding: dict[int, list[LocationFindingReference]] = {}
             for ref in (
                 LocationFindingReference.objects
-                .filter(finding_id__in=finding_ids_for_partial)
+                .filter(finding_id__in=existing_finding_ids)
                 .exclude(status__in=special_statuses)
                 .select_related("location")
             ):
                 refs_by_finding.setdefault(ref.finding_id, []).append(ref)
 
+            # Next: for each StatusUpdateEntry, determine what we should do with the existing refs
             for existing_finding, new_finding, user in self._status_updates:
                 finding_refs = refs_by_finding.get(existing_finding.id, [])
                 if new_finding.is_mitigated:
-                    # All non-special refs on this finding get mitigated
-                    ref_ids_to_mitigate_by_user.setdefault(user, set()).update(r.id for r in finding_refs)
+                    # The new finding is mitigated, so mitigate all existing (non-special) refs
+                    ref_ids_to_mitigate.update({r.id: user for r in finding_refs})
                 else:
+                    # The new finding is not mitigated; we need to reactivate locations that are in the new finding and
+                    # mitigate statuses that are NOT in the new finding.
                     new_loc_values = {
                         str(loc) for loc in self.clean_unsaved_locations(new_finding.unsaved_locations)
                     }
@@ -283,34 +310,35 @@ class LocationManager(BaseLocationManager):
                         if ref.location.location_value in new_loc_values:
                             ref_ids_to_reactivate.add(ref.id)
                         else:
-                            ref_ids_to_mitigate_by_user.setdefault(user, set()).add(ref.id)
+                            ref_ids_to_mitigate[ref.id] = user
 
-        # Reactivate all mitigated refs for these findings
-        if self._finding_ids_to_fully_reactivate:
+        # Update the "reactivate set" with the IDs of existing LocationFindingReference objects we need to reactivate
+        if self._findings_to_reactivate:
             ref_ids_to_reactivate.update(
                 LocationFindingReference.objects.filter(
-                    finding_id__in=self._finding_ids_to_fully_reactivate,
+                    finding_id__in=self._findings_to_reactivate,
                     status=FindingLocationStatus.Mitigated,
                 ).values_list("id", flat=True),
             )
 
-        # Mitigate all non-special refs for these findings, per user
-        if self._finding_ids_to_fully_mitigate:
-            # Group finding_ids by user to do one SELECT per user
-            ids_by_user: dict[Dojo_User | None, list[int]] = {}
-            for finding_id, user in self._finding_ids_to_fully_mitigate.items():
-                ids_by_user.setdefault(user, []).append(finding_id)
-            for user, finding_ids in ids_by_user.items():
-                ref_ids_to_mitigate_by_user.setdefault(user, set()).update(
-                    LocationFindingReference.objects.filter(
-                        finding_id__in=finding_ids,
-                    ).exclude(status__in=special_statuses).values_list("id", flat=True),
-                )
+        # Update the "mitigate set" with the IDs of existing LocationFindingReference objects we need to mitigate.
+        # Note we exclude LocationFindingReferences that currently have one of the special statuses.
+        if self._findings_to_mitigate:
+            ref_ids_to_mitigate.update({
+                ref_id: self._findings_to_mitigate[finding_id]
+                for ref_id, finding_id in LocationFindingReference.objects.filter(
+                    finding_id__in=self._findings_to_mitigate.keys(),
+                ).exclude(status__in=special_statuses).values_list("id", "finding_id")
+            })
 
-        # Execute bulk finding ref updates
+        # Hoorah we finally get around to actually updating stuff
         now = timezone.now()
+        # Track all updated LocationFindingReference IDs so we can update the corresponding LocationProductReferences
+        # as necessary: if any LocationFindingReference is Active, the LocationProductReferences will be set to Active;
+        # otherwise, they will be set to Mitigated.
         all_affected_ref_ids: set[int] = set()
 
+        # Update Mitigated => Active ("reactivate")
         if ref_ids_to_reactivate:
             LocationFindingReference.objects.filter(
                 id__in=ref_ids_to_reactivate,
@@ -322,24 +350,36 @@ class LocationManager(BaseLocationManager):
             )
             all_affected_ref_ids |= ref_ids_to_reactivate
 
-        for user, ref_ids in ref_ids_to_mitigate_by_user.items():
-            if ref_ids:
+        # Update ~Mitigated => Mitigated
+        if ref_ids_to_mitigate:
+            # Flip (ref_id -> user) to (user -> set[ref_id]) for per-user bulk updates
+            ref_ids_per_user: dict[Dojo_User, set[int]] = {}
+            for ref_id, user in ref_ids_to_mitigate.items():
+                ref_ids_per_user.setdefault(user, set()).add(ref_id)
+            # Update per user
+            for user, ref_ids in ref_ids_per_user.items():
                 LocationFindingReference.objects.filter(
                     id__in=ref_ids,
-                ).exclude(status=FindingLocationStatus.Mitigated).update(
+                ).exclude(
+                    status=FindingLocationStatus.Mitigated
+                ).update(
                     auditor=user,
                     audit_time=now,
                     status=FindingLocationStatus.Mitigated,
                 )
                 all_affected_ref_ids |= ref_ids
 
-        # Propagate to product refs: if any finding ref is active, product ref is active; otherwise mitigated.
+        # Propagate to product refs: if any finding ref for this location on this product is Active, product ref is
+        # Active; otherwise Mitigated.
         if all_affected_ref_ids:
+            # Grab the location IDs for all the LocationFindingReferences we updated
             affected_location_ids = set(
                 LocationFindingReference.objects.filter(
                     id__in=all_affected_ref_ids,
                 ).values_list("location_id", flat=True),
             )
+            # Look up all affected LocationFindingReferences that are now Active and associated with this product
+            # through the "finding.test.engagement.product" chain
             locations_still_active = set(
                 LocationFindingReference.objects.filter(
                     location_id__in=affected_location_ids,
@@ -347,8 +387,11 @@ class LocationManager(BaseLocationManager):
                     status=FindingLocationStatus.Active,
                 ).values_list("location_id", flat=True),
             )
+            # Diff the two; this leaves IDs of locations that should be set to Mitigated at the product level
             locations_now_mitigated = affected_location_ids - locations_still_active
 
+            # Update LocationProductReferences to Active for any locations associated with this product that have an
+            # Active LocationFindingReference
             if locations_still_active:
                 LocationProductReference.objects.filter(
                     location_id__in=locations_still_active,
@@ -356,6 +399,8 @@ class LocationManager(BaseLocationManager):
                 ).exclude(status=ProductLocationStatus.Active).update(
                     status=ProductLocationStatus.Active,
                 )
+            # Update LocationProductReferences to Mitigated for any locations associated with this product that have no
+            # Active LocationFindingReferences
             if locations_now_mitigated:
                 LocationProductReference.objects.filter(
                     location_id__in=locations_now_mitigated,
@@ -366,8 +411,8 @@ class LocationManager(BaseLocationManager):
 
         # Clear accumulators
         self._status_updates.clear()
-        self._finding_ids_to_fully_reactivate.clear()
-        self._finding_ids_to_fully_mitigate.clear()
+        self._findings_to_reactivate.clear()
+        self._findings_to_mitigate.clear()
 
     # ------------------------------------------------------------------
     # Type registry
