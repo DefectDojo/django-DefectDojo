@@ -79,7 +79,7 @@ When configuring Reimport Deduplication:
 1. Select the **Security Tool** (Universal or Generic Parser)
 2. Choose the appropriate **Deduplication Algorithm**
 
-The same three algorithm options are available for Reimport Deduplication as for Same Tool Deduplication:
+The following algorithm options are available for Reimport Deduplication:
 - Hash Code
 - Unique ID From Tool
 - Unique ID From Tool or Hash Code

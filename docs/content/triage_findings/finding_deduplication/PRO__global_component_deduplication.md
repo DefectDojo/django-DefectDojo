@@ -5,15 +5,15 @@ weight: 5
 audience: pro
 ---
 
-Global Component Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Products** based on the component name and version they reference. It is intended for Software Composition Analysis (SCA) tools, where the same vulnerable dependency (for example, `timespan@2.3.0`) may appear in many Products — and you want DefectDojo to treat those occurrences as duplicates of a single original Finding.
+Global Component Deduplication is a DefectDojo Pro algorithm that identifies duplicate Findings across **all Products** based on the component name and version they reference. It is intended for Software Composition Analysis (SCA) tools, where the same vulnerable dependency (for example, `timespan@2.3.0`) may appear in many Products, and you want DefectDojo to treat those occurrences as duplicates of a single original Finding.
 
 Unlike the other deduplication algorithms, Global Component matching is **not scoped to a single Product or Engagement**. A Finding imported into Product B can be marked as a duplicate of an older Finding in Product A, even if the two Products are unrelated.
 
 ## Enabling the Global Component Algorithm
 
-Global Component Deduplication is gated behind a feature flag and is **off by default**. To enable it on your instance, contact [DefectDojo Support](mailto:support@defectdojo.com).
+Global Component Deduplication is gated behind a feature flag and is **off by default**. To request that it be enabled on your instance, contact [DefectDojo Support](mailto:support@defectdojo.com).
 
-Once the feature is enabled, **Global Component** becomes available as an option in the **Deduplication Algorithm** dropdown for both Same Tool and Cross Tool Deduplication settings in the Tuner.
+Once the feature is enabled, **Global Component** will become available as an option in the **Deduplication Algorithm** dropdown for both Same Tool and Cross Tool Deduplication settings in the Tuner.
 
 ## Configuring Global Component Deduplication
 
@@ -71,6 +71,17 @@ In that case, the Finding is visible and labelled as a duplicate, but the user w
 
 ## Reverting
 
-To stop using Global Component for a given tool, open its Deduplication Settings and switch the algorithm back to one of the scoped options — Hash Code, Unique ID From Tool, or Unique ID From Tool or Hash Code for Same Tool; Hash Code or Disabled for Cross Tool.
+To stop using Global Component for a given tool, open its Deduplication Settings and switch the algorithm back to one of the scoped options.
+
+For **Same Tool** Deduplication:
+
+- Hash Code
+- Unique ID From Tool
+- Unique ID From Tool or Hash Code
+
+For **Cross Tool** Deduplication:
+
+- Hash Code
+- Disabled
 
 Changing the algorithm triggers a background recalculation of deduplication hashes for the tool's existing Findings.
