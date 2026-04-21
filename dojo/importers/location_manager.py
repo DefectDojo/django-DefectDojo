@@ -133,7 +133,8 @@ class LocationManager(BaseLocationManager):
             return
 
         # Convert all UnsavedLocation objects (possibly a mix of AbstractLocation and LocationData objects) to cleaned
-        # concrete location objects
+        # concrete location objects. _product_locations is the superset of all locations (finding-associated +
+        # product-only), so cleaning it once covers everything.
         all_locations = self.clean_unsaved_locations(self._product_locations)
         if not all_locations:
             self._locations_by_finding.clear()
@@ -195,7 +196,7 @@ class LocationManager(BaseLocationManager):
                 # identity_hash uniquely defines the location per type, so using these we can match up with actual
                 # persisted locations from above, all of which will be represented in saved_by_key. (Keep in mind,
                 # _locations_by_finding contains a subset of the locations across all its values in
-                # _locations_by_finding.)
+                # _product_locations.)
                 for location in self.clean_unsaved_locations(unsaved_locations):
                     saved_loc = saved_by_key[type(location), location.identity_hash]
                     finding_ref_key = (finding.id, saved_loc.location_id)
