@@ -1936,7 +1936,7 @@ def process_resolution_from_jira(
     if status_category_key is None:
         resolved = resolution_id is not None
     else:
-        resolved = resolution_id is not None and status_category_key == "done"
+        resolved = status_category_key == "done"
     jira_instance = get_jira_instance(finding)
 
     if resolved:
