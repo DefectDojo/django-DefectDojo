@@ -1911,12 +1911,14 @@ def process_resolution_from_jira(
     """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
     import dojo.risk_acceptance.helper as ra_helper  # noqa: PLC0415 import error
     status_changed = False
-    # A Jira issue is treated as "resolved" (i.e. the linked finding should be
-    # mitigated / risk-accepted / false-positive'd) only when BOTH a non-null
-    # resolution is present AND the issue's statusCategory is "done". Jira's
-    # statusCategory.key is the canonical closure signal (always one of
-    # "new", "indeterminate", "done"), and checking it alongside the
-    # resolution field prevents several real-world bugs:
+    # A Jira issue is treated as "resolved" (the linked finding should be
+    # mitigated / risk-accepted / false-positive'd) when the issue's
+    # statusCategory.key is "done". Jira's statusCategory is the canonical
+    # closure signal (one of "new", "indeterminate", "done", "undefined"),
+    # always returned by the API, and does not depend on per-workflow
+    # resolution-field hygiene.
+    #
+    # Relying on statusCategory prevents real-world bugs:
     #   1. Workflows where reopen transitions do not clear the resolution -
     #      the issue ends up in an "open but resolved" state and every
     #      webhook event for the issue would otherwise mis-mitigate the
@@ -1929,14 +1931,11 @@ def process_resolution_from_jira(
     #      and the first webhook sees the pre-transition (still-resolved)
     #      state even though the intended final state is reopened.
     #
-    # status_category_key is keyword-only and optional to preserve backward
-    # compatibility with any caller that has not yet been updated to extract
-    # it from the webhook payload; when it is None we fall back to the
-    # historical resolution-only behavior.
-    if status_category_key is None:
-        resolved = resolution_id is not None
-    else:
-        resolved = status_category_key == "done"
+    # The resolution value (when present) is still used downstream to
+    # classify "done" issues as risk-accepted, false-positive, or the
+    # default mitigated category (see jira_instance.accepted_resolutions
+    # and .false_positive_resolutions below).
+    resolved = status_category_key == "done"
     jira_instance = get_jira_instance(finding)
 
     if resolved:
