@@ -764,7 +764,7 @@ def bulk_clear_finding_m2m(finding_qs):
         Notes.objects.filter(id__in=note_ids).delete()
 
 
-def bulk_delete_findings(finding_qs, chunk_size=1000):
+def _bulk_delete_findings_internal(finding_qs, chunk_size=1000):
     """
     Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
 
@@ -797,6 +797,20 @@ def bulk_delete_findings(finding_qs, chunk_size=1000):
             "bulk_delete_findings: deleted chunk %d (%d findings)",
             chunk_num, len(chunk_ids),
         )
+
+
+def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None):
+    """Entry point; may delegate to Pro via settings.BULK_DELETE_FINDINGS_METHOD.
+
+    cascade_root: optional dict describing the top-level object whose cascade triggered
+    this bulk delete (e.g. {"model": "dojo.engagement", "pk": 9}). Ignored by OSS
+    when no custom method is configured.
+    """
+    from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+
+    if fn := get_custom_method("BULK_DELETE_FINDINGS_METHOD"):
+        return fn(finding_qs, chunk_size=chunk_size, cascade_root=cascade_root)
+    return _bulk_delete_findings_internal(finding_qs, chunk_size=chunk_size)
 
 
 def fix_loop_duplicates(scope_qs=None):

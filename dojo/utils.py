@@ -2024,6 +2024,8 @@ def async_delete_task(obj, **kwargs):
     scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
     if scope_field:
         finding_qs = Finding.objects.filter(**{scope_field: obj})
+        # cascade_root is some context we provide to the bulk_delete_findings function
+        cascade_root = {"model": obj._meta.label_lower, "pk": obj.pk}
 
         # Step 2: Prepare duplicate clusters (must happen before any deletion)
         # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
@@ -2042,10 +2044,10 @@ def async_delete_task(obj, **kwargs):
         outside_count = outside_dupes_qs.count()
         if outside_count:
             logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_count)
-            bulk_delete_findings(outside_dupes_qs, chunk_size=chunk_size)
+            bulk_delete_findings(outside_dupes_qs, chunk_size=chunk_size, cascade_root=cascade_root)
 
         # Step 4: Delete the main scope findings
-        bulk_delete_findings(finding_qs, chunk_size=chunk_size)
+        bulk_delete_findings(finding_qs, chunk_size=chunk_size, cascade_root=cascade_root)
 
     # Step 5: Delete all remaining related objects (Tests, Engagements,
     # Endpoints, etc.) via SQL cascade. Findings are already gone, so
