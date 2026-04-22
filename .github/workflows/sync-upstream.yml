@@ -1,0 +1,33 @@
+name: Sync Upstream
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * 0"
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  sync:
+    name: Sync upstream changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync from upstream
+        uses: kuma0128/sync-upstream-action@v1
+        with:
+          upstream_repo: DefectDojo/django-DefectDojo
+          upstream_branch: master
+          target_branch: master
+          mode: pr
+          pr_title: "[chore] Sync with upstream"
+          pr_labels: upstream-sync
+          token: ${{ secrets.GITHUB_TOKEN }}
