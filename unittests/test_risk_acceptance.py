@@ -111,7 +111,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
         data = copy.copy(self.data_remove_finding_from_ra)
         data["remove_finding_id"] = 2
         ra = Risk_Acceptance.objects.last()
-        response = self.client.post(reverse("view_risk_acceptance", args=(1, ra.id)), data)
+        response = self.client.post(reverse("edit_risk_acceptance", args=(1, ra.id)), data)
         self.assertEqual(302, response.status_code, response.content[:1000])
         self.assert_all_active_not_risk_accepted(Finding.objects.filter(id=2))
         self.assert_all_inactive_risk_accepted(Finding.objects.filter(id=3))

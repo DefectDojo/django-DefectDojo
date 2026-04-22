@@ -40,6 +40,22 @@ class GovulncheckParser:
     def get_version(data, node):
         return data["Requires"]["Modules"][str(node)]["Version"]
 
+    @staticmethod
+    def get_fix_info(affected_ranges):
+        for r in affected_ranges:
+            for event in r.get("events", []):
+                if "fixed" in event:
+                    return True, event["fixed"]
+        return False, ""
+
+    @staticmethod
+    def get_introduced_version(affected_ranges):
+        for r in affected_ranges:
+            for event in r.get("events", []):
+                if "introduced" in event:
+                    return event["introduced"]
+        return ""
+
     def get_finding_trace_info(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract traces.
         trace_info_strs = []
@@ -202,8 +218,12 @@ class GovulncheckParser:
                         else:
                             title = f"{osv_data['id']} - {affected_package['name']}"
 
-                        affected_version = self.get_affected_version(data, osv_data["id"])
+                        fix_available, fix_version = self.get_fix_info(affected_ranges)
 
+                        affected_version = (
+                            self.get_affected_version(data, osv_data["id"])
+                            or self.get_introduced_version(affected_ranges)
+                        )
                         severity = elem["osv"].get("severity", SEVERITY)
 
                         d = {
@@ -215,6 +235,8 @@ class GovulncheckParser:
                             "description": description,
                             "impact": impact,
                             "references": references,
+                            "fix_available": fix_available,
+                            "fix_version": fix_version,
                             "file_path": path,
                             "url": db_specific_url,
                             "unique_id_from_tool": osv_id,
