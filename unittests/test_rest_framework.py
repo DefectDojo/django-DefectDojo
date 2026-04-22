@@ -3429,6 +3429,95 @@ class ReimportScanTest(DojoAPITestCase):
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
+    # Security tests: verify that conflicting ID-based and name-based identifiers are rejected
+
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    @patch("dojo.api_v2.permissions.user_has_permission")
+    def test_reimport_engagement_param_ignored_permission_checked_on_name_resolved_target(self, mock, importer_mock, reimporter_mock):
+        """
+        Engagement is not a declared field on ReImportScanSerializer — verify
+        the permission check uses the name-resolved target, not the engagement param.
+        """
+        mock.return_value = False
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
+
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
+            payload = {
+                "minimum_severity": "Low",
+                "active": True,
+                "verified": True,
+                "scan_type": "ZAP Scan",
+                "file": testfile,
+                # engagement=1 belongs to Product 2 Engagement 1, but it should be ignored
+                "engagement": 1,
+                # These names resolve to Product 2's Engagement 4 -> Test 4
+                "product_name": "Security How-to",
+                "engagement_name": "April monthly engagement",
+                "version": "1.0.0",
+            }
+            response = self.client.post(self.url, payload)
+            self.assertEqual(403, response.status_code, response.content[:1000])
+            # Permission must be checked on name-resolved Test 4 (in Engagement 4),
+            # NOT on Test 3 (which belongs to the engagement=1 param)
+            mock.assert_called_with(User.objects.get(username="admin"),
+                Test.objects.get(id=4),
+                Permissions.Import_Scan_Result)
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
+
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    def test_reimport_with_test_id_mismatched_product_name_is_rejected(self, importer_mock, reimporter_mock):
+        """Sending test ID from one product with product_name from another must be rejected."""
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
+
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
+            payload = {
+                "minimum_severity": "Low",
+                "active": True,
+                "verified": True,
+                "scan_type": "ZAP Scan",
+                "file": testfile,
+                # Test 3 belongs to Engagement 1 -> Product 2 ("Security How-to")
+                "test": 3,
+                # But product_name points to Product 1 ("Python How-to")
+                "product_name": "Python How-to",
+                "version": "1.0.0",
+            }
+            response = self.client.post(self.url, payload)
+            self.assertEqual(400, response.status_code, response.content[:1000])
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
+
+    @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
+    @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
+    def test_reimport_with_test_id_mismatched_engagement_name_is_rejected(self, importer_mock, reimporter_mock):
+        """Sending test ID from one engagement with engagement_name from another must be rejected."""
+        importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
+        reimporter_mock.return_value = REIMPORTER_MOCK_RETURN_VALUE
+
+        with Path("tests/zap_sample.xml").open(encoding="utf-8") as testfile:
+            payload = {
+                "minimum_severity": "Low",
+                "active": True,
+                "verified": True,
+                "scan_type": "ZAP Scan",
+                "file": testfile,
+                # Test 3 belongs to Engagement 1 ("1st Quarter Engagement")
+                "test": 3,
+                # But engagement_name points to a different engagement
+                "product_name": "Security How-to",
+                "engagement_name": "April monthly engagement",
+                "version": "1.0.0",
+            }
+            response = self.client.post(self.url, payload)
+            self.assertEqual(400, response.status_code, response.content[:1000])
+            importer_mock.assert_not_called()
+            reimporter_mock.assert_not_called()
+
 
 @versioned_fixtures
 class ProductTypeTest(BaseClass.BaseClassTest):

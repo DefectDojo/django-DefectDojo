@@ -16,13 +16,8 @@ from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import fix_loop_duplicates
-from dojo.location.models import Location
-
-try:
-    from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
-except ImportError:
-    jira_status_reconciliation = None
-from dojo.models import Alerts, Announcement, Endpoint, Engagement, Finding, Product, System_Settings, User
+from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
+from dojo.models import Alerts, Engagement, Finding, Product, System_Settings, User
 from dojo.notifications.helper import create_notification
 from dojo.utils import calculate_grade, sla_compute_and_notify
 
@@ -223,37 +218,6 @@ def fix_loop_duplicates_task(*args, **kwargs):
     # Wrap with pghistory context for audit trail
     with pghistory.context(source="fix_loop_duplicates"):
         return fix_loop_duplicates()
-
-
-@app.task
-def evaluate_pro_proposition(*args, **kwargs):
-    # Ensure we should be doing this
-    if not settings.CREATE_CLOUD_BANNER:
-        return
-    # Get the announcement object
-    announcement = Announcement.objects.get_or_create(id=1)[0]
-    # Quick check for a user has modified the current banner - if not, exit early as we dont want to stomp
-    if not any(
-        entry in announcement.message
-        for entry in [
-            "",
-            "DefectDojo Pro Cloud and On-Premise Subscriptions Now Available!",
-            "Findings/Endpoints in their systems",
-        ]
-    ):
-        return
-    # Count the objects the determine if the banner should be updated
-    if settings.V3_FEATURE_LOCATIONS:
-        object_count = Finding.objects.count() + Location.objects.count()
-    else:
-        # TODO: Delete this after the move to Locations
-        object_count = Finding.objects.count() + Endpoint.objects.count()
-    # Unless the count is greater than 100k, exit early
-    if object_count < 100000:
-        return
-    # Update the announcement
-    announcement.message = f'Only professionals have {object_count:,} Findings and Endpoints in their systems... <a href="https://www.defectdojo.com/pricing" target="_blank">Get DefectDojo Pro</a> today!'
-    announcement.save()
 
 
 @app.task

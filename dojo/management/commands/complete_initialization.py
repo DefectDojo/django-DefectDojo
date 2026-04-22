@@ -14,7 +14,6 @@ from django.db import connection, connections
 from django.db.utils import ProgrammingError
 
 from dojo.auditlog import configure_pghistory_triggers
-from dojo.models import Announcement, Dojo_User, UserAnnouncement
 
 
 class Command(BaseCommand):
@@ -38,13 +37,11 @@ class Command(BaseCommand):
 
         if self.admin_user_exists():
             self.stdout.write("Admin user already exists; skipping first-boot setup")
-            self.create_announcement_banner()
             self.initialize_data()
             return
 
         self.ensure_admin_secrets()
         self.first_boot_setup()
-        self.create_announcement_banner()
         self.initialize_data()
 
     # ------------------------------------------------------------------
@@ -57,29 +54,6 @@ class Command(BaseCommand):
 
         self.stdout.write("Initializing non-standard permissions")
         call_command("initialize_permissions")
-
-    def create_announcement_banner(self) -> None:
-        if os.getenv("DD_CREATE_CLOUD_BANNER"):
-            return
-
-        self.stdout.write("Creating announcement banner")
-
-        announcement, _ = Announcement.objects.get_or_create(id=1)
-        announcement.message = (
-            '<a href="https://cloud.defectdojo.com/accounts/onboarding/plg_step_1" '
-            'target="_blank">'
-            "DefectDojo Pro Cloud and On-Premise Subscriptions Now Available! "
-            "Create an account to try Pro for free!"
-            "</a>"
-        )
-        announcement.dismissable = True
-        announcement.save()
-
-        for user in Dojo_User.objects.all():
-            UserAnnouncement.objects.get_or_create(
-                user=user,
-                announcement=announcement,
-            )
 
     # ------------------------------------------------------------------
     # Auditlog consistency
