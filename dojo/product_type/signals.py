@@ -8,9 +8,10 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.labels import get_labels
 from dojo.models import Product_Type
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import async_create_notification, create_notification
 from dojo.pghistory_models import DojoEvents
 
 labels = get_labels()
@@ -19,12 +20,14 @@ labels = get_labels()
 @receiver(post_save, sender=Product_Type)
 def product_type_post_save(sender, instance, created, **kwargs):
     if created:
-        create_notification(event="product_type_added",
-                            title=instance.name,
-                            product_type=instance,
-                            url=reverse("view_product_type", args=(instance.id,)),
-                            url_api=reverse("product_type-detail", args=(instance.id,)),
-                        )
+        dojo_dispatch_task(
+            async_create_notification,
+            event="product_type_added",
+            title=instance.name,
+            product_type_id=instance.id,
+            url=reverse("view_product_type", args=(instance.id,)),
+            url_api=reverse("product_type-detail", args=(instance.id,)),
+        )
 
 
 @receiver(post_delete, sender=Product_Type)
