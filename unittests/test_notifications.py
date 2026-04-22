@@ -602,7 +602,8 @@ class TestAsyncNotificationDispatch(DojoTestCase):
         self.assertNotIn("product_type", kwargs)
 
     def test_importer_dispatch_uses_id_kwargs(self):
-        """Static check that default_importer's test_added dispatch passes *_id kwargs (not model instances).
+        """
+        Static check that default_importer's test_added dispatch passes *_id kwargs (not model instances).
 
         The importer's notification dispatch fires deep inside a full scan-import flow;
         exercising it end-to-end is covered by integration tests. This guard test

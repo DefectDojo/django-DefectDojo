@@ -17,6 +17,9 @@ from dojo.pghistory_models import DojoEvents
 
 @receiver(post_save, sender=Engagement)
 def engagement_post_save(sender, instance, created, **kwargs):
+    # raw=True is set by loaddata; skip dispatch so fixture loading doesn't require a live broker.
+    if kwargs.get("raw"):
+        return
     if created:
         title = _('Engagement created for "%(product)s": %(name)s') % {"product": instance.product, "name": instance.name}
         dojo_dispatch_task(

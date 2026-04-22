@@ -19,6 +19,9 @@ labels = get_labels()
 
 @receiver(post_save, sender=Product_Type)
 def product_type_post_save(sender, instance, created, **kwargs):
+    # raw=True is set by loaddata; skip dispatch so fixture loading doesn't require a live broker.
+    if kwargs.get("raw"):
+        return
     if created:
         dojo_dispatch_task(
             async_create_notification,
