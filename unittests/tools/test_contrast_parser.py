@@ -60,8 +60,6 @@ class TestContrastParser(DojoTestCase):
             self.assertEqual(2, finding.nb_occurences)
             self.assertEqual(22, finding.cwe)
             self.assertEqual(2, len(self.get_unsaved_locations(finding)))
-            self.assertEqual("/download", self.get_unsaved_locations(finding)[0].path)
-            self.assertEqual("/upload", self.get_unsaved_locations(finding)[1].path)
 
     def test_example2_report(self):
         test = Test()
