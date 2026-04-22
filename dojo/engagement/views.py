@@ -286,6 +286,12 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get("status")
+            if form.cleaned_data.get("product") != engagement.product:
+                user_has_permission_or_403(
+                    request.user,
+                    form.cleaned_data.get("product"),
+                    Permissions.Engagement_Edit,
+                )
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
             if (new_status in {"Cancelled", "Completed"}):
@@ -1442,9 +1448,10 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     "Since you are not the note's author, it was not deleted.",
                     extra_tags="alert-danger")
 
-        if "remove_finding" in request.POST:
+        if edit_mode and "remove_finding" in request.POST:
             finding = get_object_or_404(
-                Finding, pk=request.POST["remove_finding_id"])
+                risk_acceptance.accepted_findings,
+                pk=request.POST["remove_finding_id"])
 
             ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 
