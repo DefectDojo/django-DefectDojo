@@ -99,13 +99,19 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.pulls.create({
+            const pr = await github.rest.pulls.create({
               owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge back ${{ inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'dev'
+            })
+            await github.rest.issues.addLabels({
+              owner: '${{ env.GITHUB_ORG }}',
+              repo: 'django-DefectDojo',
+              issue_number: pr.data.number,
+              labels: ['release-management']
             })
 
   create_pr_for_merge_back_into_bugfix:
@@ -175,11 +181,17 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.pulls.create({
+            const pr = await github.rest.pulls.create({
               owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge back ${{ inputs.release_number_new }} into bugfix from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'bugfix'
+            })
+            await github.rest.issues.addLabels({
+              owner: '${{ env.GITHUB_ORG }}',
+              repo: 'django-DefectDojo',
+              issue_number: pr.data.number,
+              labels: ['release-management']
             })
