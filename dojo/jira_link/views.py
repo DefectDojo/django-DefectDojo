@@ -149,11 +149,31 @@ def webhook(request, secret=None):
                 resolution = resolution if resolution and resolution != "None" else None
                 resolution_id = resolution["id"] if resolution else None
                 resolution_name = resolution["name"] if resolution else None
+
+                # Extract the statusCategory.key from the issue status. Jira
+                # returns one of "new" (To Do), "indeterminate" (In Progress)
+                # or "done" (Done). We pass this alongside the resolution into
+                # process_resolution_from_jira so mitigation is only triggered
+                # when the issue is genuinely closed, not just when a
+                # resolution value happens to be present.
+                status = parsed["issue"]["fields"].get("status") or {}
+                status_category = status.get("statusCategory") or {}
+                status_category_key = status_category.get("key")
+
                 jira_now = parse_datetime(parsed["issue"]["fields"]["updated"])
 
                 if findings:
                     for finding in findings:
-                        jira_helper.process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jissue, finding_group=jissue.finding_group)
+                        jira_helper.process_resolution_from_jira(
+                            finding,
+                            resolution_id,
+                            resolution_name,
+                            assignee_name,
+                            jira_now,
+                            jissue,
+                            finding_group=jissue.finding_group,
+                            status_category_key=status_category_key,
+                        )
                 # Check for any comment that could have come along with the resolution
                 if (error_response := check_for_and_create_comment(parsed)) is not None:
                     return error_response

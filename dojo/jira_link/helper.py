@@ -1133,7 +1133,23 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
         return failure_to_update_message(message, e, obj)
 
-    # Update the issue in jira
+    # Update the status in jira FIRST, before applying the other field
+    # updates (priority, description, labels, etc.). This ordering matters
+    # because each call to the Jira REST API fires its own
+    # jira:issue_updated webhook. If we updated fields first, the
+    # pre-transition webhook would see the old (stale) resolution /
+    # statusCategory - for a reopen, the webhook would still report the
+    # issue as resolved and our handler would ricochet the linked finding
+    # back to mitigated before the transition webhook even arrived. By
+    # transitioning first, every webhook that fires during this sync sees
+    # the intended post-transition state.
+    try:
+        push_status_to_jira(obj, jira_instance, jira, issue)
+    except Exception as e:
+        message = f"Failed to update the jira issue status - {e}"
+        return failure_to_update_message(message, e, obj)
+    # Update the rest of the issue fields in jira (summary, description,
+    # priority, labels, due date, etc.) AFTER the transition above.
     try:
         logger.debug("Updating JIRA issue with fields: %s", json.dumps(fields, indent=4))
         issue.update(
@@ -1144,12 +1160,6 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         j_issue.save()
     except Exception as e:
         message = f"Failed to update the jira issue with the following payload: {fields} - {e}"
-        return failure_to_update_message(message, e, obj)
-    # Update the status in jira
-    try:
-        push_status_to_jira(obj, jira_instance, jira, issue)
-    except Exception as e:
-        message = f"Failed to update the jira issue status - {e}"
         return failure_to_update_message(message, e, obj)
     # Upload dojo finding screenshots to Jira
     try:
@@ -1887,11 +1897,45 @@ def escape_for_jira(text):
     return text.replace("|", "%7D")
 
 
-def process_resolution_from_jira(finding, resolution_id, resolution_name, assignee_name, jira_now, jira_issue, finding_group: Finding_Group = None) -> bool:
+def process_resolution_from_jira(
+    finding,
+    resolution_id,
+    resolution_name,
+    assignee_name,
+    jira_now,
+    jira_issue,
+    finding_group: Finding_Group = None,
+    *,
+    status_category_key: str | None = None,
+) -> bool:
     """Processes the resolution field in the JIRA issue and updated the finding in Defect Dojo accordingly"""
     import dojo.risk_acceptance.helper as ra_helper  # noqa: PLC0415 import error
     status_changed = False
-    resolved = resolution_id is not None
+    # A Jira issue is treated as "resolved" (the linked finding should be
+    # mitigated / risk-accepted / false-positive'd) when the issue's
+    # statusCategory.key is "done". Jira's statusCategory is the canonical
+    # closure signal (one of "new", "indeterminate", "done", "undefined"),
+    # always returned by the API, and does not depend on per-workflow
+    # resolution-field hygiene.
+    #
+    # Relying on statusCategory prevents real-world bugs:
+    #   1. Workflows where reopen transitions do not clear the resolution -
+    #      the issue ends up in an "open but resolved" state and every
+    #      webhook event for the issue would otherwise mis-mitigate the
+    #      finding.
+    #   2. Workflows that set a default resolution on brand-new issues
+    #      (for example "Unresolved") - a webhook would otherwise mis-
+    #      mitigate the finding as soon as the issue was created.
+    #   3. Ricochets during DefectDojo's own push to Jira: the issue.update()
+    #      call and the subsequent status transition each fire a webhook,
+    #      and the first webhook sees the pre-transition (still-resolved)
+    #      state even though the intended final state is reopened.
+    #
+    # The resolution value (when present) is still used downstream to
+    # classify "done" issues as risk-accepted, false-positive, or the
+    # default mitigated category (see jira_instance.accepted_resolutions
+    # and .false_positive_resolutions below).
+    resolved = status_category_key == "done"
     jira_instance = get_jira_instance(finding)
 
     if resolved:
