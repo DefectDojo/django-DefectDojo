@@ -1412,7 +1412,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Dependency Track Finding Packaging Format (FPF) Export": ["component_name", "component_version", "vulnerability_ids"],
     "Horusec Scan": ["title", "description", "file_path", "line"],
     "Mobsfscan Scan": ["title", "severity", "cwe", "file_path", "description"],
-    "Tenable Scan": ["title", "severity", "vulnerability_ids", "cwe", "description"],
+    "Tenable Scan": ["title", "severity", "vulnerability_ids", "cwe"],
     "Nexpose Scan": ["title", "severity", "vulnerability_ids", "cwe"],
     # possible improvement: in the scanner put the library name into file_path, then dedup on cwe + file_path + severity
     "NPM Audit Scan": ["title", "severity", "file_path", "vulnerability_ids", "cwe"],
