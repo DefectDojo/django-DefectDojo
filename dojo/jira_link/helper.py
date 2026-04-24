@@ -1219,28 +1219,31 @@ def get_jira_issue_from_jira(find):
 
 
 def issue_from_jira_is_active(issue_from_jira):
-    #         "resolution":{
-    #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
-    #             "id":"11",
-    #             "description":"Cancelled by the customer.",
-    #             "name":"Cancelled"
-    #         },
-
-    # or
-    #         "resolution": null
-
-    # or
-    #         "resolution": "None"
-
-    if not hasattr(issue_from_jira.fields, "resolution"):
-        logger.debug(vars(issue_from_jira))
+    if not hasattr(issue_from_jira, "fields"):
+        logger.debug("No jira data fields found, treating as active")
         return True
 
-    if not issue_from_jira.fields.resolution:
+    key = getattr(getattr(getattr(issue_from_jira.fields, "status", None), "statusCategory", None), "key", None)
+    if key:
+        match key:
+            case "new" | "indeterminate":
+                logger.debug("Jira issue status category is '%s', treating as active", key)
+                return True
+            case "done":
+                logger.debug("Jira issue status category is 'done', treating as inactive")
+                return False
+            case "undefined":
+                logger.debug("Jira issue status category is 'undefined', no decision possible")
+            case _:
+                logger.warning("Unknown Jira status category key '%s', falling back to resolution check", key)
+
+    # the statusCategory is not specified or "undefined", fallback: checking if a resolution is set and evaluate it
+    if not hasattr(issue_from_jira.fields, "resolution") or not issue_from_jira.fields.resolution:
+        logger.debug("No resolution found, treating as active")
         return True
 
-    # some kind of resolution is present that is not null or None
-    return issue_from_jira.fields.resolution == "None"
+    # some kind of resolution is present that is not None
+    return False
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
