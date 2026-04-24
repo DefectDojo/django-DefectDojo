@@ -17,7 +17,6 @@ from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
-from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     Development_Environment,
     Finding,
