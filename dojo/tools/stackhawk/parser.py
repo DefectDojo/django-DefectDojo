@@ -14,7 +14,6 @@ class StackHawkScanMetadata:
         self.component_version = completed_scan["scan"]["env"]
         self.static_finding = False
         self.dynamic_finding = True
-        self.service = completed_scan["scan"]["application"]
 
 
 class StackHawkParser:
@@ -106,7 +105,6 @@ class StackHawkParser:
             dynamic_finding=metadata.dynamic_finding,
             vuln_id_from_tool=raw_finding["pluginId"],
             nb_occurences=raw_finding["totalCount"],
-            service=metadata.service,
             false_p=are_all_endpoints_false_positive,
             risk_accepted=are_all_endpoints_risk_accepted,
         )

@@ -91,7 +91,7 @@ class HydraParser:
             + password,
             static_finding=False,
             dynamic_finding=True,
-            service=metadata.service_type,
+            component_name=metadata.service_type,
         )
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations = [LocationData.url(host=host, port=port)]

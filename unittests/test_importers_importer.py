@@ -1,5 +1,7 @@
+import ast
 import logging
 import uuid
+from pathlib import Path
 from unittest.mock import patch
 
 from django.core.exceptions import ValidationError
@@ -933,3 +935,62 @@ class TestImporterUtils(DojoAPITestCase):
         vuln_ids = list(Vulnerability_Id.objects.filter(finding=finding).values_list("vulnerability_id", flat=True))
         self.assertEqual(set(new_vulnerability_ids), set(vuln_ids))
         finding.delete()
+
+
+class TestParserPolicy(DojoTestCase):
+    @staticmethod
+    def _iter_parser_files(tools_root):
+        yield from tools_root.rglob("parser.py")
+
+    @staticmethod
+    def _finding_service_offenders(repo_root, parser_file):
+        try:
+            source = parser_file.read_text(encoding="utf-8")
+            tree = ast.parse(source)
+        except (OSError, SyntaxError):
+            return []
+
+        offenders = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+
+            func = node.func
+            is_finding_call = (
+                isinstance(func, ast.Name) and func.id == "Finding"
+            ) or (
+                isinstance(func, ast.Attribute) and func.attr == "Finding"
+            )
+
+            if not is_finding_call:
+                continue
+
+            has_service_kwarg = any(keyword.arg == "service" for keyword in node.keywords if keyword.arg)
+            if has_service_kwarg:
+                rel_path = parser_file.relative_to(repo_root)
+                offenders.append(f"{rel_path}:{node.lineno}")
+
+        return offenders
+
+    def test_parsers_must_not_set_service_on_finding_directly(self):
+        """
+        Policy test: parser implementations must not set `Finding.service` directly.
+
+        Rationale:
+        - `service` should be controlled via import/reimport options and not parser-specific mapping.
+        - Direct parser assignment leads to inconsistent close-old-findings and dedupe behavior.
+        """
+        repo_root = Path(__file__).resolve().parents[1]
+        tools_root = repo_root / "dojo" / "tools"
+
+        offenders = []
+
+        for parser_file in self._iter_parser_files(tools_root):
+            offenders.extend(self._finding_service_offenders(repo_root, parser_file))
+
+        self.assertEqual(
+            [],
+            offenders,
+            "Parser must not set Finding.service directly. Offenders:\n"
+            + "\n".join(offenders),
+        )

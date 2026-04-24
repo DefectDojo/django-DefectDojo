@@ -33,28 +33,34 @@ DESCRIPTION_TEMPLATE = """{title}
 **Type:** {type}
 **Fixed version:** {fixed_version}
 
-{description_text}
+{service_text}{description_text}
 """
 
 MISC_DESCRIPTION_TEMPLATE = """**Target:** {target}
 **Type:** {type}
 
-{description}
+{service_text}{description}
 {message}
 """
 
 SECRET_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
-**Match:** {match}
+{service_text}**Match:** {match}
 """  # noqa: S105
 
 LICENSE_DESCRIPTION_TEMPLATE = """{title}
 **Category:** {category}
-**Package:** {package}
+{service_text}**Package:** {package}
 """
 
 
 class TrivyParser:
+    @staticmethod
+    def _service_text(service_name):
+        if service_name:
+            return f"**Service:** {service_name}\n"
+        return ""
+
     def get_scan_types(self):
         return ["Trivy Scan"]
 
@@ -319,6 +325,7 @@ class TrivyParser:
                     title=vuln.get("Title", ""),
                     target=target,
                     type=vul_type,
+                    service_text=self._service_text(service_name),
                     fixed_version=mitigation,
                     description_text=vuln.get("Description", ""),
                 )
@@ -341,7 +348,6 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=fix_available,
-                    service=service_name,
                     **status_fields,
                 )
                 finding.unsaved_tags = [vul_type, target_class]
@@ -377,6 +383,7 @@ class TrivyParser:
                 description = MISC_DESCRIPTION_TEMPLATE.format(
                     target=target_target,
                     type=misc_type,
+                    service_text=self._service_text(service_name),
                     description=misc_description,
                     message=misc_message,
                 )
@@ -400,7 +407,6 @@ class TrivyParser:
                     fix_available=True,
                     static_finding=True,
                     dynamic_finding=False,
-                    service=service_name,
                 )
                 if misc_avdid:
                     finding.unsaved_vulnerability_ids = []
@@ -420,6 +426,7 @@ class TrivyParser:
                 description = SECRET_DESCRIPTION_TEMPLATE.format(
                     title=secret_title,
                     category=secret_category,
+                    service_text=self._service_text(service_name),
                     match=secret_match,
                 )
                 severity = TRIVY_SEVERITIES[secret_severity]
@@ -434,7 +441,6 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=True,
-                    service=service_name,
                 )
                 finding.unsaved_tags = [target_class]
                 items.append(finding)
@@ -453,6 +459,7 @@ class TrivyParser:
                 description = LICENSE_DESCRIPTION_TEMPLATE.format(
                     title=license_name,
                     category=license_category,
+                    service_text=self._service_text(service_name),
                     package=license_pkgname,
                 )
                 severity = TRIVY_SEVERITIES[license_severity]
@@ -468,7 +475,6 @@ class TrivyParser:
                     static_finding=True,
                     dynamic_finding=False,
                     fix_available=True,
-                    service=service_name,
                 )
                 finding.unsaved_tags = [target_class]
                 items.append(finding)

@@ -33,6 +33,7 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertEqual(" code.", item.description[-6:])
         self.assertIsNone(item.mitigation)
         self.assertEqual("artifact1", item.component_name)
+        self.assertIsNone(item.service)
         self.assertIsNotNone(item.tags)
         self.assertEqual("1.0", item.component_version)
         self.assertEqual("artifact_path/artifact1/1.0/", item.file_path[:28])

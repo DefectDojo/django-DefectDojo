@@ -28,7 +28,8 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertEqual("3.5.2-r1", finding1.component_version)
             self.assertEqual("Upgrade to version: 3.5.4-r0", finding1.mitigation)
             self.assertEqual("https://avd.aquasec.com/nvd/cve-2025-9232", finding1.references)
-            self.assertEqual("test/Deployment/test-app", finding1.service)
+            self.assertIsNone(finding1.service)
+            self.assertIn("**Service:** test/Deployment/test-app", finding1.description)
             self.assertTrue(finding1.active)
             self.assertTrue(finding1.verified)
             self.assertTrue(finding1.fix_available)
@@ -47,7 +48,8 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertEqual("v1.24.4", finding2.component_version)
             self.assertEqual("Upgrade to version: 1.23.12, 1.24.6", finding2.mitigation)
             self.assertEqual("https://avd.aquasec.com/nvd/cve-2025-47907", finding2.references)
-            self.assertEqual("test/Deployment/test-app", finding2.service)
+            self.assertIsNone(finding2.service)
+            self.assertIn("**Service:** test/Deployment/test-app", finding2.description)
             self.assertTrue(finding2.active)
             self.assertTrue(finding2.verified)
             self.assertTrue(finding2.fix_available)
@@ -63,7 +65,8 @@ class TestOpenreportsParser(DojoTestCase):
             self.assertEqual("N/A", finding3.component_version)
             self.assertEqual("Upgrade to version: Configure proper security headers", finding3.mitigation)
             self.assertEqual("https://www.cisecurity.org/benchmark/docker", finding3.references)
-            self.assertEqual("test/Deployment/test-app", finding3.service)
+            self.assertIsNone(finding3.service)
+            self.assertIn("**Service:** test/Deployment/test-app", finding3.description)
             self.assertTrue(finding3.active)
             self.assertTrue(finding3.verified)
             self.assertTrue(finding3.fix_available)
@@ -80,8 +83,11 @@ class TestOpenreportsParser(DojoTestCase):
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 3)
 
-            # Verify findings from different reports have different services
-            services = {finding.service for finding in findings}
+            # Verify findings from different reports have different service contexts in descriptions
+            services = {
+                finding.description.split("**Service:** ")[1].split("\n", 1)[0]
+                for finding in findings if "**Service:** " in finding.description
+            }
             self.assertEqual(len(services), 2)
             self.assertIn("test/Deployment/app1", services)
             self.assertIn("test/Deployment/app2", services)

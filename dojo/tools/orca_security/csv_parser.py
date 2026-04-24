@@ -84,7 +84,6 @@ class OrcaSecurityCSVParser:
                 severity_justification=build_severity_justification(orca_score_raw),
                 static_finding=True,  # CSPM scan data is static analysis
                 dynamic_finding=False,
-                service=source or None,  # Source identifies the cloud resource/service
                 component_name=inventory_name or None,  # Inventory is the specific resource
                 date=parse_date(created_at),
             )
