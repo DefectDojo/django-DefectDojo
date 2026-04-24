@@ -39,8 +39,8 @@ class TestDependencyTrackParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(4, len(findings))
 
-            self.assertIsNone(findings[0].unsaved_vulnerability_ids)
-            self.assertIsNone(findings[1].unsaved_vulnerability_ids)
+            self.assertIn("533", findings[0].unsaved_vulnerability_ids)
+            self.assertIn("48", findings[1].unsaved_vulnerability_ids)
             self.assertEqual(1, len(findings[2].unsaved_vulnerability_ids))
             self.assertEqual("CVE-2016-2097", findings[2].unsaved_vulnerability_ids[0])
             self.assertEqual("8d7f5fcd-210b-491d-a29e-904c2e01b281:3e52f829-3317-48c3-bde1-342c610bd223:900991f6-335a-49cb-9bf6-87b545f960ce", findings[2].unique_id_from_tool)
@@ -110,6 +110,42 @@ class TestDependencyTrackParser(DojoTestCase):
 
             self.assertEqual(12, len(findings))
             self.assertIn("CVE-2022-2053", findings[11].unsaved_vulnerability_ids)
+
+    def test_dependency_track_parser_npm_4_14_1(self):
+        with (
+            get_unit_tests_scans_path("dependency_track") / "deptrack_npm_4.14.1.json").open(encoding="utf-8",
+        ) as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(22, len(findings))
+            # findings with GITHUB source and empty aliases should still have their GHSA id captured
+            self.assertIn("GHSA-q4gf-8mx6-v5v3", findings[4].unsaved_vulnerability_ids)
+            self.assertIn("GHSA-w5hq-g745-h8pq", findings[16].unsaved_vulnerability_ids)
+            # findings with aliases should include both the vulnId and alias ids
+            self.assertIn("GHSA-3p68-rc4w-qgx5", findings[2].unsaved_vulnerability_ids)
+            self.assertIn("CVE-2025-62718", findings[2].unsaved_vulnerability_ids)
+
+    def test_dependency_track_parser_php_4_14_1(self):
+        with (
+            get_unit_tests_scans_path("dependency_track") / "deptrack_php_4.14.1.json").open(encoding="utf-8",
+        ) as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(13, len(findings))
+            # finding with GITHUB source and empty aliases should still have its GHSA id captured
+            self.assertIn("GHSA-qrr6-mg7r-m243", findings[12].unsaved_vulnerability_ids)
+            # findings with aliases should include both the vulnId and alias ids
+            self.assertIn("GHSA-4486-gxhx-5mg7", findings[0].unsaved_vulnerability_ids)
+            self.assertIn("CVE-2026-25129", findings[0].unsaved_vulnerability_ids)
+
+    def test_dependency_track_parser_ghsa_vulnid_with_empty_aliases(self):
+        with (
+            get_unit_tests_scans_path("dependency_track") / "one_finding_ghsa_empty_aliases.json").open(encoding="utf-8",
+        ) as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            self.assertIn("GHSA-w5hq-g745-h8pq", findings[0].unsaved_vulnerability_ids)
 
     def test_dependency_track_parser_findings_with_cvssV3_score(self):
         with (get_unit_tests_scans_path("dependency_track") / "many_findings_with_cvssV3_score.json").open(encoding="utf-8") as testfile:
