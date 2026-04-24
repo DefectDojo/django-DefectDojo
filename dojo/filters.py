@@ -3130,6 +3130,10 @@ class ApiEndpointFilter(DojoFilter):
 class ApiRiskAcceptanceFilter(DojoFilter):
     created = DateRangeFilter()
     updated = DateRangeFilter()
+    created_before = DateTimeFilter(field_name="created", lookup_expr="lt")
+    created_after = DateTimeFilter(field_name="created", lookup_expr="gt")
+    updated_before = DateTimeFilter(field_name="updated", lookup_expr="lt")
+    updated_after = DateTimeFilter(field_name="updated", lookup_expr="gt")
 
     o = OrderingFilter(
         # tuple-mapping retains order

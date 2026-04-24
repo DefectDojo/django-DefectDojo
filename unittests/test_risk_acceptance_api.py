@@ -176,6 +176,19 @@ class TestRiskAcceptanceApi(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
         self.url = reverse("risk_acceptance-list")
 
+    # Helper method to create a risk acceptance for testing filters
+    def create_risk_acceptance(self):
+        risk_acceptance = Risk_Acceptance.objects.create(
+            name="Filter Test RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+        )
+        risk_acceptance.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(risk_acceptance)
+        return risk_acceptance
+
     def test_create_risk_acceptance_links_to_engagement(self):
         """Test that risk acceptance created via API appears in engagement.risk_acceptance"""
         payload = {
@@ -358,3 +371,50 @@ class TestRiskAcceptanceApi(APITestCase):
         response = self.client.put(f"{self.url}{ra.id}/", payload, format="json")
         self.assertEqual(403, response.status_code, response.content)
         self.assertIn("multiple engagements", str(response.data))
+
+    def test_risk_acceptance_created_filter(self):
+        # 1. Create a baseline Risk Acceptance using the existing test setup
+        risk_acceptance = self.create_risk_acceptance()
+        
+        # 2. Manually backdate the created date to test ranges
+        past_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=10)
+        risk_acceptance.created = past_date
+        risk_acceptance.save()
+
+        # 3. Test `created_before` (Less than / Before)
+        # Should return the risk acceptance because it was created 10 days ago
+        future_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        response = self.client.get(reverse('risk_acceptance-list') + f'?created_before={future_date}')
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertIn(risk_acceptance.id, result_ids)
+
+        # 4. Test `created_after` (Greater than / After)
+        # Should NOT return the risk acceptance because it is not newer than today
+        response = self.client.get(reverse('risk_acceptance-list') + f'?created_after={future_date}')
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertNotIn(risk_acceptance.id, result_ids)
+
+
+    def test_risk_acceptance_updated_filter(self):
+        risk_acceptance = self.create_risk_acceptance()
+        
+        # Manually backdate the updated date
+        past_date = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=10)
+        # We use .update() to bypass the auto_now=True behavior on the updated field
+        type(risk_acceptance).objects.filter(pk=risk_acceptance.id).update(updated=past_date)
+
+        future_date = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        
+        # Test updated_before
+        response = self.client.get(reverse('risk_acceptance-list') + f'?updated_before={future_date}')
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertIn(risk_acceptance.id, result_ids)
+
+        # Test updated_after
+        response = self.client.get(reverse('risk_acceptance-list') + f'?updated_after={future_date}')
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertNotIn(risk_acceptance.id, result_ids)
