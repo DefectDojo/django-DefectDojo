@@ -14,14 +14,14 @@
                 {% if sla_age < 0 %}
                   {% blocktranslate trimmed %}
                     This security finding has breached its SLA.
-                    
-                    - Day(s) overdue: {{sla}}
+                    <br/>
+                    - Day(s) overdue: {{sla_age}}
                   {% endblocktranslate %}
                 {% else %}
                   {% blocktranslate trimmed %}
                     A security finding is about to breach its SLA.
-                    
-                    - Day(s) remaining: {{sla}}
+                    <br/>   
+                    - Day(s) remaining: {{sla_age}}
                   {% endblocktranslate %}
                 {% endif %}
             </p>

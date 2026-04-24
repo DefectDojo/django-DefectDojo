@@ -18,7 +18,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import async_create_notification
 from dojo.utils import get_full_url, perform_product_grading
 from dojo.validators import clean_tags
 
@@ -140,12 +140,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         )
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
-        create_notification(
+        dojo_dispatch_task(
+            async_create_notification,
             event="test_added",
             title=f"Test created for {self.test.engagement.product}: {self.test.engagement.name}: {self.test}",
-            test=self.test,
-            engagement=self.test.engagement,
-            product=self.test.engagement.product,
+            test_id=self.test.id,
+            engagement_id=self.test.engagement_id,
+            product_id=self.test.engagement.product_id,
             url=reverse("view_test", args=(self.test.id,)),
             url_api=reverse("test-detail", args=(self.test.id,)),
         )
