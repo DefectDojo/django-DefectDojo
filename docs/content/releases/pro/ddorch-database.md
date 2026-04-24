@@ -123,14 +123,16 @@ A successful response of `?column?` with a value of `1` confirms the database is
 
 ## Part 2: Point DefectDojo at the New Database
 
-Only the `ddorch` service connects to the new database directly. The main Django application reaches the orchestrator over HTTP, so no changes to `DD_DATABASE_URL` are required.
+Only the `ddorch` service connects to the new database directly. The main Django application reaches the orchestrator over gRPC, so `DD_DATABASE_URL` does **not** change.
 
 ### 1. Set the orchestrator database URL
 
-The `ddorch` service reads its connection string from the `DD_ORCH_DATABASE_URL` environment variable. Add or update the following entry in your `.env` file (or equivalent override mechanism), replacing the placeholders with your values:
+The `ddorch` service reads its connection string from the `DD_ORCH_DATABASE_URL` environment variable and **automatically appends `-ddorch` to the database name** in whatever URL you pass it. This means you can reuse the same connection string you already use for the main Django application — no need to construct a second URL by hand.
+
+In your `.env` file (or equivalent override mechanism), set `DD_ORCH_DATABASE_URL` to point at your existing main database (the `dojodb` one, *not* `dojodb-ddorch`):
 
 ```bash
-DD_ORCH_DATABASE_URL=postgres://dojodbusr:<password>@<db-server-ip>:5432/dojodb-ddorch
+DD_ORCH_DATABASE_URL=postgres://dojodbusr:<password>@<db-server-ip>:5432/dojodb
 ```
 
 | Placeholder | Value |
@@ -138,9 +140,9 @@ DD_ORCH_DATABASE_URL=postgres://dojodbusr:<password>@<db-server-ip>:5432/dojodb-
 | `<password>` | The password set for `dojodbusr` |
 | `<db-server-ip>` | IP or hostname of your PostgreSQL server |
 
+On startup, ddorch rewrites the database name in this URL from `dojodb` to `dojodb-ddorch` and connects to the database you created in Part 1.
+
 > **Note on special characters in the password:** If the password contains `@`, `:`, `/`, `#`, or `?`, URL-encode it (for example, `@` becomes `%40`). Alphanumeric passwords need no encoding.
->
-> **Note on the hyphenated database name:** Hyphens are valid in URL path segments, so `dojodb-ddorch` does **not** need to be encoded or quoted in the `DD_ORCH_DATABASE_URL` value.
 
 ### 2. Restart the orchestrator services
 
@@ -150,36 +152,36 @@ From the deployment directory, recreate the two orchestrator containers so they 
 docker compose up -d ddorch ddorch-workers
 ```
 
-Docker Compose will detect the environment change and recreate the containers. The `ddorch` service initializes its own schema on first startup — no manual migration command is required.
+Docker Compose will detect the environment change and recreate the containers. The `ddorch` service runs its own schema migrations against `dojodb-ddorch` on startup — no manual migration command is required.
 
-### 3. Verify the services started cleanly
+### 3. Verify ddorch connected and migrated the new database
 
-Check the `ddorch` logs for a successful database connection and schema initialization:
+The most direct signal that the database is correctly wired up is the ddorch startup log. Check the last hundred lines:
 
 ```bash
 docker compose logs ddorch --tail=100
 ```
 
-You should see log lines indicating that the database connection succeeded and the service is listening on port `9871`. If you see connection errors, double-check the following:
+Look for three log lines in sequence:
 
-- The `pg_hba.conf` entry added in Part 1 allows the app server's IP.
-- PostgreSQL was reloaded (`sudo systemctl reload postgresql`) after the `pg_hba.conf` edit.
-- The password in `DD_ORCH_DATABASE_URL` matches the password set for `dojodbusr`.
-- The DB server is reachable from the app server (re-run the `psql` check from Part 1, Step 4).
+```
+{"level":"INFO","msg":"Appending database name to DATABASE_URL","from":"dojodb","to":"dojodb-ddorch"}
+INFO Running migrations current_schema_version=<N> next_version=<M> migrations_to_apply=<K>
+{"level":"INFO","msg":"starting server","port":9871}
+```
 
-Also confirm the workers container is running and connected to `ddorch`:
+What each line proves:
+
+- **`Appending database name to DATABASE_URL ... to: dojodb-ddorch`** — ddorch received your URL and derived the orch database name correctly.
+- **`Running migrations ... migrations_to_apply=0`** — ddorch connected to `dojodb-ddorch` and found the schema at the expected version. On a first-ever boot against a fresh database you may see `migrations_to_apply=<N>` with a non-zero value and no subsequent error — this means ddorch just created the tables from scratch. Both outcomes indicate success.
+- **`starting server ... port:9871`** — ddorch is up and listening.
+
+If instead you see an error such as `FATAL: password authentication failed`, `no pg_hba.conf entry for host`, or `database "dojodb-ddorch" does not exist`, the database is not reachable — revisit Part 1 before proceeding.
+
+Also confirm both orchestrator containers are running:
 
 ```bash
 docker compose ps ddorch ddorch-workers
-docker compose logs ddorch-workers --tail=50
 ```
 
-### 4. Confirm end-to-end from the main application
-
-Finally, confirm the main Django container can reach the orchestrator. From the `dojo` container:
-
-```bash
-docker compose exec dojo curl -kf https://ddorch:9871/health
-```
-
-A `200 OK` response confirms the orchestrator is healthy and the main app can talk to it. Your installation is now using the new `dojodb-ddorch` database.
+Both should report `Up`. With ddorch migrated and the workers container running, your installation is now using the new `dojodb-ddorch` database.
