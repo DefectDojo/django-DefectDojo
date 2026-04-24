@@ -17,8 +17,8 @@ from rest_framework.test import APIClient, APITestCase
 from vcr_unittest import VCRTestCase
 
 from dojo.importers.location_manager import LocationManager
-from dojo.jira_link import helper as jira_helper
-from dojo.jira_link.views import get_custom_field
+from dojo.jira import helper as jira_helper
+from dojo.jira.views import get_custom_field
 from dojo.location.models import Location, LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.middleware import DojoSytemSettingsMiddleware

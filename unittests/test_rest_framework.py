@@ -1002,8 +1002,8 @@ class FindingCloseAPITest(DojoAPITestCase):
 
     def test_close_finding_pushes_note_to_jira_when_configured(self):
         finding = Finding.objects.get(id=7)
-        with patch("dojo.jira_link.helper.add_comment") as add_comment_mock, \
-             patch("dojo.jira_link.helper.is_push_all_issues", return_value=True), \
+        with patch("dojo.jira.helper.add_comment") as add_comment_mock, \
+             patch("dojo.jira.helper.is_push_all_issues", return_value=True), \
              patch.object(Finding, "has_jira_issue", new_callable=PropertyMock, return_value=True):
             payload = {
                 "is_mitigated": True,

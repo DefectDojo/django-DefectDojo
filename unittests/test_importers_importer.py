@@ -461,7 +461,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_import_by_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -474,7 +474,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
         mock.assert_not_called()
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_import_by_product_type_name_not_exists_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=1, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -666,7 +666,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_reimport_by_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -679,7 +679,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
         mock.assert_not_called()
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_reimport_by_product_type_not_exists_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=1, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,

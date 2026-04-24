@@ -23,7 +23,6 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
@@ -46,6 +45,7 @@ from dojo.forms import (
 )
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
@@ -183,7 +183,7 @@ class ViewTest(View):
             "show_re_upload": any(test.test_type.name in code for code in get_choices_sorted()),
             "creds": Cred_Mapping.objects.filter(engagement=test.engagement).select_related("cred_id").order_by("cred_id"),
             "cred_test": Cred_Mapping.objects.filter(test=test).select_related("cred_id").order_by("cred_id"),
-            "jira_project": jira_helper.get_jira_project(test),
+            "jira_project": jira_services.get_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
@@ -478,12 +478,12 @@ class AddFindingView(View):
 
     def get_jira_form(self, request: HttpRequest, test: Test, finding_form: AddFindingForm = None):
         # Determine if jira should be used
-        if (jira_project := jira_helper.get_jira_project(test)) is not None:
+        if (jira_project := jira_services.get_project(test)) is not None:
             # Set up the args for the form
             args = [request.POST] if request.method == "POST" else []
             # Set the initial form args
             kwargs = {
-                "push_all": jira_helper.is_push_all_issues(test),
+                "push_all": jira_services.is_push_all_issues(test),
                 "prefix": "jiraform",
                 "jira_project": jira_project,
                 "finding_form": finding_form,
@@ -545,8 +545,8 @@ class AddFindingView(View):
 
         if context["jform"] and context["jform"].is_valid():
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
-            # push_to_jira = jira_helper.is_push_to_jira(finding, jform.cleaned_data.get('push_to_jira'))
-            push_to_jira = jira_helper.is_push_all_issues(finding) or context["jform"].cleaned_data.get("push_to_jira")
+            # push_to_jira = jira_services.is_push_to_jira(finding, jform.cleaned_data.get('push_to_jira'))
+            push_to_jira = jira_services.is_push_all_issues(finding) or context["jform"].cleaned_data.get("push_to_jira")
             jira_message = None
             # if the jira issue key was changed, update database
             new_jira_issue_key = context["jform"].cleaned_data.get("jira_issue")
@@ -556,18 +556,18 @@ class AddFindingView(View):
                 # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
                 # we can assume the issue exist, which is already checked in the validation of the jform
                 if not new_jira_issue_key:
-                    jira_helper.finding_unlink_jira(request, finding)
+                    jira_services.unlink_finding(request, finding)
                     jira_message = "Link to JIRA issue removed successfully."
 
                 elif new_jira_issue_key != finding.jira_issue.jira_key:
-                    jira_helper.finding_unlink_jira(request, finding)
-                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_services.unlink_finding(request, finding)
+                    jira_services.link_finding(request, finding, new_jira_issue_key)
                     jira_message = "Changed JIRA link successfully."
             else:
                 logger.debug("finding has no jira issue yet")
                 if new_jira_issue_key:
                     logger.debug("finding has no jira issue yet, but jira issue specified in request. trying to link.")
-                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_services.link_finding(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # Determine if a message should be added
             if jira_message:
@@ -667,13 +667,13 @@ def add_finding_from_template(request, tid, fid):
     test = get_object_or_404(Test, id=tid)
     template = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
-    push_all_jira_issues = jira_helper.is_push_all_issues(template)
+    push_all_jira_issues = jira_services.is_push_all_issues(template)
 
     if request.method == "POST":
 
         form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
-        if jira_helper.get_jira_project(test):
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
+        if jira_services.get_project(test):
+            jform = JIRAFindingForm(push_all=jira_services.is_push_all_issues(test), prefix="jiraform", jira_project=jira_services.get_project(test), finding_form=form)
             logger.debug(f"jform valid: {jform.is_valid()}")
 
         if (form["active"].value() is False or form["false_p"].value()) and form["duplicate"].value() is False:
@@ -724,10 +724,10 @@ def add_finding_from_template(request, tid, fid):
 
             new_finding.save()
             if "jiraform-push_to_jira" in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix="jiraform", instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
+                jform = JIRAFindingForm(request.POST, prefix="jiraform", instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_services.get_project(test), finding_form=form)
                 if jform.is_valid():
                     if jform.cleaned_data.get("push_to_jira"):
-                        jira_helper.push_to_jira(new_finding)
+                        jira_services.push(new_finding)
                 else:
                     add_error_message_to_response(f"jira form validation failed: {jform.errors}")
             if "request" in form.cleaned_data or "response" in form.cleaned_data:
@@ -809,8 +809,8 @@ def add_finding_from_template(request, tid, fid):
 
         form = AddFindingForm(req_resp=None, product=test.engagement.product, initial=initial_data)
 
-        if jira_helper.get_jira_project(test):
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
+        if jira_services.get_project(test):
+            jform = JIRAFindingForm(push_all=jira_services.is_push_all_issues(test), prefix="jiraform", jira_project=jira_services.get_project(test), finding_form=form)
 
     product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -872,9 +872,9 @@ class ReImportScanResultsView(View):
         # Decide if we need to present the Push to JIRA form
         if get_system_setting("enable_jira"):
             # Determine if jira issues should be pushed automatically
-            push_all_jira_issues = jira_helper.is_push_all_issues(test)
+            push_all_jira_issues = jira_services.is_push_all_issues(test)
             # Only return the form if the jira is enabled on this engagement or product
-            if jira_helper.get_jira_project(test):
+            if jira_services.get_project(test):
                 if request.method == "POST":
                     jira_form = JIRAImportScanForm(
                         request.POST,

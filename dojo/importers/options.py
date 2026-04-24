@@ -10,7 +10,7 @@ from django.db.models import Model
 from django.utils import timezone
 from django.utils.functional import SimpleLazyObject
 
-from dojo.jira_link.helper import get_jira_instance
+from dojo.jira.services import get_instance as get_jira_instance
 from dojo.models import (
     Development_Environment,
     Dojo_User,

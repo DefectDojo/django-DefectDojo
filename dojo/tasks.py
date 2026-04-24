@@ -202,6 +202,9 @@ def async_sla_compute_and_notify_task(*args, **kwargs):
 
 @app.task
 def jira_status_reconciliation_task(*args, **kwargs):
+    if jira_status_reconciliation is None:
+        logger.warning("Jira status reconciliation is not available")
+        return None
     # Wrap with pghistory context for audit trail
     with pghistory.context(
         source="jira_reconciliation",
