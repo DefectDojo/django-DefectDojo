@@ -9,7 +9,7 @@ import dojo.jira_link.helper as jira_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
-from dojo.importers.endpoint_manager import EndpointManager
+from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira_link.helper import is_keep_in_sync_with_jira
 from dojo.models import (
@@ -58,8 +58,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             import_type=Test_Import.IMPORT_TYPE,
             **kwargs,
         )
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager = EndpointManager(self.engagement.product)
+        self.location_handler = LocationHandler(self.engagement.product)
 
     def create_test(
         self,
@@ -240,13 +239,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             # Process any request/response pairs
             self.process_request_response_pairs(finding)
-            if settings.V3_FEATURE_LOCATIONS:
-                # Process any locations on the finding, or added on the form
-                self.process_locations(finding, self.endpoints_to_add)
-            else:
-                # TODO: Delete this after the move to Locations
-                # Process any endpoints on the finding, or added on the form
-                self.process_endpoints(finding, self.endpoints_to_add)
+            self.process_locations(finding, self.endpoints_to_add)
             # Parsers must use unsaved_tags to store tags, so we can clean them.
             # Accumulate for bulk application after the loop (O(unique_tags) instead of O(N·T)).
             cleaned_tags = clean_tags(finding.unsaved_tags)
@@ -267,16 +260,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
 
-            # If batch is full or we're at the end, persist endpoints and dispatch
+            # If batch is full or we're at the end, persist locations/endpoints and dispatch
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
-                if not settings.V3_FEATURE_LOCATIONS:
-                    self.endpoint_manager.persist(user=self.user)
-
+                self.location_handler.persist()
                 # Apply parser-supplied tags for this batch before post-processing starts,
                 # so rules/deduplication tasks see the tags already on the findings.
                 bulk_apply_parser_tags(findings_with_parser_tags)
                 findings_with_parser_tags.clear()
-
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
@@ -404,9 +394,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,
             )
-        # Persist any accumulated endpoint status mitigations
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager.persist(user=self.user)
+        # Persist any accumulated location/endpoint status changes
+        self.location_handler.persist()
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
