@@ -372,6 +372,16 @@ django:
     # `nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"`
     # `nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"`
     annotations: {}
+  # -- Expose the Django service via Gateway API HTTPRoute
+  httpRoute:
+    enabled: false
+    # -- Annotations for the HTTPRoute resource
+    annotations: {}
+    # -- Parent gateway references for the HTTPRoute
+    # parentRefs:
+    # - name: my-gateway
+    #   namespace: default
+    parentRefs: []
   nginx:
     # -- If empty, uses values from images.nginx.image
     image:

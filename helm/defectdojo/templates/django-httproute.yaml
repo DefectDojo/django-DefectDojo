@@ -1,0 +1,53 @@
+{{- if .Values.django.httpRoute.enabled -}}
+{{- $fullName := include "defectdojo.fullname" . -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  {{- if or .Values.extraAnnotations .Values.django.httpRoute.annotations }}
+  annotations:
+  {{- range $key, $value := .Values.extraAnnotations }}
+    {{ $key }}: {{ quote $value }}
+  {{- end }}
+  {{- range $key, $value := .Values.django.httpRoute.annotations }}
+    {{ $key }}: {{ quote $value }}
+  {{- end }}
+  {{- end }}
+  labels:
+    defectdojo.org/component: django
+    app.kubernetes.io/name: {{ include "defectdojo.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    helm.sh/chart: {{ include "defectdojo.chart" . }}
+    {{- range $key, $value := .Values.extraLabels }}
+    {{ $key }}: {{ quote $value }}
+    {{- end }}
+  name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  parentRefs:
+  {{- range .Values.django.httpRoute.parentRefs }}
+  - group: {{ .group | default "gateway.networking.k8s.io" }}
+    kind: {{ .kind | default "Gateway" }}
+    name: {{ .name }}
+    {{- if .namespace }}
+    namespace: {{ .namespace }}
+    {{- end }}
+    {{- if .sectionName }}
+    sectionName: {{ .sectionName }}
+    {{- end }}
+  {{- end }}
+  hostnames:
+  - {{ .Values.host | quote }}
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix
+        {{- if .Values.django.httpRoute.path }}
+        value: {{ .Values.django.httpRoute.path }}
+        {{- else }}
+        value: "/"
+        {{- end }}
+    backendRefs:
+    - name: {{ $fullName }}-django
+      port: {{ .Values.django.nginx.tls.enabled | ternary 443 80 }}
+{{- end }}
