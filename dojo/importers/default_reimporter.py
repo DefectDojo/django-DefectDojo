@@ -14,7 +14,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_reimport_legacy,
 )
 from dojo.importers.base_importer import BaseImporter, Parser
-from dojo.importers.endpoint_manager import EndpointManager
+from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
 from dojo.location.status import FindingLocationStatus
@@ -81,8 +81,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             import_type=Test_Import.REIMPORT_TYPE,
             **kwargs,
         )
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager = EndpointManager(self.test.engagement.product)
+        self.location_handler = LocationHandler(self.test.engagement.product)
 
     def process_scan(
         self,
@@ -337,13 +336,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 # Set the service supplied at import time
                 if self.service is not None:
                     unsaved_finding.service = self.service
-                if settings.V3_FEATURE_LOCATIONS:
-                    # Clean any locations that are on the finding
-                    self.location_manager.clean_unsaved_locations(unsaved_finding.unsaved_locations)
-                else:
-                    # TODO: Delete this after the move to Locations
-                    # Clean any endpoints that are on the finding
-                    self.endpoint_manager.clean_unsaved_endpoints(unsaved_finding.unsaved_endpoints)
+                self.location_handler.clean_unsaved(unsaved_finding)
                 # Calculate the hash code to be used to identify duplicates
                 unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
                 deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
@@ -379,27 +372,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         continue
                     # Update endpoints on the existing finding with those on the new finding
                     if finding.dynamic_finding:
-                        if settings.V3_FEATURE_LOCATIONS:
-                            logger.debug(
-                                "Re-import found an existing dynamic finding for this new "
-                                "finding. Checking the status of locations",
-                            )
-                            self.location_manager.update_location_status(
-                                existing_finding,
-                                unsaved_finding,
-                                self.user,
-                            )
-                        else:
-                            # TODO: Delete this after the move to Locations
-                            logger.debug(
-                                "Re-import found an existing dynamic finding for this new "
-                                "finding. Checking the status of endpoints",
-                            )
-                            self.endpoint_manager.update_endpoint_status(
-                                existing_finding,
-                                unsaved_finding,
-                                self.user,
-                            )
+                        logger.debug(
+                            "Re-import found an existing dynamic finding for this new "
+                            "finding. Checking the status of locations/endpoints",
+                        )
+                        self.location_handler.update_status(
+                            existing_finding,
+                            unsaved_finding,
+                            self.user,
+                        )
                 else:
                     finding, finding_will_be_grouped = self.process_finding_that_was_not_matched(unsaved_finding)
 
@@ -440,14 +421,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
-                        if not settings.V3_FEATURE_LOCATIONS:
-                            self.endpoint_manager.persist(user=self.user)
-
+                        self.location_handler.persist()
                         # Apply parser-supplied tags for this batch before post-processing starts,
                         # so rules/deduplication tasks see the tags already on the findings.
                         bulk_apply_parser_tags(findings_with_parser_tags)
                         findings_with_parser_tags.clear()
-
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
                         dojo_dispatch_task(
@@ -554,9 +532,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     product_grading_option=False,
                 )
                 mitigated_findings.append(finding)
-        # Persist any accumulated endpoint status mitigations
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager.persist(user=self.user)
+        # Persist any accumulated location/endpoint status changes
+        self.location_handler.persist()
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
@@ -817,16 +794,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
         note.save()
-        if settings.V3_FEATURE_LOCATIONS:
-            # Reactivate mitigated locations
-            mitigated_locations = existing_finding.locations.filter(status=FindingLocationStatus.Mitigated)
-            self.location_manager.chunk_locations_and_reactivate(mitigated_locations)
-        else:
-            # TODO: Delete this after the move to Locations
-            # Accumulate endpoint statuses for bulk reactivation in persist()
-            self.endpoint_manager.record_statuses_to_reactivate(
-                self.endpoint_manager.get_non_special_endpoint_statuses(existing_finding),
-            )
+        self.location_handler.record_reactivations_for_finding(existing_finding)
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
         # The new finding is active while the existing on is mitigated. The existing finding needs to
@@ -990,19 +958,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         Save all associated objects to the finding after it has been saved
         for the purpose of foreign key restrictions
         """
-        if settings.V3_FEATURE_LOCATIONS:
-            self.location_manager.chunk_locations_and_disperse(finding, finding_from_report.unsaved_locations)
-            if len(self.endpoints_to_add) > 0:
-                self.location_manager.chunk_locations_and_disperse(finding, self.endpoints_to_add)
-        else:
-            # TODO: Delete this after the move to Locations
-            for endpoint in finding_from_report.unsaved_endpoints:
-                key = self.endpoint_manager.record_endpoint(endpoint)
-                self.endpoint_manager.record_status_for_create(finding, key)
-            if len(self.endpoints_to_add) > 0:
-                for endpoint in self.endpoints_to_add:
-                    key = self.endpoint_manager.record_endpoint(endpoint)
-                    self.endpoint_manager.record_status_for_create(finding, key)
+        # Copy unsaved items from the parser output onto the saved finding so record_for_finding can read them
+        finding.unsaved_locations = getattr(finding_from_report, "unsaved_locations", [])
+        finding.unsaved_endpoints = getattr(finding_from_report, "unsaved_endpoints", [])
+        self.location_handler.record_for_finding(finding, self.endpoints_to_add or None)
         # For matched/existing findings, do not update tags from the report,
         # consistent with how other fields are handled on reimport.
         if not is_matched_finding:

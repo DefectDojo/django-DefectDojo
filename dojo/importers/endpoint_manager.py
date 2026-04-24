@@ -6,6 +6,7 @@ from django.db import transaction
 from django.utils import timezone
 from hyperlink._url import SCHEME_PORT_MAP  # noqa: PLC2701
 
+from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.models import (
     Dojo_User,
     Endpoint,
@@ -30,13 +31,13 @@ class EndpointUniqueKey(NamedTuple):
 
 
 # TODO: Delete this after the move to Locations
-class EndpointManager:
+class EndpointManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
         self._product = product
         self._endpoints_to_create: dict[EndpointUniqueKey, dict] = {}
         self._statuses_to_create: list[tuple[Finding, EndpointUniqueKey]] = []
-        self._statuses_to_mitigate: list[Endpoint_Status] = []
+        self._statuses_to_mitigate: list[tuple[Endpoint_Status, Dojo_User | None]] = []
         self._statuses_to_reactivate: list[Endpoint_Status] = []
 
     @staticmethod
@@ -158,13 +159,13 @@ class EndpointManager:
         new_finding_endpoints_list = new_finding.unsaved_endpoints
         if new_finding.is_mitigated:
             # New finding is mitigated, so mitigate all old endpoints
-            self._statuses_to_mitigate.extend(existing_finding_endpoint_status_list)
+            self._statuses_to_mitigate.extend((eps, user) for eps in existing_finding_endpoint_status_list)
         else:
             # Convert to set for O(1) lookups instead of O(n) linear search
             new_finding_endpoints_set = set(new_finding_endpoints_list)
             # Mitigate any endpoints in the old finding not found in the new finding
             self._statuses_to_mitigate.extend(
-                eps for eps in existing_finding_endpoint_status_list
+                (eps, user) for eps in existing_finding_endpoint_status_list
                 if eps.endpoint not in new_finding_endpoints_set
             )
             # Re-activate any endpoints in the old finding that are in the new finding
@@ -177,9 +178,9 @@ class EndpointManager:
         """Accumulate endpoint statuses for bulk reactivation in persist()."""
         self._statuses_to_reactivate.extend(statuses)
 
-    def record_statuses_to_mitigate(self, statuses: list[Endpoint_Status]) -> None:
+    def record_statuses_to_mitigate(self, statuses: list[Endpoint_Status], user: Dojo_User | None = None) -> None:
         """Accumulate endpoint statuses for bulk mitigation in persist()."""
-        self._statuses_to_mitigate.extend(statuses)
+        self._statuses_to_mitigate.extend((eps, user) for eps in statuses)
 
     def get_or_create_endpoints(self) -> tuple[dict[EndpointUniqueKey, Endpoint], list[Endpoint]]:
         """
@@ -238,7 +239,7 @@ class EndpointManager:
         self._endpoints_to_create.clear()
         return endpoints_by_key, created
 
-    def persist(self, user: Dojo_User | None = None) -> None:
+    def persist(self) -> None:
         """
         Persist all accumulated endpoint operations to the database.
 
@@ -266,11 +267,11 @@ class EndpointManager:
         if self._statuses_to_mitigate:
             now = timezone.now()
             to_update = []
-            for endpoint_status in self._statuses_to_mitigate:
+            for endpoint_status, mitigated_by in self._statuses_to_mitigate:
                 if endpoint_status.mitigated is False:
                     endpoint_status.mitigated_time = now
                     endpoint_status.last_modified = now
-                    endpoint_status.mitigated_by = user
+                    endpoint_status.mitigated_by = mitigated_by
                     endpoint_status.mitigated = True
                     to_update.append(endpoint_status)
             if to_update:
@@ -300,3 +301,46 @@ class EndpointManager:
                     batch_size=1000,
                 )
             self._statuses_to_reactivate.clear()
+
+    # ------------------------------------------------------------------
+    # Unified interface (shared with LocationManager)
+    # ------------------------------------------------------------------
+
+    def clean_unsaved(self, finding: Finding) -> None:
+        """Clean the unsaved endpoints on this finding."""
+        self.clean_unsaved_endpoints(finding.unsaved_endpoints)
+
+    def record_for_finding(self, finding: Finding, extra_locations: list[Endpoint] | None = None) -> None:
+        """Record endpoints from the finding + any form-added extras for later batch creation."""
+        self.clean_unsaved_endpoints(finding.unsaved_endpoints)
+        for endpoint in finding.unsaved_endpoints:
+            key = self.record_endpoint(endpoint)
+            self.record_status_for_create(finding, key)
+        if extra_locations:
+            for endpoint in extra_locations:
+                key = self.record_endpoint(endpoint)
+                self.record_status_for_create(finding, key)
+
+    def update_status(self, existing_finding: Finding, new_finding: Finding, user: Dojo_User) -> None:
+        """Accumulate status changes (mitigate/reactivate) based on old vs new finding."""
+        self.update_endpoint_status(existing_finding, new_finding, user)
+
+    def record_reactivations_for_finding(self, finding: Finding) -> None:
+        """Record endpoint statuses on this finding for reactivation."""
+        self.record_statuses_to_reactivate(self.get_non_special_endpoint_statuses(finding))
+
+    def record_mitigations_for_finding(self, finding: Finding, user: Dojo_User) -> None:
+        """Record endpoint statuses on this finding for mitigation."""
+        self.record_statuses_to_mitigate(finding.status_finding.all(), user)
+
+    def get_locations_for_tagging(self, findings: list[Finding]):
+        """Return queryset of locations to apply tags to."""
+        return Endpoint.objects.filter(finding__in=findings).distinct()
+
+    def get_location_tag_fallback(self, finding: Finding):
+        """Return iterable of taggable locations for per-instance fallback."""
+        return finding.endpoints.all()
+
+    def serialize_extra_locations(self, locations: list) -> dict:
+        """Serialize extra locations for import history."""
+        return {"endpoints": [str(ep) for ep in locations]} if locations else {}
