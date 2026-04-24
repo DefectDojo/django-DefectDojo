@@ -210,7 +210,45 @@ def jira_status_reconciliation_task(*args, **kwargs):
         return jira_status_reconciliation(*args, **kwargs)
 
 
-@app.task
+
+@app.task(bind=True)
+def async_import_history_cleanup(*args, **kwargs):
+    with pghistory.context(source="import_history_cleanup_task"):
+        _async_import_history_cleanup_impl()
+
+
+def _async_import_history_cleanup_impl():
+    """Delete oldest Test_Import records when a test exceeds max_import_history."""
+    try:
+        system_settings = System_Settings.objects.get()
+        max_history = system_settings.max_import_history
+        max_per_run = settings.IMPORT_HISTORY_MAX_PER_OBJECT
+    except System_Settings.DoesNotExist:
+        logger.error('System_Settings not found, skipping import history cleanup')
+        return
+
+    if max_history is None:
+        logger.info("skipping import history cleanup: max_import_history not configured")
+        return
+
+    logger.info("cleaning up import history (max per test: %s, max deletes per run: %s)", max_history, max_per_run)
+
+    tests_with_excess = Test_Import.objects \
+        .values("test") \
+        .annotate(import_count=Count("id")) \
+        .filter(import_count__gt=max_history)[:max_per_run]
+
+    total_deleted_count = 0
+    for entry in tests_with_excess:
+        test_id = entry["test"]
+        imports = Test_Import.objects.filter(test_id=test_id).order_by("created")
+        excess_count = entry["import_count"] - max_history
+        for test_import in imports[:excess_count]:
+            logger.debug("deleting Test_Import id %s for test %s", test_import.id, test_id)
+            test_import.delete()
+            total_deleted_count += 1
+
+    logger.info("total import history records deleted: %s", total_deleted_count)
 def fix_loop_duplicates_task(*args, **kwargs):
     # Wrap with pghistory context for audit trail
     with pghistory.context(source="fix_loop_duplicates"):
