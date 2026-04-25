@@ -1124,6 +1124,41 @@ div.custom-search-form {
 .announcement-banner {
     margin: 0px -15px;
     border-radius: 0px 0px 4px 4px;
+    color: #000;
+}
+
+.announcement-banner a {
+    color: #0645ad;
+    text-decoration: underline;
+}
+
+.announcement-banner strong,
+.announcement-banner b {
+    color: #222;
+}
+
+.banner-toggle {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin-left: 6px;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.banner-toggle:focus,
+.banner-toggle:active {
+    outline: none;
+    box-shadow: none;
+}
+
+.banner-toggle:not(.collapsed) .fa-caret-down {
+    transform: rotate(180deg);
+}
+
+.banner-expanded {
+    margin-top: 8px;
 }
 
 @media (min-width: 795px) {

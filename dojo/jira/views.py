@@ -21,7 +21,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-import dojo.jira_link.helper as jira_helper
+import dojo.jira.helper as jira_helper
 from dojo.authorization.authorization import user_has_configuration_permission
 
 # Local application/library imports

@@ -89,7 +89,7 @@ from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github_issue_link.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
-from dojo.jira_link.urls import urlpatterns as jira_urls
+from dojo.jira.urls import urlpatterns as jira_urls
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.urls import add_locations_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls

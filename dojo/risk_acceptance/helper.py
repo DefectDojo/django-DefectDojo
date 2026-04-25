@@ -7,9 +7,8 @@ from django.core.exceptions import PermissionDenied
 from django.urls import reverse
 from django.utils import timezone
 
-import dojo.jira_link.helper as jira_helper
 from dojo.celery import app
-from dojo.jira_link.helper import escape_for_jira
+from dojo.jira import services as jira_services
 from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings
 from dojo.notifications.helper import create_notification
 from dojo.utils import get_full_url, get_system_setting
@@ -35,9 +34,9 @@ def expire_now(risk_acceptance):
                     finding.sla_start_date = timezone.now().date()
                 # this method both saves and pushed to JIRA (no other post processing)
                 finding.save(dedupe_option=False)
-                if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+                if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
                     logger.info("pushing finding to JIRA after expiration of risk acceptance")
-                    jira_helper.push_to_jira(finding)
+                    jira_services.push(finding)
 
                 reactivated_findings.append(finding)
             else:
@@ -77,9 +76,9 @@ def reinstate(risk_acceptance, old_expiration_date):
                 update_endpoint_statuses(finding, accept_risk=True)
                 # this method both saves and pushed to JIRA (no other post processing)
                 finding.save(dedupe_option=False)
-                if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+                if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
                     logger.info("pushing finding to JIRA after reinstating risk acceptance")
-                    jira_helper.push_to_jira(finding)
+                    jira_services.push(finding)
                 reinstated_findings.append(finding)
             else:
                 logger.debug("%i:%s: already inactive, not making any changes", finding.id, finding)
@@ -121,9 +120,9 @@ def remove_finding_from_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_A
     update_endpoint_statuses(finding, accept_risk=False)
     # this method both saves and pushed to JIRA (no other post processing)
     finding.save(dedupe_option=False)
-    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+    if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
         logger.info("pushing finding to JIRA after removal from risk acceptance")
-        jira_helper.push_to_jira(finding)
+        jira_services.push(finding)
 
     # best effort jira integration, no status changes
     post_jira_comments(risk_acceptance, [finding], unaccepted_message_creator)
@@ -149,9 +148,9 @@ def add_findings_to_risk_acceptance(user: Dojo_User, risk_acceptance: Risk_Accep
 
             risk_acceptance.accepted_findings.add(finding)
 
-            if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
+            if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
                 logger.info("pushing finding to JIRA after adding to risk acceptance")
-                jira_helper.push_to_jira(finding)
+                jira_services.push(finding)
 
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
@@ -226,21 +225,21 @@ def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
 
 def expiration_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has expired".format(
-        escape_for_jira(risk_acceptance.name),
+        jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()))
 
 
 def expiration_warning_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings will expire in {} days".format(
-        escape_for_jira(risk_acceptance.name),
+        jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()), heads_up_days)
 
 
 def reinstation_message_creator(risk_acceptance, heads_up_days=0):
     return "Risk acceptance [({})|{}] with {} findings has been reinstated (expires on {})".format(
-        escape_for_jira(risk_acceptance.name),
+        jira_services.escape_text(risk_acceptance.name),
         get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
         len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
 
@@ -248,7 +247,7 @@ def reinstation_message_creator(risk_acceptance, heads_up_days=0):
 def accepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
         return "Finding has been added to risk acceptance [({})|{}] with {} findings (expires on {})".format(
-            escape_for_jira(risk_acceptance.name),
+            jira_services.escape_text(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))),
             len(risk_acceptance.accepted_findings.all()), timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y"))
     return "Finding has been risk accepted"
@@ -256,7 +255,7 @@ def accepted_message_creator(risk_acceptance, heads_up_days=0):
 
 def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
     if risk_acceptance:
-        return "finding was unaccepted/deleted from risk acceptance [({})|{}]".format(escape_for_jira(risk_acceptance.name),
+        return "finding was unaccepted/deleted from risk acceptance [({})|{}]".format(jira_services.escape_text(risk_acceptance.name),
             get_full_url(reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id))))
     return "Finding is no longer risk accepted"
 
@@ -264,10 +263,10 @@ def unaccepted_message_creator(risk_acceptance, heads_up_days=0):
 def post_jira_comment(finding, message_factory, heads_up_days=0):
     if not finding or (not finding.has_jira_issue and not finding.has_jira_group_issue):
         return
-    jira_project = jira_helper.get_jira_project(finding)
+    jira_project = jira_services.get_project(finding)
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
-        jira_instance = jira_helper.get_jira_instance(finding)
+        jira_instance = jira_services.get_instance(finding)
         if jira_instance:
 
             jira_comment = message_factory(None, heads_up_days)
@@ -277,17 +276,17 @@ def post_jira_comment(finding, message_factory, heads_up_days=0):
                 jira_issue = finding.jira_issue
             elif finding.has_jira_group_issue:
                 jira_issue = finding.finding_group.jira_issue
-            jira_helper.add_simple_jira_comment(jira_instance, jira_issue, jira_comment)
+            jira_services.add_simple_comment(jira_instance, jira_issue, jira_comment)
 
 
 def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days=0):
     if not risk_acceptance:
         return
 
-    jira_project = jira_helper.get_jira_project(risk_acceptance.engagement)
+    jira_project = jira_services.get_project(risk_acceptance.engagement)
 
     if jira_project and jira_project.risk_acceptance_expiration_notification:
-        jira_instance = jira_helper.get_jira_instance(risk_acceptance.engagement)
+        jira_instance = jira_services.get_instance(risk_acceptance.engagement)
 
         if jira_instance:
             jira_comment = message_factory(risk_acceptance, heads_up_days)
@@ -299,7 +298,7 @@ def post_jira_comments(risk_acceptance, findings, message_factory, heads_up_days
                     jira_issue = finding.finding_group.jira_issue
 
                 if jira_issue:
-                    jira_helper.add_simple_jira_comment(jira_instance, jira_issue, jira_comment)
+                    jira_services.add_simple_comment(jira_instance, jira_issue, jira_comment)
 
 
 def get_expired_risk_acceptances_to_handle():
@@ -335,8 +334,8 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, *, perform_save=True) 
         finding.save(dedupe_option=False)
     # post_jira_comment might reload from database so see unaccepted finding. but the comment
     # only contains some text so that's ok
-    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
-        jira_helper.push_to_jira(finding)
+    if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
+        jira_services.push(finding)
 
     post_jira_comment(finding, accepted_message_creator)
     # Add a note to reflect that the finding was removed from the risk acceptance
@@ -368,8 +367,8 @@ def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_
             post_jira_comment(finding, unaccepted_message_creator)
 
         # Update the JIRA obect for this finding
-        if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
-            jira_helper.push_to_jira(finding)
+        if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
+            jira_services.push(finding)
 
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:

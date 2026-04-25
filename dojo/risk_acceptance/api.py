@@ -1,18 +1,20 @@
 from abc import ABC, abstractmethod
 from typing import NamedTuple
 
+from django.core.exceptions import PermissionDenied
 from django.db.models import QuerySet
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import serializers, status
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from dojo.api_v2.permissions import UserHasRiskAcceptanceRelatedObjectPermission
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.models import Risk_Acceptance, User, Vulnerability_Id
+from dojo.models import Engagement, Risk_Acceptance, User, Vulnerability_Id
 
 AcceptedRisk = NamedTuple("AcceptedRisk", (("vulnerability_id", str), ("justification", str), ("accepted_by", str)))
 
@@ -40,10 +42,13 @@ class AcceptedRisksMixin(ABC):
         request=AcceptedRiskSerializer(many=True),
         responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
-    @action(methods=["post"], detail=True, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer,
-            filter_backends=[], pagination_class=None)
+    @action(methods=["post"], detail=True, permission_classes=[IsAuthenticated, UserHasRiskAcceptanceRelatedObjectPermission],
+            serializer_class=AcceptedRiskSerializer, filter_backends=[], pagination_class=None)
     def accept_risks(self, request, pk=None):
         model = self.get_object()
+        product = model.product if isinstance(model, Engagement) else model.engagement.product
+        if not product.enable_full_risk_acceptance:
+            raise PermissionDenied
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
         if serializer.is_valid():
             accepted_risks = serializer.save()
@@ -63,7 +68,7 @@ class AcceptedFindingsMixin(ABC):
         request=AcceptedRiskSerializer(many=True),
         responses={status.HTTP_201_CREATED: RiskAcceptanceSerializer(many=True)},
     )
-    @action(methods=["post"], detail=False, permission_classes=[IsAdminUser], serializer_class=AcceptedRiskSerializer)
+    @action(methods=["post"], detail=False, permission_classes=[IsAuthenticated], serializer_class=AcceptedRiskSerializer)
     def accept_risks(self, request):
         serializer = AcceptedRiskSerializer(data=request.data, many=True)
         if serializer.is_valid():
@@ -72,7 +77,9 @@ class AcceptedFindingsMixin(ABC):
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         owner = request.user
         accepted_result = []
-        for engagement in get_authorized_engagements(Permissions.Engagement_View):
+        for engagement in get_authorized_engagements(Permissions.Risk_Acceptance):
+            if not engagement.product.enable_full_risk_acceptance:
+                continue
             base_findings = engagement.unaccepted_open_findings
             accepted = _accept_risks(accepted_risks, base_findings, owner)
             engagement.accept_risks(accepted)

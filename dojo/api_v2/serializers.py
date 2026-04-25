@@ -24,7 +24,6 @@ from rest_framework.exceptions import ValidationError as RestFrameworkValidation
 from rest_framework.fields import DictField, MultipleChoiceField
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
@@ -40,6 +39,7 @@ from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.jira import services as jira_services
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     DEFAULT_NOTIFICATION,
@@ -75,9 +75,6 @@ from dojo.models import (
     Finding_Template,
     General_Survey,
     Global_Role,
-    JIRA_Instance,
-    JIRA_Issue,
-    JIRA_Project,
     Language_Type,
     Languages,
     Network_Locations,
@@ -1123,6 +1120,18 @@ class EngagementSerializer(serializers.ModelSerializer):
             if data.get("target_start") > data.get("target_end"):
                 msg = "Your target start date exceeds your target end date"
                 raise serializers.ValidationError(msg)
+        if (
+            self.instance is not None
+            and "product" in data
+            and data.get("product") != self.instance.product
+            and not user_has_permission(
+                self.context["request"].user,
+                data.get("product"),
+                Permissions.Engagement_Edit,
+            )
+        ):
+            msg = "You are not permitted to edit engagements in the destination product"
+            raise PermissionDenied(msg)
         return data
 
     def build_relational_field(self, field_name, relation_info):
@@ -1364,79 +1373,11 @@ class EndpointParamsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class JIRAIssueSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = JIRA_Issue
-        fields = "__all__"
-
-    def get_url(self, obj) -> str:
-        return jira_helper.get_jira_issue_url(obj)
-
-    def validate(self, data):
-        if self.context["request"].method == "PATCH":
-            engagement = data.get("engagement", self.instance.engagement)
-            finding = data.get("finding", self.instance.finding)
-            finding_group = data.get(
-                "finding_group", self.instance.finding_group,
-            )
-        else:
-            engagement = data.get("engagement", None)
-            finding = data.get("finding", None)
-            finding_group = data.get("finding_group", None)
-
-        if (
-            (engagement and not finding and not finding_group)
-            or (finding and not engagement and not finding_group)
-            or (finding_group and not engagement and not finding)
-        ):
-            pass
-        else:
-            msg = "Either engagement or finding or finding_group has to be set."
-            raise serializers.ValidationError(msg)
-
-        if finding:
-            if (linked_finding := jira_helper.jira_already_linked(finding, data.get("jira_key"), data.get("jira_id"))) is not None:
-                msg = "JIRA issue " + data.get("jira_key") + " already linked to " + reverse("view_finding", args=(linked_finding.id,))
-                raise serializers.ValidationError(msg)
-
-        return data
-
-
-class JIRAInstanceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JIRA_Instance
-        fields = "__all__"
-        extra_kwargs = {
-            "password": {"write_only": True},
-        }
-
-
-class JIRAProjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JIRA_Project
-        fields = "__all__"
-
-    def validate(self, data):
-        if self.context["request"].method == "PATCH":
-            engagement = data.get("engagement", self.instance.engagement)
-            product = data.get("product", self.instance.product)
-        else:
-            engagement = data.get("engagement", None)
-            product = data.get("product", None)
-
-        if (engagement and product) or (not engagement and not product):
-            msg = "Either engagement or product has to be set."
-            raise serializers.ValidationError(msg)
-
-        if "custom_fields" in data and isinstance(data["custom_fields"], str):
-            try:
-                data["custom_fields"] = json.loads(data["custom_fields"])
-            except json.JSONDecodeError as e:
-                raise serializers.ValidationError({"custom_fields": f"Invalid JSON: {e}"}) from e
-
-        return data
+from dojo.jira.api.serializers import (  # noqa: E402, F401 backward compat
+    JIRAInstanceSerializer,
+    JIRAIssueSerializer,
+    JIRAProjectSerializer,
+)
 
 
 class SonarqubeIssueSerializer(serializers.ModelSerializer):
@@ -1758,7 +1699,7 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
 
     @extend_schema_field(JIRAIssueSerializer)
     def get_jira(self, obj):
-        issue = jira_helper.get_jira_issue(obj)
+        issue = jira_services.get_issue(obj)
         if issue is None:
             return None
         return JIRAIssueSerializer(read_only=True).to_representation(issue)
@@ -1832,11 +1773,11 @@ class FindingSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_creation(self, obj):
-        return jira_helper.get_jira_creation(obj)
+        return jira_services.get_creation(obj)
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_change(self, obj):
-        return jira_helper.get_jira_change(obj)
+        return jira_services.get_change(obj)
 
     @extend_schema_field(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
@@ -1912,9 +1853,9 @@ class FindingSerializer(serializers.ModelSerializer):
             for location_ref in locations:
                 location_ref.location.associate_with_finding(instance)
 
-        if push_to_jira or finding_helper.is_keep_in_sync_with_jira(instance):
+        if push_to_jira or jira_services.is_keep_in_sync(instance):
             # Push synchronously so that we can see jira errors in real time
-            success, message = jira_helper.push_to_jira(instance, sync=True)
+            success, message = jira_services.push(instance, sync=True)
             if not success:
                 raise serializers.ValidationError(message)
 
@@ -2071,7 +2012,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
 
         if push_to_jira:
-            jira_helper.push_to_jira(new_finding)
+            jira_services.push(new_finding)
 
         # Create a notification
         create_notification(
@@ -3069,9 +3010,9 @@ class ReportGenerateSerializer(serializers.Serializer):
     )
 
 
-class EngagementUpdateJiraEpicSerializer(serializers.Serializer):
-    epic_name = serializers.CharField(required=False, max_length=200)
-    epic_priority = serializers.CharField(required=False, allow_null=True)
+from dojo.jira.api.serializers import (  # noqa: E402, F401 backward compat
+    EngagementUpdateJiraEpicSerializer,
+)
 
 
 class TagSerializer(serializers.Serializer):
