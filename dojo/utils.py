@@ -1576,12 +1576,13 @@ def sla_compute_and_notify(*args, **kwargs):
                     findings_list = []
 
                     for n in comb_notif_kind:
-                        title = _notification_title_for_finding(n.finding, kind, n.finding.sla_days_remaining())
-
+                        sla_age = n.finding.sla_days_remaining()
+                        title = _notification_title_for_finding(n.finding, kind, sla_age)
                         create_notification(
                             event="sla_breach",
                             title=title,
                             finding=n.finding,
+                            sla_age=sla_age,
                             url=reverse("view_finding", args=(n.finding.id,)),
                         )
 
