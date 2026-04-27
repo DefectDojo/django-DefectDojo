@@ -5,16 +5,16 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from dojo.api_v2 import permissions
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
-from dojo.authorization.roles_permissions import Permissions
-from dojo.models import (
-    Product_Type,
+from dojo.authorization import api_permissions as permissions
+from dojo.authorization.models import (
     Product_Type_Group,
     Product_Type_Member,
     Role,
 )
+from dojo.authorization.roles_permissions import Permissions
+from dojo.models import Product_Type
 from dojo.organization.api import serializers
 from dojo.organization.api.filters import (
     OrganizationFilterSet,

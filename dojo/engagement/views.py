@@ -34,7 +34,6 @@ from openpyxl.styles import Font
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import save_endpoints_to_add
@@ -271,7 +270,6 @@ def engagements_all(request):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
@@ -347,7 +345,6 @@ def edit_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Delete, "eid")
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
     product = engagement.product
@@ -389,7 +386,6 @@ def delete_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def copy_engagement(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     product = engagement.product
@@ -634,7 +630,6 @@ def prefetch_for_view_tests(tests):
     )
 
 
-@user_is_authorized(Engagement, Permissions.Test_Add, "eid")
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
     cred_form = CredMappingForm()
@@ -1182,7 +1177,6 @@ class ImportScanResultsView(View):
         return self.success_redirect(request, context)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
@@ -1194,7 +1188,6 @@ def close_eng(request, eid):
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 @require_POST
 def unlink_jira(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
@@ -1228,7 +1221,6 @@ def unlink_jira(request, eid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
@@ -1247,7 +1239,6 @@ method to complete checklists from the engagement view
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     try:
@@ -1297,7 +1288,6 @@ def complete_checklist(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
@@ -1370,12 +1360,10 @@ def add_risk_acceptance(request, eid, fid=None):
                   })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
@@ -1541,7 +1529,6 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     # Validate the engagement ID exists before moving forward
@@ -1552,7 +1539,6 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
@@ -1564,7 +1550,6 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
@@ -1578,7 +1563,6 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def download_risk_acceptance(request, eid, raid):
     mimetypes.init()
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
@@ -1603,7 +1587,6 @@ under media folder
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
     add_breadcrumb(
@@ -1636,13 +1619,11 @@ def upload_threatmodel(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
     return generate_file_response_from_file_path(eng.tmodel_path)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())

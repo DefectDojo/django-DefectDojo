@@ -3,13 +3,15 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from dojo.api_v2.serializers import ProductMetaSerializer, TagListSerializerField
 from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.models import (
+    Product_Group,
+    Product_Member,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import (
     Dojo_User,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
 )
 from dojo.organization.api.serializers import RelatedOrganizationField
 from dojo.product.queries import get_authorized_products

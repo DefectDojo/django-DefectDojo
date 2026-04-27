@@ -28,6 +28,14 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 from dojo.authorization.authorization import user_has_configuration_permission, user_is_superuser_or_global_owner
+from dojo.authorization.models import (
+    Dojo_Group_Member,
+    Global_Role,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
@@ -67,7 +75,6 @@ from dojo.models import (
     Cred_User,
     Development_Environment,
     Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     DojoMeta,
     Endpoint,
@@ -82,7 +89,6 @@ from dojo.models import (
     GITHUB_Conf,
     GITHUB_Issue,
     GITHUB_PKey,
-    Global_Role,
     Note_Type,
     Notes,
     Notification_Webhooks,
@@ -90,11 +96,7 @@ from dojo.models import (
     Objects_Product,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
     Question,
     Regulation,
     Risk_Acceptance,

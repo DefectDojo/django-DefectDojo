@@ -6,7 +6,6 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import SLAConfigForm
 from dojo.models import Product, SLA_Configuration, System_Settings
 from dojo.utils import add_breadcrumb
@@ -14,7 +13,6 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized("dojo.add_sla_configuration")
 def new_sla_config(request):
     if request.method == "POST":
         tform = SLAConfigForm(request.POST, instance=SLA_Configuration())
@@ -35,7 +33,6 @@ def new_sla_config(request):
                   {"form": tform})
 
 
-@user_is_configuration_authorized("dojo.change_sla_configuration")
 def edit_sla_config(request, slaid):
     sla_config = SLA_Configuration.objects.get(pk=slaid)
 
@@ -86,7 +83,6 @@ def edit_sla_config(request, slaid):
                   })
 
 
-@user_is_configuration_authorized("dojo.view_sla_configuration")
 def sla_config(request):
     settings = System_Settings.objects.all()
 

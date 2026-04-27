@@ -15,24 +15,26 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_has_permission_or_403,
 )
+from dojo.authorization.models import (
+    Dojo_Group_Member,
+    Global_Role,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Permissions, Roles
 from dojo.models import (
     App_Analysis,
     Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Engagement,
     Finding,
-    Global_Role,
     Languages,
     Product,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
-    Role,
     Stub_Finding,
     Test,
 )

@@ -3,6 +3,10 @@ from django_filters.rest_framework import FilterSet
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema_field
 
+from dojo.authorization.models import (
+    Product_Group,
+    Product_Member,
+)
 from dojo.filters import (
     CharFieldFilterANDExpression,
     CharFieldInFilter,
@@ -16,8 +20,6 @@ from dojo.labels import get_labels
 from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
 )
 
 labels = get_labels()

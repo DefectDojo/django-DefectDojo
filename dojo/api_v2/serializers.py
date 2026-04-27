@@ -26,6 +26,15 @@ from rest_framework.fields import DictField, MultipleChoiceField
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
+from dojo.authorization.models import (
+    Dojo_Group_Member,
+    Global_Role,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -61,7 +70,6 @@ from dojo.models import (
     Cred_User,
     Development_Environment,
     Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     DojoMeta,
     Endpoint,
@@ -75,7 +83,6 @@ from dojo.models import (
     Finding_Group,
     Finding_Template,
     General_Survey,
-    Global_Role,
     Language_Type,
     Languages,
     Network_Locations,
@@ -86,15 +93,10 @@ from dojo.models import (
     Notifications,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
     Question,
     Regulation,
     Risk_Acceptance,
-    Role,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,

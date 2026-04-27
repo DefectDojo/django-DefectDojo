@@ -4,6 +4,10 @@ from unittest.mock import Mock, patch
 
 from django.conf import settings
 
+from dojo.authorization.models import (
+    Dojo_Group_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Roles
 from dojo.location.models import Location
 from dojo.models import (
@@ -12,14 +16,12 @@ from dojo.models import (
     IMPORT_REACTIVATED_FINDING,
     IMPORT_UNTOUCHED_FINDING,
     Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Engagement,
     Notifications,
     Product,
     Product_Type,
-    Role,
     System_Settings,
     Test,
     Test_Import,

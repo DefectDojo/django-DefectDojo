@@ -15,7 +15,6 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import (
     EndpointFilter,
@@ -56,9 +55,7 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
-
 labels = get_labels()
-
 
 EXCEL_CHAR_LIMIT = 32767
 
@@ -251,13 +248,11 @@ def report_cover_page(request):
                    "report_info": report_info})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, "ptid")
 def product_type_report(request, ptid):
     product_type = get_object_or_404(Product_Type, id=ptid)
     return generate_report(request, product_type)
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_report(request, pid):
     product = get_object_or_404(Product, id=pid)
     return generate_report(request, product)
@@ -268,19 +263,16 @@ def product_findings_report(request):
     return generate_report(request, findings)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def engagement_report(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     return generate_report(request, engagement)
 
 
-@user_is_authorized(Test, Permissions.Test_View, "tid")
 def test_report(request, tid):
     test = get_object_or_404(Test, id=tid)
     return generate_report(request, test)
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
     if settings.V3_FEATURE_LOCATIONS:

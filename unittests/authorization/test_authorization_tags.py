@@ -28,7 +28,7 @@ class TestAuthorizationTags(DojoTestCase):
         self.permission_c = Permission()
         self.permission_c.codename = "c"
 
-    @patch("dojo.templatetags.authorization_tags.user_has_permission")
+    @patch("dojo.authorization.template_filters.user_has_permission")
     def test_has_object_permission_no_permission(self, mock_has_permission):
         mock_has_permission.return_value = False
 
@@ -37,7 +37,7 @@ class TestAuthorizationTags(DojoTestCase):
         self.assertFalse(result)
         mock_has_permission.assert_called_with(None, self.product_type, Permissions.Product_Type_View)
 
-    @patch("dojo.templatetags.authorization_tags.user_has_permission")
+    @patch("dojo.authorization.template_filters.user_has_permission")
     @patch("crum.get_current_user")
     def test_has_object_permission_has_permission(self, mock_current_user, mock_has_permission):
         mock_has_permission.return_value = True
@@ -54,7 +54,7 @@ class TestAuthorizationTags(DojoTestCase):
         with self.assertRaises(KeyError):
             has_object_permission(self.product_type, "Test")
 
-    @patch("dojo.templatetags.authorization_tags.configuration_permission")
+    @patch("dojo.authorization.template_filters.configuration_permission")
     @patch("crum.get_current_user")
     def test_has_configuration_permission(self, mock_current_user, mock_configuration_permission):
         mock_configuration_permission.return_value = True

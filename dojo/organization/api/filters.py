@@ -1,12 +1,12 @@
 from django_filters import BooleanFilter, NumberFilter
 from django_filters.rest_framework import FilterSet
 
-from dojo.labels import get_labels
-from dojo.models import (
-    Product_Type,
+from dojo.authorization.models import (
     Product_Type_Group,
     Product_Type_Member,
 )
+from dojo.labels import get_labels
+from dojo.models import Product_Type
 
 labels = get_labels()
 

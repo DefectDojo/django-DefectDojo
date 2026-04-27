@@ -16,7 +16,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
@@ -181,17 +180,14 @@ def process_endpoint_view(request, eid, *, host_view=False):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint(request, eid):
     return process_endpoint_view(request, eid, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -219,7 +215,6 @@ def edit_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_Delete, "eid")
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -254,7 +249,6 @@ def delete_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "pid")
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = "dojo/add_endpoint.html"
@@ -306,7 +300,6 @@ def add_product_endpoint(request):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def manage_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     meta_data_query = DojoMeta.objects.filter(endpoint=endpoint)
@@ -396,7 +389,6 @@ def endpoint_bulk_update_all(request, pid=None):
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def endpoint_status_bulk_update(request, fid):
     if request.method == "POST":
         post = request.POST
@@ -471,7 +463,6 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Product, Permissions.Location_Edit, "pid")
 def import_endpoint_meta(request, pid):
     product = get_object_or_404(Product, id=pid)
     form = ImportEndpointMetaForm()
@@ -506,13 +497,11 @@ def import_endpoint_meta(request, pid):
     })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def endpoint_host_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, host_view=True)

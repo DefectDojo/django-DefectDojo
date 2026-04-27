@@ -25,10 +25,10 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from dojo.api_v2 import serializers
-from dojo.api_v2.permissions import check_object_permission
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from dojo.api_v2.serializers import TagListSerializerField
 from dojo.api_v2.views import report_generate
+from dojo.authorization.api_permissions import check_object_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import CharFieldFilterANDExpression, CharFieldInFilter, OrderingFilter
 from dojo.location.models import LocationFindingReference, LocationProductReference

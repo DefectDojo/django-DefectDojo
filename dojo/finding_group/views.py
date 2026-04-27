@@ -13,7 +13,7 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.models import Global_Role
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import (
     FindingFilter,
@@ -23,14 +23,13 @@ from dojo.filters import (
 from dojo.finding.queries import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.jira import services as jira_services
-from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Global_Role, Product
+from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
 from dojo.product.queries import get_authorized_products
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_View, "fgid")
 def view_finding_group(request, fgid):
     finding_group = get_object_or_404(Finding_Group, pk=fgid)
     findings = finding_group.findings.all()
@@ -121,7 +120,6 @@ def view_finding_group(request, fgid):
     })
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Delete, "fgid")
 @require_POST
 def delete_finding_group(request, fgid):
     finding_group = get_object_or_404(Finding_Group, pk=fgid)
@@ -154,7 +152,6 @@ def delete_finding_group(request, fgid):
     })
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, "fgid")
 @require_POST
 def unlink_jira(request, fgid):
     logger.debug("/finding_group/%s/jira/unlink", fgid)
@@ -189,7 +186,6 @@ def unlink_jira(request, fgid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, "fgid")
 @require_POST
 def push_to_jira(request, fgid):
     logger.debug("/finding_group/%s/jira/push", fgid)

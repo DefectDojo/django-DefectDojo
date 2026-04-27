@@ -18,7 +18,7 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_has_permission_or_403,
 )
-from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
+from dojo.authorization.models import Dojo_Group_Member, Global_Role, Product_Group, Product_Type_Group
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import GroupFilter
 from dojo.forms import (
@@ -40,7 +40,7 @@ from dojo.group.queries import (
 )
 from dojo.group.utils import get_auth_group_name
 from dojo.labels import get_labels
-from dojo.models import Dojo_Group, Dojo_Group_Member, Global_Role, Product_Group, Product_Type_Group
+from dojo.models import Dojo_Group
 from dojo.utils import (
     add_breadcrumb,
     get_page_items,
@@ -50,7 +50,6 @@ from dojo.utils import (
 )
 
 logger = logging.getLogger(__name__)
-
 
 labels = get_labels()
 
@@ -400,7 +399,6 @@ class AddGroup(View):
         return render(request, self.get_template(), context)
 
 
-@user_is_authorized(Dojo_Group, Permissions.Group_Manage_Members, "gid")
 def add_group_member(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     groupform = Add_Group_MemberForm(initial={"group": group.id})
@@ -436,7 +434,6 @@ def add_group_member(request, gid):
     })
 
 
-@user_is_authorized(Dojo_Group_Member, Permissions.Group_Manage_Members, "mid")
 def edit_group_member(request, mid):
     member = get_object_or_404(Dojo_Group_Member, pk=mid)
     memberform = Edit_Group_MemberForm(instance=member)
@@ -476,7 +473,6 @@ def edit_group_member(request, mid):
     })
 
 
-@user_is_authorized(Dojo_Group_Member, Permissions.Group_Member_Delete, "mid")
 def delete_group_member(request, mid):
     member = get_object_or_404(Dojo_Group_Member, pk=mid)
     memberform = Delete_Group_MemberForm(instance=member)
@@ -578,7 +574,6 @@ def add_product_type_group(request, gid):
     })
 
 
-@user_is_configuration_authorized("auth.change_permission")
 def edit_permissions(request, gid):
     group = get_object_or_404(Dojo_Group, id=gid)
     if request.method == "POST":

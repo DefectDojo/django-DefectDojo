@@ -10,6 +10,15 @@ from unittest.mock import patch
 from django.conf import settings
 from django.utils import timezone
 
+from dojo.authorization.models import (
+    Dojo_Group_Member,
+    Global_Role,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoint_status, get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
@@ -29,21 +38,14 @@ from dojo.location.queries import (
 )
 from dojo.models import (
     Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Endpoint_Status,
     Engagement,
     Finding,
     Finding_Group,
-    Global_Role,
     Product,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
-    Role,
     Stub_Finding,
     Test,
     Test_Type,
@@ -360,7 +362,7 @@ class TestGetAuthorizedFindings(AuthorizationQueriesTestBase):
 
     def test_none_user_returns_empty(self):
         """None user should return empty queryset"""
-        with patch("dojo.finding.queries.get_current_user", return_value=None):
+        with patch("dojo.authorization.query_registrations.get_current_user", return_value=None):
             findings = get_authorized_findings(Permissions.Finding_View)
             self.assertEqual(findings.count(), 0)
 
@@ -369,7 +371,7 @@ class TestGetAuthorizedStubFindings(AuthorizationQueriesTestBase):
 
     """Tests for get_authorized_stub_findings() - uses get_current_user()"""
 
-    @patch("dojo.finding.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_superuser_gets_all_stub_findings(self, mock_get_current_user):
         """Superuser should get all stub findings"""
         mock_get_current_user.return_value = self.superuser
@@ -377,7 +379,7 @@ class TestGetAuthorizedStubFindings(AuthorizationQueriesTestBase):
         self.assertIn(self.stub_finding_1, stub_findings)
         self.assertIn(self.stub_finding_2, stub_findings)
 
-    @patch("dojo.finding.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_no_permissions_gets_empty(self, mock_get_current_user):
         """User with no permissions should not get test stub findings"""
         mock_get_current_user.return_value = self.user_no_perms
@@ -385,7 +387,7 @@ class TestGetAuthorizedStubFindings(AuthorizationQueriesTestBase):
         self.assertNotIn(self.stub_finding_1, stub_findings)
         self.assertNotIn(self.stub_finding_2, stub_findings)
 
-    @patch("dojo.finding.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_product_member_gets_product_stub_findings(self, mock_get_current_user):
         """User with product membership should get only that product's stub findings"""
         mock_get_current_user.return_value = self.user_product_member
@@ -468,7 +470,7 @@ class TestGetAuthorizedProductTypes(AuthorizationQueriesTestBase):
 
     """Tests for get_authorized_product_types() - uses get_current_user()"""
 
-    @patch("dojo.product_type.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_superuser_gets_all_product_types(self, mock_get_current_user):
         """Superuser should get all product types"""
         mock_get_current_user.return_value = self.superuser
@@ -476,7 +478,7 @@ class TestGetAuthorizedProductTypes(AuthorizationQueriesTestBase):
         self.assertIn(self.product_type_1, product_types)
         self.assertIn(self.product_type_2, product_types)
 
-    @patch("dojo.product_type.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_no_permissions_gets_empty(self, mock_get_current_user):
         """User with no permissions should not get test product types"""
         mock_get_current_user.return_value = self.user_no_perms
@@ -484,7 +486,7 @@ class TestGetAuthorizedProductTypes(AuthorizationQueriesTestBase):
         self.assertNotIn(self.product_type_1, product_types)
         self.assertNotIn(self.product_type_2, product_types)
 
-    @patch("dojo.product_type.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_global_reader_gets_all(self, mock_get_current_user):
         """User with global reader role should get all product types"""
         mock_get_current_user.return_value = self.user_global_reader
@@ -492,7 +494,7 @@ class TestGetAuthorizedProductTypes(AuthorizationQueriesTestBase):
         self.assertIn(self.product_type_1, product_types)
         self.assertIn(self.product_type_2, product_types)
 
-    @patch("dojo.product_type.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_product_type_member_gets_own_types(self, mock_get_current_user):
         """User with product type membership should get only that type"""
         mock_get_current_user.return_value = self.user_product_type_member
@@ -500,7 +502,7 @@ class TestGetAuthorizedProductTypes(AuthorizationQueriesTestBase):
         self.assertIn(self.product_type_1, product_types)
         self.assertNotIn(self.product_type_2, product_types)
 
-    @patch("dojo.product_type.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_group_product_type_member_gets_group_types(self, mock_get_current_user):
         """User in group with product type access should get that type"""
         mock_get_current_user.return_value = self.user_group_product_type_member
@@ -513,7 +515,7 @@ class TestGetAuthorizedEngagements(AuthorizationQueriesTestBase):
 
     """Tests for get_authorized_engagements() - uses get_current_user()"""
 
-    @patch("dojo.engagement.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_superuser_gets_all_engagements(self, mock_get_current_user):
         """Superuser should get all engagements"""
         mock_get_current_user.return_value = self.superuser
@@ -521,7 +523,7 @@ class TestGetAuthorizedEngagements(AuthorizationQueriesTestBase):
         self.assertIn(self.engagement_1, engagements)
         self.assertIn(self.engagement_2, engagements)
 
-    @patch("dojo.engagement.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_no_permissions_gets_empty(self, mock_get_current_user):
         """User with no permissions should not get test engagements"""
         mock_get_current_user.return_value = self.user_no_perms
@@ -529,7 +531,7 @@ class TestGetAuthorizedEngagements(AuthorizationQueriesTestBase):
         self.assertNotIn(self.engagement_1, engagements)
         self.assertNotIn(self.engagement_2, engagements)
 
-    @patch("dojo.engagement.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_global_reader_gets_all(self, mock_get_current_user):
         """User with global reader role should get all engagements"""
         mock_get_current_user.return_value = self.user_global_reader
@@ -537,7 +539,7 @@ class TestGetAuthorizedEngagements(AuthorizationQueriesTestBase):
         self.assertIn(self.engagement_1, engagements)
         self.assertIn(self.engagement_2, engagements)
 
-    @patch("dojo.engagement.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_product_member_gets_product_engagements(self, mock_get_current_user):
         """User with product membership should get only that product's engagements"""
         mock_get_current_user.return_value = self.user_product_member
@@ -545,7 +547,7 @@ class TestGetAuthorizedEngagements(AuthorizationQueriesTestBase):
         self.assertIn(self.engagement_1, engagements)
         self.assertNotIn(self.engagement_2, engagements)
 
-    @patch("dojo.engagement.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_product_type_member_gets_product_type_engagements(self, mock_get_current_user):
         """User with product type membership should get engagements in that type"""
         mock_get_current_user.return_value = self.user_product_type_member
@@ -558,7 +560,7 @@ class TestGetAuthorizedTests(AuthorizationQueriesTestBase):
 
     """Tests for get_authorized_tests() - uses get_current_user()"""
 
-    @patch("dojo.test.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_superuser_gets_all_tests(self, mock_get_current_user):
         """Superuser should get all tests"""
         mock_get_current_user.return_value = self.superuser
@@ -566,7 +568,7 @@ class TestGetAuthorizedTests(AuthorizationQueriesTestBase):
         self.assertIn(self.test_1, tests)
         self.assertIn(self.test_2, tests)
 
-    @patch("dojo.test.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_no_permissions_gets_empty(self, mock_get_current_user):
         """User with no permissions should not get test tests"""
         mock_get_current_user.return_value = self.user_no_perms
@@ -574,7 +576,7 @@ class TestGetAuthorizedTests(AuthorizationQueriesTestBase):
         self.assertNotIn(self.test_1, tests)
         self.assertNotIn(self.test_2, tests)
 
-    @patch("dojo.test.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_product_member_gets_product_tests(self, mock_get_current_user):
         """User with product membership should get only that product's tests"""
         mock_get_current_user.return_value = self.user_product_member
@@ -709,7 +711,7 @@ class TestGetAuthorizedGroups(AuthorizationQueriesTestBase):
 
     """Tests for get_authorized_groups() - uses get_current_user()"""
 
-    @patch("dojo.group.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_superuser_gets_all_groups(self, mock_get_current_user):
         """Superuser should get all groups"""
         mock_get_current_user.return_value = self.superuser
@@ -717,7 +719,7 @@ class TestGetAuthorizedGroups(AuthorizationQueriesTestBase):
         self.assertIn(self.group_product, groups)
         self.assertIn(self.group_product_type, groups)
 
-    @patch("dojo.group.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_group_member_gets_own_groups(self, mock_get_current_user):
         """User who is a group member should get that group"""
         mock_get_current_user.return_value = self.user_group_product_member

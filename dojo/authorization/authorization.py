@@ -1,6 +1,13 @@
 from django.core.exceptions import PermissionDenied
 from django.db.models import Model, QuerySet
 
+from dojo.authorization.models import (
+    Dojo_Group_Member,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+)
 from dojo.authorization.roles_permissions import (
     Permissions,
     Roles,
@@ -12,7 +19,6 @@ from dojo.models import (
     App_Analysis,
     Cred_Mapping,
     Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Engagement,
@@ -21,11 +27,7 @@ from dojo.models import (
     Languages,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
     Risk_Acceptance,
     Stub_Finding,
     Test,

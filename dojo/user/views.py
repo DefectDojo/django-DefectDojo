@@ -30,7 +30,7 @@ from rest_framework.exceptions import PermissionDenied as RFPermissionDenied
 from rest_framework.exceptions import ValidationError as RFValidationError
 
 from dojo.authorization.authorization import user_is_superuser_or_global_owner
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
+from dojo.authorization.models import Dojo_Group_Member, Product_Member, Product_Type_Member
 from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import dojo_ratelimit
 from dojo.filters import UserFilter
@@ -50,14 +50,13 @@ from dojo.forms import (
 )
 from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.labels import get_labels
-from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member, UserContactInfo
+from dojo.models import Alerts, Dojo_User, UserContactInfo
 from dojo.product.queries import get_authorized_product_members_for_user
 from dojo.product_type.queries import get_authorized_product_type_members_for_user
 from dojo.user.authentication import reset_token_for_user
 from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
-
 
 labels = get_labels()
 
@@ -82,8 +81,8 @@ class DojoLoginView(LoginView):
             extra_tags="alert-success")
         return response
 
-
 # #  Django Rest Framework API v2
+
 
 def api_v2_key(request):
     # This check should not be necessary because url should not be in 'urlpatterns' but we never know
@@ -312,7 +311,6 @@ def change_password(request):
     return render(request, "dojo/change_pwd.html", {"form": form})
 
 
-@user_is_configuration_authorized("auth.view_user")
 def user(request):
     page_name = _("All Users")
     users = Dojo_User.objects.all() \
@@ -328,7 +326,6 @@ def user(request):
     })
 
 
-@user_is_configuration_authorized("auth.add_user")
 def add_user(request):
     page_name = _("Add User")
     form = AddDojoUserForm()
@@ -385,7 +382,6 @@ def add_user(request):
         "to_add": True})
 
 
-@user_is_configuration_authorized("auth.view_user")
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
@@ -402,7 +398,6 @@ def view_user(request, uid):
         "configuration_permission_form": configuration_permission_form})
 
 
-@user_is_configuration_authorized("auth.change_user")
 def edit_user(request, uid):
     page_name = _("Edit User")
     user = get_object_or_404(Dojo_User, id=uid)
@@ -490,7 +485,6 @@ def edit_user(request, uid):
         "to_edit": user})
 
 
-@user_is_configuration_authorized("auth.delete_user")
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
@@ -635,7 +629,6 @@ def add_group_member(request, uid):
     })
 
 
-@user_is_configuration_authorized("auth.change_permission")
 def edit_permissions(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     if request.method == "POST":

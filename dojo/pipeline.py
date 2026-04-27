@@ -8,8 +8,9 @@ from django.conf import settings
 from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.google import GoogleOAuth2
 
+from dojo.authorization.models import Dojo_Group_Member, Product_Member, Role
 from dojo.authorization.roles_permissions import Permissions, Roles
-from dojo.models import Dojo_Group, Dojo_Group_Member, Product, Product_Member, Product_Type, Role
+from dojo.models import Dojo_Group, Product, Product_Type
 from dojo.product.queries import get_authorized_products
 
 logger = logging.getLogger(__name__)

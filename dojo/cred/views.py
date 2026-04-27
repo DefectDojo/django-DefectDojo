@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
-from dojo.authorization.authorization_decorators import user_is_authorized, user_is_configuration_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.cred.queries import get_authorized_cred_mappings_for_queryset
 from dojo.decorators import deprecated_view
@@ -17,7 +16,6 @@ from dojo.utils import Product_Tab, add_breadcrumb, dojo_crypto_encrypt, prepare
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized(Permissions.Credential_Add)
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def new_cred(request):
     if request.method == "POST":
@@ -40,7 +38,6 @@ def new_cred(request):
     return render(request, "dojo/new_cred.html", {"tform": tform})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def all_cred_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
@@ -50,7 +47,6 @@ def all_cred_product(request, pid):
     return render(request, "dojo/view_cred_prod.html", {"product_tab": product_tab, "creds": creds, "prod": prod})
 
 
-@user_is_configuration_authorized(Permissions.Credential_Edit)
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def edit_cred(request, ttid):
     tool_config = Cred_User.objects.get(pk=ttid)
@@ -83,7 +79,6 @@ def edit_cred(request, ttid):
     })
 
 
-@user_is_configuration_authorized(Permissions.Credential_View)
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def view_cred_details(request, ttid):
     cred = Cred_User.objects.get(pk=ttid)
@@ -122,7 +117,6 @@ def view_cred_details(request, ttid):
     })
 
 
-@user_is_configuration_authorized(Permissions.Credential_View)
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def cred(request):
     confs = Cred_User.objects.all().order_by("name", "environment", "username")
@@ -132,8 +126,6 @@ def cred(request):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def view_cred_product(request, pid, ttid):
     cred = get_object_or_404(
@@ -189,8 +181,6 @@ def view_cred_product(request, pid, ttid):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def view_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
@@ -239,8 +229,6 @@ def view_cred_product_engagement(request, eid, ttid):
         })
 
 
-@user_is_authorized(Test, Permissions.Test_View, "tid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def view_cred_engagement_test(request, tid, ttid):
     cred = get_object_or_404(
@@ -291,8 +279,6 @@ def view_cred_engagement_test(request, tid, ttid):
         })
 
 
-@user_is_authorized(Finding, Permissions.Finding_View, "fid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_View, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def view_cred_finding(request, fid, ttid):
     cred = get_object_or_404(
@@ -343,8 +329,6 @@ def view_cred_finding(request, fid, ttid):
         })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_Edit, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def edit_cred_product(request, pid, ttid):
     cred = get_object_or_404(
@@ -372,8 +356,6 @@ def edit_cred_product(request, pid, ttid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_Edit, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def edit_cred_product_engagement(request, eid, ttid):
     cred = get_object_or_404(
@@ -407,7 +389,6 @@ def edit_cred_product_engagement(request, eid, ttid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def new_cred_product(request, pid):
     prod = get_object_or_404(Product, pk=pid)
@@ -443,7 +424,6 @@ def new_cred_product(request, pid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def new_cred_product_engagement(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
@@ -495,7 +475,6 @@ def new_cred_product_engagement(request, eid):
         })
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, "tid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def new_cred_engagement_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
@@ -546,7 +525,6 @@ def new_cred_engagement_test(request, tid):
         })
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def new_cred_finding(request, fid):
     finding = get_object_or_404(Finding, pk=fid)
@@ -677,35 +655,26 @@ def delete_cred_controller(request, destination_url, elem_id, ttid):
     })
 
 
-@user_is_configuration_authorized(Permissions.Credential_Delete)
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_cred(request, ttid):
     return delete_cred_controller(request, "cred", 0, ttid=ttid)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_cred_product(request, pid, ttid):
     return delete_cred_controller(request, "all_cred_product", pid, ttid)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_cred_engagement(request, eid, ttid):
     return delete_cred_controller(request, "view_engagement", eid, ttid)
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, "tid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_cred_test(request, tid, ttid):
     return delete_cred_controller(request, "view_test", tid, ttid)
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
-@user_is_authorized(Cred_Mapping, Permissions.Credential_Delete, "ttid")
 @deprecated_view("Credential Manager", removal_version="2.59.0", removal_date="June 1, 2026")
 def delete_cred_finding(request, fid, ttid):
     return delete_cred_controller(request, "view_finding", fid, ttid)

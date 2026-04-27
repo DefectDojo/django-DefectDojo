@@ -4,7 +4,8 @@ import sys
 from django.contrib.auth.models import Permission
 from django.core.management.base import BaseCommand
 
-from dojo.models import Dojo_Group, Dojo_Group_Member, Dojo_User, Role
+from dojo.authorization.models import Dojo_Group_Member, Role
+from dojo.models import Dojo_Group, Dojo_User
 
 logger = logging.getLogger(__name__)
 

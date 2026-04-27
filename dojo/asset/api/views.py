@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 import dojo.api_v2.mixins as dojo_mixins
-from dojo.api_v2 import permissions, prefetch
+from dojo.api_v2 import prefetch
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
 from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
 from dojo.asset.api import serializers
@@ -16,12 +16,15 @@ from dojo.asset.api.filters import (
     AssetGroupFilterSet,
     AssetMemberFilterSet,
 )
+from dojo.authorization import api_permissions as permissions
+from dojo.authorization.models import (
+    Product_Group,
+    Product_Member,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
 )
 from dojo.product.queries import (
     get_authorized_product_api_scan_configurations,

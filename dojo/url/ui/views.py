@@ -14,7 +14,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_meta_import
 from dojo.forms import (
@@ -45,12 +44,10 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def view_endpoint(request: HttpRequest, location_id: int):
     return process_endpoint_view(request, location_id, host_view=False)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def view_endpoint_host(request: HttpRequest, location_id: int):
     return process_endpoint_view(request, location_id, host_view=True)
 
@@ -290,7 +287,6 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     )
 
 
-@user_is_authorized(Location, Permissions.Location_Edit, "location_id")
 def edit_endpoint(request, location_id):
     # Retrieve the Location object by ID and add breadcrumb for editing
     location = get_object_or_404(Location, id=location_id)
@@ -327,7 +323,6 @@ def edit_endpoint(request, location_id):
     )
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "product_id")
 def add_endpoint_to_product(request, product_id):
     # Retrieve the Product object by ID and initialize the URLForm for adding a new endpoint
     product = get_object_or_404(Product, id=product_id)
@@ -349,7 +344,6 @@ def add_endpoint_to_product(request, product_id):
     return render(request, "dojo/url/create.html", {"product_tab": product_tab, "form": form})
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "finding_id")
 def add_endpoint_to_finding(request, finding_id):
     # Retrieve the Finding object by ID and get its associated Product
     finding = get_object_or_404(Finding, id=finding_id)
@@ -371,7 +365,6 @@ def add_endpoint_to_finding(request, finding_id):
     return render(request, "dojo/url/create.html", {"product_tab": product_tab, "form": form})
 
 
-@user_is_authorized(Location, Permissions.Location_Delete, "location_id")
 def delete_endpoint(request, location_id):
     # Retrieve the Location object by primary key and initialize the delete form
     location = get_object_or_404(Location, pk=location_id)
@@ -405,7 +398,6 @@ def delete_endpoint(request, location_id):
     )
 
 
-@user_is_authorized(Location, Permissions.Location_Edit, "location_id")
 def manage_meta_data(request, location_id):
     # Retrieve the Location object by ID and filter its associated metadata
     location = Location.objects.get(id=location_id)
@@ -430,7 +422,6 @@ def manage_meta_data(request, location_id):
     )
 
 
-@user_is_authorized(Product, Permissions.Location_Edit, "product_id")
 def import_endpoint_meta(request, product_id):
     # Retrieve the Product object by ID and initialize the import form
     product = get_object_or_404(Product, id=product_id)
@@ -562,7 +553,6 @@ def endpoint_bulk_update_all(request, product_id=None):
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "finding_id")
 def finding_location_bulk_update(request, finding_id):
     if request.method == "POST":
         # Get the list of endpoint IDs to update and the statuses to enable
@@ -634,13 +624,11 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def endpoint_report(request, location_id):
     location = get_object_or_404(Location, id=location_id)
     return generate_report(request, location, host_view=False)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def endpoint_host_report(request, location_id):
     location = get_object_or_404(Location, id=location_id)
     return generate_report(request, location, host_view=True)

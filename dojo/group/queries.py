@@ -1,56 +1,41 @@
-from crum import get_current_user
-from django.db.models import Subquery
+try:
+    from dojo.authorization.query_filters import get_auth_filter
+except ImportError:
+    def get_auth_filter(key): return None
 
-from dojo.authorization.authorization import get_roles_for_permission, user_has_configuration_permission
-from dojo.authorization.roles_permissions import Permissions
-from dojo.models import Dojo_Group, Dojo_Group_Member, Product_Group, Product_Type_Group, Role
+try:
+    from dojo.authorization.models import Dojo_Group_Member, Product_Group, Product_Type_Group, Role
+except ImportError:
+    Dojo_Group_Member = None
+    Product_Group = None
+    Product_Type_Group = None
+    Role = None
+
+from dojo.models import Dojo_Group
 from dojo.request_cache import cache_for_request
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
 @cache_for_request
 def get_authorized_groups(permission):
-    user = get_current_user()
-
-    if user is None:
-        return Dojo_Group.objects.none()
-
-    if user.is_superuser:
-        return Dojo_Group.objects.all().order_by("name")
-
-    # Check for the case of the view_group config permission
-    if user_has_configuration_permission(user, "auth.view_group") or user_has_configuration_permission(user, "auth.add_group"):
-        return Dojo_Group.objects.all().order_by("name")
-
-    roles = get_roles_for_permission(permission)
-
-    # Get authorized group IDs via subquery
-    authorized_roles = Dojo_Group_Member.objects.filter(
-        user=user, role__in=roles,
-    ).values("group_id")
-
-    # Filter using IN with Subquery - no annotations needed
-    return Dojo_Group.objects.filter(
-        pk__in=Subquery(authorized_roles),
-    ).order_by("name")
+    impl = get_auth_filter("group.get_authorized_groups")
+    if impl:
+        return impl(permission)
+    return Dojo_Group.objects.all().order_by("name")
 
 
 def get_authorized_group_members(permission):
-    user = get_current_user()
-
-    if user is None:
-        return Dojo_Group_Member.objects.none()
-
-    if user.is_superuser:
-        return Dojo_Group_Member.objects.all().order_by("id").select_related("role")
-
-    groups = get_authorized_groups(permission)
-    return Dojo_Group_Member.objects.filter(group__in=groups).order_by("id").select_related("role")
+    impl = get_auth_filter("group.get_authorized_group_members")
+    if impl:
+        return impl(permission)
+    return Dojo_Group_Member.objects.all().order_by("id").select_related("role")
 
 
 def get_authorized_group_members_for_user(user):
-    groups = get_authorized_groups(Permissions.Group_View)
-    return Dojo_Group_Member.objects.filter(user=user, group__in=groups).order_by("group__name").select_related("role", "group")
+    impl = get_auth_filter("group.get_authorized_group_members_for_user")
+    if impl:
+        return impl(user)
+    return Dojo_Group_Member.objects.filter(user=user).order_by("group__name").select_related("role", "group")
 
 
 def get_group_members_for_group(group):

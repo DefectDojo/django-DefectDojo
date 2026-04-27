@@ -27,7 +27,10 @@ from github import Github
 
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
+from dojo.authorization.models import (
+    Product_Group,
+    Product_Member,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.filters import (
@@ -88,8 +91,6 @@ from dojo.models import (
     Notifications,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
     System_Settings,
     Test,
@@ -247,7 +248,6 @@ def iso_to_gregorian(iso_year, iso_week, iso_day):
     return start + timedelta(weeks=iso_week - 1, days=iso_day - 1)
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def view_product(request, pid):
     prod_query = Product.objects.all().select_related("product_manager", "technical_contact", "team_manager", "sla_configuration") \
                                       .prefetch_related("members") \
@@ -345,7 +345,6 @@ def view_product(request, pid):
         "sla": sla})
 
 
-@user_is_authorized(Product, Permissions.Component_View, "pid")
 def view_product_components(request, pid):
     prod = get_object_or_404(Product, id=pid)
     product_tab = Product_Tab(prod, title=str(labels.ASSET_LABEL), tab="components")
@@ -564,7 +563,6 @@ def endpoint_queries(request, prod):
     return filters
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def view_product_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     engs = Engagement.objects.filter(product=prod, active=True)
@@ -797,7 +795,6 @@ def view_product_metrics(request, pid):
         "user": request.user})
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def async_burndown_metrics(request, pid):
     prod = get_object_or_404(Product, id=pid)
     open_findings_burndown = get_open_findings_burndown(prod)
@@ -813,7 +810,6 @@ def async_burndown_metrics(request, pid):
     })
 
 
-@user_is_authorized(Product, Permissions.Engagement_View, "pid")
 def view_engagements(request, pid):
     prod = get_object_or_404(Product, id=pid)
     default_page_num = 10
@@ -1008,7 +1004,6 @@ def new_product(request, ptid=None):
                    "gform": gform})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_product(request, pid):
     product = Product.objects.get(pk=pid)
     system_settings = System_Settings.objects.get()
@@ -1085,7 +1080,6 @@ def edit_product(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_Delete, "pid")
 def delete_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     form = DeleteProductForm(instance=product)
@@ -1134,7 +1128,6 @@ def delete_product(request, pid):
         "rels": rels})
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, "pid")
 def new_eng_for_app(request, pid, *, cicd=False):
     jira_project_form = None
     jira_epic_form = None
@@ -1214,7 +1207,6 @@ def new_eng_for_app(request, pid, *, cicd=False):
         "jira_project_form": jira_project_form})
 
 
-@user_is_authorized(Product, Permissions.Technology_Add, "pid")
 def new_tech_for_prod(request, pid):
     if request.method == "POST":
         form = AppAnalysisForm(request.POST)
@@ -1236,7 +1228,6 @@ def new_tech_for_prod(request, pid):
                    "pid": pid})
 
 
-@user_is_authorized(App_Analysis, Permissions.Technology_Edit, "tid")
 def edit_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = AppAnalysisForm(instance=technology)
@@ -1257,7 +1248,6 @@ def edit_technology(request, tid):
                    "technology": technology})
 
 
-@user_is_authorized(App_Analysis, Permissions.Technology_Delete, "tid")
 def delete_technology(request, tid):
     technology = get_object_or_404(App_Analysis, id=tid)
     form = DeleteAppAnalysisForm(instance=technology)
@@ -1279,13 +1269,11 @@ def delete_technology(request, tid):
     })
 
 
-@user_is_authorized(Product, Permissions.Engagement_Add, "pid")
 def new_eng_for_app_cicd(request, pid):
     # we have to use pid=pid here as new_eng_for_app expects kwargs, because that is how django calls the function based on urls.py named groups
     return new_eng_for_app(request, pid=pid, cicd=True)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def manage_meta_data(request, pid):
     product = Product.objects.get(id=pid)
     meta_data_query = DojoMeta.objects.filter(product=product)
@@ -1583,7 +1571,6 @@ class AdHocFindingView(View):
         return render(request, self.get_template(), context)
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     presets = Engagement_Presets.objects.filter(product=prod).all()
@@ -1596,7 +1583,6 @@ def engagement_presets(request, pid):
                    "prod": prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets.objects.filter(product=prod), id=eid)
@@ -1622,7 +1608,6 @@ def edit_engagement_presets(request, pid, eid):
                    "prod": prod})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def add_engagement_presets(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == "POST":
@@ -1645,7 +1630,6 @@ def add_engagement_presets(request, pid):
     return render(request, "dojo/new_params.html", {"tform": tform, "pid": pid, "product_tab": product_tab})
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def delete_engagement_presets(request, pid, eid):
     prod = get_object_or_404(Product, id=pid)
     preset = get_object_or_404(Engagement_Presets.objects.filter(product=prod), id=eid)
@@ -1678,7 +1662,6 @@ def delete_engagement_presets(request, pid, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def edit_notifications(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == "POST":
@@ -1701,7 +1684,6 @@ def edit_notifications(request, pid):
     return HttpResponseRedirect(reverse("view_product", args=(pid,)))
 
 
-@user_is_authorized(Product, Permissions.Product_Manage_Members, "pid")
 def add_product_member(request, pid):
     product = get_object_or_404(Product, pk=pid)
     memberform = Add_Product_MemberForm(initial={"product": product.id})
@@ -1739,7 +1721,6 @@ def add_product_member(request, pid):
     })
 
 
-@user_is_authorized(Product_Member, Permissions.Product_Manage_Members, "memberid")
 def edit_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
     memberform = Edit_Product_MemberForm(instance=member)
@@ -1771,7 +1752,6 @@ def edit_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Member, Permissions.Product_Member_Delete, "memberid")
 def delete_product_member(request, memberid):
     member = get_object_or_404(Product_Member, pk=memberid)
     memberform = Delete_Product_MemberForm(instance=member)
@@ -1799,7 +1779,6 @@ def delete_product_member(request, memberid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_API_Scan_Configuration_Add, "pid")
 def add_api_scan_configuration(request, pid):
     product = get_object_or_404(Product, id=pid)
     if request.method == "POST":
@@ -1843,7 +1822,6 @@ def add_api_scan_configuration(request, pid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def view_api_scan_configurations(request, pid):
     product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
 
@@ -1857,7 +1835,6 @@ def view_api_scan_configurations(request, pid):
                   })
 
 
-@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Edit, "pascid")
 def edit_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
@@ -1903,7 +1880,6 @@ def edit_api_scan_configuration(request, pid, pascid):
                   })
 
 
-@user_is_authorized(Product_API_Scan_Configuration, Permissions.Product_API_Scan_Configuration_Delete, "pascid")
 def delete_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
@@ -1930,7 +1906,6 @@ def delete_api_scan_configuration(request, pid, pascid):
                   })
 
 
-@user_is_authorized(Product_Group, Permissions.Product_Group_Edit, "groupid")
 def edit_product_group(request, groupid):
     logger.error(groupid)
     group = get_object_or_404(Product_Group, pk=groupid)
@@ -1965,7 +1940,6 @@ def edit_product_group(request, groupid):
     })
 
 
-@user_is_authorized(Product_Group, Permissions.Product_Group_Delete, "groupid")
 def delete_product_group(request, groupid):
     group = get_object_or_404(Product_Group, pk=groupid)
     groupform = Delete_Product_GroupForm(instance=group)
@@ -1994,7 +1968,6 @@ def delete_product_group(request, groupid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Group_Add, "pid")
 def add_product_group(request, pid):
     product = get_object_or_404(Product, pk=pid)
     group_form = Add_Product_GroupForm(initial={"product": product.id})

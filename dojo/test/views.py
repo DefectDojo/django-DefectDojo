@@ -24,7 +24,6 @@ from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.engagement.queries import get_authorized_engagements
@@ -252,7 +251,6 @@ class ViewTest(View):
         # Render the form
         return render(request, self.get_template(), context)
 
-
 # def prefetch_for_test_imports(test_imports):
 #     prefetched_test_imports = test_imports
 #     if isinstance(test_imports, QuerySet):  # old code can arrive here with prods being a list because the query was already executed
@@ -265,7 +263,6 @@ class ViewTest(View):
 #     return prefetch_for_test_imports
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, "tid")
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -292,7 +289,6 @@ def edit_test(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_Delete, "tid")
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -333,7 +329,6 @@ def delete_test(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, "tid")
 def copy_test(request, tid):
     test = get_object_or_404(Test, id=tid)
     product = test.engagement.product
@@ -407,7 +402,6 @@ def test_calendar(request):
         "users": get_authorized_users(Permissions.Test_View)})
 
 
-@user_is_authorized(Test, Permissions.Test_View, "tid")
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -661,10 +655,10 @@ class AddFindingView(View):
         return render(request, self.get_template(), context)
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, "tid")
 def add_finding_from_template(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
+    user_has_permission_or_403(request.user, test, Permissions.Finding_Add)
     template = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
     push_all_jira_issues = jira_services.is_push_all_issues(template)
@@ -826,7 +820,6 @@ def add_finding_from_template(request, tid, fid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_View, "tid")
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()

@@ -1019,6 +1019,7 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.AdditionalHeaderMiddleware",
     "dojo.middleware.CustomSocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
+    "dojo.authorization.middleware.AuthorizationMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",

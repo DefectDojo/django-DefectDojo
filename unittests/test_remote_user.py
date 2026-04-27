@@ -1,7 +1,8 @@
 from django.test import Client, override_settings
 from netaddr import IPSet
 
-from dojo.models import Dojo_Group, Dojo_Group_Member, User
+from dojo.authorization.models import Dojo_Group_Member
+from dojo.models import Dojo_Group, User
 from dojo.remote_user import RemoteUserScheme
 
 from .dojo_test_case import DojoTestCase

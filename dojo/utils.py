@@ -45,6 +45,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from kombu import Connection
 
+from dojo.authorization.models import Dojo_Group_Member
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.finding.queries import get_authorized_findings
@@ -60,7 +61,6 @@ from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Engagement,

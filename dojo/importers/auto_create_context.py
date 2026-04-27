@@ -7,13 +7,15 @@ from django.db import transaction
 from django.http.request import QueryDict
 from django.utils import timezone
 
+from dojo.authorization.models import (
+    Product_Member,
+    Product_Type_Member,
+    Role,
+)
 from dojo.models import (
     Engagement,
     Product,
-    Product_Member,
     Product_Type,
-    Product_Type_Member,
-    Role,
     Test,
 )
 from dojo.utils import get_last_object_or_none, get_object_or_none

@@ -10,8 +10,8 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from dojo.api_v2.permissions import UserHasRiskAcceptanceRelatedObjectPermission
 from dojo.api_v2.serializers import RiskAcceptanceSerializer
+from dojo.authorization.api_permissions import UserHasRiskAcceptanceRelatedObjectPermission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.models import Engagement, Risk_Acceptance, User, Vulnerability_Id

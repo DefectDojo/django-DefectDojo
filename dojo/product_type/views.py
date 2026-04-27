@@ -13,7 +13,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.authorization_decorators import user_has_global_permission, user_is_authorized
+from dojo.authorization.models import Product_Type_Group, Product_Type_Member, Role
 from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import ProductFilter, ProductFilterWithoutObjectLookups, ProductTypeFilter
 from dojo.forms import (
@@ -27,7 +27,7 @@ from dojo.forms import (
     Product_TypeForm,
 )
 from dojo.labels import get_labels
-from dojo.models import Finding, Product, Product_Type, Product_Type_Group, Product_Type_Member, Role
+from dojo.models import Finding, Product, Product_Type
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_global_groups_for_product_type,
@@ -98,7 +98,6 @@ def prefetch_for_product_type(prod_types):
     )
 
 
-@user_has_global_permission(Permissions.Product_Type_Add)
 def add_product_type(request):
     page_name = str(labels.ORG_CREATE_LABEL)
     form = Product_TypeForm()
@@ -124,7 +123,6 @@ def add_product_type(request):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, "ptid")
 def view_product_type(request, ptid):
     page_name = str(labels.ORG_READ_LABEL)
     pt = get_object_or_404(Product_Type, pk=ptid)
@@ -151,7 +149,6 @@ def view_product_type(request, ptid):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Delete, "ptid")
 def delete_product_type(request, ptid):
     product_type = get_object_or_404(Product_Type, pk=ptid)
     form = Delete_Product_TypeForm(instance=product_type)
@@ -188,7 +185,6 @@ def delete_product_type(request, ptid):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Edit, "ptid")
 def edit_product_type(request, ptid):
     page_name = str(labels.ORG_UPDATE_LABEL)
     pt = get_object_or_404(Product_Type, pk=ptid)
@@ -215,7 +211,6 @@ def edit_product_type(request, ptid):
         "members": members})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Manage_Members, "ptid")
 def add_product_type_member(request, ptid):
     page_name = str(labels.ORG_USERS_ADD_LABEL)
     pt = get_object_or_404(Product_Type, pk=ptid)
@@ -251,7 +246,6 @@ def add_product_type_member(request, ptid):
     })
 
 
-@user_is_authorized(Product_Type_Member, Permissions.Product_Type_Manage_Members, "memberid")
 def edit_product_type_member(request, memberid):
     page_name = str(labels.ORG_USERS_UPDATE_LABEL)
     member = get_object_or_404(Product_Type_Member, pk=memberid)
@@ -291,7 +285,6 @@ def edit_product_type_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Type_Member, Permissions.Product_Type_Member_Delete, "memberid")
 def delete_product_type_member(request, memberid):
     page_name = str(labels.ORG_USERS_DELETE_LABEL)
     member = get_object_or_404(Product_Type_Member, pk=memberid)
@@ -327,7 +320,6 @@ def delete_product_type_member(request, memberid):
     })
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_Group_Add, "ptid")
 def add_product_type_group(request, ptid):
     page_name = str(labels.ORG_GROUPS_ADD_LABEL)
     pt = get_object_or_404(Product_Type, pk=ptid)
@@ -365,7 +357,6 @@ def add_product_type_group(request, ptid):
     })
 
 
-@user_is_authorized(Product_Type_Group, Permissions.Product_Type_Group_Edit, "groupid")
 def edit_product_type_group(request, groupid):
     page_name = str(labels.ORG_GROUPS_UPDATE_LABEL)
     group = get_object_or_404(Product_Type_Group, pk=groupid)
@@ -397,7 +388,6 @@ def edit_product_type_group(request, groupid):
     })
 
 
-@user_is_authorized(Product_Type_Group, Permissions.Product_Type_Group_Delete, "groupid")
 def delete_product_type_group(request, groupid):
     page_name = str(labels.ORG_GROUPS_DELETE_LABEL)
     group = get_object_or_404(Product_Type_Group, pk=groupid)

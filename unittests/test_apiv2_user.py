@@ -3,7 +3,8 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
-from dojo.models import Global_Role, Role, User, UserContactInfo
+from dojo.authorization.models import Global_Role, Role
+from dojo.models import User, UserContactInfo
 from unittests.dojo_test_case import versioned_fixtures
 
 

@@ -2,12 +2,12 @@ from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions
-from dojo.models import (
-    Product_Type,
+from dojo.authorization.models import (
     Product_Type_Group,
     Product_Type_Member,
 )
+from dojo.authorization.roles_permissions import Permissions
+from dojo.models import Product_Type
 from dojo.product_type.queries import get_authorized_product_types
 
 

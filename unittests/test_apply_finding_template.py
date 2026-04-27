@@ -9,6 +9,10 @@ from django.http import Http404
 from django.test.client import RequestFactory
 from django.utils import timezone
 
+from dojo.authorization.models import (
+    Product_Member,
+    Role,
+)
 from dojo.finding import views
 from dojo.finding.helper import save_endpoints_template, save_vulnerability_ids_template
 from dojo.models import (
@@ -17,9 +21,7 @@ from dojo.models import (
     Finding_Template,
     Notes,
     Product,
-    Product_Member,
     Product_Type,
-    Role,
     System_Settings,
     Test,
     Test_Type,

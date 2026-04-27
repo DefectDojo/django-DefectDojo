@@ -92,6 +92,15 @@ from dojo.asset.api.views import (
     AssetMemberViewSet,
     AssetViewSet,
 )
+from dojo.authorization.models import (
+    Dojo_Group_Member,
+    Global_Role,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Permissions
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.views import LocationFindingReferenceViewSet, LocationProductReferenceViewSet, LocationViewSet
@@ -107,7 +116,6 @@ from dojo.models import (
     Cred_User,
     Development_Environment,
     Dojo_Group,
-    Dojo_Group_Member,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -117,7 +125,6 @@ from dojo.models import (
     Finding,
     Finding_Template,
     General_Survey,
-    Global_Role,
     JIRA_Instance,
     JIRA_Issue,
     JIRA_Project,
@@ -129,13 +136,8 @@ from dojo.models import (
     Notifications,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
     Risk_Acceptance,
-    Role,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
     Stub_Finding,
@@ -603,7 +605,7 @@ class BaseClass:
             self.check_schema_response("post", "201", response)
 
         @skipIfNotSubclass(CreateModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_create_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -665,7 +667,7 @@ class BaseClass:
             self.check_schema_response("put", "200", response, detail=True)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -756,7 +758,7 @@ class BaseClass:
             self.assertEqual(self.deleted_objects, len(response.data["results"]), response.content)
 
         @skipIfNotSubclass(DestroyModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_delete_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -817,7 +819,7 @@ class BaseClass:
             self.check_schema_response("put", "200", response, detail=True)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -1368,7 +1370,7 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         self.assertEqual(403, response.status_code, response.content[:1000])
         self.assertEqual(self.endpoint_model.objects.count(), length)
 
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_object_not_authorized(self, mock):
         length = self.endpoint_model.objects.count()
         response = self.client.post(self.url, self.payload)
@@ -1386,7 +1388,7 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         self.assertEqual(403, response.status_code, response.content[:1000])
         self.assertEqual(self.endpoint_model.objects.count(), length)
 
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_delete_object_not_authorized(self, mock):
         length = self.endpoint_model.objects.count()
         current_objects = self.client.get(self.url, format="json").data
@@ -1405,7 +1407,7 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_update_object_not_authorized(self, mock):
         current_objects = self.client.get(self.url, format="json").data
         relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
@@ -2831,7 +2833,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2861,7 +2863,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2892,7 +2894,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2924,7 +2926,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2955,7 +2957,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
@@ -2992,7 +2994,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3023,7 +3025,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3092,7 +3094,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3122,7 +3124,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_scan_type_title_auto_create(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3152,7 +3154,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
@@ -3189,7 +3191,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3221,7 +3223,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3252,7 +3254,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_test_id(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3280,7 +3282,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3311,7 +3313,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3343,7 +3345,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3374,7 +3376,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_scan_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3402,7 +3404,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_scan_type_title(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3433,7 +3435,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_reimport_engagement_param_ignored_permission_checked_on_name_resolved_target(self, mock, importer_mock, reimporter_mock):
         """
         Engagement is not a declared field on ReImportScanSerializer — verify

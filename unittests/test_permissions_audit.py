@@ -23,6 +23,10 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from dojo.authorization.models import (
+    Product_Member,
+    Role,
+)
 from dojo.models import (
     Answered_Survey,
     Benchmark_Category,
@@ -41,10 +45,8 @@ from dojo.models import (
     Objects_Product,
     Objects_Review,
     Product,
-    Product_Member,
     Product_Type,
     Risk_Acceptance,
-    Role,
     Test,
     Test_Type,
     Tool_Configuration,

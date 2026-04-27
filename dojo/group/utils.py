@@ -3,7 +3,8 @@ from django.contrib.auth.models import Group
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from dojo.models import Dojo_Group, Dojo_Group_Member, Role
+from dojo.authorization.models import Dojo_Group_Member, Role
+from dojo.models import Dojo_Group
 
 
 def get_auth_group_name(group, attempt=0):
