@@ -32,7 +32,6 @@ from django.views.decorators.vary import vary_on_cookie
 from openpyxl import Workbook
 from openpyxl.styles import Font
 
-import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.authorization_decorators import user_is_authorized
@@ -74,6 +73,7 @@ from dojo.forms import (
 )
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
+from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.utils import save_locations_to_add
 from dojo.models import (
@@ -281,11 +281,17 @@ def edit_engagement(request, eid):
 
     if request.method == "POST":
         form = EngForm(request.POST, instance=engagement, cicd=is_ci_cd, product=engagement.product, user=request.user)
-        jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
+        jira_project = jira_services.get_project(engagement, use_inheritance=False)
 
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get("status")
+            if form.cleaned_data.get("product") != engagement.product:
+                user_has_permission_or_403(
+                    request.user,
+                    form.cleaned_data.get("product"),
+                    Permissions.Engagement_Edit,
+                )
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
             if (new_status in {"Cancelled", "Completed"}):
@@ -301,10 +307,10 @@ def edit_engagement(request, eid):
                 "Engagement updated successfully.",
                 extra_tags="alert-success")
 
-            success, jira_project_form = jira_helper.process_jira_project_form(request, instance=jira_project, target="engagement", engagement=engagement, product=engagement.product)
+            success, jira_project_form = jira_services.process_project_form(request, instance=jira_project, target="engagement", engagement=engagement, product=engagement.product)
             error = not success
 
-            success, jira_epic_form = jira_helper.process_jira_epic_form(request, engagement=engagement)
+            success, jira_epic_form = jira_services.process_epic_form(request, engagement=engagement)
             error = error or not success
 
             if not error:
@@ -321,7 +327,7 @@ def edit_engagement(request, eid):
 
         jira_epic_form = None
         if get_system_setting("enable_jira"):
-            jira_project = jira_helper.get_jira_project(engagement, use_inheritance=False)
+            jira_project = jira_services.get_project(engagement, use_inheritance=False)
             jira_project_form = JIRAProjectForm(instance=jira_project, target="engagement", product=engagement.product)
             logger.debug("showing jira-epic-form")
             jira_epic_form = JIRAEngagementForm(instance=engagement)
@@ -465,8 +471,8 @@ class ViewEngagement(View):
             network = eng.preset.network_locations.all()
         system_settings = System_Settings.objects.get()
 
-        jissue = jira_helper.get_jira_issue(eng)
-        jira_project = jira_helper.get_jira_project(eng)
+        jissue = jira_services.get_issue(eng)
+        jira_project = jira_services.get_project(eng)
 
         try:
             check = Check_List.objects.get(engagement=eng)
@@ -534,8 +540,8 @@ class ViewEngagement(View):
             network = eng.preset.network_locations.all()
         system_settings = System_Settings.objects.get()
 
-        jissue = jira_helper.get_jira_issue(eng)
-        jira_project = jira_helper.get_jira_project(eng)
+        jissue = jira_services.get_issue(eng)
+        jira_project = jira_services.get_project(eng)
 
         try:
             check = Check_List.objects.get(engagement=eng)
@@ -796,9 +802,9 @@ class ImportScanResultsView(View):
         jira_form = None
         push_all_jira_issues = False
         # Determine if jira issues should be pushed automatically
-        push_all_jira_issues = jira_helper.is_push_all_issues(engagement_or_product)
+        push_all_jira_issues = jira_services.is_push_all_issues(engagement_or_product)
         # Only return the form if the jira is enabled on this engagement or product
-        if jira_helper.get_jira_project(engagement_or_product):
+        if jira_services.get_project(engagement_or_product):
             if request.method == "POST":
                 jira_form = JIRAImportScanForm(
                     request.POST,
@@ -1195,7 +1201,7 @@ def unlink_jira(request, eid):
     logger.info("trying to unlink a linked jira epic from engagement %d:%s", eng.id, eng.name)
     if eng.has_jira_issue:
         try:
-            jira_helper.unlink_jira(request, eng)
+            jira_services.unlink(request, eng)
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -1442,9 +1448,10 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                     "Since you are not the note's author, it was not deleted.",
                     extra_tags="alert-danger")
 
-        if "remove_finding" in request.POST:
+        if edit_mode and "remove_finding" in request.POST:
             finding = get_object_or_404(
-                Finding, pk=request.POST["remove_finding_id"])
+                risk_acceptance.accepted_findings,
+                pk=request.POST["remove_finding_id"])
 
             ra_helper.remove_finding_from_risk_acceptance(request.user, risk_acceptance, finding)
 

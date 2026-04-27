@@ -12,6 +12,7 @@ Tests verify:
 8. Questionnaire cross-engagement IDOR (H1 #3571957)
 9. Finding Templates exposure via find_template_to_apply (H1 #3577363)
 10. Jira Epic BFLA - Reader cannot trigger update_jira_epic (H1 #3577193)
+11. Risk Acceptance remove_finding: edit_mode guard + scoped finding lookup (PR #14633)
 """
 import datetime
 
@@ -699,6 +700,266 @@ class TestRiskAcceptanceCrossEngagementIDOR(DojoTestCase):
         ))
         response = client.get(url)
         self.assertEqual(response.status_code, 200)
+
+
+class TestRiskAcceptanceRemoveFindingGuard(DojoTestCase):
+
+    """
+    PR #14633: view_edit_risk_acceptance must:
+    1. Only process 'remove_finding' when edit_mode is True (Writer+ via edit URL).
+    2. Scope the finding lookup to risk_acceptance.accepted_findings (not global Finding).
+
+    Prevents a Reader from removing findings via the view URL, and prevents
+    cross-product blind enumeration of finding IDs.
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.reader_role = Role.objects.get(name="Reader")
+        cls.owner_role = Role.objects.get(name="Owner")
+
+        # ── Product A ────────────────────────────────────────────────
+        cls.product_type_a = Product_Type.objects.create(
+            name="RA Remove Guard Test PT A",
+        )
+        cls.product_a = Product.objects.create(
+            name="RA Remove Guard Product A",
+            description="Test",
+            prod_type=cls.product_type_a,
+            enable_full_risk_acceptance=True,
+        )
+
+        # ── Product B (for cross-product IDOR test) ─────────────────
+        cls.product_type_b = Product_Type.objects.create(
+            name="RA Remove Guard Test PT B",
+        )
+        cls.product_b = Product.objects.create(
+            name="RA Remove Guard Product B",
+            description="Test",
+            prod_type=cls.product_type_b,
+            enable_full_risk_acceptance=True,
+        )
+
+        # ── Users ────────────────────────────────────────────────────
+        cls.reader_user_a = Dojo_User.objects.create_user(
+            username="ra_remove_reader_a",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+        cls.owner_user_a = Dojo_User.objects.create_user(
+            username="ra_remove_owner_a",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+        cls.owner_user_b = Dojo_User.objects.create_user(
+            username="ra_remove_owner_b",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+
+        # ── Role assignments ─────────────────────────────────────────
+        Product_Member.objects.create(
+            product=cls.product_a,
+            user=cls.reader_user_a,
+            role=cls.reader_role,
+        )
+        Product_Member.objects.create(
+            product=cls.product_a,
+            user=cls.owner_user_a,
+            role=cls.owner_role,
+        )
+        Product_Member.objects.create(
+            product=cls.product_b,
+            user=cls.owner_user_b,
+            role=cls.owner_role,
+        )
+
+        # ── Product A: engagement, test, findings, risk acceptance ───
+        cls.engagement_a = Engagement.objects.create(
+            name="RA Remove Guard Engagement A",
+            product=cls.product_a,
+            target_start=datetime.date(2024, 1, 1),
+            target_end=datetime.date(2024, 12, 31),
+        )
+        test_type, _ = Test_Type.objects.get_or_create(
+            name="Manual Code Review",
+        )
+        cls.test_a = Test.objects.create(
+            engagement=cls.engagement_a,
+            test_type=test_type,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+
+        # Finding that IS in the risk acceptance
+        cls.finding_a = Finding.objects.create(
+            title="RA Remove Guard Finding A",
+            test=cls.test_a,
+            severity="High",
+            numerical_severity="S1",
+            active=False,
+            risk_accepted=True,
+            reporter=cls.owner_user_a,
+        )
+
+        # Finding in same engagement but NOT in the risk acceptance
+        cls.finding_a_extra = Finding.objects.create(
+            title="RA Remove Guard Finding A Extra",
+            test=cls.test_a,
+            severity="Medium",
+            numerical_severity="S2",
+            active=True,
+            risk_accepted=False,
+            reporter=cls.owner_user_a,
+        )
+
+        cls.risk_acceptance_a = Risk_Acceptance.objects.create(
+            name="RA Remove Guard RA A",
+            owner=cls.owner_user_a,
+        )
+        cls.risk_acceptance_a.accepted_findings.add(cls.finding_a)
+        cls.engagement_a.risk_acceptance.add(cls.risk_acceptance_a)
+
+        # ── Product B: engagement, test, finding, risk acceptance ────
+        cls.engagement_b = Engagement.objects.create(
+            name="RA Remove Guard Engagement B",
+            product=cls.product_b,
+            target_start=datetime.date(2024, 1, 1),
+            target_end=datetime.date(2024, 12, 31),
+        )
+        cls.test_b = Test.objects.create(
+            engagement=cls.engagement_b,
+            test_type=test_type,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        cls.finding_b = Finding.objects.create(
+            title="RA Remove Guard Finding B",
+            test=cls.test_b,
+            severity="High",
+            numerical_severity="S1",
+            active=False,
+            risk_accepted=True,
+            reporter=cls.owner_user_b,
+        )
+
+        cls.risk_acceptance_b = Risk_Acceptance.objects.create(
+            name="RA Remove Guard RA B",
+            owner=cls.owner_user_b,
+        )
+        cls.risk_acceptance_b.accepted_findings.add(cls.finding_b)
+        cls.engagement_b.risk_acceptance.add(cls.risk_acceptance_b)
+
+    def _login(self, username):
+        client = Client()
+        client.login(
+            username=username,
+            password="testTEST1234!@#$",  # noqa: S106
+        )
+        return client
+
+    def _remove_finding_data(self, finding_id):
+        return {
+            "remove_finding": "Remove",
+            "remove_finding_id": finding_id,
+        }
+
+    # ── Test 1: edit_mode guard (BFLA) ───────────────────────────────
+
+    def test_reader_cannot_remove_finding_via_view_url(self):
+        """Reader POSTing remove_finding to view URL must be silently ignored."""
+        client = self._login("ra_remove_reader_a")
+        url = reverse("view_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        response = client.post(url, self._remove_finding_data(self.finding_a.id))
+        # View still redirects (302) because errors=False, but finding is untouched
+        self.assertEqual(response.status_code, 302)
+        self.finding_a.refresh_from_db()
+        self.assertFalse(self.finding_a.active)
+        self.assertTrue(self.finding_a.risk_accepted)
+        self.assertTrue(
+            self.risk_acceptance_a.accepted_findings
+            .filter(pk=self.finding_a.pk)
+            .exists(),
+        )
+
+    # ── Test 2: positive regression (edit URL works) ─────────────────
+
+    def test_owner_can_remove_finding_via_edit_url(self):
+        """Owner POSTing remove_finding to edit URL must succeed."""
+        client = self._login("ra_remove_owner_a")
+        url = reverse("edit_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        response = client.post(url, self._remove_finding_data(self.finding_a.id))
+        self.assertEqual(response.status_code, 302)
+        self.finding_a.refresh_from_db()
+        self.assertTrue(self.finding_a.active)
+        self.assertFalse(self.finding_a.risk_accepted)
+        self.assertFalse(
+            self.risk_acceptance_a.accepted_findings
+            .filter(pk=self.finding_a.pk)
+            .exists(),
+        )
+
+    # ── Test 3: scoped lookup (finding not in this RA) ───────────────
+
+    def test_finding_not_in_risk_acceptance_returns_404(self):
+        """Supplying a finding ID not in the RA's accepted_findings must 404."""
+        client = self._login("ra_remove_owner_a")
+        url = reverse("edit_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        # finding_a_extra exists in the same engagement but is NOT accepted
+        response = client.post(
+            url, self._remove_finding_data(self.finding_a_extra.id),
+        )
+        self.assertEqual(response.status_code, 404)
+
+    # ── Test 4: cross-product IDOR ───────────────────────────────────
+
+    def test_cross_product_finding_id_rejected(self):
+        """Finding from Product B cannot be removed via Product A's RA."""
+        client = self._login("ra_remove_owner_a")
+        url = reverse("edit_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        response = client.post(
+            url, self._remove_finding_data(self.finding_b.id),
+        )
+        self.assertEqual(response.status_code, 404)
+        # Product B's finding must remain untouched
+        self.finding_b.refresh_from_db()
+        self.assertFalse(self.finding_b.active)
+        self.assertTrue(self.finding_b.risk_accepted)
+
+    # ── Test 5: Reader blocked by decorator on edit URL ──────────────
+
+    def test_reader_blocked_on_edit_url_by_decorator(self):
+        """Reader lacks Risk_Acceptance permission — edit URL itself is denied."""
+        client = self._login("ra_remove_reader_a")
+        url = reverse("edit_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        response = client.post(url, self._remove_finding_data(self.finding_a.id))
+        # PermissionDenied raised; custom handler403 returns 400 (DD bug)
+        self.assertIn(response.status_code, [400, 403])
+        # Finding must remain untouched
+        self.finding_a.refresh_from_db()
+        self.assertFalse(self.finding_a.active)
+        self.assertTrue(self.finding_a.risk_accepted)
+
+    # ── Test 6: nonexistent finding ID ───────────────────────────────
+
+    def test_nonexistent_finding_id_returns_404(self):
+        """A bogus finding ID must produce 404 from the scoped lookup."""
+        client = self._login("ra_remove_owner_a")
+        url = reverse("edit_risk_acceptance", args=(
+            self.engagement_a.id, self.risk_acceptance_a.id,
+        ))
+        response = client.post(url, self._remove_finding_data(999999))
+        self.assertEqual(response.status_code, 404)
 
 
 class TestEngagementPresetsCrossProductIDOR(DojoTestCase):
@@ -1425,3 +1686,162 @@ class TestRelatedObjectPermissions(DojoTestCase):
 
         # Clean up uploaded file
         self.risk_acceptance.path.delete(save=True)
+
+
+class TestEngagementMovePermission(DojoTestCase):
+
+    """Moving an engagement to another product requires Engagement_Edit on the destination."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.owner_role = Role.objects.get(name="Owner")
+        cls.product_type = Product_Type.objects.create(name="Eng Move Test PT")
+
+        cls.product_a = Product.objects.create(
+            name="Eng Move Product A", description="Test", prod_type=cls.product_type,
+        )
+        cls.product_b = Product.objects.create(
+            name="Eng Move Product B", description="Test", prod_type=cls.product_type,
+        )
+        cls.product_c = Product.objects.create(
+            name="Eng Move Product C", description="Test", prod_type=cls.product_type,
+        )
+
+        cls.user = Dojo_User.objects.create_user(
+            username="eng_move_owner",
+            password="testTEST1234!@#$",  # noqa: S106
+            is_active=True,
+        )
+        Product_Member.objects.create(product=cls.product_a, user=cls.user, role=cls.owner_role)
+        # No membership on product_b -- user cannot move engagements there
+        Product_Member.objects.create(product=cls.product_c, user=cls.user, role=cls.owner_role)
+
+    def setUp(self):
+        self.engagement = Engagement.objects.create(
+            name="Move Test Engagement",
+            product=self.product_a,
+            target_start=datetime.date.today(),
+            target_end=datetime.date.today(),
+        )
+
+    def _api_client(self):
+        token, _ = Token.objects.get_or_create(user=self.user)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        return client
+
+    def _ui_client(self):
+        client = Client()
+        client.login(username="eng_move_owner", password="testTEST1234!@#$")  # noqa: S106
+        return client
+
+    # ── API: PATCH ────────────────────────────────────────────────────
+
+    def test_api_patch_move_to_authorized_product(self):
+        """PATCH with product the user has access to should succeed."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"product": self.product_c.id}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_c)
+
+    def test_api_patch_move_to_unauthorized_product(self):
+        """PATCH with product the user lacks access to should be denied."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"product": self.product_b.id}, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_a)
+
+    def test_api_patch_same_product(self):
+        """PATCH with the same product should succeed without extra permission check."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"product": self.product_a.id}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    def test_api_patch_without_product_field(self):
+        """PATCH without product field should succeed (no spurious check)."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        response = client.patch(url, {"version": "1.0"}, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+
+    # ── API: PUT ──────────────────────────────────────────────────────
+
+    def test_api_put_move_to_authorized_product(self):
+        """PUT with product the user has access to should succeed."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        payload = {
+            "name": "Move Test Engagement",
+            "product": self.product_c.id,
+            "target_start": str(datetime.date.today()),
+            "target_end": str(datetime.date.today()),
+            "engagement_type": "Interactive",
+            "status": "Not Started",
+        }
+        response = client.put(url, payload, format="json")
+        self.assertEqual(response.status_code, 200, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_c)
+
+    def test_api_put_move_to_unauthorized_product(self):
+        """PUT with product the user lacks access to should be denied."""
+        client = self._api_client()
+        url = reverse("engagement-detail", args=(self.engagement.id,))
+        payload = {
+            "name": "Move Test Engagement",
+            "product": self.product_b.id,
+            "target_start": str(datetime.date.today()),
+            "target_end": str(datetime.date.today()),
+            "engagement_type": "Interactive",
+            "status": "Not Started",
+        }
+        response = client.put(url, payload, format="json")
+        self.assertEqual(response.status_code, 403, response.content)
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_a)
+
+    # ── UI ────────────────────────────────────────────────────────────
+
+    def test_ui_move_to_authorized_product(self):
+        """Edit engagement form moving to authorized product should succeed."""
+        client = self._ui_client()
+        url = reverse("edit_engagement", args=(self.engagement.id,))
+        form_data = {
+            "product": self.product_c.id,
+            "target_start": datetime.date.today().strftime("%Y-%m-%d"),
+            "target_end": datetime.date.today().strftime("%Y-%m-%d"),
+            "lead": self.user.id,
+            "status": "Not Started",
+        }
+        response = client.post(url, form_data)
+        self.assertIn(response.status_code, [200, 302], response.content[:500])
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_c)
+
+    def test_ui_move_to_unauthorized_product(self):
+        """
+        Edit engagement form moving to unauthorized product should be denied.
+
+        The form's product queryset is filtered to authorized products, so
+        submitting an unauthorized product fails form validation (200 with
+        errors) before the view-level permission check runs.  Either way the
+        engagement must NOT move.
+        """
+        client = self._ui_client()
+        url = reverse("edit_engagement", args=(self.engagement.id,))
+        form_data = {
+            "product": self.product_b.id,
+            "target_start": datetime.date.today().strftime("%Y-%m-%d"),
+            "target_end": datetime.date.today().strftime("%Y-%m-%d"),
+            "lead": self.user.id,
+            "status": "Not Started",
+        }
+        response = client.post(url, form_data)
+        self.assertIn(response.status_code, [200, 403])
+        self.engagement.refresh_from_db()
+        self.assertEqual(self.engagement.product, self.product_a)

@@ -199,7 +199,7 @@
                                             </a>
                                         </li>
                                     {% endif %}
-                                    {% if CREATE_CLOUD_BANNER %}
+                                    {% if SHOW_PLG_LINK %}
                                         <li>
                                             <a href="https://cloud.defectdojo.com/accounts/onboarding/plg_step_1">
                                                 <i class="fa-solid fa-level-up fa-fw"></i>
@@ -671,8 +671,21 @@
                     </div>
                 {% endif %}
                 {% for banner in additional_banners %}
-                    <div role="alert" class="announcement-banner alert alert-{{ banner.style }} show">
-                        {{ banner.message }} <a href="{{ banner.url }}">{{ banner.link_text }}</a>
+                    <div role="alert" class="announcement-banner alert alert-{{ banner.style }} show"
+                         data-source="{{ banner.source }}">
+                        {{ banner.message|safe }}{% if banner.url %} <a href="{{ banner.url }}">{{ banner.link_text }}</a>{% endif %}
+                        {% if banner.expanded_html %}
+                            <button type="button" class="banner-toggle collapsed"
+                                    data-toggle="collapse"
+                                    data-target="#banner-expanded-{{ forloop.counter }}"
+                                    aria-expanded="false"
+                                    aria-controls="banner-expanded-{{ forloop.counter }}">
+                                <i class="fa-solid fa-caret-down"></i>
+                            </button>
+                            <div id="banner-expanded-{{ forloop.counter }}" class="collapse banner-expanded">
+                                {{ banner.expanded_html|safe }}
+                            </div>
+                        {% endif %}
                     </div>
                 {% endfor %}
                 <div class="container-fluid">

@@ -386,6 +386,7 @@ class TagImportTestAPI(DojoAPITestCase, TagImportMixin):
 
     def setUp(self):
         super().setUp()
+        settings.SECURE_SSL_REDIRECT = False
         testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()
@@ -402,6 +403,7 @@ class TagImportTestUI(DojoAPITestCase, TagImportMixin):
 
     def setUp(self):
         super().setUp()
+        settings.SECURE_SSL_REDIRECT = False
         testuser = User.objects.get(username="admin")
         testuser.usercontactinfo.block_execution = True
         testuser.usercontactinfo.save()

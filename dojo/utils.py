@@ -1517,7 +1517,7 @@ def sla_compute_and_notify(*args, **kwargs):
     Notifications are managed the usual way, so you'd have to opt-in.
     Exception is for JIRA issues, which would get a comment anyways.
     """
-    import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
+    from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
 
     class NotificationEntry:
         def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
@@ -1587,7 +1587,7 @@ def sla_compute_and_notify(*args, **kwargs):
 
                         if n.do_jira_sla_comment:
                             logger.info("Creating JIRA comment to notify of SLA breach information.")
-                            jira_helper.add_simple_jira_comment(jira_instance, n.jira_issue, title)
+                            jira_services.add_simple_comment(jira_instance, n.jira_issue, title)
 
                         findings_list.append(n.finding)
 
@@ -1676,13 +1676,13 @@ def sla_compute_and_notify(*args, **kwargs):
 
                 if jira_issue:
                     jira_count += 1
-                    jira_instance = jira_helper.get_jira_instance(finding)
+                    jira_instance = jira_services.get_instance(finding)
                     if jira_instance is not None:
                         logger.debug("JIRA config for finding is %s", jira_instance)
                         # global config or product config set, product level takes precedence
                         try:
                             # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
-                            product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
+                            product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
                         except Exception as e:
                             logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
                             logger.error("Error is: %s", e)

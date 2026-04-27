@@ -5,13 +5,12 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
-import dojo.jira_link.helper as jira_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
-from dojo.importers.endpoint_manager import EndpointManager
+from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
-from dojo.jira_link.helper import is_keep_in_sync_with_jira
+from dojo.jira import services as jira_services
 from dojo.models import (
     Engagement,
     Finding,
@@ -19,6 +18,7 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import create_notification
+from dojo.tag_utils import bulk_apply_parser_tags
 from dojo.utils import get_full_url, perform_product_grading
 from dojo.validators import clean_tags
 
@@ -57,8 +57,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             import_type=Test_Import.IMPORT_TYPE,
             **kwargs,
         )
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager = EndpointManager(self.engagement.product)
+        self.location_handler = LocationHandler(self.engagement.product)
 
     def create_test(
         self,
@@ -179,6 +178,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         at import time
         """
         new_findings = []
+        findings_with_parser_tags: list[tuple] = []
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
@@ -238,19 +238,14 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             # Process any request/response pairs
             self.process_request_response_pairs(finding)
-            if settings.V3_FEATURE_LOCATIONS:
-                # Process any locations on the finding, or added on the form
-                self.process_locations(finding, self.endpoints_to_add)
-            else:
-                # TODO: Delete this after the move to Locations
-                # Process any endpoints on the finding, or added on the form
-                self.process_endpoints(finding, self.endpoints_to_add)
-            # Parsers must use unsaved_tags to store tags, so we can clean them
+            self.process_locations(finding, self.endpoints_to_add)
+            # Parsers must use unsaved_tags to store tags, so we can clean them.
+            # Accumulate for bulk application after the loop (O(unique_tags) instead of O(N·T)).
             cleaned_tags = clean_tags(finding.unsaved_tags)
             if isinstance(cleaned_tags, list):
-                finding.tags.add(*cleaned_tags)
+                findings_with_parser_tags.append((finding, cleaned_tags))
             elif isinstance(cleaned_tags, str):
-                finding.tags.add(cleaned_tags)
+                findings_with_parser_tags.append((finding, [cleaned_tags]))
             # Process any files
             self.process_files(finding)
             # Process vulnerability IDs
@@ -264,10 +259,13 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
 
-            # If batch is full or we're at the end, persist endpoints and dispatch
+            # If batch is full or we're at the end, persist locations/endpoints and dispatch
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
-                if not settings.V3_FEATURE_LOCATIONS:
-                    self.endpoint_manager.persist(user=self.user)
+                self.location_handler.persist()
+                # Apply parser-supplied tags for this batch before post-processing starts,
+                # so rules/deduplication tasks see the tags already on the findings.
+                bulk_apply_parser_tags(findings_with_parser_tags)
+                findings_with_parser_tags.clear()
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
@@ -295,9 +293,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             )
             if self.push_to_jira:
                 if findings[0].finding_group is not None:
-                    jira_helper.push_to_jira(findings[0].finding_group)
+                    jira_services.push(findings[0].finding_group)
                 else:
-                    jira_helper.push_to_jira(findings[0])
+                    jira_services.push(findings[0])
             else:
                 logger.debug("push_to_jira is False, not pushing to JIRA")
 
@@ -308,35 +306,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         return new_findings
 
-    def close_old_findings(
-        self,
-        findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
+    def get_close_old_findings_queryset(self, new_hash_codes, new_unique_ids_from_tool):
         """
-        Closes old findings based on a hash code match at either the product
-        or the engagement scope. Closing an old finding entails setting the
-        finding to mitigated status, setting all location statuses to mitigated,
-        as well as leaving a not on the finding indicating that it was mitigated
-        because the vulnerability is no longer present in the submitted scan report.
-        """
-        # First check if close old findings is desired
-        if not self.close_old_findings_toggle:
-            return []
+        Build queryset of findings that would be closed, without closing them.
 
-        logger.debug("IMPORT_SCAN: Closing findings no longer present in scan report")
-        # Remove all the findings that are coming from the report already mitigated
-        new_hash_codes = []
-        new_unique_ids_from_tool = []
-        for finding in findings.values():
-            # Do not process closed findings in the report
-            if finding.get("is_mitigated", False):
-                continue
-            # Grab the hash code
-            if (hash_code := finding.get("hash_code")) is not None:
-                new_hash_codes.append(hash_code)
-            if (unique_id_from_tool := finding.get("unique_id_from_tool")) is not None:
-                new_unique_ids_from_tool.append(unique_id_from_tool)
+        Reusable by preview engines to count findings that would be closed.
+        """
         # Get the initial filtered list of old findings to be closed without
         # considering the scope of the product or engagement
         # Include both active findings and risk-accepted findings (which have active=False)
@@ -373,6 +348,38 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             old_findings = old_findings.filter(service=self.service)
         else:
             old_findings = old_findings.filter(Q(service__isnull=True) | Q(service__exact=""))
+        return old_findings
+
+    def close_old_findings(
+        self,
+        findings: list[Finding],
+        **kwargs: dict,
+    ) -> list[Finding]:
+        """
+        Closes old findings based on a hash code match at either the product
+        or the engagement scope. Closing an old finding entails setting the
+        finding to mitigated status, setting all location statuses to mitigated,
+        as well as leaving a not on the finding indicating that it was mitigated
+        because the vulnerability is no longer present in the submitted scan report.
+        """
+        # First check if close old findings is desired
+        if not self.close_old_findings_toggle:
+            return []
+
+        logger.debug("IMPORT_SCAN: Closing findings no longer present in scan report")
+        # Remove all the findings that are coming from the report already mitigated
+        new_hash_codes = []
+        new_unique_ids_from_tool = []
+        for finding in findings.values():
+            # Do not process closed findings in the report
+            if finding.get("is_mitigated", False):
+                continue
+            # Grab the hash code
+            if (hash_code := finding.get("hash_code")) is not None:
+                new_hash_codes.append(hash_code)
+            if (unique_id_from_tool := finding.get("unique_id_from_tool")) is not None:
+                new_unique_ids_from_tool.append(unique_id_from_tool)
+        old_findings = self.get_close_old_findings_queryset(new_hash_codes, new_unique_ids_from_tool)
         # Update the status of the findings and any locations
         for old_finding in old_findings:
             url = str(get_full_url(reverse("view_test", args=(self.test.id,))))
@@ -386,17 +393,16 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 finding_groups_enabled=self.findings_groups_enabled,
                 product_grading_option=False,
             )
-        # Persist any accumulated endpoint status mitigations
-        if not settings.V3_FEATURE_LOCATIONS:
-            self.endpoint_manager.persist(user=self.user)
+        # Persist any accumulated location/endpoint status changes
+        self.location_handler.persist()
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
         if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             for finding_group in {finding.finding_group for finding in old_findings if finding.finding_group is not None}:
                 # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
-                if self.push_to_jira or is_keep_in_sync_with_jira(finding_group, prefetched_jira_instance=self.jira_instance):
-                    jira_helper.push_to_jira(finding_group)
+                if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
+                    jira_services.push(finding_group)
 
         # Calculate grade once after all findings have been closed
         if old_findings:

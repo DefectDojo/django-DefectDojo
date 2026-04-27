@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 from vcr import VCR
 
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.jira_link import helper as jira_helper
+from dojo.jira import helper as jira_helper
 from dojo.models import Finding, Finding_Group, JIRA_Instance, JIRA_Project, Risk_Acceptance, Test, User
 from unittests.dojo_test_case import (
     DojoVCRAPITestCase,
@@ -981,9 +981,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         self.assert_cassette_played()
 
-    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
-    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
-    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.jira.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira.helper.is_push_all_issues", return_value=False)
+    @patch("dojo.jira.helper.push_to_jira", return_value=None)
     @patch("dojo.notifications.helper.send_webhooks_notification")
     def test_bulk_edit_mixed_findings_and_groups_jira_push_bug(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
         """
@@ -1130,9 +1130,9 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
 
         self.client.post("/finding/bulk", post_data)
 
-    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
-    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=True)
-    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.jira.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira.helper.is_push_all_issues", return_value=True)
+    @patch("dojo.jira.helper.push_to_jira", return_value=None)
     @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
     def test_bulk_edit_push_all_issues_pushes_finding_groups(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_can_be_pushed):
         """
@@ -1150,10 +1150,10 @@ class JIRAImportAndPushTestApi(DojoVCRAPITestCase):
         self.assertEqual(len(group_calls), 2, "Expected 2 finding groups to be pushed")
         self.assertEqual(len(individual_calls), 2, "Expected 2 individual findings to be pushed")
 
-    @patch("dojo.jira_link.helper.can_be_pushed_to_jira", return_value=(True, None, None))
-    @patch("dojo.jira_link.helper.is_keep_in_sync_with_jira", return_value=True)
-    @patch("dojo.jira_link.helper.is_push_all_issues", return_value=False)
-    @patch("dojo.jira_link.helper.push_to_jira", return_value=None)
+    @patch("dojo.jira.helper.can_be_pushed_to_jira", return_value=(True, None, None))
+    @patch("dojo.jira.helper.is_keep_in_sync_with_jira", return_value=True)
+    @patch("dojo.jira.helper.is_push_all_issues", return_value=False)
+    @patch("dojo.jira.helper.push_to_jira", return_value=None)
     @patch("dojo.notifications.helper.WebhookNotificationManger.send_webhooks_notification")
     def test_bulk_edit_keep_in_sync_pushes_finding_groups(self, mock_webhooks, mock_push_to_jira, mock_is_push_all_issues, mock_is_keep_in_sync, mock_can_be_pushed):
         """

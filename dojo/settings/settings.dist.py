@@ -120,6 +120,10 @@ env = environ.FileAwareEnv(
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_MAX_ZIP_MEMBERS=(int, 1000),
+    DD_MAX_ZIP_MEMBER_SIZE=(int, 512 * 1024 * 1024),  # 512 MB per member (uncompressed)
+    DD_MAX_ZIP_TOTAL_SIZE=(int, 1 * 1024 * 1024 * 1024),  # 1 GB total (uncompressed)
+    DD_MAX_ZIP_RATIO=(int, 100),  # max compression ratio (uncompressed / compressed)
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
@@ -356,8 +360,6 @@ env = environ.FileAwareEnv(
     DD_HASHCODE_FIELDS_PER_SCANNER=(str, ""),
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
-    # Dictates whether cloud banner is created or not
-    DD_CREATE_CLOUD_BANNER=(bool, True),
     # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Products, ...)
     # If you run big import you may want to disable this because there's a performance hit during (re-)imports.
     DD_ENABLE_AUDITLOG=(bool, True),
@@ -534,6 +536,10 @@ FILE_UPLOAD_HANDLERS = (
 )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = env("DD_DATA_UPLOAD_MAX_MEMORY_SIZE")
+MAX_ZIP_MEMBERS = env("DD_MAX_ZIP_MEMBERS")
+MAX_ZIP_MEMBER_SIZE = env("DD_MAX_ZIP_MEMBER_SIZE")
+MAX_ZIP_TOTAL_SIZE = env("DD_MAX_ZIP_TOTAL_SIZE")
+MAX_ZIP_RATIO = env("DD_MAX_ZIP_RATIO")
 
 # ------------------------------------------------------------------------------
 # URLS
@@ -1339,13 +1345,6 @@ CELERY_BEAT_SCHEDULE = {
             "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
         },
     },
-    "trigger_evaluate_pro_proposition": {
-        "task": "dojo.tasks.evaluate_pro_proposition",
-        "schedule": timedelta(hours=8),
-        "options": {
-            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
-        },
-    },
     "clear_sessions": {
         "task": "dojo.tasks.clear_sessions",
         "schedule": crontab(hour=0, minute=0, day_of_week=0),
@@ -2036,6 +2035,7 @@ VULNERABILITY_URLS = {
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
     "MAL-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/mal-2025-49305
+    "MFSA": "https://www.mozilla.org/en-US/security/advisories/",  # e.g. https://www.mozilla.org/en-US/security/advisories/mfsa2025-01/
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "MSRC_": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/msrc_cve-2025-59200
@@ -2082,9 +2082,6 @@ FILE_IMPORT_TYPES = env("DD_FILE_IMPORT_TYPES")
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
-# Dictates whether cloud banner is created or not
-CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
-
 # ------------------------------------------------------------------------------
 # Auditlog
 # ------------------------------------------------------------------------------

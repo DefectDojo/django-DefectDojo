@@ -15,7 +15,6 @@ from django.utils import timezone
 from django.utils.timezone import is_naive, make_aware, now
 from fieldsignals import pre_save_changed
 
-import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
@@ -27,7 +26,7 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
-from dojo.jira_link.helper import is_keep_in_sync_with_jira
+from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.location.utils import save_locations_to_add
@@ -241,10 +240,10 @@ def add_to_finding_group(finding_group, finds):
     finding_group.findings.add(*available_findings)
 
     # Now update the JIRA to add the finding to the finding group
-    jira_instance = jira_helper.get_jira_instance(finding_group)
+    jira_instance = jira_services.get_instance(finding_group)
     if finding_group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
         logger.debug("pushing to jira from finding.finding_bulk_update_all()")
-        jira_helper.push_to_jira(finding_group)
+        jira_services.push(finding_group)
 
     added = len(available_findings)
     skipped = len(finds) - added
@@ -269,10 +268,10 @@ def remove_from_finding_group(finds):
 
     # Now update the JIRA to remove the finding from the finding group
     for group in affected_groups:
-        jira_instance = jira_helper.get_jira_instance(group)
+        jira_instance = jira_services.get_instance(group)
         if group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
             logger.debug("pushing to jira from finding.finding_bulk_update_all()")
-            jira_helper.push_to_jira(group)
+            jira_services.push(group)
 
     return affected_groups, removed, skipped
 
@@ -347,10 +346,10 @@ def group_findings_by(finds, finding_group_by_option):
 
     # Now update the JIRA to add the finding to the finding group
     for group in affected_groups:
-        jira_instance = jira_helper.get_jira_instance(group)
+        jira_instance = jira_services.get_instance(group)
         if group.has_jira_issue and jira_instance and jira_instance.finding_jira_sync:
             logger.debug("pushing to jira from finding.finding_bulk_update_all()")
-            jira_helper.push_to_jira(group)
+            jira_services.push(group)
 
     return affected_groups, grouped, skipped, groups_created
 
@@ -452,9 +451,9 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
         # based on feedback we could introduct another push_group_to_jira boolean everywhere
         # but what about the push_all boolean? Let's see how this works for now and get some feedback.
         if finding.has_jira_issue or not finding.finding_group:
-            jira_helper.push_to_jira(finding)
+            jira_services.push(finding)
         elif finding.finding_group:
-            jira_helper.push_to_jira(finding.finding_group)
+            jira_services.push(finding.finding_group)
 
 
 @app.task
@@ -524,8 +523,8 @@ def post_process_findings_batch(
         for finding in findings:
             object_to_push = finding if finding.has_jira_issue or not finding.finding_group else finding.finding_group
             # Check the push_to_jira flag again to potentially shorty circuit without checking for existing findings
-            if push_to_jira or is_keep_in_sync_with_jira(object_to_push, prefetched_jira_instance=jira_instance):
-                jira_helper.push_to_jira(object_to_push)
+            if push_to_jira or jira_services.is_keep_in_sync(object_to_push, prefetched_jira_instance=jira_instance):
+                jira_services.push(object_to_push)
     else:
         logger.debug("push_to_jira is False, not pushing to JIRA")
 
@@ -1158,20 +1157,20 @@ def _save_finding_with_jira_sync(finding, *, new_note=None):
     jira_issue_exists = finding.has_jira_issue or (
         finding.finding_group and finding.finding_group.has_jira_issue
     )
-    jira_instance = jira_helper.get_jira_instance(finding)
-    jira_project = jira_helper.get_jira_project(finding)
+    jira_instance = jira_services.get_instance(finding)
+    jira_project = jira_services.get_project(finding)
 
     if jira_issue_exists:
         push_to_jira = (
-            jira_helper.is_push_all_issues(finding)
+            jira_services.is_push_all_issues(finding)
             or (jira_instance and jira_instance.finding_jira_sync)
         )
         if new_note and (getattr(jira_project, "push_notes", False) or push_to_jira) and not finding_in_group:
-            jira_helper.add_comment(finding, new_note, force_push=True)
+            jira_services.add_comment(finding, new_note, force_push=True)
 
     finding.save(push_to_jira=(push_to_jira and not finding_in_group))
     if push_to_jira and finding_in_group:
-        jira_helper.push_to_jira(finding.finding_group)
+        jira_services.push(finding.finding_group)
 
 
 def close_finding(

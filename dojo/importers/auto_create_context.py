@@ -181,6 +181,9 @@ class AutoCreateContextManager:
         """
         if engagement := get_object_or_none(Engagement, pk=engagement_id):
             logger.debug("Using existing engagement by id: %s", engagement_id)
+            if product is not None and engagement.product_id != product.id:
+                msg = "The provided identifiers are inconsistent — the engagement does not belong to the specified product."
+                raise ValueError(msg)
             return engagement
         # if there's no product, then for sure there's no engagement either
         if product is None:
@@ -203,6 +206,9 @@ class AutoCreateContextManager:
         """
         if test := get_object_or_none(Test, pk=test_id):
             logger.debug("Using existing Test by id: %s", test_id)
+            if engagement is not None and test.engagement_id != engagement.id:
+                msg = "The provided identifiers are inconsistent — the test does not belong to the specified engagement."
+                raise ValueError(msg)
             return test
         # If the engagement is not supplied, we cannot do anything
         if not engagement:
