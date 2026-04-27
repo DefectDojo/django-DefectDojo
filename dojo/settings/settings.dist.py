@@ -120,6 +120,10 @@ env = environ.FileAwareEnv(
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_MAX_ZIP_MEMBERS=(int, 1000),
+    DD_MAX_ZIP_MEMBER_SIZE=(int, 512 * 1024 * 1024),  # 512 MB per member (uncompressed)
+    DD_MAX_ZIP_TOTAL_SIZE=(int, 1 * 1024 * 1024 * 1024),  # 1 GB total (uncompressed)
+    DD_MAX_ZIP_RATIO=(int, 100),  # max compression ratio (uncompressed / compressed)
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
@@ -532,6 +536,10 @@ FILE_UPLOAD_HANDLERS = (
 )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = env("DD_DATA_UPLOAD_MAX_MEMORY_SIZE")
+MAX_ZIP_MEMBERS = env("DD_MAX_ZIP_MEMBERS")
+MAX_ZIP_MEMBER_SIZE = env("DD_MAX_ZIP_MEMBER_SIZE")
+MAX_ZIP_TOTAL_SIZE = env("DD_MAX_ZIP_TOTAL_SIZE")
+MAX_ZIP_RATIO = env("DD_MAX_ZIP_RATIO")
 
 # ------------------------------------------------------------------------------
 # URLS

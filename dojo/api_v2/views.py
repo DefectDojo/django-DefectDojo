@@ -37,7 +37,6 @@ from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
 )
@@ -88,10 +87,7 @@ from dojo.group.queries import (
     get_authorized_groups,
 )
 from dojo.importers.auto_create_context import AutoCreateContextManager
-from dojo.jira_link.queries import (
-    get_authorized_jira_issues,
-    get_authorized_jira_projects,
-)
+from dojo.jira import services as jira_services
 from dojo.labels import get_labels
 from dojo.models import (
     Announcement,
@@ -117,9 +113,6 @@ from dojo.models import (
     Finding_Template,
     General_Survey,
     Global_Role,
-    JIRA_Instance,
-    JIRA_Issue,
-    JIRA_Project,
     Language_Type,
     Languages,
     Network_Locations,
@@ -720,15 +713,18 @@ class EngagementViewSet(
     def update_jira_epic(self, request, pk=None):
         engagement = self.get_object()
         try:
-
             if engagement.has_jira_issue:
-                dojo_dispatch_task(jira_helper.update_epic, engagement.id, **request.data)
+                task = jira_services.get_epic_task("update_epic")
+                if task:
+                    dojo_dispatch_task(task, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic update query sent"},
                     status=status.HTTP_200_OK,
                 )
             else:
-                dojo_dispatch_task(jira_helper.add_epic, engagement.id, **request.data)
+                task = jira_services.get_epic_task("add_epic")
+                if task:
+                    dojo_dispatch_task(task, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,
@@ -1088,7 +1084,7 @@ class FindingViewSet(
     def perform_update(self, serializer):
         # IF JIRA is enabled and this product has a JIRA configuration
         push_to_jira = serializer.validated_data.get("push_to_jira")
-        jira_project = jira_helper.get_jira_project(serializer.instance)
+        jira_project = jira_services.get_project(serializer.instance)
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
@@ -1361,9 +1357,9 @@ class FindingViewSet(
             )
 
             if finding.has_jira_issue:
-                jira_helper.add_comment(finding, note)
+                jira_services.add_comment(finding, note)
             elif finding.has_jira_group_issue:
-                jira_helper.add_comment(finding.finding_group, note)
+                jira_services.add_comment(finding.finding_group, note)
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private},
@@ -1769,74 +1765,11 @@ class FindingViewSet(
 
 
 # Authorization: configuration
-class JiraInstanceViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.JIRAInstanceSerializer
-    queryset = JIRA_Instance.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "url"]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return JIRA_Instance.objects.all().order_by("id")
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class JiraIssuesViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.JIRAIssueSerializer
-    queryset = JIRA_Issue.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "jira_id",
-        "jira_key",
-        "finding",
-        "engagement",
-        "finding_group",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasJiraIssuePermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_jira_issues(Permissions.Product_View)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class JiraProjectViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.JIRAProjectSerializer
-    queryset = JIRA_Project.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "jira_instance",
-        "product",
-        "engagement",
-        "enabled",
-        "component",
-        "project_key",
-        "push_all_issues",
-        "enable_engagement_epic_mapping",
-        "push_notes",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasJiraProductPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_jira_projects(Permissions.Product_View)
+from dojo.jira.api.views import (  # noqa: E402, F401 backward compat
+    JiraInstanceViewSet,
+    JiraIssuesViewSet,
+    JiraProjectViewSet,
+)
 
 
 # Authorization: superuser
@@ -2871,7 +2804,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
             jira_driver = engagement or (product or None)
-            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+            if jira_project := (jira_services.get_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
 
         # Add pghistory context for audit trail (adds to existing middleware context).
@@ -3029,7 +2962,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
             jira_driver = test or (engagement or (product or None))
-            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+            if jira_project := (jira_services.get_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug("push_to_jira: %s", push_to_jira)
         # Add pghistory context for audit trail (adds to existing middleware context)

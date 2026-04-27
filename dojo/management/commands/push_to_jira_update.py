@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-import dojo.jira_link.helper as jira_helper
+import dojo.jira.helper as jira_helper
 from dojo.models import Finding
 from dojo.utils import get_system_setting
 
