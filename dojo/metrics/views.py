@@ -916,7 +916,10 @@ def _augment_series_with_accepted(series: list[list], ras_qs, *, period: str, tz
         )
 
         for row in accepted:
-            bucket[sev_idx[row["severity"]]] += row["cnt"]
+            sev = row["severity"]
+            if sev not in sev_idx:
+                continue
+            bucket[sev_idx[sev]] += row["cnt"]
 
         bucket[5] = sum(bucket[1:])
 
