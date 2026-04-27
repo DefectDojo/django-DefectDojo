@@ -911,6 +911,67 @@ def send_webhooks_notification(event: str, user_id: int | None = None, **kwargs:
     get_manager_class_instance()._get_manager_instance("webhooks").send_webhooks_notification(event, user=user, **kwargs)
 
 
+@app.task
+def async_create_notification(
+    event: str,
+    engagement_id: int | None = None,
+    product_id: int | None = None,
+    product_type_id: int | None = None,
+    finding_id: int | None = None,
+    test_id: int | None = None,
+    **kwargs: dict,
+) -> None:
+    # Re-fetch by id so the recipient-enumeration query and per-user Alert writes
+    # run in the worker rather than the request thread.
+    # Fetch most-specific first and derive parent objects from the already-loaded
+    # select_related chain to avoid redundant queries. For example, fetching a
+    # Test with select_related("engagement__product") covers all three objects in
+    # one query, so engagement_id and product_id don't need separate fetches.
+    fetched_engagement = None
+    fetched_product = None
+
+    if test_id is not None:
+        test = Test.objects.filter(pk=test_id).select_related("engagement__product").first()
+        if test is None:
+            return
+        kwargs["test"] = test
+        fetched_engagement = test.engagement
+        fetched_product = test.engagement.product
+
+    if engagement_id is not None:
+        if fetched_engagement is not None:
+            kwargs["engagement"] = fetched_engagement
+        else:
+            engagement = Engagement.objects.filter(pk=engagement_id).select_related("product").first()
+            if engagement is None:
+                return
+            kwargs["engagement"] = engagement
+            fetched_product = engagement.product
+
+    if product_id is not None:
+        if fetched_product is not None:
+            kwargs["product"] = fetched_product
+        else:
+            product = Product.objects.filter(pk=product_id).first()
+            if product is None:
+                return
+            kwargs["product"] = product
+
+    if product_type_id is not None:
+        product_type = Product_Type.objects.filter(pk=product_type_id).first()
+        if product_type is None:
+            return
+        kwargs["product_type"] = product_type
+
+    if finding_id is not None:
+        finding = Finding.objects.filter(pk=finding_id).select_related("test__engagement__product").first()
+        if finding is None:
+            return
+        kwargs["finding"] = finding
+
+    create_notification(event=event, **kwargs)
+
+
 @app.task(ignore_result=True)
 def webhook_reactivation(endpoint_id: int, **_kwargs: dict) -> None:
     get_manager_class_instance()._get_manager_instance("webhooks")._webhook_reactivation(endpoint_id=endpoint_id)

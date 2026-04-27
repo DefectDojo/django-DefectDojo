@@ -2063,6 +2063,7 @@ VULNERABILITY_URLS = {
     "VA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/va-25-282-01
     "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
+    "WGSA-": "https://www.watchguard.com/wgrd-psirt/advisory/",  # e.g. https://www.watchguard.com/wgrd-psirt/advisory/wgsa-2026-00008
     "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
