@@ -2051,7 +2051,6 @@ def async_delete_task(obj, **kwargs):
                 outside_dupes_qs,
                 chunk_size=chunk_size,
                 cascade_root=cascade_root,
-                product_id=product.pk if product else None,
             )
 
         # Step 4: Delete the main scope findings
@@ -2059,7 +2058,6 @@ def async_delete_task(obj, **kwargs):
             finding_qs,
             chunk_size=chunk_size,
             cascade_root=cascade_root,
-            product_id=product.pk if product else None,
         )
 
     # Step 5: Delete all remaining related objects (Tests, Engagements,
@@ -2078,6 +2076,7 @@ def async_delete_task(obj, **kwargs):
 
     # Step 7: Recalculate product grade once (Engagement/Test deletes only). Skip when the
     # deleted object is the Product itself — it is removed in step 6 and grading is pointless.
+    # For Product TYpe deletiongs we don't have a product instance, so this never fires.
     if product and not isinstance(obj, Product):
         perform_product_grading(product)
 
