@@ -129,10 +129,7 @@ Only the `ddorch` service connects to the new database directly. The main Django
 
 The `ddorch` service reads its connection string from the `DD_DATABASE_URL` environment variable and **automatically appends `-ddorch` to the database name** in whatever URL you pass it. This means you can reuse the same connection string you already use for the main Django application — no need to construct a second URL by hand.
 
-
-
 On startup, ddorch rewrites the database name in this URL from `dojodb` to `dojodb-ddorch` and connects to the database you created in Part 1.
-
 
 ### 2. Restart the orchestrator services
 
