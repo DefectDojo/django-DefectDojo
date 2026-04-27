@@ -86,7 +86,7 @@ from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
-from dojo.github_issue_link.urls import urlpatterns as github_urls
+from dojo.github.ui.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.jira.urls import urlpatterns as jira_urls

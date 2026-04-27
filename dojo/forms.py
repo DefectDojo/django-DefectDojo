@@ -32,6 +32,14 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
+from dojo.github.ui.forms import (  # noqa: F401 -- backward compat
+    DeleteGITHUBConfForm,
+    ExpressGITHUBForm,
+    GITHUB_IssueForm,
+    GITHUB_Product_Form,
+    GITHUBFindingForm,
+    GITHUBForm,
+)
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.jira import services as jira_services
 from dojo.jira.forms import (  # noqa: F401 backward compat
@@ -79,9 +87,6 @@ from dojo.models import (
     Finding_Group,
     Finding_Template,
     General_Survey,
-    GITHUB_Conf,
-    GITHUB_Issue,
-    GITHUB_PKey,
     Global_Role,
     Note_Type,
     Notes,
@@ -2801,42 +2806,6 @@ class DeleteStubFindingForm(forms.ModelForm):
         fields = ["id"]
 
 
-class GITHUB_IssueForm(forms.ModelForm):
-
-    class Meta:
-        model = GITHUB_Issue
-        exclude = ["product"]
-
-
-class GITHUBForm(forms.ModelForm):
-    api_key = forms.CharField(widget=forms.PasswordInput, required=True)
-
-    class Meta:
-        model = GITHUB_Conf
-        exclude = ["product"]
-
-
-class DeleteGITHUBConfForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = GITHUB_Conf
-        fields = ["id"]
-
-
-class ExpressGITHUBForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
-    issue_key = forms.CharField(required=True, help_text="A valid issue ID is required to gather the necessary information.")
-
-    class Meta:
-        model = GITHUB_Conf
-        exclude = ["product", "epic_name_id", "open_status_key",
-                    "close_status_key", "info_mapping_severity",
-                    "low_mapping_severity", "medium_mapping_severity",
-                    "high_mapping_severity", "critical_mapping_severity", "finding_text"]
-
-
 class Benchmark_Product_SummaryForm(forms.ModelForm):
 
     class Meta:
@@ -3220,25 +3189,6 @@ class CredUserForm(forms.ModelForm):
         model = Cred_User
         exclude = [""]
         # fields = ['selenium_script']
-
-
-class GITHUB_Product_Form(forms.ModelForm):
-    git_conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label="GITHUB Configuration", required=False)
-
-    class Meta:
-        model = GITHUB_PKey
-        exclude = ["product"]
-
-
-class GITHUBFindingForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.enabled = kwargs.pop("enabled")
-        super().__init__(*args, **kwargs)
-        self.fields["push_to_github"] = forms.BooleanField()
-        self.fields["push_to_github"].required = False
-        self.fields["push_to_github"].help_text = "Checking this will overwrite content of your Github issue, or create one."
-
-    push_to_github = forms.BooleanField(required=False)
 
 
 class LoginBanner(forms.Form):
