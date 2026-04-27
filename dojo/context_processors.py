@@ -1,5 +1,4 @@
 import contextlib
-import time
 
 # import the settings file
 from django.conf import settings
@@ -7,7 +6,7 @@ from django.contrib import messages
 
 from dojo.announcement.os_message import get_os_banner
 from dojo.labels import get_labels
-from dojo.models import Alerts, System_Settings, UserAnnouncement
+from dojo.models import System_Settings, UserAnnouncement
 
 
 def globalize_vars(request):
@@ -86,14 +85,6 @@ def bind_system_settings(request):
     return {"system_settings": system_settings}
 
 
-def bind_alert_count(request):
-    if not settings.DISABLE_ALERT_COUNTER:
-
-        if hasattr(request, "user") and request.user.is_authenticated:
-            return {"alert_count": Alerts.objects.filter(user_id=request.user).count()}
-    return {}
-
-
 def bind_announcement(request):
     with contextlib.suppress(Exception):  # TODO: this should be replaced with more meaningful exception
         if request.user.is_authenticated:
@@ -104,21 +95,10 @@ def bind_announcement(request):
     return {}
 
 
-def session_expiry_notification(request):
-    try:
-        if request.user.is_authenticated:
-            last_activity = request.session.get("_last_activity", time.time())
-            expiry_time = last_activity + settings.SESSION_COOKIE_AGE  # When the session will expire
-            warning_time = settings.SESSION_EXPIRE_WARNING  # Show warning X seconds before expiry
-            notify_time = expiry_time - warning_time
-        else:
-            notify_time = None
-    except Exception:
-        return {}
-    else:
-        return {
-            "session_notify_time": notify_time,
-        }
+from dojo.notifications.context_processors import (  # noqa: E402, F401  -- backward compat
+    bind_alert_count,
+    session_expiry_notification,
+)
 
 
 def labels(request):
