@@ -18,7 +18,7 @@ This guide walks through adding `dojodb-ddorch` to an existing self-hosted Postg
 - `listen_addresses` in `postgresql.conf` is already configured for remote access.
 - You have upgraded to the release that ships the `ddorch` and `ddorch-workers` services.
 
-> **A note on the database name:** `dojodb-ddorch` contains a hyphen, so it must be double-quoted in every SQL statement (`"dojodb-ddorch"`). If you prefer to avoid the quoting, use `dojodb_ddorch` (underscore) and drop the quotes throughout the rest of this guide.
+> **A note on the database name:** `dojodb-ddorch` contains a hyphen, so it must be double-quoted in every SQL statement (`"dojodb-ddorch"`).
 
 ## Part 1: Provision the Database
 
@@ -127,22 +127,12 @@ Only the `ddorch` service connects to the new database directly. The main Django
 
 ### 1. Set the orchestrator database URL
 
-The `ddorch` service reads its connection string from the `DD_ORCH_DATABASE_URL` environment variable and **automatically appends `-ddorch` to the database name** in whatever URL you pass it. This means you can reuse the same connection string you already use for the main Django application — no need to construct a second URL by hand.
+The `ddorch` service reads its connection string from the `DD_DATABASE_URL` environment variable and **automatically appends `-ddorch` to the database name** in whatever URL you pass it. This means you can reuse the same connection string you already use for the main Django application — no need to construct a second URL by hand.
 
-In your `.env` file (or equivalent override mechanism), set `DD_ORCH_DATABASE_URL` to point at your existing main database (the `dojodb` one, *not* `dojodb-ddorch`):
 
-```bash
-DD_ORCH_DATABASE_URL=postgres://dojodbusr:<password>@<db-server-ip>:5432/dojodb
-```
-
-| Placeholder | Value |
-|---|---|
-| `<password>` | The password set for `dojodbusr` |
-| `<db-server-ip>` | IP or hostname of your PostgreSQL server |
 
 On startup, ddorch rewrites the database name in this URL from `dojodb` to `dojodb-ddorch` and connects to the database you created in Part 1.
 
-> **Note on special characters in the password:** If the password contains `@`, `:`, `/`, `#`, or `?`, URL-encode it (for example, `@` becomes `%40`). Alphanumeric passwords need no encoding.
 
 ### 2. Restart the orchestrator services
 
