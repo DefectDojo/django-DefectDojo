@@ -122,7 +122,7 @@ There are several ways to create a Test in the OS version:
 - Select an Engagement within a Product, click the dropdown menu in the Tests subsection, and click either “Add Tests” or  “Import Scan Results”
     - This will create the ensuing Test directly within the chosen Engagement
 
-![image](images/Tests_ss6.png)
+![image](images/tests_ss6.png)
 
 - While creating an Engagement
 

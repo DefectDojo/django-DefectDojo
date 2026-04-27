@@ -117,19 +117,19 @@ In order to make a Test, an Engagement must be made to contain it, as well as an
 - In the sidebar, under Tests within the **Manage** subsection
     - You will have to select the pre-existing Engagement to attribute the Test to when completing the New Test form. 
 
-![image](images/Tests_ss1.png)
+![image](images/tests_ss1.png)
 
 - The settings dropdown at the top right corner of an Asset view
     - **Import Scan** will automatically create a Test once a scan file has been added to the Import Scan form. You will have the opportunity to either attribute the Test to a pre-existing Engagement or create and name a new Engagement to contain the new Test. 
         - While completing the Import Scan form, you may add metadata such as the version, branch tag, commit hash, and build ID. This will be reflected in the Import History section of the Test View.
 
-![image](images/Tests_ss2.png)
+![image](images/tests_ss2.png)
 
 - The settings dropdown at the top right of an Engagement view
     - **Import Scan** will follow the same workflow as Assets, but will automatically place the Test object within the Engagement in which you clicked Import Scan. 
     - **Add Test** will create a Test object but does not require that a scan be uploaded to the Test itself, which is useful in anticipation of planning future Tests or for manually entered security findings requiring tracking and remediation.
 
-![image](images/Tests_ss3.png)
+![image](images/tests_ss3.png)
 
 If you select Add Test and later wish to manually import the results of a scan to a Test, you can do so by opening the Test and clicking the Reimport Findings button in the Test’s settings or the Reimport Scan button in the Findings table.
 
