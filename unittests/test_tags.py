@@ -4,11 +4,10 @@ from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import Client, override_settings
+from django.test import Client
 from django.urls import reverse
 
-from dojo.models import Finding, Product, Test
-from dojo.product.helpers import propagate_tags_on_product_sync
+from dojo.models import Finding, Product
 from unittests.dojo_test_case import DojoAPITestCase, get_unit_tests_scans_path, versioned_fixtures
 
 logger = logging.getLogger(__name__)
