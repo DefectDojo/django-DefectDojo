@@ -61,7 +61,9 @@ def _make_finding():
 # ---------------------------------------------------------------------------
 
 class TestGetProducts(unittest.TestCase):
-    """Unit tests for get_products() — the isinstance router that resolves any model instance to its owning Product(s).
+
+    """
+    Unit tests for get_products() — the isinstance router that resolves any model instance to its owning Product(s).
 
     No DB needed. Uses MagicMock with __class__ overridden so isinstance() passes,
     then verifies the correct attribute chain is returned for each model type.
@@ -74,79 +76,83 @@ class TestGetProducts(unittest.TestCase):
 
     def test_product_returns_self(self):
         obj = self._make(Product)
-        assert get_products(obj) == [obj]
+        self.assertEqual(get_products(obj), [obj])
 
     def test_endpoint_returns_product(self):
         obj = self._make(Endpoint)
-        assert get_products(obj) == [obj.product]
+        self.assertEqual(get_products(obj), [obj.product])
 
     def test_engagement_returns_product(self):
         obj = self._make(Engagement)
-        assert get_products(obj) == [obj.product]
+        self.assertEqual(get_products(obj), [obj.product])
 
     def test_test_returns_product_via_engagement(self):
         obj = self._make(Test)
-        assert get_products(obj) == [obj.engagement.product]
+        self.assertEqual(get_products(obj), [obj.engagement.product])
 
     def test_finding_returns_product_via_test_engagement(self):
         obj = self._make(Finding)
-        assert get_products(obj) == [obj.test.engagement.product]
+        self.assertEqual(get_products(obj), [obj.test.engagement.product])
 
     def test_location_delegates_to_all_related_products(self):
         obj = self._make(Location)
         obj.all_related_products.return_value = ["p1", "p2"]
-        assert get_products(obj) == ["p1", "p2"]
+        self.assertEqual(get_products(obj), ["p1", "p2"])
 
     def test_unknown_type_returns_empty(self):
-        assert get_products(object()) == []
+        self.assertEqual(get_products(object()), [])
 
 
 class TestInheritProductTags(unittest.TestCase):
-    """Unit tests for inherit_product_tags() — the gate that decides whether inheritance should run at all.
+
+    """
+    Unit tests for inherit_product_tags() — the gate that decides whether inheritance should run at all.
 
     Returns True if either the system-wide setting or any product's per-product flag is enabled.
     Both dependencies (get_products and get_system_setting) are mocked so only the boolean
     priority logic is tested, not DB reads or isinstance routing.
     """
 
-    def _make_product(self, per_product_flag):
+    def _make_product(self, *, per_product_flag):
         p = MagicMock()
         p.enable_product_tag_inheritance = per_product_flag
         return p
 
     @patch("dojo.tags_signals.get_system_setting", return_value=True)
     @patch("dojo.tags_signals.get_products")
-    def test_system_setting_on_returns_true(self, mock_get_products, _):
-        mock_get_products.return_value = [self._make_product(False)]
-        assert inherit_product_tags(MagicMock()) is True
+    def test_system_setting_on_returns_true(self, mock_get_products, mock_setting):
+        mock_get_products.return_value = [self._make_product(per_product_flag=False)]
+        self.assertTrue(inherit_product_tags(MagicMock()))
 
     @patch("dojo.tags_signals.get_system_setting", return_value=False)
     @patch("dojo.tags_signals.get_products")
-    def test_per_product_flag_on_system_off_returns_true(self, mock_get_products, _):
-        mock_get_products.return_value = [self._make_product(True)]
-        assert inherit_product_tags(MagicMock()) is True
+    def test_per_product_flag_on_system_off_returns_true(self, mock_get_products, mock_setting):
+        mock_get_products.return_value = [self._make_product(per_product_flag=True)]
+        self.assertTrue(inherit_product_tags(MagicMock()))
 
     @patch("dojo.tags_signals.get_system_setting", return_value=False)
     @patch("dojo.tags_signals.get_products")
-    def test_both_off_returns_false(self, mock_get_products, _):
-        mock_get_products.return_value = [self._make_product(False)]
-        assert inherit_product_tags(MagicMock()) is False
+    def test_both_off_returns_false(self, mock_get_products, mock_setting):
+        mock_get_products.return_value = [self._make_product(per_product_flag=False)]
+        self.assertFalse(inherit_product_tags(MagicMock()))
 
     @patch("dojo.tags_signals.get_system_setting", return_value=False)
     @patch("dojo.tags_signals.get_products")
-    def test_no_products_returns_false(self, mock_get_products, _):
+    def test_no_products_returns_false(self, mock_get_products, mock_setting):
         mock_get_products.return_value = []
-        assert inherit_product_tags(MagicMock()) is False
+        self.assertFalse(inherit_product_tags(MagicMock()))
 
     @patch("dojo.tags_signals.get_system_setting", return_value=False)
     @patch("dojo.tags_signals.get_products")
-    def test_none_entries_in_product_list_are_skipped(self, mock_get_products, _):
-        mock_get_products.return_value = [None, self._make_product(False)]
-        assert inherit_product_tags(MagicMock()) is False
+    def test_none_entries_in_product_list_are_skipped(self, mock_get_products, mock_setting):
+        mock_get_products.return_value = [None, self._make_product(per_product_flag=False)]
+        self.assertFalse(inherit_product_tags(MagicMock()))
 
 
 class TestPropagateInheritanceEarlyExit(unittest.TestCase):
-    """Unit tests for propagate_inheritance() — the optimization guard that skips redundant DB writes.
+
+    """
+    Unit tests for propagate_inheritance() — the optimization guard that skips redundant DB writes.
 
     Returns False ("nothing to do") only when BOTH conditions hold:
       1. product tags match what is stored in instance.inherited_tags (already recorded)
@@ -176,28 +182,28 @@ class TestPropagateInheritanceEarlyExit(unittest.TestCase):
         """inherited_tags matches product tags and all present in tag_list → skip."""
         instance = self._make_instance(["alpha", "beta"])
         mock_get.return_value = [self._make_product(["alpha", "beta"])]
-        assert propagate_inheritance(instance, tag_list=["alpha", "beta"]) is False
+        self.assertFalse(propagate_inheritance(instance, tag_list=["alpha", "beta"]))
 
     @patch("dojo.tags_signals.get_products_to_inherit_tags_from")
     def test_product_tags_changed_returns_true(self, mock_get):
         """Stored inherited_tags differ from current product tags → must propagate."""
         instance = self._make_instance(["old"])
         mock_get.return_value = [self._make_product(["new"])]
-        assert propagate_inheritance(instance, tag_list=["old", "new"]) is True
+        self.assertTrue(propagate_inheritance(instance, tag_list=["old", "new"]))
 
     @patch("dojo.tags_signals.get_products_to_inherit_tags_from")
     def test_tags_not_yet_applied_to_instance_returns_true(self, mock_get):
         """inherited_tags already correct but not yet reflected in tag_list → must propagate."""
         instance = self._make_instance(["alpha"])
         mock_get.return_value = [self._make_product(["alpha"])]
-        assert propagate_inheritance(instance, tag_list=[]) is True
+        self.assertTrue(propagate_inheritance(instance, tag_list=[]))
 
     @patch("dojo.tags_signals.get_products_to_inherit_tags_from")
     def test_no_products_no_inherited_tags_returns_false(self, mock_get):
         """No products, no inherited tags, empty tag_list → already in sync, skip."""
         instance = self._make_instance([])
         mock_get.return_value = []
-        assert propagate_inheritance(instance, tag_list=[]) is False
+        self.assertFalse(propagate_inheritance(instance, tag_list=[]))
 
 
 # ---------------------------------------------------------------------------
@@ -206,7 +212,9 @@ class TestPropagateInheritanceEarlyExit(unittest.TestCase):
 
 @versioned_fixtures
 class TestInheritanceDisabled(DojoTestCase):
-    """Integration tests verifying that inheritance is a no-op when both flags are off.
+
+    """
+    Integration tests verifying that inheritance is a no-op when both flags are off.
 
     The existing suite always enabled inheritance. These tests confirm the negative path:
     product tags must not leak to child objects, and any tags already on a child must
@@ -238,7 +246,9 @@ class TestInheritanceDisabled(DojoTestCase):
 
 @versioned_fixtures
 class TestPerProductTagInheritance(DojoTestCase):
-    """Integration tests for the per-product enable_product_tag_inheritance flag.
+
+    """
+    Integration tests for the per-product enable_product_tag_inheritance flag.
 
     The existing test suite only exercised the system-wide setting. These tests verify
     that a product with its own flag=True propagates tags even when the system setting is off,
@@ -282,7 +292,9 @@ class TestPerProductTagInheritance(DojoTestCase):
 @skip_unless_v2
 @versioned_fixtures
 class TestEndpointTagInheritance(DojoTestCase):
-    """Integration tests (v2 only) for Endpoint tag inheritance.
+
+    """
+    Integration tests (v2 only) for Endpoint tag inheritance.
 
     get_products() handles Endpoint but it was never exercised by the existing suite.
     Verifies tags propagate on creation and that inherited tags are sticky
@@ -317,7 +329,9 @@ class TestEndpointTagInheritance(DojoTestCase):
 
 @skip_unless_v3
 class TestTagInheritanceOnPersist(DojoTestCase):
-    """Integration tests (v3 only) for tag inheritance via LocationManager.persist().
+
+    """
+    Integration tests (v3 only) for tag inheritance via LocationManager.persist().
 
     Verifies that tags are applied during bulk location creation and that repeated
     persist() calls with unchanged data are no-ops (no spurious DB mutations).
@@ -395,7 +409,9 @@ class TestTagInheritanceOnPersist(DojoTestCase):
 @skip_unless_v3
 @versioned_fixtures
 class TestLocationMultipleProductInheritance(DojoTestCase):
-    """Integration tests (v3 only) for Location inheriting from multiple products.
+
+    """
+    Integration tests (v3 only) for Location inheriting from multiple products.
 
     Unlike Engagement/Test/Finding which belong to exactly one product, a Location can be
     linked to many products via LocationProductReference. These tests verify that
@@ -419,10 +435,10 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
         location = Location(location_type="url", location_value="https://multi.example.com")
         location.save()
         LocationProductReference.objects.create(
-            location=location, product=p1, status=ProductLocationStatus.Active
+            location=location, product=p1, status=ProductLocationStatus.Active,
         )
         LocationProductReference.objects.create(
-            location=location, product=p2, status=ProductLocationStatus.Active
+            location=location, product=p2, status=ProductLocationStatus.Active,
         )
 
         inherit_instance_tags(location)
@@ -445,10 +461,10 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
         location = Location(location_type="url", location_value="https://mixed.example.com")
         location.save()
         LocationProductReference.objects.create(
-            location=location, product=p_inherit, status=ProductLocationStatus.Active
+            location=location, product=p_inherit, status=ProductLocationStatus.Active,
         )
         LocationProductReference.objects.create(
-            location=location, product=p_no, status=ProductLocationStatus.Active
+            location=location, product=p_no, status=ProductLocationStatus.Active,
         )
 
         inherit_instance_tags(location)
