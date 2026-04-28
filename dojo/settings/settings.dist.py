@@ -318,10 +318,7 @@ env = environ.FileAwareEnv(
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, "dojo/templates/issue-trackers"),
     DD_TEMPLATE_DIR_PREFIX=(str, "dojo/templates/"),
-    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
-    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
-    # Set to True to revert to the old behaviour where all duplicates are deleted
-    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(bool, True),
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(bool, False),
     # Enable Rate Limiting for the login page
     DD_RATE_LIMITER_ENABLED=(bool, False),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
