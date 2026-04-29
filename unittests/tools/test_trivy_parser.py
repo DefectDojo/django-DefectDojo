@@ -118,6 +118,7 @@ https://docs.docker.com/develop/develop-images/dockerfile_best-practices/"""
 **Type:** debian
 **Fixed version:** 1.8.2.2
 
+**Service:** default / Deployment / redis-follower
 APT had several integer overflows and underflows while parsing .deb packages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extracttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1.6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0.1;
 """
             self.assertEqual(description, finding.description)
@@ -127,7 +128,7 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
             self.assertEqual(["debian", "os-pkgs"], finding.unsaved_tags)
             self.assertEqual("apt", finding.component_name)
             self.assertEqual("1.8.2.1", finding.component_version)
-            self.assertEqual("default / Deployment / redis-follower", finding.service)
+            self.assertIsNone(finding.service)
             self.assertEqual(finding.file_path, "gcr.io/google_samples/gb-redis-follower:v2 (debian 10.4)")
             finding = findings[5]
             self.assertEqual("CVE-2020-27350 apt 1.8.2.1", finding.title)
@@ -137,6 +138,7 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
 **Type:** debian
 **Fixed version:** 1.8.2.2
 
+**Service:** default / Deployment / redis-leader
 APT had several integer overflows and underflows while parsing .deb packages, aka GHSL-2020-168 GHSL-2020-169, in files apt-pkg/contrib/extracttar.cc, apt-pkg/deb/debfile.cc, and apt-pkg/contrib/arfile.cc. This issue affects: apt 1.2.32ubuntu0 versions prior to 1.2.32ubuntu0.2; 1.6.12ubuntu0 versions prior to 1.6.12ubuntu0.2; 2.0.2ubuntu0 versions prior to 2.0.2ubuntu0.2; 2.1.10ubuntu0 versions prior to 2.1.10ubuntu0.1;
 """
             self.assertEqual(description, finding.description)
@@ -146,13 +148,14 @@ APT had several integer overflows and underflows while parsing .deb packages, ak
             self.assertEqual(["debian", "os-pkgs"], finding.unsaved_tags)
             self.assertEqual("apt", finding.component_name)
             self.assertEqual("1.8.2.1", finding.component_version)
-            self.assertEqual("default / Deployment / redis-leader", finding.service)
+            self.assertIsNone(finding.service)
             finding = findings[10]
             self.assertEqual("KSV001 - Process can elevate its own privileges", finding.title)
             self.assertEqual("Medium", finding.severity)
             description = """**Target:** Deployment/redis-follower
 **Type:** Kubernetes Security Check
 
+**Service:** default / Deployment / redis-follower
 A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.
 Container 'follower' of Deployment 'redis-follower' should set 'securityContext.allowPrivilegeEscalation' to false
 Number  Content
@@ -174,7 +177,7 @@ Number  Content
             self.assertEqual(["kubernetes", "config"], finding.unsaved_tags)
             self.assertIsNone(finding.component_name)
             self.assertIsNone(finding.component_version)
-            self.assertEqual("default / Deployment / redis-follower", finding.service)
+            self.assertIsNone(finding.service)
 
     def test_license_scheme(self):
         with sample_path("license_scheme.json").open(encoding="utf-8") as test_file:

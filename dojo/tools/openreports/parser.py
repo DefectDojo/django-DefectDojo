@@ -19,6 +19,7 @@ OPENREPORTS_SEVERITIES = {
 
 DESCRIPTION_TEMPLATE = """{message}
 
+**Service:** {service}
 **Category:** {category}
 **Policy:** {policy}
 **Result:** {result}
@@ -218,6 +219,7 @@ class OpenreportsParser:
             # Create description
             description = DESCRIPTION_TEMPLATE.format(
                 message=message,
+                service=service_name,
                 category=category,
                 policy=policy,
                 result=result_status,
@@ -250,7 +252,6 @@ class OpenreportsParser:
                 mitigation=mitigation,
                 component_name=pkg_name,
                 component_version=installed_version,
-                service=service_name,
                 active=active,
                 verified=verified,
                 static_finding=True,

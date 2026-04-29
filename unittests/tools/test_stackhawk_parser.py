@@ -243,7 +243,7 @@ class TestStackHawkParser(DojoTestCase):
         self.assertTrue(actual_finding.dynamic_finding)
         self.assertEqual(finding_id, actual_finding.vuln_id_from_tool)
         self.assertEqual(count, actual_finding.nb_occurences)
-        self.assertEqual(application_name, actual_finding.service)
+        self.assertIsNone(actual_finding.service)
         self.assertEqual(false_positive, actual_finding.false_p)
         self.assertEqual(risk_accepted, actual_finding.risk_accepted)
         # The following fields should be not be set from this parser.

@@ -128,6 +128,7 @@ class TestHydraParser(DojoTestCase):
                          actual_finding.description)
         self.assertFalse(actual_finding.static_finding)
         self.assertTrue(actual_finding.dynamic_finding)
+        self.assertEqual(actual_finding.component_name, "http-post-form")
         # The following fields should be not be set from this parser.
         self.assertIsNone(actual_finding.unique_id_from_tool)
         self.assertEqual(self.get_unsaved_locations(actual_finding)[0].host, finding_url)
