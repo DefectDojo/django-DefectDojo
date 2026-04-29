@@ -61,7 +61,7 @@ class MitigationFilterTestCase(TestCase):
 
     def _api_filter(self, params):
         qs = Finding.objects.filter(
-            title__in=["Finding A", "Finding B", "Finding C", "Finding D", "Finding E"]
+            title__in=["Finding A", "Finding B", "Finding C", "Finding D", "Finding E"],
         )
         f = ApiFindingFilter(params, queryset=qs)
         return set(f.qs.values_list("id", flat=True))
@@ -183,7 +183,7 @@ class MitigationUIFilterTestCase(TestCase):
 
     def _ui_filter(self, params):
         qs = Finding.objects.filter(
-            title__in=["UI Finding A", "UI Finding B", "UI Finding C", "UI Finding D"]
+            title__in=["UI Finding A", "UI Finding B", "UI Finding C", "UI Finding D"],
         )
         f = FindingFilterHelper(params, queryset=qs)
         return set(f.qs.values_list("id", flat=True))
