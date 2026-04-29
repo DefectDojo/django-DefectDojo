@@ -456,11 +456,19 @@ def configure_pghistory_triggers():
     """
     if not settings.ENABLE_AUDITLOG:
         logger.info("Audit logging disabled - disabling pghistory triggers")
-        call_command("pgtrigger", "disable")
-        logger.info("Successfully disabled pghistory triggers")
+        try:
+            call_command("pgtrigger", "disable")
+            logger.info("Successfully disabled pghistory triggers")
+        except Exception as e:
+            logger.error(f"Failed to disable pghistory triggers: {e}")
+            raise
     else:
-        call_command("pgtrigger", "enable")
-        logger.info("Successfully enabled pghistory triggers")
+        try:
+            call_command("pgtrigger", "enable")
+            logger.info("Successfully enabled pghistory triggers")
+        except Exception as e:
+            logger.error(f"Failed to enable pghistory triggers: {e}")
+            raise
 
 
 def configure_audit_system():
