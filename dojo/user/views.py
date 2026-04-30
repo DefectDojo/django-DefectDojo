@@ -195,7 +195,7 @@ def alerts(request):
 
     add_breadcrumb(title=alert_title, top_level=True, request=request)
     return render(request,
-                  "dojo/alerts.html",
+                  "notifications/alerts.html",
                   {"alerts": paged_alerts})
 
 
@@ -211,7 +211,7 @@ def delete_alerts(request):
             extra_tags="alert-success")
         return HttpResponseRedirect("alerts")
 
-    return render(request, "dojo/delete_alerts.html", {
+    return render(request, "notifications/delete_alerts.html", {
         "alerts": alerts,
         "delete_preview": get_setting("DELETE_PREVIEW"),
     })

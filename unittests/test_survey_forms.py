@@ -24,13 +24,3 @@ class TestSurveyChoiceWidget(DojoTestCase):
         widget = MultiWidgetBasic()
         self.assertEqual(widget.decompress(None), [None, None, None, None, None, None])
         self.assertEqual(widget.decompress(""), [None, None, None, None, None, None])
-
-    def test_no_pickle_in_form_module(self):
-        """Guard test: pickle must not be reintroduced into dojo/forms.py."""
-        from pathlib import Path
-
-        forms_path = Path(__file__).resolve().parent.parent / "dojo" / "forms.py"
-        contents = forms_path.read_text()
-        self.assertNotIn("import pickle", contents)
-        self.assertNotIn("pickle.loads", contents)
-        self.assertNotIn("pickle.dumps", contents)

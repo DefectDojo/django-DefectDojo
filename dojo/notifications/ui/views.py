@@ -10,9 +10,13 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import View
 
-from dojo.forms import DeleteNotificationsWebhookForm, NotificationsForm, NotificationsWebhookForm
-from dojo.models import Notification_Webhooks, Notifications
 from dojo.notifications.helper import NotificationManagerHelpers, WebhookNotificationManger
+from dojo.notifications.models import Notification_Webhooks, Notifications
+from dojo.notifications.ui.forms import (
+    DeleteNotificationsWebhookForm,
+    NotificationsForm,
+    NotificationsWebhookForm,
+)
 from dojo.utils import add_breadcrumb, get_enabled_notifications_list, get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -63,7 +67,7 @@ class SystemNotificationsView(View):
         return request, False
 
     def get_template(self):
-        return "dojo/notifications.html"
+        return "notifications/notifications.html"
 
     def get_scope(self):
         return "system"
@@ -166,7 +170,7 @@ class NotificationWebhooksView(View):
 
 
 class ListNotificationWebhooksView(NotificationWebhooksView):
-    template = "dojo/view_notification_webhooks.html"
+    template = "notifications/view_notification_webhooks.html"
     permission = "dojo.view_notification_webhooks"
     breadcrumb = "Notification Webhook List"
 
@@ -197,7 +201,7 @@ class ListNotificationWebhooksView(NotificationWebhooksView):
 
 
 class AddNotificationWebhooksView(NotificationWebhooksView):
-    template = "dojo/add_notification_webhook.html"
+    template = "notifications/add_notification_webhook.html"
     permission = "dojo.add_notification_webhooks"
     breadcrumb = "Add Notification Webhook"
 
@@ -267,7 +271,7 @@ class AddNotificationWebhooksView(NotificationWebhooksView):
 
 
 class EditNotificationWebhooksView(NotificationWebhooksView):
-    template = "dojo/edit_notification_webhook.html"
+    template = "notifications/edit_notification_webhook.html"
     permission = "dojo.change_notification_webhooks"
     # TODO: this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
     breadcrumb = "Edit Notification Webhook"
@@ -357,7 +361,7 @@ class EditNotificationWebhooksView(NotificationWebhooksView):
 
 
 class DeleteNotificationWebhooksView(NotificationWebhooksView):
-    template = "dojo/delete_notification_webhook.html"
+    template = "notifications/delete_notification_webhook.html"
     permission = "dojo.delete_notification_webhooks"
     # TODO: this could be better: @user_is_authorized(Finding, Permissions.Finding_Delete, 'fid')
     breadcrumb = "Edit Notification Webhook"
