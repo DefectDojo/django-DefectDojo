@@ -2,7 +2,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view
 from rest_framework.permissions import DjangoModelPermissions
 
-from dojo.api_v2 import permissions
+from dojo.authorization import api_permissions as permissions
 from dojo.api_v2.views import PrefetchDojoModelViewSet, schema_with_prefetch
 from dojo.notifications.api.serializer import (
     NotificationsSerializer,
