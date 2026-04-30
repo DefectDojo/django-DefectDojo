@@ -51,6 +51,7 @@ class MitigationFilterTestCase(TestCase):
         prod_type = Product_Type.objects.create(name="Test Type")
         product = Product.objects.create(
             name="Test Product",
+            description="Test Product",
             prod_type=prod_type,
         )
         cls.finding_with_mitigation = _make_finding("Finding A", "apply patch", product, cls.reporter)
@@ -174,6 +175,7 @@ class MitigationUIFilterTestCase(TestCase):
         prod_type = Product_Type.objects.create(name="UI Test Type")
         product = Product.objects.create(
             name="UI Test Product",
+            description="UI Test Product",
             prod_type=prod_type,
         )
         cls.finding_with_mitigation = _make_finding("UI Finding A", "upgrade to v2", product, cls.reporter)
