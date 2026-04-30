@@ -62,7 +62,18 @@ The kind-specific payload then follows:
 Sample Xygeni JSON reports can be found
 [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/xygeni).
 
-### Default Deduplication Hashcode Fields
-The parser sets `unique_id_from_tool` from each finding's vendor-stable
-`uniqueHash`, so re-importing the same Xygeni report does not duplicate
-findings. `vuln_id_from_tool` is set from `issueId`.
+### Deduplication
+
+Every finding carries `unique_id_from_tool` (set from Xygeni's vendor-stable
+`uniqueHash`) and `vuln_id_from_tool` (set from `issueId`). The deduplication
+algorithm is configured per scan type:
+
+| Scan type            | Algorithm                          | Hash-code fields (fallback)                                    |
+| -------------------- | ---------------------------------- | -------------------------------------------------------------- |
+| Xygeni SAST Scan     | `unique_id_from_tool`              | n/a                                                            |
+| Xygeni SCA Scan      | `unique_id_from_tool_or_hash_code` | `vulnerability_ids`, `component_name`, `component_version`     |
+| Xygeni Secrets Scan  | `unique_id_from_tool`              | n/a                                                            |
+
+For SCA the hash-code fallback enables cross-tool deduplication: the same
+CVE on the same package@version reported by Xygeni and another SCA scanner
+(Snyk, Trivy, etc.) collapse into a single Finding.
