@@ -41,8 +41,6 @@ from dojo.api_v2.views import (
     NetworkLocationsViewset,
     NotesViewSet,
     NoteTypeViewSet,
-    NotificationsViewSet,
-    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -86,7 +84,7 @@ from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
-from dojo.github_issue_link.urls import urlpatterns as github_urls
+from dojo.github.ui.urls import urlpatterns as github_urls
 from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.jira.urls import urlpatterns as jira_urls
@@ -95,7 +93,8 @@ from dojo.location.api.urls import add_locations_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
 from dojo.note_type.urls import urlpatterns as note_type_urls
 from dojo.notes.urls import urlpatterns as notes_urls
-from dojo.notifications.urls import urlpatterns as notifications_urls
+from dojo.notifications.api.urls import add_notifications_urls
+from dojo.notifications.ui.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
@@ -152,8 +151,7 @@ v2_api.register(r"metadata", DojoMetaViewSet, basename="metadata")
 v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network_locations")
 v2_api.register(r"notes", NotesViewSet, basename="notes")
 v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
-v2_api.register(r"notifications", NotificationsViewSet, basename="notifications")
-v2_api.register(r"notification_webhooks", NotificationWebhooksViewSet)
+add_notifications_urls(v2_api)
 v2_api.register(r"products", ProductViewSet, basename="product")
 v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
 v2_api.register(r"product_groups", ProductGroupViewSet, basename="product_group")

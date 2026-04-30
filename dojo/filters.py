@@ -1959,6 +1959,7 @@ class FindingFilterHelper(FilterSet):
              "risk_acceptance__created__date"),
             ("last_reviewed", "last_reviewed"),
             ("planned_remediation_date", "planned_remediation_date"),
+            ("planned_remediation_version", "planned_remediation_version"),
             ("title", "title"),
             ("test__engagement__product__name",
              "test__engagement__product__name"),
@@ -1985,6 +1986,7 @@ class FindingFilterHelper(FilterSet):
             "kev_date": "Date added to KEV",
             "sla_age_days": "SLA age (days)",
             "planned_remediation_date": "Planned Remediation",
+            "planned_remediation_version": "Planned remediation version",
         },
     )
 
