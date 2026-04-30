@@ -39,7 +39,7 @@ except ImportError:
     pass
 
 # reference: https://pypi.org/project/django-environ/
-env = environ.FileAwareEnv(**{**dict(  # noqa: C408
+env = environ.FileAwareEnv(**{**dict(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
