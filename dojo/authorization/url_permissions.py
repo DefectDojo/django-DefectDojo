@@ -324,7 +324,7 @@ URL_PERMISSIONS = {
     "edit_dev_env": [("config", "dojo.change_development_environment")],
 
     # -----------------------------------------------------------------------
-    # GitHub Issue Link (dojo/github_issue_link/views.py)
+    # GitHub Issue Link (dojo/github/ui/views.py)
     # -----------------------------------------------------------------------
     "add_github": [("config", "dojo.add_github_conf")],
     "github": [("config", "dojo.view_github_conf")],

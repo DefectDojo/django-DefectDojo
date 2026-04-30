@@ -1,17 +1,21 @@
-# python
 import logging
 import sys
 
 from django.template.loader import render_to_string
-
-# External libs
 from github import Auth, Github
 
-# Dojo related imports
-from dojo.models import Engagement, GITHUB_Issue, GITHUB_PKey, Product
+from dojo.github.models import GITHUB_Issue, GITHUB_PKey
+from dojo.models import Engagement, Product
 
-# Create global
 logger = logging.getLogger(__name__)
+
+
+def validate_github_credentials(api_key):
+    """Verify a GitHub API key by fetching the authenticated user. Raises on failure."""
+    g = Github(api_key)
+    user = g.get_user()
+    logger.debug("Using user " + user.login)
+    return user.login
 
 
 def reopen_external_issue_github(find, note, prod, eng):

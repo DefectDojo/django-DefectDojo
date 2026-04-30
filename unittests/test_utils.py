@@ -27,6 +27,7 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
 )
+from dojo.notifications.signals import create_default_notifications
 from dojo.utils import dojo_crypto_encrypt, prepare_for_view, user_post_save
 
 from .dojo_test_case import DojoTestCase
@@ -59,74 +60,37 @@ class TestUtils(DojoTestCase):
         test_output = prepare_for_view(encrypt)
         self.assertEqual(test_input, test_output)
 
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_without_template(self, mock_notifications, mock_member, mock_settings):
+    @patch("dojo.notifications.signals.Notifications")
+    def test_create_default_notifications_without_template(self, mock_notifications):
         user = Dojo_User()
         user.id = 1
 
-        group = Dojo_Group()
-        group.id = 1
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-
         save_mock_notifications = Mock(return_value=Notifications())
         mock_notifications.return_value = save_mock_notifications
-        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
+        mock_notifications.DoesNotExist = Notifications.DoesNotExist
+        mock_notifications.objects.get.side_effect = Notifications.DoesNotExist
 
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_called_with(group=group, user=user, role=role)
-        save_mock_member.save.assert_called_once()
+        create_default_notifications(None, user, created=True)
 
         mock_notifications.assert_called_with(user=user)
         save_mock_notifications.save.assert_called_once()
 
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_with_template(self, mock_notifications, mock_member, mock_settings):
+    @patch("dojo.notifications.signals.Notifications")
+    def test_create_default_notifications_with_template(self, mock_notifications):
         user = Dojo_User()
         user.id = 1
 
-        group = Dojo_Group()
-        group.id = 1
-
         template = Mock(Notifications(template=False, user=user))
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-
         mock_notifications.objects.get.return_value = template
 
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_called_with(group=group, user=user, role=role)
-        save_mock_member.save.assert_called_once()
+        create_default_notifications(None, user, created=True)
 
         mock_notifications.objects.get.assert_called_with(template=True)
         template.save.assert_called_once()
 
     @patch("dojo.models.System_Settings.objects")
     @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_email_pattern_matches(self, mock_notifications, mock_member, mock_settings):
+    def test_user_post_save_email_pattern_matches(self, mock_member, mock_settings):
         user = Dojo_User()
         user.id = 1
         user.email = "john.doe@example.com"
@@ -144,9 +108,6 @@ class TestUtils(DojoTestCase):
         mock_settings.get.return_value = system_settings_group
         save_mock_member = Mock(return_value=Dojo_Group_Member())
         mock_member.return_value = save_mock_member
-        save_mock_notifications = Mock(return_value=Notifications())
-        mock_notifications.return_value = save_mock_notifications
-        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
 
         user_post_save(None, user, created=True)
 
@@ -155,8 +116,7 @@ class TestUtils(DojoTestCase):
 
     @patch("dojo.models.System_Settings.objects")
     @patch("dojo.utils.Dojo_Group_Member")
-    @patch("dojo.utils.Notifications")
-    def test_user_post_save_email_pattern_does_not_match(self, mock_notifications, mock_member, mock_settings):
+    def test_user_post_save_email_pattern_does_not_match(self, mock_member, mock_settings):
         user = Dojo_User()
         user.id = 1
         user.email = "john.doe@partner.example.com"
@@ -170,9 +130,6 @@ class TestUtils(DojoTestCase):
         system_settings_group.default_group = group
         system_settings_group.default_group_role = role
         system_settings_group.default_group_email_pattern = ".*@example.com"
-        save_mock_notifications = Mock(return_value=Notifications())
-        mock_notifications.return_value = save_mock_notifications
-        mock_notifications.objects.get.side_effect = Exception("Mock no templates")
 
         mock_settings.get.return_value = system_settings_group
         save_mock_member = Mock(return_value=Dojo_Group_Member())

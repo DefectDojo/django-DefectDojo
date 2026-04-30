@@ -126,8 +126,6 @@ from dojo.models import (
     Note_Type,
     NoteHistory,
     Notes,
-    Notification_Webhooks,
-    Notifications,
     Product,
     Product_API_Scan_Configuration,
     Product_Type,
@@ -3408,21 +3406,6 @@ class CeleryViewSet(viewsets.ViewSet):
         return Response({"purged": purged})
 
 
-# Authorization: superuser
-@extend_schema_view(**schema_with_prefetch())
-class NotificationsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.NotificationsSerializer
-    queryset = Notifications.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "user", "product", "template"]
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Notifications.objects.all().order_by("id")
-
-
 @extend_schema_view(**schema_with_prefetch())
 class EngagementPresetsViewset(
     PrefetchDojoModelViewSet,
@@ -3685,13 +3668,3 @@ class AnnouncementViewSet(
 
     def get_queryset(self):
         return Announcement.objects.all().order_by("id")
-
-
-class NotificationWebhooksViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.NotificationWebhooksSerializer
-    queryset = Notification_Webhooks.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users
