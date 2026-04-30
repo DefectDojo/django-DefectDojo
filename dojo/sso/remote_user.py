@@ -8,7 +8,7 @@ from netaddr import IPAddress
 from rest_framework.authentication import RemoteUserAuthentication as OriginalRemoteUserAuthentication
 
 from dojo.models import Dojo_Group
-from dojo.pipeline import assign_user_to_groups, cleanup_old_groups_for_user
+from dojo.sso.pipeline import assign_user_to_groups, cleanup_old_groups_for_user
 
 logger = logging.getLogger(__name__)
 
@@ -90,7 +90,7 @@ class RemoteUserBackend(OriginalRemoteUserBackend):
 
 
 class RemoteUserScheme(OpenApiAuthenticationExtension):
-    target_class = "dojo.remote_user.RemoteUserAuthentication"
+    target_class = "dojo.sso.remote_user.RemoteUserAuthentication"
     name = "remoteUserAuth"
     match_subclasses = True
     priority = 1
