@@ -48,7 +48,7 @@ from kombu import Connection
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.finding.queries import get_authorized_findings
-from dojo.github import (
+from dojo.github.services import (
     add_external_issue_github,
     close_external_issue_github,
     reopen_external_issue_github,
