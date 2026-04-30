@@ -48,7 +48,7 @@ from kombu import Connection
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
 from dojo.finding.queries import get_authorized_findings
-from dojo.github import (
+from dojo.github.services import (
     add_external_issue_github,
     close_external_issue_github,
     reopen_external_issue_github,
@@ -1767,7 +1767,9 @@ def async_delete_task(obj, **kwargs):
     # Capture product reference before deletion for product grading at the end
     product = None
     with suppress(Product.DoesNotExist, Engagement.DoesNotExist, Test.DoesNotExist):
-        if isinstance(obj, Engagement):
+        if isinstance(obj, Product):
+            product = obj
+        elif isinstance(obj, Engagement):
             product = obj.product
         elif isinstance(obj, Test):
             product = obj.engagement.product
@@ -1776,6 +1778,8 @@ def async_delete_task(obj, **kwargs):
     scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
     if scope_field:
         finding_qs = Finding.objects.filter(**{scope_field: obj})
+        # cascade_root is some context we provide to the bulk_delete_findings function
+        cascade_root = {"model": obj._meta.label_lower, "pk": obj.pk}
 
         # Step 2: Prepare duplicate clusters (must happen before any deletion)
         # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
@@ -1794,10 +1798,18 @@ def async_delete_task(obj, **kwargs):
         outside_count = outside_dupes_qs.count()
         if outside_count:
             logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_count)
-            bulk_delete_findings(outside_dupes_qs, chunk_size=chunk_size)
+            bulk_delete_findings(
+                outside_dupes_qs,
+                chunk_size=chunk_size,
+                cascade_root=cascade_root,
+            )
 
         # Step 4: Delete the main scope findings
-        bulk_delete_findings(finding_qs, chunk_size=chunk_size)
+        bulk_delete_findings(
+            finding_qs,
+            chunk_size=chunk_size,
+            cascade_root=cascade_root,
+        )
 
     # Step 5: Delete all remaining related objects (Tests, Engagements,
     # Endpoints, etc.) via SQL cascade. Findings are already gone, so
@@ -1813,8 +1825,10 @@ def async_delete_task(obj, **kwargs):
     # All children are already gone so this is a single-row DELETE.
     obj.delete()
 
-    # Step 7: Recalculate product grade once (not per-object)
-    if product:
+    # Step 7: Recalculate product grade once (Engagement/Test deletes only). Skip when the
+    # deleted object is the Product itself — it is removed in step 6 and grading is pointless.
+    # For Product TYpe deletiongs we don't have a product instance, so this never fires.
+    if product and not isinstance(obj, Product):
         perform_product_grading(product)
 
     logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)

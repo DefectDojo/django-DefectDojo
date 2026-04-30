@@ -935,7 +935,10 @@ if not env("DD_DEFAULT_SWAGGER_UI"):
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [Path(DOJO_ROOT) / "notifications" / "templates"],
+        "DIRS": [
+            root("dojo/notifications/templates"),
+            root("dojo/github/templates"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "debug": env("DD_DEBUG"),
