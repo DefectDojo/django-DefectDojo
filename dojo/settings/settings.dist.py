@@ -20,6 +20,12 @@ from celery.schedules import crontab
 from netaddr import IPNetwork, IPSet
 
 from dojo import __version__
+from dojo.notifications.settings import (
+    NOTIFICATIONS_ENV_DEFAULTS,
+)
+from dojo.notifications.settings import (
+    populate_settings as _populate_notifications_settings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -248,13 +254,7 @@ env = environ.FileAwareEnv(
     # SLA Notifications via alerts and JIRA comments
     # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature.
     # If desired you can enable to only notify for Findings that are linked to JIRA issues.
-    # All three flags are moved to system_settings, will be removed from settings file
-    DD_SLA_NOTIFY_ACTIVE=(bool, False),
-    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
-    DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
-    # finetuning settings for when enabled
-    DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
-    DD_SLA_NOTIFY_POST_BREACH=(int, 7),
+    # SLA + alert + notification env-var schema lives in dojo/notifications/settings.py.
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
@@ -282,10 +282,6 @@ env = environ.FileAwareEnv(
     DD_LOGGING_HANDLER=(str, "console"),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
     DD_DEFAULT_SWAGGER_UI=(bool, False),
-    DD_ALERT_REFRESH=(bool, True),
-    DD_DISABLE_ALERT_COUNTER=(bool, False),
-    # to disable deleting alerts per user set value to -1
-    DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
     # regular expression to exclude one or more parsers
@@ -368,8 +364,6 @@ env = environ.FileAwareEnv(
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
-    # Use System notification settings to override user's notification settings
-    DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     # For HTTP requests, how long connection is open before timeout
@@ -379,6 +373,8 @@ env = environ.FileAwareEnv(
     DD_V3_FEATURE_LOCATIONS=(bool, False),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
+    # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
+    **NOTIFICATIONS_ENV_DEFAULTS,
 )
 
 
@@ -446,9 +442,7 @@ USE_TZ = env("DD_USE_TZ")
 
 TEST_RUNNER = env("DD_TEST_RUNNER")
 
-ALERT_REFRESH = env("DD_ALERT_REFRESH")
-DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
-MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
+_populate_notifications_settings(env, globals())
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
 # Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
@@ -725,12 +719,7 @@ DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 # If you import thousands of Active findings through your pipeline everyday,
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
-# 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
-SLA_NOTIFY_ACTIVE = env("DD_SLA_NOTIFY_ACTIVE")  # this will include 'verified' findings as well as non-verified.
-SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env("DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY")
-SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")  # Based on the 2 above, but only with a JIRA link
-SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")  # in days, notify between dayofbreach minus this number until dayofbreach
-SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")  # in days, skip notifications for findings that go past dayofbreach plus this number
+# SLA_NOTIFY_* are populated by dojo.notifications.settings.populate_settings (see ALERT_REFRESH section above).
 
 
 SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
@@ -946,7 +935,10 @@ if not env("DD_DEFAULT_SWAGGER_UI"):
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [root("dojo/github/templates")],
+        "DIRS": [
+            root("dojo/notifications/templates"),
+            root("dojo/github/templates"),
+        ],
         "APP_DIRS": True,
         "OPTIONS": {
             "debug": env("DD_DEBUG"),
@@ -959,9 +951,9 @@ TEMPLATES = [
                 "social_django.context_processors.login_redirect",
                 "dojo.context_processors.globalize_vars",
                 "dojo.context_processors.bind_system_settings",
-                "dojo.context_processors.bind_alert_count",
+                "dojo.notifications.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
-                "dojo.context_processors.session_expiry_notification",
+                "dojo.notifications.context_processors.session_expiry_notification",
                 "dojo.context_processors.labels",
             ],
         },
@@ -1290,7 +1282,7 @@ WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_S
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
     "add-alerts": {
-        "task": "dojo.tasks.add_alerts",
+        "task": "dojo.notifications.tasks.add_alerts",
         "schedule": timedelta(hours=1),
         "args": [timedelta(hours=1)],
         "options": {
@@ -1298,7 +1290,7 @@ CELERY_BEAT_SCHEDULE = {
         },
     },
     "cleanup-alerts": {
-        "task": "dojo.tasks.cleanup_alerts",
+        "task": "dojo.notifications.tasks.cleanup_alerts",
         "schedule": timedelta(hours=8),
         "options": {
             "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
@@ -1326,7 +1318,7 @@ CELERY_BEAT_SCHEDULE = {
         },
     },
     "compute-sla-age-and-notify": {
-        "task": "dojo.tasks.async_sla_compute_and_notify_task",
+        "task": "dojo.notifications.tasks.async_sla_compute_and_notify_task",
         "schedule": crontab(hour=7, minute=30),
         "options": {
             "expires": int(60 * 60 * 24 * 1.2),  # If a task is not executed within 28.8 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
@@ -1340,7 +1332,7 @@ CELERY_BEAT_SCHEDULE = {
         },
     },
     "notification_webhook_status_cleanup": {
-        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "task": "dojo.notifications.tasks.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
         "options": {
             "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
@@ -2097,7 +2089,7 @@ USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
 # ------------------------------------------------------------------------------
 # Notifications
 # ------------------------------------------------------------------------------
-NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
+# NOTIFICATIONS_SYSTEM_LEVEL_TRUMP is populated by dojo.notifications.settings.populate_settings.
 
 # ------------------------------------------------------------------------------
 # Timeouts
