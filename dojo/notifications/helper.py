@@ -18,7 +18,6 @@ from django.utils.translation import gettext as _
 from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.decorators import we_want_async
 from dojo.labels import get_labels
 from dojo.models import (
@@ -833,19 +832,19 @@ class NotificationManager(NotificationManagerHelpers):
 
         # Some errors should not be pushed to all channels, only to alerts.
         # For example reasons why JIRA Issues: https://github.com/DefectDojo/django-DefectDojo/issues/11575
+        # Per-channel sends run synchronously inside the surrounding async_create_notification
+        # task body. Dispatching inner Celery tasks would require JSON-serializable kwargs, but
+        # callers pass model instances (finding/test/engagement/product/...) and refetching every
+        # one of them per channel would multiply DB queries; running synchronously avoids both.
         if not alert_only:
+            user_id = getattr(notifications.user, "id", None)
             if self.system_settings.enable_slack_notifications and "slack" in getattr(
                 notifications,
                 event,
                 notifications.other,
             ):
                 logger.debug("Sending Slack Notification")
-                dojo_dispatch_task(
-                    send_slack_notification,
-                    event,
-                    user_id=getattr(notifications.user, "id", None),
-                    **kwargs,
-                )
+                send_slack_notification.run(event, user_id=user_id, **kwargs)
 
             if self.system_settings.enable_msteams_notifications and "msteams" in getattr(
                 notifications,
@@ -853,12 +852,7 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending MSTeams Notification")
-                dojo_dispatch_task(
-                    send_msteams_notification,
-                    event,
-                    user_id=getattr(notifications.user, "id", None),
-                    **kwargs,
-                )
+                send_msteams_notification.run(event, user_id=user_id, **kwargs)
 
             if self.system_settings.enable_mail_notifications and "mail" in getattr(
                 notifications,
@@ -866,12 +860,7 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Mail Notification")
-                dojo_dispatch_task(
-                    send_mail_notification,
-                    event,
-                    user_id=getattr(notifications.user, "id", None),
-                    **kwargs,
-                )
+                send_mail_notification.run(event, user_id=user_id, **kwargs)
 
             if self.system_settings.enable_webhooks_notifications and "webhooks" in getattr(
                 notifications,
@@ -879,12 +868,7 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Webhooks Notification")
-                dojo_dispatch_task(
-                    send_webhooks_notification,
-                    event,
-                    user_id=getattr(notifications.user, "id", None),
-                    **kwargs,
-                )
+                send_webhooks_notification.run(event, user_id=user_id, **kwargs)
 
 
 @app.task

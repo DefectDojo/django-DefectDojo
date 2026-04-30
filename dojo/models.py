@@ -1094,7 +1094,12 @@ class SLA_Configuration(models.Model):
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
                 from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, self, products, severities=severities)
+                dojo_dispatch_task(
+                    async_update_sla_expiration_dates_sla_config_sync,
+                    self.id,
+                    list(products.values_list("id", flat=True)),
+                    severities=severities,
+                )
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1256,7 +1261,11 @@ class Product(BaseModel):
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
                 from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, sla_config, Product.objects.filter(id=self.id))
+                dojo_dispatch_task(
+                    async_update_sla_expiration_dates_sla_config_sync,
+                    sla_config.id,
+                    [self.id],
+                )
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])

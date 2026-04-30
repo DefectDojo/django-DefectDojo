@@ -28,23 +28,26 @@ class DojoAsyncTask(Task):
         """
         Restore user context in the celery worker via crum.impersonate.
 
-        The apply_async method injects ``async_user`` into kwargs when a task
-        is dispatched. Here we pop it and set it as the current user in
-        thread-local storage so that all downstream code — including nested
-        dojo_dispatch_task calls — sees the correct user via
-        get_current_user().
+        The apply_async method injects ``async_user_id`` into kwargs when a task
+        is dispatched. Here we pop it, resolve to a user instance, and set it
+        as the current user in thread-local storage so that all downstream
+        code — including nested dojo_dispatch_task calls — sees the correct
+        user via get_current_user().
 
-        When a task is called directly (not via apply_async), async_user is
+        When a task is called directly (not via apply_async), async_user_id is
         not in kwargs. In that case we leave the existing crum context
         intact so that callers who already set a user (e.g. via
         crum.impersonate in tests or request middleware) are not disrupted.
         """
-        if "async_user" not in kwargs:
+        if "async_user_id" not in kwargs:
             return super().__call__(*args, **kwargs)
 
         import crum  # noqa: PLC0415
 
-        user = kwargs.pop("async_user")
+        from dojo.models import Dojo_User  # noqa: PLC0415 circular import
+
+        user_id = kwargs.pop("async_user_id")
+        user = Dojo_User.objects.filter(pk=user_id).first() if user_id else None
         with crum.impersonate(user):
             return super().__call__(*args, **kwargs)
 
@@ -59,8 +62,9 @@ class DojoAsyncTask(Task):
         # Inject user context for Dojo tasks only. Celery built-in tasks (e.g.
         # celery.backend_cleanup) do not accept custom kwargs.
         task_name = self.name or ""
-        if not task_name.startswith("celery.") and "async_user" not in kwargs:
-            kwargs["async_user"] = get_current_user()
+        if not task_name.startswith("celery.") and "async_user_id" not in kwargs:
+            user = get_current_user()
+            kwargs["async_user_id"] = user.id if user else None
 
         # Control flag used for sync/async decision; never pass into the task itself
         kwargs.pop("sync", None)
@@ -135,8 +139,6 @@ class PgHistoryTask(PluggableContextTask):
 
 app = Celery("dojo", task_cls=PgHistoryTask)
 
-# Using a string here means the worker will not have to
-# pickle the object when using Windows.
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)

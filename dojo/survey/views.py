@@ -1,4 +1,4 @@
-import pickle
+import json
 from datetime import date, timedelta
 
 from django.contrib import messages
@@ -490,7 +490,7 @@ def create_question(request):
                         order=form.cleaned_data["order"],
                         text=form.cleaned_data["text"],
                         multichoice=choiceQuestionFrom.cleaned_data["multichoice"])
-                    choices_to_process = pickle.loads(choiceQuestionFrom.cleaned_data["answer_choices"])
+                    choices_to_process = json.loads(choiceQuestionFrom.cleaned_data["answer_choices"])
 
                     for c in choices_to_process:
                         if c is not None and len(c) > 0:
