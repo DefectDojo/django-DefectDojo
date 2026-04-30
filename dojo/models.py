@@ -1099,6 +1099,10 @@ class SLA_Configuration(models.Model):
                     list(products.values_list("id", flat=True)),
                     severities=severities,
                 )
+                # The async task refetches and resets async_updating on its own copy.
+                # Mirror that on this in-memory instance so a subsequent save() on the
+                # same instance does not trigger the lock-revert path at line 1058.
+                self.async_updating = False
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1265,6 +1269,12 @@ class Product(BaseModel):
                     sla_config.id,
                     [self.id],
                 )
+                # The async task refetches and resets async_updating on its own copies.
+                # Mirror that on this in-memory product and the in-memory sla_config so a
+                # subsequent save() on either does not trigger their lock-revert paths.
+                self.async_updating = False
+                if sla_config:
+                    sla_config.async_updating = False
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
