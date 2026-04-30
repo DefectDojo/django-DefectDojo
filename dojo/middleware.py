@@ -6,15 +6,10 @@ from threading import local
 from urllib.parse import quote
 
 import pghistory.middleware
-import requests
 from django.conf import settings
-from django.contrib import messages
 from django.db import models
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
 from django.urls import reverse
-from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
-from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -77,31 +72,6 @@ class LoginRequiredMiddleware:
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
         return response
-
-
-class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
-    def process_exception(self, request, exception):
-        if isinstance(exception, requests.exceptions.RequestException):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthCanceled):
-            messages.warning(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthFailed):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthForbidden):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthTokenError):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, TypeError) and "'NoneType' object is not iterable" in str(exception):
-            logger.warning("OIDC login error: NoneType is not iterable")
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE)
-            return redirect("/login?force_login_form")
-        logger.error(f"Unhandled exception during social login: {exception}")
-        return super().process_exception(request, exception)
 
 
 class DojoSytemSettingsMiddleware:
