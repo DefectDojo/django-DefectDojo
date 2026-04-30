@@ -1967,6 +1967,7 @@ class FindingFilterHelper(FilterSet):
              "risk_acceptance__created__date"),
             ("last_reviewed", "last_reviewed"),
             ("planned_remediation_date", "planned_remediation_date"),
+            ("planned_remediation_version", "planned_remediation_version"),
             ("title", "title"),
             ("test__engagement__product__name",
              "test__engagement__product__name"),
@@ -1993,6 +1994,7 @@ class FindingFilterHelper(FilterSet):
             "kev_date": "Date added to KEV",
             "sla_age_days": "SLA age (days)",
             "planned_remediation_date": "Planned Remediation",
+            "planned_remediation_version": "Planned remediation version",
         },
     )
 
@@ -3139,21 +3141,38 @@ class ApiEndpointFilter(DojoFilter):
 
 
 class ApiRiskAcceptanceFilter(DojoFilter):
+    created = DateRangeFilter()
+    updated = DateRangeFilter()
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
             ("name", "name"),
+            ("created", "created"),
+            ("updated", "updated"),
         ),
     )
 
     class Meta:
         model = Risk_Acceptance
-        fields = [
-            "name", "accepted_findings", "recommendation", "recommendation_details",
-            "decision", "decision_details", "accepted_by", "owner", "expiration_date",
-            "expiration_date_warned", "expiration_date_handled", "reactivate_expired",
-            "restart_sla_expired", "notes",
-        ]
+        fields = {
+            "name": ["exact", "icontains"],
+            "accepted_findings": ["exact"],
+            "recommendation": ["exact"],
+            "recommendation_details": ["exact", "icontains"],
+            "decision": ["exact"],
+            "decision_details": ["exact", "icontains"],
+            "accepted_by": ["exact", "icontains"],
+            "owner": ["exact"],
+            "expiration_date": ["exact", "gt", "lt", "gte", "lte"],
+            "expiration_date_warned": ["exact", "gt", "lt", "gte", "lte"],
+            "expiration_date_handled": ["exact", "gt", "lt", "gte", "lte"],
+            "reactivate_expired": ["exact"],
+            "restart_sla_expired": ["exact"],
+            "notes": ["exact"],
+            "created": ["exact", "gt", "lt", "gte", "lte"],
+            "updated": ["exact", "gt", "lt", "gte", "lte"],
+        }
 
 
 class EngagementTestFilterHelper(FilterSet):

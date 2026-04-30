@@ -1,9 +1,10 @@
 import importlib
 import json
 import logging
+import re
 from contextlib import suppress
-from datetime import timedelta
 
+import crum
 import requests
 import yaml
 from django.conf import settings
@@ -12,22 +13,18 @@ from django.core.mail import EmailMessage
 from django.db.models import Count, Prefetch, Q, QuerySet
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
-from django.urls import reverse
+from django.urls import get_script_prefix, reverse
 from django.utils.translation import gettext as _
 
 from dojo import __version__ as dd_version
 from dojo.authorization.roles_permissions import Permissions
-from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.decorators import we_want_async
 from dojo.labels import get_labels
 from dojo.models import (
-    Alerts,
     Dojo_User,
     Engagement,
     Finding,
-    Notification_Webhooks,
-    Notifications,
     Product,
     Product_Type,
     System_Settings,
@@ -35,6 +32,7 @@ from dojo.models import (
     UserContactInfo,
     get_current_datetime,
 )
+from dojo.notifications.models import Alerts, Notification_Webhooks, Notifications
 from dojo.user.queries import (
     get_authorized_users_for_product_and_product_type,
     get_authorized_users_for_product_type,
@@ -814,6 +812,9 @@ class NotificationManager(NotificationManagerHelpers):
             logger.warning("no notifications!")
             return
 
+        # Lazy import to avoid circular import: dojo.notifications.tasks imports the
+        # Manager classes defined in this module.
+
         logger.debug(
             "sending notification " + ("asynchronously" if we_want_async() else "synchronously"),
         )
@@ -887,60 +888,254 @@ class NotificationManager(NotificationManagerHelpers):
                 )
 
 
-@app.task
-def send_slack_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
-    user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    get_manager_class_instance()._get_manager_instance("slack").send_slack_notification(event, user=user, **kwargs)
+def process_tag_notifications(request, note, parent_url, parent_title):
+    regex = re.compile(r"(?:\A|\s)@(\w+)\b")
+
+    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
+
+    users_to_notify = [
+        Dojo_User.objects.filter(username=username).get()
+        for username in usernames_to_check
+        if Dojo_User.objects.filter(is_active=True, username=username).exists()
+    ]
+
+    if len(note.entry) > 200:
+        note.entry = note.entry[:200]
+        note.entry += "..."
+
+    create_notification(
+        event="user_mentioned",
+        section=parent_title,
+        note=note,
+        title=f"{request.user} jotted a note",
+        url=parent_url,
+        icon="commenting",
+        recipients=users_to_notify,
+        requested_by=crum.get_current_user())
 
 
-@app.task
-def send_msteams_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
-    user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    get_manager_class_instance()._get_manager_instance("msteams").send_msteams_notification(event, user=user, **kwargs)
+def sla_compute_and_notify(*args, **kwargs):
+    """
+    The SLA computation and notification will be disabled if the user opts out
+    of the Findings SLA on the System Settings page.
+
+    Notifications are managed the usual way, so you'd have to opt-in.
+    Exception is for JIRA issues, which would get a comment anyways.
+    """
+    from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
+
+    class NotificationEntry:
+        def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
+            self.finding = finding
+            self.jira_issue = jira_issue
+            self.do_jira_sla_comment = do_jira_sla_comment
+
+    def _add_notification(finding, kind):
+        # jira_issue, do_jira_sla_comment are taken from the context
+        # kind can be one of: breached, prebreach, breaching
+        if finding.test.engagement.product.disable_sla_breach_notifications:
+            return
+
+        notification = NotificationEntry(finding=finding,
+                                         jira_issue=jira_issue,
+                                         do_jira_sla_comment=do_jira_sla_comment)
+
+        pt = finding.test.engagement.product.prod_type.name
+        p = finding.test.engagement.product.name
+
+        if pt in combined_notifications:
+            if p in combined_notifications[pt]:
+                if kind in combined_notifications[pt][p]:
+                    combined_notifications[pt][p][kind].append(notification)
+                else:
+                    combined_notifications[pt][p][kind] = [notification]
+            else:
+                combined_notifications[pt][p] = {kind: [notification]}
+        else:
+            combined_notifications[pt] = {p: {kind: [notification]}}
+
+    def _notification_title_for_finding(finding, kind, sla_age):
+        title = f"Finding {finding.id} - "
+        if kind == "breached":
+            abs_sla_age = abs(sla_age)
+            period = "day"
+            if abs_sla_age > 1:
+                period = "days"
+            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
+        elif kind == "prebreach":
+            title += f"SLA pre-breach warning - {sla_age} day(s) left"
+        elif kind == "breaching":
+            title += "SLA is breaching today"
+
+        return title
+
+    def _create_notifications():
+        for prodtype, comb_notif_prodtype in combined_notifications.items():
+            for prod, comb_notif_prod in comb_notif_prodtype.items():
+                for kind, comb_notif_kind in comb_notif_prod.items():
+                    # creating notifications on per-finding basis
+
+                    # we need this list for combined notification feature as we
+                    # can not supply references to local objects as
+                    # create_notification() arguments
+                    findings_list = []
+
+                    for n in comb_notif_kind:
+                        sla_age = n.finding.sla_days_remaining()
+                        title = _notification_title_for_finding(n.finding, kind, sla_age)
+                        create_notification(
+                            event="sla_breach",
+                            title=title,
+                            finding=n.finding,
+                            sla_age=sla_age,
+                            url=reverse("view_finding", args=(n.finding.id,)),
+                        )
+
+                        if n.do_jira_sla_comment:
+                            logger.info("Creating JIRA comment to notify of SLA breach information.")
+                            jira_services.add_simple_comment(jira_instance, n.jira_issue, title)
+
+                        findings_list.append(n.finding)
+
+                    # producing a "combined" SLA breach notification
+                    title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
+                    product = comb_notif_kind[0].finding.test.engagement.product
+                    create_notification(
+                        event="sla_breach_combined",
+                        title=title_combined,
+                        product=product,
+                        findings=findings_list,
+                        breach_kind=kind,
+                        base_url=get_script_prefix(),
+                    )
+
+    # exit early on flags
+    system_settings = System_Settings.objects.get()
+    if not system_settings.enable_notify_sla_active and not system_settings.enable_notify_sla_active_verified:
+        logger.info("Will not notify on SLA breach per user configured settings")
+        return
+
+    jira_issue = None
+    jira_instance = None
+    # notifications list per product per product type
+    combined_notifications = {}
+    try:
+        if system_settings.enable_finding_sla:
+            logger.info("About to process findings for SLA notifications.")
+            logger.debug(f"Active {system_settings.enable_notify_sla_active}, Verified {system_settings.enable_notify_sla_active_verified}, Has JIRA {system_settings.enable_notify_sla_jira_only}, pre-breach {settings.SLA_NOTIFY_PRE_BREACH}, post-breach {settings.SLA_NOTIFY_POST_BREACH}")
+
+            query = None
+            if system_settings.enable_notify_sla_active_verified:
+                query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
+            elif system_settings.enable_notify_sla_active:
+                query = Q(active=True, is_mitigated=False, duplicate=False)
+            logger.debug("My query: %s", query)
+
+            no_jira_findings = {}
+            if system_settings.enable_notify_sla_jira_only:
+                logger.debug("Ignoring findings that are not linked to a JIRA issue")
+                no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
+
+            total_count = 0
+            pre_breach_count = 0
+            post_breach_count = 0
+            post_breach_no_notify_count = 0
+            jira_count = 0
+            at_breach_count = 0
+
+            # Taking away for now, since the prefetch is not efficient
+            # .select_related('jira_issue') \
+            # .prefetch_related(Prefetch('test__engagement__product__jira_project_set__jira_instance')) \
+            # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
+            findings = Finding.objects \
+                .filter(query) \
+                .exclude(severity="Info") \
+                .exclude(id__in=no_jira_findings)
+
+            for finding in findings:
+                total_count += 1
+                sla_age = finding.sla_days_remaining()
+
+                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
+                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
+                severity, enforce = finding.get_sla_period()
+                if not enforce:
+                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
+                    continue
+
+                # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
+                if sla_age is None:
+                    sla_age = 0
+
+                if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
+                    post_breach_no_notify_count += 1
+                    # Skip finding notification if breached for too long
+                    logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
+                    continue
+
+                do_jira_sla_comment = False
+                jira_issue = None
+                if finding.has_jira_issue:
+                    jira_issue = finding.jira_issue
+                elif finding.has_jira_group_issue:
+                    jira_issue = finding.finding_group.jira_issue
+
+                if jira_issue:
+                    jira_count += 1
+                    jira_instance = jira_services.get_instance(finding)
+                    if jira_instance is not None:
+                        logger.debug("JIRA config for finding is %s", jira_instance)
+                        # global config or product config set, product level takes precedence
+                        try:
+                            # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
+                            product_jira_sla_comment_enabled = jira_services.get_project(finding).product_jira_sla_notification
+                        except Exception as e:
+                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
+                            logger.error("Error is: %s", e)
+
+                        jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
+
+                        if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
+                            logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
+                            do_jira_sla_comment = True
+                            logger.debug(f"JIRA issue is {jira_issue.jira_key}")
+
+                logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
+                if (sla_age < 0):
+                    post_breach_count += 1
+                    logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
+                    abs_sla_age = abs(sla_age)
+                    if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
+                        _add_notification(finding, "breached")
+                    else:
+                        logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
+                # The finding is within the pre-breach period
+                elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
+                    pre_breach_count += 1
+                    logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
+                    _add_notification(finding, "prebreach")
+                # The finding breaches the SLA today
+                elif (sla_age == 0):
+                    at_breach_count += 1
+                    logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
+                    _add_notification(finding, "breaching")
+
+            _create_notifications()
+            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, total_count)
+
+    except System_Settings.DoesNotExist:
+        logger.info("Findings SLA is not enabled.")
 
 
-@app.task
-def send_mail_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
-    user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    get_manager_class_instance()._get_manager_instance("mail").send_mail_notification(event, user=user, **kwargs)
-
-
-@app.task
-def send_webhooks_notification(event: str, user_id: int | None = None, **kwargs: dict) -> None:
-    user = Dojo_User.objects.get(pk=user_id) if user_id else None
-    get_manager_class_instance()._get_manager_instance("webhooks").send_webhooks_notification(event, user=user, **kwargs)
-
-
-@app.task(ignore_result=True)
-def webhook_reactivation(endpoint_id: int, **_kwargs: dict) -> None:
-    get_manager_class_instance()._get_manager_instance("webhooks")._webhook_reactivation(endpoint_id=endpoint_id)
-
-
-@app.task(ignore_result=True)
-def webhook_status_cleanup(*_args: list, **_kwargs: dict):
-    # If some endpoint was affected by some outage (5xx, 429, Timeout) but it was clean during last 24 hours,
-    # we consider this endpoint as healthy so need to reset it
-    endpoints = Notification_Webhooks.objects.filter(
-        status=Notification_Webhooks.Status.STATUS_ACTIVE_TMP,
-        last_error__lt=get_current_datetime() - timedelta(hours=24),
-    )
-    for endpoint in endpoints:
-        endpoint.status = Notification_Webhooks.Status.STATUS_ACTIVE
-        endpoint.first_error = None
-        endpoint.last_error = None
-        endpoint.note = f"Reactivation from {Notification_Webhooks.Status.STATUS_ACTIVE_TMP}"
-        endpoint.save()
-        logger.debug(
-            f"Webhook endpoint '{endpoint.name}' reactivated from '{Notification_Webhooks.Status.STATUS_ACTIVE_TMP}' to '{Notification_Webhooks.Status.STATUS_ACTIVE}'",
-        )
-
-    # Reactivation of STATUS_INACTIVE_TMP endpoints.
-    # They should reactive automatically in 60s, however in case of some unexpected event (e.g. start of whole stack),
-    # endpoints should not be left in STATUS_INACTIVE_TMP state
-    broken_endpoints = Notification_Webhooks.objects.filter(
-        status=Notification_Webhooks.Status.STATUS_INACTIVE_TMP,
-        last_error__lt=get_current_datetime() - timedelta(minutes=5),
-    )
-    for endpoint in broken_endpoints:
-        manager = WebhookNotificationManger()
-        manager._webhook_reactivation(endpoint_id=endpoint.pk)
+# Backward-compat re-exports: tasks moved to dojo.notifications.tasks. Placed at
+# end-of-file so the Manager classes above are fully defined before
+# dojo.notifications.tasks (which imports them) is loaded.
+from dojo.notifications.tasks import (  # noqa: E402, F401  -- backward compat
+    async_create_notification,
+    send_mail_notification,
+    send_msteams_notification,
+    send_slack_notification,
+    send_webhooks_notification,
+    webhook_reactivation,
+    webhook_status_cleanup,
+)

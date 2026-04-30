@@ -1,6 +1,5 @@
 import csv
 import datetime
-import hashlib
 import io
 import sys
 
@@ -89,9 +88,7 @@ class ContrastParser:
                     },
                 )
 
-            dupe_key = hashlib.sha256(
-                f"{finding.vuln_id_from_tool}".encode(),
-            ).digest()
+            dupe_key = finding.unique_id_from_tool
 
             if dupe_key in dupes:
                 dupes[dupe_key].description = (

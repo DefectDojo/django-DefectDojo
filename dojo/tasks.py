@@ -1,5 +1,4 @@
 import logging
-from datetime import timedelta
 
 import pghistory
 from celery import Task
@@ -9,90 +8,24 @@ from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.core.management import call_command
 from django.db.models import Count, Prefetch
-from django.urls import reverse
-from django.utils import timezone
 
 from dojo.auditlog import run_flush_auditlog
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import fix_loop_duplicates
 from dojo.management.commands.jira_status_reconciliation import jira_status_reconciliation
-from dojo.models import Alerts, Engagement, Finding, Product, System_Settings, User
-from dojo.notifications.helper import create_notification
-from dojo.utils import calculate_grade, sla_compute_and_notify
+from dojo.models import Finding, System_Settings
+from dojo.utils import calculate_grade
 
 logger = get_task_logger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
-# Logs the error to the alerts table, which appears in the notification toolbar
-def log_generic_alert(source, title, description):
-    create_notification(event="other", title=title, description=description,
-                        icon="bullseye", source=source)
-
-
-@app.task(bind=True)
-def add_alerts(self, runinterval, *args, **kwargs):
-    now = timezone.now()
-
-    upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by("target_start")
-    for engagement in upcoming_engagements:
-        create_notification(event="upcoming_engagement",
-                            title=f"Upcoming engagement: {engagement.name}",
-                            engagement=engagement,
-                            recipients=[engagement.lead],
-                            url=reverse("view_engagement", args=(engagement.id,)))
-
-    stale_engagements = Engagement.objects.filter(
-        target_start__gt=now - runinterval,
-        target_end__lt=now,
-        status="In Progress").order_by("-target_end")
-    for eng in stale_engagements:
-        create_notification(event="stale_engagement",
-                            title=f"Stale Engagement: {eng.name}",
-                            description='The engagement "{}" is stale. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
-                            url=reverse("view_engagement", args=(eng.id,)),
-                            recipients=[eng.lead])
-
-    system_settings = System_Settings.objects.get()
-    if system_settings.engagement_auto_close:
-        # Close Engagements older than user defined days
-        close_days = system_settings.engagement_auto_close_days
-        unclosed_engagements = Engagement.objects.filter(target_end__lte=now - timedelta(days=close_days),
-                                                        status="In Progress").order_by("target_end")
-
-        for eng in unclosed_engagements:
-            create_notification(event="auto_close_engagement",
-                                title=eng.name,
-                                description='The engagement "{}" has auto-closed. Target end was {}.'.format(eng.name, eng.target_end.strftime("%b. %d, %Y")),
-                                url=reverse("view_engagement", args=(eng.id,)),
-                                recipients=[eng.lead])
-
-        unclosed_engagements.update(status="Completed", active=False, updated=timezone.now())
-
-    # Calculate grade
-    if system_settings.enable_product_grade:
-        products = Product.objects.all()
-        for product in products:
-            dojo_dispatch_task(calculate_grade, product.id)
-
-
-@app.task(bind=True)
-def cleanup_alerts(*args, **kwargs):
-    try:
-        max_alerts_per_user = settings.MAX_ALERTS_PER_USER
-    except System_Settings.DoesNotExist:
-        max_alerts_per_user = -1
-
-    if max_alerts_per_user > -1:
-        total_deleted_count = 0
-        logger.info("start deleting oldest alerts if a user has more than %s alerts", max_alerts_per_user)
-        users = User.objects.all()
-        for user in users:
-            alerts_to_delete = Alerts.objects.filter(user_id=user.id).order_by("-created")[max_alerts_per_user:].values_list("id", flat=True)
-            total_deleted_count += len(alerts_to_delete)
-            Alerts.objects.filter(pk__in=list(alerts_to_delete)).delete()
-        logger.info("total number of alerts deleted: %s", total_deleted_count)
+from dojo.notifications.tasks import (  # noqa: E402, F401  -- backward compat
+    add_alerts,
+    cleanup_alerts,
+    log_generic_alert,
+)
 
 
 @app.task(bind=True)
@@ -189,19 +122,14 @@ def celery_status():
     return True
 
 
-@app.task
-def async_sla_compute_and_notify_task(*args, **kwargs):
-    logger.debug("Computing SLAs and notifying as needed")
-    try:
-        system_settings = System_Settings.objects.get()
-        if system_settings.enable_finding_sla:
-            sla_compute_and_notify(*args, **kwargs)
-    except Exception:
-        logger.exception("An unexpected error was thrown calling the SLA code")
+from dojo.notifications.tasks import async_sla_compute_and_notify_task  # noqa: E402, F401  -- backward compat
 
 
 @app.task
 def jira_status_reconciliation_task(*args, **kwargs):
+    if jira_status_reconciliation is None:
+        logger.warning("Jira status reconciliation is not available")
+        return None
     # Wrap with pghistory context for audit trail
     with pghistory.context(
         source="jira_reconciliation",

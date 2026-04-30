@@ -8,7 +8,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
-import dojo.jira_link.helper as jira_helper
+import dojo.jira.helper as jira_helper
 from dojo.models import Engagement, Finding, Finding_Group, Product
 
 logger = logging.getLogger(__name__)
@@ -327,7 +327,7 @@ def _reconcile_finding_groups(mode, product_obj, engagement_obj, timestamp, dryr
 
             if action == "import_status_from_jira":
                 # Import status from JIRA to all findings in the group
-                # Same pattern as the JIRA webhook handler in dojo/jira_link/views.py
+                # Same pattern as the JIRA webhook handler in dojo/jira/views.py
                 any_status_changed = False
                 for find in group_findings:
                     if not dryrun:

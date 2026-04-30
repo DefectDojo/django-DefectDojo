@@ -9,13 +9,11 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from github import Github
 
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
-
-# Local application/library imports
-from dojo.forms import DeleteGITHUBConfForm, GITHUBForm
-from dojo.models import GITHUB_Conf
+from dojo.github.models import GITHUB_Conf
+from dojo.github.services import validate_github_credentials
+from dojo.github.ui.forms import DeleteGITHUBConfForm, GITHUBForm
 from dojo.utils import add_breadcrumb, get_setting
 
 logger = logging.getLogger(__name__)
@@ -33,9 +31,7 @@ def new_github(request):
         if gform.is_valid():
             try:
                 api_key = gform.cleaned_data.get("api_key")
-                g = Github(api_key)
-                user = g.get_user()
-                logger.debug("Using user " + user.login)
+                validate_github_credentials(api_key)
 
                 new_j = gform.save(commit=False)
                 new_j.api_key = api_key
