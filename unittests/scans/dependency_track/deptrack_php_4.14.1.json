@@ -1,0 +1,643 @@
+{
+    "meta": {
+        "baseUrl": "http://dtrack.example.org",
+        "application": "Dependency-Track",
+        "version": "4.14.1",
+        "timestamp": "2026-04-24T19:38:13Z"
+    },
+    "findings": [
+        {
+            "component": {
+                "latestVersion": "v0.12.22",
+                "name": "psysh",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/psy/psysh@v0.12.10",
+                "uuid": "31e34ab6-b84e-42f1-905c-60f3aac1d3bc",
+                "version": "v0.12.10",
+                "group": "psy"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-02-20 12:59:34.289"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "cvssV3BaseScore": 6.7,
+                "vulnId": "GHSA-4486-gxhx-5mg7",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-4486-gxhx-5mg7",
+                        "cveId": "CVE-2026-25129"
+                    }
+                ],
+                "references": "* [https://github.com/bobthecow/psysh/security/advisories/GHSA-4486-gxhx-5mg7](https://github.com/bobthecow/psysh/security/advisories/GHSA-4486-gxhx-5mg7)\n* [https://github.com/bobthecow/psysh/releases/tag/v0.11.23](https://github.com/bobthecow/psysh/releases/tag/v0.11.23)\n* [https://github.com/bobthecow/psysh/releases/tag/v0.12.19](https://github.com/bobthecow/psysh/releases/tag/v0.12.19)\n* [https://nvd.nist.gov/vuln/detail/CVE-2026-25129](https://nvd.nist.gov/vuln/detail/CVE-2026-25129)\n* [https://github.com/advisories/GHSA-4486-gxhx-5mg7](https://github.com/advisories/GHSA-4486-gxhx-5mg7)",
+                "cweId": 427,
+                "description": "### Summary\nPsySH automatically loads and executes a `.psysh.php` file from the Current Working Directory (CWD) on startup. If an attacker can write to a directory that a victim later uses as their CWD when launching PsySH, the attacker can trigger arbitrary code execution in the victim's context. When the victim runs PsySH with elevated privileges (e.g., root), this results in local privilege escalation.\n\n### Details\nPsySH supports per-directory configuration via a `.psysh.php` file located in the process CWD. This file is executed implicitly when PsySH starts, without requiring explicit opt-in and without validating that the file and directory are safe (e.g., owned by the current user and not group/world-writable).\n\nThis enables a CWD poisoning scenario: a low-privileged user can plant a malicious `.psysh.php` in any directory they can write to, then wait for a higher-privileged user to start PsySH while their shell is in that directory.\n\n### PoC\n1. As a low-privileged user, create a malicious `.psysh.php` in an attacker-writable directory (example: `/tmp`):\n\n```bash\nbob@localhost:/tmp$ echo \"<?php system('id > poc.txt'); ?>\" > .psysh.php\nbob@localhost:/tmp# ls -lah .psysh.php\n-rw-r--r-- 1 bob bob 33 Jan 28 11:17 .psysh.php\n```\n\n2. As the victim user, start PsySH with CWD set to that directory and exit:\n\n```bash\nroot@localhost:/tmp# cd /tmp\nroot@localhost:/tmp# ./psysh\nPsy Shell v0.12.18 (PHP 8.1.2-1ubuntu2.23 \u2014 cli) by Justin Hileman\nNew PHP manual is available (latest: 3.0.1). Update with `doc --update-manual`\n> exit\n\n   INFO  Goodbye.\n\n```\n\n3. Verify code execution triggered in the victim context:\n\n```bash\nbob@localhost:/tmp$ ls -lah poc.txt\n-rw-r--r-- 1 root root 39 Jan 28 11:19 poc.txt\nbob@localhost:/tmp$ cat poc.txt\nuid=0(root) gid=0(root) groups=0(root)\n````\n\n\n### Impact\n\nThis is a CWD configuration poisoning issue leading to arbitrary code execution in the victim user\u2019s context. If a privileged user (e.g., root, a CI runner, or an ops/debug account) launches PsySH with CWD set to an attacker-writable directory containing a malicious `.psysh.php`, the attacker can execute commands with that privileged user\u2019s permissions, resulting in local privilege escalation.\n\nDownstream consumers that embed PsySH inherit this risk. For example, Laravel Tinker (`php artisan tinker`) uses PsySH. If a privileged user runs Tinker while their shell is in an attacker-writable directory, the `.psysh.php` auto-load behavior can be abused in the same way to execute attacker-controlled code under the victim\u2019s privileges.",
+                "cvssV3Vector": "CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:H",
+                "epssScore": 0.00005,
+                "source": "GITHUB",
+                "published": "2026-01-30 21:28:44.0",
+                "title": "PsySH has Local Privilege Escalation via CWD .psysh.php auto-load",
+                "cwes": [
+                    {
+                        "cweId": 427,
+                        "name": "Uncontrolled Search Path Element"
+                    }
+                ],
+                "uuid": "74d31593-c268-442c-a266-9535ededb57e",
+                "severityRank": 2,
+                "cweName": "Uncontrolled Search Path Element",
+                "epssPercentile": 0.00233
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:31e34ab6-b84e-42f1-905c-60f3aac1d3bc:74d31593-c268-442c-a266-9535ededb57e",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "13.1.7",
+                "name": "phpunit",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/phpunit/phpunit@10.5.48",
+                "uuid": "ba890e8c-91ed-4b2c-bed2-ea5c3ddf8eac",
+                "version": "10.5.48",
+                "group": "phpunit"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-02-20 12:59:34.981"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 7.8,
+                "vulnId": "GHSA-vvj3-c3rp-c85p",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-vvj3-c3rp-c85p",
+                        "cveId": "CVE-2026-24765"
+                    }
+                ],
+                "references": "* [https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-vvj3-c3rp-c85p](https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-vvj3-c3rp-c85p)\n* [https://github.com/sebastianbergmann/phpunit/commit/613d142f5a8471ca71623ce5ca2795f79248329e](https://github.com/sebastianbergmann/phpunit/commit/613d142f5a8471ca71623ce5ca2795f79248329e)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/10.5.63](https://github.com/sebastianbergmann/phpunit/releases/tag/10.5.63)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/11.5.50](https://github.com/sebastianbergmann/phpunit/releases/tag/11.5.50)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/12.5.8](https://github.com/sebastianbergmann/phpunit/releases/tag/12.5.8)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/8.5.52](https://github.com/sebastianbergmann/phpunit/releases/tag/8.5.52)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/9.6.33](https://github.com/sebastianbergmann/phpunit/releases/tag/9.6.33)\n* [https://owasp.org/www-project-top-10-ci-cd-security-risks/CICD-SEC-04-Poisoned-Pipeline-Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/CICD-SEC-04-Poisoned-Pipeline-Execution)\n* [https://nvd.nist.gov/vuln/detail/CVE-2026-24765](https://nvd.nist.gov/vuln/detail/CVE-2026-24765)\n* [https://github.com/sebastianbergmann/phpunit/commit/3141742e00620e2968d3d2e732d320de76685fda](https://github.com/sebastianbergmann/phpunit/commit/3141742e00620e2968d3d2e732d320de76685fda)\n* [https://lists.debian.org/debian-lts-announce/2026/02/msg00009.html](https://lists.debian.org/debian-lts-announce/2026/02/msg00009.html)\n* [https://github.com/advisories/GHSA-vvj3-c3rp-c85p](https://github.com/advisories/GHSA-vvj3-c3rp-c85p)",
+                "cweId": 502,
+                "description": "### Overview\n\nA vulnerability has been discovered involving unsafe deserialization of code coverage data in PHPT test execution. The vulnerability exists in the `cleanupForCoverage()` method, which deserializes code coverage files without validation, potentially allowing remote code execution if malicious `.coverage` files are present prior to the execution of the PHPT test.\n\n### Technical Details\n\n**Affected Component:** PHPT test runner, method `cleanupForCoverage()`\n**Affected Versions:** <= 8.5.51, <= 9.6.32, <= 10.5.61, <= 11.5.49, <= 12.5.7\n\n### Vulnerable Code Pattern\n\n```php\nif ($buffer !== false) {\n    // Unsafe call without restrictions\n    $coverage = @unserialize($buffer);\n}\n```\n\nThe vulnerability occurs when a `.coverage` file, which should not exist before test execution, is deserialized without the `allowed_classes` parameter restriction. An attacker with local file write access can place a malicious serialized object with a `__wakeup()` method into the file system, leading to arbitrary code execution during test runs with code coverage instrumentation enabled.\n\n### Attack Prerequisites and Constraints\n\nThis vulnerability requires **local file write access** to the location where PHPUnit stores or expects code coverage files for PHPT tests. This can occur through:\n\n* **CI/CD Pipeline Attacks:** A malicious pull request that places a `.coverage` file alongside test files, executed when the CI system runs tests using PHPUnit and collects code coverage information\n* **Local Development Environment:** An attacker with shell access or ability to write files to the project directory\n* **Compromised Dependencies:** A supply chain attack inserting malicious files into a package or monorepo\n\n**Critical Context:** Running test suites from unreviewed pull requests without isolated execution is inherently a code execution risk, independent of this specific vulnerability. This represents a broader class of [Poisoned Pipeline Execution (PPE) attacks](https://owasp.org/www-project-top-10-ci-cd-security-risks/CICD-SEC-04-Poisoned-Pipeline-Execution) affecting CI/CD systems.\n\n### Proposed Remediation Approach\n\nRather than just silently sanitizing the input via `['allowed_classes' => false]`, the maintainer has chosen to make the anomalous state explicit by treating pre-existing `.coverage` files for PHPT tests as an error condition.\n\n#### Rationale for Error-Based Approach:\n\n1. **Visibility Over Silence:** When an invariant is violated (a `.coverage` file existing before test execution), the error must be visible in CI/CD output, alerting operators to investigate the root cause rather than proceeding with sanitized input\n2. **Operational Security:** A `.coverage` file should never exist before tests run, coverage data is generated by executing tests, not sourced from artifacts. Its presence indicates:\n    * A malicious actor placed it intentionally\n    * Build artifacts from a previous run contaminated the environment\n    * An unexpected filesystem state requiring investigation\n3. **Defense-in-Depth Principle:** Protecting a single deserialization call does not address the fundamental attack surface. Proper mitigations for PPE attacks lie outside PHPUnit's scope:\n    * Isolate CI/CD runners (ephemeral, containerized environments)\n    * Restrict code execution on protected branches\n    * Scan pull requests and artifacts for tampering\n    * Use branch protection rules to prevent unreviewed code execution\n\n### Severity Classification\n\n* **Attack Vector (AV):** Local (L) \u2014 requires write access to the file system where tests execute\n* **Attack Complexity (AC):** Low (L) \u2014 exploitation is straightforward once the malicious file is placed\n* **Privileges Required (PR):** Low (L) \u2014 PR submitter status or contributor role provides sufficient access\n* **User Interaction (UI):** None (N) \u2014 automatic execution during standard test execution\n* **Scope (S):** Unchanged (U) \u2014 impact remains within the affected test execution context\n* **Confidentiality Impact (C):** High (H) \u2014 full remote code execution enables complete system compromise\n* **Integrity Impact (I):** High (H) \u2014 arbitrary code execution allows malicious modifications\n* **Availability Impact (A):** High (H) \u2014 full code execution permits denial-of-service actions\n\n### Mitigating Factors (Environmental Context)\n\nOrganizations can reduce the effective risk of this vulnerability through proper CI/CD configuration:\n\n* **Ephemeral Runners:** Use containerized, single-use CI/CD runners that discard filesystem state between runs\n* **Code Review Enforcement:** Require human review and approval before executing code from pull requests\n* **Branch Protection:** Enforce branch protection rules that block unreviewed code execution\n* **Artifact Isolation:** Separate build artifacts from source; never reuse artifacts across independent builds\n* **Access Control:** Limit file write permissions in CI environments to authenticated, trusted actors\n\n### Fixed Behaviour\n\nWhen a `.coverage` file is detected for a PHPT test prior to execution, PHPUnit will emit a clear error message identifying the anomalous state. This ensures:\n\n* **Visibility:** The error appears prominently in CI/CD output and test logs\n* **Investigation:** Operations teams can investigate the root cause (potential tampering, environment contamination)\n* **Fail-Fast Semantics:** Test execution stops rather than proceeding with an unexpected state\n\n### Recommendation\n\n**Update to the patched version immediately** if a project runs PHPT tests using PHPUnit with coverage instrumentation in any CI/CD environment that executes code from external contributors. Additionally, audit the project's CI/CD configuration to ensure:\n\n* Pull requests from forks or untrusted sources execute in isolated environments\n* Branch protection rules require human review before code execution\n* CI/CD runners are ephemeral and discarded after each build\n* Build artifacts are not reused across independent runs without validation",
+                "cvssV3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                "epssScore": 0.00081,
+                "source": "GITHUB",
+                "published": "2026-01-27 22:26:22.0",
+                "title": "PHPUnit Vulnerable to Unsafe Deserialization in PHPT Code Coverage Handling",
+                "cwes": [
+                    {
+                        "cweId": 502,
+                        "name": "Deserialization of Untrusted Data"
+                    }
+                ],
+                "uuid": "ac02ba9c-479f-4c0d-8ac8-3cdcd014583a",
+                "severityRank": 1,
+                "cweName": "Deserialization of Untrusted Data",
+                "epssPercentile": 0.23701
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:ba890e8c-91ed-4b2c-bed2-ea5c3ddf8eac:ac02ba9c-479f-4c0d-8ac8-3cdcd014583a",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "13.1.7",
+                "name": "phpunit",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/phpunit/phpunit@10.5.48",
+                "uuid": "ba890e8c-91ed-4b2c-bed2-ea5c3ddf8eac",
+                "version": "10.5.48",
+                "group": "phpunit"
+            },
+            "attribution": {
+                "alternateIdentifier": "CVE-2026-24765",
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-02-20 12:59:54.281",
+                "referenceUrl": "https://ossindex.sonatype.org/vulnerability/CVE-2026-24765?component-type=composer&component-name=phpunit%2Fphpunit&utm_source=dependency-track&utm_medium=integration&utm_content=v4.13.6"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 7.8,
+                "vulnId": "CVE-2026-24765",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-vvj3-c3rp-c85p",
+                        "cveId": "CVE-2026-24765"
+                    }
+                ],
+                "references": "* [https://github.com/sebastianbergmann/phpunit/commit/3141742e00620e2968d3d2e732d320de76685fda](https://github.com/sebastianbergmann/phpunit/commit/3141742e00620e2968d3d2e732d320de76685fda)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/10.5.63](https://github.com/sebastianbergmann/phpunit/releases/tag/10.5.63)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/11.5.50](https://github.com/sebastianbergmann/phpunit/releases/tag/11.5.50)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/12.5.8](https://github.com/sebastianbergmann/phpunit/releases/tag/12.5.8)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/8.5.52](https://github.com/sebastianbergmann/phpunit/releases/tag/8.5.52)\n* [https://github.com/sebastianbergmann/phpunit/releases/tag/9.6.33](https://github.com/sebastianbergmann/phpunit/releases/tag/9.6.33)\n* [https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-vvj3-c3rp-c85p](https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-vvj3-c3rp-c85p)\n* [https://lists.debian.org/debian-lts-announce/2026/02/msg00009.html](https://lists.debian.org/debian-lts-announce/2026/02/msg00009.html)",
+                "cweId": 502,
+                "description": "PHPUnit is a testing framework for PHP. A vulnerability has been discovered in versions prior to 12.5.8, 11.5.50, 10.5.62, 9.6.33, and 8.5.52 involving unsafe deserialization of code coverage data in PHPT test execution. The vulnerability exists in the `cleanupForCoverage()` method, which deserializes code coverage files without validation, potentially allowing remote code execution if malicious `.coverage` files are present prior to the execution of the PHPT test. The vulnerability occurs when a `.coverage` file, which should not exist before test execution, is deserialized without the `allowed_classes` parameter restriction. An attacker with local file write access can place a malicious serialized object with a `__wakeup()` method into the file system, leading to arbitrary code execution during test runs with code coverage instrumentation enabled. This vulnerability requires local file write access to the location where PHPUnit stores or expects code coverage files for PHPT tests. This can occur through CI/CD pipeline attacks, the local development environment, and/or compromised dependencies. Rather than just silently sanitizing the input via `['allowed_classes' => false]`, the maintainer has chosen to make the anomalous state explicit by treating pre-existing `.coverage` files for PHPT tests as an error condition. Starting in versions  in versions 12.5.8, 11.5.50, 10.5.62, 9.6.33, when a `.coverage` file is detected for a PHPT test prior to execution, PHPUnit will emit a clear error message identifying the anomalous state. Organizations can reduce the effective risk of this vulnerability through proper CI/CD configuration, including ephemeral runners, code review enforcement, branch protection, artifact isolation, and access control.",
+                "cvssV3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                "epssScore": 0.00126,
+                "source": "NVD",
+                "published": "2026-01-27 22:15:56.79",
+                "cwes": [
+                    {
+                        "cweId": 502,
+                        "name": "Deserialization of Untrusted Data"
+                    }
+                ],
+                "uuid": "917e90e5-5330-4fe2-aa34-31f9a21dd4f3",
+                "severityRank": 1,
+                "cweName": "Deserialization of Untrusted Data",
+                "epssPercentile": 0.31632
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:ba890e8c-91ed-4b2c-bed2-ea5c3ddf8eac:917e90e5-5330-4fe2-aa34-31f9a21dd4f3",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "3.0.51",
+                "name": "phpseclib",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/phpseclib/phpseclib@3.0.49",
+                "uuid": "49d15a67-4a45-4986-abb0-57b1e0a36592",
+                "version": "3.0.49",
+                "group": "phpseclib"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-03-20 00:24:59.612"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "vulnId": "GHSA-94g3-g5v7-q4jg",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-94g3-g5v7-q4jg",
+                        "cveId": "CVE-2026-32935"
+                    }
+                ],
+                "references": "* [https://github.com/phpseclib/phpseclib/security/advisories/GHSA-94g3-g5v7-q4jg](https://github.com/phpseclib/phpseclib/security/advisories/GHSA-94g3-g5v7-q4jg)\n* [https://github.com/phpseclib/phpseclib/commit/ccc21aef71eb170e9bf819b167e67d1fd9e6e788](https://github.com/phpseclib/phpseclib/commit/ccc21aef71eb170e9bf819b167e67d1fd9e6e788)\n* [https://nvd.nist.gov/vuln/detail/CVE-2026-32935](https://nvd.nist.gov/vuln/detail/CVE-2026-32935)\n* [https://github.com/advisories/GHSA-94g3-g5v7-q4jg](https://github.com/advisories/GHSA-94g3-g5v7-q4jg)",
+                "cvssV4Score": 8.2,
+                "cweId": 208,
+                "description": "### Impact\nThose using AES in CBC mode may be susceptible to a padding oracle timing attack.\n\n### Patches\nhttps://github.com/phpseclib/phpseclib/commit/ccc21aef71eb170e9bf819b167e67d1fd9e6e788\n\n### Workarounds\nUse AES in CTR, CFB or OFB modes",
+                "source": "GITHUB",
+                "published": "2026-03-19 16:42:18.0",
+                "title": "phpseclib's AES-CBC unpadding susceptible to padding oracle timing attack",
+                "cwes": [
+                    {
+                        "cweId": 208,
+                        "name": "Observable Timing Discrepancy"
+                    }
+                ],
+                "uuid": "4d5e727b-9e95-4b10-b43c-622c998a9aa6",
+                "severityRank": 1,
+                "cweName": "Observable Timing Discrepancy",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:49d15a67-4a45-4986-abb0-57b1e0a36592:4d5e727b-9e95-4b10-b43c-622c998a9aa6",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "3.0.51",
+                "name": "phpseclib",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/phpseclib/phpseclib@3.0.49",
+                "uuid": "49d15a67-4a45-4986-abb0-57b1e0a36592",
+                "version": "3.0.49",
+                "group": "phpseclib"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-03-21 01:00:18.254"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 5.9,
+                "vulnId": "CVE-2026-32935",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-94g3-g5v7-q4jg",
+                        "cveId": "CVE-2026-32935"
+                    }
+                ],
+                "references": "* [https://github.com/phpseclib/phpseclib/commit/ccc21aef71eb170e9bf819b167e67d1fd9e6e788](https://github.com/phpseclib/phpseclib/commit/ccc21aef71eb170e9bf819b167e67d1fd9e6e788)\n* [https://github.com/phpseclib/phpseclib/security/advisories/GHSA-94g3-g5v7-q4jg](https://github.com/phpseclib/phpseclib/security/advisories/GHSA-94g3-g5v7-q4jg)",
+                "cvssV4Score": 8.2,
+                "cweId": 208,
+                "description": "phpseclib is a PHP secure communications library. Projects using versions 1.0.26 and below, 2.0.0 through 2.0.51, and 3.0.0 through 3.0.49 are vulnerable to a to padding oracle timing attack when using AES in CBC mode. This issue has been fixed in versions 1.0.27, 2.0.52 and 3.0.50.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:N/A:N",
+                "epssScore": 0.0002,
+                "source": "NVD",
+                "published": "2026-03-20 03:16:00.763",
+                "cwes": [
+                    {
+                        "cweId": 208,
+                        "name": "Observable Timing Discrepancy"
+                    }
+                ],
+                "uuid": "ae415070-f9c4-42b5-97a7-5f216f0616d5",
+                "severityRank": 1,
+                "cweName": "Observable Timing Discrepancy",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:H/AT:N/PR:N/UI:N/VC:H/VI:N/VA:N/SC:N/SI:N/SA:N",
+                "epssPercentile": 0.05353
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:49d15a67-4a45-4986-abb0-57b1e0a36592:ae415070-f9c4-42b5-97a7-5f216f0616d5",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "3.0.51",
+                "name": "phpseclib",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/phpseclib/phpseclib@3.0.49",
+                "uuid": "49d15a67-4a45-4986-abb0-57b1e0a36592",
+                "version": "3.0.49",
+                "group": "phpseclib"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-11 00:00:33.307"
+            },
+            "vulnerability": {
+                "severity": "LOW",
+                "cvssV3BaseScore": 3.7,
+                "vulnId": "GHSA-r854-jrxh-36qx",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-r854-jrxh-36qx",
+                        "cveId": "CVE-2026-40194"
+                    }
+                ],
+                "references": "* [https://github.com/phpseclib/phpseclib/security/advisories/GHSA-r854-jrxh-36qx](https://github.com/phpseclib/phpseclib/security/advisories/GHSA-r854-jrxh-36qx)\n* [https://github.com/phpseclib/phpseclib/commit/ffe48b6b1b1af6963327f0a5330e3aa004a194ac](https://github.com/phpseclib/phpseclib/commit/ffe48b6b1b1af6963327f0a5330e3aa004a194ac)\n* [https://github.com/phpseclib/phpseclib/releases/tag/1.0.28](https://github.com/phpseclib/phpseclib/releases/tag/1.0.28)\n* [https://github.com/phpseclib/phpseclib/releases/tag/2.0.53](https://github.com/phpseclib/phpseclib/releases/tag/2.0.53)\n* [https://github.com/phpseclib/phpseclib/releases/tag/3.0.51](https://github.com/phpseclib/phpseclib/releases/tag/3.0.51)\n* [https://nvd.nist.gov/vuln/detail/CVE-2026-40194](https://nvd.nist.gov/vuln/detail/CVE-2026-40194)\n* [https://github.com/advisories/GHSA-r854-jrxh-36qx](https://github.com/advisories/GHSA-r854-jrxh-36qx)",
+                "cweId": 208,
+                "description": "# phpseclib SSH2: Variable-time comparison in HMAC verification\n\n## Summary\n\n`phpseclib\\Net\\SSH2::get_binary_packet()` uses PHP's `!=` operator to compare a received SSH packet HMAC against the locally computed HMAC. `!=` on equal-length binary strings in PHP uses `memcmp()`, which short-circuits on the first differing byte. This is a real variable-time comparison (CWE-208), proven by scaling benchmarks.\n\nThe finding is **Low severity (defense-in-depth)**, not Critical. Practical exploitation over the network is prevented by SSH's disconnect-on-MAC-failure behavior combined with per-connection session keys. The fix is a one-liner: replace `!=` with `hash_equals()`, which the codebase already uses in 9 other places.\n\n- **Target:** `phpseclib/phpseclib`\n- **File:** `phpseclib/Net/SSH2.php`\n- **Lines (master `e819a163c`):** 3405 and 3410\n- **CWE:** CWE-208 (Observable Timing Discrepancy)\n- **CVSS v3.1:** 3.7 \u2014 `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N`\n- **Severity:** Low (cryptographic hygiene / defense-in-depth)\n- **Affected branches:** `master`, `3.0`, `2.0`, `1.0` (all supported versions)\n\n## Root cause\n\n`phpseclib/Net/SSH2.php` lines 3399-3415 (master at `e819a163c`):\n\n```php\nif ($this->hmac_check instanceof Hash) {\n    $reconstructed = !$this->hmac_check_etm ?\n        pack('Na*', $packet->packet_length, $packet->plain) :\n        substr($packet->raw, 0, -$this->hmac_size);\n    if (($this->hmac_check->getHash() & \"\\xFF\\xFF\\xFF\\xFF\") == 'umac') {\n        $this->hmac_check->setNonce(\"\\0\\0\\0\\0\" . pack('N', $this->get_seq_no));\n        if ($hmac != $this->hmac_check->hash($reconstructed)) {                     // <-- line 3405\n            $this->disconnect_helper(DisconnectReason::MAC_ERROR);\n            throw new ConnectionClosedException('Invalid UMAC');\n        }\n    } else {\n        if ($hmac != $this->hmac_check->hash(pack('Na*', $this->get_seq_no, $reconstructed))) {  // <-- line 3410\n            $this->disconnect_helper(DisconnectReason::MAC_ERROR);\n            throw new ConnectionClosedException('Invalid HMAC');\n        }\n    }\n}\n```\n\nBoth `$hmac` (read from the socket via `Strings::pop($raw, $this->hmac_size)` at line 3348) and the computed hash are equal-length binary strings. PHP's `!=` operator on equal-length strings dispatches to `zend_binary_strcmp()` which internally calls `memcmp()`. Modern libc `memcmp` short-circuits on the first differing byte, producing a timing signal that scales linearly with the number of matching leading bytes.\n\n### The same bug exists on every supported branch\n\n| Branch | File | Line(s) | Expression |\n|---|---|---|---|\n| `master` (@ `e819a163c`) | `phpseclib/Net/SSH2.php` | 3405, 3410 | `$hmac != $this->hmac_check->hash(...)` |\n| `3.0` | `phpseclib/Net/SSH2.php` | 3741, 3746 | `$hmac != $this->hmac_check->hash(...)` |\n| `2.0` | `phpseclib/Net/SSH2.php` | 3796 | `$hmac != $this->hmac_check->hash(...)` |\n| `1.0` | `phpseclib/Net/SSH2.php` | 3810 | `$hmac != $this->hmac_check->hash(...)` |\n\nVerified with `git show <branch>:phpseclib/Net/SSH2.php`.\n\n### Reachability\n\nThe HMAC verification path at lines 3399-3415 is reached on **every received SSH packet** when the negotiated cipher is not AEAD \u2014 i.e., any of:\n\n- `aes128-cbc`, `aes192-cbc`, `aes256-cbc`\n- `aes128-ctr`, `aes192-ctr`, `aes256-ctr`\n- `3des-cbc`, `3des-ctr`\n- `blowfish-cbc`, `blowfish-ctr`\n- `twofish-*-cbc`, `twofish-*-ctr`\n- `arcfour`, `arcfour128`, `arcfour256`\n\ncombined with any non-AEAD MAC (hmac-sha2-256, hmac-sha2-512, hmac-sha1, hmac-sha1-96, hmac-md5, hmac-md5-96, umac-64, umac-128, and their -etm variants \u2014 full list at `getSupportedMACAlgorithms()` around line 4754).\n\nAEAD ciphers (`aes128-gcm@openssh.com`, `aes256-gcm@openssh.com`, `chacha20-poly1305@openssh.com`) go through a different path (lines 3353-3381) and do not reach the `!=` comparison \u2014 their authentication tag is checked inside the AEAD implementation.\n\n`$this->hmac_check` is set during key exchange at `SSH2.php:1812`:\n\n```php\nif (!$this->decrypt->usesNonce()) {\n    [$this->hmac_check, $checkKeyLength] = self::mac_algorithm_to_hash_instance($mac_algorithm_in);\n    $this->hmac_size = $this->hmac_check->getLengthInBytes();\n}\n```\n\nSo any SSH2 client session negotiating a non-AEAD cipher exercises the vulnerable code path starting from the first post-KEX packet.\n\n### Contrast with existing code that does the right thing\n\n`hash_equals()` is already used in 9 other places in the phpseclib codebase, proving the maintainer knows the pattern:\n\n```\nphpseclib/File/CMS/DigestedData.php:186\nphpseclib/File/CMS/SignedData/Signer.php:294\nphpseclib/File/CMS/SignedData/Signer.php:406\nphpseclib/Crypt/Common/Formats/Keys/PuTTY.php:236\nphpseclib/Crypt/RSA/PublicKey.php:98, 105, 188, 229\nphpseclib/Crypt/RSA/PrivateKey.php:386\n```\n\nThe SSH2 MAC comparison is the one place it was missed.\n\n## Proof of concept\n\nAll scripts under `poc/`. They prove three things:\n1. PHP's `!=` on equal-length binary strings IS variable-time and short-circuits.\n2. `hash_equals()` is constant-time over the same inputs.\n3. Applied to 32-byte HMAC-SHA256 values as produced by phpseclib's `Crypt\\Hash` class, the code path at `SSH2.php:3405/3410` leaks ~2-14 ns of signal per comparison.\n\n### PoC 1: baseline measurement (`poc/01_verify_variable_time.php`)\n\nMeasures `!=` vs `hash_equals()` on 32-byte strings with first-byte vs last-byte mismatch. 500,000 iterations each, trimmed mean, Welch's t-test.\n\nRepresentative output (PHP 8.3.6 on Linux x86_64):\n\n```\n=== PHP != operator vs hash_equals() on 32-byte strings ===\nIterations: 500000\n\n!= first-byte mismatch: median=40 p25=40 p75=50 tmean=44.3\n!= last-byte mismatch:  median=50 p25=40 p75=50 tmean=46.4\nGap (last - first):     tmean_delta=2.1 ns\n\nhash_equals first-byte: median=110 tmean=112.7\nhash_equals last-byte:  median=111 tmean=114.9\nGap (last - first):     tmean_delta=2.2 ns\n```\n\nThe 32-byte delta is small (~2 ns) and lives in the noise. This alone doesn't prove variable-time behavior. PoC 2 does.\n\n### PoC 2: scaling test (`poc/02_scaling_test.php`)\n\nThe decisive test. If `!=` is truly constant-time, timing should not depend on mismatch position. If it short-circuits, timing should scale linearly with prefix length. Test strings from 32 bytes to 4096 bytes.\n\n```\nLength  32 bytes: range (first-last byte mismatch) =   1.72 ns\nLength  64 bytes: range                            =   2.42 ns\nLength 128 bytes: range                            =   8.33 ns\nLength 256 bytes: range                            =  16.91 ns\nLength 512 bytes: range                            =  38.89 ns\nLength 1024 bytes: range                           =  81.16 ns\nLength 4096 bytes: range                           = 284.26 ns\n```\n\n**This is monotone, linear scaling.** Confirmed variable-time: `!=` short-circuits. Per-byte delta ≈ 0.089 ns/byte (4096 bytes → ~284 ns → 284/4096 ≈ 0.069 ns/byte after accounting for the fixed call overhead).\n\n### PoC 3: contrast with `hash_equals()` (`poc/03_hash_equals_scaling.php`)\n\nSame test, `!=` vs `hash_equals()` on 1024-byte strings:\n\n```\nMismatch pos         | != tmean (ns)        | hash_equals tmean\n----------------------------------------------------------------------\nbyte    0            |    83.72 (sd  4.79) |   873.78 (sd 100.71)\nbyte  128            |    98.48 (sd  8.27) |   855.10 (sd 87.50)\nbyte  256            |   103.36 (sd  7.01) |   869.21 (sd 89.61)\nbyte  512            |   125.65 (sd 10.07) |   879.74 (sd 81.82)\nbyte  768            |   145.73 (sd  9.96) |   848.59 (sd 84.34)\nbyte 1023            |   175.33 (sd 14.31) |   852.24 (sd 85.81)\n\n!= range (last - first):          91.62 ns\nhash_equals range (last - first): 31.15 ns\n```\n\n`!=` monotonically increases with mismatch position. `hash_equals` is flat; the 31 ns range is measurement jitter (sd ≈ 90 ns > range).\n\nPer-byte delta from this run: 91.62 / 1023 ≈ 0.089 ns/byte. Extrapolated to 32-byte HMAC: ~2.86 ns total signal between first-byte-diff and last-byte-diff.\n\n### PoC 4: end-to-end with phpseclib's Hash class (`poc/04_phpseclib_in_context.php`)\n\nUses `phpseclib4\\Crypt\\Hash` (the exact class bound to `$this->hmac_check`) to compute a real HMAC-SHA-256, then executes the exact expression `$hmac != $this->hmac_check->hash(...)` from SSH2.php:3410:\n\n```\nUsing != (SSH2.php:3405,3410 pattern):\n  first-byte mismatch: 44.33 ns\n  last-byte mismatch:  58.19 ns\n  Δ (last - first):    13.86 ns  <-- timing leak signal\n\nUsing hash_equals() (the fix):\n  first-byte mismatch: 113.67 ns\n  last-byte mismatch:  112.93 ns\n  Δ (last - first):    -0.74 ns  <-- should be flat (noise)\n```\n\nThe 13.86 ns vs 2.86 ns variation between runs is within measurement variance \u2014 the signal is real and the sign matches every run (last > first for `!=`, flat for `hash_equals`).\n\n## Impact\n\n**Severity: Low (defense-in-depth).** This is a real CWE-208 instance, but it is not a practical remote vulnerability.\n\n### Why exploitation over the network is infeasible\n\n1. **Signal is tiny.** ~3-14 ns per HMAC compare. Network RTT jitter on a reasonable LAN is 100 µs (100,000 ns). On the internet it is 1-10 ms. The signal-to-noise ratio for a remote observer is ~1e-5 to 1e-7.\n\n2. **One measurement per connection.** On every MAC failure, `SSH2.php:3406/3411` calls `disconnect_helper(MAC_ERROR)` and throws. The connection is torn down. A reconnect goes through a fresh key exchange, producing a new HMAC key. The HMAC over a fresh key is uncorrelated with the prior HMAC. An attacker cannot accumulate prefix-matching information across connections because there is no fixed target.\n\n3. **MAC is over sequence-numbered data.** Each packet's MAC input includes `$this->get_seq_no` (line 3410) or a nonce (line 3404). Even within a single connection, replays are impossible \u2014 every MAC is bound to a distinct seq number. There is no stable oracle to probe.\n\n4. **No adaptive probe.** A Bleichenbacher/Lucky13-style attack needs tens of thousands of adaptive queries against a single secret. SSH's hard disconnect eliminates this primitive entirely.\n\n5. **Rough sample-count requirement.** To distinguish a 3 ns signal from 1 ms jitter with high confidence you need roughly `(noise / signal)^2 ≈ (1e6 / 3)^2 ≈ 1e11` independent samples. With one sample per connection (and each connection being against a fresh secret), this is unreachable on any practical scale.\n\n### What remains real\n\n1. **Cryptographic hygiene.** A security library should not use non-constant-time comparison on MACs, period. That is standard practice (RFC 4634, NIST SP 800-131A guidance on cryptographic implementations).\n2. **Code correctness / API consistency.** The library already uses `hash_equals()` in 9 other comparable places. The SSH2 MAC path is inconsistent with the rest of the codebase.\n3. **Future-proofing.** If PHP or the underlying `memcmp()` implementation changes, or if a future MAC algorithm uses longer digests, the signal grows linearly. A constant-time comparison eliminates the concern permanently.\n4. **Static analysis / audit hygiene.** Cryptographic linters (e.g., GitHub CodeQL's `js/timing-attack`, phpcs-security-audit) flag non-constant-time comparisons on secret values. A clean codebase passes those checks.\n\n### CVSS breakdown\n\n`CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N` = **3.7 (Low)**\n\n- **AV:N** \u2014 network path, attacker on the SSH transport.\n- **AC:H** \u2014 extremely high complexity; remote exploitation is not demonstrated and is believed infeasible.\n- **PR:N/UI:N** \u2014 no prior auth or interaction needed to observe the timing (if there were any signal).\n- **S:U** \u2014 no scope change.\n- **C:L / I:N / A:N** \u2014 theoretical information exposure of MAC prefix bits only, no integrity or availability impact.\n\nThis is the same vector string used for CVE-2026-32935 (the recent AES-CBC padding oracle in the same library), differing only in Confidentiality (L vs H) because padding oracle actually recovers plaintext whereas this MAC timing does not enable any known plaintext recovery.\n\n## Fix\n\nTwo-line patch:\n\n```diff\n--- a/phpseclib/Net/SSH2.php\n+++ b/phpseclib/Net/SSH2.php\n@@ -3402,12 +3402,12 @@ class SSH2\n                 substr($packet->raw, 0, -$this->hmac_size);\n             if (($this->hmac_check->getHash() & \"\\xFF\\xFF\\xFF\\xFF\") == 'umac') {\n                 $this->hmac_check->setNonce(\"\\0\\0\\0\\0\" . pack('N', $this->get_seq_no));\n-                if ($hmac != $this->hmac_check->hash($reconstructed)) {\n+                if (!hash_equals($this->hmac_check->hash($reconstructed), $hmac)) {\n                     $this->disconnect_helper(DisconnectReason::MAC_ERROR);\n                     throw new ConnectionClosedException('Invalid UMAC');\n                 }\n             } else {\n-                if ($hmac != $this->hmac_check->hash(pack('Na*', $this->get_seq_no, $reconstructed))) {\n+                if (!hash_equals($this->hmac_check->hash(pack('Na*', $this->get_seq_no, $reconstructed)), $hmac)) {\n                     $this->disconnect_helper(DisconnectReason::MAC_ERROR);\n                     throw new ConnectionClosedException('Invalid HMAC');\n                 }\n```\n\nThe same one-liner should be applied to `phpseclib/Net/SSH2.php` on `3.0` (lines 3741, 3746), `2.0` (line 3796), and `1.0` (line 3810).\n\n`hash_equals()` is a built-in PHP function available since PHP 5.6. phpseclib's minimum PHP version for all supported branches is well above that, so there is no compatibility concern \u2014 and indeed, as noted, `hash_equals()` is already used throughout the codebase for exactly this purpose.\n\n### PoC 5: prefix-position byte-recovery test (`poc/05_prefix_position_test.php`)\n\nThe critical question: can an attacker recover the MAC byte-by-byte? Tests candidate MACs with 0, 1, 2, ..., 31 correct leading bytes using phpseclib's `Crypt\\Hash` class. 500,000 iterations per position.\n\n```\n 0 correct prefix bytes: tmean= 65.75 ns  sd= 4.89 ns\n 1 correct prefix bytes: tmean= 66.36 ns  sd= 4.77 ns\n 2 correct prefix bytes: tmean= 60.06 ns  sd= 5.29 ns\n 4 correct prefix bytes: tmean= 58.08 ns  sd= 5.24 ns\n 8 correct prefix bytes: tmean= 66.93 ns  sd= 4.60 ns\n12 correct prefix bytes: tmean= 64.01 ns  sd= 4.83 ns\n16 correct prefix bytes: tmean= 61.81 ns  sd= 5.55 ns\n20 correct prefix bytes: tmean= 60.46 ns  sd= 5.40 ns\n24 correct prefix bytes: tmean= 60.53 ns  sd= 4.06 ns\n28 correct prefix bytes: tmean= 60.54 ns  sd= 3.99 ns\n31 correct prefix bytes: tmean= 59.04 ns  sd= 3.96 ns\n\nRange (0 prefix vs 31 prefix): -6.71 ns (NEGATIVE)\n```\n\n**No monotonic signal.** The range is negative (wrong direction for an oracle), and the standard deviations (4-5 ns) are larger than any observed position-dependent delta. Byte-by-byte MAC recovery is not feasible even locally on 32-byte HMACs.\n\nThis conclusively rules out the \"timing oracle for MAC forgery\" escalation path.\n\n## Escalation angles investigated and ruled out\n\n9 rounds of external review suggested various escalation paths. Every one is dead:\n\n| Angle | Result | Evidence |\n|---|---|---|\n| Byte-by-byte MAC recovery | **Dead** | PoC 5: no monotonic signal at 32 bytes (-6.71ns range, wrong sign) |\n| Persistent oracle (connection survives MAC failure) | **Dead** | disconnect_helper() + throw is unconditional (3406-3412); reset_connection() clears all state |\n| Sequence desync (Terrapin-style) | **Dead** | get_seq_no++ at 3469 is AFTER MAC check; failed MAC throws before increment |\n| SSH_MSG_IGNORE MAC bypass | **Dead** | All message types go through get_binary_packet() MAC check before filter() |\n| Memory exhaustion via packet_length | **Dead** | packet_length capped at 0x9000 (36KB) at line 3542 |\n| State machine abuse / fail-open | **Dead** | reset_connection() nulls socket, clears bitmap, all crypto state |\n| Protocol downgrade on MAC failure | **Dead** | Immediate disconnect, no fallback or renegotiation |\n| Padding oracle chain (Lucky13) | **Dead** | MAC check (3405) is BEFORE padding interpretation (3418) |\n| SFTP subsystem bypass | **Dead** | SFTP uses same SSH2 transport, same MAC verification |\n| BigInteger type confusion | **Dead** | Engine selected at construction, not per-packet |\n| Pre-auth reachability | Yes, but irrelevant | One guess per connection with fresh keys = no oracle |\n\n## Devil's advocate review\n\nEvery objection I could think of, addressed:\n\n**\"This is just a code smell. Show me a real exploit.\"**\nAcknowledged. The report does not claim remote exploitability. It is submitted as Low / defense-in-depth, consistent with how similar findings are treated in other cryptographic libraries (see e.g. OpenSSH commits replacing `memcmp()` with `timingsafe_bcmp` for similar reasons).\n\n**\"PHP's `!=` might not even short-circuit \u2014 you're just seeing noise.\"**\nPoC 2 rules this out. Timing scales monotonically and nearly linearly with mismatch position across a 128x range of string lengths (32 bytes → 4096 bytes). That is not noise.\n\n**\"SSH disconnects on MAC failure, so you only get one sample. Case closed.\"**\nCorrect, and the report says so explicitly. This is why the severity is Low rather than High.\n\n**\"There is no adaptive probe because session keys rotate per connection.\"**\nCorrect, and the report says so explicitly. This is the primary reason the network attack is infeasible.\n\n**\"Is this Lucky13-style? Does the MAC check happen after padding?\"**\nNo. MAC verification at `SSH2.php:3399-3414` runs BEFORE any padding interpretation. Padding length is only read at line 3418, strictly after the MAC check. There is no unpadding oracle here. (Lucky13 in phpseclib's AES-CBC decrypt path is a separate, already-fixed issue \u2014 CVE-2026-32935.)\n\n**\"Maybe the `get_seq_no` or nonce path somehow enables forgery.\"**\nNo. The seq number is deterministic (incremented by one per packet) and the nonce (for UMAC) is derived from it. Neither is attacker-controlled in any useful sense. The MAC key is the secret, and it is per-connection.\n\n**\"Is this already reported?\"**\nSearched published advisories (`gh api repos/phpseclib/phpseclib/security-advisories`). Only CVE-2026-32935 is published, for a different code path (AES-CBC padding oracle after MAC verification). The SSH2 MAC comparison issue is not covered by any published advisory. The fix commit for CVE-2026-32935 (`ccc21aef71eb170e9bf819b167e67d1fd9e6e788`) did not touch `SSH2.php:3405` or `:3410`.\n\n**\"Does the project's threat model even consider this in scope?\"**\nSECURITY.md says \"To report a security vulnerability, please use the Tidelift security contact.\" It does not exclude timing side-channels. The maintainer has already fixed constant-time comparison issues in other parts of the library (RSA, OAEP, AES-CBC padding) and uses `hash_equals()` in 9 other places. This issue is consistent with the maintainer's existing security posture, and the fix is trivial.\n\n**\"Is the Low severity appropriate? Could it be informational?\"**\nLow is appropriate. \"Informational\" would be for something that is provably no-impact. This is a demonstrable CWE-208 instance on secret-dependent data. It scores 3.7 under CVSS v3.1 with AC:H and C:L. That is Low, not Informational. The recent CVE-2026-32935 is assigned for a timing-side-channel in the same file category and given CVSS 4.0 = 8.2 (their vector is more severe because padding oracle actually recovers plaintext). This one would score lower than that, which matches the Low designation.\n\n**\"Would a maintainer just close this?\"**\nUnlikely. The fix is a one-liner, there is no behavioral change, it aligns with existing code style in the same codebase, and it silences future audit findings. The maintainer has a track record of accepting similar hardening patches. If they close it, the reason would likely be \"we already know, not worth a CVE\" \u2014 which would still leave the code fixed, which is the goal.\n\n## Suggested reporting path\n\nGitHub PVR is enabled for phpseclib/phpseclib (`{\"enabled\":true}`). SECURITY.md says to use the Tidelift contact, but GitHub PVR is a reasonable alternative and lets the maintainer decide whether to coordinate with Tidelift. Either path is acceptable.\n\nGiven the Low severity, this could also be filed as a public pull request rather than a security advisory. That would be faster for everyone and avoids using the private disclosure channel for a hardening fix.\n\n## Files\n\n- `poc/01_verify_variable_time.php` \u2014 baseline 32-byte timing measurement\n- `poc/02_scaling_test.php` \u2014 decisive scaling test across string lengths\n- `poc/03_hash_equals_scaling.php` \u2014 `!=` vs `hash_equals()` comparison\n- `poc/04_phpseclib_in_context.php` \u2014 end-to-end repro using phpseclib's `Crypt\\Hash`\n- `notes.md` \u2014 research notes, dead ends, escalation angles considered\n- `prior-work.md` \u2014 prior work search results\n- `status.json` \u2014 machine-readable status\n\nKoda Reef",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                "source": "GITHUB",
+                "published": "2026-04-10 20:58:10.0",
+                "title": "phpseclib has a variable-time HMAC comparison in SSH2::get_binary_packet() using != instead of hash_equals()",
+                "cwes": [
+                    {
+                        "cweId": 208,
+                        "name": "Observable Timing Discrepancy"
+                    }
+                ],
+                "uuid": "382aa944-61c8-4cc8-90b4-14a7cefaf573",
+                "severityRank": 3,
+                "cweName": "Observable Timing Discrepancy"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:49d15a67-4a45-4986-abb0-57b1e0a36592:382aa944-61c8-4cc8-90b4-14a7cefaf573",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "3.0.51",
+                "name": "phpseclib",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/phpseclib/phpseclib@3.0.49",
+                "uuid": "49d15a67-4a45-4986-abb0-57b1e0a36592",
+                "version": "3.0.49",
+                "group": "phpseclib"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-14 12:24:34.95"
+            },
+            "vulnerability": {
+                "severity": "LOW",
+                "cvssV3BaseScore": 3.7,
+                "vulnId": "CVE-2026-40194",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-r854-jrxh-36qx",
+                        "cveId": "CVE-2026-40194"
+                    }
+                ],
+                "references": "* [https://github.com/phpseclib/phpseclib/commit/ffe48b6b1b1af6963327f0a5330e3aa004a194ac](https://github.com/phpseclib/phpseclib/commit/ffe48b6b1b1af6963327f0a5330e3aa004a194ac)\n* [https://github.com/phpseclib/phpseclib/releases/tag/1.0.28](https://github.com/phpseclib/phpseclib/releases/tag/1.0.28)\n* [https://github.com/phpseclib/phpseclib/releases/tag/2.0.53](https://github.com/phpseclib/phpseclib/releases/tag/2.0.53)\n* [https://github.com/phpseclib/phpseclib/releases/tag/3.0.51](https://github.com/phpseclib/phpseclib/releases/tag/3.0.51)\n* [https://github.com/phpseclib/phpseclib/security/advisories/GHSA-r854-jrxh-36qx](https://github.com/phpseclib/phpseclib/security/advisories/GHSA-r854-jrxh-36qx)",
+                "cweId": 208,
+                "description": "phpseclib is a PHP secure communications library. Prior to 3.0.51, 2.0.53, and 1.0.28, phpseclib\\Net\\SSH2::get_binary_packet() uses PHP's != operator to compare a received SSH packet HMAC against the locally computed HMAC. != on equal-length binary strings in PHP uses memcmp(), which short-circuits on the first differing byte. This is a real variable-time comparison (CWE-208), proven by scaling benchmarks. This vulnerability is fixed in 3.0.51, 2.0.53, and 1.0.28.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:L/I:N/A:N",
+                "epssScore": 0.00013,
+                "source": "NVD",
+                "published": "2026-04-10 21:16:27.583",
+                "cwes": [
+                    {
+                        "cweId": 208,
+                        "name": "Observable Timing Discrepancy"
+                    }
+                ],
+                "uuid": "9d1ff5a2-1ccf-4e19-99fd-5fa221779a61",
+                "severityRank": 3,
+                "cweName": "Observable Timing Discrepancy",
+                "epssPercentile": 0.02284
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:49d15a67-4a45-4986-abb0-57b1e0a36592:9d1ff5a2-1ccf-4e19-99fd-5fa221779a61",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "v15.32.1",
+                "name": "graphql-php",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/webonyx/graphql-php@v15.30.2",
+                "uuid": "c09d12ab-1f01-4243-9bfc-8cae6bd747aa",
+                "version": "v15.30.2",
+                "group": "webonyx"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-14 12:24:48.31"
+            },
+            "vulnerability": {
+                "severity": "MEDIUM",
+                "vulnId": "GHSA-68jq-c3rv-pcrr",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-68jq-c3rv-pcrr",
+                        "cveId": "CVE-2026-40476"
+                    }
+                ],
+                "references": "* [https://github.com/webonyx/graphql-php/security/advisories/GHSA-68jq-c3rv-pcrr](https://github.com/webonyx/graphql-php/security/advisories/GHSA-68jq-c3rv-pcrr)\n* [https://github.com/webonyx/graphql-php/releases/tag/v15.31.5](https://github.com/webonyx/graphql-php/releases/tag/v15.31.5)\n* [https://github.com/advisories/GHSA-68jq-c3rv-pcrr](https://github.com/advisories/GHSA-68jq-c3rv-pcrr)",
+                "cvssV4Score": 6.9,
+                "cweId": 407,
+                "description": "The `OverlappingFieldsCanBeMerged` validation rule exhibits quadratic time complexity when processing queries with many repeated fields sharing the same response name. An attacker can send a crafted query like `{ hello hello hello ... }` with thousands of repeated fields, causing excessive CPU usage during validation before execution begins.\n\nThis is not mitigated by existing QueryDepth or QueryComplexity rules.\n\n**Observed impact (tested on v15.31.4):**\n- 1000 fields: ~0.6s\n- 2000 fields: ~2.4s\n- 3000 fields: ~5.3s\n- 5000 fields: request timeout (>20s)\n\n**Root cause:** `collectConflictsWithin()` performs O(n²) pairwise comparisons of all fields with the same response name. For identical repeated fields, every comparison returns \"no conflict\" but the quadratic iteration count causes resource exhaustion.\n\n**Fix:** Deduplicate structurally identical fields before pairwise comparison, reducing the complexity from O(n²) to O(u²) where u is the number of unique field signatures (typically 1 for this attack pattern).\n\n**Credit:** Ashwak N (ashwakn04@gmail.com)",
+                "source": "GITHUB",
+                "published": "2026-04-14 01:05:05.0",
+                "title": "graphql-php is affected by a Denial of Service via quadratic complexity in OverlappingFieldsCanBeMerged validation",
+                "cwes": [
+                    {
+                        "cweId": 407,
+                        "name": "Inefficient Algorithmic Complexity"
+                    }
+                ],
+                "uuid": "024053c6-0dab-485a-bb98-a500b395c160",
+                "severityRank": 2,
+                "cweName": "Inefficient Algorithmic Complexity",
+                "cvssV4Vector": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:L/SC:N/SI:N/SA:N"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:c09d12ab-1f01-4243-9bfc-8cae6bd747aa:024053c6-0dab-485a-bb98-a500b395c160",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "2.9.7",
+                "name": "composer",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/composer/composer@2.9.5",
+                "uuid": "cb3ccd6a-dec4-4840-964a-093be384836f",
+                "version": "2.9.5",
+                "group": "composer"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-15 00:00:46.094"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 8.8,
+                "vulnId": "GHSA-gqw4-4w2p-838q",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-gqw4-4w2p-838q",
+                        "cveId": "CVE-2026-40261"
+                    }
+                ],
+                "references": "* [https://github.com/composer/composer/security/advisories/GHSA-gqw4-4w2p-838q](https://github.com/composer/composer/security/advisories/GHSA-gqw4-4w2p-838q)\n* [https://github.com/FriendsOfPHP/security-advisories/blob/master/composer/composer/CVE-2026-40261.yaml](https://github.com/FriendsOfPHP/security-advisories/blob/master/composer/composer/CVE-2026-40261.yaml)\n* [https://nvd.nist.gov/vuln/detail/CVE-2026-40261](https://nvd.nist.gov/vuln/detail/CVE-2026-40261)\n* [https://github.com/composer/composer/releases/tag/2.9.6](https://github.com/composer/composer/releases/tag/2.9.6)\n* [https://github.com/advisories/GHSA-gqw4-4w2p-838q](https://github.com/advisories/GHSA-gqw4-4w2p-838q)",
+                "cweId": 20,
+                "description": "### Impact\nThe `Perforce::syncCodeBase()` method appended the `$sourceReference` parameter to a shell command without proper escaping, allowing an attacker to inject arbitrary commands through a crafted source reference containing shell metacharacters. Further as in GHSA-wg36-wvj6-r67p / CVE-2026-40176 the `Perforce::generateP4Command()` method constructed shell commands by interpolating user-supplied Perforce connection parameters (port, user, client) without proper escaping from the source url field. Composer would execute these injected commands even if Perforce is not installed.\n\nThe source reference and url are provided as part of package metadata. Any Composer package repository can serve package metadata declaring perforce as a source type with a malicious source reference or source url. This means the vulnerability can be exploited through any package served by a compromised or malicious Composer repository. An attack does not require Perforce to be installed on the client, as Composer will attempt to execute the constructed command regardless.\n\nThis vulnerability is exploitable when installing or updating dependencies from source (`--prefer-source`, default when installing dev prefixed versions), even if you do not use Perforce.\n\n### Patches\nFixed in Composer 2.2.27 (2.2 LTS) and 2.9.6 (mainline)\n\nNote, the fix for the source url in the `Perforce::generateP4Command()` was addressed as part of the patches for GHSA-wg36-wvj6-r67p / CVE-2026-40176 in the same versions.\n\n### Workarounds\n\n- Avoid installing dependencies from source by using `--prefer-dist` or the `preferred-install: dist` config setting.\n- Only use trusted Composer repositories.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                "source": "GITHUB",
+                "published": "2026-04-14 20:01:42.0",
+                "title": "Composer has a command injection via malicious perforce reference",
+                "cwes": [
+                    {
+                        "cweId": 20,
+                        "name": "Improper Input Validation"
+                    },
+                    {
+                        "cweId": 78,
+                        "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+                    }
+                ],
+                "uuid": "05da2e28-bdd8-4d25-9cbe-1cc4b32cb0de",
+                "severityRank": 1,
+                "cweName": "Improper Input Validation"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:cb3ccd6a-dec4-4840-964a-093be384836f:05da2e28-bdd8-4d25-9cbe-1cc4b32cb0de",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "2.9.7",
+                "name": "composer",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/composer/composer@2.9.5",
+                "uuid": "cb3ccd6a-dec4-4840-964a-093be384836f",
+                "version": "2.9.5",
+                "group": "composer"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-15 00:00:46.263"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 7.8,
+                "vulnId": "GHSA-wg36-wvj6-r67p",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-wg36-wvj6-r67p",
+                        "cveId": "CVE-2026-40176"
+                    }
+                ],
+                "references": "* [https://github.com/composer/composer/security/advisories/GHSA-wg36-wvj6-r67p](https://github.com/composer/composer/security/advisories/GHSA-wg36-wvj6-r67p)\n* [https://github.com/FriendsOfPHP/security-advisories/blob/master/composer/composer/CVE-2026-40176.yaml](https://github.com/FriendsOfPHP/security-advisories/blob/master/composer/composer/CVE-2026-40176.yaml)\n* [https://nvd.nist.gov/vuln/detail/CVE-2026-40176](https://nvd.nist.gov/vuln/detail/CVE-2026-40176)\n* [https://github.com/composer/composer/releases/tag/2.9.6](https://github.com/composer/composer/releases/tag/2.9.6)\n* [https://github.com/advisories/GHSA-wg36-wvj6-r67p](https://github.com/advisories/GHSA-wg36-wvj6-r67p)",
+                "cweId": 20,
+                "description": "### Impact\nThe `Perforce::generateP4Command()` method constructed shell commands by interpolating user-supplied Perforce connection parameters (port, user, client) without proper escaping. An attacker controlling a repository configuration in a malicious composer.json declaring a Perforce VCS repository could inject arbitrary commands through these values, leading to command execution in the context of the user running Composer. Composer would execute these injected commands even if Perforce is not installed.\n\nVCS repositories are only loaded from the root composer.json file located in the directory you execute Composer commands in and from the composer config directory (e.g. `~/.config/composer/composer.json`). So this vulnerability cannot be exploited through composer.json files of packages installed as dependencies.\n\nYou are at risk of command execution if you run Composer commands on untrusted projects with attacker supplied composer.json files, regardless of whether you or any of your dependencies use Perforce.\n\n### Patches\nFixed in Composer 2.2.27 (2.2 LTS) and 2.9.6 (mainline)\n\n### Workarounds\n- Carefully inspect composer.json files before running Composer on them. Verify that Perforce-related fields contain valid values.\n- Only run Composer commands on projects from trusted sources.",
+                "cvssV3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                "source": "GITHUB",
+                "published": "2026-04-14 20:03:08.0",
+                "title": "Composer has a command injection via malicious perforce repository",
+                "cwes": [
+                    {
+                        "cweId": 20,
+                        "name": "Improper Input Validation"
+                    },
+                    {
+                        "cweId": 78,
+                        "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+                    }
+                ],
+                "uuid": "18642485-f8a5-4de7-b39a-2f18b691ea83",
+                "severityRank": 1,
+                "cweName": "Improper Input Validation"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:cb3ccd6a-dec4-4840-964a-093be384836f:18642485-f8a5-4de7-b39a-2f18b691ea83",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "2.9.7",
+                "name": "composer",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/composer/composer@2.9.5",
+                "uuid": "cb3ccd6a-dec4-4840-964a-093be384836f",
+                "version": "2.9.5",
+                "group": "composer"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-15 11:20:24.398"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 8.8,
+                "vulnId": "CVE-2026-40261",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-gqw4-4w2p-838q",
+                        "cveId": "CVE-2026-40261"
+                    }
+                ],
+                "references": "* [https://github.com/composer/composer/releases/tag/2.9.6](https://github.com/composer/composer/releases/tag/2.9.6)\n* [https://github.com/composer/composer/security/advisories/GHSA-gqw4-4w2p-838q](https://github.com/composer/composer/security/advisories/GHSA-gqw4-4w2p-838q)",
+                "cweId": 20,
+                "description": "Composer is a dependency manager for PHP. Versions 1.0 through 2.2.26 and 2.3 through 2.9.5 contain a command injection vulnerability in the Perforce::syncCodeBase() method, which appends the $sourceReference parameter to a shell command without proper escaping, and additionally in the Perforce::generateP4Command() method as in GHSA-wg36-wvj6-r67p / CVE-2026-40176, which interpolates user-supplied Perforce connection parameters (port, user, client) from the source url field without proper escaping. An attacker can inject arbitrary commands through crafted source reference or source url values containing shell metacharacters, even if Perforce is not installed. Unlike CVE-2026-40176, the source reference and url are provided as part of package metadata, meaning any compromised or malicious Composer repository can serve package metadata declaring perforce as a source type with malicious values. This vulnerability is exploitable when installing or updating dependencies from source, including the default behavior when installing dev-prefixed versions. This issue has been fixed in Composer 2.2.27 (2.2 LTS) and 2.9.6 (mainline). If developers are unable to immediately update, they can avoid installing dependencies from source by using --prefer-dist or the preferred-install: dist config setting, and only use trusted Composer repositories as a workaround.",
+                "cvssV3Vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                "epssScore": 0.00039,
+                "source": "NVD",
+                "published": "2026-04-15 21:17:27.693",
+                "cwes": [
+                    {
+                        "cweId": 20,
+                        "name": "Improper Input Validation"
+                    },
+                    {
+                        "cweId": 78,
+                        "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+                    }
+                ],
+                "uuid": "8dafdf28-dfe8-486a-9bac-34d73f6eed17",
+                "severityRank": 1,
+                "cweName": "Improper Input Validation",
+                "epssPercentile": 0.1179
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:cb3ccd6a-dec4-4840-964a-093be384836f:8dafdf28-dfe8-486a-9bac-34d73f6eed17",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "2.9.7",
+                "name": "composer",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/composer/composer@2.9.5",
+                "uuid": "cb3ccd6a-dec4-4840-964a-093be384836f",
+                "version": "2.9.5",
+                "group": "composer"
+            },
+            "attribution": {
+                "analyzerIdentity": "OSSINDEX_ANALYZER",
+                "attributedOn": "2026-04-15 11:20:24.531"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 7.8,
+                "vulnId": "CVE-2026-40176",
+                "aliases": [
+                    {
+                        "ghsaId": "GHSA-wg36-wvj6-r67p",
+                        "cveId": "CVE-2026-40176"
+                    }
+                ],
+                "references": "* [https://github.com/composer/composer/releases/tag/2.9.6](https://github.com/composer/composer/releases/tag/2.9.6)\n* [https://github.com/composer/composer/security/advisories/GHSA-wg36-wvj6-r67p](https://github.com/composer/composer/security/advisories/GHSA-wg36-wvj6-r67p)",
+                "cweId": 20,
+                "description": "Composer is a dependency manager for PHP. Versions 1.0 through 2.2.26 and 2.3 through 2.9.5 contain a command injection vulnerability in the Perforce::generateP4Command() method, which constructs shell commands by interpolating user-supplied Perforce connection parameters (port, user, client) without proper escaping. An attacker can inject arbitrary commands through these values in a malicious composer.json declaring a Perforce VCS repository, leading to command execution in the context of the user running Composer, even if Perforce is not installed. VCS repositories are only loaded from the root composer.json or the composer config directory, so this cannot be exploited through composer.json files of packages installed as dependencies. Users are at risk if they run Composer commands on untrusted projects with attacker-supplied composer.json files. This issue has been fixed in Composer 2.2.27 (2.2 LTS) and 2.9.6 (mainline).",
+                "cvssV3Vector": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H",
+                "epssScore": 0.00011,
+                "source": "NVD",
+                "published": "2026-04-15 21:17:27.357",
+                "cwes": [
+                    {
+                        "cweId": 20,
+                        "name": "Improper Input Validation"
+                    },
+                    {
+                        "cweId": 78,
+                        "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"
+                    }
+                ],
+                "uuid": "bf0b594b-921e-4177-a27f-720e6a4f2515",
+                "severityRank": 1,
+                "cweName": "Improper Input Validation",
+                "epssPercentile": 0.01509
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:cb3ccd6a-dec4-4840-964a-093be384836f:bf0b594b-921e-4177-a27f-720e6a4f2515",
+            "analysis": {
+                "isSuppressed": false
+            }
+        },
+        {
+            "component": {
+                "latestVersion": "13.1.7",
+                "name": "phpunit",
+                "project": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+                "purl": "pkg:composer/phpunit/phpunit@10.5.48",
+                "uuid": "ba890e8c-91ed-4b2c-bed2-ea5c3ddf8eac",
+                "version": "10.5.48",
+                "group": "phpunit"
+            },
+            "attribution": {
+                "analyzerIdentity": "INTERNAL_ANALYZER",
+                "attributedOn": "2026-04-18 23:06:27.224"
+            },
+            "vulnerability": {
+                "severity": "HIGH",
+                "cvssV3BaseScore": 7.8,
+                "vulnId": "GHSA-qrr6-mg7r-m243",
+                "aliases": [],
+                "references": "* [https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-qrr6-mg7r-m243](https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-qrr6-mg7r-m243)\n* [https://github.com/sebastianbergmann/phpunit/pull/6592](https://github.com/sebastianbergmann/phpunit/pull/6592)\n* [https://github.com/advisories/GHSA-qrr6-mg7r-m243](https://github.com/advisories/GHSA-qrr6-mg7r-m243)",
+                "cweId": 88,
+                "description": "## Impact\n\nPHPUnit forwards PHP INI settings to child processes (used for isolated/PHPT test execution) as `-d name=value` command-line arguments without neutralizing INI metacharacters. Because PHP's INI parser interprets `\"` as a string delimiter, `;` as the start of a comment, and most importantly a newline as a directive separator, a value containing a newline is parsed by the child process as multiple INI directives.\n\nAn attacker able to influence a single INI value can therefore inject arbitrary additional directives into the child's configuration, including `auto_prepend_file`, `extension`, `disable_functions`, `open_basedir`, and others. Setting `auto_prepend_file` to an attacker-controlled path yields remote code execution in the child process.\n\nSources of INI values that participate in the attack:\n\n- `<ini name=\"\u2026\" value=\"\u2026\"/>` entries in `phpunit.xml` / `phpunit.xml.dist`\n- INI settings inherited from the host PHP runtime via `ini_get_all()`\n\n### Threat Model\n\nExploitation requires the attacker to control the content of an INI value read by PHPUnit. In practice this means write access to the project's `phpunit.xml`, the host `php.ini`, or the PHP binary's environment. The most realistic exposure is [Poisoned Pipeline Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/CICD-SEC-04-Poisoned-Pipeline-Execution) (PPE): a pull request from an untrusted contributor that modifies `phpunit.xml` to include a newline-containing INI value, executed by a CI system that runs PHPUnit against the PR without isolation. A malicious newline is not visibly distinguishable from a legitimate value in a typical diff review.\n\n### Affected component\n\n`PHPUnit\\Util\\PHP\\JobRunner::settingsToParameters()`.\n\n## Patches\n\nThe fix has two parts:\n\n**1. Reject line-break characters**\n\nBecause a newline or carriage return in an INI value has no legitimate use and is the primitive that enables directive injection, any PHP setting value containing `\\n` or `\\r` is now rejected with an explicit `PhpProcessException`. This follows the same \"visibility over silence\" principle applied in [CVE-2026-24765](https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-vvj3-c3rp-c85p): the anomalous state fails loudly in CI output rather than being silently sanitized, giving operators an opportunity to investigate whether it reflects tampering, environment contamination, or an unexpected upstream change.\n\n**2. Quote remaining metacharacters**\n\nValues containing `\"` or `;`, both of which have legitimate uses (e.g., regex-valued INI settings such as `ddtrace`'s `datadog.appsec.obfuscation_parameter_value_regexp`), are wrapped in double quotes with inner `\"` escaped as `\\\"`, so PHP's INI parser reads them as literal string contents rather than comment/delimiter tokens. Plain values are forwarded unchanged so that boolean keywords (`On`/`Off`) and bitwise expressions (`E_ALL & ~E_NOTICE`) retain their INI semantics.\n\n## Workarounds\n\nIf upgrading is not immediately possible:\n\n- Audit INI values: Ensure no `<ini value=\"\u2026\">` entry in `phpunit.xml` / `phpunit.xml.dist` contains newline, `\"`, or `;` characters, and that nothing writes such values into configuration at build time.\n- Isolate CI execution of untrusted code: Run PHPUnit against pull requests only in ephemeral, containerized runners that discard filesystem state between jobs; require human review before executing PRs from forks; enforce branch protection on workflows that handle secrets (`pull_request_target` and similar). These mitigations apply to the broader PPE risk class and are effective against this vulnerability as well.\n- Restrict who can modify `phpunit.xml`: Treat `phpunit.xml` as security-sensitive in code review, particularly `<ini>` entries.\n- Sanitize host INI: Ensure the host PHP's `php.ini` does not contain values with embedded newlines or unescaped metacharacters.\n\n## References\n\n- Fix: https://github.com/sebastianbergmann/phpunit/pull/6592\n- Related advisory (same threat class, Poisoned Pipeline Execution): [GHSA-vvj3-c3rp-c85p / CVE-2026-24765](https://github.com/sebastianbergmann/phpunit/security/advisories/GHSA-vvj3-c3rp-c85p)\n- OWASP CI/CD Top 10: [CICD-SEC-04 Poisoned Pipeline Execution](https://owasp.org/www-project-top-10-ci-cd-security-risks/CICD-SEC-04-Poisoned-Pipeline-Execution)\n- CWE-88: https://cwe.mitre.org/data/definitions/88.html\n- CWE-93: https://cwe.mitre.org/data/definitions/93.html",
+                "cvssV3Vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+                "source": "GITHUB",
+                "published": "2026-04-18 00:59:28.0",
+                "title": "PHPUnit has Argument injection via newline in PHP INI values that are forwarded to child processes",
+                "cwes": [
+                    {
+                        "cweId": 88,
+                        "name": "Improper Neutralization of Argument Delimiters in a Command ('Argument Injection')"
+                    },
+                    {
+                        "cweId": 93,
+                        "name": "Improper Neutralization of CRLF Sequences ('CRLF Injection')"
+                    }
+                ],
+                "uuid": "b36da30c-0bbf-444f-9de8-da5b4f62257f",
+                "severityRank": 1,
+                "cweName": "Improper Neutralization of Argument Delimiters in a Command ('Argument Injection')"
+            },
+            "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a57:ba890e8c-91ed-4b2c-bed2-ea5c3ddf8eac:b36da30c-0bbf-444f-9de8-da5b4f62257f",
+            "analysis": {
+                "isSuppressed": false
+            }
+        }
+    ],
+    "project": {
+        "name": "acme/acme-app (php)",
+        "purl": "pkg:composer/acme/acme-app@application",
+        "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a57",
+        "version": "develop"
+    },
+    "version": "1.3"
+}

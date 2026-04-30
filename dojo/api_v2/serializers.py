@@ -28,6 +28,7 @@ import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
     save_endpoints_template,
@@ -116,7 +117,7 @@ from dojo.models import (
     Vulnerability_Id,
     get_current_date,
 )
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import async_create_notification
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -2086,10 +2087,11 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             jira_helper.push_to_jira(new_finding)
 
         # Create a notification
-        create_notification(
+        dojo_dispatch_task(
+            async_create_notification,
             event="finding_added",
             title=_("Addition of %s") % new_finding.title,
-            finding=new_finding,
+            finding_id=new_finding.id,
             description=_('Finding "%s" was added by %s') % (new_finding.title, new_finding.reporter),
             url=reverse("view_finding", args=(new_finding.id,)),
             icon="exclamation-triangle",
