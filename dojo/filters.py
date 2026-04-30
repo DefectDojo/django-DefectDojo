@@ -3126,10 +3126,16 @@ class ApiEndpointFilter(DojoFilter):
 
 
 class ApiRiskAcceptanceFilter(DojoFilter):
+    # DateRangeFilter
+    created = DateRangeFilter()
+    updated = DateRangeFilter()
+
     o = OrderingFilter(
         # tuple-mapping retains order
         fields=(
             ("name", "name"),
+            ("created", "created"),
+            ("updated", "updated"),
         ),
     )
 
