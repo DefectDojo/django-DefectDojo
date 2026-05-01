@@ -15,10 +15,16 @@ from email.utils import getaddresses
 from pathlib import Path
 
 import environ
-import pghistory
 from celery.schedules import crontab
 
 from dojo import __version__
+from dojo.auditlog.settings import (  # noqa: F401 -- re-exported as Django settings
+    AUDITLOG_DISABLE_ON_RAW_SAVE,
+    PGHISTORY_CONTEXT_FIELD,
+    PGHISTORY_FOREIGN_KEY_FIELD,
+    PGHISTORY_OBJ_FIELD,
+)
+from dojo.auditlog.settings import ENV_SCHEMA as AUDITLOG_ENV_SCHEMA
 from dojo.notifications.settings import (
     NOTIFICATIONS_ENV_DEFAULTS,
 )
@@ -201,12 +207,9 @@ env = environ.FileAwareEnv(**{**dict(
     DD_CELERY_QUEUE_PURGE_BATCH_SIZE=(int, 1000),
     # Maximum number of tasks to purge in a single per-task purge action
     DD_CELERY_QUEUE_PURGE_MAX_TASKS=(int, 10000),
-    # Delete Auditlogs older than x month; -1 to keep all logs
-    DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
-    # Batch size for flushing audit logs per task run
-    DD_AUDITLOG_FLUSH_BATCH_SIZE=(int, 1000),
-    # Maximum number of batches to process per task run
-    DD_AUDITLOG_FLUSH_MAX_BATCHES=(int, 100),
+    # Audit-log env-var schema (DD_ENABLE_AUDITLOG, DD_AUDITLOG_FLUSH_*) sourced
+    # from dojo/auditlog/settings.py.
+    **AUDITLOG_ENV_SCHEMA,
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
@@ -254,9 +257,6 @@ env = environ.FileAwareEnv(**{**dict(
     DD_HASHCODE_FIELDS_PER_SCANNER=(str, ""),
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
-    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Products, ...)
-    # If you run big import you may want to disable this because there's a performance hit during (re-)imports.
-    DD_ENABLE_AUDITLOG=(bool, True),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
@@ -705,7 +705,11 @@ if not env("DD_DEFAULT_SWAGGER_UI"):
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
+        # dojo.auditlog/notifications/github are subpackages of the dojo Django
+        # app, so APP_DIRS does not auto-discover their templates/ directories.
+        # Add them explicitly.
         "DIRS": [
+            root("dojo/auditlog/templates"),
             root("dojo/notifications/templates"),
             root("dojo/github/templates"),
         ],
@@ -1659,8 +1663,7 @@ FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 # List of acceptable file types that can be (re)imported
 FILE_IMPORT_TYPES = env("DD_FILE_IMPORT_TYPES")
 # Fixes error
-# AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
-AUDITLOG_DISABLE_ON_RAW_SAVE = False
+# AUDITLOG_DISABLE_ON_RAW_SAVE is imported from dojo.auditlog.settings at the top of this file.
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
 # ------------------------------------------------------------------------------
@@ -1759,9 +1762,8 @@ if DEBUG:
 # Auditlog configuration                                                                                #
 #########################################################################################################
 
-PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
-PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
-PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
+# PGHISTORY_FOREIGN_KEY_FIELD, PGHISTORY_CONTEXT_FIELD, and PGHISTORY_OBJ_FIELD
+# are imported from dojo.auditlog.settings at the top of this file.
 
 #########################################################################################################
 # End of Auditlog configuration                                                                          #

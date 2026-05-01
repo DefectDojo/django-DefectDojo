@@ -261,8 +261,8 @@ if hasattr(settings, "PRELOAD_URL_PATTERNS"):
     urlpatterns += settings.PRELOAD_URL_PATTERNS
 
 urlpatterns += [
-    # action history
-    re_path(r"^{}history/(?P<cid>\d+)/(?P<oid>\d+)$".format(get_system_setting("url_prefix")), views.action_history, name="action_history"),
+    # action history (audit-log page) — defined in dojo/auditlog/ui/urls.py
+    re_path(r"^", include("dojo.auditlog.ui.urls")),
     re_path(r"^{}".format(get_system_setting("url_prefix")), include(ur)),
 
     # drf-spectacular = OpenAPI3
