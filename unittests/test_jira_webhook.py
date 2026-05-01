@@ -667,3 +667,124 @@ class JIRAWebhookTest(DojoTestCase):
         last_note = finding.notes.order_by("-id").first()
         self.assertIsNotNone(last_note)
         self.assertEqual(last_note.entry, "(Valentijn Scholten (valentijn)): test2")
+
+    # ---- statusCategory guard on the mitigation path ----
+    # The webhook payload's issue.fields.resolution used to be the sole
+    # signal for whether the Jira issue was closed, which caused several
+    # real-world false-mitigations:
+    #   (a) Jira workflows where the Reopen transition does not clear
+    #       resolution - the issue ends up in status=To-Do with a stale
+    #       resolution value, and every webhook mis-mitigated the finding.
+    #   (b) Ricochets during DefectDojo's own push to Jira: when a finding
+    #       is reopened, the issue.update() and the subsequent transition
+    #       fire separate webhooks, and the first one sees the
+    #       pre-transition (still-resolved) state.
+    # The fix: a webhook only mitigates when BOTH resolution is non-null
+    # AND statusCategory.key == "done". These tests lock that in.
+
+    def _update_body_with_status(self, *, status_name, status_category_key):
+        body = json.loads(self.jira_issue_update_template_string)
+        # Target the JIRA_Issue linked to finding 5 (jira_id=2 in the fixture)
+        body["issue"]["id"] = 2
+        body["issue"]["fields"]["status"]["name"] = status_name
+        body["issue"]["fields"]["status"]["statusCategory"]["key"] = status_category_key
+        # The template already carries a non-null resolution ("Cancelled").
+        # That is the interesting state: resolution is set but status may or
+        # may not actually be "done".
+        return body
+
+    def _reset_finding_to_active(self, finding):
+        finding.active = True
+        finding.is_mitigated = False
+        finding.mitigated = None
+        finding.mitigated_by = None
+        finding.false_p = False
+        finding.risk_accepted = False
+        finding.save()
+
+    def test_webhook_update_does_not_mitigate_when_status_category_is_new(self):
+        """
+        Regression: resolution set + statusCategory 'new' must NOT mitigate.
+
+        This is the real-world symptom seen when a Jira Reopen transition
+        forgets to clear the resolution field, or when DefectDojo's own
+        multi-step push to Jira fires a webhook against the pre-transition
+        state during a finding reopen.
+        """
+        self.system_settings(
+            enable_jira=True, enable_jira_web_hook=True,
+            disable_jira_webhook_secret=False,
+            jira_webhook_secret=self.correct_secret,
+        )
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        self._reset_finding_to_active(finding)
+
+        body = self._update_body_with_status(
+            status_name="To Do", status_category_key="new",
+        )
+        response = self.client.post(
+            reverse("jira_web_hook_secret", args=(self.correct_secret, )),
+            body,
+            content_type="application/json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.active)
+        self.assertFalse(finding.is_mitigated)
+        self.assertIsNone(finding.mitigated)
+        self.assertIsNone(finding.mitigated_by)
+
+    def test_webhook_update_does_not_mitigate_when_status_category_is_indeterminate(self):
+        """Same guard for issues in the 'In Progress' category."""
+        self.system_settings(
+            enable_jira=True, enable_jira_web_hook=True,
+            disable_jira_webhook_secret=False,
+            jira_webhook_secret=self.correct_secret,
+        )
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        self._reset_finding_to_active(finding)
+
+        body = self._update_body_with_status(
+            status_name="In Progress", status_category_key="indeterminate",
+        )
+        response = self.client.post(
+            reverse("jira_web_hook_secret", args=(self.correct_secret, )),
+            body,
+            content_type="application/json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertTrue(finding.active)
+        self.assertFalse(finding.is_mitigated)
+
+    def test_webhook_update_mitigates_when_status_category_is_done(self):
+        """Happy path: a genuinely-closed Jira issue still mitigates its finding."""
+        self.system_settings(
+            enable_jira=True, enable_jira_web_hook=True,
+            disable_jira_webhook_secret=False,
+            jira_webhook_secret=self.correct_secret,
+        )
+        jira_issue = JIRA_Issue.objects.get(jira_id=2)
+        finding = jira_issue.finding
+        self._reset_finding_to_active(finding)
+
+        body = self._update_body_with_status(
+            status_name="Done", status_category_key="done",
+        )
+        response = self.client.post(
+            reverse("jira_web_hook_secret", args=(self.correct_secret, )),
+            body,
+            content_type="application/json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        finding.refresh_from_db()
+        self.assertFalse(finding.active)
+        self.assertTrue(finding.is_mitigated)
+        self.assertIsNotNone(finding.mitigated)
+        self.assertIsNotNone(finding.mitigated_by)
+        self.assertEqual(finding.mitigated_by.username, "JIRA")
