@@ -102,6 +102,13 @@ def _reconcile_findings(mode, product_obj, engagement_obj, timestamp, dryrun, me
         resolution = issue_from_jira.fields.resolution if issue_from_jira.fields.resolution and issue_from_jira.fields.resolution != "None" else None
         resolution_id = resolution.id if resolution else None
         resolution_name = resolution.name if resolution else None
+        # statusCategory.key is the canonical "is this issue done" signal
+        # that process_resolution_from_jira uses to decide whether to mitigate.
+        status_category_key = getattr(
+            getattr(getattr(issue_from_jira.fields, "status", None), "statusCategory", None),
+            "key",
+            None,
+        )
 
         # convert from str to datetime
         issue_from_jira.fields.updated = parse_datetime(issue_from_jira.fields.updated)
@@ -175,7 +182,11 @@ def _reconcile_findings(mode, product_obj, engagement_obj, timestamp, dryrun, me
             if action == "import_status_from_jira":
                 message_action = "deactivating" if find.active else "reactivating"
 
-                status_changed = jira_helper.process_resolution_from_jira(find, resolution_id, resolution_name, assignee_name, issue_from_jira.fields.updated, find.jira_issue) if not dryrun else "dryrun"
+                status_changed = jira_helper.process_resolution_from_jira(
+                    find, resolution_id, resolution_name, assignee_name,
+                    issue_from_jira.fields.updated, find.jira_issue,
+                    status_category_key=status_category_key,
+                ) if not dryrun else "dryrun"
                 if status_changed:
                     message = f"{find.jira_issue.jira_key}; {settings.SITE_URL}/finding/{find.id};{find.status()};{resolution_name};{flag1};{flag2};{flag3};{find.jira_issue.jira_change};{issue_from_jira.fields.updated};{find.last_status_update};{issue_from_jira.fields.updated};{find.last_reviewed};{issue_from_jira.fields.updated};{message_action} finding in defectdojo;{status_changed}"
                     messages.append(message)
@@ -264,6 +275,13 @@ def _reconcile_finding_groups(mode, product_obj, engagement_obj, timestamp, dryr
         resolution = issue_from_jira.fields.resolution if issue_from_jira.fields.resolution and issue_from_jira.fields.resolution != "None" else None
         resolution_id = resolution.id if resolution else None
         resolution_name = resolution.name if resolution else None
+        # statusCategory.key is the canonical "is this issue done" signal
+        # that process_resolution_from_jira uses to decide whether to mitigate.
+        status_category_key = getattr(
+            getattr(getattr(issue_from_jira.fields, "status", None), "statusCategory", None),
+            "key",
+            None,
+        )
 
         # convert from str to datetime
         issue_from_jira.fields.updated = parse_datetime(issue_from_jira.fields.updated)
@@ -335,6 +353,7 @@ def _reconcile_finding_groups(mode, product_obj, engagement_obj, timestamp, dryr
                             find, resolution_id, resolution_name, assignee_name,
                             issue_from_jira.fields.updated, finding_group.jira_issue,
                             finding_group=finding_group,
+                            status_category_key=status_category_key,
                         )
                     else:
                         status_changed = "dryrun"
