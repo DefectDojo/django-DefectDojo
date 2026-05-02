@@ -4,6 +4,7 @@ import json
 import logging
 import re
 import time
+import xml.etree.ElementTree as ET
 from datetime import datetime
 
 import six
@@ -2399,6 +2400,8 @@ class CommonImportScanSerializer(serializers.Serializer):
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
+        except ET.ParseError as e:
+            raise serializers.ValidationError(f"Malformed XML: {e}")
 
     def validate(self, data: dict) -> dict:
         scan_type = data.get("scan_type")
@@ -2707,6 +2710,8 @@ class ReImportScanSerializer(CommonImportScanSerializer):
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
+        except ET.ParseError as e:
+            raise serializers.ValidationError(f"Malformed XML: {e}")
 
     def save(self, *, push_to_jira=False):
         # Go through the validate method
@@ -2787,6 +2792,8 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
             raise Exception(se)
         except ValueError as ve:
             raise Exception(ve)
+        except ET.ParseError as e:
+            raise serializers.ValidationError(f"Malformed XML: {e}")
 
 
 class LanguageTypeSerializer(serializers.ModelSerializer):
