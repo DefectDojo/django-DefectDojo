@@ -236,12 +236,11 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertIsNone(outside_dupe.duplicate_finding)
 
     @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
-    def test_cascade_delete_skips_outside_reconfigure(self):
+    def test_cascade_delete_removes_outside_scope_duplicate_findings(self):
         """
-        When DUPLICATE_CLUSTER_CASCADE_DELETE=True, outside duplicates are left untouched.
-
-        The caller (async_delete_crawl_task) handles deletion of outside-scope
-        duplicates separately via bulk_delete_findings.
+        When DUPLICATE_CLUSTER_CASCADE_DELETE=True, outside-scope findings in the duplicate
+        cluster are deleted (same as legacy duplicate_cluster.order_by("-id").delete() in
+        finding_delete), not merely unlinked.
         """
         original = self._create_finding(self.test1, "Original")
         outside_dupe = self._create_finding(self.test2, "Outside Dupe")
@@ -250,10 +249,29 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         with impersonate(self.testuser):
             prepare_duplicates_for_delete(self.test1)
 
-        outside_dupe.refresh_from_db()
-        # Outside dupe is still a duplicate — not reconfigured or deleted
-        self.assertTrue(outside_dupe.duplicate)
-        self.assertEqual(outside_dupe.duplicate_finding_id, original.id)
+        self.assertFalse(
+            Finding.objects.filter(id=outside_dupe.id).exists(),
+            msg="outside-scope duplicate should be cascade-deleted with DUPLICATE_CLUSTER_CASCADE_DELETE=True",
+        )
+
+    @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
+    def test_engagement_delete_with_outside_scope_duplicate_no_fk_violation(self):
+        # Regression: engagement.delete() raises IntegrityError when DUPLICATE_CLUSTER_CASCADE_DELETE=True
+        # and an outside-scope finding still holds a duplicate_finding FK to an in-scope finding.
+        original = self._create_finding(self.test1, "Original in Eng1")
+        outside_dupe = self._create_finding(self.test3, "Outside Dupe in Eng2")
+        self._make_duplicate(outside_dupe, original)
+
+        # This must not raise django.db.utils.IntegrityError (FK violation)
+        with impersonate(self.testuser):
+            self.engagement1.delete()
+
+        # Engagement and its findings are gone
+        self.assertFalse(Engagement.objects.filter(id=self.engagement1.id).exists())
+        self.assertFalse(Finding.objects.filter(id=original.id).exists())
+
+        # Outside-scope duplicate was cascade-deleted with the cluster (legacy behaviour)
+        self.assertFalse(Finding.objects.filter(id=outside_dupe.id).exists())
 
     def test_multiple_originals(self):
         """Multiple originals in the same test each get their clusters handled."""
