@@ -45,6 +45,7 @@ from dojo.models import (
     Test,
     User,
     UserContactInfo,
+    Vulnerability_Id,
 )
 from dojo.tools.stackhawk.parser import StackHawkParser
 
@@ -76,7 +77,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
         # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
         # By warming up the cache here, these queries are executed before we start counting queries
-        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test]:
+        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test, Vulnerability_Id]:
             ContentType.objects.get_for_model(model)
 
     @contextmanager
@@ -523,7 +524,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=111,
+            expected_num_queries1=110,
             expected_num_async_tasks1=2,
             expected_num_queries2=90,
             expected_num_async_tasks2=2,
@@ -788,7 +789,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=118,
+            expected_num_queries1=117,
             expected_num_async_tasks1=2,
             expected_num_queries2=93,
             expected_num_async_tasks2=2,
