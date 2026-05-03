@@ -167,7 +167,8 @@ def process_epic_form(request, engagement=None):
 
 def process_resolution_from_jira(finding, resolution_id, resolution_name,
                                  assignee_name, jira_now, jira_issue,
-                                 finding_group=None):
+                                 finding_group=None, *,
+                                 status_category_key: str | None = None):
     """
     Process a resolution change from Jira webhook.
 
@@ -177,6 +178,7 @@ def process_resolution_from_jira(finding, resolution_id, resolution_name,
         finding, resolution_id, resolution_name,
         assignee_name, jira_now, jira_issue,
         finding_group=finding_group,
+        status_category_key=status_category_key,
     )
 
 
