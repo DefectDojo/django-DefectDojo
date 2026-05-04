@@ -9,7 +9,7 @@ from django.test import RequestFactory, override_settings
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
 
-from dojo.middleware import CustomSocialAuthExceptionMiddleware
+from dojo.sso.middleware import CustomSocialAuthExceptionMiddleware
 
 from .dojo_test_case import DojoTestCase
 

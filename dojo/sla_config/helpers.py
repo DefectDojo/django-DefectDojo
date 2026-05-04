@@ -8,7 +8,12 @@ logger = logging.getLogger(__name__)
 
 
 @app.task
-def async_update_sla_expiration_dates_sla_config_sync(sla_config: SLA_Configuration, products: list[Product], *args, severities: list[str] | None = None, **kwargs):
+def async_update_sla_expiration_dates_sla_config_sync(sla_config_id: int, product_ids: list[int], *args, severities: list[str] | None = None, **kwargs):
+    sla_config = SLA_Configuration.objects.filter(pk=sla_config_id).first()
+    if sla_config is None:
+        logger.info("SLA_Configuration with id %s no longer exists, skipping update", sla_config_id)
+        return
+    products = Product.objects.filter(pk__in=product_ids)
     if method := get_custom_method("FINDING_SLA_EXPIRATION_CALCULATION_METHOD"):
         method(sla_config, products, severities=severities)
     else:

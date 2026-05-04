@@ -20,8 +20,10 @@ Always verify updated counts by:
 
 import logging
 from contextlib import contextmanager
+from unittest.mock import patch
 
 from crum import impersonate
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings, tag
 from django.utils import timezone
@@ -43,7 +45,9 @@ from dojo.models import (
     Test,
     User,
     UserContactInfo,
+    Vulnerability_Id,
 )
+from dojo.tools.stackhawk.parser import StackHawkParser
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2
 
@@ -73,7 +77,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
         # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
         # By warming up the cache here, these queries are executed before we start counting queries
-        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test]:
+        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test, Vulnerability_Id]:
             ContentType.objects.get_for_model(model)
 
     @contextmanager
@@ -276,6 +280,31 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     """Performance tests using small sample files (StackHawk, ~6 findings)."""
 
+    def setUp(self):
+        super().setUp()
+
+        original_get_findings = StackHawkParser.get_findings
+
+        def _patched_get_findings(parser_self, json_output, test):
+            findings = original_get_findings(parser_self, json_output, test)
+            for f in findings:
+                f.unsaved_tags = ["perf-tag-a", "perf-tag-b"]
+                f.unsaved_vulnerability_ids = [f"CVE-2021-{f.vuln_id_from_tool}"]
+            return findings
+
+        patcher = patch.object(StackHawkParser, "get_findings", _patched_get_findings)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        hashcode_override = override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={
+                **settings.HASHCODE_FIELDS_PER_SCANNER,
+                "StackHawk HawkScan": ["vulnerability_ids", "vuln_id_from_tool"],
+            },
+        )
+        hashcode_override.enable()
+        self.addCleanup(hashcode_override.disable)
+
     def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3, expected_num_queries4, expected_num_async_tasks4):
         """
         Log output can be quite large as when the assertNumQueries fails, all queries are printed.
@@ -314,9 +343,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=139,
+            expected_num_queries1=172,
             expected_num_async_tasks1=2,
-            expected_num_queries2=115,
+            expected_num_queries2=125,
             expected_num_async_tasks2=1,
             expected_num_queries3=29,
             expected_num_async_tasks3=1,
@@ -338,11 +367,11 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=152,
+            expected_num_queries1=188,
             expected_num_async_tasks1=2,
-            expected_num_queries2=122,
+            expected_num_queries2=133,
             expected_num_async_tasks2=1,
-            expected_num_queries3=36,
+            expected_num_queries3=37,
             expected_num_async_tasks3=1,
             expected_num_queries4=100,
             expected_num_async_tasks4=0,
@@ -363,13 +392,13 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=159,
+            expected_num_queries1=198,
             expected_num_async_tasks1=4,
-            expected_num_queries2=129,
+            expected_num_queries2=143,
             expected_num_async_tasks2=3,
-            expected_num_queries3=40,
+            expected_num_queries3=44,
             expected_num_async_tasks3=3,
-            expected_num_queries4=107,
+            expected_num_queries4=109,
             expected_num_async_tasks4=2,
         )
 
@@ -379,65 +408,72 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         Test method to measure deduplication performance by importing the same scan twice.
         The second import should result in all findings being marked as duplicates.
         This is different from reimport as we create a new test each time.
+        Uses hash ["vulnerability_ids", "endpoints"] — stable because both imports use the same file.
         """
         _, engagement, lead, environment = self._create_test_objects(
             "TestDojoDeduplicationPerformance",
             "Test Deduplication Performance Engagement",
         )
 
-        # First import - all findings should be new
-        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
-        # This allows us to see all count mismatches in a single test run, making it easier to fix
-        # all incorrect expected values at once rather than fixing them one at a time.
-        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
-        with (  # noqa: SIM117
-            self.subTest("first_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+        with override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={
+                **settings.HASHCODE_FIELDS_PER_SCANNER,
+                "StackHawk HawkScan": ["vulnerability_ids", "endpoints"],
+            },
         ):
-            with self.subTest(step="first_import", metric="queries"):
-                with self.assertNumQueries(expected_num_queries1):
-                    with self.subTest(step="first_import", metric="async_tasks"):
-                        with self._assertNumAsyncTask(expected_num_async_tasks1):
-                            import_options = {
-                                "user": lead,
-                                "lead": lead,
-                                "scan_date": None,
-                                "environment": environment,
-                                "minimum_severity": "Info",
-                                "active": True,
-                                "verified": True,
-                                "scan_type": STACK_HAWK_SCAN_TYPE,
-                                "engagement": engagement,
-                            }
-                            importer = DefaultImporter(**import_options)
-                            _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
+            # First import - all findings should be new
+            # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+            with (  # noqa: SIM117
+                self.subTest("first_import"), impersonate(Dojo_User.objects.get(username="admin")),
+                STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+            ):
+                with self.subTest(step="first_import", metric="queries"):
+                    with self.assertNumQueries(expected_num_queries1):
+                        with self.subTest(step="first_import", metric="async_tasks"):
+                            with self._assertNumAsyncTask(expected_num_async_tasks1):
+                                import_options = {
+                                    "user": lead,
+                                    "lead": lead,
+                                    "scan_date": None,
+                                    "environment": environment,
+                                    "minimum_severity": "Info",
+                                    "active": True,
+                                    "verified": True,
+                                    "scan_type": STACK_HAWK_SCAN_TYPE,
+                                    "engagement": engagement,
+                                }
+                                importer = DefaultImporter(**import_options)
+                                _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
 
-        # Second import - all findings should be duplicates
-        # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
-        # This allows us to see all count mismatches in a single test run, making it easier to fix
-        # all incorrect expected values at once rather than fixing them one at a time.
-        # Nested with statements are intentional - each assertion needs its own subTest wrapper.
-        with (  # noqa: SIM117
-            self.subTest("second_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
-        ):
-            with self.subTest(step="second_import", metric="queries"):
-                with self.assertNumQueries(expected_num_queries2):
-                    with self.subTest(step="second_import", metric="async_tasks"):
-                        with self._assertNumAsyncTask(expected_num_async_tasks2):
-                            import_options = {
-                                "user": lead,
-                                "lead": lead,
-                                "scan_date": None,
-                                "environment": environment,
-                                "minimum_severity": "Info",
-                                "active": True,
-                                "verified": True,
-                                "scan_type": STACK_HAWK_SCAN_TYPE,
-                                "engagement": engagement,
-                            }
-                            importer = DefaultImporter(**import_options)
-                            _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
+            # Second import - all findings should be duplicates
+            # Each assertion context manager is wrapped in its own subTest so that if one fails, the others still run.
+            # This allows us to see all count mismatches in a single test run, making it easier to fix
+            # all incorrect expected values at once rather than fixing them one at a time.
+            # Nested with statements are intentional - each assertion needs its own subTest wrapper.
+            with (  # noqa: SIM117
+                self.subTest("second_import"), impersonate(Dojo_User.objects.get(username="admin")),
+                STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+            ):
+                with self.subTest(step="second_import", metric="queries"):
+                    with self.assertNumQueries(expected_num_queries2):
+                        with self.subTest(step="second_import", metric="async_tasks"):
+                            with self._assertNumAsyncTask(expected_num_async_tasks2):
+                                import_options = {
+                                    "user": lead,
+                                    "lead": lead,
+                                    "scan_date": None,
+                                    "environment": environment,
+                                    "minimum_severity": "Info",
+                                    "active": True,
+                                    "verified": True,
+                                    "scan_type": STACK_HAWK_SCAN_TYPE,
+                                    "engagement": engagement,
+                                }
+                                importer = DefaultImporter(**import_options)
+                                _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
 
         # Log the results for analysis
         logger.debug(f"First import: {len_new_findings1} new findings, {len_closed_findings1} closed findings")
@@ -488,9 +524,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=74,
+            expected_num_queries1=110,
             expected_num_async_tasks1=2,
-            expected_num_queries2=66,
+            expected_num_queries2=90,
             expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -509,9 +545,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=87,
+            expected_num_queries1=126,
             expected_num_async_tasks1=2,
-            expected_num_queries2=80,
+            expected_num_queries2=107,
             expected_num_async_tasks2=2,
         )
 
@@ -536,6 +572,28 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         # count against the measured sections.
         for model in [Location, LocationFindingReference]:
             ContentType.objects.get_for_model(model)
+
+        original_get_findings = StackHawkParser.get_findings
+
+        def _patched_get_findings(parser_self, json_output, test):
+            findings = original_get_findings(parser_self, json_output, test)
+            for f in findings:
+                f.unsaved_tags = ["perf-tag-a", "perf-tag-b"]
+                f.unsaved_vulnerability_ids = [f"CVE-2021-{f.vuln_id_from_tool}"]
+            return findings
+
+        patcher = patch.object(StackHawkParser, "get_findings", _patched_get_findings)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+        hashcode_override = override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={
+                **settings.HASHCODE_FIELDS_PER_SCANNER,
+                "StackHawk HawkScan": ["vulnerability_ids", "vuln_id_from_tool"],
+            },
+        )
+        hashcode_override.enable()
+        self.addCleanup(hashcode_override.disable)
 
     def _import_reimport_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, expected_num_queries3, expected_num_async_tasks3, expected_num_queries4, expected_num_async_tasks4):
         r"""
@@ -575,14 +633,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=1191,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=716,
-            expected_num_async_tasks2=17,
-            expected_num_queries3=346,
-            expected_num_async_tasks3=16,
-            expected_num_queries4=212,
-            expected_num_async_tasks4=6,
+            expected_num_queries1=179,
+            expected_num_async_tasks1=2,
+            expected_num_queries2=134,
+            expected_num_async_tasks2=1,
+            expected_num_queries3=37,
+            expected_num_async_tasks3=1,
+            expected_num_queries4=101,
+            expected_num_async_tasks4=0,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -599,14 +657,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=1206,
-            expected_num_async_tasks1=7,
-            expected_num_queries2=725,
-            expected_num_async_tasks2=17,
-            expected_num_queries3=355,
-            expected_num_async_tasks3=16,
-            expected_num_queries4=212,
-            expected_num_async_tasks4=6,
+            expected_num_queries1=197,
+            expected_num_async_tasks1=2,
+            expected_num_queries2=144,
+            expected_num_async_tasks2=1,
+            expected_num_queries3=47,
+            expected_num_async_tasks3=1,
+            expected_num_queries4=101,
+            expected_num_async_tasks4=0,
         )
 
     @override_settings(ENABLE_AUDITLOG=True)
@@ -624,14 +682,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=1216,
-            expected_num_async_tasks1=9,
-            expected_num_queries2=735,
-            expected_num_async_tasks2=19,
-            expected_num_queries3=359,
-            expected_num_async_tasks3=18,
-            expected_num_queries4=222,
-            expected_num_async_tasks4=8,
+            expected_num_queries1=210,
+            expected_num_async_tasks1=4,
+            expected_num_queries2=157,
+            expected_num_async_tasks2=3,
+            expected_num_queries3=54,
+            expected_num_async_tasks3=3,
+            expected_num_queries4=113,
+            expected_num_async_tasks4=2,
         )
 
     def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
@@ -639,55 +697,62 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         Test method to measure deduplication performance by importing the same scan twice.
         Mirrors TestDojoImporterPerformanceSmall._deduplication_performance but uses
         Locations-specific product/engagement names for test isolation.
+        Uses hash ["vulnerability_ids", "endpoints"] — stable because both imports use the same file.
         """
         _, engagement, lead, environment = self._create_test_objects(
             "TestDojoDeduplicationPerformanceLocations",
             "Test Deduplication Performance Engagement Locations",
         )
 
-        with (  # noqa: SIM117
-            self.subTest("first_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+        with override_settings(
+            HASHCODE_FIELDS_PER_SCANNER={
+                **settings.HASHCODE_FIELDS_PER_SCANNER,
+                "StackHawk HawkScan": ["vulnerability_ids", "endpoints"],
+            },
         ):
-            with self.subTest(step="first_import", metric="queries"):
-                with self.assertNumQueries(expected_num_queries1):
-                    with self.subTest(step="first_import", metric="async_tasks"):
-                        with self._assertNumAsyncTask(expected_num_async_tasks1):
-                            import_options = {
-                                "user": lead,
-                                "lead": lead,
-                                "scan_date": None,
-                                "environment": environment,
-                                "minimum_severity": "Info",
-                                "active": True,
-                                "verified": True,
-                                "scan_type": STACK_HAWK_SCAN_TYPE,
-                                "engagement": engagement,
-                            }
-                            importer = DefaultImporter(**import_options)
-                            _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
+            with (  # noqa: SIM117
+                self.subTest("first_import"), impersonate(Dojo_User.objects.get(username="admin")),
+                STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+            ):
+                with self.subTest(step="first_import", metric="queries"):
+                    with self.assertNumQueries(expected_num_queries1):
+                        with self.subTest(step="first_import", metric="async_tasks"):
+                            with self._assertNumAsyncTask(expected_num_async_tasks1):
+                                import_options = {
+                                    "user": lead,
+                                    "lead": lead,
+                                    "scan_date": None,
+                                    "environment": environment,
+                                    "minimum_severity": "Info",
+                                    "active": True,
+                                    "verified": True,
+                                    "scan_type": STACK_HAWK_SCAN_TYPE,
+                                    "engagement": engagement,
+                                }
+                                importer = DefaultImporter(**import_options)
+                                _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
 
-        with (  # noqa: SIM117
-            self.subTest("second_import"), impersonate(Dojo_User.objects.get(username="admin")),
-            STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
-        ):
-            with self.subTest(step="second_import", metric="queries"):
-                with self.assertNumQueries(expected_num_queries2):
-                    with self.subTest(step="second_import", metric="async_tasks"):
-                        with self._assertNumAsyncTask(expected_num_async_tasks2):
-                            import_options = {
-                                "user": lead,
-                                "lead": lead,
-                                "scan_date": None,
-                                "environment": environment,
-                                "minimum_severity": "Info",
-                                "active": True,
-                                "verified": True,
-                                "scan_type": STACK_HAWK_SCAN_TYPE,
-                                "engagement": engagement,
-                            }
-                            importer = DefaultImporter(**import_options)
-                            _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
+            with (  # noqa: SIM117
+                self.subTest("second_import"), impersonate(Dojo_User.objects.get(username="admin")),
+                STACK_HAWK_FILENAME.open(encoding="utf-8") as scan,
+            ):
+                with self.subTest(step="second_import", metric="queries"):
+                    with self.assertNumQueries(expected_num_queries2):
+                        with self.subTest(step="second_import", metric="async_tasks"):
+                            with self._assertNumAsyncTask(expected_num_async_tasks2):
+                                import_options = {
+                                    "user": lead,
+                                    "lead": lead,
+                                    "scan_date": None,
+                                    "environment": environment,
+                                    "minimum_severity": "Info",
+                                    "active": True,
+                                    "verified": True,
+                                    "scan_type": STACK_HAWK_SCAN_TYPE,
+                                    "engagement": engagement,
+                                }
+                                importer = DefaultImporter(**import_options)
+                                _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
 
         logger.debug(f"First import: {len_new_findings1} new findings, {len_closed_findings1} closed findings")
         logger.debug(f"Second import: {len_new_findings2} new findings, {len_closed_findings2} closed findings")
@@ -724,10 +789,10 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=1411,
-            expected_num_async_tasks1=8,
-            expected_num_queries2=1013,
-            expected_num_async_tasks2=8,
+            expected_num_queries1=117,
+            expected_num_async_tasks1=2,
+            expected_num_queries2=93,
+            expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
 
@@ -744,8 +809,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=1426,
-            expected_num_async_tasks1=8,
-            expected_num_queries2=1135,
-            expected_num_async_tasks2=8,
+            expected_num_queries1=135,
+            expected_num_async_tasks1=2,
+            expected_num_queries2=218,
+            expected_num_async_tasks2=2,
         )

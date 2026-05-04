@@ -2,7 +2,7 @@ from django.test import Client, override_settings
 from netaddr import IPSet
 
 from dojo.models import Dojo_Group, Dojo_Group_Member, User
-from dojo.remote_user import RemoteUserScheme
+from dojo.sso.remote_user import RemoteUserScheme
 
 from .dojo_test_case import DojoTestCase
 
@@ -152,7 +152,7 @@ class TestRemoteUser(DojoTestCase):
         AUTH_REMOTEUSER_TRUSTED_PROXY=IPSet(["192.168.0.0/24", "192.168.2.0/24"]),
     )
     def test_untrusted_proxy(self):
-        with self.assertLogs("dojo.remote_user", level="DEBUG") as cm:
+        with self.assertLogs("dojo.sso.remote_user", level="DEBUG") as cm:
             resp = self.client1.get("/profile",
                                     REMOTE_ADDR="192.168.1.42",
                                     headers={
