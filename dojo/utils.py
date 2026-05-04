@@ -1737,7 +1737,7 @@ def _get_object_name(obj):
 
 
 @app.task
-def async_delete_task(model_label, pk, *, preview=False, **kwargs):
+def async_delete_task(model_label, pk, **kwargs):
     """
     Delete an object and all its related objects using the SQL cascade walker.
 
@@ -1749,14 +1749,9 @@ def async_delete_task(model_label, pk, *, preview=False, **kwargs):
     efficient bottom-up SQL deletion of all FK-related tables. The top-level
     object is deleted via ORM obj.delete() to fire Django signals.
 
-    When ``preview=True``, no data is modified. Returns a Counter mapping
-    model __name__ to the number of objects that would be deleted.
-
     Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
-    from collections import Counter  # noqa: PLC0415
-
     from django.apps import apps  # noqa: PLC0415
 
     from dojo.finding.helper import (  # noqa: PLC0415 circular import
@@ -1769,64 +1764,53 @@ def async_delete_task(model_label, pk, *, preview=False, **kwargs):
     obj = Model.objects.filter(pk=pk).first()
     if obj is None:
         logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
-        return Counter() if preview else None
+        return
 
-    logger.debug("ASYNC_DELETE: %s %s: %s", "Previewing" if preview else "Deleting", _get_object_name(obj), obj)
+    logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
     if not isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
-        if not preview:
-            logger.debug("ASYNC_DELETE: %s async delete not supported. Deleting normally: %s", _get_object_name(obj), obj)
-            obj.delete()
-        return Counter() if preview else None
+        logger.debug("ASYNC_DELETE: %s async delete not supported. Deleting normally: %s", _get_object_name(obj), obj)
+        obj.delete()
+        return
 
     obj_name = _get_object_name(obj)
-    logger.info("ASYNC_DELETE: Starting %s of %s: %s", "preview" if preview else "deletion", obj_name, obj)
-
-    counter = Counter() if preview else None
+    logger.info("ASYNC_DELETE: Starting deletion of %s: %s", obj_name, obj)
 
     # Capture product reference before deletion for product grading at the end
     product = None
-    if not preview:
-        with suppress(Product.DoesNotExist, Engagement.DoesNotExist, Test.DoesNotExist):
-            if isinstance(obj, Product):
-                product = obj
-            elif isinstance(obj, Engagement):
-                product = obj.product
-            elif isinstance(obj, Test):
-                product = obj.engagement.product
+    with suppress(Product.DoesNotExist, Engagement.DoesNotExist, Test.DoesNotExist):
+        if isinstance(obj, Product):
+            product = obj
+        elif isinstance(obj, Engagement):
+            product = obj.product
+        elif isinstance(obj, Test):
+            product = obj.engagement.product
 
     # Step 1: Determine finding scope
     scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
     if scope_field:
         finding_qs = Finding.objects.filter(**{scope_field: obj})
+        # cascade_root is some context we provide to the bulk_delete_findings function
+        cascade_root = {"model": obj._meta.label_lower, "pk": obj.pk}
 
-        if preview:
-            per_product = bulk_delete_findings(finding_qs, preview=True)
-            counter["Finding"] += sum(per_product.values()) if per_product else 0
-        else:
-            # cascade_root is some context we provide to the bulk_delete_findings function
-            cascade_root = {"model": obj._meta.label_lower, "pk": obj.pk}
+        # Step 2: Prepare duplicate clusters (must happen before any deletion)
+        # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
+        # and deletes any outside scope duplicates to avoid FK violations during chunked deletion.
+        prepare_duplicates_for_delete(obj)
 
-            # Step 2: Prepare duplicate clusters (must happen before any deletion)
-            # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
-            # and deletes any outside scope duplicates to avoid FK violations during chunked deletion.
-            prepare_duplicates_for_delete(obj)
+        # Step 3: Delete the main scope findings
+        chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+        bulk_delete_findings(
+            finding_qs,
+            chunk_size=chunk_size,
+            cascade_root=cascade_root,
+        )
 
-            # Step 3: Delete the main scope findings
-            chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-            bulk_delete_findings(
-                finding_qs,
-                chunk_size=chunk_size,
-                cascade_root=cascade_root,
-            )
-
-    # Step 4: Walk all remaining related objects via SQL cascade.
-    # Findings are skipped (already counted/deleted above).
+    # Step 4: Delete all remaining related objects (Tests, Engagements,
+    # Endpoints, etc.) via SQL cascade. Findings are already gone, so
+    # skip_relations={Finding} avoids walking empty relations.
+    # Single transaction is fine here — the heavy relations (Findings,
+    # Endpoint_Status) are already deleted; only lightweight rows remain.
     pk_query = type(obj).objects.filter(pk=obj.pk)
-    if preview:
-        cascade_delete_related_objects(type(obj), pk_query, skip_relations={Finding}, preview=True, counter=counter)
-        counter[obj._meta.model.__name__] += 1
-        return counter
-
     with transaction.atomic():
         cascade_delete_related_objects(type(obj), pk_query, skip_relations={Finding})
 
