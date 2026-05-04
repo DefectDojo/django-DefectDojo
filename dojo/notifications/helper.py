@@ -845,7 +845,10 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Slack Notification")
-                send_slack_notification.run(event, user_id=user_id, **kwargs)
+                try:
+                    send_slack_notification.run(event, user_id=user_id, **kwargs)
+                except Exception:
+                    logger.exception("Failed to send Slack notification for event %s", event)
 
             if self.system_settings.enable_msteams_notifications and "msteams" in getattr(
                 notifications,
@@ -853,7 +856,10 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending MSTeams Notification")
-                send_msteams_notification.run(event, user_id=user_id, **kwargs)
+                try:
+                    send_msteams_notification.run(event, user_id=user_id, **kwargs)
+                except Exception:
+                    logger.exception("Failed to send MSTeams notification for event %s", event)
 
             if self.system_settings.enable_mail_notifications and "mail" in getattr(
                 notifications,
@@ -861,7 +867,10 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Mail Notification")
-                send_mail_notification.run(event, user_id=user_id, **kwargs)
+                try:
+                    send_mail_notification.run(event, user_id=user_id, **kwargs)
+                except Exception:
+                    logger.exception("Failed to send Mail notification for event %s", event)
 
             if self.system_settings.enable_webhooks_notifications and "webhooks" in getattr(
                 notifications,
@@ -869,7 +878,10 @@ class NotificationManager(NotificationManagerHelpers):
                 notifications.other,
             ):
                 logger.debug("Sending Webhooks Notification")
-                send_webhooks_notification.run(event, user_id=user_id, **kwargs)
+                try:
+                    send_webhooks_notification.run(event, user_id=user_id, **kwargs)
+                except Exception:
+                    logger.exception("Failed to send Webhooks notification for event %s", event)
 
 
 def process_tag_notifications(request, note, parent_url, parent_title):
