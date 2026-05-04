@@ -10,6 +10,25 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## May 2026: v2.58
+
+### May 4, 2026: v2.58.0
+
+* **(Pro UI)** Added shared table preferences so saved column/filter configurations on list views can be shared across users.
+* **(Pro UI)** Markdown content now wraps text correctly, preventing horizontal overflow on long lines.
+* **(Performance)** Pro UI List Virtualization
+* **(Performance)** Improved import performance by optimizing import queries and bulk-applying parser-supplied per-finding tags.
+* **(Performance)** Locations endpoints optimized for faster retrieval on large datasets.
+* **(SBOM)** SBOM imports now support replace mode for re-importing the full inventory of a component set.
+* **(Reports)** Beat Reporting feature is now available for Cloud subscribers
+* **(API)** Added `created` and `updated` date filters to the Risk Acceptance API.
+* **(Jira)** Webhook handler no longer mis-mitigates findings on non-"done" Jira issue transitions.
+* **(Deployment)** Default Celery task serializer is now JSON, removing pickle from the task dispatch path.
+* **(Tools)** Added Qualys VMDR CSV parser.
+* **(Tools)** Coverity API parser now supports `RESOURCE_LEAK` quality findings.
+* **(Tools)** SonarQube parser now falls back to `mdDesc` when populating finding descriptions.
+* **(Settings)** `MAX_ZIP_*` limits are now configurable via settings.
+
 ## Apr 2026: v2.57
 
 ### Apr 27, 2026: v2.57.3
