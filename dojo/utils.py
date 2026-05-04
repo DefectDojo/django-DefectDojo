@@ -1783,35 +1783,18 @@ def async_delete_task(obj, **kwargs):
 
         # Step 2: Prepare duplicate clusters (must happen before any deletion)
         # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
-        # we handle that below by expanding scope to include outside duplicates.
+        # and deletes any outside scope duplicates to avoid FK violations during chunked deletion.
         prepare_duplicates_for_delete(obj)
 
-        # Step 3: Delete outside-scope duplicates first — these point to findings
-        # in the main scope via duplicate_finding FK, so they must be removed before
-        # the originals to avoid FK violations during chunked deletion.
-        scope_ids = finding_qs.values_list("id", flat=True)
-        outside_dupes_qs = (
-            Finding.objects.filter(duplicate_finding_id__in=scope_ids)
-            .exclude(id__in=scope_ids)
-        )
+        # Step 3: Delete the main scope findings
         chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-        outside_count = outside_dupes_qs.count()
-        if outside_count:
-            logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_count)
-            bulk_delete_findings(
-                outside_dupes_qs,
-                chunk_size=chunk_size,
-                cascade_root=cascade_root,
-            )
-
-        # Step 4: Delete the main scope findings
         bulk_delete_findings(
             finding_qs,
             chunk_size=chunk_size,
             cascade_root=cascade_root,
         )
 
-    # Step 5: Delete all remaining related objects (Tests, Engagements,
+    # Step 4: Delete all remaining related objects (Tests, Engagements,
     # Endpoints, etc.) via SQL cascade. Findings are already gone, so
     # skip_relations={Finding} avoids walking empty relations.
     # Single transaction is fine here — the heavy relations (Findings,
@@ -1820,12 +1803,12 @@ def async_delete_task(obj, **kwargs):
     with transaction.atomic():
         cascade_delete_related_objects(type(obj), pk_query, skip_relations={Finding})
 
-    # Step 6: Delete the top-level object via ORM to fire Django signals
+    # Step 5: Delete the top-level object via ORM to fire Django signals
     # (post_delete notifications, pghistory audit, Pro signals).
     # All children are already gone so this is a single-row DELETE.
     obj.delete()
 
-    # Step 7: Recalculate product grade once (Engagement/Test deletes only). Skip when the
+    # Step 6: Recalculate product grade once (Engagement/Test deletes only). Skip when the
     # deleted object is the Product itself — it is removed in step 6 and grading is pointless.
     # For Product TYpe deletiongs we don't have a product instance, so this never fires.
     if product and not isinstance(obj, Product):
