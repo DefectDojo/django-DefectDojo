@@ -1,10 +1,11 @@
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
 
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tag_utils import bulk_add_tag_mapping, bulk_add_tags_to_instances, bulk_apply_parser_tags
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
@@ -258,6 +259,183 @@ class BulkTagUtilsTest(TestCase):
                 tag_field_name=self.get_tag_field_name(),
             )
         self.assertIn("is not a TagField", str(cm.exception))
+
+
+class BulkTagMappingTest(TestCase):
+
+    """Tests for bulk_add_tag_mapping — the multi-tag, ~5-query variant."""
+
+    LOCATION_CLASS = Location if settings.V3_FEATURE_LOCATIONS else Endpoint
+
+    def setUp(self):
+        self.tag_model = self.LOCATION_CLASS.tags.tag_model
+        self.product_type = Product_Type.objects.create(name="PT-Mapping")
+        self.product = Product.objects.create(name="Mapping Product", description="test", prod_type=self.product_type)
+
+    def _make_location(self, hostname):
+        if not settings.V3_FEATURE_LOCATIONS:
+            return Endpoint.objects.create(product=self.product, host=hostname)
+        url = URL.get_or_create_from_values(host=hostname)
+        url.location.associate_with_product(self.product)
+        return url.location
+
+    def _make_locations(self, n):
+        return [self._make_location(f"map-host-{i}.example.com") for i in range(n)]
+
+    def test_basic_different_tags_different_instances(self):
+        a, b, c = self._make_locations(3)
+        created = bulk_add_tag_mapping({"alpha": [a, b], "beta": [b, c], "gamma": [c]})
+
+        self.assertEqual(created, 5)
+        a.refresh_from_db()
+        b.refresh_from_db()
+        c.refresh_from_db()
+        self.assertEqual([t.name for t in a.tags.all()], ["alpha"])
+        self.assertCountEqual([t.name for t in b.tags.all()], ["alpha", "beta"])
+        self.assertCountEqual([t.name for t in c.tags.all()], ["beta", "gamma"])
+
+        self.assertEqual(self.tag_model.objects.get(name="alpha").count, 2)
+        self.assertEqual(self.tag_model.objects.get(name="beta").count, 2)
+        self.assertEqual(self.tag_model.objects.get(name="gamma").count, 1)
+
+    def test_same_tag_across_all_instances(self):
+        instances = self._make_locations(4)
+        created = bulk_add_tag_mapping({"shared": instances})
+
+        self.assertEqual(created, 4)
+        self.assertEqual(self.tag_model.objects.get(name="shared").count, 4)
+
+    def test_skips_existing_relationships(self):
+        a, b, c = self._make_locations(3)
+        a.tags.add("existing")
+        b.tags.add("existing")
+
+        created = bulk_add_tag_mapping({"existing": [a, b, c]})
+
+        self.assertEqual(created, 1)
+        self.assertEqual(self.tag_model.objects.get(name="existing").count, 3)
+
+    def test_empty_dict_returns_zero(self):
+        created = bulk_add_tag_mapping({})
+        self.assertEqual(created, 0)
+
+    def test_empty_instance_lists_returns_zero(self):
+        created = bulk_add_tag_mapping({"tag-a": [], "tag-b": []})
+        self.assertEqual(created, 0)
+        self.assertEqual(self.tag_model.objects.filter(name__in=["tag-a", "tag-b"]).count(), 0)
+
+    def test_case_insensitive_finds_existing_tag(self):
+        # Pre-create tag in lowercase (simulating force_lowercase storage)
+        instances = self._make_locations(2)
+        instances[0].tags.add("mytag")
+
+        # Requesting "MYTAG" should match the existing "mytag" object
+        created = bulk_add_tag_mapping({"MYTAG": [instances[0], instances[1]]})
+
+        self.assertEqual(created, 1)
+        self.assertEqual(self.tag_model.objects.count(), 1)
+
+    def test_creates_new_tags_that_dont_exist(self):
+        instances = self._make_locations(2)
+        created = bulk_add_tag_mapping({"brand-new-a": [instances[0]], "brand-new-b": [instances[1]]})
+
+        self.assertEqual(created, 2)
+        self.assertTrue(self.tag_model.objects.filter(name="brand-new-a").exists())
+        self.assertTrue(self.tag_model.objects.filter(name="brand-new-b").exists())
+
+    def test_clears_prefetch_cache(self):
+        instances = list(self.LOCATION_CLASS.objects.filter(
+            pk__in=[loc.pk for loc in self._make_locations(2)],
+        ).prefetch_related("tags"))
+
+        for inst in instances:
+            self.assertEqual(list(inst.tags.all()), [])
+
+        bulk_add_tag_mapping({"cache-map": instances})
+
+        for inst in instances:
+            self.assertIn("cache-map", [t.name for t in inst.tags.all()])
+
+    def test_product_rejected(self):
+        pt = Product_Type.objects.create(name="PT-Reject")
+        product = Product.objects.create(name="P-Reject", description="x", prod_type=pt)
+        with self.assertRaises(ValueError, msg="Product instances are not supported"):
+            bulk_add_tag_mapping({"tag": [product]})
+
+    def test_batching_creates_all_relationships(self):
+        instances = self._make_locations(15)
+        created = bulk_add_tag_mapping({"batch-tag": instances}, batch_size=4)
+
+        self.assertEqual(created, 15)
+        self.assertEqual(self.tag_model.objects.get(name="batch-tag").count, 15)
+
+
+class BulkApplyParserTagsTest(TestCase):
+
+    """Tests for bulk_apply_parser_tags — the import-loop accumulator path."""
+
+    def setUp(self):
+        self.tag_model = Finding.tags.tag_model
+        self.reporter = User.objects.create_user(username="parser-test-user")
+        pt = Product_Type.objects.create(name="PT-Parser")
+        product = Product.objects.create(name="Parser Product", description="x", prod_type=pt)
+        engagement = Engagement.objects.create(
+            name="E-Parser", product=product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        tt = Test_Type.objects.create(name="Parser Test Type")
+        test = Test.objects.create(
+            title="T-Parser", engagement=engagement, test_type=tt,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        self.test = test
+
+    def _make_finding(self, title):
+        return Finding.objects.create(title=title, severity="Low", test=self.test, reporter=self.reporter)
+
+    def test_applies_tags_correctly(self):
+        f1 = self._make_finding("F1")
+        f2 = self._make_finding("F2")
+        f3 = self._make_finding("F3")
+
+        bulk_apply_parser_tags([
+            (f1, ["network", "web"]),
+            (f2, ["network"]),
+            (f3, ["pci"]),
+        ])
+
+        f1.refresh_from_db()
+        f2.refresh_from_db()
+        f3.refresh_from_db()
+        self.assertCountEqual([t.name for t in f1.tags.all()], ["network", "web"])
+        self.assertCountEqual([t.name for t in f2.tags.all()], ["network"])
+        self.assertCountEqual([t.name for t in f3.tags.all()], ["pci"])
+
+        self.assertEqual(self.tag_model.objects.get(name="network").count, 2)
+        self.assertEqual(self.tag_model.objects.get(name="web").count, 1)
+        self.assertEqual(self.tag_model.objects.get(name="pci").count, 1)
+
+    def test_empty_list_is_noop(self):
+        bulk_apply_parser_tags([])
+        self.assertEqual(self.tag_model.objects.count(), 0)
+
+    def test_filters_empty_tag_strings(self):
+        f = self._make_finding("F-empty")
+        bulk_apply_parser_tags([(f, ["", "valid", ""])])
+        f.refresh_from_db()
+        self.assertEqual([t.name for t in f.tags.all()], ["valid"])
+
+    def test_dynamic_tags_many_unique_values(self):
+        # Simulate a parser that emits one unique tag per finding (e.g. resource name)
+        findings = [self._make_finding(f"F-dyn-{i}") for i in range(20)]
+        pairs = [(f, [f"resource-{i}"]) for i, f in enumerate(findings)]
+        bulk_apply_parser_tags(pairs)
+
+        for i, f in enumerate(findings):
+            f.refresh_from_db()
+            self.assertEqual([t.name for t in f.tags.all()], [f"resource-{i}"])
+
+        self.assertEqual(self.tag_model.objects.count(), 20)
 
 
 @versioned_fixtures

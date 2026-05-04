@@ -12,6 +12,22 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Apr 2026: v2.57
 
+### Apr 27, 2026: v2.57.3
+
+* **(Pro UI)** Asset menu now shows the Permissions tab for users with an inherited Organization role.
+* **(Pro UI)** Added an Environment column to the Test list and Findings list.
+* **(Pro UI)** Asset hierarchy refreshes immediately after editing an asset, so changes are reflected without a manual reload.
+* **(Pro UI)** Standardized the "Test Type" label and split Test and Test Type into separate columns on the test list.
+* **(Pro UI)** Corrected the Product column label on the Group page under the V3 relabeling.
+* **(Pro UI)** Removed the duplicate greeting message shown after login.
+* **(Performance)** Create-path notifications are now dispatched asynchronously, removing a source of slow POST latency.
+* **(Deployment)** On premise deployments now include the Orchestrator services.
+* **(Notifications)** Improved the format and display of SLA breach notifications.
+* **(Engineer Metrics)** Fixed a KeyError that could be raised when loading the Engineer Metrics page.
+* **(Tools)** Contrast parser no longer collapses distinct findings that share a rule name.
+* **(Tools)** Dependency Track parser no longer drops vulnerability IDs when `aliases` is empty.
+* **(Tools)** Added WatchGuard security advisories as a supported Vulnerability ID source.
+
 ### Apr 20, 2026: v2.57.2
 
 * **(Pro UI)** Search and filter state is now preserved when closing a Finding from a Finding list, so you don't lose your place after editing.

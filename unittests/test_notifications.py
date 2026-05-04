@@ -875,7 +875,7 @@ class TestNotificationWebhooks(DojoTestCase):
             wh.note = "Response status code: 503"
             wh.save()
 
-            with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
+            with self.assertLogs("dojo.notifications", level="DEBUG") as cm:
                 webhook_status_cleanup()
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
@@ -911,7 +911,7 @@ class TestNotificationWebhooks(DojoTestCase):
             wh.note = "Response status code: 503"
             wh.save()
 
-            with self.assertLogs("dojo.notifications.helper", level="DEBUG") as cm:
+            with self.assertLogs("dojo.notifications", level="DEBUG") as cm:
                 webhook_status_cleanup()
 
             updated_wh = Notification_Webhooks.objects.filter(owner=None).first()
