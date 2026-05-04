@@ -61,7 +61,7 @@ def execute_update_sql(query, **updatespec):
     return execute_compiled_sql(*get_update_sql(query, **updatespec))
 
 
-def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0, preview=False, counter=None):
+def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0, preview=False, counter=None, preview_models=None):
     """
     Recursively walk Django model relations and execute compiled SQL
     to perform cascade DELETE / SET_NULL on related objects without the Collector.
@@ -83,6 +83,9 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
         level: Recursion depth (for logging only).
         preview: When True, count instead of delete (dry-run mode).
         counter: Counter accumulator for preview mode. Updated in place.
+        preview_models: Optional set of model __name__ strings. When set, only
+                        COUNT models in this set during preview; still recurse
+                        through all models to reach tracked descendants.
 
     Returns:
         Number of records deleted at this level (0 at level 0 since root is not deleted).
@@ -141,13 +144,15 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
             )
             if preview:
                 # Count related objects at this level before recursing into their children.
-                n = related_model.objects.filter(**filterspec).count()
-                if n:
-                    counter[related_model.__name__] += n
-                    logger.debug(
-                        "cascade_delete preview: counted %d %s records",
-                        n, related_model.__name__,
-                    )
+                # Skip COUNT when preview_models is set and this model is not in it.
+                if preview_models is None or related_model.__name__ in preview_models:
+                    n = related_model.objects.filter(**filterspec).count()
+                    if n:
+                        counter[related_model.__name__] += n
+                        logger.debug(
+                            "cascade_delete preview: counted %d %s records",
+                            n, related_model.__name__,
+                        )
                 # Recurse to count grandchildren even when n==0 (subquery may still match).
                 cascade_delete_related_objects(
                     related_model, related_pk_query,
@@ -157,6 +162,7 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
                     level=level + 1,
                     preview=True,
                     counter=counter,
+                    preview_models=preview_models,
                 )
             else:
                 # Recurse into children first (bottom-up deletion)
