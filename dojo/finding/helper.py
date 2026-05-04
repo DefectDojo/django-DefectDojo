@@ -830,13 +830,15 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
         )
 
 
-def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, order_desc=False):
+def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, order_desc=False, preview=False):
     """
     Entry point; may delegate to Pro via settings.BULK_DELETE_FINDINGS_METHOD.
 
     cascade_root: optional dict describing the top-level object whose cascade triggered
     this bulk delete (e.g. {"model": "dojo.engagement", "pk": 9}). Ignored by OSS
     when no custom method is configured.
+
+    preview: when True, return a ``{product_id: finding_count}`` dict without deleting anything.
     """
     from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
 
@@ -846,7 +848,10 @@ def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, orde
             chunk_size=chunk_size,
             cascade_root=cascade_root,
             order_desc=order_desc,
+            preview=preview,
         )
+    if preview:
+        return None
     return _bulk_delete_findings_internal(finding_qs, chunk_size=chunk_size, order_desc=order_desc)
 
 
