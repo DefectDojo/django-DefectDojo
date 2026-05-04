@@ -611,20 +611,32 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 
-def prepare_duplicates_for_delete(obj):
+def prepare_duplicates_for_delete(obj, preview=False):
     """
     Prepare duplicate clusters before deleting a Test, Engagement, Product, or Product_Type.
 
     Resets inside-scope duplicate FKs and reconfigures outside-scope clusters
     so that cascade_delete won't hit FK violations on the self-referential
     duplicate_finding field.
+
+    When preview=True, no data is modified. Returns the count of outside-scope
+    findings that would be deleted (non-zero only when DUPLICATE_CLUSTER_CASCADE_DELETE=True).
     """
     from dojo.utils import FINDING_SCOPE_FILTERS  # noqa: PLC0415 circular import
 
     scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
     if scope_field is None:
-        logger.warning("prepare_duplicates_for_delete: unsupported object type %s", type(obj).__name__)
-        return
+        if not preview:
+            logger.warning("prepare_duplicates_for_delete: unsupported object type %s", type(obj).__name__)
+        return 0 if preview else None
+
+    if preview:
+        if not settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+            return 0
+        scope_ids_subquery = Finding.objects.filter(**{scope_field: obj}).values_list("id", flat=True)
+        return Finding.objects.filter(
+            duplicate_finding_id__in=scope_ids_subquery,
+        ).exclude(id__in=scope_ids_subquery).count()
 
     logger.debug("prepare_duplicates_for_delete: %s %d", type(obj).__name__, obj.id)
 
