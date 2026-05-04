@@ -1799,14 +1799,11 @@ class Endpoint(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, Endpoint):
-            # Check if the contents of the endpoint match
             contents_match = str(self) == str(other)
-            # Determine if products should be used in the equation
-            if self.product is not None and other.product is not None:
-                # Check if the products are the same
-                products_match = (self.product) == other.product
-                # Check if the contents match
-                return products_match and contents_match
+            # Use product_id (cached integer) instead of self.product to avoid
+            # triggering a FK lookup on every comparison inside NestedObjects.add_edge.
+            if self.product_id is not None and other.product_id is not None:
+                return self.product_id == other.product_id and contents_match
             return contents_match
 
         return NotImplemented
