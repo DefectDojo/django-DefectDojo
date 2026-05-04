@@ -38,7 +38,9 @@ def log_generic_alert(source, title, description):
 
 
 @app.task(bind=True)
-def add_alerts(self, runinterval, *args, **kwargs):
+def add_alerts(self, *args, **kwargs):
+    # Run interval matches the beat schedule for this task (see CELERY_BEAT_SCHEDULE).
+    runinterval = timedelta(hours=1)
     now = timezone.now()
 
     upcoming_engagements = Engagement.objects.filter(target_start__gt=now + timedelta(days=3), target_start__lt=now + timedelta(days=3) + runinterval).order_by("target_start")

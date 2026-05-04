@@ -107,7 +107,7 @@ env = environ.FileAwareEnv(**{**dict(
     DD_CELERY_RESULT_BACKEND=(str, "django-db"),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
-    DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
+    DD_CELERY_TASK_SERIALIZER=(str, "json"),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
     # Hard ceiling on task runtime. When reached, the worker process is sent SIGKILL — no cleanup
     # code runs. Always set higher than DD_CELERY_TASK_SOFT_TIME_LIMIT. (0 = disabled, no limit)
@@ -847,8 +847,9 @@ CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = env("DD_CELERY_RESULT_EXPIRES")
 CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
-CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
+CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
+CELERY_RESULT_SERIALIZER = "json"
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
 
 if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
@@ -872,7 +873,6 @@ CELERY_BEAT_SCHEDULE = {
     "add-alerts": {
         "task": "dojo.notifications.tasks.add_alerts",
         "schedule": timedelta(hours=1),
-        "args": [timedelta(hours=1)],
         "options": {
             "expires": int(60 * 60 * 1 * 1.2),  # If a task is not executed within 72 minutes, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
         },
