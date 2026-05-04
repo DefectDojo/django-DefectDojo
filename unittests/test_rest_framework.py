@@ -60,8 +60,6 @@ from dojo.api_v2.views import (
     LanguageViewSet,
     NotesViewSet,
     NoteTypeViewSet,
-    NotificationsViewSet,
-    NotificationWebhooksViewSet,
     ProductAPIScanConfigurationViewSet,
     ProductGroupViewSet,
     ProductMemberViewSet,
@@ -149,6 +147,7 @@ from dojo.models import (
     User,
     UserContactInfo,
 )
+from dojo.notifications.api.views import NotificationsViewSet, NotificationWebhooksViewSet
 from dojo.organization.api.views import (
     OrganizationGroupViewSet,
     OrganizationMemberViewSet,
@@ -1002,8 +1001,8 @@ class FindingCloseAPITest(DojoAPITestCase):
 
     def test_close_finding_pushes_note_to_jira_when_configured(self):
         finding = Finding.objects.get(id=7)
-        with patch("dojo.jira_link.helper.add_comment") as add_comment_mock, \
-             patch("dojo.jira_link.helper.is_push_all_issues", return_value=True), \
+        with patch("dojo.jira.helper.add_comment") as add_comment_mock, \
+             patch("dojo.jira.helper.is_push_all_issues", return_value=True), \
              patch.object(Finding, "has_jira_issue", new_callable=PropertyMock, return_value=True):
             payload = {
                 "is_mitigated": True,
@@ -2718,7 +2717,7 @@ class UsersTest(BaseClass.BaseClassTest):
         }
         self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 25
+        self.deleted_objects = 13
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create(self):
