@@ -1,5 +1,5 @@
+import json
 import logging
-import pickle
 import re
 import warnings
 from datetime import date, datetime
@@ -3477,7 +3477,7 @@ class MultiWidgetBasic(forms.widgets.MultiWidget):
 
     def decompress(self, value):
         if value:
-            return pickle.loads(value)
+            return json.loads(value)
         return [None, None, None, None, None, None]
 
     def format_output(self, rendered_widgets):
@@ -3497,7 +3497,7 @@ class MultiExampleField(forms.fields.MultiValueField):
         super().__init__(list_fields, *args, **kwargs)
 
     def compress(self, values):
-        return pickle.dumps(values)
+        return json.dumps(values)
 
 
 class CreateChoiceQuestionForm(forms.Form):

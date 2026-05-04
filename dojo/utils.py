@@ -1737,9 +1737,12 @@ def _get_object_name(obj):
 
 
 @app.task
-def async_delete_task(obj, **kwargs):
+def async_delete_task(model_label, pk, **kwargs):
     """
     Delete an object and all its related objects using the SQL cascade walker.
+
+    Takes ``(model_label, pk)`` (e.g. ``("dojo.product", 42)``) so the task
+    arguments are JSON-serializable. The instance is refetched in the worker.
 
     Handles Python-level concerns (duplicates, integrators, M2M, file cleanup,
     product grading) explicitly, then uses cascade_delete_related_objects() for
@@ -1749,11 +1752,19 @@ def async_delete_task(obj, **kwargs):
     Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
+    from django.apps import apps  # noqa: PLC0415
+
     from dojo.finding.helper import (  # noqa: PLC0415 circular import
         bulk_delete_findings,
         prepare_duplicates_for_delete,
     )
     from dojo.utils_cascade_delete import cascade_delete_related_objects  # noqa: PLC0415 circular import
+
+    Model = apps.get_model(model_label)
+    obj = Model.objects.filter(pk=pk).first()
+    if obj is None:
+        logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
+        return
 
     logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
     if not isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
@@ -1839,7 +1850,7 @@ class async_delete:
         """
         from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-        dojo_dispatch_task(async_delete_task, obj, **kwargs)
+        dojo_dispatch_task(async_delete_task, obj._meta.label_lower, obj.pk, **kwargs)
 
     @staticmethod
     def get_object_name(obj):
