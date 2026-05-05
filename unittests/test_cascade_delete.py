@@ -27,7 +27,8 @@ logger = logging.getLogger(__name__)
 
 
 class TestCascadeDeletePreviewModels(DojoTestCase):
-    """Tests for cascade_delete_related_objects(preview=True, preview_models=...)."""
+
+    """Tests for cascade_delete_related_objects(preview_only=True, preview_models=...)."""
 
     def setUp(self):
         super().setUp()
@@ -72,7 +73,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         )
 
     def test_preview_counts_cascade_relations(self):
-        """preview=True accumulates counts into counter without deleting."""
+        """preview_only=True accumulates counts into counter without deleting."""
         self._create_finding("F1")
         self._create_finding("F2")
 
@@ -80,7 +81,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         cascade_delete_related_objects(
             Engagement,
             Engagement.objects.filter(pk=self.engagement.pk),
-            preview=True,
+            preview_only=True,
             counter=counter,
         )
 
@@ -99,7 +100,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         cascade_delete_related_objects(
             Engagement,
             Engagement.objects.filter(pk=self.engagement.pk),
-            preview=True,
+            preview_only=True,
             counter=counter,
             preview_models=tracked,
         )
@@ -116,7 +117,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         cascade_delete_related_objects(
             Engagement,
             Engagement.objects.filter(pk=self.engagement.pk),
-            preview=True,
+            preview_only=True,
             counter=counter,
             preview_models={"Test", "Finding"},
         )
@@ -132,7 +133,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         cascade_delete_related_objects(
             Engagement,
             Engagement.objects.filter(pk=self.engagement.pk),
-            preview=True,
+            preview_only=True,
             counter=counter_full,
             preview_models=None,
         )
@@ -141,7 +142,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         cascade_delete_related_objects(
             Engagement,
             Engagement.objects.filter(pk=self.engagement.pk),
-            preview=True,
+            preview_only=True,
             counter=counter_filtered,
             preview_models={"Test", "Finding"},
         )
@@ -150,13 +151,13 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         self.assertGreaterEqual(len(counter_full), len(counter_filtered))
 
     def test_preview_does_not_delete(self):
-        """preview=True with preview_models never deletes any rows."""
+        """preview_only=True with preview_models never deletes any rows."""
         f = self._create_finding("F1")
 
         cascade_delete_related_objects(
             Engagement,
             Engagement.objects.filter(pk=self.engagement.pk),
-            preview=True,
+            preview_only=True,
             counter=Counter(),
             preview_models={"Test", "Finding"},
         )
@@ -171,7 +172,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
         cascade_delete_related_objects(
             Engagement,
             Engagement.objects.filter(pk=999999),
-            preview=True,
+            preview_only=True,
             counter=counter,
             preview_models={"Test", "Finding"},
         )

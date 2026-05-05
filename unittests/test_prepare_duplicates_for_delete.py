@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 
 @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=False)
 class TestPrepareDuplicatesForDelete(DojoTestCase):
+
     """Tests for prepare_duplicates_for_delete()."""
 
     def setUp(self):
@@ -491,12 +492,13 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
 
 @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=False)
 class TestPrepareDuplicatesForDeletePreview(TestPrepareDuplicatesForDelete):
-    """Tests for prepare_duplicates_for_delete(preview=True) — no data modified."""
+
+    """Tests for prepare_duplicates_for_delete(preview_only=True) — no data modified."""
 
     def test_preview_returns_zero_no_outside_duplicates(self):
         """No outside-scope duplicates → count is 0."""
         self._create_finding(self.test1, "F1")
-        count = prepare_duplicates_for_delete(self.test1, preview=True)
+        count = prepare_duplicates_for_delete(self.test1, preview_only=True)
         self.assertEqual(count, 0)
 
     def test_preview_returns_zero_cascade_delete_false(self):
@@ -505,7 +507,7 @@ class TestPrepareDuplicatesForDeletePreview(TestPrepareDuplicatesForDelete):
         outside_dupe = self._create_finding(self.test2, "Outside Dupe")
         self._make_duplicate(outside_dupe, original)
 
-        count = prepare_duplicates_for_delete(self.test1, preview=True)
+        count = prepare_duplicates_for_delete(self.test1, preview_only=True)
         self.assertEqual(count, 0)
 
     @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
@@ -515,7 +517,7 @@ class TestPrepareDuplicatesForDeletePreview(TestPrepareDuplicatesForDelete):
         outside_dupe = self._create_finding(self.test2, "Outside Dupe")
         self._make_duplicate(outside_dupe, original)
 
-        count = prepare_duplicates_for_delete(self.test1, preview=True)
+        count = prepare_duplicates_for_delete(self.test1, preview_only=True)
         self.assertEqual(count, 1)
 
     @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
@@ -530,23 +532,23 @@ class TestPrepareDuplicatesForDeletePreview(TestPrepareDuplicatesForDelete):
         self._make_duplicate(dupe_b, original_b)
         self._make_duplicate(dupe_b2, original_b)
 
-        count = prepare_duplicates_for_delete(self.test1, preview=True)
+        count = prepare_duplicates_for_delete(self.test1, preview_only=True)
         self.assertEqual(count, 3)
 
     @override_settings(DUPLICATE_CLUSTER_CASCADE_DELETE=True)
     def test_preview_does_not_modify_data(self):
-        """preview=True must not change any Finding rows."""
+        """preview_only=True must not change any Finding rows."""
         original = self._create_finding(self.test1, "Original")
         outside_dupe = self._create_finding(self.test2, "Outside Dupe")
         self._make_duplicate(outside_dupe, original)
 
-        prepare_duplicates_for_delete(self.test1, preview=True)
+        prepare_duplicates_for_delete(self.test1, preview_only=True)
 
         outside_dupe.refresh_from_db()
         self.assertTrue(outside_dupe.duplicate)
         self.assertEqual(outside_dupe.duplicate_finding_id, original.id)
 
     def test_preview_returns_zero_for_unsupported_type(self):
-        """Unsupported object type → 0, no warning logged (preview is silent)."""
-        count = prepare_duplicates_for_delete(object(), preview=True)
+        """Unsupported object type → 0, no warning logged (preview_only is silent)."""
+        count = prepare_duplicates_for_delete(object(), preview_only=True)
         self.assertEqual(count, 0)

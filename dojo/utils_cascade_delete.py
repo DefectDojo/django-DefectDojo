@@ -61,7 +61,7 @@ def execute_update_sql(query, **updatespec):
     return execute_compiled_sql(*get_update_sql(query, **updatespec))
 
 
-def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0, preview=False, counter=None, preview_models=None):
+def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations=None, skip_m2m_for=None, base_model=None, level=0, *, preview_only=False, counter=None, preview_models=None):
     """
     Recursively walk Django model relations and execute compiled SQL
     to perform cascade DELETE / SET_NULL on related objects without the Collector.
@@ -81,15 +81,15 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
                       by the caller (avoids redundant tag count queries).
         base_model: Root model class (set automatically on first call).
         level: Recursion depth (for logging only).
-        preview: When True, count instead of delete (dry-run mode).
-        counter: Counter accumulator for preview mode. Updated in place.
+        preview_only: When True, count instead of delete (dry-run mode).
+        counter: Counter accumulator for preview_only mode. Updated in place.
         preview_models: Optional set of model __name__ strings. When set, only
-                        COUNT models in this set during preview; still recurse
+                        COUNT models in this set during preview_only; still recurse
                         through all models to reach tracked descendants.
 
     Returns:
         Number of records deleted at this level (0 at level 0 since root is not deleted).
-        In preview mode always returns 0; counts are accumulated in ``counter``.
+        In preview_only mode always returns 0; counts are accumulated in ``counter``.
 
     """
     if skip_relations is None:
@@ -98,7 +98,7 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
         skip_m2m_for = set()
     if base_model is None:
         base_model = from_model
-    if preview and counter is None:
+    if preview_only and counter is None:
         counter = Counter()
 
     instance_pk_query = instance_pk_query.values_list("pk").order_by()
@@ -127,7 +127,7 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
         filterspec = {f"{fk_column}__in": models.Subquery(instance_pk_query)}
 
         if on_delete_name == "SET_NULL":
-            if not preview:
+            if not preview_only:
                 count = execute_update_sql(
                     related_model.objects.filter(**filterspec),
                     **{fk_column: None},
@@ -136,13 +136,13 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
                     "cascade_delete: SET NULL on %d %s records",
                     count, related_model.__name__,
                 )
-            # In preview mode SET_NULL means objects survive — nothing to count.
+            # In preview_only mode SET_NULL means objects survive — nothing to count.
 
         elif on_delete_name == "CASCADE":
             related_pk_query = related_model.objects.filter(**filterspec).values_list(
                 related_model._meta.pk.name,
             )
-            if preview:
+            if preview_only:
                 # Count related objects at this level before recursing into their children.
                 # Skip COUNT when preview_models is set and this model is not in it.
                 if preview_models is None or related_model.__name__ in preview_models:
@@ -160,7 +160,7 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
                     skip_m2m_for=skip_m2m_for,
                     base_model=base_model,
                     level=level + 1,
-                    preview=True,
+                    preview_only=True,
                     counter=counter,
                     preview_models=preview_models,
                 )
@@ -186,7 +186,7 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
                 on_delete_name, from_model.__name__, related_model.__name__,
             )
 
-    if not preview:
+    if not preview_only:
         # Clear M2M through tables before deleting (not discovered by _meta.related_objects).
         # Skip if the caller already handled M2M cleanup for this model (e.g. bulk_clear_finding_m2m).
         if from_model not in skip_m2m_for:
@@ -230,7 +230,7 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
         )
         return 0
 
-    if preview:
+    if preview_only:
         return 0
 
     # At deeper levels, delete records after their children are gone
@@ -243,5 +243,3 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
         level, count, from_model.__name__,
     )
     return count
-
-

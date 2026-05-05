@@ -611,7 +611,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
 
 
-def prepare_duplicates_for_delete(obj, preview=False):
+def prepare_duplicates_for_delete(obj, *, preview_only=False):
     """
     Prepare duplicate clusters before deleting a Test, Engagement, Product, or Product_Type.
 
@@ -619,18 +619,18 @@ def prepare_duplicates_for_delete(obj, preview=False):
     so that cascade_delete won't hit FK violations on the self-referential
     duplicate_finding field.
 
-    When preview=True, no data is modified. Returns the count of outside-scope
+    When preview_only=True, no data is modified. Returns the count of outside-scope
     findings that would be deleted (non-zero only when DUPLICATE_CLUSTER_CASCADE_DELETE=True).
     """
     from dojo.utils import FINDING_SCOPE_FILTERS  # noqa: PLC0415 circular import
 
     scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
     if scope_field is None:
-        if not preview:
+        if not preview_only:
             logger.warning("prepare_duplicates_for_delete: unsupported object type %s", type(obj).__name__)
-        return 0 if preview else None
+        return 0 if preview_only else None
 
-    if preview:
+    if preview_only:
         if not settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
             return 0
         scope_ids_subquery = Finding.objects.filter(**{scope_field: obj}).values_list("id", flat=True)
@@ -649,7 +649,7 @@ def prepare_duplicates_for_delete(obj, preview=False):
 
     if not scope_ids_subquery.exists():
         logger.debug("no findings in scope, nothing to prepare")
-        return
+        return None
 
     # Bulk-reset inside-scope duplicates: single UPDATE instead of per-original mass_model_updater.
     # Clears the duplicate_finding FK so cascade_delete won't trip over dangling self-references.
@@ -705,6 +705,8 @@ def prepare_duplicates_for_delete(obj, preview=False):
                 "nulled %d outside-scope duplicate_finding references to prevent FK violation",
                 outside_orphan_count,
             )
+
+    return None
 
 
 @receiver(pre_delete, sender=Test)
@@ -842,7 +844,7 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
         )
 
 
-def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, order_desc=False, preview=False):
+def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, order_desc=False, preview_only=False):
     """
     Entry point; may delegate to Pro via settings.BULK_DELETE_FINDINGS_METHOD.
 
@@ -850,7 +852,7 @@ def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, orde
     this bulk delete (e.g. {"model": "dojo.engagement", "pk": 9}). Ignored by OSS
     when no custom method is configured.
 
-    preview: when True, return a ``{product_id: finding_count}`` dict without deleting anything.
+    preview_only: when True, return a ``{product_id: finding_count}`` dict without deleting anything.
     """
     from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
 
@@ -860,9 +862,9 @@ def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, orde
             chunk_size=chunk_size,
             cascade_root=cascade_root,
             order_desc=order_desc,
-            preview=preview,
+            preview_only=preview_only,
         )
-    if preview:
+    if preview_only:
         return None
     return _bulk_delete_findings_internal(finding_qs, chunk_size=chunk_size, order_desc=order_desc)
 
