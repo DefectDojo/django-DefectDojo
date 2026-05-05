@@ -164,6 +164,118 @@ def bulk_add_tags_to_instances(tag_or_tags, instances, tag_field_name: str = "ta
     return total_created
 
 
+def bulk_remove_tags_from_instances(tag_or_tags, instances, tag_field_name: str = "tags", batch_size: int | None = None) -> int:
+    """
+    Efficiently remove tag(s) from many model instances.
+
+    Symmetric to ``bulk_add_tags_to_instances``:
+
+    - tag_or_tags: a single string, an iterable of strings or tag objects, or a Tagulous edit string.
+    - instances: QuerySet or list of model instances of the same class.
+    - tag_field_name: name of the TagField on the model (default: ``"tags"``).
+    - Decrements ``tag.count`` for every removed (instance, tag) pair.
+    - Deletes through-model rows in one DELETE per tag (or batched).
+    - Clears Django prefetch caches on the input instances so subsequent access reloads from DB.
+
+    Returns the total number of relationships removed across all provided tags.
+    Tags that do not exist or are not currently associated with any instance are silently skipped.
+    """
+    if batch_size is None:
+        batch_size = getattr(settings, "TAG_BULK_ADD_BATCH_SIZE", 1000)
+
+    if hasattr(instances, "model"):
+        instances = list(instances)
+
+    if not instances:
+        return 0
+
+    model_class = instances[0].__class__
+
+    # Mirror the Product safety check from bulk_add_tags_to_instances. Removing
+    # tags from a Product would normally trigger inheritance propagation via
+    # m2m_changed signals; this helper bypasses signals, so disallow it.
+    if model_class is Product:
+        msg = "bulk_remove_tags_from_instances: Product instances are not supported; use Product.tags.remove() or a propagation-aware helper"
+        raise ValueError(msg)
+
+    try:
+        tag_field = model_class._meta.get_field(tag_field_name)
+    except Exception:
+        msg = f"Model {model_class.__name__} does not have field '{tag_field_name}'"
+        raise ValueError(msg)
+
+    if not hasattr(tag_field, "tag_options"):
+        msg = f"Field '{tag_field_name}' is not a TagField"
+        raise ValueError(msg)
+
+    tag_model = tag_field.related_model
+    through_model = tag_field.remote_field.through
+
+    # Normalize input into a list of tag names (mirrors bulk_add_tags_to_instances).
+    tag_names: list[str] = []
+    try:
+        if isinstance(tag_or_tags, str):
+            space_delimiter = getattr(tag_field, "tag_options", None).space_delimiter if hasattr(tag_field, "tag_options") else False
+            tag_names = parse_tags(tag_or_tags, space_delimiter=space_delimiter)
+        elif isinstance(tag_or_tags, Iterable):
+            tag_names = [getattr(t, "name", str(t)) for t in tag_or_tags]
+        else:
+            tag_names = [str(tag_or_tags)]
+    except Exception:
+        tag_names = [str(tag_or_tags)]
+
+    # Resolve through-model FK names dynamically (no hard-coding).
+    through_fields = {f.name: f for f in through_model._meta.fields}
+    source_field_name = None
+    target_field_name = None
+    for field_name, field in through_fields.items():
+        if hasattr(field, "remote_field") and field.remote_field:
+            if field.remote_field.model == model_class:
+                source_field_name = field_name
+            elif field.remote_field.model == tag_model:
+                target_field_name = field_name
+
+    total_removed = 0
+
+    for single_tag_name in tag_names:
+        if not single_tag_name:
+            continue
+
+        # Resolve the tag — skip silently if it doesn't exist (nothing to remove).
+        if tag_field.tag_options.case_sensitive:
+            tag = tag_model.objects.filter(name=single_tag_name).first()
+        else:
+            tag = tag_model.objects.filter(name__iexact=single_tag_name).first()
+        if tag is None:
+            continue
+
+        for i in range(0, len(instances), batch_size):
+            batch_instances = instances[i:i + batch_size]
+            batch_ids = [instance.pk for instance in batch_instances]
+
+            with transaction.atomic():
+                # One DELETE per tag-batch. Returns the deleted-row count.
+                deleted_count, _ = through_model.objects.filter(
+                    **{target_field_name: tag.pk},
+                    **{f"{source_field_name}__in": batch_ids},
+                ).delete()
+
+                if deleted_count:
+                    total_removed += deleted_count
+                    # Decrement the Tagulous-maintained count to avoid drift.
+                    tag_model.objects.filter(pk=tag.pk).update(
+                        count=models.F("count") - deleted_count,
+                    )
+
+                    # Invalidate prefetch caches so callers see the new state.
+                    for instance in batch_instances:
+                        prefetch_cache = getattr(instance, "_prefetched_objects_cache", None)
+                        if prefetch_cache is not None:
+                            prefetch_cache.pop(tag_field_name, None)
+
+    return total_removed
+
+
 def bulk_add_tag_mapping(
     tag_to_instances: dict[str, list],
     tag_field_name: str = "tags",
@@ -410,4 +522,4 @@ def bulk_remove_all_tags(model_class, instance_ids_qs):
             )
 
 
-__all__ = ["bulk_add_tag_mapping", "bulk_add_tags_to_instances", "bulk_apply_parser_tags", "bulk_remove_all_tags"]
+__all__ = ["bulk_add_tag_mapping", "bulk_add_tags_to_instances", "bulk_apply_parser_tags", "bulk_remove_all_tags", "bulk_remove_tags_from_instances"]

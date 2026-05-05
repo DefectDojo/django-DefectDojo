@@ -59,6 +59,12 @@ def inherit_linked_instance_tags(instance: LocationFindingReference | LocationPr
 @receiver(signals.post_save, sender=Finding)
 @receiver(signals.post_save, sender=Location)
 def inherit_tags_on_instance(sender, instance, created, **kwargs):
+    # Only inherit on creation. The previous behavior fired on every save
+    # (create OR update), repeatedly re-applying inherited tags to children
+    # whose tag state had not changed. Sticky enforcement on user-driven
+    # tag edits is handled by `make_inherited_tags_sticky` (m2m_changed).
+    if not created:
+        return
     inherit_instance_tags(instance)
 
 
