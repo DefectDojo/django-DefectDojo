@@ -16,11 +16,12 @@ from __future__ import annotations
 
 import logging
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import override_settings
 from django.utils import timezone
 
-from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
+from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.product.helpers import propagate_tags_on_product_sync
 from unittests.dojo_test_case import DojoTestCase
 
@@ -59,6 +60,34 @@ def _make_product_with_findings(name: str, *, n_findings: int, tags: list[str] |
             reporter=user,
         )
     return product
+
+
+def _make_endpoints(product: Product, n: int) -> None:
+    """Create N Endpoints attached directly to the product (V2 only)."""
+    for i in range(n):
+        ep = Endpoint(host=f"perf-{product.id}-{i}.example.com", product=product)
+        ep.save()
+
+
+def _make_locations(product: Product, n: int) -> None:
+    """Create N URL Locations attached to the product via LocationManager.persist (V3 only)."""
+    # Local imports so the file remains importable when V3_FEATURE_LOCATIONS=False.
+    from dojo.importers.location_manager import LocationManager  # noqa: PLC0415
+    from dojo.tools.locations import LocationData  # noqa: PLC0415
+
+    finding = Finding.objects.filter(test__engagement__product=product).first()
+    if finding is None:
+        # _make_product_with_findings should have been called first with n_findings>=1.
+        msg = "_make_locations requires the product to have at least one Finding"
+        raise RuntimeError(msg)
+
+    loc_data = [
+        LocationData(type="url", data={"url": f"https://perf-{product.id}-{i}.example.com"})
+        for i in range(n)
+    ]
+    mgr = LocationManager(product)
+    mgr.record_locations_for_finding(finding, loc_data)
+    mgr.persist()
 
 
 @override_settings(
@@ -237,6 +266,75 @@ class TagInheritancePerfBaselines(DojoTestCase):
         self.assertIn("inherited", {t.name for t in finding.tags.all()})
 
     # ------------------------------------------------------------------
+    # V2: propagation to Endpoints (skipped under V3_FEATURE_LOCATIONS)
+    # ------------------------------------------------------------------
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_product_tag_add_propagates_to_100_endpoints_v2(self):
+        """`product.tags.add("x")` then sync -> propagate to 100 Endpoints (V2)."""
+        product = _make_product_with_findings("perf-add-eps", n_findings=0, tags=["initial"])
+        _make_endpoints(product, n=100)
+
+        with self.assertNumQueries(self.EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS):
+            product.tags.add("perf-added-ep")
+            propagate_tags_on_product_sync(product)
+
+        endpoint = Endpoint.objects.filter(product=product).first()
+        self.assertIn("perf-added-ep", [t.name for t in endpoint.tags.all()])
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_product_tag_remove_propagates_to_100_endpoints_v2(self):
+        """`product.tags.remove("x")` then sync -> remove from 100 Endpoints (V2)."""
+        product = _make_product_with_findings("perf-remove-eps", n_findings=0, tags=["to-remove-ep", "stays-ep"])
+        _make_endpoints(product, n=100)
+
+        with self.assertNumQueries(self.EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS):
+            product.tags.remove("to-remove-ep")
+            propagate_tags_on_product_sync(product)
+
+        endpoint = Endpoint.objects.filter(product=product).first()
+        endpoint_tag_names = {t.name for t in endpoint.tags.all()}
+        self.assertNotIn("to-remove-ep", endpoint_tag_names)
+        self.assertIn("stays-ep", endpoint_tag_names)
+
+    # ------------------------------------------------------------------
+    # V3: propagation to Locations (skipped under V2)
+    # ------------------------------------------------------------------
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_product_tag_add_propagates_to_100_locations_v3(self):
+        """`product.tags.add("x")` then sync -> propagate to 100 Locations (V3)."""
+        # Locations are created against a finding; ensure the product has one.
+        product = _make_product_with_findings("perf-add-locs", n_findings=1, tags=["initial"])
+        _make_locations(product, n=100)
+
+        with self.assertNumQueries(self.EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS):
+            product.tags.add("perf-added-loc")
+            propagate_tags_on_product_sync(product)
+
+        from dojo.location.models import Location  # noqa: PLC0415
+        loc = Location.objects.filter(products__product=product).first()
+        self.assertIsNotNone(loc)
+        self.assertIn("perf-added-loc", [t.name for t in loc.tags.all()])
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_product_tag_remove_propagates_to_100_locations_v3(self):
+        """`product.tags.remove("x")` then sync -> remove from 100 Locations (V3)."""
+        product = _make_product_with_findings("perf-remove-locs", n_findings=1, tags=["to-remove-loc", "stays-loc"])
+        _make_locations(product, n=100)
+
+        with self.assertNumQueries(self.EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS):
+            product.tags.remove("to-remove-loc")
+            propagate_tags_on_product_sync(product)
+
+        from dojo.location.models import Location  # noqa: PLC0415
+        loc = Location.objects.filter(products__product=product).first()
+        self.assertIsNotNone(loc)
+        location_tag_names = {t.name for t in loc.tags.all()}
+        self.assertNotIn("to-remove-loc", location_tag_names)
+        self.assertIn("stays-loc", location_tag_names)
+
+    # ------------------------------------------------------------------
     # Pinned baselines (current code; tighten in PR #1 / PR #2)
     # ------------------------------------------------------------------
     # Calibrated against current implementation. If a redesign lowers a
@@ -245,9 +343,30 @@ class TagInheritancePerfBaselines(DojoTestCase):
 
     # Calibrated against current `dev` branch behavior.
     # Tighten as PR #1 (Phase A) and PR #2 (Phase B) land.
-    EXPECTED_PRODUCT_TAG_ADD_100 = 4758
-    EXPECTED_PRODUCT_TAG_REMOVE_100 = 4540
+    # Some hot paths execute slightly different code under V2 vs V3
+    # (V3 walks an extra Location queryset; V2 walks an Endpoint queryset).
+    # Use ``_pin(v2=..., v3=...)`` to select the appropriate baseline.
+    @staticmethod
+    def _pin(*, v2: int, v3: int) -> int:
+        return v3 if settings.V3_FEATURE_LOCATIONS else v2
+
+    @property
+    def EXPECTED_PRODUCT_TAG_ADD_100(self) -> int:
+        return self._pin(v2=4758, v3=4759)
+
+    @property
+    def EXPECTED_PRODUCT_TAG_REMOVE_100(self) -> int:
+        return self._pin(v2=4540, v3=4541)
+
     EXPECTED_CREATE_ONE_FINDING = 64
     EXPECTED_CREATE_100_FINDINGS = 4025
     EXPECTED_FINDING_ADD_USER_TAG = 17
     EXPECTED_FINDING_REMOVE_INHERITED = 44
+
+    # V2 endpoint paths (only run when V3_FEATURE_LOCATIONS=False)
+    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 3958
+    EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 3740
+
+    # V3 location paths (only run when V3_FEATURE_LOCATIONS=True)
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 4532
+    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 4307
