@@ -16,14 +16,18 @@ from __future__ import annotations
 
 import logging
 
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import override_settings
 from django.utils import timezone
 
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.product.helpers import propagate_tags_on_product_sync
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import (
+    DojoAPITestCase,
+    DojoTestCase,
+    get_unit_tests_scans_path,
+    versioned_fixtures,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -134,87 +138,50 @@ class TagInheritancePerfBaselines(DojoTestCase):
         ss.save()
 
     # ------------------------------------------------------------------
-    # Product tag add / remove → propagate to children
+    # Helpers shared by V2/V3 variants of the same scenario.
     # ------------------------------------------------------------------
 
-    def test_baseline_product_tag_add_propagates_to_100_findings(self):
-        """
-        `product.tags.add("x")` then sync → propagate to 100 findings.
-
-        Hot path: Product tag toggle in the UI on a product with many
-        findings. Today's flow runs `obj.save()` per child. Phase A bulk SQL
-        will collapse this dramatically.
-        """
-        product = _make_product_with_findings("perf-add", n_findings=100, tags=["initial"])
-
-        with self.assertNumQueries(self.EXPECTED_PRODUCT_TAG_ADD_100):
+    def _do_product_tag_add_findings(self, name: str, expected: int) -> None:
+        product = _make_product_with_findings(name, n_findings=100, tags=["initial"])
+        with self.assertNumQueries(expected):
             product.tags.add("perf-added")
             propagate_tags_on_product_sync(product)
-
-        # Correctness: a finding under the product now carries the new tag.
         finding = Finding.objects.filter(test__engagement__product=product).first()
         self.assertIn("perf-added", [t.name for t in finding.tags.all()])
 
-    def test_baseline_product_tag_remove_propagates_to_100_findings(self):
-        """`product.tags.remove("x")` then sync → remove from 100 findings."""
-        product = _make_product_with_findings("perf-remove", n_findings=100, tags=["to-remove", "stays"])
-
-        with self.assertNumQueries(self.EXPECTED_PRODUCT_TAG_REMOVE_100):
+    def _do_product_tag_remove_findings(self, name: str, expected: int) -> None:
+        product = _make_product_with_findings(name, n_findings=100, tags=["to-remove", "stays"])
+        with self.assertNumQueries(expected):
             product.tags.remove("to-remove")
             propagate_tags_on_product_sync(product)
-
         finding = Finding.objects.filter(test__engagement__product=product).first()
         finding_tag_names = {t.name for t in finding.tags.all()}
         self.assertNotIn("to-remove", finding_tag_names)
         self.assertIn("stays", finding_tag_names)
 
-    # ------------------------------------------------------------------
-    # Child creation under inheritance-on product
-    # ------------------------------------------------------------------
-
-    def test_baseline_create_one_finding_under_inheritance(self):
-        """
-        Single Finding.objects.create() on inheritance-on product.
-
-        post_save fires `inherit_tags_on_instance` which calls
-        `_manage_inherited_tags` → 2 m2m `.set()` calls per save. This
-        baseline pins the per-finding cost. Phase A gates on `created=True`
-        so updates stop paying it; Phase B replaces the M2M dance with a
-        single JSON column write.
-        """
-        product = _make_product_with_findings("perf-create-one", n_findings=0, tags=["t1", "t2"])
+    def _do_create_one_finding(self, name: str, expected: int) -> None:
+        product = _make_product_with_findings(name, n_findings=0, tags=["t1", "t2"])
         engagement = Engagement.objects.filter(product=product).first()
         test = Test.objects.filter(engagement=engagement).first()
         user = User.objects.get(username="tag_perf_user")
-
-        with self.assertNumQueries(self.EXPECTED_CREATE_ONE_FINDING):
+        with self.assertNumQueries(expected):
             Finding.objects.create(
                 test=test,
                 title="single-perf",
                 severity="Medium",
                 reporter=user,
             )
-
-        # Finding.save() titlecases + truncates the title — look up via test FK
+        # Finding.save() titlecases + truncates the title; look up via test FK.
         finding = Finding.objects.filter(test=test).first()
         self.assertIsNotNone(finding)
         self.assertEqual({"t1", "t2"}, {t.name for t in finding.tags.all()})
 
-    def test_baseline_create_100_findings_under_inheritance(self):
-        """
-        100 sequential Finding.objects.create() under inheritance.
-
-        Approximates an importer hot loop. Today every iteration fires
-        `_manage_inherited_tags` per finding. After Phase B, wrapping in
-        `with tag_inheritance.batch():` should collapse to a single bulk
-        sync at exit.
-        """
-        product = _make_product_with_findings("perf-create-100", n_findings=0, tags=["t1", "t2"])
+    def _do_create_100_findings(self, name: str, expected: int) -> None:
+        product = _make_product_with_findings(name, n_findings=0, tags=["t1", "t2"])
         engagement = Engagement.objects.filter(product=product).first()
         test = Test.objects.filter(engagement=engagement).first()
         user = User.objects.get(username="tag_perf_user")
-
-        with self.assertNumQueries(self.EXPECTED_CREATE_100_FINDINGS):
+        with self.assertNumQueries(expected):
             for i in range(100):
                 Finding.objects.create(
                     test=test,
@@ -222,48 +189,86 @@ class TagInheritancePerfBaselines(DojoTestCase):
                     severity="Medium",
                     reporter=user,
                 )
-
         self.assertEqual(100, Finding.objects.filter(test=test).count())
         any_finding = Finding.objects.filter(test=test).first()
         self.assertEqual({"t1", "t2"}, {t.name for t in any_finding.tags.all()})
 
-    # ------------------------------------------------------------------
-    # Sticky enforcement on child tag edits
-    # ------------------------------------------------------------------
-
-    def test_baseline_finding_add_user_tag_sticky_path(self):
-        """
-        `finding.tags.add("user-only")` — sticky signal still runs.
-
-        Adding a *non-inherited* tag still fires `m2m_changed` →
-        `make_inherited_tags_sticky` → re-checks product tags. Phase B
-        moves this work out of the signal entirely.
-        """
-        product = _make_product_with_findings("perf-sticky-add", n_findings=1, tags=["inherited"])
+    def _do_finding_add_user_tag(self, name: str, expected: int) -> None:
+        product = _make_product_with_findings(name, n_findings=1, tags=["inherited"])
         finding = Finding.objects.filter(test__engagement__product=product).first()
-
-        with self.assertNumQueries(self.EXPECTED_FINDING_ADD_USER_TAG):
+        with self.assertNumQueries(expected):
             finding.tags.add("user-only")
-
         finding_tag_names = {t.name for t in finding.tags.all()}
         self.assertIn("user-only", finding_tag_names)
         self.assertIn("inherited", finding_tag_names)  # still sticky
 
-    def test_baseline_finding_remove_inherited_tag_sticky_re_adds(self):
-        """
-        `finding.tags.remove("inherited")` — sticky re-adds.
-
-        Most expensive sticky path: signal re-applies inherited tags via
-        `inherit_tags` → `_manage_inherited_tags` → 2 M2M `.set()` calls.
-        """
-        product = _make_product_with_findings("perf-sticky-rm", n_findings=1, tags=["inherited"])
+    def _do_finding_remove_inherited(self, name: str, expected: int) -> None:
+        product = _make_product_with_findings(name, n_findings=1, tags=["inherited"])
         finding = Finding.objects.filter(test__engagement__product=product).first()
-
-        with self.assertNumQueries(self.EXPECTED_FINDING_REMOVE_INHERITED):
+        with self.assertNumQueries(expected):
             finding.tags.remove("inherited")
-
-        # Sticky re-adds the inherited tag
+        # Sticky re-adds the inherited tag.
         self.assertIn("inherited", {t.name for t in finding.tags.all()})
+
+    # ------------------------------------------------------------------
+    # Product tag add / remove (Findings only) - V2 + V3 variants.
+    # ------------------------------------------------------------------
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_product_tag_add_propagates_to_100_findings_v2(self):
+        self._do_product_tag_add_findings("perf-add-v2", self.EXPECTED_PRODUCT_TAG_ADD_100_V2)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_product_tag_add_propagates_to_100_findings_v3(self):
+        self._do_product_tag_add_findings("perf-add-v3", self.EXPECTED_PRODUCT_TAG_ADD_100_V3)
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_product_tag_remove_propagates_to_100_findings_v2(self):
+        self._do_product_tag_remove_findings("perf-remove-v2", self.EXPECTED_PRODUCT_TAG_REMOVE_100_V2)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_product_tag_remove_propagates_to_100_findings_v3(self):
+        self._do_product_tag_remove_findings("perf-remove-v3", self.EXPECTED_PRODUCT_TAG_REMOVE_100_V3)
+
+    # ------------------------------------------------------------------
+    # Child creation under inheritance - V2 + V3 variants.
+    # ------------------------------------------------------------------
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_create_one_finding_under_inheritance_v2(self):
+        self._do_create_one_finding("perf-create-one-v2", self.EXPECTED_CREATE_ONE_FINDING_V2)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_create_one_finding_under_inheritance_v3(self):
+        self._do_create_one_finding("perf-create-one-v3", self.EXPECTED_CREATE_ONE_FINDING_V3)
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_create_100_findings_under_inheritance_v2(self):
+        self._do_create_100_findings("perf-create-100-v2", self.EXPECTED_CREATE_100_FINDINGS_V2)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_create_100_findings_under_inheritance_v3(self):
+        self._do_create_100_findings("perf-create-100-v3", self.EXPECTED_CREATE_100_FINDINGS_V3)
+
+    # ------------------------------------------------------------------
+    # Sticky enforcement on child tag edits - V2 + V3 variants.
+    # ------------------------------------------------------------------
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_finding_add_user_tag_sticky_path_v2(self):
+        self._do_finding_add_user_tag("perf-sticky-add-v2", self.EXPECTED_FINDING_ADD_USER_TAG_V2)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_finding_add_user_tag_sticky_path_v3(self):
+        self._do_finding_add_user_tag("perf-sticky-add-v3", self.EXPECTED_FINDING_ADD_USER_TAG_V3)
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_finding_remove_inherited_tag_sticky_re_adds_v2(self):
+        self._do_finding_remove_inherited("perf-sticky-rm-v2", self.EXPECTED_FINDING_REMOVE_INHERITED_V2)
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_finding_remove_inherited_tag_sticky_re_adds_v3(self):
+        self._do_finding_remove_inherited("perf-sticky-rm-v3", self.EXPECTED_FINDING_REMOVE_INHERITED_V3)
 
     # ------------------------------------------------------------------
     # V2: propagation to Endpoints (skipped under V3_FEATURE_LOCATIONS)
@@ -337,36 +342,143 @@ class TagInheritancePerfBaselines(DojoTestCase):
     # ------------------------------------------------------------------
     # Pinned baselines (current code; tighten in PR #1 / PR #2)
     # ------------------------------------------------------------------
-    # Calibrated against current implementation. If a redesign lowers a
-    # number, lower the pin in the same PR. If a regression raises it, fix
-    # the regression. NEVER raise a pin without justification.
+    # Each scenario pins V2 and V3 separately because the propagation code
+    # branches on V3_FEATURE_LOCATIONS. Per-test @override_settings forces
+    # the appropriate mode so all variants execute in a single suite run.
 
-    # Calibrated against current `dev` branch behavior.
-    # Tighten as PR #1 (Phase A) and PR #2 (Phase B) land.
-    # Some hot paths execute slightly different code under V2 vs V3
-    # (V3 walks an extra Location queryset; V2 walks an Endpoint queryset).
-    # Use ``_pin(v2=..., v3=...)`` to select the appropriate baseline.
-    @staticmethod
-    def _pin(*, v2: int, v3: int) -> int:
-        return v3 if settings.V3_FEATURE_LOCATIONS else v2
+    # Findings-only scenarios.
+    EXPECTED_PRODUCT_TAG_ADD_100_V2 = 4758
+    EXPECTED_PRODUCT_TAG_ADD_100_V3 = 4759
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 4540
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 4541
 
-    @property
-    def EXPECTED_PRODUCT_TAG_ADD_100(self) -> int:
-        return self._pin(v2=4758, v3=4759)
+    EXPECTED_CREATE_ONE_FINDING_V2 = 64
+    EXPECTED_CREATE_ONE_FINDING_V3 = 64
+    EXPECTED_CREATE_100_FINDINGS_V2 = 4024
+    EXPECTED_CREATE_100_FINDINGS_V3 = 4024
 
-    @property
-    def EXPECTED_PRODUCT_TAG_REMOVE_100(self) -> int:
-        return self._pin(v2=4540, v3=4541)
+    EXPECTED_FINDING_ADD_USER_TAG_V2 = 17
+    EXPECTED_FINDING_ADD_USER_TAG_V3 = 17
+    EXPECTED_FINDING_REMOVE_INHERITED_V2 = 44
+    EXPECTED_FINDING_REMOVE_INHERITED_V3 = 44
 
-    EXPECTED_CREATE_ONE_FINDING = 64
-    EXPECTED_CREATE_100_FINDINGS = 4025
-    EXPECTED_FINDING_ADD_USER_TAG = 17
-    EXPECTED_FINDING_REMOVE_INHERITED = 44
-
-    # V2 endpoint paths (only run when V3_FEATURE_LOCATIONS=False)
+    # V2 endpoint paths (Endpoints have no V3 counterpart in this class).
     EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 3958
     EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 3740
 
-    # V3 location paths (only run when V3_FEATURE_LOCATIONS=True)
+    # V3 location paths (LocationManager has no V2 counterpart in this class).
     EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 4532
     EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 4307
+
+
+@override_settings(
+    CELERY_TASK_ALWAYS_EAGER=True,
+    CELERY_TASK_EAGER_PROPAGATES=True,
+)
+@versioned_fixtures
+class TagInheritanceImportPerfBaselines(DojoAPITestCase):
+
+    """
+    Pinned query-count baselines for the importer hot path.
+
+    Real production tag-inheritance cost lives in scan import / reimport: the
+    importer creates findings + endpoints/locations, then `_manage_inherited_tags`
+    runs per row. Phase A (bulk product-side propagation + post_save gated on
+    create) doesn't touch this loop because the importer's hot path is
+    creation-driven. Phase B's `tag_inheritance.batch()` context manager
+    targets it.
+
+    Two scenarios:
+      - First import of a ZAP scan into an inheritance-on product.
+      - Reimport of the same scan with no changes (idempotent path).
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    @classmethod
+    def setUpTestData(cls):
+        from dojo.models import System_Settings  # noqa: PLC0415
+        ss = System_Settings.objects.get()
+        ss.enable_product_tag_inheritance = True
+        ss.save()
+
+    def setUp(self):
+        super().setUp()
+        self.login_as_admin()
+        self.system_settings(enable_product_tag_inheritance=True)
+        self.product = self.create_product("Tag Perf Import Product", tags=["inherit", "these"])
+        self.engagement = self.create_engagement("Tag Perf Import Engagement", self.product)
+        self.scan_path = get_unit_tests_scans_path("zap") / "dvwa_baseline_dojo.xml"
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_zap_scan_import_v2(self):
+        """
+        V2: first-time import of a 19-finding ZAP scan with inheritance enabled.
+
+        Captures total query count for: scan parse + finding creation + endpoint
+        attachment + per-row inherit_tags signal chain. Production hot path.
+        Phase A leaves this number ~unchanged; Phase B's `tag_inheritance.batch()`
+        targets it.
+        """
+        with self.assertNumQueries(self.EXPECTED_ZAP_IMPORT_V2):
+            response = self.import_scan_with_params(
+                self.scan_path,
+                engagement=self.engagement.id,
+            )
+
+        test_id = response["test"]
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertIsNotNone(finding)
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_zap_scan_import_v3(self):
+        """V3: first-time import; uses LocationManager for endpoint persistence."""
+        with self.assertNumQueries(self.EXPECTED_ZAP_IMPORT_V3):
+            response = self.import_scan_with_params(
+                self.scan_path,
+                engagement=self.engagement.id,
+            )
+
+        test_id = response["test"]
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertIsNotNone(finding)
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_zap_scan_reimport_no_change_v2(self):
+        """V2: reimport same scan; expected to be a near-no-op for tag inheritance."""
+        response = self.import_scan_with_params(
+            self.scan_path,
+            engagement=self.engagement.id,
+        )
+        test_id = response["test"]
+
+        with self.assertNumQueries(self.EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2):
+            self.reimport_scan_with_params(test_id, str(self.scan_path))
+
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_zap_scan_reimport_no_change_v3(self):
+        """V3: reimport same scan with no changes."""
+        response = self.import_scan_with_params(
+            self.scan_path,
+            engagement=self.engagement.id,
+        )
+        test_id = response["test"]
+
+        with self.assertNumQueries(self.EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3):
+            self.reimport_scan_with_params(test_id, str(self.scan_path))
+
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
+    # Pinned baselines per mode. Each test forces its own V3_FEATURE_LOCATIONS
+    # via @override_settings so all four import paths run in a single suite
+    # invocation regardless of the ambient `DD_V3_FEATURE_LOCATIONS` env var.
+    EXPECTED_ZAP_IMPORT_V2 = 1461
+    EXPECTED_ZAP_IMPORT_V3 = 1319
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 77
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 95
