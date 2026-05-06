@@ -67,7 +67,14 @@ def flush_for_product(product) -> None:
     ``propagate_tags_on_product_sync``, which uses the Phase A bulk-diff
     helpers to sync `inherited_tags` and `tags` across all children in O(1)
     queries per (model x tag) instead of O(N) rows.
+
+    Short-circuits when tag inheritance is disabled (neither the system-wide
+    flag nor the per-product flag is set) so callers (e.g. importers) can
+    invoke this unconditionally without paying for it.
     """
-    # Local import to avoid circulars at module import time.
+    # Local imports to avoid circulars at module import time.
     from dojo.product.helpers import propagate_tags_on_product_sync  # noqa: PLC0415
+    from dojo.utils import get_system_setting  # noqa: PLC0415
+    if not getattr(product, "enable_product_tag_inheritance", False) and not get_system_setting("enable_product_tag_inheritance"):
+        return
     propagate_tags_on_product_sync(product)
