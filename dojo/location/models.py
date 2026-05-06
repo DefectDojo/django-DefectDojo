@@ -73,10 +73,10 @@ class Location(BaseModel):
         related_name="location_tags",
         help_text=_("A tag that can be used to differentiate a Location"),
     )
-    inherited_tags = TagField(
+    _inherited_tag_names = JSONField(
+        default=list,
         blank=True,
-        force_lowercase=True,
-        help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"),
+        help_text=_("Internal: tag names inherited from the product, used to identify which entries in `tags` came from inheritance vs user input."),
     )
 
     objects = LocationManager().from_queryset(LocationQueryset)()

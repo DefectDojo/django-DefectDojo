@@ -19,8 +19,6 @@ from dojo.url.models import URL
 from dojo.utils import get_system_setting
 
 if TYPE_CHECKING:
-    from tagulous.models import TagField
-
     from dojo.models import Dojo_User, Finding
 
 logger = logging.getLogger(__name__)
@@ -535,20 +533,26 @@ class LocationManager(BaseLocationManager):
             for pid, p in products.items()
         }
 
-        # Helper method for getting all tags from the given TagField
-        def _get_tags(tags_field: TagField) -> dict[int, set[str]]:
-            through_model = tags_field.through
-            fk_name = tags_field.field.m2m_reverse_field_name()
-            tags_by_location: dict[int, set[str]] = {loc.id: set() for loc in locations}
-            for l_id, t_name in through_model.objects.filter(
-                location_id__in=location_ids,
-            ).values_list("location_id", f"{fk_name}__name"):
-                tags_by_location[l_id].add(t_name)
-            return tags_by_location
+        # Read existing `_inherited_tag_names` JSON column per location.
+        existing_inherited_by_location: dict[int, set[str]] = {
+            loc_id: set(names or [])
+            for loc_id, names in Location.objects.filter(
+                id__in=location_ids,
+            ).values_list("id", "_inherited_tag_names")
+        }
+        # Default to empty set for locations not yet returned (none expected).
+        for loc_id in location_ids:
+            existing_inherited_by_location.setdefault(loc_id, set())
 
-        # Gather inherited and 'regular' tags per location
-        existing_inherited_by_location: dict[int, set[str]] = _get_tags(Location.inherited_tags)
-        existing_tags_by_location: dict[int, set[str]] = _get_tags(Location.tags)
+        # Read existing `tags` M2M per location via the through table.
+        existing_tags_by_location: dict[int, set[str]] = {loc_id: set() for loc_id in location_ids}
+        tags_field = Location.tags
+        through_model = tags_field.through
+        fk_name = tags_field.field.m2m_reverse_field_name()
+        for l_id, t_name in through_model.objects.filter(
+            location_id__in=location_ids,
+        ).values_list("location_id", f"{fk_name}__name"):
+            existing_tags_by_location[l_id].add(t_name)
 
         # Perform the bulk updates inside a `tag_inheritance.batch()` context.
         # While the batch is active, signal handlers in `dojo/tags_signals.py`

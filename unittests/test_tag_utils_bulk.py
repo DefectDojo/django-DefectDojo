@@ -230,7 +230,7 @@ class BulkTagUtilsTest(TestCase):
         for child in (eng, test, loc1, loc2):
             child.refresh_from_db()
             self.assertNotIn("p-tag", [t.name for t in child.tags.all()])
-            self.assertNotIn("p-tag", [t.name for t in child.inherited_tags.all()])
+            self.assertNotIn("p-tag", child._inherited_tag_names or [])
 
     def test_bulk_add_invalid_field_name(self):
         instances = self._make_locations(1)
@@ -452,7 +452,7 @@ class BulkTagUtilsInheritanceTest(DojoAPITestCase):
         return [t.name for t in obj.tags.all()]
 
     def _inherited_tags_list(self, obj):
-        return [t.name for t in obj.inherited_tags.all()]
+        return list(obj._inherited_tag_names or [])
 
     def test_bulk_add_tags_to_findings_does_not_affect_inheritance(self):
         # Arrange: build a minimal tree with engagement/test and two findings

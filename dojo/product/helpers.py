@@ -119,96 +119,95 @@ def _build_location_target_names_map(location_ids):
 
 def _sync_inheritance_for_qs(queryset, *, target_names_per_child):
     """
-    Sync inherited_tags + tags for every child in `queryset` to its target tag set.
+    Sync `_inherited_tag_names` (JSON column) + `tags` (M2M) for every child
+    in `queryset` to its target tag set.
 
     target_names_per_child: callable(child) -> set[str].
 
-    Issues bulk SQL: one through-table read for current inherited_tags, then
-    bulk add/remove on `tags` and `inherited_tags` fields.
+    Issues bulk SQL:
+      - one fetch of `(pk, _inherited_tag_names, tags through-table)`
+      - bulk add/remove on `tags` based on the diff
+      - bulk UPDATE of `_inherited_tag_names`
     """
-    children = list(queryset)
+    children = list(queryset.only("pk", "_inherited_tag_names"))
     if not children:
         return
 
     model_class = type(children[0])
-    inherited_field = model_class._meta.get_field("inherited_tags")
-    inherited_through = inherited_field.remote_field.through
-    inherited_tag_model = inherited_field.related_model
+    tags_field = model_class._meta.get_field("tags")
+    tags_through = tags_field.remote_field.through
+    tags_tag_model = tags_field.related_model
 
     # Resolve through-table FK column for the source side.
     source_field_name = None
-    for field in inherited_through._meta.fields:
+    for field in tags_through._meta.fields:
         if hasattr(field, "remote_field") and field.remote_field and field.remote_field.model == model_class:
             source_field_name = field.name
             break
 
     child_ids = [c.pk for c in children]
-    # One query: pull every (child_id, tag_name) pair from the inherited_tags through table.
-    existing_pairs = inherited_through.objects.filter(
-        **{f"{source_field_name}__in": child_ids},
-    ).values_list(source_field_name, f"{inherited_tag_model._meta.model_name}__name")
 
-    old_inherited_by_child: dict[int, set[str]] = defaultdict(set)
-    for child_id, tag_name in existing_pairs:
-        old_inherited_by_child[child_id].add(tag_name)
+    # Read each child's persisted "what was inherited" JSON column.
+    old_inherited_by_child: dict[int, set[str]] = {
+        c.pk: set(c._inherited_tag_names or []) for c in children
+    }
 
-    # Compute per-child diff and bucket by tag name. Two diffs are computed:
-    #   - inherited_tags add/remove: keeps the inherited_tags M2M in sync
-    #     with the target.
-    #   - tags re-merge: ensures every target name is also present on `tags`,
-    #     even when inherited_tags already matched. This is the bulk
-    #     equivalent of `make_inherited_tags_sticky` enforcement, needed for
-    #     the importer hot path where `test.tags.set([...])` overwrites the
-    #     full tag list inside a `tag_inheritance.batch()` block.
-    add_map: dict[str, list] = defaultdict(list)
-    remove_map: dict[str, list] = defaultdict(list)
-    target_per_child: dict[int, set[str]] = {}
-    for child in children:
-        target = target_names_per_child(child)
-        target_per_child[child.pk] = target
-        old = old_inherited_by_child.get(child.pk, set())
-        for name in target - old:
-            add_map[name].append(child)
-        for name in old - target:
-            remove_map[name].append(child)
-
-    # Apply adds. Both `tags` and `inherited_tags` get the same set of new
-    # inherited names — `_manage_inherited_tags` did the same.
-    if add_map:
-        bulk_add_tag_mapping(add_map, tag_field_name="inherited_tags")
-        bulk_add_tag_mapping(add_map, tag_field_name="tags")
-
-    # Apply removes.
-    for name, instances in remove_map.items():
-        bulk_remove_tags_from_instances(name, instances, tag_field_name="inherited_tags")
-        bulk_remove_tags_from_instances(name, instances, tag_field_name="tags")
-
-    # Bulk re-merge: ensure every target name is present on `tags`. We need
-    # this for the importer hot path where `tags.set([...])` inside a
-    # `tag_inheritance.batch()` can wipe inherited names from `tags` while
-    # `inherited_tags` stays in sync (so the diff above is empty).
-    #
-    # Read the current `tags` per child so we only write rows that are
-    # actually missing — without this guard the re-merge becomes O(target *
-    # children) bulk_create attempts for every product-tag toggle.
-    tags_field = model_class._meta.get_field("tags")
-    tags_through = tags_field.remote_field.through
-    tags_tag_model = tags_field.related_model
+    # Read each child's current `tags` through-table in one bulk SELECT.
     existing_tags_pairs = tags_through.objects.filter(
         **{f"{source_field_name}__in": child_ids},
     ).values_list(source_field_name, f"{tags_tag_model._meta.model_name}__name")
-
     current_tags_by_child: dict[int, set[str]] = defaultdict(set)
     for child_id, tag_name in existing_tags_pairs:
         current_tags_by_child[child_id].add(tag_name)
 
+    # Compute per-child diff:
+    #   - add_map: names in target but not currently inherited (need add to `tags`)
+    #   - remove_map: names previously inherited but no longer in target (remove from `tags`)
+    #   - remerge_map: names in target but missing from `tags` (sticky re-merge)
+    #   - new_inherited_per_child: the JSON column write
+    add_map: dict[str, list] = defaultdict(list)
+    remove_map: dict[str, list] = defaultdict(list)
     remerge_map: dict[str, list] = defaultdict(list)
+    new_inherited_per_child: dict[int, list[str]] = {}
     for child in children:
-        target = target_per_child[child.pk]
-        current = current_tags_by_child.get(child.pk, set())
-        # Skip names already added by the diff above; only fix true drift.
-        already_added = {name for name, lst in add_map.items() if child in lst}
-        for name in target - current - already_added:
+        target = set(target_names_per_child(child))
+        old = old_inherited_by_child.get(child.pk, set())
+        current_tags = current_tags_by_child.get(child.pk, set())
+
+        # JSON column desired value: deterministic order = sorted names.
+        new_inherited_per_child[child.pk] = sorted(target)
+
+        # Names newly inherited (not previously recorded in JSON column).
+        newly_added_names = target - old
+        for name in newly_added_names:
+            add_map[name].append(child)
+        # Names previously inherited but no longer in target.
+        for name in old - target:
+            remove_map[name].append(child)
+        # Sticky re-merge: target name missing from `tags`. Skip names
+        # already covered by add_map for this child to avoid double-write.
+        for name in (target - current_tags) - newly_added_names:
             remerge_map[name].append(child)
-    if remerge_map:
-        bulk_add_tag_mapping(remerge_map, tag_field_name="tags")
+
+    # Apply tag-add. Combine add_map + remerge_map; the two never overlap
+    # for the same (child, name) pair by construction above.
+    combined_add: dict[str, list] = defaultdict(list)
+    for name, lst in add_map.items():
+        combined_add[name].extend(lst)
+    for name, lst in remerge_map.items():
+        combined_add[name].extend(lst)
+    if combined_add:
+        bulk_add_tag_mapping(combined_add, tag_field_name="tags")
+
+    # Apply tag-remove.
+    for name, instances in remove_map.items():
+        bulk_remove_tags_from_instances(name, instances, tag_field_name="tags")
+
+    # Bulk-write the JSON column. Group children by desired value to minimize
+    # UPDATE statements.
+    grouped_writes: dict[tuple[str, ...], list[int]] = defaultdict(list)
+    for child_id, names in new_inherited_per_child.items():
+        if names != sorted(old_inherited_by_child.get(child_id, set())):
+            grouped_writes[tuple(names)].append(child_id)
+    for names_tuple, ids in grouped_writes.items():
+        model_class.objects.filter(pk__in=ids).update(_inherited_tag_names=list(names_tuple))

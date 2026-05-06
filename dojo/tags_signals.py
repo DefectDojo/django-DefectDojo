@@ -97,7 +97,9 @@ def propagate_inheritance(instance, tag_list=None):
         for product in get_products_to_inherit_tags_from(instance)
         for tag in product.tags.all()
     ]
-    existing_inherited_tags = [tag.name for tag in instance.inherited_tags.all()]
+    # Read the persisted inherited-name list from the JSON column. Falls
+    # back to an empty list for new/unsaved instances.
+    existing_inherited_tags = list(getattr(instance, "_inherited_tag_names", []) or [])
     # Check if product tags already matches inherited tags
     product_tags_equals_inherited_tags = product_inherited_tags == existing_inherited_tags
     # Check if product tags have already been inherited

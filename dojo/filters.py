@@ -332,6 +332,18 @@ def cwe_options(queryset):
 
 
 class DojoFilter(FilterSet):
+    @classmethod
+    def filter_for_field(cls, field, field_name, lookup_expr=None):
+        # `_inherited_tag_names` is an internal JSONField on
+        # Engagement/Test/Finding/Endpoint/Location used by the tag
+        # inheritance subsystem. It must never be exposed as a filter:
+        # django-filter would otherwise raise on JSONField auto-generation
+        # in every FilterSet whose `Meta.fields` resolves it.
+        from django.db.models import JSONField  # noqa: PLC0415
+        if isinstance(field, JSONField) and field_name == "_inherited_tag_names":
+            return None
+        return super().filter_for_field(field, field_name, lookup_expr)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1780,7 +1792,7 @@ class ApiFindingFilter(DojoFilter):
     class Meta:
         model = Finding
         exclude = ["url", "thread_id", "notes", "files",
-                   "line", "cve"]
+                   "line", "cve", "_inherited_tag_names"]
 
     def filter_mitigated_after(self, queryset, name, value):
         if value.hour == 0 and value.minute == 0 and value.second == 0:
@@ -2135,7 +2147,7 @@ class FindingFilterWithoutObjectLookups(FindingFilterHelper, FindingTagStringFil
                    "numerical_severity", "line", "duplicate_finding",
                    "hash_code", "reviewers", "created", "files",
                    "sla_start_date", "sla_expiration_date", "cvssv3",
-                   "severity_justification", "steps_to_reproduce"]
+                   "severity_justification", "steps_to_reproduce", "_inherited_tag_names"]
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -2212,7 +2224,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
                    "numerical_severity", "line", "duplicate_finding",
                    "hash_code", "reviewers", "created", "files",
                    "sla_start_date", "sla_expiration_date", "cvssv3",
-                   "severity_justification", "steps_to_reproduce"]
+                   "severity_justification", "steps_to_reproduce", "_inherited_tag_names"]
 
     def __init__(self, *args, **kwargs):
         self.user = None
@@ -2950,7 +2962,7 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
 
     class Meta:
         model = Endpoint
-        exclude = ["findings", "inherited_tags"]
+        exclude = ["findings", "_inherited_tag_names"]
 
 
 class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
@@ -3091,7 +3103,7 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
 
     class Meta:
         model = Endpoint
-        exclude = ["findings", "inherited_tags", "product"]
+        exclude = ["findings", "_inherited_tag_names", "product"]
 
 
 class ApiEndpointFilter(DojoFilter):
@@ -3435,7 +3447,7 @@ class ReportFindingFilterHelper(FilterSet):
         # exclude sonarqube issue as by default it will show all without checking permissions
         exclude = ["date", "cwe", "url", "description", "mitigation", "impact",
                    "references", "sonarqube_issue", "duplicate_finding",
-                   "thread_id", "notes", "inherited_tags", "endpoints",
+                   "thread_id", "notes", "_inherited_tag_names", "endpoints",
                    "numerical_severity", "reporter", "last_reviewed",
                    "jira_creation", "jira_change", "files"]
 

@@ -112,27 +112,56 @@ def _get_statistics_for_queryset(qs, annotation_factory):
 
 
 def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
-    # get copies of the current tag lists
+    """
+    Sync `obj._inherited_tag_names` (JSON column) and `obj.tags` (M2M) so
+    that:
+      - `_inherited_tag_names` == set(incoming_inherited_tags)
+      - `obj.tags` == (current_user_tags) UNION set(incoming_inherited_tags)
+    where `current_user_tags = current_tags - previous_inherited`.
+
+    The previous implementation maintained a duplicate `inherited_tags`
+    TagField; that field has been replaced with a single JSON column on
+    each child model. The JSON column tracks which entries in `tags`
+    came from inheritance vs user input, satisfying the "remove inherited
+    tag from product" requirement (previously sourced from the duplicate
+    M2M).
+    """
     if potentially_existing_tags is None:
         potentially_existing_tags = []
-    current_inherited_tags = [] if isinstance(obj.inherited_tags, FakeTagRelatedManager) else [tag.name for tag in obj.inherited_tags.all()]
-    tag_list = potentially_existing_tags if isinstance(obj.tags, FakeTagRelatedManager) or len(potentially_existing_tags) > 0 else [tag.name for tag in obj.tags.all()]
-    # Clean existing tag list from the old inherited tags. This represents the tags on the object and not the product
-    cleaned_tag_list = [tag for tag in tag_list if tag not in current_inherited_tags]
-    # Add the incoming inherited tag list
-    if incoming_inherited_tags:
-        for tag in incoming_inherited_tags:
-            if tag not in cleaned_tag_list:
-                cleaned_tag_list.append(tag)
-    # Update the current list of inherited tags. iteratively do this because of tagulous object restraints
-    if isinstance(obj.inherited_tags, FakeTagRelatedManager):
-        obj.inherited_tags.set_tag_list(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set_tag_list(cleaned_tag_list)
+    incoming_list = list(incoming_inherited_tags or [])
+
+    current_inherited = list(obj._inherited_tag_names or [])
+
+    # Determine current `tags` list. For unsaved instances Tagulous returns
+    # a FakeTagRelatedManager that can't query the DB; fall back to the
+    # potentially_existing_tags hint or the manager's local cache.
+    if isinstance(obj.tags, FakeTagRelatedManager):
+        tag_list = list(potentially_existing_tags) if potentially_existing_tags else list(obj.tags.get_tag_list())
+    elif potentially_existing_tags:
+        tag_list = list(potentially_existing_tags)
     else:
-        obj.inherited_tags.set(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set(cleaned_tag_list)
+        tag_list = [tag.name for tag in obj.tags.all()]
+
+    # Strip previously-inherited names so user-only tags survive.
+    cleaned = [t for t in tag_list if t not in current_inherited]
+    # Append new inherited names (preserve order, no duplicates).
+    for n in incoming_list:
+        if n not in cleaned:
+            cleaned.append(n)
+
+    # Persist JSON column. For saved instances issue a targeted UPDATE so we
+    # don't fire post_save (which would re-enter inheritance via signals).
+    obj._inherited_tag_names = incoming_list
+    if obj.pk is not None:
+        type(obj).objects.filter(pk=obj.pk).update(_inherited_tag_names=incoming_list)
+
+    # Persist `tags` M2M. Only write when something changed -- avoids
+    # firing m2m_changed (and the sticky receiver) for no-op syncs.
+    if incoming_list and set(cleaned) != set(tag_list):
+        if isinstance(obj.tags, FakeTagRelatedManager):
+            obj.tags.set_tag_list(cleaned)
+        else:
+            obj.tags.set(cleaned)
 
 
 def copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
@@ -1583,7 +1612,7 @@ class Engagement(BaseModel):
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name=_("Deduplication within this engagement only"), help_text=_("If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
-    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
+    _inherited_tag_names = models.JSONField(default=list, blank=True, help_text=_("Internal: tag names inherited from the product, used to identify which entries in `tags` came from inheritance vs user input."))
 
     class Meta:
         ordering = ["-target_start"]
@@ -1774,7 +1803,7 @@ class Endpoint(models.Model):
                                       through=Endpoint_Status)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this endpoint. Choose from the list or add new tags. Press Enter key to add."))
-    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
+    _inherited_tag_names = models.JSONField(default=list, blank=True, help_text=_("Internal: tag names inherited from the product, used to identify which entries in `tags` came from inheritance vs user input."))
 
     class Meta:
         ordering = ["product", "host", "protocol", "port", "userinfo", "path", "query", "fragment"]
@@ -2181,7 +2210,7 @@ class Test(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=True)
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add."))
-    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
+    _inherited_tag_names = models.JSONField(default=list, blank=True, help_text=_("Internal: tag names inherited from the product, used to identify which entries in `tags` came from inheritance vs user input."))
 
     version = models.CharField(max_length=100, null=True, blank=True)
 
@@ -2791,7 +2820,7 @@ class Finding(BaseModel):
                                 help_text=_("Effort for fixing / remediating the vulnerability (Low, Medium, High)"))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this finding. Choose from the list or add new tags. Press Enter key to add."))
-    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
+    _inherited_tag_names = models.JSONField(default=list, blank=True, help_text=_("Internal: tag names inherited from the product, used to identify which entries in `tags` came from inheritance vs user input."))
 
     SEVERITIES = {"Info": 4, "Low": 3, "Medium": 2,
                   "High": 1, "Critical": 0}
@@ -4585,13 +4614,9 @@ from dojo.utils import (  # noqa: E402  # there is issue due to a circular impor
 
 tagulous.admin.register(Product.tags)
 tagulous.admin.register(Test.tags)
-tagulous.admin.register(Test.inherited_tags)
 tagulous.admin.register(Finding.tags)
-tagulous.admin.register(Finding.inherited_tags)
 tagulous.admin.register(Engagement.tags)
-tagulous.admin.register(Engagement.inherited_tags)
 tagulous.admin.register(Endpoint.tags)
-tagulous.admin.register(Endpoint.inherited_tags)
 tagulous.admin.register(Finding_Template.tags)
 tagulous.admin.register(App_Analysis.tags)
 tagulous.admin.register(Objects_Product.tags)

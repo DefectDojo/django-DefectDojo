@@ -359,35 +359,33 @@ class TagInheritancePerfBaselines(DojoTestCase):
     # Findings-only scenarios.
     # Pre-Phase-A V2: 4758 add, 4540 remove. V3: 4759/4541.
     # Phase A bulk-propagate drops these dramatically.
-    # Phase B Stage 2 adds ~3 queries to read current `tags` for the bulk
-    # re-merge step (compensates for tags wiped inside batch contexts).
-    EXPECTED_PRODUCT_TAG_ADD_100_V2 = 94
-    EXPECTED_PRODUCT_TAG_ADD_100_V3 = 94
-    EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 56
-    EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 56
+    # Phase B Stage 3 (drop duplicate inherited_tags TagField; replace with
+    # _inherited_tag_names JSONField) drops further: a single UPDATE on the
+    # JSON column instead of M2M through-table mutations on a duplicate field.
+    EXPECTED_PRODUCT_TAG_ADD_100_V2 = 58
+    EXPECTED_PRODUCT_TAG_ADD_100_V3 = 58
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 38
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 38
 
-    EXPECTED_CREATE_ONE_FINDING_V2 = 64
-    EXPECTED_CREATE_ONE_FINDING_V3 = 64
-    EXPECTED_CREATE_100_FINDINGS_V2 = 4024
-    EXPECTED_CREATE_100_FINDINGS_V3 = 4024
+    EXPECTED_CREATE_ONE_FINDING_V2 = 42
+    EXPECTED_CREATE_ONE_FINDING_V3 = 42
+    EXPECTED_CREATE_100_FINDINGS_V2 = 2814
+    EXPECTED_CREATE_100_FINDINGS_V3 = 2814
 
-    EXPECTED_FINDING_ADD_USER_TAG_V2 = 17
-    EXPECTED_FINDING_ADD_USER_TAG_V3 = 17
-    EXPECTED_FINDING_REMOVE_INHERITED_V2 = 44
-    EXPECTED_FINDING_REMOVE_INHERITED_V3 = 44
+    EXPECTED_FINDING_ADD_USER_TAG_V2 = 16
+    EXPECTED_FINDING_ADD_USER_TAG_V3 = 16
+    EXPECTED_FINDING_REMOVE_INHERITED_V2 = 24
+    EXPECTED_FINDING_REMOVE_INHERITED_V3 = 24
 
     # V2 endpoint paths. Pre-Phase-A: 3958 add, 3740 remove.
-    # Phase B Stage 2 raises endpoint add 91 -> 194 because the eager Celery
-    # propagate dispatched by m2m_changed and the explicit
-    # propagate_tags_on_product_sync call both pay the new tags-read for
-    # bulk re-merge. Acceptable: the same lever delivers a 27% drop on the
-    # ZAP import path. Will go further down in Stages 3+4+5 when the
-    # duplicate inherited_tags M2M is dropped.
-    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 194
-    EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 56
+    # Phase B Stage 3 dropped the inherited_tags TagField; bulk re-merge
+    # de-duplicates entries so endpoint path collapses in line with findings.
+    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 58
+    EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 38
 
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
     # Phase B Stage 2 + location precompute: bulk-built target-name map.
+    # Stage 3 may further drop these once JSON column replaces M2M reads.
     EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 123
     EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 73
 
@@ -510,7 +508,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # rises because flush always runs; bulk re-merge has a fixed cost even
     # when there's no work. Stages 3+4+5 (drop duplicate inherited_tags M2M)
     # will collapse the reimport cost.
-    EXPECTED_ZAP_IMPORT_V2 = 1006
-    EXPECTED_ZAP_IMPORT_V3 = 947
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 103
+    EXPECTED_ZAP_IMPORT_V2 = 700
+    EXPECTED_ZAP_IMPORT_V3 = 698
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 78
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 136

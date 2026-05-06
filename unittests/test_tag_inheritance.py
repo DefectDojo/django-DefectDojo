@@ -155,10 +155,10 @@ class TestPropagateInheritanceEarlyExit(unittest.TestCase):
     Unit tests for propagate_inheritance() — the optimization guard that skips redundant DB writes.
 
     Returns False ("nothing to do") only when BOTH conditions hold:
-      1. product tags match what is stored in instance.inherited_tags (already recorded)
+      1. product tags match what is stored in instance._inherited_tag_names (already recorded)
       2. those tags are already present in the instance's full tag_list (already applied)
     If either condition is false, returns True and the caller proceeds to write tags.
-    get_products_to_inherit_tags_from and instance.inherited_tags.all() are mocked
+    get_products_to_inherit_tags_from and instance._inherited_tag_names are mocked
     to isolate the boolean logic from DB access.
     """
 
@@ -169,7 +169,7 @@ class TestPropagateInheritanceEarlyExit(unittest.TestCase):
 
     def _make_instance(self, inherited_names):
         instance = MagicMock()
-        instance.inherited_tags.all.return_value = [self._tag(n) for n in inherited_names]
+        instance._inherited_tag_names = list(inherited_names)
         return instance
 
     def _make_product(self, tag_names):
@@ -351,7 +351,7 @@ class TestTagInheritanceOnPersist(DojoTestCase):
         mgr.persist()
 
         loc = Location.objects.get(url__host="oss-tag-inherit.example.com")
-        inherited = sorted(t.name for t in loc.inherited_tags.all())
+        inherited = sorted(loc._inherited_tag_names or [])
         self.assertEqual(inherited, ["inherit", "tags", "these"])
 
     def test_bulk_inherit_is_no_op_when_already_in_sync(self):
@@ -398,12 +398,14 @@ class TestTagInheritanceOnPersist(DojoTestCase):
             mgr2.persist()
 
         tag_through = Location.tags.through._meta.db_table
-        inherited_through = Location.inherited_tags.through._meta.db_table
         for q in ctx.captured_queries:
             sql = q["sql"].lower()
             if sql.startswith(("insert", "update", "delete")):
                 self.assertNotIn(tag_through.lower(), sql, f"Unexpected tags mutation: {q['sql']}")
-                self.assertNotIn(inherited_through.lower(), sql, f"Unexpected inherited_tags mutation: {q['sql']}")
+                # _inherited_tag_names is now a JSONField on the parent table;
+                # check no UPDATEs target it for re-synced data.
+                if "_inherited_tag_names" in sql:
+                    self.fail(f"Unexpected _inherited_tag_names mutation: {q['sql']}")
 
 
 @skip_unless_v3

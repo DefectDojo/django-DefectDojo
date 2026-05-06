@@ -57,30 +57,18 @@ def get_table_names(model_name):
     elif model_name == "FindingTags":
         table_name = "dojo_finding_tags"
         event_table_name = "dojo_finding_tagsevent"
-    elif model_name == "FindingInheritedTags":
-        table_name = "dojo_finding_inherited_tags"
-        event_table_name = "dojo_finding_inherited_tagsevent"
     elif model_name == "ProductTags":
         table_name = "dojo_product_tags"
         event_table_name = "dojo_product_tagsevent"
     elif model_name == "EngagementTags":
         table_name = "dojo_engagement_tags"
         event_table_name = "dojo_engagement_tagsevent"
-    elif model_name == "EngagementInheritedTags":
-        table_name = "dojo_engagement_inherited_tags"
-        event_table_name = "dojo_engagement_inherited_tagsevent"
     elif model_name == "TestTags":
         table_name = "dojo_test_tags"
         event_table_name = "dojo_test_tagsevent"
-    elif model_name == "TestInheritedTags":
-        table_name = "dojo_test_inherited_tags"
-        event_table_name = "dojo_test_inherited_tagsevent"
     elif model_name == "EndpointTags":
         table_name = "dojo_endpoint_tags"
         event_table_name = "dojo_endpoint_tagsevent"
-    elif model_name == "EndpointInheritedTags":
-        table_name = "dojo_endpoint_inherited_tags"
-        event_table_name = "dojo_endpoint_inherited_tagsevent"
     elif model_name == "FindingTemplateTags":
         table_name = "dojo_finding_template_tags"
         event_table_name = "dojo_finding_template_tagsevent"

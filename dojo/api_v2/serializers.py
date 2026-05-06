@@ -1110,7 +1110,7 @@ class EngagementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Engagement
-        exclude = ("inherited_tags",)
+        exclude = ("_inherited_tag_names",)
 
     def validate(self, data):
         if self.context["request"].method == "POST":
@@ -1282,7 +1282,7 @@ class EndpointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Endpoint
-        exclude = ("inherited_tags",)
+        exclude = ("_inherited_tag_names",)
 
     def validate(self, data):
 
@@ -1418,7 +1418,7 @@ class TestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        exclude = ("inherited_tags",)
+        exclude = ("_inherited_tag_names",)
 
     def build_relational_field(self, field_name, relation_info):
         if field_name == "notes":
@@ -1442,7 +1442,7 @@ class TestCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Test
-        exclude = ("inherited_tags",)
+        exclude = ("_inherited_tag_names",)
 
 
 class TestTypeCreateSerializer(serializers.ModelSerializer):
@@ -1746,7 +1746,7 @@ class FindingSerializer(serializers.ModelSerializer):
         model = Finding
         exclude = (
             "cve",
-            "inherited_tags",
+            "_inherited_tag_names",
         )
 
     # TODO: Delete this after the move to Locations
@@ -1967,7 +1967,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         model = Finding
         exclude = (
             "cve",
-            "inherited_tags",
+            "_inherited_tag_names",
         )
         extra_kwargs = {
             "active": {"required": True},

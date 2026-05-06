@@ -65,8 +65,8 @@ def flush_for_product(product) -> None:
     code has created/modified many children of one product and the
     per-instance signal handlers were suppressed. Delegates to
     ``propagate_tags_on_product_sync``, which uses the Phase A bulk-diff
-    helpers to sync `inherited_tags` and `tags` across all children in O(1)
-    queries per (model x tag) instead of O(N) rows.
+    helpers to sync `_inherited_tag_names` and `tags` across all children
+    in O(1) queries per (model x tag) instead of O(N) rows.
 
     Short-circuits when tag inheritance is disabled (neither the system-wide
     flag nor the per-product flag is set) so callers (e.g. importers) can

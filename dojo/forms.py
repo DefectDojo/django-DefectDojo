@@ -1141,7 +1141,7 @@ class EngForm(forms.ModelForm):
 
     class Meta:
         model = Engagement
-        exclude = ("first_contacted", "real_start", "engagement_type", "inherited_tags",
+        exclude = ("first_contacted", "real_start", "engagement_type", "_inherited_tag_names",
                    "real_end", "requester", "reason", "updated", "report_type",
                    "product", "threat_model", "api_test", "pen_test", "check_list")
 
@@ -1327,7 +1327,7 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "_inherited_tag_names",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date")
 
 
@@ -1433,7 +1433,7 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "_inherited_tag_names",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
                    "sla_expiration_date")
 
@@ -1517,7 +1517,7 @@ class PromoteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "_inherited_tag_names",
                    "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing")
 
 
@@ -1682,7 +1682,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "_inherited_tag_names",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue",
                    "endpoints", "endpoint_status")
 
@@ -1965,7 +1965,7 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class EditEndpointForm(forms.ModelForm):
     class Meta:
         model = Endpoint
-        exclude = ["product", "inherited_tags"]
+        exclude = ["product", "_inherited_tag_names"]
 
     def __init__(self, *args, **kwargs):
         self.product = None

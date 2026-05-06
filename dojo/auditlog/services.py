@@ -398,15 +398,15 @@ def register_django_pghistory_models():
     # the through models, which can't be imported at module level.
     tag_through_models = [
         # (Parent model, field name, proxy class name)
+        # `inherited_tags` TagField was removed in the tag-inheritance
+        # redesign; the inherited-name list now lives in a
+        # `_inherited_tag_names` JSONField whose changes are captured by the
+        # parent table's pghistory event automatically.
         (Finding, "tags", "FindingTags"),
-        (Finding, "inherited_tags", "FindingInheritedTags"),
         (Product, "tags", "ProductTags"),
         (Engagement, "tags", "EngagementTags"),
-        (Engagement, "inherited_tags", "EngagementInheritedTags"),
         (Test, "tags", "TestTags"),
-        (Test, "inherited_tags", "TestInheritedTags"),
         (Endpoint, "tags", "EndpointTags"),
-        (Endpoint, "inherited_tags", "EndpointInheritedTags"),
         (Finding_Template, "tags", "FindingTemplateTags"),
         (App_Analysis, "tags", "AppAnalysisTags"),
         (Objects_Product, "tags", "ObjectsProductTags"),
