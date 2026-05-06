@@ -129,7 +129,7 @@ def _sync_inheritance_for_qs(queryset, *, target_names_per_child):
       - bulk add/remove on `tags` based on the diff
       - bulk UPDATE of `_inherited_tag_names`
     """
-    children = list(queryset.only("pk", "_inherited_tag_names"))
+    children = queryset if isinstance(queryset, list) else list(queryset.only("pk", "_inherited_tag_names"))
     if not children:
         return
 

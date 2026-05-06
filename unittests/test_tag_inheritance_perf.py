@@ -385,9 +385,9 @@ class TagInheritancePerfBaselines(DojoTestCase):
 
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
     # Phase B Stage 2 + location precompute: bulk-built target-name map.
-    # Stage 3 may further drop these once JSON column replaces M2M reads.
-    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 123
-    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 73
+    # Stage 3 (JSON column) collapsed inherited_tags M2M reads further.
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 75
+    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 49
 
 
 @override_settings(
@@ -509,6 +509,6 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # when there's no work. Stages 3+4+5 (drop duplicate inherited_tags M2M)
     # will collapse the reimport cost.
     EXPECTED_ZAP_IMPORT_V2 = 700
-    EXPECTED_ZAP_IMPORT_V3 = 698
+    EXPECTED_ZAP_IMPORT_V3 = 661
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 78
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 136
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 99
