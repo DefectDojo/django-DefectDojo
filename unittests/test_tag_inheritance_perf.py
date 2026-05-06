@@ -17,9 +17,11 @@ from __future__ import annotations
 import logging
 
 from django.contrib.auth.models import User
+from django.contrib.contenttypes.models import ContentType
 from django.test import override_settings
 from django.utils import timezone
 
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.product.helpers import propagate_tags_on_product_sync
 from unittests.dojo_test_case import (
@@ -136,6 +138,16 @@ class TagInheritancePerfBaselines(DojoTestCase):
         ss = System_Settings.objects.get()
         ss.enable_product_tag_inheritance = True
         ss.save()
+
+        # Warm up ContentType cache for models touched by the propagation
+        # paths so first-call ContentType lookups don't count against the
+        # measured sections (matches the pattern in test_importers_performance).
+        # Without this, the first test in a fresh process to exercise the V3
+        # Location path pays a one-time lookup, producing a matrix-dependent
+        # off-by-one when CI runs with V3_FEATURE_LOCATIONS true vs false at
+        # startup.
+        for model in [Endpoint, Engagement, Finding, Location, LocationFindingReference, LocationProductReference, Product, Product_Type, Test, Test_Type]:
+            ContentType.objects.get_for_model(model)
 
     # ------------------------------------------------------------------
     # Helpers shared by V2/V3 variants of the same scenario.
@@ -317,7 +329,6 @@ class TagInheritancePerfBaselines(DojoTestCase):
             product.tags.add("perf-added-loc")
             propagate_tags_on_product_sync(product)
 
-        from dojo.location.models import Location  # noqa: PLC0415
         loc = Location.objects.filter(products__product=product).first()
         self.assertIsNotNone(loc)
         self.assertIn("perf-added-loc", [t.name for t in loc.tags.all()])
@@ -332,7 +343,6 @@ class TagInheritancePerfBaselines(DojoTestCase):
             product.tags.remove("to-remove-loc")
             propagate_tags_on_product_sync(product)
 
-        from dojo.location.models import Location  # noqa: PLC0415
         loc = Location.objects.filter(products__product=product).first()
         self.assertIsNotNone(loc)
         location_tag_names = {t.name for t in loc.tags.all()}
@@ -367,7 +377,7 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 3740
 
     # V3 location paths (LocationManager has no V2 counterpart in this class).
-    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 4532
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 4531
     EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 4307
 
 
