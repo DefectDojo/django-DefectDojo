@@ -72,12 +72,19 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
     # tag edits is handled by `make_inherited_tags_sticky` (m2m_changed).
     if not created:
         return
+    # Inside a `tag_inheritance.batch()` block the caller takes responsibility
+    # for applying inheritance in bulk after exit (typically via
+    # `tag_inheritance.flush_for_product`).
+    if tag_inheritance.is_in_batch():
+        return
     inherit_instance_tags(instance)
 
 
 @receiver(signals.post_save, sender=LocationFindingReference)
 @receiver(signals.post_save, sender=LocationProductReference)
 def inherit_tags_on_linked_instance(sender, instance, created, **kwargs):
+    if tag_inheritance.is_in_batch():
+        return
     inherit_linked_instance_tags(instance)
 
 

@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
+from dojo import tag_inheritance
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
     find_candidates_for_deduplication_hash,
@@ -107,43 +108,51 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
-        (
-            new_findings,
-            reactivated_findings,
-            findings_to_mitigate,
-            untouched_findings,
-        ) = self.process_findings(parsed_findings, **kwargs)
-        # Close any old findings in the processed list if the the user specified for that
-        # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(findings_to_mitigate, **kwargs)
-        # Update the timestamps of the test object by looking at the findings imported
-        logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
-        # Update the timestamps of the test object by looking at the findings imported
-        self.update_timestamps()
-        # Update the test meta
-        self.update_test_meta()
-        # Update the test tags
-        self.update_test_tags()
-        # Save the test and engagement for changes to take affect
-        self.test.save()
-        self.test.engagement.save()
-        logger.debug("REIMPORT_SCAN: Updating test tags")
-        # Create a test import history object to record the flags sent to the importer
-        # This operation will return None if the user does not have the import history
-        # feature enabled
-        test_import_history = self.update_import_history(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-            reactivated_findings=reactivated_findings,
-            untouched_findings=untouched_findings,
-        )
-        # Apply tags to findings and endpoints
-        self.apply_import_tags(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-            reactivated_findings=reactivated_findings,
-            untouched_findings=untouched_findings,
-        )
+        # Suppress per-row tag-inheritance signal work during the reimport
+        # hot loop. Inheritance is applied in bulk after the batch via
+        # `tag_inheritance.flush_for_product`. See default_importer for the
+        # rationale.
+        with tag_inheritance.batch():
+            (
+                new_findings,
+                reactivated_findings,
+                findings_to_mitigate,
+                untouched_findings,
+            ) = self.process_findings(parsed_findings, **kwargs)
+            # Close any old findings in the processed list if the the user specified for that
+            # to occur in the form that is then passed to the kwargs
+            closed_findings = self.close_old_findings(findings_to_mitigate, **kwargs)
+            # Update the timestamps of the test object by looking at the findings imported
+            logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
+            # Update the timestamps of the test object by looking at the findings imported
+            self.update_timestamps()
+            # Update the test meta
+            self.update_test_meta()
+            # Update the test tags
+            self.update_test_tags()
+            # Save the test and engagement for changes to take affect
+            self.test.save()
+            self.test.engagement.save()
+            logger.debug("REIMPORT_SCAN: Updating test tags")
+            # Create a test import history object to record the flags sent to the importer
+            # This operation will return None if the user does not have the import history
+            # feature enabled
+            test_import_history = self.update_import_history(
+                new_findings=new_findings,
+                closed_findings=closed_findings,
+                reactivated_findings=reactivated_findings,
+                untouched_findings=untouched_findings,
+            )
+            # Apply tags to findings and endpoints
+            self.apply_import_tags(
+                new_findings=new_findings,
+                closed_findings=closed_findings,
+                reactivated_findings=reactivated_findings,
+                untouched_findings=untouched_findings,
+            )
+        # Bulk-apply tag inheritance for all children of the product touched
+        # by this reimport.
+        tag_inheritance.flush_for_product(self.test.engagement.product)
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
