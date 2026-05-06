@@ -17,7 +17,7 @@
     "datatables.net-colreorder": "^2.1.2",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
-    "easymde": "^2.20.0",
+    "easymde": "^2.21.0",
     "flot": "flot/flot#~0.8.3",
     "font-awesome": "^4.0.0",
     "fullcalendar": "^3.10.2",
