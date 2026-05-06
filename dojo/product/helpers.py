@@ -6,7 +6,7 @@ from django.conf import settings
 from django.db.models import Q
 
 from dojo.celery import app
-from dojo.location.models import Location
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.tag_utils import bulk_add_tag_mapping, bulk_remove_tags_from_instances
 
@@ -50,15 +50,19 @@ def propagate_tags_on_product_sync(product):
     )
     if settings.V3_FEATURE_LOCATIONS:
         logger.debug("Propagating tags from %s to all locations", product)
-        location_qs = Location.objects.filter(
+        # Materialize once so we can build a precomputed
+        # {location_id: set[tag_name]} map without re-evaluating the queryset
+        # or paying N+1 in `_location_target_names`.
+        locations = list(Location.objects.filter(
             Q(products__product=product)
             | Q(findings__finding__test__engagement__product=product),
-        ).distinct()
-        # Locations can be linked to multiple products, so the inherited target
-        # is the union of every related product's tags. Compute per-location.
+        ).distinct())
+        location_target_names = _build_location_target_names_map(
+            [loc.pk for loc in locations],
+        )
         _sync_inheritance_for_qs(
-            location_qs,
-            target_names_per_child=_location_target_names,
+            locations,
+            target_names_per_child=lambda loc: location_target_names.get(loc.pk, set()),
         )
     else:
         logger.debug("Propagating tags from %s to all endpoints", product)
@@ -68,13 +72,49 @@ def propagate_tags_on_product_sync(product):
         )
 
 
-def _location_target_names(location):
-    names: set[str] = set()
-    for related_product in location.all_related_products():
-        if related_product is None:
-            continue
-        names.update(tag.name for tag in related_product.tags.all())
-    return names
+def _build_location_target_names_map(location_ids):
+    """
+    Bulk-compute {location_id: set[tag_name]} for the given locations.
+
+    Replaces the per-location `_location_target_names` callable, which issued
+    one `Product.objects.filter(...).distinct()` query plus N `.tags.all()`
+    queries per location. Now: 3 queries total regardless of fan-out.
+    """
+    if not location_ids:
+        return {}
+
+    location_to_products: dict[int, set[int]] = defaultdict(set)
+    for loc_id, prod_id in LocationProductReference.objects.filter(
+        location_id__in=location_ids,
+    ).values_list("location_id", "product_id"):
+        location_to_products[loc_id].add(prod_id)
+    for loc_id, prod_id in LocationFindingReference.objects.filter(
+        location_id__in=location_ids,
+    ).values_list("location_id", "finding__test__engagement__product_id"):
+        if prod_id is not None:
+            location_to_products[loc_id].add(prod_id)
+
+    all_product_ids = {pid for pids in location_to_products.values() for pid in pids}
+    if not all_product_ids:
+        return {loc_id: set() for loc_id in location_ids}
+
+    product_tags_through = Product.tags.through
+    tag_model = Product.tags.tag_model
+    tag_field_name = tag_model._meta.model_name
+    product_to_tag_names: dict[int, set[str]] = defaultdict(set)
+    for prod_id, tag_name in product_tags_through.objects.filter(
+        product_id__in=all_product_ids,
+    ).values_list("product_id", f"{tag_field_name}__name"):
+        product_to_tag_names[prod_id].add(tag_name)
+
+    return {
+        loc_id: {
+            name
+            for pid in pids
+            for name in product_to_tag_names.get(pid, set())
+        }
+        for loc_id, pids in location_to_products.items()
+    }
 
 
 def _sync_inheritance_for_qs(queryset, *, target_names_per_child):

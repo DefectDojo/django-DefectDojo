@@ -387,8 +387,9 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 56
 
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
-    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 320
-    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 270
+    # Phase B Stage 2 + location precompute: bulk-built target-name map.
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 123
+    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 73
 
 
 @override_settings(
@@ -510,6 +511,6 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # when there's no work. Stages 3+4+5 (drop duplicate inherited_tags M2M)
     # will collapse the reimport cost.
     EXPECTED_ZAP_IMPORT_V2 = 1006
-    EXPECTED_ZAP_IMPORT_V3 = 984
+    EXPECTED_ZAP_IMPORT_V3 = 947
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 140
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 103
