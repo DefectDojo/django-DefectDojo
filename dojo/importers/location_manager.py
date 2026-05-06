@@ -7,14 +7,13 @@ from typing import TYPE_CHECKING, NamedTuple
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.db.models import signals
 from django.utils import timezone
 
+from dojo import tag_inheritance
 from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.location.models import AbstractLocation, Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Product, _manage_inherited_tags
-from dojo.tags_signals import make_inherited_tags_sticky
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 from dojo.utils import get_system_setting
@@ -551,10 +550,17 @@ class LocationManager(BaseLocationManager):
         existing_inherited_by_location: dict[int, set[str]] = _get_tags(Location.inherited_tags)
         existing_tags_by_location: dict[int, set[str]] = _get_tags(Location.tags)
 
-        # Perform the bulk updates. First, though, disconnect the make_inherited_tags_sticky signal on Location.tags
-        # while updating, otherwise each (inherited_)tags.set() will trigger, defeating the purpose of this bulk update.
-        disconnected = signals.m2m_changed.disconnect(make_inherited_tags_sticky, sender=Location.tags.through)
-        try:
+        # Perform the bulk updates inside a `tag_inheritance.batch()` context.
+        # While the batch is active, signal handlers in `dojo/tags_signals.py`
+        # short-circuit per-row inheritance work that would otherwise fire on
+        # every `(inherited_)tags.set()` and defeat the bulk update.
+        #
+        # This replaces a previous `signals.m2m_changed.disconnect(...)` /
+        # `connect(...)` dance which was process-global and therefore unsafe
+        # under threaded gunicorn / Celery thread pools / ASGI threadpools:
+        # while disconnected, every thread in the process lost sticky
+        # enforcement. Thread-local batch state avoids that hazard.
+        with tag_inheritance.batch():
             for location in locations:
                 target_tag_names: set[str] = set()
                 for pid in product_ids_by_location[location.id]:
@@ -573,6 +579,3 @@ class LocationManager(BaseLocationManager):
                     list(target_tag_names),
                     potentially_existing_tags=existing_tags_by_location[location.id],
                 )
-        finally:
-            if disconnected:
-                signals.m2m_changed.connect(make_inherited_tags_sticky, sender=Location.tags.through)
