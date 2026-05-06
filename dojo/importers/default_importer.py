@@ -5,6 +5,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
+from dojo import tag_inheritance
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
@@ -114,29 +115,39 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: for fresh imports, parse_findings() calls create_test() internally,
         # so self.test is guaranteed to be set after this call.
         parsed_findings = self.parse_findings(scan, parser) or []
-        new_findings = self.process_findings(parsed_findings, **kwargs)
-        # Close any old findings in the processed list if the the user specified for that
-        # to occur in the form that is then passed to the kwargs
-        closed_findings = self.close_old_findings(self.test.finding_set.all(), **kwargs)
-        # Update the timestamps of the test object by looking at the findings imported
-        self.update_timestamps()
-        # Update the test meta
-        self.update_test_meta()
-        # Save the test and engagement for changes to take affect
-        self.test.save()
-        self.test.engagement.save()
-        # Create a test import history object to record the flags sent to the importer
-        # This operation will return None if the user does not have the import history
-        # feature enabled
-        test_import_history = self.update_import_history(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-        )
-        # Apply tags to findings and endpoints/locations
-        self.apply_import_tags(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-        )
+        # Suppress per-row tag-inheritance signal work during the import hot
+        # loop. Inheritance is applied in bulk after the batch via
+        # `tag_inheritance.flush_for_product` (see below). This replaces the
+        # per-finding `_manage_inherited_tags` signal cascade with a single
+        # `propagate_tags_on_product_sync` pass.
+        with tag_inheritance.batch():
+            new_findings = self.process_findings(parsed_findings, **kwargs)
+            # Close any old findings in the processed list if the the user specified for that
+            # to occur in the form that is then passed to the kwargs
+            closed_findings = self.close_old_findings(self.test.finding_set.all(), **kwargs)
+            # Update the timestamps of the test object by looking at the findings imported
+            self.update_timestamps()
+            # Update the test meta
+            self.update_test_meta()
+            # Save the test and engagement for changes to take affect
+            self.test.save()
+            self.test.engagement.save()
+            # Create a test import history object to record the flags sent to the importer
+            # This operation will return None if the user does not have the import history
+            # feature enabled
+            test_import_history = self.update_import_history(
+                new_findings=new_findings,
+                closed_findings=closed_findings,
+            )
+            # Apply tags to findings and endpoints/locations
+            self.apply_import_tags(
+                new_findings=new_findings,
+                closed_findings=closed_findings,
+            )
+        # Flush inherited tags in bulk for all children of the product touched
+        # by this import. Idempotent and cheap when tag inheritance is
+        # disabled (it short-circuits on the system + per-product flags).
+        tag_inheritance.flush_for_product(self.test.engagement.product)
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         dojo_dispatch_task(

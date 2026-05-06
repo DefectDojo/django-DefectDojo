@@ -112,11 +112,20 @@ def _sync_inheritance_for_qs(queryset, *, target_names_per_child):
     for child_id, tag_name in existing_pairs:
         old_inherited_by_child[child_id].add(tag_name)
 
-    # Compute per-child diff and bucket by tag name.
+    # Compute per-child diff and bucket by tag name. Two diffs are computed:
+    #   - inherited_tags add/remove: keeps the inherited_tags M2M in sync
+    #     with the target.
+    #   - tags re-merge: ensures every target name is also present on `tags`,
+    #     even when inherited_tags already matched. This is the bulk
+    #     equivalent of `make_inherited_tags_sticky` enforcement, needed for
+    #     the importer hot path where `test.tags.set([...])` overwrites the
+    #     full tag list inside a `tag_inheritance.batch()` block.
     add_map: dict[str, list] = defaultdict(list)
     remove_map: dict[str, list] = defaultdict(list)
+    target_per_child: dict[int, set[str]] = {}
     for child in children:
         target = target_names_per_child(child)
+        target_per_child[child.pk] = target
         old = old_inherited_by_child.get(child.pk, set())
         for name in target - old:
             add_map[name].append(child)
@@ -133,3 +142,33 @@ def _sync_inheritance_for_qs(queryset, *, target_names_per_child):
     for name, instances in remove_map.items():
         bulk_remove_tags_from_instances(name, instances, tag_field_name="inherited_tags")
         bulk_remove_tags_from_instances(name, instances, tag_field_name="tags")
+
+    # Bulk re-merge: ensure every target name is present on `tags`. We need
+    # this for the importer hot path where `tags.set([...])` inside a
+    # `tag_inheritance.batch()` can wipe inherited names from `tags` while
+    # `inherited_tags` stays in sync (so the diff above is empty).
+    #
+    # Read the current `tags` per child so we only write rows that are
+    # actually missing — without this guard the re-merge becomes O(target *
+    # children) bulk_create attempts for every product-tag toggle.
+    tags_field = model_class._meta.get_field("tags")
+    tags_through = tags_field.remote_field.through
+    tags_tag_model = tags_field.related_model
+    existing_tags_pairs = tags_through.objects.filter(
+        **{f"{source_field_name}__in": child_ids},
+    ).values_list(source_field_name, f"{tags_tag_model._meta.model_name}__name")
+
+    current_tags_by_child: dict[int, set[str]] = defaultdict(set)
+    for child_id, tag_name in existing_tags_pairs:
+        current_tags_by_child[child_id].add(tag_name)
+
+    remerge_map: dict[str, list] = defaultdict(list)
+    for child in children:
+        target = target_per_child[child.pk]
+        current = current_tags_by_child.get(child.pk, set())
+        # Skip names already added by the diff above; only fix true drift.
+        already_added = {name for name, lst in add_map.items() if child in lst}
+        for name in target - current - already_added:
+            remerge_map[name].append(child)
+    if remerge_map:
+        bulk_add_tag_mapping(remerge_map, tag_field_name="tags")

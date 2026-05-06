@@ -37,6 +37,9 @@ def batch():
             # Bulk operations that would otherwise fire `make_inherited_tags_sticky`
             # or `inherit_tags_on_instance` per row.
             ...
+        # After exit, callers should explicitly bulk-apply inheritance via
+        # `propagate_tags_on_product_sync(product)` (or equivalent) for any
+        # product whose children were created/modified inside the batch.
 
     The context is reentrant; nested ``with`` blocks share the suppression
     until the outermost block exits. State lives in ``threading.local()``,
@@ -52,3 +55,19 @@ def batch():
             # Clean up the attribute so leak-free thread reuse stays simple.
             with contextlib.suppress(AttributeError):
                 del _state.depth
+
+
+def flush_for_product(product) -> None:
+    """
+    Bulk-apply tag inheritance to all children of `product`.
+
+    Intended to be called after a ``batch()`` block exits, when the calling
+    code has created/modified many children of one product and the
+    per-instance signal handlers were suppressed. Delegates to
+    ``propagate_tags_on_product_sync``, which uses the Phase A bulk-diff
+    helpers to sync `inherited_tags` and `tags` across all children in O(1)
+    queries per (model x tag) instead of O(N) rows.
+    """
+    # Local import to avoid circulars at module import time.
+    from dojo.product.helpers import propagate_tags_on_product_sync  # noqa: PLC0415
+    propagate_tags_on_product_sync(product)

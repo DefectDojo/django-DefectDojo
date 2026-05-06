@@ -359,10 +359,12 @@ class TagInheritancePerfBaselines(DojoTestCase):
     # Findings-only scenarios.
     # Pre-Phase-A V2: 4758 add, 4540 remove. V3: 4759/4541.
     # Phase A bulk-propagate drops these dramatically.
-    EXPECTED_PRODUCT_TAG_ADD_100_V2 = 91
-    EXPECTED_PRODUCT_TAG_ADD_100_V3 = 91
-    EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 53
-    EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 53
+    # Phase B Stage 2 adds ~3 queries to read current `tags` for the bulk
+    # re-merge step (compensates for tags wiped inside batch contexts).
+    EXPECTED_PRODUCT_TAG_ADD_100_V2 = 94
+    EXPECTED_PRODUCT_TAG_ADD_100_V3 = 94
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 56
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 56
 
     EXPECTED_CREATE_ONE_FINDING_V2 = 64
     EXPECTED_CREATE_ONE_FINDING_V3 = 64
@@ -375,12 +377,18 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_FINDING_REMOVE_INHERITED_V3 = 44
 
     # V2 endpoint paths. Pre-Phase-A: 3958 add, 3740 remove.
-    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 91
-    EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 53
+    # Phase B Stage 2 raises endpoint add 91 -> 194 because the eager Celery
+    # propagate dispatched by m2m_changed and the explicit
+    # propagate_tags_on_product_sync call both pay the new tags-read for
+    # bulk re-merge. Acceptable: the same lever delivers a 27% drop on the
+    # ZAP import path. Will go further down in Stages 3+4+5 when the
+    # duplicate inherited_tags M2M is dropped.
+    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 194
+    EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 56
 
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
-    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 316
-    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 266
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 320
+    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 270
 
 
 @override_settings(
@@ -495,9 +503,13 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
     # Phase B Stage 1 (thread-safe batch context) adds ~20 queries on the V3
     # import path because the previous process-global signal-disconnect was
-    # narrower in scope (Location.tags.through only). Net-positive trade for
-    # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 1385
-    EXPECTED_ZAP_IMPORT_V3 = 1263
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
+    # narrower in scope (Location.tags.through only).
+    # Phase B Stage 2 (importer-wide batch + flush_for_product) drops import
+    # ~27%/22% (signal cascade replaced by single bulk propagate). Reimport
+    # rises because flush always runs; bulk re-merge has a fixed cost even
+    # when there's no work. Stages 3+4+5 (drop duplicate inherited_tags M2M)
+    # will collapse the reimport cost.
+    EXPECTED_ZAP_IMPORT_V2 = 1006
+    EXPECTED_ZAP_IMPORT_V3 = 984
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 140
