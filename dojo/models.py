@@ -1093,7 +1093,16 @@ class SLA_Configuration(models.Model):
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
                 from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, self, products, severities=severities)
+                dojo_dispatch_task(
+                    async_update_sla_expiration_dates_sla_config_sync,
+                    self.id,
+                    list(products.values_list("id", flat=True)),
+                    severities=severities,
+                )
+                # The async task refetches and resets async_updating on its own copy.
+                # Mirror that on this in-memory instance so a subsequent save() on the
+                # same instance does not trigger the lock-revert path at line 1058.
+                self.async_updating = False
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1255,7 +1264,17 @@ class Product(BaseModel):
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
                 from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, sla_config, Product.objects.filter(id=self.id))
+                dojo_dispatch_task(
+                    async_update_sla_expiration_dates_sla_config_sync,
+                    sla_config.id,
+                    [self.id],
+                )
+                # The async task refetches and resets async_updating on its own copies.
+                # Mirror that on this in-memory product and the in-memory sla_config so a
+                # subsequent save() on either does not trigger their lock-revert paths.
+                self.async_updating = False
+                if sla_config:
+                    sla_config.async_updating = False
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
