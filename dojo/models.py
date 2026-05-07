@@ -38,7 +38,6 @@ from django.utils.html import escape
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
 from django_extensions.db.models import TimeStampedModel
-from multiselectfield import MultiSelectField
 from polymorphic.base import ManagerInheritanceWarning
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
@@ -1094,7 +1093,16 @@ class SLA_Configuration(models.Model):
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
                 from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, self, products, severities=severities)
+                dojo_dispatch_task(
+                    async_update_sla_expiration_dates_sla_config_sync,
+                    self.id,
+                    list(products.values_list("id", flat=True)),
+                    severities=severities,
+                )
+                # The async task refetches and resets async_updating on its own copy.
+                # Mirror that on this in-memory instance so a subsequent save() on the
+                # same instance does not trigger the lock-revert path at line 1058.
+                self.async_updating = False
 
     def clean(self):
         sla_days = [self.critical, self.high, self.medium, self.low]
@@ -1256,7 +1264,17 @@ class Product(BaseModel):
                 from dojo.sla_config.helpers import async_update_sla_expiration_dates_sla_config_sync  # noqa: I001, PLC0415 circular import
                 from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-                dojo_dispatch_task(async_update_sla_expiration_dates_sla_config_sync, sla_config, Product.objects.filter(id=self.id))
+                dojo_dispatch_task(
+                    async_update_sla_expiration_dates_sla_config_sync,
+                    sla_config.id,
+                    [self.id],
+                )
+                # The async task refetches and resets async_updating on its own copies.
+                # Mirror that on this in-memory product and the in-memory sla_config so a
+                # subsequent save() on either does not trigger their lock-revert paths.
+                self.async_updating = False
+                if sla_config:
+                    sla_config.async_updating = False
 
     def get_absolute_url(self):
         return reverse("view_product", args=[str(self.id)])
@@ -1349,8 +1367,8 @@ class Product(BaseModel):
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
-        return jira_helper.has_jira_configured(self)
+        from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
+        return jira_services.has_configured(self)
 
     def violates_sla(self):
         findings = Finding.objects.filter(test__engagement__product=self,
@@ -1637,8 +1655,8 @@ class Engagement(BaseModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
-        return jira_helper.has_jira_issue(self)
+        from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
+        return jira_services.has_issue(self)
 
     @property
     def is_ci_cd(self):
@@ -1781,14 +1799,11 @@ class Endpoint(models.Model):
 
     def __eq__(self, other):
         if isinstance(other, Endpoint):
-            # Check if the contents of the endpoint match
             contents_match = str(self) == str(other)
-            # Determine if products should be used in the equation
-            if self.product is not None and other.product is not None:
-                # Check if the products are the same
-                products_match = (self.product) == other.product
-                # Check if the contents match
-                return products_match and contents_match
+            # Use product_id (cached integer) instead of self.product to avoid
+            # triggering a FK lookup on every comparison inside NestedObjects.add_edge.
+            if self.product_id is not None and other.product_id is not None:
+                return self.product_id == other.product_id and contents_match
             return contents_match
 
         return NotImplemented
@@ -3360,8 +3375,8 @@ class Finding(BaseModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
-        return jira_helper.has_jira_issue(self)
+        from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
+        return jira_services.has_issue(self)
 
     @cached_property
     def finding_group(self):
@@ -3373,13 +3388,13 @@ class Finding(BaseModel):
         if not self.has_finding_group:
             return False
 
-        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
-        return jira_helper.has_jira_issue(self.finding_group)
+        from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
+        return jira_services.has_issue(self.finding_group)
 
     @property
     def has_jira_configured(self):
-        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
-        return jira_helper.has_jira_configured(self)
+        from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
+        return jira_services.has_configured(self)
 
     @cached_property
     def has_finding_group(self):
@@ -3701,8 +3716,8 @@ class Finding_Group(TimeStampedModel):
 
     @property
     def has_jira_issue(self):
-        import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
-        return jira_helper.has_jira_issue(self)
+        from dojo.jira import services as jira_services  # noqa: PLC0415 circular import
+        return jira_services.has_issue(self)
 
     @cached_property
     def severity(self):
@@ -4084,370 +4099,32 @@ class BannerConf(models.Model):
     banner_message = models.CharField(max_length=500, help_text=_("This message will be displayed on the login page. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"), default="")
 
 
-class GITHUB_Conf(models.Model):
-    configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
-    api_key = models.CharField(max_length=2000, help_text=_("Enter your Github API Key"), default="")
-
-    def __str__(self):
-        return self.configuration_name
-
-
-class GITHUB_Issue(models.Model):
-    issue_id = models.CharField(max_length=200)
-    issue_url = models.URLField(max_length=2000, verbose_name=_("GitHub issue URL"))
-    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return str(self.issue_id) + "| GitHub Issue URL: " + str(self.issue_url)
-
-
-class GITHUB_Clone(models.Model):
-    github_id = models.CharField(max_length=200)
-    github_clone_id = models.CharField(max_length=200)
-
-
-class GITHUB_Details_Cache(models.Model):
-    github_id = models.CharField(max_length=200)
-    github_key = models.CharField(max_length=200)
-    github_status = models.CharField(max_length=200)
-    github_resolution = models.CharField(max_length=200)
-
-
-class GITHUB_PKey(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-
-    git_project = models.CharField(max_length=200, blank=True, verbose_name=_("Github project"), help_text=_("Specify your project location. (:user/:repo)"))
-    git_conf = models.ForeignKey(GITHUB_Conf, verbose_name=_("Github Configuration"),
-                                 null=True, blank=True, on_delete=models.CASCADE)
-    git_push_notes = models.BooleanField(default=False, blank=True, help_text=_("Notes added to findings will be automatically added to the corresponding github issue"))
-
-    def __str__(self):
-        return self.product.name + " | " + self.git_project
-
-
-class JIRA_Instance(models.Model):
-    configuration_name = models.CharField(max_length=2000, help_text=_("Enter a name to give to this configuration"), default="")
-    url = models.URLField(max_length=2000, verbose_name=_("JIRA URL"), help_text=_("For more information how to configure Jira, read the DefectDojo documentation."))
-    username = models.CharField(max_length=2000, verbose_name=_("Username/Email"), help_text=_("Username or Email Address, see DefectDojo documentation for more information."))
-    password = models.CharField(max_length=2000, verbose_name=_("Password/Token"), help_text=_("Password or API Token, see DefectDojo documentation for more information."))
-
-    if hasattr(settings, "JIRA_ISSUE_TYPE_CHOICES_CONFIG"):
-        default_issue_type_choices = settings.JIRA_ISSUE_TYPE_CHOICES_CONFIG
-    else:
-        default_issue_type_choices = (
-                                        ("Task", "Task"),
-                                        ("Story", "Story"),
-                                        ("Epic", "Epic"),
-                                        ("Spike", "Spike"),
-                                        ("Bug", "Bug"),
-                                        ("Security", "Security"),
-                                    )
-    default_issue_type = models.CharField(max_length=255,
-                                          choices=default_issue_type_choices,
-                                          default="Bug",
-                                          help_text=_("You can define extra issue types in settings.py"))
-    issue_template_dir = models.CharField(max_length=255,
-                                      null=True,
-                                      blank=True,
-                                      help_text=_("Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates."))
-    epic_name_id = models.IntegerField(help_text=_("To obtain the 'Epic name id' visit https://<YOUR JIRA URL>/rest/api/2/field and search for Epic Name. Copy the number out of cf[number] and paste it here."))
-    open_status_key = models.IntegerField(verbose_name=_("Reopen Transition ID"), help_text=_("Transition ID to Re-Open JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance"))
-    close_status_key = models.IntegerField(verbose_name=_("Close Transition ID"), help_text=_("Transition ID to Close JIRA issues, visit https://<YOUR JIRA URL>/rest/api/latest/issue/<ANY VALID ISSUE KEY>/transitions?expand=transitions.fields to find the ID for your JIRA instance"))
-    info_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Info"))
-    low_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Low"))
-    medium_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Medium"))
-    high_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: High"))
-    critical_mapping_severity = models.CharField(max_length=200, help_text=_("Maps to the 'Priority' field in Jira. For example: Critical"))
-    finding_text = models.TextField(null=True, blank=True, help_text=_("Additional text that will be added to the finding in Jira. For example including how the finding was created or who to contact for more information."))
-    accepted_mapping_resolution = models.CharField(null=True, blank=True, max_length=300, verbose_name="Risk Accepted resolution mapping", help_text=_('JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding becoming Risk Accepted in Defect Dojo. The expiration time for this Risk Acceptance will be determined by the "Risk acceptance form default days" in "System Settings". This mapping is not used when Findings are pushed to JIRA. In that case the Risk Accepted Findings are closed in JIRA and JIRA sets the default resolution.'))
-    false_positive_mapping_resolution = models.CharField(null=True, blank=True, verbose_name="False Positive resolution mapping", max_length=300, help_text=_("JIRA issues that are closed in JIRA with one of these resolutions will result in the Finding being marked as False Positive Defect Dojo. This mapping is not used when Findings are pushed to JIRA. In that case the Finding is closed in JIRA and JIRA sets the default resolution."))
-    global_jira_sla_notification = models.BooleanField(default=True, blank=False, verbose_name=_("Globally send SLA notifications as comment?"), help_text=_("This setting can be overidden at the Product level"))
-    finding_jira_sync = models.BooleanField(default=False, blank=False, verbose_name=_("Automatically sync Findings with JIRA?"), help_text=_("If enabled, this will sync changes to a Finding automatically to JIRA"))
-
-    def __str__(self):
-        return self.configuration_name + " | " + self.url + " | " + self.username
-
-    @property
-    def accepted_resolutions(self):
-        return [m.strip() for m in (self.accepted_mapping_resolution or "").split(",")]
-
-    @property
-    def false_positive_resolutions(self):
-        return [m.strip() for m in (self.false_positive_mapping_resolution or "").split(",")]
-
-    def get_priority(self, status):
-        if status == "Info":
-            return self.info_mapping_severity
-        if status == "Low":
-            return self.low_mapping_severity
-        if status == "Medium":
-            return self.medium_mapping_severity
-        if status == "High":
-            return self.high_mapping_severity
-        if status == "Critical":
-            return self.critical_mapping_severity
-        return "N/A"
-
-
-# declare form here as we can't import forms.py due to circular imports not even locally
-class JIRAForm_Admin(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
-
-    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
-    password_from_db = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance:
-            # keep password from db to use if the user entered no password
-            self.password_from_db = self.instance.password
-            self.fields["password"].required = False
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if not cleaned_data["password"]:
-            cleaned_data["password"] = self.password_from_db
-
-        return cleaned_data
-
-
-class JIRA_Instance_Admin(admin.ModelAdmin):
-    form = JIRAForm_Admin
-
-
-class JIRA_Project(models.Model):
-    jira_instance = models.ForeignKey(JIRA_Instance, verbose_name=_("JIRA Instance"),
-                             null=True, blank=True, on_delete=models.PROTECT)
-    project_key = models.CharField(max_length=200, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
-    issue_template_dir = models.CharField(max_length=255,
-                                      null=True,
-                                      blank=True,
-                                      help_text=_("Choose the folder containing the Django templates used to render the JIRA issue description. These are stored in dojo/templates/issue-trackers. Leave empty to use the default jira_full templates."))
-    engagement = models.OneToOneField(Engagement, on_delete=models.CASCADE, null=True, blank=True)
-    component = models.CharField(max_length=200, blank=True)
-    custom_fields = models.JSONField(max_length=200, blank=True, null=True,
-                                   help_text=_('JIRA custom field JSON mapping of Id to value, e.g. {"customfield_10122": [{"name": "8.0.1"}]}'))
-    default_assignee = models.CharField(max_length=200, blank=True, null=True,
-                                     help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
-    jira_labels = models.CharField(max_length=200, blank=True, null=True,
-                                   help_text=_("JIRA issue labels space seperated"))
-    add_vulnerability_id_to_jira_label = models.BooleanField(default=False,
-                                                             verbose_name=_("Add vulnerability Id as a JIRA label"),
-                                                             blank=False)
-    push_all_issues = models.BooleanField(default=False, blank=True,
-         help_text=_("Automatically create JIRA tickets for verified findings, assuming enforce_verified_status is True, or for all findings otherwise. Once linked, the JIRA ticket will continue to sync, regardless of status in DefectDojo."))
-    enable_engagement_epic_mapping = models.BooleanField(default=False,
-                                                         blank=True)
-    epic_issue_type_name = models.CharField(max_length=64, blank=True, default="Epic", help_text=_("The name of the of structure that represents an Epic"))
-    push_notes = models.BooleanField(default=False, blank=True)
-    product_jira_sla_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send SLA notifications as comment?"))
-    risk_acceptance_expiration_notification = models.BooleanField(default=False, blank=True, verbose_name=_("Send Risk Acceptance expiration notifications as comment?"))
-    enabled = models.BooleanField(
-        verbose_name=_("Enable Connection With Jira Project"),
-        help_text=_("When disabled, Findings will no longer be pushed to Jira, even if they have already been pushed previously."),
-        default=True,
-        blank=True)
-
-    def __str__(self):
-        value = f"{self.id}: {self.project_key} ({self.jira_instance.url if self.jira_instance else 'None'})"
-        if not self.enabled:
-            value += " - Not Connected"
-        return value
-
-    def clean(self):
-        if not self.jira_instance:
-            msg = "Cannot save JIRA Project Configuration without JIRA Instance"
-            raise ValidationError(msg)
-
-
-# declare form here as we can't import forms.py due to circular imports not even locally
-class JIRAForm_Admin(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
-
-    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
-    password_from_db = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance:
-            # keep password from db to use if the user entered no password
-            self.password_from_db = self.instance.password
-            self.fields["password"].required = False
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if not cleaned_data["password"]:
-            cleaned_data["password"] = self.password_from_db
-
-        return cleaned_data
-
-
-class JIRA_Conf_Admin(admin.ModelAdmin):
-    form = JIRAForm_Admin
-
-
-class JIRA_Issue(models.Model):
-    jira_project = models.ForeignKey(JIRA_Project, on_delete=models.CASCADE, null=True)
-    jira_id = models.CharField(max_length=200)
-    jira_key = models.CharField(max_length=200)
-    finding = models.OneToOneField(Finding, null=True, blank=True, on_delete=models.CASCADE)
-    engagement = models.OneToOneField(Engagement, null=True, blank=True, on_delete=models.CASCADE)
-    finding_group = models.OneToOneField(Finding_Group, null=True, blank=True, on_delete=models.CASCADE)
-
-    jira_creation = models.DateTimeField(editable=True,
-                                         null=True,
-                                         verbose_name=_("Jira creation"),
-                                         help_text=_("The date a Jira issue was created from this finding."))
-    jira_change = models.DateTimeField(editable=True,
-                                       null=True,
-                                       verbose_name=_("Jira last update"),
-                                       help_text=_("The date the linked Jira issue was last modified."))
-
-    def __str__(self):
-        text = ""
-        if self.finding:
-            text = self.finding.test.engagement.product.name + " | Finding: " + self.finding.title + ", ID: " + str(self.finding.id)
-        elif self.engagement:
-            text = self.engagement.product.name + " | Engagement: " + self.engagement.name + ", ID: " + str(self.engagement.id)
-        return text + " | Jira Key: " + str(self.jira_key)
-
-    def set_obj(self, obj):
-        if isinstance(obj, Finding):
-            self.finding = obj
-        elif isinstance(obj, Finding_Group):
-            self.finding_group = obj
-        elif isinstance(obj, Engagement):
-            self.engagement = obj
-        else:
-            msg = f"unknown object type while creating JIRA_Issue: {to_str_typed(obj)}"
-            raise TypeError(msg)
-
-
-NOTIFICATION_CHOICE_SLACK = ("slack", "slack")
-NOTIFICATION_CHOICE_MSTEAMS = ("msteams", "msteams")
-NOTIFICATION_CHOICE_MAIL = ("mail", "mail")
-NOTIFICATION_CHOICE_WEBHOOKS = ("webhooks", "webhooks")
-NOTIFICATION_CHOICE_ALERT = ("alert", "alert")
-
-NOTIFICATION_CHOICES = (
-    NOTIFICATION_CHOICE_SLACK,
-    NOTIFICATION_CHOICE_MSTEAMS,
-    NOTIFICATION_CHOICE_MAIL,
-    NOTIFICATION_CHOICE_WEBHOOKS,
-    NOTIFICATION_CHOICE_ALERT,
+from dojo.github.models import (  # noqa: E402, F401 -- backward compat
+    GITHUB_Clone,
+    GITHUB_Conf,
+    GITHUB_Details_Cache,
+    GITHUB_Issue,
+    GITHUB_PKey,
 )
-
-DEFAULT_NOTIFICATION = NOTIFICATION_CHOICE_ALERT
-
-
-class Notifications(models.Model):
-    product_type_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    product_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    engagement_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    test_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-
-    scan_added = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, help_text=_("Triggered whenever an (re-)import has been done that created/updated/closed findings."))
-    scan_added_empty = MultiSelectField(choices=NOTIFICATION_CHOICES, default=[], blank=True, help_text=_("Triggered whenever an (re-)import has been done (even if that created/updated/closed no findings)."))
-    jira_update = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True, verbose_name=_("JIRA problems"), help_text=_("JIRA sync happens in the background, errors will be shown as notifications/alerts so make sure to subscribe"))
-    upcoming_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    stale_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    auto_close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    close_engagement = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    user_mentioned = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    code_review = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    review_requested = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    other = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True)
-    user = models.ForeignKey(Dojo_User, default=None, null=True, editable=False, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, default=None, null=True, editable=False, on_delete=models.CASCADE)
-    template = models.BooleanField(default=False)
-    sla_breach = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
-        verbose_name=_("SLA breach"),
-        help_text=_("Get notified of (upcoming) SLA breaches"))
-    risk_acceptance_expiration = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
-        verbose_name=_("Risk Acceptance Expiration"),
-        help_text=_("Get notified of (upcoming) Risk Acceptance expiries"))
-    sla_breach_combined = MultiSelectField(choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION, blank=True,
-        verbose_name=_("SLA breach (combined)"),
-        help_text=_("Get notified of (upcoming) SLA breaches (a message per project)"))
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["user", "product"], name="notifications_user_product"),
-        ]
-        indexes = [
-            models.Index(fields=["user", "product"]),
-        ]
-
-    def __str__(self):
-        return f"Notifications about {self.product or 'all projects'} for {self.user or 'system notifications'}"
-
-    @classmethod
-    def merge_notifications_list(cls, notifications_list):
-        if not notifications_list:
-            return []
-
-        result = None
-        for notifications in notifications_list:
-            if result is None:
-                # we start by copying the first instance, because creating a new instance would set all notification columns to 'alert' :-()
-                result = notifications
-                # result.pk = None # detach from db
-            else:
-                result.product_type_added = {*result.product_type_added, *notifications.product_type_added}
-                result.product_added = {*result.product_added, *notifications.product_added}
-                result.engagement_added = {*result.engagement_added, *notifications.engagement_added}
-                result.test_added = {*result.test_added, *notifications.test_added}
-                result.scan_added = {*result.scan_added, *notifications.scan_added}
-                result.jira_update = {*result.jira_update, *notifications.jira_update}
-                result.upcoming_engagement = {*result.upcoming_engagement, *notifications.upcoming_engagement}
-                result.stale_engagement = {*result.stale_engagement, *notifications.stale_engagement}
-                result.auto_close_engagement = {*result.auto_close_engagement, *notifications.auto_close_engagement}
-                result.close_engagement = {*result.close_engagement, *notifications.close_engagement}
-                result.user_mentioned = {*result.user_mentioned, *notifications.user_mentioned}
-                result.code_review = {*result.code_review, *notifications.code_review}
-                result.review_requested = {*result.review_requested, *notifications.review_requested}
-                result.other = {*result.other, *notifications.other}
-                result.sla_breach = {*result.sla_breach, *notifications.sla_breach}
-                result.sla_breach_combined = {*result.sla_breach_combined, *notifications.sla_breach_combined}
-                result.risk_acceptance_expiration = {*result.risk_acceptance_expiration, *notifications.risk_acceptance_expiration}
-        return result
-
-
-class NotificationsAdmin(admin.ModelAdmin):
-    list_filter = ("user", "product")
-
-    def get_list_display(self, request):
-        list_fields = ["user", "product"]
-        list_fields += [field.name for field in self.model._meta.fields if field.name not in list_fields]
-        return list_fields
-
-
-class Notification_Webhooks(models.Model):
-    class Status(models.TextChoices):
-        __STATUS_ACTIVE = "active"
-        __STATUS_INACTIVE = "inactive"
-        STATUS_ACTIVE = f"{__STATUS_ACTIVE}", _("Active")
-        STATUS_ACTIVE_TMP = f"{__STATUS_ACTIVE}_tmp", _("Active but 5xx (or similar) error detected")
-        STATUS_INACTIVE_TMP = f"{__STATUS_INACTIVE}_tmp", _("Temporary inactive because of 5xx (or similar) error")
-        STATUS_INACTIVE_PERMANENT = f"{__STATUS_INACTIVE}_permanent", _("Permanently inactive")
-
-    name = models.CharField(max_length=100, default="", blank=False, unique=True,
-                                    help_text=_("Name of the incoming webhook"))
-    url = models.URLField(max_length=200, default="", blank=False,
-                                    help_text=_("The full URL of the incoming webhook"))
-    header_name = models.CharField(max_length=100, default="", blank=True, null=True,
-                                   help_text=_("Name of the header required for interacting with Webhook endpoint"))
-    header_value = models.CharField(max_length=100, default="", blank=True, null=True,
-                                   help_text=_("Content of the header required for interacting with Webhook endpoint"))
-    status = models.CharField(max_length=20, choices=Status, default="active", blank=False,
-                              help_text=_("Status of the incoming webhook"), editable=False)
-    first_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened first time"), blank=True, null=True, editable=False)
-    last_error = models.DateTimeField(help_text=_("If endpoint is active, when error happened last time"), blank=True, null=True, editable=False)
-    note = models.CharField(max_length=1000, default="", blank=True, null=True, help_text=_("Description of the latest error"), editable=False)
-    owner = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.CASCADE,
-                              help_text=_("Owner/receiver of notification, if empty processed as system notification"))
-    # TODO: Test that `editable` will block editing via API
+from dojo.jira.models import (  # noqa: E402,F401 backward compat
+    JIRA_Instance,
+    JIRA_Instance_Admin,
+    JIRA_Issue,
+    JIRA_Project,
+)
+from dojo.notifications.admin import NotificationsAdmin  # noqa: E402, F401  -- backward compat
+from dojo.notifications.models import (  # noqa: E402, F401  -- backward compat
+    DEFAULT_NOTIFICATION,
+    NOTIFICATION_CHOICE_ALERT,
+    NOTIFICATION_CHOICE_MAIL,
+    NOTIFICATION_CHOICE_MSTEAMS,
+    NOTIFICATION_CHOICE_SLACK,
+    NOTIFICATION_CHOICE_WEBHOOKS,
+    NOTIFICATION_CHOICES,
+    Alerts,
+    Notification_Webhooks,
+    Notifications,
+)
 
 
 class Tool_Product_Settings(models.Model):
@@ -4470,19 +4147,6 @@ class Tool_Product_History(models.Model):
     succesfull = models.BooleanField(default=True, verbose_name=_("Succesfully"))
     configuration_details = models.CharField(max_length=2000, null=True,
                                              blank=True)
-
-
-class Alerts(models.Model):
-    title = models.CharField(max_length=250, default="", null=False)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.URLField(max_length=2000, null=True, blank=True)
-    source = models.CharField(max_length=100, default="Generic")
-    icon = models.CharField(max_length=25, default="icon-user-check")
-    user_id = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True, null=False)
-
-    class Meta:
-        ordering = ["-created"]
 
 
 class Cred_User(models.Model):
@@ -4917,7 +4581,6 @@ class ChoiceAnswer(Answer):
 
 from dojo.utils import (  # noqa: E402  # there is issue due to a circular import
     parse_cvss_data,
-    to_str_typed,
 )
 
 tagulous.admin.register(Product.tags)
@@ -4968,17 +4631,7 @@ admin.site.register(Product_Type)
 admin.site.register(UserContactInfo)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
-admin.site.register(Alerts)
-admin.site.register(JIRA_Issue)
-admin.site.register(JIRA_Instance, JIRA_Instance_Admin)
-admin.site.register(JIRA_Project)
-admin.site.register(GITHUB_Conf)
-admin.site.register(GITHUB_Issue)
-admin.site.register(GITHUB_Clone)
-admin.site.register(GITHUB_Details_Cache)
-admin.site.register(GITHUB_PKey)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
-admin.site.register(Notification_Webhooks)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(Cred_User)
@@ -5014,7 +4667,6 @@ admin.site.register(BurpRawRequestResponse)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)
-admin.site.register(Notifications, NotificationsAdmin)
 admin.site.register(Tool_Product_History)
 admin.site.register(General_Survey)
 admin.site.register(Test_Import)
