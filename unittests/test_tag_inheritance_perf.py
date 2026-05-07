@@ -380,10 +380,10 @@ class TagInheritancePerfBaselines(DojoTestCase):
     # Phase B Stage 2 raises endpoint add 91 -> 194 because the eager Celery
     # propagate dispatched by m2m_changed and the explicit
     # propagate_tags_on_product_sync call both pay the new tags-read for
-    # bulk re-merge. Acceptable: the same lever delivers a 27% drop on the
-    # ZAP import path. Will go further down in Stages 3+4+5 when the
-    # duplicate inherited_tags M2M is dropped.
-    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 194
+    # bulk re-merge. The bulk-propagate + batch-context + Location precompute
+    # commits later in Stage 2 collapse this back to 94. Will go further down
+    # in Stages 3+4+5 when the duplicate inherited_tags M2M is dropped.
+    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 94
     EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 56
 
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
