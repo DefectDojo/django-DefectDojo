@@ -115,12 +115,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: for fresh imports, parse_findings() calls create_test() internally,
         # so self.test is guaranteed to be set after this call.
         parsed_findings = self.parse_findings(scan, parser) or []
-        # Suppress per-row tag-inheritance signal work during the import hot
-        # loop. Inheritance is applied in bulk after the batch via
-        # `tag_inheritance.flush_for_product` (see below). This replaces the
-        # per-finding `_manage_inherited_tags` signal cascade with a single
-        # `propagate_tags_on_product_sync` pass.
-        with tag_inheritance.batch():
+        # Open a tag-inheritance context. Signal handlers register touched
+        # instances into the context; the context auto-flushes (bulk-applies
+        # inherited tags) on exit. Mid-context `ctx.flush()` calls drain the
+        # accumulated set early — used before per-batch post-process dispatch
+        # so JIRA labels reflect the full tag state on first push.
+        with tag_inheritance.batch() as tag_ctx:
             new_findings = self.process_findings(parsed_findings, **kwargs)
             # Close any old findings in the processed list if the the user specified for that
             # to occur in the form that is then passed to the kwargs
@@ -144,10 +144,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 new_findings=new_findings,
                 closed_findings=closed_findings,
             )
-        # Flush inherited tags in bulk for all children of the product touched
-        # by this import. Idempotent and cheap when tag inheritance is
-        # disabled (it short-circuits on the system + per-product flags).
-        tag_inheritance.flush_for_product(self.test.engagement.product)
+        # Inheritance auto-flushes on context exit above.
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         dojo_dispatch_task(
@@ -280,6 +277,11 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 findings_with_parser_tags.clear()
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
+                # Drain the inheritance context BEFORE dispatching post-process
+                # so the JIRA push inside that task sees inherited tags on the
+                # findings (otherwise inheritance lands later, on context exit).
+                if (ctx := tag_inheritance.current()) is not None:
+                    ctx.flush()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
                              push_to_jira, len(finding_ids_batch), is_final_finding)
                 dojo_dispatch_task(

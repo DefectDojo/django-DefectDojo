@@ -510,7 +510,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # rises because flush always runs; bulk re-merge has a fixed cost even
     # when there's no work. Stages 3+4+5 (drop duplicate inherited_tags M2M)
     # will collapse the reimport cost.
-    EXPECTED_ZAP_IMPORT_V2 = 1006
-    EXPECTED_ZAP_IMPORT_V3 = 947
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 103
+    EXPECTED_ZAP_IMPORT_V2 = 1057
+    EXPECTED_ZAP_IMPORT_V3 = 997
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87

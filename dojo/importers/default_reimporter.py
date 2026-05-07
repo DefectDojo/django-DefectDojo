@@ -108,11 +108,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Get the findings from the parser based on what methods the parser supplies
         # This could either mean traditional file parsing, or API pull parsing
         parsed_findings = self.parse_findings(scan, parser) or []
-        # Suppress per-row tag-inheritance signal work during the reimport
-        # hot loop. Inheritance is applied in bulk after the batch via
-        # `tag_inheritance.flush_for_product`. See default_importer for the
-        # rationale.
-        with tag_inheritance.batch():
+        # Open a tag-inheritance context (auto-flushes on exit). Signals
+        # register touched instances; `ctx.flush()` mid-loop drains them
+        # before each post-process dispatch so JIRA labels are correct.
+        with tag_inheritance.batch() as tag_ctx:
             (
                 new_findings,
                 reactivated_findings,
@@ -150,9 +149,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 reactivated_findings=reactivated_findings,
                 untouched_findings=untouched_findings,
             )
-        # Bulk-apply tag inheritance for all children of the product touched
-        # by this reimport.
-        tag_inheritance.flush_for_product(self.test.engagement.product)
+        # Inheritance auto-flushes on context exit above.
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
@@ -436,6 +433,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         findings_with_parser_tags.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
+                        # Drain the inheritance context BEFORE dispatching
+                        # post-process so the JIRA push inside that task sees
+                        # inherited tags on the findings.
+                        if (ctx := tag_inheritance.current()) is not None:
+                            ctx.flush()
                         dojo_dispatch_task(
                             finding_helper.post_process_findings_batch,
                             finding_ids_batch,

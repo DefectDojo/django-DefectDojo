@@ -33,17 +33,18 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
 @receiver(signals.m2m_changed, sender=Location.tags.through)
 def make_inherited_tags_sticky(sender, instance, action, **kwargs):
     """Make sure inherited tags are added back in if they are removed"""
-    # Inside a `tag_inheritance.batch()` block the caller takes responsibility
-    # for applying inheritance in bulk; per-row signal work would defeat the
-    # purpose. This replaces the old `signals.m2m_changed.disconnect(...)`
-    # pattern, which was process-global and unsafe under threaded workers.
-    if tag_inheritance.is_in_batch():
+    if action not in {"post_add", "post_remove"}:
         return
-    if action in {"post_add", "post_remove"}:
-        if inherit_product_tags(instance):
-            tag_list = [tag.name for tag in instance.tags.all()]
-            if propagate_inheritance(instance, tag_list=tag_list):
-                instance.inherit_tags(tag_list)
+    # Inside a `tag_inheritance.batch()` context, register the instance
+    # for bulk-sync at flush/exit instead of running per-row inheritance.
+    ctx = tag_inheritance.current()
+    if ctx is not None and ctx.is_active():
+        ctx.add(instance)
+        return
+    if inherit_product_tags(instance):
+        tag_list = [tag.name for tag in instance.tags.all()]
+        if propagate_inheritance(instance, tag_list=tag_list):
+            instance.inherit_tags(tag_list)
 
 
 def inherit_instance_tags(instance):
@@ -72,10 +73,11 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
     # tag edits is handled by `make_inherited_tags_sticky` (m2m_changed).
     if not created:
         return
-    # Inside a `tag_inheritance.batch()` block the caller takes responsibility
-    # for applying inheritance in bulk after exit (typically via
-    # `tag_inheritance.flush_for_product`).
-    if tag_inheritance.is_in_batch():
+    # Inside a `tag_inheritance.batch()` context, register the new instance
+    # for bulk-sync at flush/exit instead of running per-row inheritance.
+    ctx = tag_inheritance.current()
+    if ctx is not None and ctx.is_active():
+        ctx.add(instance)
         return
     inherit_instance_tags(instance)
 
@@ -83,7 +85,11 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
 @receiver(signals.post_save, sender=LocationFindingReference)
 @receiver(signals.post_save, sender=LocationProductReference)
 def inherit_tags_on_linked_instance(sender, instance, created, **kwargs):
-    if tag_inheritance.is_in_batch():
+    # Linked refs (LocationFinding/LocationProductReference) bind a Location
+    # to a Finding/Product. Register the underlying Location for bulk-sync.
+    ctx = tag_inheritance.current()
+    if ctx is not None and ctx.is_active():
+        ctx.add(instance.location)
         return
     inherit_linked_instance_tags(instance)
 
