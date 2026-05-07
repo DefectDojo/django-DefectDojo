@@ -263,6 +263,7 @@ class Permissions(IntEnum):
             Permissions.Product_API_Scan_Configuration_Delete,
         }
 
+
 def get_roles_with_permissions():
     return {
         Roles.Reader: {
