@@ -76,7 +76,6 @@ class DojoAppConfig(AppConfig):
         # Importing the signals file is good enough if using the receiver decorator
         import dojo.announcement.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.benchmark.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
-        import dojo.cred.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
 
         # TODO: Delete this after the move to Locations
         import dojo.endpoint.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady

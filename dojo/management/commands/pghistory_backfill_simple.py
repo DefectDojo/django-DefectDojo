@@ -45,7 +45,6 @@ class Command(BaseCommand):
             "Finding_Group",
             "Risk_Acceptance",
             "Finding_Template",
-            "Cred_User",
             "Notification_Webhooks",
             "FindingReviewers",  # M2M through table for Finding.reviewers
             # Tag through tables (tagulous auto-generated)
@@ -97,7 +96,6 @@ class Command(BaseCommand):
         excluded_fields_map = {
             "Dojo_User": ["password"],
             "Product": ["updated"],
-            "Cred_User": ["password"],
             "Notification_Webhooks": ["header_name", "header_value"],
         }
         return excluded_fields_map.get(model_name, [])

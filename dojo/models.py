@@ -551,11 +551,6 @@ class System_Settings(models.Model):
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_("Risk acceptance expiration heads up days"), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
-    enable_credentials = models.BooleanField(
-        default=True,
-        blank=False,
-        verbose_name=_("Enable credentials"),
-        help_text=_("With this setting turned off, credentials will be disabled in the user interface."))
     enable_questionnaires = models.BooleanField(
         default=True,
         blank=False,
@@ -4149,55 +4144,6 @@ class Tool_Product_History(models.Model):
                                              blank=True)
 
 
-class Cred_User(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    username = models.CharField(max_length=200, null=False)
-    password = models.CharField(max_length=600, null=False)
-    role = models.CharField(max_length=200, null=False)
-    authentication = models.CharField(max_length=15,
-                                      choices=(
-                                          ("Form", "Form Authentication"),
-                                          ("SSO", "SSO Redirect")),
-                                      default="Form")
-    http_authentication = models.CharField(max_length=15,
-                                           choices=(
-                                               ("Basic", "Basic"),
-                                               ("NTLM", "NTLM")),
-                                           null=True, blank=True)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.URLField(max_length=2000, null=False)
-    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.RESTRICT)
-    login_regex = models.CharField(max_length=200, null=True, blank=True)
-    logout_regex = models.CharField(max_length=200, null=True, blank=True)
-    notes = models.ManyToManyField(Notes, blank=True, editable=False)
-    is_valid = models.BooleanField(default=True, verbose_name=_("Login is valid"))
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name + " (" + self.role + ")"
-
-
-class Cred_Mapping(models.Model):
-    cred_id = models.ForeignKey(Cred_User, null=False,
-                                related_name="cred_user",
-                                verbose_name=_("Credential"), on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, null=True, blank=True,
-                                related_name="product", on_delete=models.CASCADE)
-    finding = models.ForeignKey(Finding, null=True, blank=True,
-                                related_name="finding", on_delete=models.CASCADE)
-    engagement = models.ForeignKey(Engagement, null=True, blank=True,
-                                   related_name="engagement", on_delete=models.CASCADE)
-    test = models.ForeignKey(Test, null=True, blank=True, related_name="test", on_delete=models.CASCADE)
-    is_authn_provider = models.BooleanField(default=False,
-                                            verbose_name=_("Authentication Provider"))
-    url = models.URLField(max_length=2000, null=True, blank=True)
-
-    def __str__(self):
-        return self.cred_id.name + " (" + self.cred_id.role + ")"
-
-
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False, unique=True)
     color = models.CharField(max_length=7, null=True, blank=True, verbose_name=_("HTML color"))
@@ -4634,8 +4580,6 @@ admin.site.register(Note_Type)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
-admin.site.register(Cred_User)
-admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings)
 admin.site.register(SLA_Configuration)
 admin.site.register(CWE)

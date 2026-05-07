@@ -17,8 +17,6 @@ from dojo.api_v2.views import (
     BurpRawRequestResponseViewSet,
     CeleryViewSet,
     ConfigurationPermissionViewSet,
-    CredentialsMappingViewSet,
-    CredentialsViewSet,
     DevelopmentEnvironmentViewSet,
     DojoGroupMemberViewSet,
     DojoGroupViewSet,
@@ -78,7 +76,6 @@ from dojo.asset.urls import urlpatterns as asset_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.components.urls import urlpatterns as component_urls
-from dojo.cred.urls import urlpatterns as cred_urls
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.urls import urlpatterns as eng_urls
@@ -127,8 +124,6 @@ handler400 = "dojo.views.custom_bad_request_view"
 v2_api = DefaultRouter()
 v2_api.register(r"announcements", AnnouncementViewSet, basename="announcement")
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
-v2_api.register(r"credential_mappings", CredentialsMappingViewSet, basename="cred_mapping")
-v2_api.register(r"credentials", CredentialsViewSet, basename="cred_user")
 v2_api.register(r"development_environments", DevelopmentEnvironmentViewSet, basename="development_environment")
 v2_api.register(r"dojo_groups", DojoGroupViewSet, basename="dojo_group")
 v2_api.register(r"dojo_group_members", DojoGroupMemberViewSet, basename="dojo_group_member")
@@ -218,7 +213,6 @@ ur += github_urls
 ur += tool_type_urls
 ur += tool_config_urls
 ur += tool_product_urls
-ur += cred_urls
 ur += sla_urls
 ur += system_settings_urls
 ur += notifications_urls

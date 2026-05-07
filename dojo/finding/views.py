@@ -83,7 +83,6 @@ from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
-    Cred_Mapping,
     Dojo_User,
     Endpoint,
     Endpoint_Status,
@@ -472,29 +471,6 @@ class ViewFinding(View):
             "findings_list_lastElement": findings[last_pos],
         }
 
-    def get_credential_objects(self, finding: Finding):
-        cred = (
-            Cred_Mapping.objects.filter(test=finding.test.id)
-            .select_related("cred_id")
-            .order_by("cred_id")
-        )
-        cred_engagement = (
-            Cred_Mapping.objects.filter(engagement=finding.test.engagement.id)
-            .select_related("cred_id")
-            .order_by("cred_id")
-        )
-        cred_finding = (
-            Cred_Mapping.objects.filter(finding=finding.id)
-            .select_related("cred_id")
-            .order_by("cred_id")
-        )
-
-        return {
-            "cred_finding": cred_finding,
-            "cred": cred,
-            "cred_engagement": cred_engagement,
-        }
-
     def get_request_response(self, finding: Finding):
         request_response = None
         burp_request = None
@@ -704,7 +680,6 @@ class ViewFinding(View):
         context = self.get_initial_context(request, finding, user)
         # Add in the other extras
         context |= self.get_previous_and_next_findings(finding)
-        context |= self.get_credential_objects(finding)
         # Add in more of the other extras
         context |= self.get_request_response(finding)
         context |= self.get_similar_findings(request, finding)

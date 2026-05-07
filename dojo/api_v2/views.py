@@ -49,7 +49,6 @@ from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
     get_authorized_endpoints,
@@ -59,7 +58,6 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
     ApiAppAnalysisFilter,
-    ApiCredentialsFilter,
     ApiDojoMetaFilter,
     ApiEndpointFilter,
     ApiEngagementFilter,
@@ -96,8 +94,6 @@ from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
     Check_List,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
     Dojo_Group,
     Dojo_Group_Member,
@@ -877,130 +873,6 @@ class AppAnalysisViewSet(
 
     def get_queryset(self):
         return get_authorized_app_analysis(Permissions.Product_View)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class CredentialsViewSet(
-    PrefetchDojoModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.CredentialSerializer
-    queryset = Cred_User.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Cred_User.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
-
-
-# Authorization: configuration
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class CredentialsMappingViewSet(
-    PrefetchDojoModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.CredentialMappingSerializer
-    queryset = Cred_Mapping.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiCredentialsFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasCredentialPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_cred_mappings(Permissions.Credential_View)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
 
 
 # Authorization: configuration

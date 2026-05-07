@@ -40,8 +40,6 @@ from dojo.api_v2.views import (
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
-    CredentialsMappingViewSet,
-    CredentialsViewSet,
     DevelopmentEnvironmentViewSet,
     DojoGroupMemberViewSet,
     DojoGroupViewSet,
@@ -101,8 +99,6 @@ from dojo.models import (
     BurpRawRequestResponse,
     ChoiceAnswer,
     ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
     Dojo_Group,
     Dojo_Group_Member,
@@ -4285,53 +4281,6 @@ class ConfigurationPermissionTest(BaseClass.BaseClassTest):
         self.viewname = "permission"
         self.viewset = ConfigurationPermissionViewSet
         self.test_type = TestType.STANDARD
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class CredentialMappingTest(BaseClass.BaseClassTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Cred_Mapping
-        self.endpoint_path = "credential_mappings"
-        self.viewname = "cred_mapping"
-        self.viewset = CredentialsMappingViewSet
-        self.payload = {
-            "cred_id": 1,
-            "product": 1,
-            "url": "https://google.com",
-        }
-        self.update_fields = {"url": "https://bing.com"}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product
-        self.permission_create = Permissions.Credential_Add
-        self.permission_update = Permissions.Credential_Edit
-        self.permission_delete = Permissions.Credential_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class CredentialTest(BaseClass.BaseClassTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Cred_User
-        self.endpoint_path = "credentials"
-        self.viewname = "cred_user"
-        self.viewset = CredentialsViewSet
-        self.payload = {
-            "name": "name",
-            "username": "usernmae",
-            "password": "password",
-            "role": "role",
-            "url": "https://some-url.com",
-            "environment": 1,
-        }
-        self.update_fields = {"name": "newname"}
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

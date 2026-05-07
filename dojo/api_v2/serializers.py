@@ -55,8 +55,6 @@ from dojo.models import (
     Check_List,
     ChoiceAnswer,
     ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
     Dojo_Group,
     Dojo_Group_Member,
@@ -2152,18 +2150,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
             save_endpoints_template(instance, endpoint_urls)
 
         return super().update(instance, validated_data)
-
-
-class CredentialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_User
-        exclude = ("password",)
-
-
-class CredentialMappingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_Mapping
-        fields = "__all__"
 
 
 class StubFindingSerializer(serializers.ModelSerializer):

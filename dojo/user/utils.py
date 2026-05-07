@@ -16,8 +16,6 @@ class Permission_Helper:
     def display_name(self):
         if self.name == "bannerconf":
             return "Login Banner"
-        if self.name == "cred user":
-            return "Credentials"
         if self.name == "github conf":
             return "GitHub Configurations"
         if self.name == "engagement survey":

@@ -45,7 +45,6 @@ class Command(BaseCommand):
 
         # All pghistory Event tables based on tracked models
         event_tables = [
-            "Cred_UserEvent",
             "Dojo_UserEvent",
             "EndpointEvent",
             "EngagementEvent",

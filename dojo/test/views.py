@@ -49,7 +49,6 @@ from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
-    Cred_Mapping,
     Endpoint,
     Finding,
     Finding_Group,
@@ -181,8 +180,6 @@ class ViewTest(View):
             "person": request.user.username,
             "request": request,
             "show_re_upload": any(test.test_type.name in code for code in get_choices_sorted()),
-            "creds": Cred_Mapping.objects.filter(engagement=test.engagement).select_related("cred_id").order_by("cred_id"),
-            "cred_test": Cred_Mapping.objects.filter(test=test).select_related("cred_id").order_by("cred_id"),
             "jira_project": jira_services.get_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),

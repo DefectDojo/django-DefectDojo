@@ -10,7 +10,6 @@ from dojo.authorization.roles_permissions import (
 from dojo.location.models import AbstractLocation, Location
 from dojo.models import (
     App_Analysis,
-    Cred_Mapping,
     Dojo_Group,
     Dojo_Group_Member,
     Dojo_User,
@@ -220,25 +219,6 @@ def user_has_permission(user: Dojo_User, obj: Model, permission: int) -> bool:
                 user, obj.group, permission,
             )
         return user_has_permission(user, obj.group, permission)
-    if (
-        isinstance(obj, Cred_Mapping)
-        and permission in Permissions.get_credential_permissions()
-    ):
-        if obj.product:
-            return user_has_permission(user, obj.product, permission)
-        if obj.engagement:
-            return user_has_permission(
-                user, obj.engagement.product, permission,
-            )
-        if obj.test:
-            return user_has_permission(
-                user, obj.test.engagement.product, permission,
-            )
-        if obj.finding:
-            return user_has_permission(
-                user, obj.finding.test.engagement.product, permission,
-            )
-        return None
     msg = f"No authorization implemented for class {type(obj).__name__} and permission {permission}"
     raise NoAuthorizationImplementedError(msg)
 

@@ -62,7 +62,6 @@ from dojo.models import (
     SEVERITY_CHOICES,
     App_Analysis,
     ChoiceQuestion,
-    Cred_Mapping,
     Development_Environment,
     Dojo_Group,
     Dojo_User,
@@ -3359,12 +3358,6 @@ class ApiAppAnalysisFilter(DojoFilter):
     class Meta:
         model = App_Analysis
         fields = ["product", "name", "user", "version"]
-
-
-class ApiCredentialsFilter(DojoFilter):
-    class Meta:
-        model = Cred_Mapping
-        fields = "__all__"
 
 
 class EndpointReportFilter(DojoFilter):
