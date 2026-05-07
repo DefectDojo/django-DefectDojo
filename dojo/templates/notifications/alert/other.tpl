@@ -1,1 +1,0 @@
-{% load i18n %}{{ description|safe }}

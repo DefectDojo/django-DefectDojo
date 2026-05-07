@@ -84,6 +84,8 @@ class DojoAppConfig(AppConfig):
         import dojo.file_uploads.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.finding_group.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.notes.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.notifications.admin  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.notifications.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.product.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.product_type.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.risk_acceptance.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady

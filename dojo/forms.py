@@ -1,5 +1,5 @@
+import json
 import logging
-import pickle
 import re
 import warnings
 from datetime import date, datetime
@@ -32,6 +32,14 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
+from dojo.github.ui.forms import (  # noqa: F401 -- backward compat
+    DeleteGITHUBConfForm,
+    ExpressGITHUBForm,
+    GITHUB_IssueForm,
+    GITHUB_Product_Form,
+    GITHUBFindingForm,
+    GITHUBForm,
+)
 from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.jira import services as jira_services
 from dojo.jira.forms import (  # noqa: F401 backward compat
@@ -79,14 +87,9 @@ from dojo.models import (
     Finding_Group,
     Finding_Template,
     General_Survey,
-    GITHUB_Conf,
-    GITHUB_Issue,
-    GITHUB_PKey,
     Global_Role,
     Note_Type,
     Notes,
-    Notification_Webhooks,
-    Notifications,
     Objects_Product,
     Product,
     Product_API_Scan_Configuration,
@@ -2801,42 +2804,6 @@ class DeleteStubFindingForm(forms.ModelForm):
         fields = ["id"]
 
 
-class GITHUB_IssueForm(forms.ModelForm):
-
-    class Meta:
-        model = GITHUB_Issue
-        exclude = ["product"]
-
-
-class GITHUBForm(forms.ModelForm):
-    api_key = forms.CharField(widget=forms.PasswordInput, required=True)
-
-    class Meta:
-        model = GITHUB_Conf
-        exclude = ["product"]
-
-
-class DeleteGITHUBConfForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = GITHUB_Conf
-        fields = ["id"]
-
-
-class ExpressGITHUBForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=True)
-    issue_key = forms.CharField(required=True, help_text="A valid issue ID is required to gather the necessary information.")
-
-    class Meta:
-        model = GITHUB_Conf
-        exclude = ["product", "epic_name_id", "open_status_key",
-                    "close_status_key", "info_mapping_severity",
-                    "low_mapping_severity", "medium_mapping_severity",
-                    "high_mapping_severity", "critical_mapping_severity", "finding_text"]
-
-
 class Benchmark_Product_SummaryForm(forms.ModelForm):
 
     class Meta:
@@ -3155,55 +3122,12 @@ class Benchmark_RequirementForm(forms.ModelForm):
         exclude = [""]
 
 
-class NotificationsForm(forms.ModelForm):
-
-    class Meta:
-        model = Notifications
-        exclude = ["template"]
-
-
-class NotificationsWebhookForm(forms.ModelForm):
-    class Meta:
-        model = Notification_Webhooks
-        exclude = []
-
-    def __init__(self, *args, **kwargs):
-        is_superuser = kwargs.pop("is_superuser", False)
-        super().__init__(*args, **kwargs)
-        if not is_superuser:  # Only superadmins can edit owner
-            self.fields["owner"].disabled = True  # TODO: needs to be tested
-
-
-class DeleteNotificationsWebhookForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["name"].disabled = True
-        self.fields["url"].disabled = True
-
-    class Meta:
-        model = Notification_Webhooks
-        fields = ["id", "name", "url"]
-
-
-class ProductNotificationsForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if not self.instance.id:
-            self.initial["engagement_added"] = ""
-            self.initial["close_engagement"] = ""
-            self.initial["test_added"] = ""
-            self.initial["scan_added"] = ""
-            self.initial["sla_breach"] = ""
-            self.initial["sla_breach_combined"] = ""
-            self.initial["risk_acceptance_expiration"] = ""
-
-    class Meta:
-        model = Notifications
-        fields = ["engagement_added", "close_engagement", "test_added", "scan_added", "sla_breach", "sla_breach_combined", "risk_acceptance_expiration"]
+from dojo.notifications.ui.forms import (  # noqa: E402, F401  -- backward compat
+    DeleteNotificationsWebhookForm,
+    NotificationsForm,
+    NotificationsWebhookForm,
+    ProductNotificationsForm,
+)
 
 
 class AjaxChoiceField(forms.ChoiceField):
@@ -3220,25 +3144,6 @@ class CredUserForm(forms.ModelForm):
         model = Cred_User
         exclude = [""]
         # fields = ['selenium_script']
-
-
-class GITHUB_Product_Form(forms.ModelForm):
-    git_conf = forms.ModelChoiceField(queryset=GITHUB_Conf.objects.all(), label="GITHUB Configuration", required=False)
-
-    class Meta:
-        model = GITHUB_PKey
-        exclude = ["product"]
-
-
-class GITHUBFindingForm(forms.Form):
-    def __init__(self, *args, **kwargs):
-        self.enabled = kwargs.pop("enabled")
-        super().__init__(*args, **kwargs)
-        self.fields["push_to_github"] = forms.BooleanField()
-        self.fields["push_to_github"].required = False
-        self.fields["push_to_github"].help_text = "Checking this will overwrite content of your Github issue, or create one."
-
-    push_to_github = forms.BooleanField(required=False)
 
 
 class LoginBanner(forms.Form):
@@ -3572,7 +3477,7 @@ class MultiWidgetBasic(forms.widgets.MultiWidget):
 
     def decompress(self, value):
         if value:
-            return pickle.loads(value)
+            return json.loads(value)
         return [None, None, None, None, None, None]
 
     def format_output(self, rendered_widgets):
@@ -3592,7 +3497,7 @@ class MultiExampleField(forms.fields.MultiValueField):
         super().__init__(list_fields, *args, **kwargs)
 
     def compress(self, values):
-        return pickle.dumps(values)
+        return json.dumps(values)
 
 
 class CreateChoiceQuestionForm(forms.Form):

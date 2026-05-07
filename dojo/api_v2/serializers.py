@@ -21,12 +21,13 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
-from rest_framework.fields import DictField, MultipleChoiceField
+from rest_framework.fields import DictField
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
     save_endpoints_template,
@@ -42,9 +43,7 @@ from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.jira import services as jira_services
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
-    DEFAULT_NOTIFICATION,
     IMPORT_ACTIONS,
-    NOTIFICATION_CHOICES,
     SEVERITIES,
     SEVERITY_CHOICES,
     STATS_FIELDS,
@@ -81,8 +80,6 @@ from dojo.models import (
     Note_Type,
     NoteHistory,
     Notes,
-    Notification_Webhooks,
-    Notifications,
     Product,
     Product_API_Scan_Configuration,
     Product_Group,
@@ -113,7 +110,7 @@ from dojo.models import (
     Vulnerability_Id,
     get_current_date,
 )
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import async_create_notification
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -2015,10 +2012,11 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             jira_services.push(new_finding)
 
         # Create a notification
-        create_notification(
+        dojo_dispatch_task(
+            async_create_notification,
             event="finding_added",
             title=_("Addition of %s") % new_finding.title,
-            finding=new_finding,
+            finding_id=new_finding.id,
             description=_('Finding "%s" was added by %s') % (new_finding.title, new_finding.reporter),
             url=reverse("view_finding", args=(new_finding.id,)),
             icon="exclamation-triangle",
@@ -3067,110 +3065,7 @@ class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
 
 
-class NotificationsSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(),
-        required=False,
-        default=None,
-        allow_null=True,
-    )
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=Dojo_User.objects.all(),
-        required=False,
-        default=None,
-        allow_null=True,
-    )
-    product_type_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    product_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    engagement_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    test_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    scan_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    jira_update = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    upcoming_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    stale_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    auto_close_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    close_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    user_mentioned = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    code_review = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    review_requested = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    other = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    sla_breach = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    sla_breach_combined = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    risk_acceptance_expiration = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    template = serializers.BooleanField(default=False)
-
-    class Meta:
-        model = Notifications
-        fields = "__all__"
-
-    def validate(self, data):
-        user = None
-        product = None
-        template = False
-
-        if self.instance is not None:
-            user = self.instance.user
-            product = self.instance.product
-
-        if "user" in data:
-            user = data.get("user")
-        if "product" in data:
-            product = data.get("product")
-        if "template" in data:
-            template = data.get("template")
-
-        if (
-            template
-            and Notifications.objects.filter(template=True).count() > 0
-        ):
-            msg = "Notification template already exists"
-            raise ValidationError(msg)
-        if (
-            self.instance is None
-            or user != self.instance.user
-            or product != self.instance.product
-        ):
-            notifications = Notifications.objects.filter(
-                user=user, product=product, template=template,
-            ).count()
-            if notifications > 0:
-                msg = "Notification for user and product already exists"
-                raise ValidationError(msg)
-        return data
+from dojo.notifications.api.serializer import NotificationsSerializer  # noqa: E402, F401  -- backward compat
 
 
 class EngagementPresetsSerializer(serializers.ModelSerializer):
@@ -3347,7 +3242,4 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             raise
 
 
-class NotificationWebhooksSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Notification_Webhooks
-        fields = "__all__"
+from dojo.notifications.api.serializer import NotificationWebhooksSerializer  # noqa: E402, F401  -- backward compat

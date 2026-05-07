@@ -88,7 +88,7 @@ def dojo_async_task(func=None, *, signature=False):
             from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
             user = get_current_user()
-            kwargs["async_user"] = user
+            kwargs["async_user_id"] = user.id if user else None
 
             # Capture pghistory context to pass to Celery worker
             # The PgHistoryTask base class will apply this context in the worker

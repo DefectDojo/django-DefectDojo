@@ -12,6 +12,48 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## Apr 2026: v2.57
 
+### Apr 27, 2026: v2.57.3
+
+* **(Pro UI)** Asset menu now shows the Permissions tab for users with an inherited Organization role.
+* **(Pro UI)** Added an Environment column to the Test list and Findings list.
+* **(Pro UI)** Asset hierarchy refreshes immediately after editing an asset, so changes are reflected without a manual reload.
+* **(Pro UI)** Standardized the "Test Type" label and split Test and Test Type into separate columns on the test list.
+* **(Pro UI)** Corrected the Product column label on the Group page under the V3 relabeling.
+* **(Pro UI)** Removed the duplicate greeting message shown after login.
+* **(Performance)** Create-path notifications are now dispatched asynchronously, removing a source of slow POST latency.
+* **(Deployment)** On premise deployments now include the Orchestrator services.
+* **(Notifications)** Improved the format and display of SLA breach notifications.
+* **(Engineer Metrics)** Fixed a KeyError that could be raised when loading the Engineer Metrics page.
+* **(Tools)** Contrast parser no longer collapses distinct findings that share a rule name.
+* **(Tools)** Dependency Track parser no longer drops vulnerability IDs when `aliases` is empty.
+* **(Tools)** Added WatchGuard security advisories as a supported Vulnerability ID source.
+
+### Apr 20, 2026: v2.57.2
+
+* **(Pro UI)** Search and filter state is now preserved when closing a Finding from a Finding list, so you don't lose your place after editing.
+* **(Risk Acceptance)** Bulk Edit no longer leaves Simple Risk Acceptance findings in an inconsistent "Active + Risk Accepted" state. Reactivating a previously risk-accepted Finding now behaves correctly.
+* **(Risk SLA)** Creating a Risk SLA no longer silently coerces unchecked `enforce_*_risk` options to `True`.
+* **(Surveys)** Fixed survey access for both authenticated users and anonymous links.
+* **(Universal Parser)** Non-ASCII scan names no longer cause a `UnicodeEncodeError` on import. CSV files with `""`-escaped quotes in multiline fields now parse correctly.
+* **(API)** Import/Reimport now validates consistency between ID-based and name-based identifiers, catching mismatched payloads earlier.
+* **(Permissions)** Moving an Engagement between Products now requires appropriate permission on both the source and target Product.
+* **(Reports)** Fixed a CSS overflow issue in rendered reports. Cleaned up endpoint template rendering for user fields.
+* **(Tools)** `govulncheck` parser now records `fix_available` and `fix_version`. Risk Recon parser now validates URLs via a shared SSRF utility. Added Mozilla Foundation security advisories as a supported Vulnerability ID source.
+
+### Apr 13, 2026: v2.57.1
+
+* **(Pro UI)** Object-level history views no longer default to a 31-day date filter, so the full history is visible on load.
+* **(Pro UI)** Audit Log "changes" filter now searches only the names of changed fields, reducing false matches.
+* **(Pro UI)** Predefined Finding filters now sync UI state correctly, so the active filter indicator reflects the applied filter.
+* **(Deduplication)** Added a UI for global component deduplication settings, behind a feature flag.
+* **(Rules Engine)** Fixed a preview timeout that occurred when rules were previewed against large Finding sets.
+* **(Universal Parser)** CSV/XML query path now displays correctly in the Universal Parser UI.
+* **(Import)** Additional parameters are now stored in import settings, making them available for reuse on reimport.
+* **(Tools)** Wazuh 4.8 parser now correctly attaches endpoints and locations to findings.
+* **(Tools)** Invicti parser now uses `FirstSeenDate` when populating Finding dates when `DD_USE_FIRST_SEEN` is enabled.
+* **(Tools)** `govulncheck` parser fixed for NDJSON output.
+* **(Tools)** Added CNNVD as a supported Vulnerability ID source.
+
 ### Apr 7, 2026: v2.57.0
 
 * **(Custom Enrichment)** On-prem administrators can now configure custom URLs for EPSS and KEV enrichment data sources under **Settings → Finding Enrichment Settings**. Each source (EPSS scores and CISA Known Exploited Vulnerabilities) can be independently enabled and pointed to an internal mirror or proxy. A **Test Configuration** button validates connectivity before saving. Findings with CVE IDs are automatically enriched with EPSS score/percentile and KEV status during enrichment runs.

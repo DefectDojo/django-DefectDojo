@@ -81,7 +81,7 @@ jobs:
           yq -i '.annotations."artifacthub.io/changes" = ""' helm/defectdojo/Chart.yaml
 
       - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@2ccf3e77eb70dc80d62f8cc26f15d0a96b75fef4 # v1.8.0
+        uses: losisin/helm-docs-github-action@3a4528e97c49a5e83de6b78c50c61c8ee5c9f944 # v2
         with:
           chart-search-root: "helm/defectdojo"
 
@@ -99,13 +99,19 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.pulls.create({
+            const pr = await github.rest.pulls.create({
               owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge back ${{ inputs.release_number_new }} into dev from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'dev'
+            })
+            await github.rest.issues.addLabels({
+              owner: '${{ env.GITHUB_ORG }}',
+              repo: 'django-DefectDojo',
+              issue_number: pr.data.number,
+              labels: ['release-management']
             })
 
   create_pr_for_merge_back_into_bugfix:
@@ -157,7 +163,7 @@ jobs:
           yq -i '.annotations."artifacthub.io/changes" = ""' helm/defectdojo/Chart.yaml
 
       - name: Run helm-docs
-        uses: losisin/helm-docs-github-action@2ccf3e77eb70dc80d62f8cc26f15d0a96b75fef4 # v1.8.0
+        uses: losisin/helm-docs-github-action@3a4528e97c49a5e83de6b78c50c61c8ee5c9f944 # v2
         with:
           chart-search-root: "helm/defectdojo"
 
@@ -175,11 +181,17 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.rest.pulls.create({
+            const pr = await github.rest.pulls.create({
               owner: '${{ env.GITHUB_ORG }}',
               repo: 'django-DefectDojo',
               title: 'Release: Merge back ${{ inputs.release_number_new }} into bugfix from: ${{ env.NEW_BRANCH }}',
               body: `Release triggered by \`${ process.env.GITHUB_ACTOR }\``,
               head: '${{ env.NEW_BRANCH }}',
               base: 'bugfix'
+            })
+            await github.rest.issues.addLabels({
+              owner: '${{ env.GITHUB_ORG }}',
+              repo: 'django-DefectDojo',
+              issue_number: pr.data.number,
+              labels: ['release-management']
             })

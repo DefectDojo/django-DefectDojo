@@ -667,6 +667,33 @@ def prepare_duplicates_for_delete(obj):
             # so original_finding.all() now only contains outside-scope duplicates.
             reconfigure_duplicate_cluster(original, original.original_finding.all())
 
+    # When DUPLICATE_CLUSTER_CASCADE_DELETE=True, reconfigure_duplicate_cluster is a no-op.
+    # Match legacy finding_delete(): delete outside-scope cluster members that point at
+    # in-scope originals (duplicate_cluster.order_by("-id").delete()). Transitive duplicate
+    # chains do not need a separate expansion pass — fix_loop_duplicates above normalizes them.
+    if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
+        outside_cascade_qs = Finding.objects.filter(
+            duplicate_finding_id__in=scope_ids_subquery,
+        ).exclude(id__in=scope_ids_subquery)
+        outside_count = outside_cascade_qs.count()
+        if outside_count:
+            logger.debug(
+                "cascade-delete %d outside-scope duplicate findings (DUPLICATE_CLUSTER_CASCADE_DELETE)",
+                outside_count,
+            )
+            bulk_delete_findings(outside_cascade_qs, order_desc=True)
+    else:
+        outside_orphan_count = Finding.objects.filter(
+            duplicate_finding_id__in=scope_ids_subquery,
+        ).exclude(
+            id__in=scope_ids_subquery,
+        ).update(duplicate_finding=None, duplicate=False)
+        if outside_orphan_count:
+            logger.debug(
+                "nulled %d outside-scope duplicate_finding references to prevent FK violation",
+                outside_orphan_count,
+            )
+
 
 @receiver(pre_delete, sender=Test)
 def test_pre_delete(sender, instance, **kwargs):
@@ -763,7 +790,7 @@ def bulk_clear_finding_m2m(finding_qs):
         Notes.objects.filter(id__in=note_ids).delete()
 
 
-def bulk_delete_findings(finding_qs, chunk_size=1000):
+def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=False):
     """
     Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
 
@@ -771,6 +798,10 @@ def bulk_delete_findings(finding_qs, chunk_size=1000):
     discovered by _meta.related_objects), then uses cascade_delete for
     all FK relations via raw SQL.
     Chunked with per-chunk transaction.atomic() for crash safety.
+
+    When order_desc is True, findings are processed highest id first (matches
+    finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
+    duplicate chains delete children before parents.
     """
     from dojo.signals import pre_bulk_delete_findings  # noqa: PLC0415 circular import
     from dojo.utils_cascade_delete import (  # noqa: PLC0415 circular import
@@ -780,9 +811,10 @@ def bulk_delete_findings(finding_qs, chunk_size=1000):
 
     pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
     bulk_clear_finding_m2m(finding_qs)
+    ordered_qs = finding_qs.order_by("-id") if order_desc else finding_qs.order_by("id")
     for chunk_num, chunk_ids in enumerate(
         batched(
-            finding_qs.values_list("id", flat=True).order_by("id").iterator(chunk_size=chunk_size),
+            ordered_qs.values_list("id", flat=True).iterator(chunk_size=chunk_size),
             chunk_size,
             strict=False,
         ),
@@ -796,6 +828,26 @@ def bulk_delete_findings(finding_qs, chunk_size=1000):
             "bulk_delete_findings: deleted chunk %d (%d findings)",
             chunk_num, len(chunk_ids),
         )
+
+
+def bulk_delete_findings(finding_qs, chunk_size=1000, cascade_root=None, *, order_desc=False):
+    """
+    Entry point; may delegate to Pro via settings.BULK_DELETE_FINDINGS_METHOD.
+
+    cascade_root: optional dict describing the top-level object whose cascade triggered
+    this bulk delete (e.g. {"model": "dojo.engagement", "pk": 9}). Ignored by OSS
+    when no custom method is configured.
+    """
+    from dojo.utils import get_custom_method  # noqa: PLC0415 circular import
+
+    if fn := get_custom_method("BULK_DELETE_FINDINGS_METHOD"):
+        return fn(
+            finding_qs,
+            chunk_size=chunk_size,
+            cascade_root=cascade_root,
+            order_desc=order_desc,
+        )
+    return _bulk_delete_findings_internal(finding_qs, chunk_size=chunk_size, order_desc=order_desc)
 
 
 def fix_loop_duplicates(scope_qs=None):
