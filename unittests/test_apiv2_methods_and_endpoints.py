@@ -47,9 +47,7 @@ class ApiEndpointMethods(DojoTestCase):
         exempt_list = {
             "import-scan", "reimport-scan", "notes", "system_settings", "celery", "roles",
             "import-languages", "endpoint_meta_import", "test_types",
-            "configuration_permissions", "questionnaire_questions",
-            "questionnaire_answers", "questionnaire_answered_questionnaires",
-            "questionnaire_engagement_questionnaires", "questionnaire_general_questionnaires",
+            "configuration_permissions",
             # pghistory Event models (should not be exposed via API)
             "dojo_userevents", "endpointevents", "engagementevents", "findingevents",
             "finding_groupevents", "product_typeevents", "productevents", "testevents",

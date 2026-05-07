@@ -67,11 +67,6 @@ from dojo.api_v2.views import (
     ProductTypeMemberViewSet,
     ProductTypeViewSet,
     ProductViewSet,
-    QuestionnaireAnsweredSurveyViewSet,
-    QuestionnaireAnswerViewSet,
-    QuestionnaireEngagementSurveyViewSet,
-    QuestionnaireGeneralSurveyViewSet,
-    QuestionnaireQuestionViewSet,
     RiskAcceptanceViewSet,
     RoleViewSet,
     SonarqubeIssueViewSet,
@@ -96,11 +91,8 @@ from dojo.location.api.views import LocationFindingReferenceViewSet, LocationPro
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import (
     Announcement,
-    Answered_Survey,
     App_Analysis,
     BurpRawRequestResponse,
-    ChoiceAnswer,
-    ChoiceQuestion,
     Cred_Mapping,
     Cred_User,
     Development_Environment,
@@ -110,11 +102,9 @@ from dojo.models import (
     Endpoint,
     Endpoint_Status,
     Engagement,
-    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Template,
-    General_Survey,
     Global_Role,
     JIRA_Instance,
     JIRA_Issue,
@@ -139,8 +129,6 @@ from dojo.models import (
     Stub_Finding,
     Test,
     Test_Type,
-    TextAnswer,
-    TextQuestion,
     Tool_Configuration,
     Tool_Product_Settings,
     Tool_Type,
@@ -4332,102 +4320,6 @@ class CredentialTest(BaseClass.BaseClassTest):
         self.update_fields = {"name": "newname"}
         self.test_type = TestType.STANDARD
         self.deleted_objects = 2
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-class TextQuestionTest(BaseClass.BaseClassTest):
-    fixtures = ["questionnaire_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = TextQuestion
-        self.endpoint_path = "questionnaire_questions"
-        self.viewname = "question"
-        self.viewset = QuestionnaireQuestionViewSet
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 5
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-class ChoiceQuestionTest(BaseClass.BaseClassTest):
-    fixtures = ["questionnaire_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = ChoiceQuestion
-        self.endpoint_path = "questionnaire_questions"
-        self.viewname = "question"
-        self.viewset = QuestionnaireQuestionViewSet
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 5
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-class TextAnswerTest(BaseClass.BaseClassTest):
-    fixtures = ["questionnaire_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = TextAnswer
-        self.endpoint_path = "questionnaire_answers"
-        self.viewname = "answer"
-        self.viewset = QuestionnaireAnswerViewSet
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 5
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-class ChoiceAnswerTest(BaseClass.BaseClassTest):
-    fixtures = ["questionnaire_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = ChoiceAnswer
-        self.endpoint_path = "questionnaire_answers"
-        self.viewname = "answer"
-        self.viewset = QuestionnaireAnswerViewSet
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 5
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-class GeneralSurveyTest(BaseClass.BaseClassTest):
-    fixtures = ["questionnaire_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = General_Survey
-        self.endpoint_path = "questionnaire_general_questionnaires"
-        self.viewname = "general_survey"
-        self.viewset = QuestionnaireGeneralSurveyViewSet
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 5
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-class EngagementSurveyTest(BaseClass.BaseClassTest):
-    fixtures = ["questionnaire_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Engagement_Survey
-        self.endpoint_path = "questionnaire_engagement_questionnaires"
-        self.viewname = "engagement_survey"
-        self.viewset = QuestionnaireEngagementSurveyViewSet
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 5
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-    def test_link_engagement_questionnaire(self):
-        end_url = self.url + "4/link_engagement/2/"
-        result = self.client.post(end_url)
-        self.assertEqual(result.status_code, status.HTTP_200_OK, f"Failed to link enagement survey to engagement: {result.content} on {end_url}")
-
-
-class AnsweredSurveyTest(BaseClass.BaseClassTest):
-    fixtures = ["questionnaire_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Answered_Survey
-        self.endpoint_path = "questionnaire_answered_questionnaires"
-        self.viewname = "answered_survey"
-        self.viewset = QuestionnaireAnsweredSurveyViewSet
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 5
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
