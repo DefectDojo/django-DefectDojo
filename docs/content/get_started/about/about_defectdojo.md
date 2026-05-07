@@ -86,7 +86,7 @@ DefectDojo Inc. hosts a Pro edition of this software for commercial purposes.  A
 * **[CLI Tools](/import_data/pro/specialized_import/external_tools/)** for rapid integration with your systems
 * **[Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab
 * **[Improved Metrics](/metrics_reports/pro_metrics/pro__overview/)** for executive reporting and high-level analysis
-* **[Priority And Risk](/asset_modelling/hierarchy/pro__priority_sla/)** to identify the Findings of highest urgency, system-wide
+* **[Priority And Risk](/asset_modelling/pro_hierarchy/priority_sla/)** to identify the Findings of highest urgency, system-wide
 * **Premium Support** and implementation guidance for your organization
 
 The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises.

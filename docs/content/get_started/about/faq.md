@@ -34,7 +34,7 @@ DefectDojo is designed to support and standardize your current security workflow
 DefectDojo Pro expands on the above workflows further, adding:
 
 - An [improved UI](/get_started/about/ui_pro_vs_os/) designed for speed and efficiency when navigating through enterprise-level data volumes. It also includes a dark mode.
-- The ability to [pre-triage your Findings](/asset_modelling/hierarchy/pro__priority_sla/) by Priority and Risk, allowing your team to identify and fix your most critical issues first.
+- The ability to [pre-triage your Findings](/asset_modelling/pro_hierarchy/priority_sla/) by Priority and Risk, allowing your team to identify and fix your most critical issues first.
 - A [Rules Engine](/automation/rules_engine/about) to script automated bulk actions and build custom workflows to handle Findings and other objects, no programming experience required.
 - [Enhanced report and metrics generation capabilities](/get_started/about/ui_pro_vs_os/#new-dashboards) to easily share the security posture of your apps and repos.
 - [Advanced deduplication settings](/triage_findings/finding_deduplication/pro__deduplication_tuning/) to fine-tune how DefectDojo identifies and manages duplicate findings.
@@ -54,7 +54,7 @@ Role and permission assignment generally happens at the Product Type / Product l
 
 Whether you’re a one-person security team for a small organization or a CISO overseeing a swath of software projects,you can easily organize [Role-Based Access Control (RBAC)](/admin/user_management/about_perms_and_roles/) in order to properly establish context for each team member and control access to certain parts of Infrastructure.
 
-Generally, role and permission assignment happens at the [Product Type/Product level](/asset_modelling/hierarchy/product_hierarchy/). Each team member can be given a role pertaining to one or more Products or Product Types that governs how they can interact with the vulnerability data within (e.g., read only, read-write, or full control). 
+Generally, role and permission assignment happens at the [Product Type/Product level](/asset_modelling/os_hierarchy/product_hierarchy/). Each team member can be given a role pertaining to one or more Products or Product Types that governs how they can interact with the vulnerability data within (e.g., read only, read-write, or full control). 
 
 ## Import Workflows
 

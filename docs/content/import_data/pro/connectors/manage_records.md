@@ -58,7 +58,7 @@ Once a Record is Mapped, DefectDojo will be ready to import your tool’s scans 
 
 This makes it possible to send scan data from multiple Connectors to the same Product. All of the data will be stored in the same Engagement, but each Connector will store data in a separate Test.
 
-To learn more about Products, Engagements and Tests, see our [Product Hierarchy Overview](/asset_modelling/hierarchy/product_hierarchy/).
+To learn more about Products, Engagements and Tests, see our [Product Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/).
 
 ## Record States - Glossary
 
