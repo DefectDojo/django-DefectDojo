@@ -210,6 +210,22 @@ h1, h2, h3, h4, h5, h6,
   display: none;
 }
 
+// Pro badge — appears next to sidebar items with audience: pro
+.pro-badge {
+  display: inline-block;
+  margin-left: 0.5em;
+  padding: 0.05em 0.45em;
+  border: 1px solid #F2561D;
+  border-radius: 0.25rem;
+  background-color: rgba(#F2561D, 0.72);
+  color: #fff;
+  font-size: 0.7em;
+  font-weight: 500;
+  line-height: 1.4;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
 // ============================================================
 // Cards
 // ============================================================
@@ -415,6 +431,12 @@ h1, h2, h3, h4, h5, h6,
   }
 
   #version-select[data-version="pro"] {
+    background-color: rgba(#F2561D, 0.85);
+    border-color: #F2762E;
+  }
+
+  // Pro badge in dark mode
+  .pro-badge {
     background-color: rgba(#F2561D, 0.85);
     border-color: #F2762E;
   }

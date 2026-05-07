@@ -31,6 +31,14 @@
       {{- $linkContent = . }}
     {{- end }}
 
+    {{- /* Pro badge for nodes whose page is marked audience: pro */ -}}
+    {{- $proBadge := "" -}}
+    {{- with $node.Page }}
+      {{- if eq .Params.audience "pro" }}
+        {{- $proBadge = `<span class="pro-badge" aria-label="Pro feature">Pro</span>` -}}
+      {{- end }}
+    {{- end }}
+
     {{- $ariaCurrent := "" -}}
     {{- $liClass := "" -}}
 
@@ -47,7 +55,7 @@
     <li {{- with $liClass }} class="{{ . }}" {{ end -}}>
       {{- with $node.Page.Pages }}
         <details{{- with $ariaCurrent }} open{{- end }}{{- if ne $node.Page.Params.sidebar.collapsed true }} open{{- end }}>
-          <summary>{{ $linkContent }}</summary>
+          <summary>{{ $linkContent }}{{ $proBadge | safeHTML }}</summary>
           <ul class="list-unstyled list-nested">
             {{- range . }}
               {{- template "walk" (dict "node" . "currentPage" $currentPage "version" $version) }}
@@ -56,7 +64,7 @@
         </details>
       {{- else }}
         {{- if $node.Page }}
-          <a {{- with $ariaCurrent }} aria-current="{{ . }}" {{- end }} href="{{- $node.Page.RelPermalink }}">{{ $linkContent }}</a>
+          <a {{- with $ariaCurrent }} aria-current="{{ . }}" {{- end }} href="{{- $node.Page.RelPermalink }}">{{ $linkContent }}{{ $proBadge | safeHTML }}</a>
         {{- else }}
           {{- /* Menu-only item with no page */ -}}
           {{ $linkContent }}
