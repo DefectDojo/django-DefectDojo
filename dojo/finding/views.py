@@ -2,7 +2,6 @@
 import base64
 import contextlib
 import copy
-import json
 import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
@@ -21,7 +20,7 @@ from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils import formats, timezone
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.views import View
