@@ -30,13 +30,8 @@ lxml==6.1.0
 Markdown==3.10.2
 openpyxl==3.1.5
 Pillow==12.2.0  # required by django-imagekit
-<<<<<<< dependabot/pip/dev/cryptography-48.0.0
-psycopg[c]==3.3.3
-cryptography==48.0.0
-=======
 psycopg[c]==3.3.4
-cryptography==46.0.7
->>>>>>> dev
+cryptography==48.0.0
 python-dateutil==2.9.0.post0
 redis==7.4.0
 requests==2.33.1
