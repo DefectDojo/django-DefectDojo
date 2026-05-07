@@ -75,7 +75,6 @@ from dojo.api_v2.views import (
     RiskAcceptanceViewSet,
     RoleViewSet,
     SonarqubeIssueViewSet,
-    StubFindingsViewSet,
     TestsViewSet,
     TestTypesViewSet,
     ToolConfigurationsViewSet,
@@ -136,7 +135,6 @@ from dojo.models import (
     Role,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     Test,
     Test_Type,
     TextAnswer,
@@ -2515,38 +2513,6 @@ class AssetTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Product_Delete
         self.deleted_objects = 25
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class StubFindingsTest(BaseClass.BaseClassTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Stub_Finding
-        self.endpoint_path = "stub_findings"
-        self.viewname = "stub_finding"
-        self.viewset = StubFindingsViewSet
-        self.payload = {
-            "title": "Stub Finding 1",
-            "date": "2017-12-31",
-            "severity": "High",
-            "description": "test stub finding",
-            "reporter": 3,
-            "test": 3,
-        }
-        self.update_fields = {"severity": "Low"}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Stub_Finding
-        self.permission_create = Permissions.Finding_Add
-        self.permission_update = Permissions.Finding_Edit
-        self.permission_delete = Permissions.Finding_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-    def test_severity_validation(self):
-        result = self.client.patch(self.url + "2/", data={"severity": "Not a valid choice"})
-        self.assertEqual(result.status_code, status.HTTP_400_BAD_REQUEST, "Severity just got set to something invalid")
-        self.assertEqual(result.json()["severity"], ["Severity must be one of the following: ['Info', 'Low', 'Medium', 'High', 'Critical']"])
 
 
 @versioned_fixtures

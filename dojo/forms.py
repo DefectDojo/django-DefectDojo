@@ -102,7 +102,6 @@ from dojo.models import (
     Regulation,
     Risk_Acceptance,
     SLA_Configuration,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Type,
@@ -1687,28 +1686,6 @@ class FindingForm(forms.ModelForm):
                    "endpoints", "endpoint_status")
 
 
-class StubFindingForm(forms.ModelForm):
-    title = forms.CharField(required=True, max_length=1000)
-
-    class Meta:
-        model = Stub_Finding
-        order = ("title",)
-        exclude = (
-            "date", "description", "severity", "reporter", "test", "is_mitigated")
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if "title" in cleaned_data:
-            if len(cleaned_data["title"]) <= 0:
-                msg = "The title is required."
-                raise forms.ValidationError(msg)
-        else:
-            msg = "The title is required."
-            raise forms.ValidationError(msg)
-
-        return cleaned_data
-
-
 class ApplyFindingTemplateForm(forms.Form):
 
     title = forms.CharField(max_length=1000, required=True)
@@ -2793,15 +2770,6 @@ class FindingFormID(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ("id",)
-
-
-class DeleteStubFindingForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Stub_Finding
-        fields = ["id"]
 
 
 class Benchmark_Product_SummaryForm(forms.ModelForm):

@@ -38,7 +38,6 @@ from dojo.authorization.authorization_decorators import (
 )
 from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.decorators import deprecated_view
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -64,7 +63,6 @@ from dojo.forms import (
     DefectFindingForm,
     DeleteFindingForm,
     DeleteFindingTemplateForm,
-    DeleteStubFindingForm,
     EditPlannedRemediationDateFindingForm,
     FindingBulkUpdateForm,
     FindingForm,
@@ -73,9 +71,7 @@ from dojo.forms import (
     JIRAFindingForm,
     MergeFindings,
     NoteForm,
-    PromoteFindingForm,
     ReviewFindingForm,
-    StubFindingForm,
     TypedNoteForm,
 )
 from dojo.jira import services as jira_services
@@ -98,7 +94,6 @@ from dojo.models import (
     NoteHistory,
     Notes,
     Product,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
@@ -2023,230 +2018,6 @@ def apply_template_to_finding(request, fid, tid):
 
         return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
-
-
-@user_is_authorized(Test, Permissions.Finding_Add, "tid")
-def add_stub_finding(request, tid):
-    test = get_object_or_404(Test, id=tid)
-    if request.method == "POST":
-        form = StubFindingForm(request.POST)
-        if form.is_valid():
-            stub_finding = form.save(commit=False)
-            stub_finding.test = test
-            stub_finding.reporter = request.user
-            stub_finding.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Stub Finding created successfully.",
-                extra_tags="alert-success",
-            )
-            if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                data = {
-                    "message": "Stub Finding created successfully.",
-                    "id": stub_finding.id,
-                    "severity": "None",
-                    "date": formats.date_format(stub_finding.date, "DATE_FORMAT"),
-                }
-                return HttpResponse(json.dumps(data))
-        else:
-            if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                data = {
-                    "message": "Stub Finding form has error, please revise and try again.",
-                }
-                return HttpResponse(json.dumps(data))
-
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Stub Finding form has error, please revise and try again.",
-                extra_tags="alert-danger",
-            )
-    add_breadcrumb(title="Add Stub Finding", top_level=False, request=request)
-    return HttpResponseRedirect(reverse("view_test", args=(tid,)))
-
-
-@user_is_authorized(Stub_Finding, Permissions.Finding_Delete, "fid")
-@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
-def delete_stub_finding(request, fid):
-    finding = get_object_or_404(Stub_Finding, id=fid)
-
-    if request.method == "POST":
-        form = DeleteStubFindingForm(request.POST, instance=finding)
-        if form.is_valid():
-            tid = finding.test.id
-            finding.delete()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Potential Finding deleted successfully.",
-                extra_tags="alert-success",
-            )
-            return HttpResponseRedirect(reverse("view_test", args=(tid,)))
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Unable to delete potential finding, please try again.",
-            extra_tags="alert-danger",
-        )
-        return None
-    raise PermissionDenied
-
-
-@user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
-@deprecated_view("Stub Findings", removal_version="2.59.0", removal_date="June 1, 2026")
-def promote_to_finding(request, fid):
-    finding = get_object_or_404(Stub_Finding, id=fid)
-    test = finding.test
-    form_error = False
-    push_all_jira_issues = jira_services.is_push_all_issues(finding)
-    jform = None
-    use_jira = jira_services.get_project(finding) is not None
-    product_tab = Product_Tab(
-        finding.test.engagement.product, title="Promote Finding", tab="findings",
-    )
-
-    if request.method == "POST":
-        form = PromoteFindingForm(request.POST, product=test.engagement.product)
-        if use_jira:
-            jform = JIRAFindingForm(
-                request.POST,
-                instance=finding,
-                prefix="jiraform",
-                push_all=push_all_jira_issues,
-                jira_project=jira_services.get_project(finding),
-            )
-
-        if form.is_valid() and (jform is None or jform.is_valid()):
-            if jform:
-                logger.debug(
-                    "jform.jira_issue: %s", jform.cleaned_data.get("jira_issue"),
-                )
-                logger.debug(
-                    JFORM_PUSH_TO_JIRA_MESSAGE, jform.cleaned_data.get("push_to_jira"),
-                )
-
-            new_finding = form.save(commit=False)
-            new_finding.test = test
-            new_finding.reporter = request.user
-            new_finding.numerical_severity = Finding.get_numerical_severity(
-                new_finding.severity,
-            )
-
-            new_finding.active = True
-            new_finding.false_p = False
-            new_finding.duplicate = False
-            new_finding.mitigated = None
-            new_finding.verified = True
-            new_finding.out_of_scope = False
-
-            new_finding.save()
-
-            finding_helper.add_locations(new_finding, form)
-
-            push_to_jira = False
-            if jform and jform.is_valid():
-                # Push to Jira?
-                logger.debug("jira form valid")
-                push_to_jira = push_all_jira_issues or jform.cleaned_data.get(
-                    "push_to_jira",
-                )
-
-                # if the jira issue key was changed, update database
-                new_jira_issue_key = jform.cleaned_data.get("jira_issue")
-                if new_finding.has_jira_issue:
-                    # vaiable "jira_issue" no used
-                    # jira_issue = new_finding.jira_issue
-                    """
-                    everything in DD around JIRA integration is based on the internal id of
-                    the issue in JIRA instead of on the public jira issue key.
-                    I have no idea why, but it means we have to retrieve
-                    the issue from JIRA to get the internal JIRA id. we can assume the issue exist,
-                    which is already checked in the validation of the jform
-                    """
-
-                    if not new_jira_issue_key:
-                        jira_services.unlink_finding(request, new_finding)
-
-                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_services.unlink_finding(request, new_finding)
-                        jira_services.link_finding(
-                            request, new_finding, new_jira_issue_key,
-                        )
-                else:
-                    logger.debug("finding has no jira issue yet")
-                    if new_jira_issue_key:
-                        logger.debug(
-                            "finding has no jira issue yet, but jira issue specified in request. trying to link.")
-                        jira_services.link_finding(
-                            request, new_finding, new_jira_issue_key,
-                        )
-
-            finding_helper.save_vulnerability_ids(
-                new_finding, form.cleaned_data["vulnerability_ids"].split(),
-            )
-
-            new_finding.save(push_to_jira=push_to_jira)
-
-            finding.delete()
-            if "githubform" in request.POST:
-                gform = GITHUBFindingForm(
-                    request.POST,
-                    prefix="githubform",
-                    enabled=GITHUB_PKey.objects.get(
-                        product=test.engagement.product,
-                    ).push_all_issues,
-                )
-                if gform.is_valid():
-                    add_external_issue(new_finding.id, "github")
-
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Finding promoted successfully.",
-                extra_tags="alert-success",
-            )
-
-            return HttpResponseRedirect(reverse("view_test", args=(test.id,)))
-        form_error = True
-        add_error_message_to_response(
-            "The form has errors, please correct them below.",
-        )
-        add_field_errors_to_response(jform)
-        add_field_errors_to_response(form)
-    else:
-        form = PromoteFindingForm(
-            initial={
-                "title": finding.title,
-                "product_tab": product_tab,
-                "date": finding.date,
-                "severity": finding.severity,
-                "description": finding.description,
-                "test": finding.test,
-                "reporter": finding.reporter,
-            },
-            product=test.engagement.product,
-        )
-
-        if use_jira:
-            jform = JIRAFindingForm(
-                prefix="jiraform",
-                push_all=jira_services.is_push_all_issues(test),
-                jira_project=jira_services.get_project(test),
-            )
-
-    return render(
-        request,
-        "dojo/promote_to_finding.html",
-        {
-            "form": form,
-            "product_tab": product_tab,
-            "test": test,
-            "stub_finding": finding,
-            "form_error": form_error,
-            "jform": jform,
-        },
-    )
 
 
 @user_has_global_permission(Permissions.Finding_Edit)

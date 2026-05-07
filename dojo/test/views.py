@@ -56,7 +56,6 @@ from dojo.models import (
     Finding_Template,
     Note_Type,
     Product_API_Scan_Configuration,
-    Stub_Finding,
     Test,
     Test_Import,
 )
@@ -108,14 +107,6 @@ class ViewTest(View):
         return {
             "paged_test_imports": paged_test_imports,
             "test_import_filter": test_import_filter,
-        }
-
-    def get_stub_findings(self, request: HttpRequest, test: Test):
-        stub_findings = Stub_Finding.objects.filter(test=test)
-        paged_stub_findings = get_page_items(request, stub_findings, 25)
-
-        return {
-            "stub_findings": paged_stub_findings,
         }
 
     def get_findings(self, request: HttpRequest, test: Test):
@@ -194,7 +185,6 @@ class ViewTest(View):
         context["form"] = form
         # Add some of the related objects
         context |= self.get_findings(request, test)
-        context |= self.get_stub_findings(request, test)
         context |= self.get_test_import_data(request, test)
 
         return context
