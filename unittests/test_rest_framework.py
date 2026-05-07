@@ -1682,7 +1682,9 @@ class EngagementTest(BaseClass.RelatedObjectsTest, BaseClass.BaseClassTest):
         self.permission_create = Permissions.Engagement_Add
         self.permission_update = Permissions.Engagement_Edit
         self.permission_delete = Permissions.Engagement_Delete
-        self.deleted_objects = 23
+        # 23 -> 21: cascading delete no longer pulls 2 Stub_Finding rows now
+        # that the model has been removed.
+        self.deleted_objects = 21
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 

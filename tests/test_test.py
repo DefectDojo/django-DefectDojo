@@ -188,27 +188,6 @@ class TestUnitTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS2").click()
         self.assertTrue(self.is_text_present_on_page(text="product2.finding.com"))
 
-    def test_merge_findings(self):
-        # View existing test from ProductTest()
-        # Login to the site.
-        driver = self.driver
-
-        # Navigate to the engagement page
-        self.goto_active_engagements_overview(driver)
-        # Select a previously created engagement title
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Beta Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Quick Security Testing").click()
-
-        driver.find_element(By.ID, "select_all").click()
-
-        driver.find_element(By.ID, "merge_findings").click()
-
-        Select(driver.find_element(By.ID, "id_finding_action")).select_by_visible_text("Inactive")
-
-        Select(driver.find_element(By.ID, "id_findings_to_merge")).select_by_visible_text("App Vulnerable to XSS3")
-
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
@@ -239,7 +218,9 @@ def suite():
     suite.addTest(TestUnitTest("test_create_test"))
     suite.addTest(TestUnitTest("test_edit_test"))
     suite.addTest(TestUnitTest("test_add_test_finding"))
-    suite.addTest(TestUnitTest("test_merge_findings"))
+    # test_merge_findings depended on the stub-finding promote flow to create
+    # a second finding ("App Vulnerable to XSS3") before merging — drop it
+    # along with the rest of the stub-finding scaffolding.
     suite.addTest(TestUnitTest("test_add_note"))
     suite.addTest(TestUnitTest("test_delete_test"))
     suite.addTest(ProductTest("test_delete_product"))
