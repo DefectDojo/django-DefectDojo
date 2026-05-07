@@ -12,6 +12,14 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## May 2026: v2.58
 
+### May 6, 2026: v2.58.1
+
+* **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
+* **(Pro UI)** Anchor links now open in a new tab as expected, so following a reference no longer pulls you away from the page you were working on.
+* **(Pro UI)** Adding findings to an existing Risk Acceptance works reliably again. A recent performance improvement caused the form to fail for some users; you can now resume managing accepted findings without errors.
+* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default — forcing you to reorder columns every session.
+* **(API)** Fixed a 500 error when fetching vulnerable endpoints (`GET /api/vue/endpoints/{id}/vulnerable/`), restoring reliable access to vulnerability data for an endpoint.
+
 ### May 4, 2026: v2.58.0
 
 * **(Pro UI)** Added shared table preferences so saved column/filter configurations on list views can be shared across users.
@@ -40,7 +48,7 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 * **(Pro UI)** Corrected the Product column label on the Group page under the V3 relabeling.
 * **(Pro UI)** Removed the duplicate greeting message shown after login.
 * **(Performance)** Create-path notifications are now dispatched asynchronously, removing a source of slow POST latency.
-* **(Deployment)** On premise deployments now include the Orchestrator services.
+* **(Deployment)** On premise deployments now include the Orchestrator services. Please see [additional instructions](/releases/pro/ddorch-database) for more details
 * **(Notifications)** Improved the format and display of SLA breach notifications.
 * **(Engineer Metrics)** Fixed a KeyError that could be raised when loading the Engineer Metrics page.
 * **(Tools)** Contrast parser no longer collapses distinct findings that share a rule name.
