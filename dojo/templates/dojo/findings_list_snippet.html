@@ -393,6 +393,9 @@
                                     <th scope="col">
                                         {% dojo_sort request 'Planned Remediation' 'planned_remediation_date' %}
                                     </th>
+                                    <th scope="col">
+                                        {% dojo_sort request 'Planned remediation version' 'planned_remediation_version' %}
+                                    </th>
                                     {% if filter_name != 'Closed' %}
                                         <th scope="col">
                                             {% trans "Reviewers" %}

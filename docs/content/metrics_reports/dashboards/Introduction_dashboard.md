@@ -62,7 +62,7 @@ Select **Reset Dashboard Configuration** from the same menu to restore defaults.
 * **Customizable Dashboard Tiles**, which you can use to visualize the metrics which are relevant to you.
 * **Pre\-built Dashboard Charts**, which visualize your team’s overall performance.
 
-Each team member shares a single dashboard, but the results of the dashboard are restricted by their role and Product Membership. Team members will only see calculated stats for the Products, Engagements, Findings or other objects that they have access to. For more information, see our guides on [User Permissions and Roles](https://docs.defectdojo.com/en/user_management/about-permissions--roles/).
+Each team member shares a single dashboard, but the results of the dashboard are restricted by their role and Product Membership. Team members will only see calculated stats for the Products, Engagements, Findings or other objects that they have access to. For more information, see our guides on [User Permissions and Roles](/admin/user_management/about_perms_and_roles).
 
 ### Dashboard Tiles
 
@@ -78,7 +78,7 @@ Tiles can:
 
 Tiles are pinned to the top section of your **🏠 Home** page.
 
-To learn how to add and use dashboard tiles, see our [guide](../about_custom_dashboard_tiles).
+To learn how to add and use dashboard tiles, see our [guide](/metrics_reports/dashboards/about_custom_dashboard_tiles).
 
 ### Dashboard Charts
 
@@ -90,7 +90,7 @@ Located beneath Dashboard Tiles, DefectDojo has five pre\-built charts:
 * **Top 10 Graded Products** table
 * **Bottom 10 Graded Products** table
 
-These charts can be added or removed from the dashboard via **[Dashboard Configuration](https://docs.defectdojo.com/en/dashboard/how-to-edit-dashboard-configuration/)**.
+These charts can be added or removed from the dashboard via **Dashboard Configuration**.
 
 #### Historical Finding Severity
 

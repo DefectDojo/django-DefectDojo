@@ -18,10 +18,11 @@ class _SupportsApplyAsync(Protocol):
 
 def _inject_async_user(kwargs: Mapping[str, Any] | None) -> dict[str, Any]:
     result: dict[str, Any] = dict(kwargs or {})
-    if "async_user" not in result:
+    if "async_user_id" not in result:
         from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
-        result["async_user"] = get_current_user()
+        user = get_current_user()
+        result["async_user_id"] = user.id if user else None
     return result
 
 
@@ -58,7 +59,7 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     """
     Dispatch a task/signature using DefectDojo semantics.
 
-    - Inject `async_user` if missing.
+    - Inject `async_user_id` if missing.
     - Capture and inject pghistory context if available.
     - Respect `sync=True` (foreground execution) and user `block_execution`.
     - Support `countdown=<seconds>` for async dispatch.
