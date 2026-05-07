@@ -211,17 +211,20 @@ h1, h2, h3, h4, h5, h6,
 }
 
 // Pro badge — appears next to sidebar items with audience: pro
+// Box height is `1lh` so it equals one line-height of the surrounding text.
 .pro-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 1lh;
   margin-left: 0.5em;
-  padding: 0.05em 0.45em;
+  padding: 0 0.45em;
   border: 1px solid #F2561D;
   border-radius: 0.25rem;
   background-color: rgba(#F2561D, 0.72);
   color: #fff;
   font-size: 0.7em;
   font-weight: 500;
-  line-height: 1.4;
   vertical-align: middle;
   white-space: nowrap;
 }
