@@ -3011,7 +3011,7 @@ class BurpRawRequestResponseViewSet(
     filterset_fields = ["finding"]
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasFindingRelatedObjectPermission,
+        permissions.UserHasBurpRawRequestResponsePermission,
     )
 
     def get_queryset(self):
