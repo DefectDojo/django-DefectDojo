@@ -1,7 +1,7 @@
 import sys
 import unittest
 
-from base_test_class import BaseTestCase, on_exception_html_source_logger
+from base_test_class import BaseTestCase
 from product_test import ProductTest, WaitForPageLoad
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -188,88 +188,6 @@ class TestUnitTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS2").click()
         self.assertTrue(self.is_text_present_on_page(text="product2.finding.com"))
 
-    def test_add_stub_finding(self):
-        # Login to the site.
-        driver = self.driver
-
-        # Select the previously created test
-        # Select a previously created engagement title
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Beta Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Quick Security Testing").click()
-
-        # Enter the title of the stub finding
-        # Keep a good practice of clearing field before entering value
-        driver.find_element(By.ID, "quick_add_finding").clear()
-        driver.find_element(By.ID, "quick_add_finding").send_keys("App Vulnerable to XSS3")
-        # Click on Add Potential Finding
-        driver.find_element(By.ID, "the_button").click()
-
-    def test_add_and_promote_stub_finding(self):
-
-        self.test_add_stub_finding()
-
-        driver = self.driver
-
-        # Select the previously created test
-        self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Beta Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Quick Security Testing").click()
-
-        # Click on link of finding name to promote to finding
-        driver.find_element(By.PARTIAL_LINK_TEXT, "App Vulnerable to XSS3").click()
-        self.assertTrue(self.is_info_message_present(text="In order to promote a Potential Finding to a Verified Finding you must provide the following information."))
-        self.assertEqual(driver.find_element(By.ID, "id_title").get_attribute("value"), "App Vulnerable to XSS3")
-        # finding Description
-        # Note item [0] is a meta tag on the top of the page with name "description", so we use [1]
-        driver.execute_script("document.getElementsByName('description')[1].style.display = 'inline'")
-        driver.find_elements(By.NAME, "description")[1].send_keys(Keys.TAB, "This is just a test finding")
-
-        # "Click" the Done button to Edit the finding
-        driver.find_element(By.ID, "submit").click()
-
-        # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Finding promoted successfully"))
-
-    @on_exception_html_source_logger
-    def test_add_and_delete_stub_finding(self):
-
-        self.test_add_stub_finding()
-
-        driver = self.driver
-
-        # Select the previously created test
-        self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Beta Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Quick Security Testing").click()
-
-        # Click on Delete butten
-        driver.find_elements(By.NAME, "stub_finding_delete")[0].click()
-        # Accept popup
-        driver.switch_to.alert.accept()
-        # Check the stub finding is deleted
-        self.assertFalse(driver.find_elements(By.NAME, "stub_finding_name"))
-
-    def test_merge_findings(self):
-        # View existing test from ProductTest()
-        # Login to the site.
-        driver = self.driver
-
-        # Navigate to the engagement page
-        self.goto_active_engagements_overview(driver)
-        # Select a previously created engagement title
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Beta Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Quick Security Testing").click()
-
-        driver.find_element(By.ID, "select_all").click()
-
-        driver.find_element(By.ID, "merge_findings").click()
-
-        Select(driver.find_element(By.ID, "id_finding_action")).select_by_visible_text("Inactive")
-
-        Select(driver.find_element(By.ID, "id_findings_to_merge")).select_by_visible_text("App Vulnerable to XSS3")
-
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-
     def test_delete_test(self):
         # Login to the site. Password will have to be modified
         # to match an admin password in your own container
@@ -300,9 +218,9 @@ def suite():
     suite.addTest(TestUnitTest("test_create_test"))
     suite.addTest(TestUnitTest("test_edit_test"))
     suite.addTest(TestUnitTest("test_add_test_finding"))
-    suite.addTest(TestUnitTest("test_add_and_promote_stub_finding"))
-    suite.addTest(TestUnitTest("test_merge_findings"))
-    suite.addTest(TestUnitTest("test_add_and_delete_stub_finding"))
+    # test_merge_findings depended on the stub-finding promote flow to create
+    # a second finding ("App Vulnerable to XSS3") before merging — drop it
+    # along with the rest of the stub-finding scaffolding.
     suite.addTest(TestUnitTest("test_add_note"))
     suite.addTest(TestUnitTest("test_delete_test"))
     suite.addTest(ProductTest("test_delete_product"))

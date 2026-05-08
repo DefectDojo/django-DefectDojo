@@ -85,7 +85,6 @@ from dojo.models import (
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
@@ -2141,35 +2140,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
             save_endpoints_template(instance, endpoint_urls)
 
         return super().update(instance, validated_data)
-
-
-class StubFindingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
-
-
-class StubFindingCreateSerializer(serializers.ModelSerializer):
-    test = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all())
-
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-        extra_kwargs = {
-            "reporter": {"default": serializers.CurrentUserDefault()},
-        }
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
 
 
 class ProductSerializer(serializers.ModelSerializer):

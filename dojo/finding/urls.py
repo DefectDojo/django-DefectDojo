@@ -164,13 +164,6 @@ urlpatterns = [
         views.set_finding_as_original, name="set_finding_as_original"),
     re_path(r"^finding/(?P<fid>\d+)/remediation_date$", views.remediation_date,
         name="remediation_date"),
-    # stub findings
-    re_path(r"^stub_finding/(?P<tid>\d+)/add$",
-        views.add_stub_finding, name="add_stub_finding"),
-    re_path(r"^stub_finding/(?P<fid>\d+)/promote$",
-        views.promote_to_finding, name="promote_to_finding"),
-    re_path(r"^stub_finding/(?P<fid>\d+)/delete$",
-        views.delete_stub_finding, name="delete_stub_finding"),
 
     # template findings
 

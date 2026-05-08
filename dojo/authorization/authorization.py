@@ -26,7 +26,6 @@ from dojo.models import (
     Product_Type_Group,
     Product_Type_Member,
     Risk_Acceptance,
-    Stub_Finding,
     Test,
 )
 from dojo.request_cache import cache_for_request
@@ -134,9 +133,9 @@ def user_has_permission(user: Dojo_User, obj: Model, permission: int) -> bool:
         if obj.engagement is not None:
             return user_has_permission(user, obj.engagement.product, permission)
         return user_has_global_permission(user, permission)
-    if ((
-        isinstance(obj, Finding | Stub_Finding)
-    ) and permission in Permissions.get_finding_permissions()) or (
+    if (
+        isinstance(obj, Finding) and permission in Permissions.get_finding_permissions()
+    ) or (
         isinstance(obj, Finding_Group)
         and permission in Permissions.get_finding_group_permissions()
     ):

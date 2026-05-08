@@ -73,7 +73,6 @@ from dojo.filters import (
 )
 from dojo.finding.queries import (
     get_authorized_findings,
-    get_authorized_stub_findings,
 )
 from dojo.finding.views import (
     duplicate_cluster,
@@ -124,7 +123,6 @@ from dojo.models import (
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
@@ -2083,77 +2081,6 @@ class ProductTypeGroupViewSet(
         # Object authorization won't work if not all data is provided
         response = {"message": "Patch function is not offered in this path."}
         return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class StubFindingsViewSet(
-    PrefetchDojoModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.StubFindingSerializer
-    queryset = Stub_Finding.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "title", "date", "severity", "description"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasFindingPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_stub_findings(
-            Permissions.Finding_View,
-        ).distinct()
-
-    def get_serializer_class(self):
-        if self.request and self.request.method == "POST":
-            return serializers.StubFindingCreateSerializer
-        return serializers.StubFindingSerializer
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
 
 
 # Authorization: authenticated, configuration

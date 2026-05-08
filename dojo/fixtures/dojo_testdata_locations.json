@@ -2096,42 +2096,6 @@
     }
   },
   {
-    "pk": 2,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 1",
-      "test": 3,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 2",
-      "test": 14,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
-    "pk": 4,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 3",
-      "test": 13,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
     "pk": 1,
     "model": "dojo.finding_template",
     "fields": {
