@@ -3677,27 +3677,6 @@ class Vulnerability_Id(models.Model):
         return reverse("view_finding", args=[str(self.finding.id)])
 
 
-class Stub_Finding(models.Model):
-    title = models.TextField(max_length=1000, blank=False, null=False)
-    date = models.DateField(default=get_current_date, blank=False, null=False)
-    severity = models.CharField(max_length=200, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
-    reporter = models.ForeignKey(Dojo_User, editable=False, default=1, on_delete=models.RESTRICT)
-
-    class Meta:
-        ordering = ("-date", "title")
-
-    def __str__(self):
-        return self.title
-
-    def get_breadcrumbs(self):
-        bc = self.test.get_breadcrumbs()
-        bc += [{"title": "Potential Finding: " + str(self),
-                "url": reverse("view_potential_finding", args=(self.id,))}]
-        return bc
-
-
 class Finding_Group(TimeStampedModel):
 
     GROUP_BY_OPTIONS = [("component_name", "Component Name"),
@@ -4618,7 +4597,6 @@ admin.site.register(Test)
 admin.site.register(Finding, FindingAdmin)
 admin.site.register(FileUpload)
 admin.site.register(FileAccessToken)
-admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)

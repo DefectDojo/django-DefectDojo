@@ -55,7 +55,6 @@ from dojo.api_v2.views import (
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
     SonarqubeIssueViewSet,
-    StubFindingsViewSet,
     SystemSettingsViewSet,
     TestImportViewSet,
     TestsViewSet,
@@ -162,7 +161,6 @@ v2_api.register(r"roles", RoleViewSet, basename="role")
 v2_api.register(r"sla_configurations", SLAConfigurationViewset, basename="sla_configurations")
 v2_api.register(r"sonarqube_issues", SonarqubeIssueViewSet, basename="sonarqube_issue")
 v2_api.register(r"sonarqube_transitions", SonarqubeIssueTransitionViewSet, basename="sonarqube_issue_transition")
-v2_api.register(r"stub_findings", StubFindingsViewSet, basename="stub_finding")
 v2_api.register(r"system_settings", SystemSettingsViewSet, basename="system_settings")
 v2_api.register(r"technologies", AppAnalysisViewSet, basename="app_analysis")
 v2_api.register(r"tests", TestsViewSet, basename="test")
