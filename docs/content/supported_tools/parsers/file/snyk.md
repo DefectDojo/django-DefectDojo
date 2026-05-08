@@ -7,7 +7,7 @@ Snyk output file can be imported in JSON format. Snyk is a developer-first
 security platform that identifies vulnerabilities in open source dependencies 
 (SCA) and application code (SAST). DefectDojo currently supports the SCA 
 report format via the Snyk parser. For SAST findings, use the 
-[Snyk Code](snyk_code.md) parser instead.
+[Snyk Code](../snyk_code) parser instead.
 
 ### Sample Scan Data
 
