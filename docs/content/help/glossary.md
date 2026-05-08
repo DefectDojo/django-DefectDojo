@@ -19,6 +19,8 @@ A scoped security activity representing a testing window, pipeline, or assessmen
 A single execution of a scanner or manual assessment within an Engagement. Tests store execution metadata and act as the ingestion point for Findings.
 ## Service (Both)
 An optional sub-object used to attribute Findings to a specific component or interface within an Asset. Services are most useful in OS DefectDojo, as their functionality is replicated and enhanced by Asset Hierarchy in the Pro version.
+## Components (Both)
+A third-party library, software module, or external dependency that is tracked in DefectDojo Pro. Imported Components are derived from scan data and associated with Findings. In the Pro UI, the Component Table aggregates Active, Duplicate, and Total Finding counts per Component and remains populated even when all associated Findings are Mitigated.
 ## Finding (Both)
 The most granular vulnerability object in DefectDojo's Product Hierarchy that represents a discrete security issue.
 ### Finding Status (Both)
