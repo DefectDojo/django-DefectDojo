@@ -4,6 +4,8 @@ from django.conf import settings
 from dojo.api_v2 import serializers
 from dojo.models import (
     CWE,
+    Answer,
+    Answered_Survey,
     BannerConf,
     Benchmark_Category,
     Benchmark_Product,
@@ -11,8 +13,12 @@ from dojo.models import (
     Benchmark_Requirement,
     Benchmark_Type,
     Choice,
+    ChoiceAnswer,
+    ChoiceQuestion,
     Contact,
+    Engagement_Survey,
     FileAccessToken,
+    General_Survey,
     GITHUB_Clone,
     GITHUB_Conf,
     GITHUB_Details_Cache,
@@ -21,9 +27,12 @@ from dojo.models import (
     Objects_Product,
     Objects_Review,
     Product_Line,
+    Question,
     Report_Type,
     Testing_Guide,
     Testing_Guide_Category,
+    TextAnswer,
+    TextQuestion,
     Tool_Product_History,
     UserAnnouncement,
 )
@@ -47,9 +56,7 @@ class ApiEndpointMethods(DojoTestCase):
         exempt_list = {
             "import-scan", "reimport-scan", "notes", "system_settings", "celery", "roles",
             "import-languages", "endpoint_meta_import", "test_types",
-            "configuration_permissions", "questionnaire_questions",
-            "questionnaire_answers", "questionnaire_answered_questionnaires",
-            "questionnaire_engagement_questionnaires", "questionnaire_general_questionnaires",
+            "configuration_permissions",
             # pghistory Event models (should not be exposed via API)
             "dojo_userevents", "endpointevents", "engagementevents", "findingevents",
             "finding_groupevents", "product_typeevents", "productevents", "testevents",
@@ -133,6 +140,17 @@ class ApiEndpoints(DojoTestCase):
             Benchmark_Product,
             Benchmark_Product_Summary,
             Choice,
+            # Questionnaire models: API endpoints removed in 2.59 (announced
+            # 2.56), but the UI feature under dojo/survey/ still uses them.
+            Question,
+            TextQuestion,
+            ChoiceQuestion,
+            Answer,
+            TextAnswer,
+            ChoiceAnswer,
+            Answered_Survey,
+            Engagement_Survey,
+            General_Survey,
         ]
 
     def test_is_defined(self):

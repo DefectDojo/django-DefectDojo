@@ -48,11 +48,6 @@ from dojo.api_v2.views import (
     ProductTypeMemberViewSet,
     ProductTypeViewSet,
     ProductViewSet,
-    QuestionnaireAnsweredSurveyViewSet,
-    QuestionnaireAnswerViewSet,
-    QuestionnaireEngagementSurveyViewSet,
-    QuestionnaireGeneralSurveyViewSet,
-    QuestionnaireQuestionViewSet,
     RegulationsViewSet,
     ReImportScanView,
     RiskAcceptanceViewSet,
@@ -178,11 +173,6 @@ v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
 v2_api.register(r"users", UsersViewSet, basename="user")
 v2_api.register(r"user_contact_infos", UserContactInfoViewSet, basename="usercontactinfo")
-v2_api.register(r"questionnaire_answers", QuestionnaireAnswerViewSet, basename="answer")
-v2_api.register(r"questionnaire_answered_questionnaires", QuestionnaireAnsweredSurveyViewSet, basename="answered_survey")
-v2_api.register(r"questionnaire_engagement_questionnaires", QuestionnaireEngagementSurveyViewSet, basename="engagement_survey")
-v2_api.register(r"questionnaire_general_questionnaires", QuestionnaireGeneralSurveyViewSet, basename="general_survey")
-v2_api.register(r"questionnaire_questions", QuestionnaireQuestionViewSet, basename="question")
 # Add the location routes
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Locations
