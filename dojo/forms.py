@@ -71,8 +71,6 @@ from dojo.models import (
     Choice,
     ChoiceAnswer,
     ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
     Dojo_Group,
     Dojo_Group_Member,
@@ -2987,32 +2985,6 @@ class ObjectSettingsForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class CredMappingForm(forms.ModelForm):
-    cred_user = forms.ModelChoiceField(
-        queryset=Cred_Mapping.objects.all().select_related("cred_id"),
-        required=False,
-        label="Select a Credential",
-    )
-
-    class Meta:
-        model = Cred_Mapping
-        fields = ["cred_user"]
-        exclude = ["product", "finding", "engagement", "test", "url", "is_authn_provider"]
-
-    def __init__(self, *args, **kwargs):
-        cred_user_queryset = kwargs.pop("cred_user_queryset", None)
-        super().__init__(*args, **kwargs)
-        if cred_user_queryset is not None:
-            self.fields["cred_user"].queryset = cred_user_queryset
-
-
-class CredMappingFormProd(forms.ModelForm):
-    class Meta:
-        model = Cred_Mapping
-        fields = ["cred_id", "url", "is_authn_provider"]
-        exclude = ["product", "finding", "engagement", "test"]
-
-
 class EngagementPresetsForm(forms.ModelForm):
 
     notes = forms.CharField(widget=forms.Textarea(attrs={}),
@@ -3101,17 +3073,6 @@ from dojo.notifications.ui.forms import (  # noqa: E402, F401  -- backward compa
 class AjaxChoiceField(forms.ChoiceField):
     def valid_value(self, value):
         return True
-
-
-class CredUserForm(forms.ModelForm):
-    # selenium_script = forms.FileField(widget=forms.widgets.FileInput(
-    #    attrs={"accept": ".py"}),
-    #    label="Select a Selenium Script", required=False)
-
-    class Meta:
-        model = Cred_User
-        exclude = [""]
-        # fields = ['selenium_script']
 
 
 class LoginBanner(forms.Form):

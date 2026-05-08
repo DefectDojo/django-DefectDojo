@@ -13,21 +13,20 @@ from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
-from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
-from dojo.models import Cred_User, Engagement, Finding, Note_Type, NoteHistory, Notes, Test
+from dojo.models import Engagement, Finding, Note_Type, NoteHistory, Notes, Test
 from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_PAGES = Literal["engagement", "test", "finding", "cred"]
+SUPPORTED_PAGES = Literal["engagement", "test", "finding"]
 
 
-def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES | None, objid: int) -> tuple[Notes, Engagement | Test | Finding | Cred_User, int, str]:
+def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES | None, objid: int) -> tuple[Notes, Engagement | Test | Finding, int, str]:
     note = get_object_or_404(Notes, id=note_id)
     # Quick check to make sure we have a valid page
     if page is None or page not in get_args(SUPPORTED_PAGES):
@@ -42,9 +41,6 @@ def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES 
     elif page == "finding":
         obj = get_authorized_findings(Permissions.Finding_View).filter(id=objid).first()
         reverse_url = "view_finding"
-    elif page == "cred":
-        obj = get_authorized_cred_mappings(Permissions.Cred_View).filter(id=objid).first()
-        reverse_url = "view_cred_details"
     else:
         # If we get here, something is wrong, so let's just raise PermissionDenied
         raise PermissionDenied

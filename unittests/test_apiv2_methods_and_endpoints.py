@@ -60,7 +60,7 @@ class ApiEndpointMethods(DojoTestCase):
             # pghistory Event models (should not be exposed via API)
             "dojo_userevents", "endpointevents", "engagementevents", "findingevents",
             "finding_groupevents", "product_typeevents", "productevents", "testevents",
-            "risk_acceptanceevents", "finding_templateevents", "cred_userevents",
+            "risk_acceptanceevents", "finding_templateevents",
             "notification_webhooksevents", "location",
         }
         patch_exempt_list = {
