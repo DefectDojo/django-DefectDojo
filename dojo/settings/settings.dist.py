@@ -1616,6 +1616,7 @@ VULNERABILITY_URLS = {
     "JVNDB-": "https://jvndb.jvn.jp/en/contents/",  # e.g. https://jvndb.jvn.jp/en/contents/2025/JVNDB-2025-004079.html
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
+    "KSA-": "https://www.krones.com/media/downloads/KRONES-Security-Advisory-&&.pdf",  # e.g. https://www.krones.com/media/downloads/KRONES-Security-Advisory-KSA-2025-2.pdf
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
     "MAL-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/mal-2025-49305
     "MFSA": "https://www.mozilla.org/en-US/security/advisories/",  # e.g. https://www.mozilla.org/en-US/security/advisories/mfsa2025-01/
