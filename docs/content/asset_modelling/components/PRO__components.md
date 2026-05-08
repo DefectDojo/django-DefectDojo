@@ -7,7 +7,6 @@ weight: 1
 
 In DefectDojo, Components represent third-party libraries, software components, and modules that potentially have vulnerabilities.
 
-* DefectDojo Pro has introduced a beta feature called **Locations**, which will eventually consolidate and  Components and Endpoints.
 
 ## Component Views
 
