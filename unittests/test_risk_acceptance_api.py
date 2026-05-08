@@ -381,17 +381,17 @@ class TestRiskAcceptanceApi(APITestCase):
         risk_acceptance.created = past_date
         risk_acceptance.save()
 
-        # 3. Test `created_before` (Less than / Before)
+        # 3. Test `created__lt` (Less than / Before)
         # Should return the risk acceptance because it was created 10 days ago
         future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        response = self.client.get(reverse("risk_acceptance-list") + f"?created_before={future_date}")
+        response = self.client.get(reverse("risk_acceptance-list") + f"?created__lt={future_date}")
         self.assertEqual(response.status_code, 200)
         result_ids = {item["id"] for item in response.json()["results"]}
         self.assertIn(risk_acceptance.id, result_ids)
 
-        # 4. Test `created_after` (Greater than / After)
+        # 4. Test `created__gt` (Greater than / After)
         # Should NOT return the risk acceptance because it is not newer than today
-        response = self.client.get(reverse("risk_acceptance-list") + f"?created_after={future_date}")
+        response = self.client.get(reverse("risk_acceptance-list") + f"?created__gt={future_date}")
         self.assertEqual(response.status_code, 200)
         result_ids = {item["id"] for item in response.json()["results"]}
         self.assertNotIn(risk_acceptance.id, result_ids)
@@ -406,14 +406,14 @@ class TestRiskAcceptanceApi(APITestCase):
 
         future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
-        # Test updated_before
-        response = self.client.get(reverse("risk_acceptance-list") + f"?updated_before={future_date}")
+        # Test updated__lt
+        response = self.client.get(reverse("risk_acceptance-list") + f"?updated__lt={future_date}")
         self.assertEqual(response.status_code, 200)
         result_ids = {item["id"] for item in response.json()["results"]}
         self.assertIn(risk_acceptance.id, result_ids)
 
-        # Test updated_after
-        response = self.client.get(reverse("risk_acceptance-list") + f"?updated_after={future_date}")
+        # Test updated__gt
+        response = self.client.get(reverse("risk_acceptance-list") + f"?updated__gt={future_date}")
         self.assertEqual(response.status_code, 200)
         result_ids = {item["id"] for item in response.json()["results"]}
         self.assertNotIn(risk_acceptance.id, result_ids)
