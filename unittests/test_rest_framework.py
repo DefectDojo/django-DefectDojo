@@ -1788,6 +1788,7 @@ class FindingRequestResponseTest(DojoAPITestCase):
         self.assertEqual(200, response.status_code, response.content[:1000])
 
 
+@versioned_fixtures
 class RequestResponsePairsAuthzTest(DojoAPITestCase):
 
     fixtures = ["dojo_testdata.json"]
