@@ -34,18 +34,30 @@ class TagInheritanceContext:
 
     """
     Per-thread registrar for instances whose inherited tags need
-    re-syncing in bulk. Touched instances are grouped by model class;
-    ``flush()`` runs one bulk diff per (model, product) group via the
-    existing ``_sync_inheritance_for_qs`` helper.
+    re-syncing in bulk.
+
+    Layout: ``{product_id: {model_class: {pk, ...}}}`` for single-product
+    children (Engagement / Test / Finding / Endpoint), plus a separate
+    set of Location pks (locations are linked to many products via
+    LocationProductReference / LocationFindingReference, so their target
+    tag set is the union of all related products' tags).
+
+    On ``flush()``: one bulk diff per (product, model) group via
+    ``_sync_inheritance_for_qs``; locations route through the bulk
+    target-map helper.
     """
 
     def __init__(self):
         self._depth = 0
-        # model_class -> set of instance pks
-        self._touched: dict[type, set[int]] = defaultdict(set)
+        # product_id -> model_class -> set[pk]
+        self._touched_by_product: dict[int, dict[type, set[int]]] = defaultdict(lambda: defaultdict(set))
+        # Cached resolved Product instances so flush doesn't re-read.
+        self._product_by_id: dict[int, object] = {}
+        # Locations are multi-product; tracked separately and resolved at flush.
+        self._touched_locations: set[int] = set()
         # System-wide inheritance flag is read from the DB and cached for
-        # the lifetime of the context. Per-product flags are read directly
-        # off the in-memory product instance.
+        # the lifetime of the context. Per-product flags are read off the
+        # in-memory product instance (no DB cost).
         self._system_inheritance: bool | None = None
 
     def is_active(self) -> bool:
@@ -57,28 +69,34 @@ class TagInheritanceContext:
             self._system_inheritance = bool(get_system_setting("enable_product_tag_inheritance"))
         return self._system_inheritance
 
-    def is_inheritance_enabled_for(self, instance) -> bool:
-        """
-        True when the given instance is under at least one product whose
-        inheritance is enabled (per-product flag or system-wide).
-        """
-        from dojo.tags_signals import get_products  # noqa: PLC0415
-        products = get_products(instance)
-        if any(getattr(p, "enable_product_tag_inheritance", False) for p in products if p):
-            return True
-        return self.system_inheritance_enabled()
-
     def add(self, instance) -> None:
         """
-        Register an instance for bulk-sync at next flush. No-op when
-        inheritance is disabled for this instance, so the bulk path stays
-        cheap on inheritance-off products.
+        Register an instance for bulk-sync at next flush.
+
+        For Location: always register (filtered at flush time, since
+        per-location inheritance check would cost a DB query each).
+
+        For other models: resolve product upfront (in-memory FK chain),
+        skip when inheritance is disabled for that product. Stays cheap
+        on inheritance-off products.
         """
         if instance is None or getattr(instance, "pk", None) is None:
             return
-        if not self.is_inheritance_enabled_for(instance):
+
+        from dojo.location.models import Location  # noqa: PLC0415
+        if isinstance(instance, Location):
+            self._touched_locations.add(instance.pk)
             return
-        self._touched[type(instance)].add(instance.pk)
+
+        from dojo.tags_signals import get_products  # noqa: PLC0415
+        for product in get_products(instance):
+            if product is None:
+                continue
+            if not getattr(product, "enable_product_tag_inheritance", False):
+                if not self.system_inheritance_enabled():
+                    continue
+            self._touched_by_product[product.id][type(instance)].add(instance.pk)
+            self._product_by_id[product.id] = product
 
     def flush(self) -> None:
         """
@@ -86,7 +104,7 @@ class TagInheritanceContext:
         clear the registry. Idempotent and cheap when nothing was
         touched.
         """
-        if not self._touched:
+        if not self._touched_by_product and not self._touched_locations:
             return
         # Local imports to avoid circulars at module import time.
         from dojo.location.models import Location  # noqa: PLC0415
@@ -94,43 +112,33 @@ class TagInheritanceContext:
             _build_location_target_names_map,
             _sync_inheritance_for_qs,
         )
-        from dojo.tags_signals import get_products  # noqa: PLC0415
 
-        touched, self._touched = self._touched, defaultdict(set)
+        touched_by_product = self._touched_by_product
+        product_by_id = self._product_by_id
+        touched_locations = self._touched_locations
+        self._touched_by_product = defaultdict(lambda: defaultdict(set))
+        self._product_by_id = {}
+        self._touched_locations = set()
 
-        for model_class, pks in touched.items():
-            if not pks:
+        for product_id, model_pks in touched_by_product.items():
+            product = product_by_id.get(product_id)
+            if product is None:
                 continue
-            queryset = model_class.objects.filter(pk__in=pks)
-            if model_class is Location:
-                # Location target = union of related products' tags. Use
-                # the bulk precompute helper.
-                target_map = _build_location_target_names_map(list(pks))
+            target_tag_names = {tag.name for tag in product.tags.all()}
+            for model_class, pks in model_pks.items():
+                if not pks:
+                    continue
                 _sync_inheritance_for_qs(
-                    queryset,
-                    target_names_per_child=lambda loc, _m=target_map: _m.get(loc.pk, set()),
+                    model_class.objects.filter(pk__in=pks),
+                    target_names_per_child=lambda _c, _t=target_tag_names: _t,
                 )
-            else:
-                # All other children belong to one product (Finding via
-                # test, Endpoint via product, etc.). Group by product so
-                # each group gets one target name set.
-                instances = list(queryset)
-                by_product: dict[int, list] = defaultdict(list)
-                product_by_id: dict[int, object] = {}
-                for inst in instances:
-                    products = get_products(inst)
-                    for product in products:
-                        if product is None:
-                            continue
-                        by_product[product.id].append(inst)
-                        product_by_id[product.id] = product
-                for product_id, group in by_product.items():
-                    product = product_by_id[product_id]
-                    target_names = {tag.name for tag in product.tags.all()}
-                    _sync_inheritance_for_qs(
-                        group,
-                        target_names_per_child=lambda _c, _t=target_names: _t,
-                    )
+
+        if touched_locations:
+            target_map = _build_location_target_names_map(list(touched_locations))
+            _sync_inheritance_for_qs(
+                Location.objects.filter(pk__in=touched_locations),
+                target_names_per_child=lambda loc, _m=target_map: _m.get(loc.pk, set()),
+            )
 
 
 def current() -> TagInheritanceContext | None:
