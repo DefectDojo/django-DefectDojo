@@ -37,7 +37,7 @@ def make_inherited_tags_sticky(sender, instance, action, **kwargs):
     # for applying inheritance in bulk; per-row signal work would defeat the
     # purpose. This replaces the old `signals.m2m_changed.disconnect(...)`
     # pattern, which was process-global and unsafe under threaded workers.
-    if tag_inheritance.is_in_batch():
+    if tag_inheritance.is_in_batch_mode():
         return
     if action in {"post_add", "post_remove"}:
         if inherit_product_tags(instance):

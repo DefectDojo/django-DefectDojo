@@ -560,7 +560,7 @@ class LocationManager(BaseLocationManager):
         # under threaded gunicorn / Celery thread pools / ASGI threadpools:
         # while disconnected, every thread in the process lost sticky
         # enforcement. Thread-local batch state avoids that hazard.
-        with tag_inheritance.batch():
+        with tag_inheritance.batch_mode():
             for location in locations:
                 target_tag_names: set[str] = set()
                 for pid in product_ids_by_location[location.id]:

@@ -22,13 +22,13 @@ from contextlib import contextmanager
 _state = threading.local()
 
 
-def is_in_batch() -> bool:
+def is_in_batch_mode() -> bool:
     """Return True when the current thread is inside an active ``batch()``."""
     return bool(getattr(_state, "depth", 0))
 
 
 @contextmanager
-def batch():
+def batch_mode():
     """
     Suppress per-instance inheritance signals for the calling thread.
 
