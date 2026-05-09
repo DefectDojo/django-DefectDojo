@@ -61,6 +61,8 @@ RUN \
   yarn
 COPY manage.py ./
 COPY dojo/ ./dojo/
+# Build Tailwind CSS
+RUN cd components && yarn build:css
 # always collect static for debug toolbar as we can't make it dependant on env variables or build arguments without breaking docker layer caching
 RUN env DD_SECRET_KEY='.' DD_DJANGO_DEBUG_TOOLBAR_ENABLED=True python3 manage.py collectstatic --noinput --verbosity=2 && true
 

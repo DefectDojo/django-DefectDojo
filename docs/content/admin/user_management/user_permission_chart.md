@@ -1,10 +1,14 @@
 ---
 title: "Action permission charts"
-description: "All user permissions in detail"
+description: "All DefectDojo Pro user permissions in detail"
 weight: 4
+audience: pro
 aliases:
   - /en/customize_dojo/user_management/user_permission_chart
 ---
+
+> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [2.59 upgrade notes](/releases/os_upgrading/2.59/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
+
 ## Role Permission Chart
 
 This chart is intended to list all permissions related to a Product or Product Type, as well as which permissions are available to each role.

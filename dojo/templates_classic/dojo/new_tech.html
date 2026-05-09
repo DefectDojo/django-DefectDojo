@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+ {% block content %}
+    {{ block.super }}
+     <h3> Add Technology </h3>
+     <form class="form-horizontal" action="{%  url 'new_tech_for_prod' pid %}" method="post">{% csrf_token %}
+         {% include "dojo/form_fields.html" with form=form %}
+         <div class="form-group">
+             <div class="col-sm-offset-2 col-sm-10">
+                 <input class="btn btn-primary" label="submit" type="submit" value="Submit"/>
+             </div>
+         </div>
+     </form>
+ {% endblock %}

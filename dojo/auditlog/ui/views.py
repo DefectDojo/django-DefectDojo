@@ -18,7 +18,6 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_has_permission_or_403,
 )
-from dojo.authorization.roles_permissions import Permissions
 from dojo.location.models import Location
 from dojo.models import (
     Endpoint,
@@ -46,34 +45,34 @@ def action_history(request, cid, oid):
     object_value = None
 
     if ct.model == "product":
-        user_has_permission_or_403(request.user, obj, Permissions.Product_View)
+        user_has_permission_or_403(request.user, obj, "view")
         product_id = obj.id
         active_tab = "overview"
         object_value = Product.objects.get(id=obj.id)
     elif ct.model == "engagement":
-        user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+        user_has_permission_or_403(request.user, obj, "view")
         object_value = Engagement.objects.get(id=obj.id)
         product_id = object_value.product.id
         active_tab = "engagements"
     elif ct.model == "test":
-        user_has_permission_or_403(request.user, obj, Permissions.Test_View)
+        user_has_permission_or_403(request.user, obj, "view")
         object_value = Test.objects.get(id=obj.id)
         product_id = object_value.engagement.product.id
         active_tab = "engagements"
         test = True
     elif ct.model == "finding":
-        user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
+        user_has_permission_or_403(request.user, obj, "view")
         object_value = Finding.objects.get(id=obj.id)
         product_id = object_value.test.engagement.product.id
         active_tab = "findings"
         finding = object_value
     elif ct.model == "location":
-        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
+        user_has_permission_or_403(request.user, obj, "view")
         object_value = Location.objects.get(id=obj.id)
         active_tab = "endpoints"
     # TODO: Delete this after the move to Locations
     elif ct.model == "endpoint":
-        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
+        user_has_permission_or_403(request.user, obj, "view")
         object_value = Endpoint.objects.get(id=obj.id)
         product_id = object_value.product.id
         active_tab = "endpoints"
@@ -82,10 +81,10 @@ def action_history(request, cid, oid):
         authorized = False
         fetched_engagements = list(engagements)
         if len(fetched_engagements) == 0:
-            authorized = user_has_global_permission(request.user, Permissions.Risk_Acceptance)
+            authorized = user_has_global_permission(request.user, "edit")
         else:
             for engagement in fetched_engagements:
-                if user_has_permission(request.user, engagement, Permissions.Engagement_View):
+                if user_has_permission(request.user, engagement, "view"):
                     authorized = True
                     break
         if not authorized:

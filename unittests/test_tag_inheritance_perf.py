@@ -490,14 +490,18 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Pinned baselines per mode. Each test forces its own V3_FEATURE_LOCATIONS
     # via @override_settings so all four import paths run in a single suite
     # invocation regardless of the ambient `DD_V3_FEATURE_LOCATIONS` env var.
+    # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
     # Phase A nudges these slightly downward (post_save gated on created=True
     # avoids re-running inheritance on no-op finding updates during reimport).
-    # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
     # Phase B Stage 1 (thread-safe batch context) adds ~20 queries on the V3
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 1385
-    EXPECTED_ZAP_IMPORT_V3 = 1263
+    # Track B legacy auth + Alert FK-validation skip: notifications dispatch
+    # to the full active-user set (legacy doesn't filter by RBAC role) but
+    # the per-Alert ForeignKey.validate EXISTS probe is gone, netting -7
+    # against the pre-Track-B numbers.
+    EXPECTED_ZAP_IMPORT_V2 = 1378
+    EXPECTED_ZAP_IMPORT_V3 = 1256
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
