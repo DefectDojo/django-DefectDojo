@@ -4,6 +4,7 @@ import logging
 from django.db.models import signals
 from django.dispatch import receiver
 
+from dojo import tag_inheritance
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
@@ -32,6 +33,12 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
 @receiver(signals.m2m_changed, sender=Location.tags.through)
 def make_inherited_tags_sticky(sender, instance, action, **kwargs):
     """Make sure inherited tags are added back in if they are removed"""
+    # Inside a `tag_inheritance.batch()` block the caller takes responsibility
+    # for applying inheritance in bulk; per-row signal work would defeat the
+    # purpose. This replaces the old `signals.m2m_changed.disconnect(...)`
+    # pattern, which was process-global and unsafe under threaded workers.
+    if tag_inheritance.is_in_batch_mode():
+        return
     if action in {"post_add", "post_remove"}:
         if inherit_product_tags(instance):
             tag_list = [tag.name for tag in instance.tags.all()]

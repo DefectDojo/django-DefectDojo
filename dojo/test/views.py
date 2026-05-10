@@ -49,14 +49,12 @@ from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
-    Cred_Mapping,
     Endpoint,
     Finding,
     Finding_Group,
     Finding_Template,
     Note_Type,
     Product_API_Scan_Configuration,
-    Stub_Finding,
     Test,
     Test_Import,
 )
@@ -108,14 +106,6 @@ class ViewTest(View):
         return {
             "paged_test_imports": paged_test_imports,
             "test_import_filter": test_import_filter,
-        }
-
-    def get_stub_findings(self, request: HttpRequest, test: Test):
-        stub_findings = Stub_Finding.objects.filter(test=test)
-        paged_stub_findings = get_page_items(request, stub_findings, 25)
-
-        return {
-            "stub_findings": paged_stub_findings,
         }
 
     def get_findings(self, request: HttpRequest, test: Test):
@@ -181,8 +171,6 @@ class ViewTest(View):
             "person": request.user.username,
             "request": request,
             "show_re_upload": any(test.test_type.name in code for code in get_choices_sorted()),
-            "creds": Cred_Mapping.objects.filter(engagement=test.engagement).select_related("cred_id").order_by("cred_id"),
-            "cred_test": Cred_Mapping.objects.filter(test=test).select_related("cred_id").order_by("cred_id"),
             "jira_project": jira_services.get_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
@@ -194,7 +182,6 @@ class ViewTest(View):
         context["form"] = form
         # Add some of the related objects
         context |= self.get_findings(request, test)
-        context |= self.get_stub_findings(request, test)
         context |= self.get_test_import_data(request, test)
 
         return context

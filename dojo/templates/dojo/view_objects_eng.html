@@ -142,33 +142,9 @@ No files for this build were found.
                         jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
                     },
                     success: function (data, textStatus, jqXHR) {
-                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
-                        //
-                        $('table#stub_findings').removeClass('hidden');
-                        var fid = jqXHR.getResponseHeader('Location').split('/');
-                        fid = fid[fid.length - 2];
-                        var row = $("<tr id='added-" + fid + "' class='success'></tr>");
-                        var link = $('<a></a>');
-
-                        link.attr('href', "/stub_finding/" + fid + "/promote");
-                        link.text($("input#quick_add_finding").val());
-                        var title = $("<td></td>").append(link);
-                        var severity = $("<td> </td>");
-                        var reporter = $("<td>{{ request.user.username }}</td>");
-                        var date = $("<td>None</td>");
-                        var actions = $('<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <a class="btn btn-sm btn-danger" href="/stub_finding/[id]/delete">Delete</a></div></td>'.replace(/\[id\]/g, fid));
-
-                        row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");
                         $("input#quick_add_finding").val("")
                         $('button#the_button').removeClass("btn-warning btn-danger").addClass('btn-success');
-
                         $("input#quick_add_finding").focus()
-
-                        setTimeout(function () {
-                            $("tr#added-" + fid + " td").animate({
-                                backgroundColor: "#fff",
-                            })
-                        }, 2000)
                     },
                     error: function () {
                         $('form#quick-add-form').addClass("has-error");

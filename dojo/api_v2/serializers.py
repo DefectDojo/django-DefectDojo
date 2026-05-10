@@ -48,15 +48,9 @@ from dojo.models import (
     SEVERITY_CHOICES,
     STATS_FIELDS,
     Announcement,
-    Answer,
-    Answered_Survey,
     App_Analysis,
     BurpRawRequestResponse,
     Check_List,
-    ChoiceAnswer,
-    ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
     Dojo_Group,
     Dojo_Group_Member,
@@ -67,12 +61,10 @@ from dojo.models import (
     Endpoint_Status,
     Engagement,
     Engagement_Presets,
-    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Group,
     Finding_Template,
-    General_Survey,
     Global_Role,
     Language_Type,
     Languages,
@@ -87,21 +79,17 @@ from dojo.models import (
     Product_Type,
     Product_Type_Group,
     Product_Type_Member,
-    Question,
     Regulation,
     Risk_Acceptance,
     Role,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    TextAnswer,
-    TextQuestion,
     Tool_Configuration,
     Tool_Product_Settings,
     Tool_Type,
@@ -2154,47 +2142,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
-class CredentialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_User
-        exclude = ("password",)
-
-
-class CredentialMappingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_Mapping
-        fields = "__all__"
-
-
-class StubFindingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
-
-
-class StubFindingCreateSerializer(serializers.ModelSerializer):
-    test = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all())
-
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-        extra_kwargs = {
-            "reporter": {"default": serializers.CurrentUserDefault()},
-        }
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
-
-
 class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
@@ -3118,111 +3065,6 @@ class ConfigurationPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         exclude = ("content_type",)
-
-
-class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        if isinstance(instance, TextQuestion):
-            return TextQuestionSerializer(instance=instance).data
-        if isinstance(instance, ChoiceQuestion):
-            return ChoiceQuestionSerializer(instance=instance).data
-        return QuestionSerializer(instance=instance).data
-
-    class Meta:
-        model = Question
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        exclude = ("polymorphic_ctype",)
-
-
-class TextQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TextQuestion
-        exclude = ("polymorphic_ctype",)
-
-
-class ChoiceQuestionSerializer(serializers.ModelSerializer):
-    choices = serializers.StringRelatedField(many=True)
-
-    class Meta:
-        model = ChoiceQuestion
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionnaireAnsweredSurveySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Answered_Survey
-        fields = "__all__"
-
-
-class QuestionnaireAnswerSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        if isinstance(instance, TextAnswer):
-            return TextAnswerSerializer(instance=instance).data
-        if isinstance(instance, ChoiceAnswer):
-            return ChoiceAnswerSerializer(instance=instance).data
-        return AnswerSerializer(instance=instance).data
-
-    class Meta:
-        model = Answer
-        exclude = ("polymorphic_ctype",)
-
-
-class AnswerSerializer(serializers.ModelSerializer):
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = Answer
-        exclude = ("polymorphic_ctype",)
-
-
-class TextAnswerSerializer(serializers.ModelSerializer):
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = TextAnswer
-        exclude = ("polymorphic_ctype",)
-
-
-class ChoiceAnswerSerializer(serializers.ModelSerializer):
-    answer = serializers.StringRelatedField(many=True)
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = ChoiceAnswer
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionnaireEngagementSurveySerializer(serializers.ModelSerializer):
-    questions = serializers.SerializerMethodField()
-
-    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    def get_questions(self, obj):
-        questions = obj.questions.all()
-        formated_questions = []
-        for question in questions:
-            formated_question = f"Order #{question.order} - {question.text}{' (Optional)' if question.optional else ''}"
-            formated_questions.append(formated_question)
-        return formated_questions
-
-    class Meta:
-        model = Engagement_Survey
-        fields = "__all__"
-
-
-class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
-    survey = QuestionnaireEngagementSurveySerializer()
-
-    class Meta:
-        model = General_Survey
-        fields = "__all__"
 
 
 class AnnouncementSerializer(serializers.ModelSerializer):

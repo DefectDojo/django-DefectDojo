@@ -71,8 +71,6 @@ from dojo.models import (
     Choice,
     ChoiceAnswer,
     ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
     Dojo_Group,
     Dojo_Group_Member,
@@ -102,7 +100,6 @@ from dojo.models import (
     Regulation,
     Risk_Acceptance,
     SLA_Configuration,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Type,
@@ -1687,28 +1684,6 @@ class FindingForm(forms.ModelForm):
                    "endpoints", "endpoint_status")
 
 
-class StubFindingForm(forms.ModelForm):
-    title = forms.CharField(required=True, max_length=1000)
-
-    class Meta:
-        model = Stub_Finding
-        order = ("title",)
-        exclude = (
-            "date", "description", "severity", "reporter", "test", "is_mitigated")
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if "title" in cleaned_data:
-            if len(cleaned_data["title"]) <= 0:
-                msg = "The title is required."
-                raise forms.ValidationError(msg)
-        else:
-            msg = "The title is required."
-            raise forms.ValidationError(msg)
-
-        return cleaned_data
-
-
 class ApplyFindingTemplateForm(forms.Form):
 
     title = forms.CharField(max_length=1000, required=True)
@@ -2795,15 +2770,6 @@ class FindingFormID(forms.ModelForm):
         fields = ("id",)
 
 
-class DeleteStubFindingForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Stub_Finding
-        fields = ["id"]
-
-
 class Benchmark_Product_SummaryForm(forms.ModelForm):
 
     class Meta:
@@ -3019,32 +2985,6 @@ class ObjectSettingsForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class CredMappingForm(forms.ModelForm):
-    cred_user = forms.ModelChoiceField(
-        queryset=Cred_Mapping.objects.all().select_related("cred_id"),
-        required=False,
-        label="Select a Credential",
-    )
-
-    class Meta:
-        model = Cred_Mapping
-        fields = ["cred_user"]
-        exclude = ["product", "finding", "engagement", "test", "url", "is_authn_provider"]
-
-    def __init__(self, *args, **kwargs):
-        cred_user_queryset = kwargs.pop("cred_user_queryset", None)
-        super().__init__(*args, **kwargs)
-        if cred_user_queryset is not None:
-            self.fields["cred_user"].queryset = cred_user_queryset
-
-
-class CredMappingFormProd(forms.ModelForm):
-    class Meta:
-        model = Cred_Mapping
-        fields = ["cred_id", "url", "is_authn_provider"]
-        exclude = ["product", "finding", "engagement", "test"]
-
-
 class EngagementPresetsForm(forms.ModelForm):
 
     notes = forms.CharField(widget=forms.Textarea(attrs={}),
@@ -3133,17 +3073,6 @@ from dojo.notifications.ui.forms import (  # noqa: E402, F401  -- backward compa
 class AjaxChoiceField(forms.ChoiceField):
     def valid_value(self, value):
         return True
-
-
-class CredUserForm(forms.ModelForm):
-    # selenium_script = forms.FileField(widget=forms.widgets.FileInput(
-    #    attrs={"accept": ".py"}),
-    #    label="Select a Selenium Script", required=False)
-
-    class Meta:
-        model = Cred_User
-        exclude = [""]
-        # fields = ['selenium_script']
 
 
 class LoginBanner(forms.Form):
