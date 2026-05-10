@@ -132,11 +132,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
-        # Apply tags to findings and endpoints/locations
-        self.apply_import_tags(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-        )
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         dojo_dispatch_task(
@@ -169,6 +164,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
     ) -> list[Finding]:
         # Batched post-processing (no chord): dispatch a task per 1000 findings or on final finding
         batch_finding_ids: list[int] = []
+        batch_findings: list[Finding] = []
         batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
 
         """
@@ -259,6 +255,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
             logger.debug("process_findings: computed push_to_jira=%s", push_to_jira)
             batch_finding_ids.append(finding.id)
+            batch_findings.append(finding)
 
             # If batch is full or we're at the end, persist locations/endpoints and dispatch
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
@@ -267,6 +264,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 # so rules/deduplication tasks see the tags already on the findings.
                 bulk_apply_parser_tags(findings_with_parser_tags)
                 findings_with_parser_tags.clear()
+                # Apply import-time tags before post-processing so rules/deduplication see them.
+                self.apply_import_tags_for_batch(batch_findings)
+                batch_findings.clear()
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",

@@ -33,7 +33,6 @@ from dojo.models import (
     Product_Type_Group,
     Product_Type_Member,
     Role,
-    Stub_Finding,
     Test,
 )
 from dojo.url.models import URL
@@ -75,9 +74,6 @@ class TestAuthorization(DojoTestCase):
 
         cls.finding = Finding()
         cls.finding.test = cls.test
-
-        cls.stub_finding = Stub_Finding()
-        cls.stub_finding.test = cls.test
 
         if settings.V3_FEATURE_LOCATIONS:
             cls.location = URL(host="testhost.com")
@@ -350,28 +346,6 @@ class TestAuthorization(DojoTestCase):
         mock_foo.filter.return_value = [self.product_member_owner]
 
         result = user_has_permission(self.user, self.finding, Permissions.Finding_Delete)
-
-        self.assertTrue(result)
-        mock_foo.filter.assert_called_with(user=self.user)
-
-    @patch("dojo.models.Product_Member.objects")
-    def test_user_has_permission_stub_finding_no_permissions(self, mock_foo):
-        mock_foo.select_related.return_value = mock_foo
-        mock_foo.select_related.return_value = mock_foo
-        mock_foo.filter.return_value = [self.product_member_reader]
-
-        result = user_has_permission(self.user, self.stub_finding, Permissions.Finding_Edit)
-
-        self.assertFalse(result)
-        mock_foo.filter.assert_called_with(user=self.user)
-
-    @patch("dojo.models.Product_Member.objects")
-    def test_user_has_permission_stub_finding_success(self, mock_foo):
-        mock_foo.select_related.return_value = mock_foo
-        mock_foo.select_related.return_value = mock_foo
-        mock_foo.filter.return_value = [self.product_member_owner]
-
-        result = user_has_permission(self.user, self.stub_finding, Permissions.Finding_Delete)
 
         self.assertTrue(result)
         mock_foo.filter.assert_called_with(user=self.user)

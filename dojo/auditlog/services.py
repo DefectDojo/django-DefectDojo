@@ -151,7 +151,6 @@ def register_django_pghistory_models():
     from dojo.location.models import Location  # noqa: PLC0415
     from dojo.models import (  # noqa: PLC0415
         App_Analysis,
-        Cred_User,
         Dojo_User,
         # TODO: Delete this after the move to Locations
         Endpoint,
@@ -311,21 +310,6 @@ def register_django_pghistory_models():
             ],
         },
     )(Finding_Template)
-
-    pghistory.track(
-        pghistory.InsertEvent(),
-        pghistory.UpdateEvent(condition=pghistory.AnyChange(exclude_auto=True)),
-        pghistory.DeleteEvent(),
-        pghistory.ManualEvent(label="initial_backfill"),
-        exclude=["password"],
-        meta={
-            "indexes": [
-                models.Index(fields=["pgh_created_at"]),
-                models.Index(fields=["pgh_label"]),
-                models.Index(fields=["pgh_context_id"]),
-            ],
-        },
-    )(Cred_User)
 
     pghistory.track(
         pghistory.InsertEvent(),

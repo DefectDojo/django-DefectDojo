@@ -16,7 +16,6 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import (
     get_authorized_findings,
     get_authorized_findings_for_queryset,
-    get_authorized_stub_findings,
     get_authorized_vulnerability_ids,
 )
 from dojo.finding_group.queries import get_authorized_finding_groups
@@ -44,7 +43,6 @@ from dojo.models import (
     Product_Type_Group,
     Product_Type_Member,
     Role,
-    Stub_Finding,
     Test,
     Test_Type,
     Vulnerability_Id,
@@ -230,24 +228,6 @@ class AuthorizationQueriesTestBase(DojoTestCase):
             },
         )
 
-        # Create stub findings - reporter is required
-        cls.stub_finding_1, _ = Stub_Finding.objects.get_or_create(
-            test=cls.test_1,
-            title="Auth Test Stub Finding 1",
-            defaults={
-                "severity": "High",
-                "reporter": cls.superuser,
-            },
-        )
-        cls.stub_finding_2, _ = Stub_Finding.objects.get_or_create(
-            test=cls.test_2,
-            title="Auth Test Stub Finding 2",
-            defaults={
-                "severity": "Medium",
-                "reporter": cls.superuser,
-            },
-        )
-
         # Create vulnerability IDs
         cls.vuln_id_1, _ = Vulnerability_Id.objects.get_or_create(
             finding=cls.finding_1,
@@ -363,35 +343,6 @@ class TestGetAuthorizedFindings(AuthorizationQueriesTestBase):
         with patch("dojo.finding.queries.get_current_user", return_value=None):
             findings = get_authorized_findings(Permissions.Finding_View)
             self.assertEqual(findings.count(), 0)
-
-
-class TestGetAuthorizedStubFindings(AuthorizationQueriesTestBase):
-
-    """Tests for get_authorized_stub_findings() - uses get_current_user()"""
-
-    @patch("dojo.finding.queries.get_current_user")
-    def test_superuser_gets_all_stub_findings(self, mock_get_current_user):
-        """Superuser should get all stub findings"""
-        mock_get_current_user.return_value = self.superuser
-        stub_findings = get_authorized_stub_findings(Permissions.Finding_View)
-        self.assertIn(self.stub_finding_1, stub_findings)
-        self.assertIn(self.stub_finding_2, stub_findings)
-
-    @patch("dojo.finding.queries.get_current_user")
-    def test_user_no_permissions_gets_empty(self, mock_get_current_user):
-        """User with no permissions should not get test stub findings"""
-        mock_get_current_user.return_value = self.user_no_perms
-        stub_findings = get_authorized_stub_findings(Permissions.Finding_View)
-        self.assertNotIn(self.stub_finding_1, stub_findings)
-        self.assertNotIn(self.stub_finding_2, stub_findings)
-
-    @patch("dojo.finding.queries.get_current_user")
-    def test_user_product_member_gets_product_stub_findings(self, mock_get_current_user):
-        """User with product membership should get only that product's stub findings"""
-        mock_get_current_user.return_value = self.user_product_member
-        stub_findings = get_authorized_stub_findings(Permissions.Finding_View)
-        self.assertIn(self.stub_finding_1, stub_findings)
-        self.assertNotIn(self.stub_finding_2, stub_findings)
 
 
 class TestGetAuthorizedVulnerabilityIds(AuthorizationQueriesTestBase):

@@ -357,10 +357,12 @@ class TagInheritancePerfBaselines(DojoTestCase):
     # the appropriate mode so all variants execute in a single suite run.
 
     # Findings-only scenarios.
-    EXPECTED_PRODUCT_TAG_ADD_100_V2 = 4758
-    EXPECTED_PRODUCT_TAG_ADD_100_V3 = 4759
-    EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 4540
-    EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 4541
+    # Pre-Phase-A V2: 4758 add, 4540 remove. V3: 4759/4541.
+    # Phase A bulk-propagate drops these dramatically.
+    EXPECTED_PRODUCT_TAG_ADD_100_V2 = 91
+    EXPECTED_PRODUCT_TAG_ADD_100_V3 = 91
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 53
+    EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 53
 
     EXPECTED_CREATE_ONE_FINDING_V2 = 64
     EXPECTED_CREATE_ONE_FINDING_V3 = 64
@@ -372,13 +374,13 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_FINDING_REMOVE_INHERITED_V2 = 44
     EXPECTED_FINDING_REMOVE_INHERITED_V3 = 44
 
-    # V2 endpoint paths (Endpoints have no V3 counterpart in this class).
-    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 3958
-    EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 3740
+    # V2 endpoint paths. Pre-Phase-A: 3958 add, 3740 remove.
+    EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 91
+    EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 53
 
-    # V3 location paths (LocationManager has no V2 counterpart in this class).
-    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 4531
-    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 4307
+    # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 316
+    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 266
 
 
 @override_settings(
@@ -488,7 +490,14 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Pinned baselines per mode. Each test forces its own V3_FEATURE_LOCATIONS
     # via @override_settings so all four import paths run in a single suite
     # invocation regardless of the ambient `DD_V3_FEATURE_LOCATIONS` env var.
-    EXPECTED_ZAP_IMPORT_V2 = 1461
-    EXPECTED_ZAP_IMPORT_V3 = 1319
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 77
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 95
+    # Phase A nudges these slightly downward (post_save gated on created=True
+    # avoids re-running inheritance on no-op finding updates during reimport).
+    # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
+    # Phase B Stage 1 (thread-safe batch context) adds ~20 queries on the V3
+    # import path because the previous process-global signal-disconnect was
+    # narrower in scope (Location.tags.through only). Net-positive trade for
+    # eliminating the threading bug; full Phase B reductions land in Stage 2.
+    EXPECTED_ZAP_IMPORT_V2 = 1385
+    EXPECTED_ZAP_IMPORT_V3 = 1263
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
