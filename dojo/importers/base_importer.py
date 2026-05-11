@@ -1,7 +1,6 @@
 import base64
 import logging
 import time
-from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -337,59 +336,28 @@ class BaseImporter(ImporterOptions):
         if self.tags is not None and len(self.tags) > 0:
             self.test.tags.set(self.tags)
 
-    def apply_import_tags(
-        self,
-        new_findings: Iterable[Finding] | None = None,
-        closed_findings: Iterable[Finding] | None = None,
-        reactivated_findings: Iterable[Finding] | None = None,
-        untouched_findings: Iterable[Finding] | None = None,
-    ) -> None:
-        """Apply tags to findings and endpoints from an import operation."""
-        # Normalize None values to empty lists and convert sets/other iterables to lists
-        if untouched_findings is None:
-            untouched_findings = []
-        elif not isinstance(untouched_findings, list):
-            untouched_findings = list(untouched_findings)
+    def apply_import_tags_for_batch(self, findings: list[Finding]) -> None:
+        """
+        Apply import-time tags to a batch of already-saved findings and their endpoints.
 
-        if reactivated_findings is None:
-            reactivated_findings = []
-        elif not isinstance(reactivated_findings, list):
-            reactivated_findings = list(reactivated_findings)
-
-        if closed_findings is None:
-            closed_findings = []
-        elif not isinstance(closed_findings, list):
-            closed_findings = list(closed_findings)
-
-        if new_findings is None:
-            new_findings = []
-        elif not isinstance(new_findings, list):
-            new_findings = list(new_findings)
-
-        # Collect all affected findings
-        findings_to_tag = new_findings + closed_findings + reactivated_findings + untouched_findings
-
-        if not findings_to_tag:
+        Called per batch inside process_findings(), before post_process_findings_batch is
+        dispatched, so that rules/deduplication tasks see the import tags on the findings.
+        """
+        if not findings or not self.tags:
             return
-
-        # Add any tags to the findings imported if necessary
-        if self.apply_tags_to_findings and self.tags:
-            findings_qs = Finding.objects.filter(id__in=[f.id for f in findings_to_tag])
+        if self.apply_tags_to_findings:
             try:
                 bulk_add_tags_to_instances(
                     tag_or_tags=self.tags,
-                    instances=findings_qs,
+                    instances=findings,
                     tag_field_name="tags",
                 )
             except IntegrityError:
-                # Fallback to safe per-instance tagging if concurrent deletes occur
-                for finding in findings_to_tag:
+                for finding in findings:
                     for tag in self.tags:
                         self.add_tags_safe(finding, tag)
-
-        # Add any tags to any locations/endpoints of the findings imported if necessary
-        if self.apply_tags_to_endpoints and self.tags:
-            locations_qs = self.location_handler.get_locations_for_tagging(findings_to_tag)
+        if self.apply_tags_to_endpoints:
+            locations_qs = self.location_handler.get_locations_for_tagging(findings)
             try:
                 bulk_add_tags_to_instances(
                     tag_or_tags=self.tags,
@@ -397,7 +365,7 @@ class BaseImporter(ImporterOptions):
                     tag_field_name="tags",
                 )
             except IntegrityError:
-                for finding in findings_to_tag:
+                for finding in findings:
                     for location in self.location_handler.get_location_tag_fallback(finding):
                         for tag in self.tags:
                             self.add_tags_safe(location, tag)

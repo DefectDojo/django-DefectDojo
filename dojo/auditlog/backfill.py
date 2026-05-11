@@ -20,7 +20,6 @@ def get_excluded_fields(model_name):
     excluded_fields_map = {
         "Dojo_User": ["password"],
         "Product": ["updated"],
-        "Cred_User": ["password"],
         "Notification_Webhooks": ["header_name", "header_value"],
     }
     return excluded_fields_map.get(model_name, [])
@@ -43,9 +42,6 @@ def get_table_names(model_name):
     elif model_name == "Finding_Template":
         table_name = "dojo_finding_template"
         event_table_name = "dojo_finding_templateevent"
-    elif model_name == "Cred_User":
-        table_name = "dojo_cred_user"
-        event_table_name = "dojo_cred_userevent"
     elif model_name == "Notification_Webhooks":
         table_name = "dojo_notification_webhooks"
         event_table_name = "dojo_notification_webhooksevent"
@@ -366,7 +362,7 @@ def get_tracked_models():
     return [
         "Dojo_User", "Endpoint", "Engagement", "Finding", "Finding_Group",
         "Product_Type", "Product", "Test", "Risk_Acceptance",
-        "Finding_Template", "Cred_User", "Notification_Webhooks",
+        "Finding_Template", "Notification_Webhooks",
         "FindingReviewers",  # M2M through table for Finding.reviewers
         "Location", "URL",
         # Tag through tables (tagulous auto-generated)

@@ -62,7 +62,6 @@ from dojo.models import (
     SEVERITY_CHOICES,
     App_Analysis,
     ChoiceQuestion,
-    Cred_Mapping,
     Development_Environment,
     Dojo_Group,
     Dojo_User,
@@ -1624,6 +1623,7 @@ class ApiFindingFilter(DojoFilter):
     verified = BooleanFilter(field_name="verified")
     has_jira = BooleanFilter(field_name="jira_issue", lookup_expr="isnull", exclude=True)
     fix_available = BooleanFilter(field_name="fix_available")
+    mitigation_available = BooleanFilter(method="filter_mitigation_available", label="Mitigation Available")
     # CharFilter
     component_version = CharFilter(lookup_expr="icontains")
     component_name = CharFilter(lookup_expr="icontains")
@@ -1796,6 +1796,11 @@ class ApiFindingFilter(DojoFilter):
 
         return queryset.filter(mitigated=value)
 
+    def filter_mitigation_available(self, queryset, name, value):
+        if value:
+            return queryset.exclude(mitigation__isnull=True).exclude(mitigation__exact="")
+        return queryset.filter(Q(mitigation__isnull=True) | Q(mitigation__exact=""))
+
 
 class PercentageFilter(NumberFilter):
     def __init__(self, *args, **kwargs):
@@ -1830,6 +1835,8 @@ class FindingFilterHelper(FilterSet):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     fix_available = ReportBooleanFilter()
+    mitigation = CharFilter(lookup_expr="icontains")
+    mitigation_available = BooleanFilter(method="filter_mitigation_available", label="Mitigation Available")
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
@@ -2020,6 +2027,11 @@ class FindingFilterHelper(FilterSet):
             return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
 
         return queryset.filter(mitigated=value)
+
+    def filter_mitigation_available(self, queryset, name, value):
+        if value:
+            return queryset.exclude(mitigation__isnull=True).exclude(mitigation__exact="")
+        return queryset.filter(Q(mitigation__isnull=True) | Q(mitigation__exact=""))
 
 
 def get_finding_group_queryset_for_context(pid=None, eid=None, tid=None):
@@ -3361,12 +3373,6 @@ class ApiAppAnalysisFilter(DojoFilter):
         fields = ["product", "name", "user", "version"]
 
 
-class ApiCredentialsFilter(DojoFilter):
-    class Meta:
-        model = Cred_Mapping
-        fields = "__all__"
-
-
 class EndpointReportFilter(DojoFilter):
     protocol = CharFilter(lookup_expr="icontains")
     userinfo = CharFilter(lookup_expr="icontains")
@@ -3417,6 +3423,7 @@ class ReportFindingFilterHelper(FilterSet):
     out_of_scope = ReportBooleanFilter()
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     file_path = CharFilter(lookup_expr="icontains")
+    mitigation_available = BooleanFilter(method="filter_mitigation_available", label="Mitigation Available")
 
     o = OrderingFilter(
         fields=(
@@ -3438,6 +3445,11 @@ class ReportFindingFilterHelper(FilterSet):
                    "thread_id", "notes", "inherited_tags", "endpoints",
                    "numerical_severity", "reporter", "last_reviewed",
                    "jira_creation", "jira_change", "files"]
+
+    def filter_mitigation_available(self, queryset, name, value):
+        if value:
+            return queryset.exclude(mitigation__isnull=True).exclude(mitigation__exact="")
+        return queryset.filter(Q(mitigation__isnull=True) | Q(mitigation__exact=""))
 
     def manage_kwargs(self, kwargs):
         self.prod_type = None
