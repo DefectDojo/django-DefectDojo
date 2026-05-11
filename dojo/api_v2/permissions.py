@@ -422,6 +422,23 @@ class UserHasFindingNotePermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasBurpRawRequestResponsePermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return check_post_permission(
+            request, Finding, "finding", Permissions.Finding_Edit,
+        )
+
+    def has_object_permission(self, request, view, obj):
+        return check_object_permission(
+            request,
+            obj.finding,
+            Permissions.Finding_View,
+            Permissions.Finding_Edit,
+            Permissions.Finding_Edit,
+            Permissions.Finding_Edit,
+        )
+
+
 class UserHasImportPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         # permission check takes place before validation, so we don't have access to serializer.validated_data()

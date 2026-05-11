@@ -22,14 +22,14 @@ See our [Pro UI Guide](/get_started/about/ui_pro_vs_os/) for more information.
 
 ### Assets/Organizations
 
-DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/hierarchy/pro__assets_organizations/) for details.
+DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/assets_organizations/) for details.
 
 ![image](images/asset_hierarchy_diagram.png)
 
 ### Finding Priority
 
 DefectDojo Pro can pre-triage your Findings by Priority and Risk, allowing your team to identify and fix your most critical issues first.
-See our [Finding Priority Guide](/asset_modelling/hierarchy/pro__priority_sla/) for more details.
+See our [Finding Priority Guide](/asset_modelling/pro_hierarchy/priority_sla/) for more details.
 
 ### Rules Engine
 
