@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Asset Hierarchy on DefectDojo Documentation</title><link>https://docs.defectdojo.com/asset_modelling/pro_hierarchy/</link><description>Recent content in Asset Hierarchy on DefectDojo Documentation</description><generator>Hugo</generator><language>en-US</language><copyright>Copyright (c) 2020-2025 DefectDojo Inc.</copyright><lastBuildDate>Mon, 01 Jan 0001 00:00:00 +0000</lastBuildDate><atom:link href="https://docs.defectdojo.com/asset_modelling/pro_hierarchy/index.xml" rel="self" type="application/rss+xml"/><item><title>Assets and Organization structure</title><link>https://docs.defectdojo.com/asset_modelling/pro_hierarchy/assets_organizations/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/asset_modelling/pro_hierarchy/assets_organizations/</guid><description>&lt;p&gt;DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.&lt;/p&gt;
+&lt;p&gt;Currently, this feature is in Beta.&lt;/p&gt;</description></item><item><title>Assign Priority, Risk and SLAs</title><link>https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/asset_modelling/pro_hierarchy/priority_sla/</guid><description>&lt;p&gt;
+
+&lt;img
+ src="https://docs.defectdojo.com/images/pro_finding_priority.png"
+ width="1120"
+ height="632"
+ decoding="async"
+ fetchpriority="auto"
+ loading="lazy"
+ alt="image"
+ id="h-rh-i-0"
+&gt;&lt;/p&gt;
+&lt;p&gt;Effective risk-based vulnerability management requires an approach that considers
+both business context and technical exploitability. Using DefectDojo Pro’s Priority and Risk feature, users can automatically sort Findings into a meaningful context, ensuring
+high-impact vulnerabilities can be addressed first.&lt;/p&gt;</description></item><item><title>Product Health Grade</title><link>https://docs.defectdojo.com/asset_modelling/pro_hierarchy/product_health_grade/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/asset_modelling/pro_hierarchy/product_health_grade/</guid><description>&lt;p&gt;DefectDojo can calculate a grade for your Products based on the amount of Findings contained within. Grades are ranked from A - F.&lt;/p&gt;</description></item></channel></rss>
