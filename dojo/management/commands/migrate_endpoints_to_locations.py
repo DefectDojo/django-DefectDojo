@@ -2,6 +2,7 @@ import contextlib
 import datetime
 import logging
 import time
+from collections import defaultdict
 
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -10,7 +11,7 @@ from django.utils import timezone
 
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import DojoMeta, Endpoint, Endpoint_Status
+from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Product
 from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
@@ -97,6 +98,29 @@ class Command(BaseCommand):
         if self.benchmark:
             self.timings[phase] += time.perf_counter() - t0
             self.counts[phase] += 1
+
+    # -- Tag inheritance bookkeeping -----------------------------------------
+
+    def _track_product_location(self, product: Product, location: Location) -> None:
+        """
+        Record a (product, location) pair for the post-migration tag inheritance pass.
+
+        The migration creates locations that may be linked to multiple products
+        (via the endpoint's own product and via each finding's product). We
+        collect every contributing product per location so the post-pass can
+        call ``LocationManager(product)._bulk_inherit_tags(locations)`` once
+        per product group — covering the case where a location is shared
+        across products with differing ``enable_product_tag_inheritance``
+        flags (the helper short-circuits via its own diff check on repeat
+        visits, so redundancy is safe).
+        """
+        if product is None or product.id is None:
+            return
+        if location is None or location.id is None:
+            return
+        self.locations_by_product_id[product.id].add(location.id)
+        self.product_obj_by_id.setdefault(product.id, product)
+        self.location_obj_by_id.setdefault(location.id, location)
 
     # -- Migration logic --------------------------------------------------
 
@@ -197,6 +221,10 @@ class Command(BaseCommand):
             if finding is None:
                 continue
             product = finding.test.engagement.product
+            # Track this contributing product for the post-migration tag
+            # inheritance pass (covers the case where a finding's product
+            # differs from endpoint.product).
+            self._track_product_location(product, location)
             status = self._convert_endpoint_status_to_string_status(endpoint_status)
             # Endpoint_Status.date is a Date; the original code persisted
             # the same midnight-aware datetime in a post-save UPDATE. We
@@ -298,6 +326,55 @@ class Command(BaseCommand):
                           f"{(total_seconds * 1000.0 / total_endpoints if total_endpoints else 0):>18.2f}"
                           f"{'100.0%':>10}")
 
+    # -- Post-migration tag inheritance --------------------------------------
+
+    def _run_tag_inheritance(self) -> None:
+        """
+        Drive `LocationManager._bulk_inherit_tags` once per contributing product.
+
+        Each `LocationManager` call is wrapped in its own try/except so a
+        failure on one product group doesn't prevent the rest from running —
+        same philosophy as the per-endpoint loop. Tag inheritance is a
+        purely additive post-pass; the underlying location/reference rows
+        are already committed by the main loop, so partial failure here
+        leaves a consistent (if incomplete-inheritance) state that a
+        targeted re-run can finish.
+        """
+        if not self.locations_by_product_id:
+            return
+
+        # Lazy import: dojo.importers.* pulls in a lot of modules and we
+        # don't want it loaded at management-command discovery time.
+        from dojo.importers.location_manager import LocationManager  # noqa: PLC0415
+
+        t0 = time.time()
+        n_products = len(self.locations_by_product_id)
+        n_pairs = sum(len(loc_ids) for loc_ids in self.locations_by_product_id.values())
+        n_unique_locations = len(self.location_obj_by_id)
+        n_failures = 0
+        for prod_id, loc_ids in self.locations_by_product_id.items():
+            product = self.product_obj_by_id[prod_id]
+            locations = [self.location_obj_by_id[lid] for lid in loc_ids]
+            try:
+                LocationManager(product)._bulk_inherit_tags(locations)
+            except Exception:
+                logger.exception(
+                    "Tag inheritance pass failed for product id=%s "
+                    "(%d location(s)); continuing with remaining products",
+                    prod_id, len(locations),
+                )
+                n_failures += 1
+        elapsed = time.time() - t0
+        msg = (
+            f"Tag inheritance pass: visited {n_pairs:,} (product, location) pair(s) "
+            f"across {n_products:,} product(s), {n_unique_locations:,} unique location(s), "
+            f"in {elapsed:.2f}s"
+        )
+        if n_failures:
+            self.stdout.write(self.style.WARNING(f"{msg} — {n_failures} product group(s) failed"))
+        else:
+            self.stdout.write(self.style.SUCCESS(msg))
+
     # -- handle ---------------------------------------------------------------
 
     def handle(self, *args, **options):
@@ -309,6 +386,21 @@ class Command(BaseCommand):
         # Per-phase wall-clock accumulators.
         self.timings = dict.fromkeys(PHASES, 0.0)
         self.counts = dict.fromkeys(PHASES, 0)
+
+        # Bookkeeping for the post-migration tag inheritance pass.
+        # `locations_by_product_id` maps product.id -> set of location.ids
+        # contributed by that product (via endpoint.product OR finding.test.
+        # engagement.product). We hold the Product/Location objects in
+        # parallel maps so the post-pass can hand them directly to
+        # `LocationManager(product)._bulk_inherit_tags(locations)` without
+        # extra DB lookups.
+        self.locations_by_product_id: dict[int, set[int]] = defaultdict(set)
+        self.product_obj_by_id: dict[int, Product] = {}
+        self.location_obj_by_id: dict[int, Location] = {}
+
+        # Collected per-endpoint failures so a single bad row doesn't abort
+        # a multi-hour migration. Each entry is (endpoint_id, exception_str).
+        self.failed_endpoints: list[tuple[int | None, str]] = []
 
         if self.query_count:
             connection.force_debug_cursor = True
@@ -360,11 +452,29 @@ class Command(BaseCommand):
                 # prefetch will start incrementing.
                 self._bench_end("fetch_endpoint", t_fetch)
 
-                # Get the URL object first
-                location = self._endpoint_to_url(endpoint)
-                # Associate the URL with the findings associated with the Findings
-                # the association to a finding will also apply to a product automatically
-                self._associate_location_with_findings(endpoint, location)
+                # Wrap the per-endpoint work so one failure doesn't abort a
+                # multi-hour migration. We log the full traceback and record
+                # the endpoint id, then continue. The bulk_create-based hot
+                # path makes partial-state on failure unlikely (each phase
+                # is its own bulk insert), and any rows that DID land remain
+                # valid and idempotent on re-run.
+                try:
+                    # Get the URL object first
+                    location = self._endpoint_to_url(endpoint)
+                    # Track the endpoint's own product as a contributor for the
+                    # post-migration tag inheritance pass (the no-findings
+                    # branch of _associate_location_with_findings also depends
+                    # on this product, and it won't be tracked otherwise).
+                    if endpoint.product_id:
+                        self._track_product_location(endpoint.product, location)
+                    # Associate the URL with the findings associated with the Findings
+                    # the association to a finding will also apply to a product automatically
+                    self._associate_location_with_findings(endpoint, location)
+                except Exception as exc:
+                    endpoint_id = getattr(endpoint, "id", None)
+                    logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
+                    self.failed_endpoints.append((endpoint_id, str(exc)))
+                    continue
 
                 # Progress report every --progress-every endpoints
                 if i % self.progress_every == 0:
@@ -378,10 +488,31 @@ class Command(BaseCommand):
                     self._log_progress(i, endpoint_count, run_t0, queries_in_chunk)
 
             elapsed = time.time() - run_t0
+            successful = i - len(self.failed_endpoints)
             self.stdout.write(self.style.SUCCESS(
-                f"Done. Migrated {i:,} endpoints in {self._fmt_duration(elapsed)} "
+                f"Done. Migrated {successful:,}/{i:,} endpoints in {self._fmt_duration(elapsed)} "
                 f"({(i / elapsed if elapsed else 0):.2f} endpoints/sec).",
             ))
+            if self.failed_endpoints:
+                preview_ids = [eid for eid, _ in self.failed_endpoints[:10]]
+                self.stdout.write(self.style.WARNING(
+                    f"{len(self.failed_endpoints):,} endpoint(s) failed; see logger output above "
+                    f"for tracebacks. First failing endpoint IDs: {preview_ids}",
+                ))
+
+            # Run the post-migration tag inheritance pass. `bulk_create` skips
+            # the `inherit_tags_on_linked_instance` post_save signal, so for
+            # deployments with `enable_product_tag_inheritance` enabled (per
+            # product or system-wide) the migrated Locations would otherwise
+            # not pick up inherited product tags. We grouped (product,
+            # location) pairs during the main loop and now drive
+            # `LocationManager._bulk_inherit_tags` once per contributing
+            # product. The helper rediscovers each location's full product
+            # set via LocationProductReference/LocationFindingReference and
+            # diff-checks before writing, so revisits of shared locations
+            # across product groups are idempotent.
+            self._run_tag_inheritance()
+
             self._print_benchmark_summary(i, elapsed)
 
         if self.query_count:
