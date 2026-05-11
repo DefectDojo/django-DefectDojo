@@ -14,7 +14,7 @@ The essence of DefectDojo is to import security data, organize it, and present i
 
 1. Start by [importing a file](/import_data/import_scan_files/pro__import_scan_ui/) using the UI.  This is generally the quickest way to see how your data fits into the DefectDojo model.
 
-2. Now that you have data in DefectDojo, learn more about how to organize it with the [Product Hierarchy Overview](/asset_modelling/hierarchy/product_hierarchy/). The Product Hierarchy creates a working inventory of your apps, which helps you divide your data into logical categories, apply access control rules, sort Findings by [Priority and Risk](/asset_modelling/hierarchy/pro__priority_sla/) or to segment your reports to the correct team.
+2. Now that you have data in DefectDojo, learn more about how to organize it with the [Product Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/). The Product Hierarchy creates a working inventory of your apps, which helps you divide your data into logical categories, apply access control rules, sort Findings by [Priority and Risk](/asset_modelling/pro_hierarchy/priority_sla/) or to segment your reports to the correct team.
 
 3. Check out your [Metrics pages](/metrics_reports/pro_metrics/pro__overview/) which can be used to quickly share Finding reports with key stakeholders.
 
