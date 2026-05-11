@@ -197,7 +197,7 @@ Note that when a Product's Prioritization Engine is changed, or a Prioritization
 
 Each Product in DefectDojo can have its own Service Level Agreement (SLA) configuration, which represents the days your organization has to remediate or otherwise manage a Finding.
 
-SLA can be set based on either **[Finding Severity](/asset_modelling/hierarchy/product_hierarchy/#findings)** or **[Finding Risk](/asset_modelling/hierarchy/pro__priority_sla/)** (in DefectDojo Pro).
+SLA can be set based on either **[Finding Severity](/asset_modelling/os_hierarchy/product_hierarchy/#findings)** or **[Finding Risk](/asset_modelling/pro_hierarchy/priority_sla/)** (in DefectDojo Pro).
 
 ![image](images/sla_multiple.png)
 

@@ -100,7 +100,7 @@ Tags can be managed in the following ways:
 
 **Pro UI note: though Tag inheritance can be configured using the Pro UI, inherited Tags currently can only be accessed and filtered for through the Classic UI or the API.**
 
-When Tag Inheritance is enabled, tags applied to a given Product will automatically be applied to all objects under Products in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/).
+When Tag Inheritance is enabled, tags applied to a given Product will automatically be applied to all objects under Products in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/).
 
 ### Configuration
 
