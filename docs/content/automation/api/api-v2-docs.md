@@ -189,7 +189,7 @@ Some of the api wrappers contain quite a bit of logic to ease scanning and impor
 ## Import
 Importing via the API is performed via the [import-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
 
-As described in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
+As described in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
 
 An import can be performed by specifying the names of these entities in the API request:
 

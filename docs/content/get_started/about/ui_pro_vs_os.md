@@ -32,13 +32,13 @@ To access the Pro UI, open your User Options menu from the top-right hand corner
 
 4. Import methods can be found in the Import section: set up [API Connectors](/import_data/pro/connectors/about_connectors/), use the [Add Findings](/import_data/import_scan_files/pro__import_scan_ui/) form to Add Findings, use [Smart Upload](/import_data/pro/specialized_import/smart_upload/) to handle infrastructure scanning tools, or use our external tools—[Universal Importer and DefectDojo CLI](/import_data/pro/specialized_import/external_tools/)—to streamline both the import and reimport processes of Findings and associated objects.
 
-5. The **Manage** section allows you to view different objects in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/), with views for Product Types, Products, Engagements, Tests, Findings, Risk Acceptances, Endpoints, and Components.  There are additional sections for generating reports (Report Builder), using surveys (Surveys), as well as a [Rules Engine](/automation/rules_engine/about/). 
+5. The **Manage** section allows you to view different objects in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/), with views for Product Types, Products, Engagements, Tests, Findings, Risk Acceptances, Endpoints, and Components.  There are additional sections for generating reports (Report Builder), using surveys (Surveys), as well as a [Rules Engine](/automation/rules_engine/about/). 
 
 5. The **Settings** section allows you to configure your DefectDojo instance, including your Integrations, License, Cloud Settings, Users, Feature Configuration and admin-level Enterprise Settings.
 
 6. The **Pro Settings** section contains the System Settings, Banner Settings, Notification Settings, Jira Instances, Deduplication Settings, and Authentication Settings, including SAML, OIDC, OAuth, Login, and MFA forms.
 
-7. The Pro UI also has a **new table format**, used in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/) to help with navigation.  Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
+7. The Pro UI also has a **new table format**, used in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/) to help with navigation.  Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
 
 8. The table also has a **"Toggle Columns"** menu which can add or remove columns from the table.
 
