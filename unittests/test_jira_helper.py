@@ -1,25 +1,14 @@
 import logging
 from unittest.mock import Mock
 
-from dojo.jira_link import helper as jira_helper
+import dojo.jira.helper as jira_helper
 from unittests.dojo_test_case import DojoTestCase
 
 logger = logging.getLogger(__name__)
 
 
 class JIRAHelperTest(DojoTestCase):
-
-    """Unit tests for JIRA helper functions"""
-
     def create_mock_jira_issue(self, status_category_key=None, resolution=None):
-        """
-        Helper to create a mock JIRA issue with configurable status category and resolution.
-
-        Args:
-            status_category_key: The key for statusCategory (e.g., "new", "indeterminate", "done")
-            resolution: Resolution value (None, "None", or a dict with resolution details)
-
-        """
         issue = Mock()
         issue.fields = Mock()
 
