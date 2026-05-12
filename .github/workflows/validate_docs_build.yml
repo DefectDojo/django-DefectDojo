@@ -44,6 +44,36 @@ jobs:
       - name: Check internal links
         uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
         with:
-          args: --offline --no-progress --root-dir docs/public './docs/public/**/*.html'
+          # --remap makes lychee resolve absolute docs.defectdojo.com URLs against
+          # the freshly built site, so absURL-rendered links (e.g. nav menu items)
+          # are verified as 404s instead of being skipped as remote URLs.
+          args: >-
+            --offline --no-progress
+            --root-dir ${{ github.workspace }}/docs/public
+            --remap "https://docs.defectdojo.com file://${{ github.workspace }}/docs/public"
+            './docs/public/**/*.html'
           fail: true
+
+      - name: Check in-app docs help links
+        # Find every file under dojo/ that hardcodes a docs.defectdojo.com URL
+        # (templates, settings, etc.) and check those links against the freshly
+        # built site. --remap turns the absolute docs URLs into local file lookups;
+        # --exclude '%7[BD]' drops URL-encoded Django template tags ({% ... %})
+        # so only real external docs URLs are checked. lychee is on $PATH from
+        # the previous lychee-action step.
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(grep -rl 'docs\.defectdojo\.com' dojo/ \
+            --include='*.html' --include='*.py' --include='*.tpl')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No files reference docs.defectdojo.com — pattern is stale." >&2
+            exit 1
+          fi
+          printf 'Checking in-app docs links in:\n'
+          printf '  %s\n' "${files[@]}"
+          lychee --offline --no-progress \
+            --root-dir "${GITHUB_WORKSPACE}/docs/public" \
+            --remap "https://docs.defectdojo.com file://${GITHUB_WORKSPACE}/docs/public" \
+            --exclude '%7[BD]' \
+            "${files[@]}"
 
