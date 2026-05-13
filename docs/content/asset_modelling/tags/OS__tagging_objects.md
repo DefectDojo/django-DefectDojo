@@ -71,7 +71,7 @@ Tags can be managed in the following ways:
 
 ## Tag Inheritance
 
-When Tag Inheritance is enabled, tags applied to a given Product will automatically be applied to all objects under Products in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/).
+When Tag Inheritance is enabled, tags applied to a given Product will automatically be applied to all objects under Products in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/).
 
 ### Configuration
 

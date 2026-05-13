@@ -1773,6 +1773,67 @@ class FindingRequestResponseTest(DojoAPITestCase):
 
 
 @versioned_fixtures
+class RequestResponsePairsAuthzTest(DojoAPITestCase):
+
+    fixtures = ["dojo_testdata.json"]
+
+    def _client_for(self, username):
+        user = User.objects.get(username=username)
+        token = Token.objects.get(user=user)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        return client
+
+    def test_admin_can_create_request_response_pair_positive_control(self):
+        client = self._client_for("admin")
+        before = BurpRawRequestResponse.objects.filter(finding_id=7).count()
+        response = client.post(
+            "/api/v2/request_response_pairs/",
+            dumps({
+                "finding": 7,
+                "burpRequestBase64": "cmVxdWVzdAo=",
+                "burpResponseBase64": "cmVzcG9uc2UK",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201, response.content[:1000])
+        self.assertEqual(BurpRawRequestResponse.objects.filter(finding_id=7).count(), before + 1)
+
+    def test_unrelated_user_cannot_create_request_response_pair_on_hidden_finding(self):
+        client = self._client_for("user2")
+        # Sanity: the victim finding is genuinely hidden from this user.
+        get_response = client.get("/api/v2/findings/7/")
+        self.assertEqual(get_response.status_code, 404)
+
+        before = BurpRawRequestResponse.objects.filter(finding_id=7).count()
+        response = client.post(
+            "/api/v2/request_response_pairs/",
+            dumps({
+                "finding": 7,
+                "burpRequestBase64": "cmVxdWVzdAo=",
+                "burpResponseBase64": "cmVzcG9uc2UK",
+            }),
+            content_type="application/json",
+        )
+        self.assertIn(response.status_code, (403, 404), response.content[:1000])
+        self.assertEqual(BurpRawRequestResponse.objects.filter(finding_id=7).count(), before)
+
+    def test_post_without_finding_returns_4xx(self):
+        client = self._client_for("user2")
+        response = client.post(
+            "/api/v2/request_response_pairs/",
+            dumps({
+                "burpRequestBase64": "cmVxdWVzdAo=",
+                "burpResponseBase64": "cmVzcG9uc2UK",
+            }),
+            content_type="application/json",
+        )
+        # check_post_permission raises ParseError (400) when "finding" is omitted.
+        self.assertGreaterEqual(response.status_code, 400)
+        self.assertLess(response.status_code, 500)
+
+
+@versioned_fixtures
 class FilesTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
