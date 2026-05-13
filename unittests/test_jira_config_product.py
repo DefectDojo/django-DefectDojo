@@ -87,8 +87,11 @@ class JIRAConfigProductTest(DojoTestCase):
         # debian throws 'Name or service not known' error and alpine 'Name does not resolve'
         self.assertTrue(("Name or service not known" in content) or ("Name does not resolve" in content), content)
 
-        # test raw connection error
-        with self.assertRaises(requests.exceptions.RequestException):
+        # test raw connection error — the helper now rejects unresolvable
+        # hostnames via validate_url_for_ssrf before invoking the JIRA client,
+        # which surfaces as ValueError. The original requests-level failure is
+        # still accepted in case validation is bypassed by configuration.
+        with self.assertRaises((ValueError, requests.exceptions.RequestException)):
             jira_helper.get_jira_connection_raw(data["url"], data["username"], data["password"])
 
     @patch("dojo.jira.views.jira_helper.get_jira_connection_raw")
