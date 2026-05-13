@@ -1,5 +1,7 @@
 import vulners
 
+from dojo.utils_ssrf import SSRFError, validate_url_for_ssrf
+
 
 class VulnersAPI:
 
@@ -12,6 +14,11 @@ class VulnersAPI:
         if tool_config.authentication_type == "API":
             self.api_key = tool_config.api_key
             if tool_config.url:
+                try:
+                    validate_url_for_ssrf(tool_config.url)
+                except SSRFError as e:
+                    msg = f"Vulners URL is not allowed: {e}"
+                    raise ValueError(msg) from e
                 self.vulners_api_url = tool_config.url
         else:
             msg = f"Vulners.com Authentication type {tool_config.authentication_type} not supported"

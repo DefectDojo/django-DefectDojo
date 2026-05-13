@@ -5,7 +5,7 @@
     "fields": {
       "name": "SQ1",
       "description": null,
-      "url": "http://localhost/",
+      "url": "https://8.8.8.8/",
       "tool_type": 1,
       "authentication_type": "API",
       "extras": null,

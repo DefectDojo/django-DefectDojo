@@ -1,7 +1,8 @@
 from urllib.parse import urlencode
 
-import requests
 from django.conf import settings
+
+from dojo.utils_ssrf import make_ssrf_safe_session
 
 
 class BugcrowdAPI:
@@ -16,7 +17,7 @@ class BugcrowdAPI:
     }
 
     def __init__(self, tool_config):
-        self.session = requests.Session()
+        self.session = make_ssrf_safe_session()
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
             self.session.headers.update(

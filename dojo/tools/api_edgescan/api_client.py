@@ -1,8 +1,9 @@
 import json
 from json.decoder import JSONDecodeError
 
-import requests
 from django.conf import settings
+
+from dojo.utils_ssrf import SSRFError, make_ssrf_safe_session, validate_url_for_ssrf
 
 
 class EdgescanAPI:
@@ -15,6 +16,12 @@ class EdgescanAPI:
         if tool_config.authentication_type == "API":
             self.api_key = tool_config.api_key
             self.url = tool_config.url or self.DEFAULT_URL
+            try:
+                validate_url_for_ssrf(self.url)
+            except SSRFError as e:
+                msg = f"Edgescan URL is not allowed: {e}"
+                raise ValueError(msg) from e
+            self.session = make_ssrf_safe_session()
             self.options = self.get_extra_options(tool_config)
         else:
             msg = f"Edgescan Authentication type {tool_config.authentication_type} not supported"
@@ -39,7 +46,7 @@ class EdgescanAPI:
         if self.options and "date" in self.options:
             url += f"&c[date_opened_after]={self.options['date']}"
 
-        response = requests.get(
+        response = self.session.get(
             url=url,
             headers=self.get_headers(),
             proxies=self.get_proxies(),

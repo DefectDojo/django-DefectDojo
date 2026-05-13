@@ -1,5 +1,6 @@
-import requests
 from django.conf import settings
+
+from dojo.utils_ssrf import make_ssrf_safe_session
 
 
 class CobaltAPI:
@@ -9,7 +10,7 @@ class CobaltAPI:
     cobalt_api_url = "https://api.cobalt.io"
 
     def __init__(self, tool_config):
-        self.session = requests.Session()
+        self.session = make_ssrf_safe_session()
         if tool_config.authentication_type == "API":
             self.api_token = tool_config.api_key
             self.org_token = tool_config.extras

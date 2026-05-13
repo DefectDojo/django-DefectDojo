@@ -1,12 +1,18 @@
-import requests
 from django.conf import settings
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 
 from dojo.utils import prepare_for_view
+from dojo.utils_ssrf import SSRFError, make_ssrf_safe_session, validate_url_for_ssrf
 
 
 class SonarQubeAPI:
     def __init__(self, tool_config):
+        try:
+            validate_url_for_ssrf(tool_config.url)
+        except SSRFError as e:
+            msg = f"SonarQube URL is not allowed: {e}"
+            raise ValueError(msg) from e
+
         self.rules_cache = {}
 
         supported_issue_types = ["BUG", "VULNERABILITY", "CODE_SMELL"]
@@ -42,7 +48,7 @@ class SonarQubeAPI:
                 msg = f"Detected unsupported issue type! Supported types are {', '.join(supported_issue_types)}"
                 raise Exception(msg)
 
-        self.session = requests.Session()
+        self.session = make_ssrf_safe_session()
         self.default_headers = {"User-Agent": "DefectDojo"}
         self.sonar_api_url = tool_config.url
         if tool_config.authentication_type == "Password":
