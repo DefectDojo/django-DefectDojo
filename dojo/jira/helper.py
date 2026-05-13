@@ -46,6 +46,7 @@ from dojo.utils import (
     to_str_typed,
     truncate_with_dots,
 )
+from dojo.utils_ssrf import SSRFError, validate_url_for_ssrf
 
 logger = logging.getLogger(__name__)
 
@@ -435,6 +436,12 @@ def has_jira_configured(obj):
 
 
 def connect_to_jira(jira_server, jira_username, jira_password):
+    try:
+        validate_url_for_ssrf(jira_server)
+    except SSRFError as e:
+        msg = f"JIRA URL is not allowed: {e}"
+        raise ValueError(msg) from e
+
     max_retries = getattr(settings, "JIRA_MAX_RETRIES", 3)
     timeout = getattr(settings, "JIRA_TIMEOUT", (10, 30))
 
