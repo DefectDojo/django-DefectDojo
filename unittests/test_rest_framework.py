@@ -1849,6 +1849,7 @@ class RequestResponsePairsAuthzTest(DojoAPITestCase):
         self.assertLess(response.status_code, 500)
 
 
+@versioned_fixtures
 class FindingActionAuthzTest(DojoAPITestCase):
 
     fixtures = ["dojo_testdata.json"]
