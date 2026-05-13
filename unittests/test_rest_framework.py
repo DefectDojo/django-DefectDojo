@@ -1849,6 +1849,69 @@ class RequestResponsePairsAuthzTest(DojoAPITestCase):
         self.assertLess(response.status_code, 500)
 
 
+class FindingActionAuthzTest(DojoAPITestCase):
+
+    fixtures = ["dojo_testdata.json"]
+
+    def _client_for(self, username):
+        user = User.objects.get(username=username)
+        token = Token.objects.get(user=user)
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        return client
+
+    def test_admin_can_reset_finding_duplicate_status(self):
+        client = self._client_for("admin")
+        # Mark finding 2 as a duplicate of finding 3 first, then reset.
+        set_response = client.post("/api/v2/findings/2/original/3/")
+        self.assertEqual(set_response.status_code, status.HTTP_204_NO_CONTENT, set_response.content[:500])
+        reset_response = client.post("/api/v2/findings/2/duplicate/reset/")
+        self.assertEqual(reset_response.status_code, status.HTTP_204_NO_CONTENT, reset_response.content[:500])
+        refreshed = Finding.objects.get(pk=2)
+        self.assertFalse(refreshed.duplicate)
+        self.assertIsNone(refreshed.duplicate_finding)
+
+    def test_admin_can_set_finding_as_original(self):
+        client = self._client_for("admin")
+        response = client.post("/api/v2/findings/2/original/3/")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT, response.content[:500])
+        refreshed = Finding.objects.get(pk=2)
+        self.assertTrue(refreshed.duplicate)
+        self.assertEqual(refreshed.duplicate_finding_id, 3)
+
+    def test_unrelated_user_cannot_reset_finding_duplicate_status(self):
+        client = self._client_for("user2")
+        # Sanity: finding 7 is not visible to this user.
+        self.assertEqual(client.get("/api/v2/findings/7/").status_code, 404)
+
+        before = Finding.objects.get(pk=7)
+        before_duplicate = before.duplicate
+        before_duplicate_finding_id = before.duplicate_finding_id
+
+        response = client.post("/api/v2/findings/7/duplicate/reset/")
+        self.assertIn(response.status_code, (403, 404), response.content[:500])
+
+        after = Finding.objects.get(pk=7)
+        self.assertEqual(after.duplicate, before_duplicate)
+        self.assertEqual(after.duplicate_finding_id, before_duplicate_finding_id)
+
+    def test_unrelated_user_cannot_set_finding_as_original(self):
+        client = self._client_for("user2")
+        # Sanity: finding 7 is not visible to this user.
+        self.assertEqual(client.get("/api/v2/findings/7/").status_code, 404)
+
+        before = Finding.objects.get(pk=7)
+        before_duplicate = before.duplicate
+        before_duplicate_finding_id = before.duplicate_finding_id
+
+        response = client.post("/api/v2/findings/7/original/2/")
+        self.assertIn(response.status_code, (403, 404), response.content[:500])
+
+        after = Finding.objects.get(pk=7)
+        self.assertEqual(after.duplicate, before_duplicate)
+        self.assertEqual(after.duplicate_finding_id, before_duplicate_finding_id)
+
+
 @versioned_fixtures
 class FilesTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
