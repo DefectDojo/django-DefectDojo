@@ -12,7 +12,6 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 
@@ -33,13 +32,13 @@ def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES 
         raise PermissionDenied
     # Get the real object based on page type
     if page == "engagement":
-        obj = get_authorized_engagements(Permissions.Engagement_View).filter(id=objid).first()
+        obj = get_authorized_engagements("view").filter(id=objid).first()
         reverse_url = "view_engagement"
     elif page == "test":
-        obj = get_authorized_tests(Permissions.Test_View).filter(id=objid).first()
+        obj = get_authorized_tests("view").filter(id=objid).first()
         reverse_url = "view_test"
     elif page == "finding":
-        obj = get_authorized_findings(Permissions.Finding_View).filter(id=objid).first()
+        obj = get_authorized_findings("view").filter(id=objid).first()
         reverse_url = "view_finding"
     else:
         # If we get here, something is wrong, so let's just raise PermissionDenied
@@ -59,7 +58,7 @@ def delete_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid
     form = DeleteNoteForm(request.POST, instance=note)
 
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, obj, Permissions.Note_Delete)
+        user_has_permission_or_403(request.user, obj, "delete")
 
     if form.is_valid():
         note.delete()
@@ -80,7 +79,7 @@ def edit_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: 
     note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, obj, Permissions.Note_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
 
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -139,7 +138,7 @@ def note_history(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, obji
     note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, obj, Permissions.Note_View_History)
+        user_has_permission_or_403(request.user, obj, "view")
 
     history = note.history.all()
 

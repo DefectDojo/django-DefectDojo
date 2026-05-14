@@ -4,15 +4,17 @@ from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
 
+from dojo.authorization.models import (
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Roles
 from dojo.models import (
     Engagement,
     Finding,
     Product,
     Product_Type,
-    Product_Type_Member,
     Risk_Acceptance,
-    Role,
     Test,
     Test_Type,
     User,

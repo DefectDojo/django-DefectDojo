@@ -11,7 +11,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
 from dojo.forms import ManageFileFormSet
 from dojo.models import (
     Engagement,
@@ -43,15 +42,15 @@ def custom_bad_request_view(request, exception=None):
 def manage_files(request, oid, obj_type):
     if obj_type == "Engagement":
         obj = get_object_or_404(Engagement, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Engagement_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_engagement", "engagement_set")
     elif obj_type == "Test":
         obj = get_object_or_404(Test, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Test_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_test", "test_set")
     elif obj_type == "Finding":
         obj = get_object_or_404(Finding, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_finding", "finding_set")
     else:
         raise Http404
@@ -119,12 +118,8 @@ def protected_serve(request, path, document_root=None, *, show_indexes=False):
         raise Http404
     # Should only one item (but not sure what type) in the list, so O(n=1)
     for obj in object_set:
-        if isinstance(obj, Engagement):
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        elif isinstance(obj, Test):
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-        elif isinstance(obj, Finding):
-            user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
+        if isinstance(obj, (Engagement, Test, Finding)):
+            user_has_permission_or_403(request.user, obj, "view")
 
     return generate_file_response(file)
 
@@ -137,15 +132,15 @@ def access_file(request, fid, oid, obj_type, *, url=False):
     file = get_object_or_404(FileUpload, pk=fid)
     if obj_type == "Engagement":
         obj = get_object_or_404(Engagement, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+        user_has_permission_or_403(request.user, obj, "view")
         obj_manager = file.engagement_set
     elif obj_type == "Test":
         obj = get_object_or_404(Test, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Test_View)
+        user_has_permission_or_403(request.user, obj, "view")
         obj_manager = file.test_set
     elif obj_type == "Finding":
         obj = get_object_or_404(Finding, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
+        user_has_permission_or_403(request.user, obj, "view")
         obj_manager = file.finding_set
     else:
         raise Http404

@@ -3,6 +3,7 @@ import contextlib
 # import the settings file
 from django.conf import settings
 from django.contrib import messages
+from django.urls import NoReverseMatch, reverse
 
 from dojo.announcement.os_message import get_os_banner
 from dojo.labels import get_labels
@@ -12,7 +13,6 @@ from dojo.models import System_Settings, UserAnnouncement
 def globalize_vars(request):
     # return the value you want as a dictionnary. you may add multiple values in there.
     context = {
-        "SHOW_LOGIN_FORM": settings.SHOW_LOGIN_FORM,
         "FORGOT_PASSWORD": settings.FORGOT_PASSWORD,
         "FORGOT_USERNAME": settings.FORGOT_USERNAME,
         "CLASSIC_AUTH_ENABLED": settings.CLASSIC_AUTH_ENABLED,
@@ -40,10 +40,35 @@ def globalize_vars(request):
         for banner in request.session.pop("_product_banners", []):
             additional_banners.append(banner)
 
+    if _should_show_ui_toggle_banner(request):
+        try:
+            profile_url = reverse("view_profile")
+        except NoReverseMatch:
+            profile_url = ""
+        additional_banners.append({
+            "source": "ui_toggle",
+            "message": "A redesigned UI is available as a beta opt-in. It will become the default on September 8th in the 2.62.0 release.",
+            "style": "info",
+            "url": profile_url,
+            "link_text": "Enable it in your profile.",
+            "expanded_html": None,
+        })
+
     if additional_banners:
         context["additional_banners"] = additional_banners
 
     return context
+
+
+def _should_show_ui_toggle_banner(request):
+    user = getattr(request, "user", None)
+    if user is None or not getattr(user, "is_authenticated", False):
+        return False
+    contact = getattr(user, "usercontactinfo", None)
+    # Show the banner whenever the authenticated user has not opted into the
+    # Tailwind UI — that includes users without a contact info row at all
+    # (those users get the classic UI by default in UIPreferenceLoader).
+    return not (contact is not None and getattr(contact, "ui_use_tailwind", False))
 
 
 def bind_system_settings(request):

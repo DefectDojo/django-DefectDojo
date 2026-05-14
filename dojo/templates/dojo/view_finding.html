@@ -51,7 +51,7 @@
                             <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dropdownMenu1">
-                            {% if finding|has_object_permission:"Finding_Edit" %}
+                            {% if finding|has_object_permission:"edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'edit_finding' finding.id %}">
                                         <i class="fa-solid fa-pen-to-square"></i> Edit Finding
@@ -63,7 +63,7 @@
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" %}
+                            {% if finding|has_object_permission:"edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'manage_files' oid=finding.id obj_type='Finding' %}">
                                         <i class="fa-solid fa-file-image-o"></i> Manage Files
@@ -71,8 +71,8 @@
                                 </li>
                                 <li role="separator" class="divider"></li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_View" %}
-                                {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                            {% if finding|has_object_permission:"view" %}
+                                {% if finding|has_object_permission:"edit" and clear_peer_review %}
                                     <li role="presentation">
                                         <a href="{% url 'clear_finding_review' finding.id %}">
                                             <i class="icon-user-check"></i> Clear Review
@@ -86,7 +86,7 @@
                                     </li>
                                 {% endif %}
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" %}
+                            {% if finding|has_object_permission:"edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'touch_finding' finding.id %}">
                                         <i class="fa-solid fa-clock"></i> Touch Finding
@@ -94,7 +94,7 @@
                                 </li>
                             {% endif %}
                             <li role="separator" class="divider"></li>
-                            {% if "Finding_Add"|has_global_permission %}
+                            {% if "add"|has_global_permission %}
                                 <li role="presentation">
                                     <a href="{% url 'mktemplate' finding.id %}">
                                         <i class="fa-solid fa-copy"></i> Make Finding a Template
@@ -102,14 +102,14 @@
                                 </li>
                             {% endif %}
 
-                            {% if finding|has_object_permission:"Finding_Edit" %}
+                            {% if finding|has_object_permission:"edit" %}
                                 <li role="presentation">
                                     <a href="{% url 'find_template_to_apply' finding.id %}">
                                         <i class="fa-solid fa-copy"></i> Apply Template to Finding
                                     </a>
                                 </li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" %}
+                            {% if finding|has_object_permission:"edit" %}
                                 <li role="separator" class="divider"></li>
                                     <li role="presentation">
                                         <a href="{% url 'remediation_date' finding.id %}">
@@ -117,7 +117,7 @@
                                         </a>
                                     </li>
                             {% endif %}
-                            {% if finding|has_object_permission:"Finding_Edit" %}
+                            {% if finding|has_object_permission:"edit" %}
                                 <li role="separator" class="divider"></li>
                                 {% if finding.mitigated %}
                                     <li role="presentation">
@@ -140,7 +140,7 @@
                                 </li>
                                 {% endif %}
                             {% endif %}
-                            {% if finding|has_object_permission:"Risk_Acceptance" %}
+                            {% if finding|has_object_permission:"edit" %}
                                 {% if finding.risk_accepted %}
                                     <li role="presentation">
                                     <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -171,7 +171,7 @@
                                     <i class="fa-solid fa-clock-rotate-left"></i> View History
                                 </a>
                             </li>
-                            {% if finding|has_object_permission:"Finding_Delete" %}
+                            {% if finding|has_object_permission:"delete" %}
                                 <li role="separator" class="divider"></li>
                                 <li role="presentation">
                                     <a class="text-danger delete-finding" href="#">
@@ -197,7 +197,7 @@
                                 <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
                                 Alert: This Finding is under review and may not be 100% accurate.
                             </span>
-                            {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                            {% if finding|has_object_permission:"edit" and clear_peer_review %}
                                 [<a title="Clear Review" class="text-primary" style="display: inline !important;"
                                     href="{% url 'clear_finding_review' finding.id %}">Clear Review</a>]
                             {% endif %}
@@ -281,7 +281,7 @@
                                 {% if finding.severity %}
                                     {{ finding.severity_display }}
                                     {% if system_settings.enable_cvss4_display and finding.cvssv4_score or system_settings.enable_cvss3_display and finding.cvssv3_score %}
-                                        <i class="no-italics has-popover" font-style="normal" data-toggle="tooltip" data-placement="bottom" data-container="body" data-html="true" title="" href="#"
+                                        <i class="no-italics has-popover" font-style="normal" data-html="true" href="#"
                                             data-content="{% if system_settings.enable_cvss4_display and finding.cvssv4 %}{{ finding.cvssv4 }} ({{ finding.cvssv4_score }}){% endif %}{% if system_settings.enable_cvss4_display and finding.cvssv4 and system_settings.enable_cvss3_display and finding.cvssv3 %}<br/>{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3 %}{{ finding.cvssv3 }} ({{ finding.cvssv3_score }}){% endif %}">
                                         ({% if system_settings.enable_cvss4_display and finding.cvssv4_score %}{{ finding.cvssv4_score }}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}, {% endif %}{% endif %}{% if system_settings.enable_cvss3_display and finding.cvssv3_score %}{{ finding.cvssv3_score }}{% endif %})</i>
                                     {% endif %}
@@ -314,9 +314,7 @@
                                 {% for ra in finding.risk_acceptance_set.all|slice:":5" %}
                                     <a href="{% url 'view_risk_acceptance' finding.test.engagement.id ra.id %}"
                                     class="fa-solid fa-circle-exclamation fa-lg has-popover {% if ra.is_expired %}lightgrey{% endif%}"
-                                    data-trigger="hover" data-placement="right"
-                                    data-content="{{ ra.name_and_expiration_info }}"
-                                    data-container="body" data-original-title="Risk Acceptance"></a>
+                                    data-content="{{ ra.name_and_expiration_info }}"></a>
                                 {% endfor %}
                             </td>
                         {% endif %}
@@ -630,21 +628,20 @@
                         {% if finding.has_jira_issue %}
                             <a href="{{ finding | jira_issue_url }}"
                             target="_blank" title="{{ finding | jira_issue_url }}">{{ finding | jira_key }}</a>
-                            <i id="unlink_jira" class="fa-solid fa-trash" title="Unlink JIRA issue from this finding."></i>
-                            <i id="push_to_jira" class="fa-solid fa-share-from-square" title="Push finding data to linked JIRA issue."></i>
+                            <i id="unlink_jira" class="fa-solid fa-trash" title="Unlink JIRA issue from this finding." hx-post="{% url 'finding_unlink_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" hx-confirm="Are you sure you want to unlink this JIRA issue?" style="cursor:pointer"></i>
+                            <i id="push_to_jira" class="fa-solid fa-share-from-square" title="Push finding data to linked JIRA issue." hx-post="{% url 'finding_push_to_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
                         {% else %}
                             {% if can_be_pushed_to_jira %}
                                 {% if not finding.has_jira_group_issue %}
                                 None
-                                <i id="push_to_jira" class="fa-solid fa-share-from-square" title="Create JIRA issue for this finding"></i>
+                                <i id="push_to_jira" class="fa-solid fa-share-from-square" title="Create JIRA issue for this finding" hx-post="{% url 'finding_push_to_jira' finding.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
                                 {% comment %} <a href="{% url 'finding_link_to_jira' finding.id %}" title="Link existing JIRA issue to finding.">
                                     <i class="fa-solid fa-asterisk" title="Link existing JIRA issue to finding."></i>
                                 </a> {% endcomment %}
                                 {% endif %}
                             {% else %}
-                                <i class="fa-solid fa-circle-question has-popover" data-trigger="hover"
-                                data-content="{{ can_be_pushed_to_jira_error }}"
-                                data-placement="bottom" data-container="body">
+                                <i class="fa-solid fa-circle-question has-popover"
+                                data-content="{{ can_be_pushed_to_jira_error }}">
                                 </i>
                             {% endif %}
                         {% endif %}
@@ -667,7 +664,7 @@
                 {% if 'is_finding_groups_enabled'|system_setting_enabled and finding.finding_group %}
                     <td>
                         <a href="{% url 'view_finding_group' finding.finding_group.id %}" title="{{ finding.finding_group.name }}">{{ finding.finding_group.name }}</a>
-                        <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings."></i>
+                        <i id="push_group_to_jira_{{ finding.finding_group.group.id }}" data-group-id="{{ finding.finding_group.id }}" class="fa-solid fa-share-from-square push_group_to_jira" title="Update JIRA issue with current data from this group of findings." hx-post="{% url 'finding_group_push_to_jira' finding.finding_group.id %}" hx-swap="none" hx-on::after-request="window.location.reload()" style="cursor:pointer"></i>
                     </td>
                 {% endif %}
                 {% if finding.effort_for_fixing %}
@@ -715,7 +712,7 @@
         <div id="duplicate_cluster" style="padding-top: 6em; margin-top: -6em;"></div>
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h4>Duplicate Cluster ({{ finding|finding_duplicate_cluster_size }})<span class="pull-right"><a data-toggle="collapse" id="duplicate_tree_toggle" href="#duplicate_tree"><i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                <h4>Duplicate Cluster ({{ finding|finding_duplicate_cluster_size }})<span class="pull-right"><a data-toggle="collapse" id="duplicate_tree_toggle" href="#duplicate_tree"><i class="fa-solid fa-chevron-down"></i></a></span></h4>
             </div>
             <div id="duplicate_tree" class="panel-body collapse">
                 {% if finding.duplicate_finding %}
@@ -731,18 +728,17 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 class="has-filters">Similar Findings ({{ similar_findings.paginator.count }})
-                    <i class="fa-solid fa-circle-question has-popover" data-trigger="hover"
+                    <i class="fa-solid fa-circle-question has-popover"
                        data-content="Opening this panel shows findings in this Asset that are not exact duplicates,
                         but have similar values for Vulnerability Id, CWE, file_path, line number, unique_id_from_tool.
                         It has a filter panel where filtering can be made less or more strict. The resulting findings can be view, marked as duplicate or original.
                         Clear filters will empty all filters. Restart will start over by matching against the fields
-                        mentioned above."
-                        data-placement="bottom" data-container="body">
+                        mentioned above.">
                     </i>
                     <span class="pull-right">
                         <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters-wrapper" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
                         &nbsp;
-                        <a data-toggle="collapse" href="#the-filters-wrapper"><i class="glyphicon glyphicon-chevron-down"></i></a>
+                        <a data-toggle="collapse" href="#the-filters-wrapper"><i class="fa-solid fa-chevron-down"></i></a>
                     </span>
                 </h4>
             </div>
@@ -773,12 +769,7 @@
                     <h4 class="has-filters">
                         {% trans "Import History" %} ({{ test_import_finding_actions_count }})
                         <i class="fa-solid fa-circle-question has-popover"
-                        data-trigger="hover"
-                        data-content="List of imports/reimports that created/closed/reactivated this finding in any test."
-                        data-placement="right"
-                        data-container="body"
-                        data-original-title=""
-                        title="">
+                        data-content="List of imports/reimports that created/closed/reactivated this finding in any test.">
                         </i>
                         <div class="dropdown pull-right">
                             <button id="show-filters"
@@ -791,7 +782,7 @@
                             &nbsp;
                             <span class="pull-right">
                                 <a data-toggle="collapse" href="#import_history">
-                                    <i class="glyphicon glyphicon-chevron-down"></i>
+                                    <i class="fa-solid fa-chevron-down"></i>
                                 </a>
                             </span>
                         </div>
@@ -949,7 +940,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Description <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i
-                        class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                        class="fa-solid fa-chevron-up"></i></a></span></h4>
             </div>
             <div id="vuln_desc" class="panel-body finding-description collapse in">
               <pre>{{ finding.description|markdown_render|default_if_none:"" }}</pre>
@@ -963,7 +954,7 @@
                         <div class="panel-heading">
                             <h4>Files<span class="pull-right">
                             <a data-toggle="collapse" href="#add_feat_files">
-                                <i class="glyphicon glyphicon-chevron-down"></i></a></span>
+                                <i class="fa-solid fa-chevron-down"></i></a></span>
                             <a title="Manage Files" name="Manage Files" class="btn btn-sm btn-primary pull-right"
                                 href="{% url 'manage_files' oid=finding.id obj_type='Finding' %}">
                                 <span class="fa-solid fa-pen-to-square"></span></a>
@@ -979,7 +970,7 @@
                                         {% if file|get_thumbnail %}
                                             <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
                                         {% else %}
-                                            <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                                            <span style="font-size: 50px;" class="fa-solid fa-file"></span>
                                         {% endif %}
                                     </a>
                                 </div>
@@ -997,7 +988,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Mitigation <span class="pull-right"><a data-toggle="collapse" href="#vuln_mitigation"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.mitigation %}up{%else%}down{%endif%}"></i></a></span></h4>
+                        class="fa-solid fa-chevron-{% if finding.mitigation %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_mitigation" class="panel-body collapse {% if finding.mitigation %}in{%endif%}">
                 <pre>{{ finding.mitigation|markdown_render|default_if_none:"" }}</pre>
@@ -1007,7 +998,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <h4>Request / Response Pairs <span class="pull-right"><a data-toggle="collapse" href="#vuln_req_res">
-                        <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                        <i class="fa-solid fa-chevron-down"></i></a></span></h4>
                 </div>
                 <div id="vuln_req_res" class="panel-body collapse">
                     {% for req_resp in finding.burprawrequestresponse_set.all %}
@@ -1015,7 +1006,7 @@
                             <div class="panel-heading">
                                 <h4>Request #{{ forloop.counter }}<span class="pull-right">
                                     <a data-toggle="collapse" href="#vuln_req_{{ forloop.counter }}">
-                                        <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                                        <i class="fa-solid fa-chevron-down"></i></a></span></h4>
                             </div>
                             <div id="vuln_req_{{ forloop.counter }}" class="panel-body collapse">
                                 <pre>{{ req_resp.get_request }}</pre>
@@ -1025,7 +1016,7 @@
                             <div class="panel-heading">
                                 <h4>Response #{{ forloop.counter }}<span class="pull-right">
                                     <a data-toggle="collapse" href="#vuln_res_{{ forloop.counter }}">
-                                        <i class="glyphicon glyphicon-chevron-down"></i></a></span></h4>
+                                        <i class="fa-solid fa-chevron-down"></i></a></span></h4>
                             </div>
 
                             <div id="vuln_res_{{ forloop.counter }}" class="panel-body collapse">
@@ -1039,7 +1030,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Impact <span class="pull-right"><a data-toggle="collapse" href="#vuln_impact"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.impact %}up{%else%}down{%endif%}"></i></a></span></h4>
+                        class="fa-solid fa-chevron-{% if finding.impact %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_impact" class="panel-body collapse {% if finding.impact %}in{%endif%}">
                 <pre>{{ finding.impact|markdown_render|default_if_none:"" }}</pre>
@@ -1049,7 +1040,7 @@
         <div class="panel panel-default" id="steps">
             <div class="panel-heading">
                 <h4>Steps To Reproduce <span class="pull-right"><a data-toggle="collapse" href="#vuln_reproduce"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.steps_to_reproduce %}up{%else%}down{%endif%}"></i></a></span></h4>
+                        class="fa-solid fa-chevron-{% if finding.steps_to_reproduce %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_reproduce" class="panel-body collapse {% if finding.steps_to_reproduce %}in{%endif%}">
                 <pre>{{ finding.steps_to_reproduce|markdown_render|default_if_none:"" }}</pre>
@@ -1059,7 +1050,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Severity Justification <span class="pull-right"><a data-toggle="collapse" href="#sev_just"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.severity_justification %}up{%else%}down{%endif%}"></i></a></span></h4>
+                        class="fa-solid fa-chevron-{% if finding.severity_justification %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="sev_just" class="panel-body collapse {% if finding.severity_justification %}in{%endif%}">
                 <pre>{{ finding.severity_justification|markdown_render|default_if_none:"" }}</pre>
@@ -1069,7 +1060,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>References <span class="pull-right"><a data-toggle="collapse" href="#vuln_refs"><i
-                        class="glyphicon glyphicon-chevron-{% if finding.references %}up{%else%}down{%endif%}"></i></a></span></h4>
+                        class="fa-solid fa-chevron-{% if finding.references %}up{%else%}down{%endif%}"></i></a></span></h4>
             </div>
             <div id="vuln_refs" class="panel-body collapse {% if finding.references %}in{%endif%}">
                 <pre>{{ finding.get_references_with_links|markdown_render|default_if_none:"" }}</pre>
@@ -1094,12 +1085,11 @@
     {{ block.super }}
     <script src="{% static "clipboard/dist/clipboard.min.js" %}"></script>
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         var firstID = {% if findings_list.0 %}{{findings_list.0}}{% else %}null{% endif %};
         var currentID = {% if finding.id %}{{finding.id}}{% else %}null{% endif %};
         var lastID = {% if findings_list_lastElement %}{{findings_list_lastElement}}{% else %}null{% endif %};
-        var canEditFinding = {% if finding|has_object_permission:"Finding_Edit" %}true{% else %}false{% endif %};
+        var canEditFinding = {% if finding|has_object_permission:"edit" %}true{% else %}false{% endif %};
         var findingIsMitigated = {% if finding.mitigated %}true{% else %}false{% endif %};
         var findingIsVerified = {% if finding.verified %}true{% else %}false{% endif %};
         if(currentID != firstID)
@@ -1138,7 +1128,7 @@
             })
             $("a[data-toggle='collapse']").on('click', function () {
                 var i = $($(this).find('i').get(0));
-                i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
+                i.toggleClass('fa-chevron-up').toggleClass('fa-chevron-down');
             })
 
             // Configure tooltips for CVSS vectors - try multiple approaches
@@ -1236,46 +1226,6 @@
                     }
                 }
             });
-        });
-
-        function jira_action(elem, url) {
-            $(elem).removeClass().addClass('fa-solid fa-spin fa-spinner')
-
-            $.ajax({
-                type: "post",
-                dataType:'json',
-                data: '',
-                context: this,
-                url: url,
-                // The ``X-CSRFToken`` evidently can't be set in the
-                // ``headers`` option, so force it here.
-                // This method requires jQuery 1.5+.
-                beforeSend: function (jqXHR, settings) {
-                    // Pull the token out of the DOM.
-                    jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-                },
-                success: function (data, textStatus, jqXHR) {
-                },
-                error: function (request, status, error) {
-                    console.log('error')
-                    console.log(request.responseText)
-                },
-                complete: function(e) {
-                    location.reload()
-                }
-            });
-        }
-
-        $("#push_to_jira").on('click', function(e) {
-            jira_action(this,'{% url 'finding_push_to_jira' finding.id %}')
-        });
-
-        $("#unlink_jira").on('click', function(e) {
-            jira_action(this,'{% url 'finding_unlink_jira' finding.id %}')
-        });
-
-        $(".push_group_to_jira").on('click', function(e) {
-            jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/push')
         });
 
         var checkbox_count = 0;

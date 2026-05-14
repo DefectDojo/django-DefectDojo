@@ -1,7 +1,47 @@
-from enum import IntEnum
+from enum import IntEnum, StrEnum
+
+
+class Action(StrEnum):
+
+    """
+    Legacy permission actions. The fine-grained Permissions enum below is
+    preserved so existing call sites (`@user_is_authorized(Permissions.X, …)`)
+    keep compiling, but every check now flattens to one of these intents:
+
+      * View          — read-only access to an object (membership in
+                        authorized_users, or staff/superuser bypass)
+      * Edit / Add    — mutating an existing object or creating one
+                        (membership in authorized_users + staff bypass)
+      * Delete        — destroying an object (staff/superuser only)
+      * Import        — bulk ingest of scan results (staff bypass + per-product
+                        membership)
+      * StaffOnly     — administrative actions like member management or
+                        configuration changes
+      * SuperuserOnly — system-wide changes that legacy never delegated
+
+    The role hierarchy (Reader / Writer / Maintainer / Owner) does not exist
+    in this model; per-product distinctions collapse to membership.
+    """
+
+    View = "view"
+    Add = "add"
+    Edit = "edit"
+    Delete = "delete"
+    Import = "import"
+    StaffOnly = "staff_only"
+    SuperuserOnly = "superuser_only"
 
 
 class Roles(IntEnum):
+
+    """
+    Preserved for backward compatibility. Legacy authorization no longer
+    branches on roles — these values now act as labels only. The membership
+    tables (Product_Member, Product_Type_Member, Global_Role) exist as inert
+    data tables that the dojo-pro plugin can adopt; nothing in dojo/ reads
+    role assignments after the legacy rewrite.
+    """
+
     Reader = 5
     API_Importer = 1
     Writer = 2
@@ -131,360 +171,157 @@ class Permissions(IntEnum):
     @classmethod
     def get_engagement_permissions(cls):
         return {
-            Permissions.Engagement_View,
-            Permissions.Engagement_Edit,
-            Permissions.Engagement_Delete,
-            Permissions.Risk_Acceptance,
-            Permissions.Test_Add,
-            Permissions.Import_Scan_Result,
-            Permissions.Note_Add,
-            Permissions.Note_Delete,
-            Permissions.Note_Edit,
-            Permissions.Note_View_History,
+            "view",
+            "edit",
+            "delete",
+            "add",
+            "import",
         }.union(cls.get_test_permissions())
 
     @classmethod
     def get_test_permissions(cls):
         return {
-            Permissions.Test_View,
-            Permissions.Test_Edit,
-            Permissions.Test_Delete,
-            Permissions.Finding_Add,
-            Permissions.Import_Scan_Result,
-            Permissions.Note_Add,
-            Permissions.Note_Delete,
-            Permissions.Note_Edit,
-            Permissions.Note_View_History,
+            "view",
+            "edit",
+            "delete",
+            "add",
+            "import",
         }.union(cls.get_finding_permissions())
 
     @classmethod
     def get_finding_permissions(cls):
         return {
-            Permissions.Finding_View,
-            Permissions.Finding_Edit,
-            Permissions.Finding_Add,
-            Permissions.Import_Scan_Result,
-            Permissions.Finding_Delete,
-            Permissions.Note_Add,
-            Permissions.Risk_Acceptance,
-            Permissions.Note_Delete,
-            Permissions.Note_Edit,
-            Permissions.Note_View_History,
+            "view",
+            "edit",
+            "add",
+            "import",
+            "delete",
         }.union(cls.get_finding_group_permissions())
 
     @classmethod
     def get_finding_group_permissions(cls):
         return {
-            Permissions.Finding_Group_View,
-            Permissions.Finding_Group_Edit,
-            Permissions.Finding_Group_Delete,
+            "view",
+            "edit",
+            "delete",
         }
 
     @classmethod
     def get_location_permissions(cls):
         return {
-            Permissions.Location_View,
-            Permissions.Location_Edit,
-            Permissions.Location_Delete,
+            "view",
+            "edit",
+            "delete",
         }
 
     @classmethod
     def get_product_member_permissions(cls):
         return {
-            Permissions.Product_View,
-            Permissions.Product_Manage_Members,
-            Permissions.Product_Member_Delete,
+            "view",
+            "staff_only",
+            "delete",
         }
 
     @classmethod
     def get_product_type_member_permissions(cls):
         return {
-            Permissions.Product_Type_View,
-            Permissions.Product_Type_Manage_Members,
-            Permissions.Product_Type_Member_Delete,
+            "view",
+            "staff_only",
+            "delete",
         }
 
     @classmethod
     def get_product_group_permissions(cls):
         return {
-            Permissions.Product_Group_View,
-            Permissions.Product_Group_Edit,
-            Permissions.Product_Group_Delete,
+            "view",
+            "edit",
+            "delete",
         }
 
     @classmethod
     def get_product_type_group_permissions(cls):
         return {
-            Permissions.Product_Type_Group_View,
-            Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete,
+            "view",
+            "edit",
+            "delete",
         }
 
     @classmethod
     def get_group_permissions(cls):
         return {
-            Permissions.Group_View,
-            Permissions.Group_Member_Delete,
-            Permissions.Group_Manage_Members,
-            Permissions.Group_Add_Owner,
-            Permissions.Group_Edit,
-            Permissions.Group_Delete,
+            "view",
+            "delete",
+            "staff_only",
+            "edit",
         }
 
     @classmethod
     def get_group_member_permissions(cls):
         return {
-            Permissions.Group_View,
-            Permissions.Group_Manage_Members,
-            Permissions.Group_Member_Delete,
+            "view",
+            "staff_only",
+            "delete",
         }
 
     @classmethod
     def get_language_permissions(cls):
         return {
-            Permissions.Language_View,
-            Permissions.Language_Edit,
-            Permissions.Language_Delete,
+            "view",
+            "edit",
+            "delete",
         }
 
     @classmethod
     def get_technology_permissions(cls):
         return {
-            Permissions.Technology_View,
-            Permissions.Technology_Edit,
-            Permissions.Technology_Delete,
+            "view",
+            "edit",
+            "delete",
         }
 
     @classmethod
     def get_product_api_scan_configuration_permissions(cls):
         return {
-            Permissions.Product_API_Scan_Configuration_View,
-            Permissions.Product_API_Scan_Configuration_Edit,
-            Permissions.Product_API_Scan_Configuration_Delete,
+            "view",
+            "edit",
+            "delete",
         }
 
 
 def get_roles_with_permissions():
     return {
         Roles.Reader: {
-            Permissions.Product_Type_View,
-            Permissions.Product_View,
-            Permissions.Engagement_View,
-            Permissions.Test_View,
-            Permissions.Finding_View,
-            Permissions.Finding_Group_View,
-            Permissions.Location_View,
-            Permissions.Component_View,
-            Permissions.Note_Add,
-            Permissions.Product_Group_View,
-            Permissions.Product_Type_Group_View,
-            Permissions.Group_View,
-            Permissions.Language_View,
-            Permissions.Technology_View,
-            Permissions.Product_API_Scan_Configuration_View,
-            Permissions.Product_Tracking_Files_View,
+            "view",
+            "add",
         },
         Roles.API_Importer: {
-            Permissions.Product_Type_View,
-            Permissions.Product_View,
-            Permissions.Engagement_View,
-            Permissions.Engagement_Add,
-            Permissions.Engagement_Edit,
-            Permissions.Test_View,
-            Permissions.Test_Edit,
-            Permissions.Finding_View,
-            Permissions.Finding_Group_View,
-            Permissions.Location_View,
-            Permissions.Component_View,
-            Permissions.Product_Group_View,
-            Permissions.Product_Type_Group_View,
-            Permissions.Technology_View,
-            Permissions.Import_Scan_Result,
+            "view",
+            "add",
+            "edit",
+            "import",
         },
         Roles.Writer: {
-            Permissions.Product_Type_View,
-            Permissions.Product_View,
-            Permissions.Engagement_View,
-            Permissions.Engagement_Add,
-            Permissions.Engagement_Edit,
-            Permissions.Risk_Acceptance,
-            Permissions.Test_View,
-            Permissions.Test_Add,
-            Permissions.Test_Edit,
-            Permissions.Finding_View,
-            Permissions.Finding_Add,
-            Permissions.Import_Scan_Result,
-            Permissions.Finding_Edit,
-            Permissions.Finding_Group_View,
-            Permissions.Finding_Group_Add,
-            Permissions.Finding_Group_Edit,
-            Permissions.Finding_Group_Delete,
-            Permissions.Location_View,
-            Permissions.Location_Add,
-            Permissions.Location_Edit,
-            Permissions.Benchmark_Edit,
-            Permissions.Component_View,
-            Permissions.Note_View_History,
-            Permissions.Note_Edit,
-            Permissions.Note_Add,
-            Permissions.Product_Group_View,
-            Permissions.Product_Type_Group_View,
-            Permissions.Group_View,
-            Permissions.Language_View,
-            Permissions.Language_Add,
-            Permissions.Language_Edit,
-            Permissions.Language_Delete,
-            Permissions.Technology_View,
-            Permissions.Technology_Add,
-            Permissions.Technology_Edit,
-            Permissions.Product_API_Scan_Configuration_View,
-            Permissions.Product_Tracking_Files_View,
+            "view",
+            "add",
+            "edit",
+            "import",
+            "delete",
         },
         Roles.Maintainer: {
-            Permissions.Product_Type_Add_Product,
-            Permissions.Product_Type_View,
-            Permissions.Product_Type_Member_Delete,
-            Permissions.Product_Type_Manage_Members,
-            Permissions.Product_Type_Edit,
-            Permissions.Product_View,
-            Permissions.Product_Member_Delete,
-            Permissions.Product_Manage_Members,
-            Permissions.Product_Configure_Notifications,
-            Permissions.Product_Edit,
-            Permissions.Engagement_View,
-            Permissions.Engagement_Add,
-            Permissions.Engagement_Edit,
-            Permissions.Engagement_Delete,
-            Permissions.Risk_Acceptance,
-            Permissions.Test_View,
-            Permissions.Test_Add,
-            Permissions.Test_Edit,
-            Permissions.Test_Delete,
-            Permissions.Finding_View,
-            Permissions.Finding_Add,
-            Permissions.Import_Scan_Result,
-            Permissions.Finding_Edit,
-            Permissions.Finding_Delete,
-            Permissions.Finding_Group_View,
-            Permissions.Finding_Group_Add,
-            Permissions.Finding_Group_Edit,
-            Permissions.Finding_Group_Delete,
-            Permissions.Location_View,
-            Permissions.Location_Add,
-            Permissions.Location_Edit,
-            Permissions.Location_Delete,
-            Permissions.Benchmark_Edit,
-            Permissions.Benchmark_Delete,
-            Permissions.Component_View,
-            Permissions.Note_View_History,
-            Permissions.Note_Edit,
-            Permissions.Note_Add,
-            Permissions.Note_Delete,
-            Permissions.Product_Group_View,
-            Permissions.Product_Group_Add,
-            Permissions.Product_Group_Edit,
-            Permissions.Product_Group_Delete,
-            Permissions.Product_Type_Group_View,
-            Permissions.Product_Type_Group_Add,
-            Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete,
-            Permissions.Group_View,
-            Permissions.Group_Edit,
-            Permissions.Group_Manage_Members,
-            Permissions.Group_Member_Delete,
-            Permissions.Language_View,
-            Permissions.Language_Add,
-            Permissions.Language_Edit,
-            Permissions.Language_Delete,
-            Permissions.Technology_View,
-            Permissions.Technology_Add,
-            Permissions.Technology_Edit,
-            Permissions.Technology_Delete,
-            Permissions.Product_API_Scan_Configuration_View,
-            Permissions.Product_API_Scan_Configuration_Add,
-            Permissions.Product_API_Scan_Configuration_Edit,
-            Permissions.Product_API_Scan_Configuration_Delete,
-            Permissions.Product_Tracking_Files_View,
-            Permissions.Product_Tracking_Files_Add,
-            Permissions.Product_Tracking_Files_Edit,
-            Permissions.Product_Tracking_Files_Delete,
+            "add",
+            "view",
+            "delete",
+            "staff_only",
+            "edit",
+            "import",
         },
         Roles.Owner: {
-            Permissions.Product_Type_Add_Product,
-            Permissions.Product_Type_View,
-            Permissions.Product_Type_Member_Delete,
-            Permissions.Product_Type_Manage_Members,
-            Permissions.Product_Type_Member_Add_Owner,
-            Permissions.Product_Type_Edit,
-            Permissions.Product_Type_Delete,
-            Permissions.Product_View,
-            Permissions.Product_Member_Delete,
-            Permissions.Product_Manage_Members,
-            Permissions.Product_Member_Add_Owner,
-            Permissions.Product_Configure_Notifications,
-            Permissions.Product_Edit,
-            Permissions.Product_Delete,
-            Permissions.Engagement_View,
-            Permissions.Engagement_Add,
-            Permissions.Engagement_Edit,
-            Permissions.Engagement_Delete,
-            Permissions.Risk_Acceptance,
-            Permissions.Test_View,
-            Permissions.Test_Add,
-            Permissions.Test_Edit,
-            Permissions.Test_Delete,
-            Permissions.Finding_View,
-            Permissions.Finding_Add,
-            Permissions.Import_Scan_Result,
-            Permissions.Finding_Edit,
-            Permissions.Finding_Delete,
-            Permissions.Finding_Group_View,
-            Permissions.Finding_Group_Add,
-            Permissions.Finding_Group_Edit,
-            Permissions.Finding_Group_Delete,
-            Permissions.Location_View,
-            Permissions.Location_Add,
-            Permissions.Location_Edit,
-            Permissions.Location_Delete,
-            Permissions.Benchmark_Edit,
-            Permissions.Benchmark_Delete,
-            Permissions.Component_View,
-            Permissions.Note_View_History,
-            Permissions.Note_Edit,
-            Permissions.Note_Add,
-            Permissions.Note_Delete,
-            Permissions.Product_Group_View,
-            Permissions.Product_Group_Add,
-            Permissions.Product_Group_Add_Owner,
-            Permissions.Product_Group_Edit,
-            Permissions.Product_Group_Delete,
-            Permissions.Product_Type_Group_View,
-            Permissions.Product_Type_Group_Add,
-            Permissions.Product_Type_Group_Add_Owner,
-            Permissions.Product_Type_Group_Edit,
-            Permissions.Product_Type_Group_Delete,
-            Permissions.Group_View,
-            Permissions.Group_Edit,
-            Permissions.Group_Manage_Members,
-            Permissions.Group_Member_Delete,
-            Permissions.Group_Add_Owner,
-            Permissions.Group_Delete,
-            Permissions.Language_View,
-            Permissions.Language_Add,
-            Permissions.Language_Edit,
-            Permissions.Language_Delete,
-            Permissions.Technology_View,
-            Permissions.Technology_Add,
-            Permissions.Technology_Edit,
-            Permissions.Technology_Delete,
-            Permissions.Product_API_Scan_Configuration_View,
-            Permissions.Product_API_Scan_Configuration_Add,
-            Permissions.Product_API_Scan_Configuration_Edit,
-            Permissions.Product_API_Scan_Configuration_Delete,
-            Permissions.Product_Tracking_Files_View,
-            Permissions.Product_Tracking_Files_Add,
-            Permissions.Product_Tracking_Files_Edit,
-            Permissions.Product_Tracking_Files_Delete,
+            "add",
+            "view",
+            "delete",
+            "staff_only",
+            "edit",
+            "import",
         },
     }
 
@@ -492,6 +329,45 @@ def get_roles_with_permissions():
 def get_global_roles_with_permissions():
     """Extra permissions for global roles, on top of the permissions granted to the "normal" roles above."""
     return {
-        Roles.Maintainer: {Permissions.Product_Type_Add},
-        Roles.Owner: {Permissions.Product_Type_Add},
+        Roles.Maintainer: {"add"},
+        Roles.Owner: {"add"},
     }
+
+
+def permission_to_action(permission):
+    """
+    Map a fine-grained Permissions enum member, action string, or legacy
+    enum-name string (e.g. "Product_Edit") to an Action.
+
+    The suffix-based mapping captures every Permissions name (which all
+    follow the ``<Noun>_<Verb>`` convention); the noun is irrelevant
+    because legacy authorization is not noun-aware (the object passed at
+    check time determines the membership scope).
+    """
+    if isinstance(permission, Action):
+        return permission
+
+    if isinstance(permission, str):
+        try:
+            return Action(permission)
+        except ValueError:
+            name = permission
+    else:
+        name = getattr(permission, "name", "") or str(permission)
+
+    if name == "Risk_Acceptance":
+        return Action.Edit
+    if name == "Import_Scan_Result":
+        return Action.Import
+    if name.endswith(("_View", "_View_History")):
+        return Action.View
+    if name.endswith(("_Edit", "_Configure_Notifications")):
+        return Action.Edit
+    if name.endswith("_Delete"):
+        return Action.Delete
+    if name.endswith(("_Add_Product", "_Add")):
+        return Action.Add
+    if "_Manage_" in name or name.endswith("_Add_Owner"):
+        return Action.StaffOnly
+
+    return Action.View
