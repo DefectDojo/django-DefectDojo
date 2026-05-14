@@ -231,6 +231,40 @@ class Location(BaseModel):
             | Q(engagement__test__finding__locations__location=self),
         ).distinct()
 
+    def iter_related_products(self) -> list[Product]:
+        """
+        Prefetch-friendly equivalent of `all_related_products()`.
+
+        Walks `self.products.all()` (LocationProductReference) and
+        `self.findings.all()` (LocationFindingReference -> Finding -> Test ->
+        Engagement -> Product) via Django related managers, so a caller that
+        already issued
+
+            Location.objects.filter(...).prefetch_related(
+                "products__product__tags",
+                "findings__finding__test__engagement__product__tags",
+            )
+
+        gets every Product (and its tags) in 0 extra queries per Location.
+
+        Use this method from bulk paths where many Locations are processed at
+        once. The original `all_related_products()` still issues a single
+        DISTINCT JOIN query and is kept for per-instance signal paths where
+        prefetching is not possible.
+        """
+        seen: set[int] = set()
+        result: list[Product] = []
+        for ref in self.products.all():
+            if ref.product_id not in seen:
+                seen.add(ref.product_id)
+                result.append(ref.product)
+        for ref in self.findings.all():
+            product = ref.finding.test.engagement.product
+            if product.id not in seen:
+                seen.add(product.id)
+                result.append(product)
+        return result
+
     def products_to_inherit_tags_from(self) -> list[Product]:
         from dojo.utils import get_system_setting  # noqa: PLC0415
         system_wide_inherit = get_system_setting("enable_product_tag_inheritance")

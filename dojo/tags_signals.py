@@ -48,6 +48,12 @@ def make_inherited_tags_sticky(sender, instance, action, **kwargs):
 
 def inherit_instance_tags(instance):
     """Usually nothing to do when saving a model, except for new models?"""
+    # Suppress per-instance inheritance work inside an active batch. The
+    # caller (signal handler or bulk_create cleanup) need not know about
+    # batch_mode; whoever opened the batch is responsible for the bulk
+    # apply at exit.
+    if tag_inheritance.is_in_batch_mode():
+        return
     if inherit_product_tags(instance):
         # TODO: Is this change OK to make?
         # tag_list = instance._tags_tagulous.get_tag_list()
@@ -70,6 +76,7 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
     # (create OR update), repeatedly re-applying inherited tags to children
     # whose tag state had not changed. Sticky enforcement on user-driven
     # tag edits is handled by `make_inherited_tags_sticky` (m2m_changed).
+    # `inherit_instance_tags` itself early-returns when a batch is active.
     if not created:
         return
     inherit_instance_tags(instance)

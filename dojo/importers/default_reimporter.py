@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
+from dojo import tag_inheritance
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
     find_candidates_for_deduplication_hash,
@@ -24,6 +25,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.product.helpers import apply_inherited_tags_for_findings
 from dojo.tag_utils import bulk_apply_parser_tags
 from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
@@ -263,6 +265,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
+        # Whole hot loop runs under `batch_mode()`: per-row inheritance signals
+        # for the findings/endpoints/locations created below are suppressed.
+        # Inheritance is then applied in bulk per-batch (right before
+        # `post_process_findings_batch` dispatch) so rules/dedup see inherited
+        # tags on `finding.tags`.
+        with tag_inheritance.batch_mode():
+            return self._process_findings_internal(parsed_findings, **kwargs)
+
+    def _process_findings_internal(
+        self,
+        parsed_findings: list[Finding],
+        **kwargs: dict,
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         # Only process findings with the same service value (or None)
         # Even though the service values is used in the hash_code calculation,
@@ -422,6 +437,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         findings_with_parser_tags.clear()
                         # Apply import-time tags before post-processing so rules/deduplication see them.
                         self.apply_import_tags_for_batch(batch_findings)
+                        # Apply inherited Product tags to this batch's findings (and
+                        # their endpoints/locations) BEFORE post_process_findings_batch
+                        # dispatches, so rules/dedup see inherited tags on .tags.
+                        apply_inherited_tags_for_findings(batch_findings)
                         batch_findings.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()

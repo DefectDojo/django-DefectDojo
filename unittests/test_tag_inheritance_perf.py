@@ -379,13 +379,14 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 53
 
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
-    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 316
-    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 266
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 125
+    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 75
 
 
 @override_settings(
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
+    SECURE_SSL_REDIRECT=False,
 )
 @versioned_fixtures
 class TagInheritanceImportPerfBaselines(DojoAPITestCase):
@@ -497,7 +498,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 1385
-    EXPECTED_ZAP_IMPORT_V3 = 1263
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
+    EXPECTED_ZAP_IMPORT_V2 = 477
+    EXPECTED_ZAP_IMPORT_V3 = 945
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 102
