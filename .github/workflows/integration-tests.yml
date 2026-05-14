@@ -73,7 +73,6 @@ jobs:
           "tests/tool_type_test.py",
           "tests/user_profile_test.py",
           "tests/user_test.py",
-          # "tests/import_scanner_test.py",
           # "tests/zap.py",
         ]
         os: [debian]
