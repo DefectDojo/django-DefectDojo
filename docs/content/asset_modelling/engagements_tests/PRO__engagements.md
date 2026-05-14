@@ -2,7 +2,7 @@
 title: "Engagements"
 description: "Understanding Engagements in DefectDojo Pro"
 audience: pro
-weight: 2
+weight: 3
 ---
 Organizations → Assets → **ENGAGEMENTS** → Tests → Findings 
 
@@ -70,7 +70,7 @@ Engagements sit below Assets and above Tests in the object hierarchy. As such, a
 
 ### Create Engagements 
 
-Before creating an Engagement, you must first have created an Asset to contain it. 
+Before creating an Engagement, you must first have [created an Asset](/asset_modelling/engagements_tests/pro__assets/#create-assets) to contain it. 
 
 There are several ways to create an Engagement: 
 
@@ -117,7 +117,11 @@ Changing an Engagement’s status to “Completed” will mean that most write o
 
 ### Edit Engagements 
 
-Engagements can be edited by clicking **Edit Engagement** from within the gear menu. All ensuing fields that can be edited are also available when the Engagement is being created.
+Engagements can be edited by clicking **Edit Engagement** from within the gear menu. The same menu can also be accessed by clicking the ⋮ kebab menu to the left of the Asset in the All Assets view. 
+
+All ensuing fields that can be edited are also available when the Engagement is being created. 
+
+![image](images/engagements_ss99.png)
 
 ### Copy Engagements 
 

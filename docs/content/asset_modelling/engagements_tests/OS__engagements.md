@@ -2,7 +2,7 @@
 title: "Engagements"
 description: "Understanding Engagements in DefectDojo OS"
 audience: opensource
-weight: 2
+weight: 3
 ---
 Product Types → Products → **ENGAGEMENTS** → Tests → Findings 
 
