@@ -56,13 +56,13 @@ logger = logging.getLogger(__name__)
 _state = threading.local()
 
 
-def is_in_batch_mode() -> bool:
+def is_suppressed() -> bool:
     """Return True when the current thread is inside an active ``batch()``."""
     return bool(getattr(_state, "depth", 0))
 
 
 @contextmanager
-def batch_mode():
+def suppress():
     """
     Suppress per-instance inheritance signals for the calling thread.
 
@@ -175,7 +175,7 @@ def inherit_instance_tags(instance):
     # caller (signal handler or bulk_create cleanup) need not know about
     # batch_mode; whoever opened the batch is responsible for the bulk
     # apply at exit.
-    if is_in_batch_mode():
+    if is_suppressed():
         return
     if inherit_product_tags(instance):
         # TODO: Is this change OK to make?
