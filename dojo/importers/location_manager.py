@@ -210,11 +210,18 @@ class LocationManager(BaseLocationManager):
                 all_product_refs, batch_size=1000, ignore_conflicts=True,
             )
 
-        # Trigger bulk tag inheritance
-        tag_inheritance.apply_inherited_tags_for_locations(
-            [loc.location for loc in saved],
-            product=self._product,
-        )
+        # Trigger bulk tag inheritance only when the Location's product
+        # membership actually changed. New product refs are the only thing
+        # that can add a Product to a Location's inherited-tags target set
+        # (new finding refs are always to findings in `self._product`, so
+        # they don't introduce a new Product); skipping when `all_product_refs`
+        # is empty avoids the through-table read on no-change reimports.
+        if all_product_refs:
+            new_ref_location_ids = {ref.location_id for ref in all_product_refs}
+            tag_inheritance.apply_inherited_tags_for_locations(
+                [loc.location for loc in saved if loc.location_id in new_ref_location_ids],
+                product=self._product,
+            )
 
         # Clear accumulators
         self._locations_by_finding.clear()

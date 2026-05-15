@@ -317,6 +317,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         batch_finding_ids: list[int] = []
         batch_findings: list[Finding] = []
+        # Findings that were newly created (else branch below) — pass these to
+        # `apply_inherited_tags_for_findings` instead of `batch_findings` so
+        # matched/existing findings (which already have correct inherited tags)
+        # don't trigger a redundant through-table read on no-change reimports.
+        new_findings_in_batch: list[Finding] = []
         findings_with_parser_tags: list[tuple] = []
         # Batch size for deduplication/post-processing (only new findings)
         dedupe_batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
@@ -399,6 +404,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         candidates_by_uid,
                         candidates_by_key,
                     )
+                    if finding:
+                        new_findings_in_batch.append(finding)
 
                 # This condition __appears__ to always be true, but am afraid to remove it
                 if finding:
@@ -437,10 +444,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         findings_with_parser_tags.clear()
                         # Apply import-time tags before post-processing so rules/deduplication see them.
                         self.apply_import_tags_for_batch(batch_findings)
-                        # Apply inherited Product tags to this batch's findings (and
-                        # their endpoints/locations) BEFORE post_process_findings_batch
+                        # Apply inherited Product tags to NEWLY CREATED findings only
+                        # (and their endpoints/locations) BEFORE post_process_findings_batch
                         # dispatches, so rules/dedup see inherited tags on .tags.
-                        apply_inherited_tags_for_findings(batch_findings)
+                        # Matched/existing findings already have inheritance applied from
+                        # their original creation; re-running it on no-change reimports
+                        # would be ~8 wasted queries per batch.
+                        apply_inherited_tags_for_findings(new_findings_in_batch)
+                        new_findings_in_batch.clear()
                         batch_findings.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()

@@ -546,5 +546,5 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
     EXPECTED_ZAP_IMPORT_V2 = 420
     EXPECTED_ZAP_IMPORT_V3 = 444
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 100
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 81
