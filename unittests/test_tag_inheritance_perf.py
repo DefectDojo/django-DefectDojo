@@ -364,15 +364,15 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 53
     EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 53
 
-    EXPECTED_CREATE_ONE_FINDING_V2 = 61
-    EXPECTED_CREATE_ONE_FINDING_V3 = 61
-    EXPECTED_CREATE_100_FINDINGS_V2 = 3724
-    EXPECTED_CREATE_100_FINDINGS_V3 = 3724
+    EXPECTED_CREATE_ONE_FINDING_V2 = 55
+    EXPECTED_CREATE_ONE_FINDING_V3 = 55
+    EXPECTED_CREATE_100_FINDINGS_V2 = 3124
+    EXPECTED_CREATE_100_FINDINGS_V3 = 3124
 
-    EXPECTED_FINDING_ADD_USER_TAG_V2 = 16
-    EXPECTED_FINDING_ADD_USER_TAG_V3 = 16
-    EXPECTED_FINDING_REMOVE_INHERITED_V2 = 40
-    EXPECTED_FINDING_REMOVE_INHERITED_V3 = 40
+    EXPECTED_FINDING_ADD_USER_TAG_V2 = 17
+    EXPECTED_FINDING_ADD_USER_TAG_V3 = 17
+    EXPECTED_FINDING_REMOVE_INHERITED_V2 = 18
+    EXPECTED_FINDING_REMOVE_INHERITED_V3 = 18
 
     # V2 endpoint paths. Pre-Phase-A: 3958 add, 3740 remove.
     EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 91
@@ -395,7 +395,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     Pinned query-count baselines for the importer hot path.
 
     Real production tag-inheritance cost lives in scan import / reimport: the
-    importer creates findings + endpoints/locations, then `_manage_inherited_tags`
+    importer creates findings + endpoints/locations, then `_sync_inherited_tags`
     runs per row. Phase A (bulk product-side propagation + post_save gated on
     create) doesn't touch this loop because the importer's hot path is
     creation-driven. Phase B's `tag_inheritance.batch()` context manager
@@ -498,7 +498,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 463
-    EXPECTED_ZAP_IMPORT_V3 = 931
+    EXPECTED_ZAP_IMPORT_V2 = 422
+    EXPECTED_ZAP_IMPORT_V3 = 809
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 102
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 101

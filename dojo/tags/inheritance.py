@@ -17,7 +17,7 @@ Provides:
 
 - The per-instance inheritance helpers previously scattered across
   ``dojo/tags/signals.py``, ``dojo/models.py``, and ``dojo/product/helpers.py``
-  (``_manage_inherited_tags``, ``get_products``, ``inherit_product_tags``,
+  (``_sync_inherited_tags``, ``get_products``, ``inherit_product_tags``,
   ``get_products_to_inherit_tags_from``, ``inherit_instance_tags``).
 
 - The bulk product-wide inheritance sync (``propagate_tags_on_product_sync``)
@@ -93,28 +93,58 @@ def suppress_tag_inheritance():
 # ---------------------------------------------------------------------------
 
 
-def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
-    # get copies of the current tag lists
-    if potentially_existing_tags is None:
-        potentially_existing_tags = []
-    current_inherited_tags = [] if isinstance(obj.inherited_tags, FakeTagRelatedManager) else [tag.name for tag in obj.inherited_tags.all()]
-    tag_list = potentially_existing_tags if isinstance(obj.tags, FakeTagRelatedManager) or len(potentially_existing_tags) > 0 else [tag.name for tag in obj.tags.all()]
-    # Clean existing tag list from the old inherited tags. This represents the tags on the object and not the product
-    cleaned_tag_list = [tag for tag in tag_list if tag not in current_inherited_tags]
-    # Add the incoming inherited tag list
-    if incoming_inherited_tags:
-        for tag in incoming_inherited_tags:
-            if tag not in cleaned_tag_list:
-                cleaned_tag_list.append(tag)
-    # Update the current list of inherited tags. iteratively do this because of tagulous object restraints
+def _sync_inherited_tags(obj, incoming_inherited_tags):
+    """
+    Sync ``obj.inherited_tags`` and ``obj.tags`` to match ``incoming_inherited_tags``.
+
+    Diff-based: only the inherited names that changed are added/removed. Also
+    re-adds any inherited name that has been stripped from ``obj.tags`` directly
+    (sticky enforcement).
+
+    Writes are wrapped in ``suppress_tag_inheritance()`` so the m2m_changed
+    signal fired by each ``.add()``/``.remove()`` does not dispatch
+    ``make_inherited_tags_sticky`` back into this function. The context
+    manager is reentrant so callers that already opened a batch (e.g.
+    ``inherit_instance_tags`` or ``LocationManager._bulk_inherit_tags``)
+    nest harmlessly.
+    """
+    target = set(incoming_inherited_tags or [])
+
+    # Unsaved instance: FakeTagRelatedManager has no .all()/.add()/.remove().
+    # Set in-memory tag lists directly, merging incoming into any preset tags.
+    # set_tag_list() is purely in-memory — no DB write, no m2m_changed — so it
+    # doesn't need the suppress wrap. The `obj.tags.add(*target)` fallback
+    # below covers a theoretical mixed-state case (saved tags manager next to
+    # an unsaved inherited_tags manager) and DOES fire m2m_changed, so it
+    # gets wrapped.
     if isinstance(obj.inherited_tags, FakeTagRelatedManager):
-        obj.inherited_tags.set_tag_list(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set_tag_list(cleaned_tag_list)
-    else:
-        obj.inherited_tags.set(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set(cleaned_tag_list)
+        obj.inherited_tags.set_tag_list(list(target))
+        if target:
+            if isinstance(obj.tags, FakeTagRelatedManager):
+                existing = obj.tags.get_tag_list()
+                obj.tags.set_tag_list(list(dict.fromkeys([*existing, *target])))
+            else:
+                with suppress_tag_inheritance():
+                    obj.tags.add(*target)
+        return
+
+    current_inherited = {tag.name for tag in obj.inherited_tags.all()}
+    current_tags = {tag.name for tag in obj.tags.all()}
+    to_remove = current_inherited - target
+    to_add = target - current_inherited
+    # Sticky: any target name already absent from obj.tags AND not covered by
+    # to_add (user-driven m2m_changed stripped it). Re-add separately.
+    sticky_missing = (target - current_tags) - to_add
+
+    with suppress_tag_inheritance():
+        if to_remove:
+            obj.inherited_tags.remove(*to_remove)
+            obj.tags.remove(*to_remove)
+        if to_add:
+            obj.inherited_tags.add(*to_add)
+            obj.tags.add(*to_add)
+        if sticky_missing:
+            obj.tags.add(*sticky_missing)
 
 
 def get_products(instance):
@@ -151,34 +181,17 @@ def inherit_instance_tags(instance, *, force=False):
     """
     Apply product-inherited tags to ``instance``.
 
-    Unless ``force=True``, respects ``suppress_tag_inheritance()`` so bulk callers can defer
-    per-instance work. Skips the write when inherited_tags already match the
-    contributing products' tags and the instance's tag_list already contains
-    them.
+    Unless ``force=True``, respects ``suppress_tag_inheritance()`` so bulk
+    callers can defer per-instance work. The underlying ``_sync_inherited_tags``
+    diffs the current vs target inherited set and only writes the delta.
     """
     if not force and is_suppressed():
         return
     products = get_products_to_inherit_tags_from(instance)
     if not products:
         return
-    tag_list = instance.tags.get_tag_list()
-    product_inherited_tags = [tag.name for product in products for tag in product.tags.all()]
-    existing_inherited_tags = [tag.name for tag in instance.inherited_tags.all()]
-    # Skip the write if both: stored inherited_tags already match and all are
-    # present in the instance's tag_list (already applied).
-    if (
-        product_inherited_tags == existing_inherited_tags
-        and set(product_inherited_tags) <= set(tag_list)
-    ):
-        return
-    # Suppress reentrancy: the inherit_tags() write fires m2m_changed on
-    # the tags through-table, which would dispatch make_inherited_tags_sticky
-    # back into this function. We're already writing the correct state, so
-    # the signal has nothing to enforce. Without this guard, get_tag_list()'s
-    # cached value during the inner m2m_changed can be stale, defeating the
-    # in-sync early-exit and causing infinite signal recursion.
-    with suppress_tag_inheritance():
-        instance.inherit_tags(tag_list)
+    incoming_inherited_tags = [tag.name for product in products for tag in product.tags.all()]
+    _sync_inherited_tags(instance, incoming_inherited_tags)
 
 
 # ---------------------------------------------------------------------------
@@ -381,7 +394,7 @@ def _sync_inheritance_for_qs(queryset, *, target_names_per_child):
             remove_map[name].append(child)
 
     # Apply adds. Both `tags` and `inherited_tags` get the same set of new
-    # inherited names — `_manage_inherited_tags` did the same.
+    # inherited names — `_sync_inherited_tags` did the same.
     if add_map:
         bulk_add_tag_mapping(add_map, tag_field_name="inherited_tags")
         bulk_add_tag_mapping(add_map, tag_field_name="tags")

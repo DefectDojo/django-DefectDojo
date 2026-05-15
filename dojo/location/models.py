@@ -34,7 +34,7 @@ from dojo.location.manager import (
     LocationQueryset,
 )
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import Dojo_User, Finding, Product, _manage_inherited_tags, copy_model_util
+from dojo.models import Dojo_User, Finding, Product, copy_model_util
 from dojo.tools.locations import LocationAssociationData
 
 if TYPE_CHECKING:
@@ -273,11 +273,6 @@ class Location(BaseModel):
         if get_system_setting("enable_product_tag_inheritance"):
             return products
         return [product for product in products if product.enable_product_tag_inheritance]
-
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for product in self.products_to_inherit_tags_from() for tag in product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
     class Meta:
         verbose_name = "Locations - Location"

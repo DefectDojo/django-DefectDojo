@@ -12,7 +12,7 @@ from django.utils import timezone
 from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.location.models import AbstractLocation, Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
-from dojo.models import Product, _manage_inherited_tags
+from dojo.models import Product, _sync_inherited_tags
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
@@ -485,7 +485,7 @@ class LocationManager(BaseLocationManager):
     def _bulk_inherit_tags(self, locations):
         """
         Bulk equivalent of calling inherit_instance_tags(loc) for many Locations. Actually persisting updates is handled
-        by a per-location call to _manage_inherited_tags(), but at least determining what the tags are is more efficient
+        by a per-location call to _sync_inherited_tags(), but at least determining what the tags are is more efficient
         (plus we can skip locations that don't need an update at all).
 
         When tag inheritance is enabled, computes the target inherited tags for each location from all related products
@@ -546,11 +546,10 @@ class LocationManager(BaseLocationManager):
                 tags_by_location[l_id].add(t_name)
             return tags_by_location
 
-        # Gather inherited and 'regular' tags per location
+        # Gather inherited tags per location for the in-sync skip check below.
         existing_inherited_by_location: dict[int, set[str]] = _get_tags(Location.inherited_tags)
-        existing_tags_by_location: dict[int, set[str]] = _get_tags(Location.tags)
 
-        # Perform the bulk updates inside a `tag_inheritance.batch()` context.
+        # Perform the bulk updates inside a `tag_inheritance.suppress_tag_inheritance()` context.
         # While the batch is active, signal handlers in `dojo/tags_signals.py`
         # short-circuit per-row inheritance work that would otherwise fire on
         # every `(inherited_)tags.set()` and defeat the bulk update.
@@ -574,8 +573,4 @@ class LocationManager(BaseLocationManager):
                     continue
 
                 # Update tags for this location
-                _manage_inherited_tags(
-                    location,
-                    list(target_tag_names),
-                    potentially_existing_tags=existing_tags_by_location[location.id],
-                )
+                _sync_inherited_tags(location, list(target_tag_names))

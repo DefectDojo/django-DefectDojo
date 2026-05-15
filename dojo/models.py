@@ -110,12 +110,12 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     return stats
 
 
-def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
+def _sync_inherited_tags(obj, incoming_inherited_tags):
     # Backward-compat shim. Implementation lives in dojo.tags.inheritance; lazy
     # import keeps dojo.models loadable before dojo.tags.inheritance (which
     # transitively imports dojo.utils -> dojo.models) is ready.
-    from dojo.tags.inheritance import _manage_inherited_tags as _impl  # noqa: PLC0415
-    return _impl(obj, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
+    from dojo.tags.inheritance import _sync_inherited_tags as _impl  # noqa: PLC0415
+    return _impl(obj, incoming_inherited_tags)
 
 
 def copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
@@ -1569,11 +1569,6 @@ class Engagement(BaseModel):
             from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
             perform_product_grading(self.product)
 
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
-
 
 class CWE(models.Model):
     url = models.CharField(max_length=1000)
@@ -2019,11 +2014,6 @@ class Endpoint(models.Model):
             fragment=fragment,
         )
 
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
-
 
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
@@ -2223,11 +2213,6 @@ class Test(models.Model):
     def statistics(self):
         """Queries the database, no prefetching, so could be slow for lists of model instances"""
         return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
-
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.engagement.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 class Test_Import(TimeStampedModel):
@@ -3527,11 +3512,6 @@ class Finding(BaseModel):
 
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
-
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.test.engagement.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
     @property
     def violates_sla(self):
