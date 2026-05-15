@@ -213,14 +213,9 @@ def propagate_tags_on_product_sync(product):
     Product's current tags, and applies adds/removes via the bulk tag
     helpers. Both `tags` and `inherited_tags` fields are kept in sync.
     """
-    # Skip the full child sweep when inheritance is disabled both system-wide
-    # and on this product. Without this gate the importer hot path pays ~9
-    # queries per scan (one product-tags read + one list/through-table read per
-    # child kind) even when no inheritance work is possible. State transitions
-    # (toggling the flag on/off) still trigger a full sweep via the m2m_changed
-    # handler on `Product.tags.through` and the per-product flag save handler.
     if not (get_system_setting("enable_product_tag_inheritance") or product.enable_product_tag_inheritance):
         return
+
     inherited_tag_names = {tag.name for tag in product.tags.all()}
 
     logger.debug("Propagating tags from %s to all engagements", product)
