@@ -9,7 +9,14 @@ from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.product import helpers as async_product_funcs
-from dojo.utils import get_system_setting
+from dojo.tag_inheritance import (
+    get_products,  # noqa: F401 -- backward compat re-export
+    get_products_to_inherit_tags_from,  # noqa: F401 -- backward compat re-export
+    inherit_instance_tags,  # noqa: F401 -- backward compat re-export
+    inherit_linked_instance_tags,  # noqa: F401 -- backward compat re-export
+    inherit_product_tags,
+    propagate_inheritance,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -46,26 +53,6 @@ def make_inherited_tags_sticky(sender, instance, action, **kwargs):
                 instance.inherit_tags(tag_list)
 
 
-def inherit_instance_tags(instance):
-    """Usually nothing to do when saving a model, except for new models?"""
-    # Suppress per-instance inheritance work inside an active batch. The
-    # caller (signal handler or bulk_create cleanup) need not know about
-    # batch_mode; whoever opened the batch is responsible for the bulk
-    # apply at exit.
-    if tag_inheritance.is_in_batch_mode():
-        return
-    if inherit_product_tags(instance):
-        # TODO: Is this change OK to make?
-        # tag_list = instance._tags_tagulous.get_tag_list()
-        tag_list = instance.tags.get_tag_list()
-        if propagate_inheritance(instance, tag_list=tag_list):
-            instance.inherit_tags(tag_list)
-
-
-def inherit_linked_instance_tags(instance: LocationFindingReference | LocationProductReference):
-    inherit_instance_tags(instance.location)
-
-
 @receiver(signals.post_save, sender=Endpoint)
 @receiver(signals.post_save, sender=Engagement)
 @receiver(signals.post_save, sender=Test)
@@ -79,61 +66,10 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
     # `inherit_instance_tags` itself early-returns when a batch is active.
     if not created:
         return
-    inherit_instance_tags(instance)
+    tag_inheritance.inherit_instance_tags(instance)
 
 
 @receiver(signals.post_save, sender=LocationFindingReference)
 @receiver(signals.post_save, sender=LocationProductReference)
 def inherit_tags_on_linked_instance(sender, instance, created, **kwargs):
-    inherit_linked_instance_tags(instance)
-
-
-def propagate_inheritance(instance, tag_list=None):
-    # Get the expected product tags
-    if tag_list is None:
-        tag_list = []
-    product_inherited_tags = [
-        tag.name
-        for product in get_products_to_inherit_tags_from(instance)
-        for tag in product.tags.all()
-    ]
-    existing_inherited_tags = [tag.name for tag in instance.inherited_tags.all()]
-    # Check if product tags already matches inherited tags
-    product_tags_equals_inherited_tags = product_inherited_tags == existing_inherited_tags
-    # Check if product tags have already been inherited
-    tags_have_already_been_inherited = set(product_inherited_tags) <= set(tag_list)
-    return not (product_tags_equals_inherited_tags and tags_have_already_been_inherited)
-
-
-def inherit_product_tags(instance) -> bool:
-    products = get_products(instance)
-    # Save a read in the db
-    if any(product.enable_product_tag_inheritance for product in products if product):
-        return True
-
-    return get_system_setting("enable_product_tag_inheritance")
-
-
-def get_products_to_inherit_tags_from(instance) -> list[Product]:
-    products = get_products(instance)
-    system_wide_inherit = get_system_setting("enable_product_tag_inheritance")
-
-    return [
-        product for product in products if product.enable_product_tag_inheritance or system_wide_inherit
-    ]
-
-
-def get_products(instance) -> list[Product]:
-    if isinstance(instance, Product):
-        return [instance]
-    if isinstance(instance, Endpoint):
-        return [instance.product]
-    if isinstance(instance, Engagement):
-        return [instance.product]
-    if isinstance(instance, Test):
-        return [instance.engagement.product]
-    if isinstance(instance, Finding):
-        return [instance.test.engagement.product]
-    if isinstance(instance, Location):
-        return list(instance.all_related_products())
-    return []
+    tag_inheritance.inherit_linked_instance_tags(instance)

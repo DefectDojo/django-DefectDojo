@@ -498,7 +498,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 477
-    EXPECTED_ZAP_IMPORT_V3 = 945
+    EXPECTED_ZAP_IMPORT_V2 = 470
+    EXPECTED_ZAP_IMPORT_V3 = 938
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 102

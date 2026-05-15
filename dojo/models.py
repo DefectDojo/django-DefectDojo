@@ -41,7 +41,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from tagulous.models import TagField
-from tagulous.models.managers import FakeTagRelatedManager
+from tagulous.models.managers import FakeTagRelatedManager  # noqa: F401 -- backward compat re-export
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
@@ -111,27 +111,11 @@ def _get_statistics_for_queryset(qs, annotation_factory):
 
 
 def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
-    # get copies of the current tag lists
-    if potentially_existing_tags is None:
-        potentially_existing_tags = []
-    current_inherited_tags = [] if isinstance(obj.inherited_tags, FakeTagRelatedManager) else [tag.name for tag in obj.inherited_tags.all()]
-    tag_list = potentially_existing_tags if isinstance(obj.tags, FakeTagRelatedManager) or len(potentially_existing_tags) > 0 else [tag.name for tag in obj.tags.all()]
-    # Clean existing tag list from the old inherited tags. This represents the tags on the object and not the product
-    cleaned_tag_list = [tag for tag in tag_list if tag not in current_inherited_tags]
-    # Add the incoming inherited tag list
-    if incoming_inherited_tags:
-        for tag in incoming_inherited_tags:
-            if tag not in cleaned_tag_list:
-                cleaned_tag_list.append(tag)
-    # Update the current list of inherited tags. iteratively do this because of tagulous object restraints
-    if isinstance(obj.inherited_tags, FakeTagRelatedManager):
-        obj.inherited_tags.set_tag_list(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set_tag_list(cleaned_tag_list)
-    else:
-        obj.inherited_tags.set(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set(cleaned_tag_list)
+    # Backward-compat shim. Implementation lives in dojo.tag_inheritance; lazy
+    # import keeps dojo.models loadable before dojo.tag_inheritance (which
+    # transitively imports dojo.utils -> dojo.models) is ready.
+    from dojo.tag_inheritance import _manage_inherited_tags as _impl  # noqa: PLC0415
+    return _impl(obj, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 def copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
