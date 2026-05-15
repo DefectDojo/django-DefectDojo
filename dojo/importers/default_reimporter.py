@@ -24,8 +24,8 @@ from dojo.models import (
     Test,
     Test_Import,
 )
-from dojo.product.helpers import apply_inherited_tags_for_findings
 from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.inheritance import apply_inherited_tags_for_findings
 from dojo.tags.utils import bulk_apply_parser_tags
 from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags

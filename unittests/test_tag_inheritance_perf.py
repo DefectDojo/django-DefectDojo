@@ -23,7 +23,7 @@ from django.utils import timezone
 
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.product.helpers import propagate_tags_on_product_sync
+from dojo.tags.inheritance import propagate_tags_on_product_sync
 from unittests.dojo_test_case import (
     DojoAPITestCase,
     DojoTestCase,
@@ -398,7 +398,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     importer creates findings + endpoints/locations, then `_sync_inherited_tags`
     runs per row. Phase A (bulk product-side propagation + post_save gated on
     create) doesn't touch this loop because the importer's hot path is
-    creation-driven. Phase B's `tag_inheritance.batch()` context manager
+    creation-driven. Phase B's `tag_inheritance.suppress_tag_inheritance()` context manager
     targets it.
 
     Two scenarios:
@@ -430,7 +430,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
 
         Captures total query count for: scan parse + finding creation + endpoint
         attachment + per-row inherit_tags signal chain. Production hot path.
-        Phase A leaves this number ~unchanged; Phase B's `tag_inheritance.batch()`
+        Phase A leaves this number ~unchanged; Phase B's `tag_inheritance.suppress_tag_inheritance()`
         targets it.
         """
         with self.assertNumQueries(self.EXPECTED_ZAP_IMPORT_V2):
@@ -499,6 +499,6 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
     EXPECTED_ZAP_IMPORT_V2 = 422
-    EXPECTED_ZAP_IMPORT_V3 = 809
+    EXPECTED_ZAP_IMPORT_V3 = 445
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 101

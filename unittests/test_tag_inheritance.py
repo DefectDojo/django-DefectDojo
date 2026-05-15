@@ -26,12 +26,12 @@ from dojo.importers.location_manager import LocationManager
 from dojo.location.models import Location, LocationProductReference
 from dojo.location.status import ProductLocationStatus
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.product.helpers import propagate_tags_on_product_sync
 from dojo.tags.inheritance import (
     _sync_inherited_tags,  # noqa: PLC2701 -- private API tested directly
     get_products,
     inherit_instance_tags,
     is_tag_inheritance_enabled,
+    propagate_tags_on_product_sync,
 )
 from dojo.tools.locations import LocationData
 from unittests.dojo_test_case import (

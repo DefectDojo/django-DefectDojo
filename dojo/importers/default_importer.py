@@ -18,8 +18,8 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.notifications.helper import async_create_notification
-from dojo.product.helpers import apply_inherited_tags_for_findings
 from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.inheritance import apply_inherited_tags_for_findings
 from dojo.tags.utils import bulk_apply_parser_tags
 from dojo.utils import get_full_url, perform_product_grading
 from dojo.validators import clean_tags

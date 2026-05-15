@@ -16,11 +16,12 @@ Provides:
   the full rationale).
 
 - The per-instance inheritance helpers previously scattered across
-  ``dojo/tags/signals.py``, ``dojo/models.py``, and ``dojo/product/helpers.py``
+  ``dojo/tags/signals.py`` and ``dojo/models.py``
   (``_sync_inherited_tags``, ``get_products``, ``inherit_product_tags``,
   ``get_products_to_inherit_tags_from``, ``inherit_instance_tags``).
 
-- The bulk product-wide inheritance sync (``propagate_tags_on_product_sync``)
+- The bulk product-wide inheritance sync (``propagate_tags_on_product_sync``),
+  its Celery entrypoint (``propagate_tags_on_product``),
   plus per-batch importer helpers (``apply_inherited_tags_for_findings`` /
   ``apply_inherited_tags_for_endpoints``) and their shared ``_sync_inheritance_for_qs``
   primitive.
@@ -30,11 +31,10 @@ before ``dojo.models`` finishes initialising.
 """
 from __future__ import annotations
 
-import contextlib
 import logging
 import threading
 from collections import defaultdict
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 
 from django.conf import settings
 from django.db.models import Q
@@ -45,6 +45,7 @@ from tagulous.models.managers import FakeTagRelatedManager
 # evaluation of ``dojo.models``. By the time anything imports this module
 # (signals registration, importers, the per-model ``inherit_tags()`` shim
 # in ``dojo.models``), the full model layer is initialised.
+from dojo.celery import app
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.tags.utils import bulk_add_tag_mapping, bulk_remove_tags_from_instances
@@ -56,7 +57,7 @@ _state = threading.local()
 
 
 def is_suppressed() -> bool:
-    """Return True when the current thread is inside an active ``batch()``."""
+    """Return True when the current thread is inside an active ``suppress_tag_inheritance()``."""
     return bool(getattr(_state, "depth", 0))
 
 
@@ -83,7 +84,7 @@ def suppress_tag_inheritance():
         _state.depth -= 1
         if _state.depth <= 0:
             # Clean up the attribute so leak-free thread reuse stays simple.
-            with contextlib.suppress(AttributeError):
+            with suppress(AttributeError):
                 del _state.depth
 
 
@@ -197,8 +198,7 @@ def inherit_instance_tags(instance, *, force=False):
 
 
 # ---------------------------------------------------------------------------
-# Bulk product-wide inheritance (relocated from dojo/product/helpers.py).
-# Logic unchanged.
+# Bulk product-wide inheritance
 # ---------------------------------------------------------------------------
 
 
@@ -226,17 +226,17 @@ def propagate_tags_on_product_sync(product):
     logger.debug("Propagating tags from %s to all engagements", product)
     _sync_inheritance_for_qs(
         Engagement.objects.filter(product=product),
-        target_names_per_child=lambda _child: inherited_tag_names,
+        target_tag_names_per_child=lambda _child: inherited_tag_names,
     )
     logger.debug("Propagating tags from %s to all tests", product)
     _sync_inheritance_for_qs(
         Test.objects.filter(engagement__product=product),
-        target_names_per_child=lambda _child: inherited_tag_names,
+        target_tag_names_per_child=lambda _child: inherited_tag_names,
     )
     logger.debug("Propagating tags from %s to all findings", product)
     _sync_inheritance_for_qs(
         Finding.objects.filter(test__engagement__product=product),
-        target_names_per_child=lambda _child: inherited_tag_names,
+        target_tag_names_per_child=lambda _child: inherited_tag_names,
     )
     if settings.V3_FEATURE_LOCATIONS:
         logger.debug("Propagating tags from %s to all locations", product)
@@ -248,14 +248,29 @@ def propagate_tags_on_product_sync(product):
         # is the union of every related product's tags. Compute per-location.
         _sync_inheritance_for_qs(
             location_qs,
-            target_names_per_child=_inherited_tag_names_for_location,
+            target_tag_names_per_child=_inherited_tag_names_for_location,
         )
     else:
         logger.debug("Propagating tags from %s to all endpoints", product)
         _sync_inheritance_for_qs(
             Endpoint.objects.filter(product=product),
-            target_names_per_child=lambda _child: inherited_tag_names,
+            target_tag_names_per_child=lambda _child: inherited_tag_names,
         )
+
+
+@app.task(name="dojo.product.helpers.propagate_tags_on_product")
+def propagate_tags_on_product_deprecated(product_id, *args, **kwargs):
+    # kept to make sure tasks are still processed if someone didn't do a clean shutdown before upgrading
+    logger.warning("propagate_tags_on_product_deprecated is deprecated and will be removed in a future version. Use propagate_tags_on_product instead.")
+    propagate_tags_on_product(product_id, *args, **kwargs)
+
+
+@app.task(name="dojo.product.helpers.propagate_tags_on_product")
+def propagate_tags_on_product(product_id, *args, **kwargs):
+    """Load Product by id and run ``propagate_tags_on_product_sync`` (Celery worker)."""
+    with suppress(Product.DoesNotExist):
+        product = Product.objects.get(id=product_id)
+        propagate_tags_on_product_sync(product)
 
 
 def apply_inherited_tags_for_endpoints(endpoints):
@@ -275,7 +290,7 @@ def apply_inherited_tags_for_endpoints(endpoints):
     inherited_tag_names = {tag.name for tag in product.tags.all()}
     _sync_inheritance_for_qs(
         Endpoint.objects.filter(id__in=[e.pk for e in endpoints]),
-        target_names_per_child=lambda _child: inherited_tag_names,
+        target_tag_names_per_child=lambda _child: inherited_tag_names,
     )
 
 
@@ -305,17 +320,17 @@ def apply_inherited_tags_for_findings(findings):
 
     _sync_inheritance_for_qs(
         Finding.objects.filter(id__in=finding_ids),
-        target_names_per_child=lambda _child: inherited_tag_names,
+        target_tag_names_per_child=lambda _child: inherited_tag_names,
     )
     if settings.V3_FEATURE_LOCATIONS:
         _sync_inheritance_for_qs(
             Location.objects.filter(findings__finding_id__in=finding_ids).distinct().prefetch_related(*_LOCATION_PREFETCH_FOR_INHERITANCE),
-            target_names_per_child=_inherited_tag_names_for_location,
+            target_tag_names_per_child=_inherited_tag_names_for_location,
         )
     else:
         _sync_inheritance_for_qs(
             Endpoint.objects.filter(status_endpoint__finding_id__in=finding_ids).distinct(),
-            target_names_per_child=lambda _child: inherited_tag_names,
+            target_tag_names_per_child=lambda _child: inherited_tag_names,
         )
 
 
@@ -327,20 +342,95 @@ def _inherited_tag_names_for_location(location):
     Product), a Location can be attached to multiple Products — directly via
     `LocationProductReference` or indirectly via `LocationFindingReference`
     -> Finding -> Test -> Engagement -> Product. The target inherited set is
-    therefore the UNION of every related Product's tags.
+    therefore the UNION of every related Product's tags, restricted to
+    Products whose own `enable_product_tag_inheritance` flag is on (or where
+    the system-wide setting is on).
 
-    Used as the `target_names_per_child` callback for `_sync_inheritance_for_qs`
+    Used as the `target_tag_names_per_child` callback for `_sync_inheritance_for_qs`
     on Location querysets; it must be called per Location because each Location
     has its own set of related Products. Uses `iter_related_products()` so
     that an upstream `prefetch_related(...)` reduces per-call cost to 0
     queries.
     """
+    system_wide = bool(get_system_setting("enable_product_tag_inheritance"))
     names: set[str] = set()
     for related_product in location.iter_related_products():
         if related_product is None:
             continue
+        if not system_wide and not related_product.enable_product_tag_inheritance:
+            continue
         names.update(tag.name for tag in related_product.tags.all())
     return names
+
+
+def apply_inherited_tags_for_locations(locations, *, product):
+    """
+    Per-batch bulk inheritance for Locations touched during an import.
+
+    A Location can be linked to multiple Products via `LocationProductReference`
+    (direct) or `LocationFindingReference` -> Finding -> Test -> Engagement ->
+    Product (indirect). Target inherited set is the union of every contributing
+    Product's tags, filtered by each Product's `enable_product_tag_inheritance`
+    flag (skipped entirely when the system-wide setting is on).
+
+    Gated on the importing `product`: when neither the system setting nor the
+    importing product's flag is on, this is a no-op. Tags from other products
+    propagate via their own `Product.tags.through` m2m_changed handler when
+    they change, so skipping here is safe.
+
+    Uses values_list-based ref-table lookups (4 small queries) rather than
+    `prefetch_related(_LOCATION_PREFETCH_FOR_INHERITANCE)` to keep the
+    importer hot path lean.
+    """
+    locations = list(locations)
+    if not locations:
+        return
+    system_wide = bool(get_system_setting("enable_product_tag_inheritance"))
+    if not system_wide and not getattr(product, "enable_product_tag_inheritance", False):
+        return
+
+    from dojo.location.models import (  # noqa: PLC0415
+        LocationFindingReference,
+        LocationProductReference,
+    )
+
+    location_ids = [loc.id for loc in locations]
+    product_ids_by_location: dict[int, set[int]] = {loc.id: set() for loc in locations}
+
+    for loc_id, prod_id in LocationProductReference.objects.filter(
+        location_id__in=location_ids,
+    ).values_list("location_id", "product_id"):
+        product_ids_by_location[loc_id].add(prod_id)
+
+    # LocationFindingReference -> Finding -> Test -> Engagement -> Product.
+    # Shouldn't add anything new (LocationProductReference is created alongside),
+    # but covers edge cases where only the finding ref exists.
+    for loc_id, prod_id in (
+        LocationFindingReference.objects
+        .filter(location_id__in=location_ids)
+        .values_list("location_id", "finding__test__engagement__product_id")
+    ):
+        product_ids_by_location[loc_id].add(prod_id)
+
+    all_product_ids = {pid for pids in product_ids_by_location.values() for pid in pids}
+    product_qs = Product.objects.filter(id__in=all_product_ids).prefetch_related("tags")
+    if not system_wide:
+        product_qs = product_qs.filter(enable_product_tag_inheritance=True)
+    tags_by_product: dict[int, set[str]] = {
+        p.id: {t.name for t in p.tags.all()} for p in product_qs
+    }
+
+    def _target_for_location(loc):
+        names: set[str] = set()
+        for pid in product_ids_by_location[loc.id]:
+            # product_ids_by_location may contain products that shouldn't contribute
+            # (ref lookups weren't flag-filtered); check membership in tags_by_product.
+            tags = tags_by_product.get(pid)
+            if tags:
+                names |= tags
+        return names
+
+    _sync_inheritance_for_qs(locations, target_tag_names_per_child=_target_for_location)
 
 
 _LOCATION_PREFETCH_FOR_INHERITANCE = (
@@ -349,11 +439,11 @@ _LOCATION_PREFETCH_FOR_INHERITANCE = (
 )
 
 
-def _sync_inheritance_for_qs(queryset, *, target_names_per_child):
+def _sync_inheritance_for_qs(queryset, *, target_tag_names_per_child):
     """
     Sync inherited_tags + tags for every child in `queryset` to its target tag set.
 
-    target_names_per_child: callable(child) -> set[str].
+    target_tag_names_per_child: callable(child) -> set[str].
 
     Issues bulk SQL: one through-table read for current inherited_tags, then
     bulk add/remove on `tags` and `inherited_tags` fields.
@@ -388,7 +478,7 @@ def _sync_inheritance_for_qs(queryset, *, target_names_per_child):
     add_map: dict[str, list] = defaultdict(list)
     remove_map: dict[str, list] = defaultdict(list)
     for child in children:
-        target = target_names_per_child(child)
+        target = target_tag_names_per_child(child)
         old = old_inherited_by_child.get(child.pk, set())
         for name in target - old:
             add_map[name].append(child)

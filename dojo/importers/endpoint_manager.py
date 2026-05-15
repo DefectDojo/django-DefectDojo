@@ -14,7 +14,7 @@ from dojo.models import (
     Finding,
     Product,
 )
-from dojo.product.helpers import apply_inherited_tags_for_endpoints
+from dojo.tags.inheritance import apply_inherited_tags_for_endpoints
 
 logger = logging.getLogger(__name__)
 
