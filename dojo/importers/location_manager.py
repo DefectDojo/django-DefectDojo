@@ -9,11 +9,11 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from dojo import tag_inheritance
 from dojo.importers.base_location_manager import BaseLocationManager
 from dojo.location.models import AbstractLocation, Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import Product, _manage_inherited_tags
+from dojo.tags import inheritance as tag_inheritance
 from dojo.tools.locations import LocationData
 from dojo.url.models import URL
 from dojo.utils import get_system_setting

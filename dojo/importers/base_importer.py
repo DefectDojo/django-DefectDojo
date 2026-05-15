@@ -33,7 +33,7 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.notifications.helper import create_notification
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe

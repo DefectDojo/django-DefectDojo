@@ -4,12 +4,12 @@ import logging
 from django.db.models import signals
 from django.dispatch import receiver
 
-from dojo import tag_inheritance
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.product import helpers as async_product_funcs
-from dojo.tag_inheritance import (
+from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.inheritance import (
     get_products,  # noqa: F401 -- backward compat re-export
     get_products_to_inherit_tags_from,  # noqa: F401 -- backward compat re-export
     inherit_instance_tags,  # noqa: F401 -- backward compat re-export

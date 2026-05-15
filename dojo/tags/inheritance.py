@@ -6,7 +6,7 @@ Provides:
 - ``batch_mode()`` — thread-local context manager that suppresses
   per-instance inheritance work driven by ``m2m_changed`` and ``post_save``
   signals. While inside a batch, the signal handlers in
-  ``dojo/tags_signals.py`` early-return; the calling code is responsible for
+  ``dojo/tags/signals.py`` early-return; the calling code is responsible for
   applying inheritance in bulk (e.g. via the importer's existing
   ``_bulk_inherit_tags`` path or ``propagate_tags_on_product_sync``).
 
@@ -16,7 +16,7 @@ Provides:
   the full rationale).
 
 - The per-instance inheritance helpers previously scattered across
-  ``dojo/tags_signals.py``, ``dojo/models.py``, and ``dojo/product/helpers.py``
+  ``dojo/tags/signals.py``, ``dojo/models.py``, and ``dojo/product/helpers.py``
   (``_manage_inherited_tags``, ``get_products``, ``inherit_product_tags``,
   ``get_products_to_inherit_tags_from``, ``propagate_inheritance``,
   ``inherit_instance_tags``, ``inherit_linked_instance_tags``).
@@ -42,13 +42,13 @@ from django.db.models import Q
 from tagulous.models.managers import FakeTagRelatedManager
 
 # Top-level imports of dojo internals are safe here because
-# ``dojo.tag_inheritance`` is loaded lazily — never during the initial
+# ``dojo.tags.inheritance`` is loaded lazily — never during the initial
 # evaluation of ``dojo.models``. By the time anything imports this module
 # (signals registration, importers, the per-model ``inherit_tags()`` shim
 # in ``dojo.models``), the full model layer is initialised.
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
-from dojo.tag_utils import bulk_add_tag_mapping, bulk_remove_tags_from_instances
+from dojo.tags.utils import bulk_add_tag_mapping, bulk_remove_tags_from_instances
 from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -90,7 +90,7 @@ def batch_mode():
 
 # ---------------------------------------------------------------------------
 # Per-instance inheritance helpers (relocated from dojo/models.py +
-# dojo/tags_signals.py). Logic unchanged.
+# dojo/tags/signals.py). Logic unchanged.
 # ---------------------------------------------------------------------------
 
 

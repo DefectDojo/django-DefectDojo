@@ -3,7 +3,7 @@ import logging
 
 from dojo.celery import app
 from dojo.models import Product
-from dojo.tag_inheritance import (
+from dojo.tags.inheritance import (
     _LOCATION_PREFETCH_FOR_INHERITANCE,  # noqa: F401 -- backward compat re-export
     _inherited_tag_names_for_location,  # noqa: F401 -- backward compat re-export
     _sync_inheritance_for_qs,  # noqa: F401 -- backward compat re-export

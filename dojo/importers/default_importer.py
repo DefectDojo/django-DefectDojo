@@ -5,7 +5,6 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 from django.urls import reverse
 
-from dojo import tag_inheritance
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
 from dojo.importers.base_importer import BaseImporter, Parser
@@ -20,7 +19,8 @@ from dojo.models import (
 )
 from dojo.notifications.helper import async_create_notification
 from dojo.product.helpers import apply_inherited_tags_for_findings
-from dojo.tag_utils import bulk_apply_parser_tags
+from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.utils import bulk_apply_parser_tags
 from dojo.utils import get_full_url, perform_product_grading
 from dojo.validators import clean_tags
 

@@ -111,10 +111,10 @@ def _get_statistics_for_queryset(qs, annotation_factory):
 
 
 def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
-    # Backward-compat shim. Implementation lives in dojo.tag_inheritance; lazy
-    # import keeps dojo.models loadable before dojo.tag_inheritance (which
+    # Backward-compat shim. Implementation lives in dojo.tags.inheritance; lazy
+    # import keeps dojo.models loadable before dojo.tags.inheritance (which
     # transitively imports dojo.utils -> dojo.models) is ready.
-    from dojo.tag_inheritance import _manage_inherited_tags as _impl  # noqa: PLC0415
+    from dojo.tags.inheritance import _manage_inherited_tags as _impl  # noqa: PLC0415
     return _impl(obj, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 

@@ -6,7 +6,6 @@ from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
-from dojo import tag_inheritance
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
     find_candidates_for_deduplication_hash,
@@ -26,7 +25,8 @@ from dojo.models import (
     Test_Import,
 )
 from dojo.product.helpers import apply_inherited_tags_for_findings
-from dojo.tag_utils import bulk_apply_parser_tags
+from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.utils import bulk_apply_parser_tags
 from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 

@@ -27,7 +27,7 @@ from dojo.location.models import Location, LocationProductReference
 from dojo.location.status import ProductLocationStatus
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.product.helpers import propagate_tags_on_product_sync
-from dojo.tags_signals import get_products, inherit_product_tags, propagate_inheritance
+from dojo.tags.signals import get_products, inherit_product_tags, propagate_inheritance
 from dojo.tools.locations import LocationData
 from unittests.dojo_test_case import (
     DojoAPITestCase,
@@ -118,32 +118,32 @@ class TestInheritProductTags(unittest.TestCase):
         p.enable_product_tag_inheritance = per_product_flag
         return p
 
-    @patch("dojo.tag_inheritance.get_system_setting", return_value=True)
-    @patch("dojo.tag_inheritance.get_products")
+    @patch("dojo.tags.inheritance.get_system_setting", return_value=True)
+    @patch("dojo.tags.inheritance.get_products")
     def test_system_setting_on_returns_true(self, mock_get_products, mock_setting):
         mock_get_products.return_value = [self._make_product(per_product_flag=False)]
         self.assertTrue(inherit_product_tags(MagicMock()))
 
-    @patch("dojo.tag_inheritance.get_system_setting", return_value=False)
-    @patch("dojo.tag_inheritance.get_products")
+    @patch("dojo.tags.inheritance.get_system_setting", return_value=False)
+    @patch("dojo.tags.inheritance.get_products")
     def test_per_product_flag_on_system_off_returns_true(self, mock_get_products, mock_setting):
         mock_get_products.return_value = [self._make_product(per_product_flag=True)]
         self.assertTrue(inherit_product_tags(MagicMock()))
 
-    @patch("dojo.tag_inheritance.get_system_setting", return_value=False)
-    @patch("dojo.tag_inheritance.get_products")
+    @patch("dojo.tags.inheritance.get_system_setting", return_value=False)
+    @patch("dojo.tags.inheritance.get_products")
     def test_both_off_returns_false(self, mock_get_products, mock_setting):
         mock_get_products.return_value = [self._make_product(per_product_flag=False)]
         self.assertFalse(inherit_product_tags(MagicMock()))
 
-    @patch("dojo.tag_inheritance.get_system_setting", return_value=False)
-    @patch("dojo.tag_inheritance.get_products")
+    @patch("dojo.tags.inheritance.get_system_setting", return_value=False)
+    @patch("dojo.tags.inheritance.get_products")
     def test_no_products_returns_false(self, mock_get_products, mock_setting):
         mock_get_products.return_value = []
         self.assertFalse(inherit_product_tags(MagicMock()))
 
-    @patch("dojo.tag_inheritance.get_system_setting", return_value=False)
-    @patch("dojo.tag_inheritance.get_products")
+    @patch("dojo.tags.inheritance.get_system_setting", return_value=False)
+    @patch("dojo.tags.inheritance.get_products")
     def test_none_entries_in_product_list_are_skipped(self, mock_get_products, mock_setting):
         mock_get_products.return_value = [None, self._make_product(per_product_flag=False)]
         self.assertFalse(inherit_product_tags(MagicMock()))
@@ -177,28 +177,28 @@ class TestPropagateInheritanceEarlyExit(unittest.TestCase):
         product.tags.all.return_value = [self._tag(n) for n in tag_names]
         return product
 
-    @patch("dojo.tag_inheritance.get_products_to_inherit_tags_from")
+    @patch("dojo.tags.inheritance.get_products_to_inherit_tags_from")
     def test_already_in_sync_returns_false(self, mock_get):
         """inherited_tags matches product tags and all present in tag_list → skip."""
         instance = self._make_instance(["alpha", "beta"])
         mock_get.return_value = [self._make_product(["alpha", "beta"])]
         self.assertFalse(propagate_inheritance(instance, tag_list=["alpha", "beta"]))
 
-    @patch("dojo.tag_inheritance.get_products_to_inherit_tags_from")
+    @patch("dojo.tags.inheritance.get_products_to_inherit_tags_from")
     def test_product_tags_changed_returns_true(self, mock_get):
         """Stored inherited_tags differ from current product tags → must propagate."""
         instance = self._make_instance(["old"])
         mock_get.return_value = [self._make_product(["new"])]
         self.assertTrue(propagate_inheritance(instance, tag_list=["old", "new"]))
 
-    @patch("dojo.tag_inheritance.get_products_to_inherit_tags_from")
+    @patch("dojo.tags.inheritance.get_products_to_inherit_tags_from")
     def test_tags_not_yet_applied_to_instance_returns_true(self, mock_get):
         """inherited_tags already correct but not yet reflected in tag_list → must propagate."""
         instance = self._make_instance(["alpha"])
         mock_get.return_value = [self._make_product(["alpha"])]
         self.assertTrue(propagate_inheritance(instance, tag_list=[]))
 
-    @patch("dojo.tag_inheritance.get_products_to_inherit_tags_from")
+    @patch("dojo.tags.inheritance.get_products_to_inherit_tags_from")
     def test_no_products_no_inherited_tags_returns_false(self, mock_get):
         """No products, no inherited tags, empty tag_list → already in sync, skip."""
         instance = self._make_instance([])
@@ -427,7 +427,7 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
         self.system_settings(enable_product_tag_inheritance=True)
 
     def test_location_inherits_from_multiple_products(self):
-        from dojo.tags_signals import inherit_instance_tags  # noqa: PLC0415
+        from dojo.tags.signals import inherit_instance_tags  # noqa: PLC0415
 
         p1 = self.create_product("Product A", tags=["p1-tag"])
         p2 = self.create_product("Product B", tags=["p2-tag"])
@@ -449,7 +449,7 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
         self.assertIn("p2-tag", tag_names)
 
     def test_location_inherits_only_from_flagged_product_when_system_off(self):
-        from dojo.tags_signals import inherit_instance_tags  # noqa: PLC0415
+        from dojo.tags.signals import inherit_instance_tags  # noqa: PLC0415
 
         self.system_settings(enable_product_tag_inheritance=False)
 
