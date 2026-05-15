@@ -135,21 +135,21 @@ def get_products(instance):
 
 
 def inherit_product_tags(instance) -> bool:
-    products = get_products(instance)
-    # Save a read in the db
-    if any(product.enable_product_tag_inheritance for product in products if product):
+    # System-wide setting is cached, so check it first to short-circuit
+    # before walking related products.
+    if get_system_setting("enable_product_tag_inheritance"):
         return True
-
-    return get_system_setting("enable_product_tag_inheritance")
+    products = get_products(instance)
+    return any(product.enable_product_tag_inheritance for product in products if product)
 
 
 def get_products_to_inherit_tags_from(instance):
     products = get_products(instance)
-    system_wide_inherit = get_system_setting("enable_product_tag_inheritance")
-
-    return [
-        product for product in products if product.enable_product_tag_inheritance or system_wide_inherit
-    ]
+    # System-wide setting is cached — short-circuit before reading the
+    # per-product flag on every related product.
+    if get_system_setting("enable_product_tag_inheritance"):
+        return products
+    return [product for product in products if product.enable_product_tag_inheritance]
 
 
 def propagate_inheritance(instance, tag_list=None):
@@ -212,7 +212,7 @@ def propagate_tags_on_product_sync(product):
     # child kind) even when no inheritance work is possible. State transitions
     # (toggling the flag on/off) still trigger a full sweep via the m2m_changed
     # handler on `Product.tags.through` and the per-product flag save handler.
-    if not (product.enable_product_tag_inheritance or get_system_setting("enable_product_tag_inheritance")):
+    if not (get_system_setting("enable_product_tag_inheritance") or product.enable_product_tag_inheritance):
         return
     inherited_tag_names = {tag.name for tag in product.tags.all()}
 
@@ -263,7 +263,7 @@ def apply_inherited_tags_for_endpoints(endpoints):
     if not endpoints:
         return
     product = endpoints[0].product
-    if not (product.enable_product_tag_inheritance or get_system_setting("enable_product_tag_inheritance")):
+    if not (get_system_setting("enable_product_tag_inheritance") or product.enable_product_tag_inheritance):
         return
     inherited_tag_names = {tag.name for tag in product.tags.all()}
     _sync_inheritance_for_qs(
@@ -291,7 +291,7 @@ def apply_inherited_tags_for_findings(findings):
     # Single-product invariant inside one importer call. Smart upload calls
     # this per-product so the assumption holds there too.
     product = findings[0].test.engagement.product
-    if not (product.enable_product_tag_inheritance or get_system_setting("enable_product_tag_inheritance")):
+    if not (get_system_setting("enable_product_tag_inheritance") or product.enable_product_tag_inheritance):
         return
     inherited_tag_names = {tag.name for tag in product.tags.all()}
     finding_ids = [f.pk for f in findings]

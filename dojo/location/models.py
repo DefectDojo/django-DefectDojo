@@ -267,12 +267,12 @@ class Location(BaseModel):
 
     def products_to_inherit_tags_from(self) -> list[Product]:
         from dojo.utils import get_system_setting  # noqa: PLC0415
-        system_wide_inherit = get_system_setting("enable_product_tag_inheritance")
-        return [
-            product for product
-            in self.all_related_products()
-            if product.enable_product_tag_inheritance or system_wide_inherit
-        ]
+        # System-wide setting is cached — short-circuit before reading the
+        # per-product flag on every related product.
+        products = self.all_related_products()
+        if get_system_setting("enable_product_tag_inheritance"):
+            return products
+        return [product for product in products if product.enable_product_tag_inheritance]
 
     def inherit_tags(self, potentially_existing_tags):
         # get a copy of the tags to be inherited

@@ -270,7 +270,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Inheritance is then applied in bulk per-batch (right before
         # `post_process_findings_batch` dispatch) so rules/dedup see inherited
         # tags on `finding.tags`.
-        with tag_inheritance.batch_mode():
+        with tag_inheritance.suppress():
             return self._process_findings_internal(parsed_findings, **kwargs)
 
     def _process_findings_internal(

@@ -495,10 +495,10 @@ class LocationManager(BaseLocationManager):
         if not locations:
             return
 
-        # Check whether tag inheritance is enabled at either the product level or system-wide; quit early if neither
-        product_inherit = getattr(self._product, "enable_product_tag_inheritance", False)
+        # Check whether tag inheritance is enabled at either the product level or system-wide; quit early if neither.
+        # System-wide setting is cached, so check it first to short-circuit before reading the product attribute.
         system_wide_inherit = bool(get_system_setting("enable_product_tag_inheritance"))
-        if not system_wide_inherit and not product_inherit:
+        if not system_wide_inherit and not getattr(self._product, "enable_product_tag_inheritance", False):
             return
 
         # A location can be shared across multiple products. Its inherited tags should be the union of
