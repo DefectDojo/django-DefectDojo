@@ -207,7 +207,7 @@ def propagate_tags_on_product_deprecated(product_id, *args, **kwargs):
     propagate_tags_on_product(product_id, *args, **kwargs)
 
 
-@app.task(name="dojo.product.helpers.propagate_tags_on_product")
+@app.task
 def propagate_tags_on_product(product_id, *args, **kwargs):
     """Load Product by id and run ``propagate_tags_on_product_sync`` (Celery worker)."""
     with suppress(Product.DoesNotExist):
