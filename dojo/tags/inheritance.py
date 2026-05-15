@@ -18,8 +18,7 @@ Provides:
 - The per-instance inheritance helpers previously scattered across
   ``dojo/tags/signals.py``, ``dojo/models.py``, and ``dojo/product/helpers.py``
   (``_manage_inherited_tags``, ``get_products``, ``inherit_product_tags``,
-  ``get_products_to_inherit_tags_from``, ``propagate_inheritance``,
-  ``inherit_instance_tags``).
+  ``get_products_to_inherit_tags_from``, ``inherit_instance_tags``).
 
 - The bulk product-wide inheritance sync (``propagate_tags_on_product_sync``)
   plus per-batch importer helpers (``apply_inherited_tags_for_findings`` /
@@ -62,12 +61,12 @@ def is_suppressed() -> bool:
 
 
 @contextmanager
-def suppress():
+def suppress_tag_inheritance():
     """
     Suppress per-instance inheritance signals for the calling thread.
 
     Usage:
-        with tag_inheritance.batch():
+        with tag_inheritance.suppress_tag_inheritance():
             # Bulk operations that would otherwise fire `make_inherited_tags_sticky`
             # or `inherit_tags_on_instance` per row.
             ...
@@ -148,37 +147,38 @@ def is_tag_inheritance_enabled(instance) -> bool:
     return bool(get_products_to_inherit_tags_from(instance))
 
 
-def propagate_inheritance(instance, tag_list=None):
-    # Get the expected product tags
-    if tag_list is None:
-        tag_list = []
-    product_inherited_tags = [
-        tag.name
-        for product in get_products_to_inherit_tags_from(instance)
-        for tag in product.tags.all()
-    ]
-    existing_inherited_tags = [tag.name for tag in instance.inherited_tags.all()]
-    # Check if product tags already matches inherited tags
-    product_tags_equals_inherited_tags = product_inherited_tags == existing_inherited_tags
-    # Check if product tags have already been inherited
-    tags_have_already_been_inherited = set(product_inherited_tags) <= set(tag_list)
-    return not (product_tags_equals_inherited_tags and tags_have_already_been_inherited)
+def inherit_instance_tags(instance, *, force=False):
+    """
+    Apply product-inherited tags to ``instance``.
 
-
-def inherit_instance_tags(instance):
-    """Usually nothing to do when saving a model, except for new models?"""
-    # Suppress per-instance inheritance work inside an active batch. The
-    # caller (signal handler or bulk_create cleanup) need not know about
-    # batch_mode; whoever opened the batch is responsible for the bulk
-    # apply at exit.
-    if is_suppressed():
+    Unless ``force=True``, respects ``suppress_tag_inheritance()`` so bulk callers can defer
+    per-instance work. Skips the write when inherited_tags already match the
+    contributing products' tags and the instance's tag_list already contains
+    them.
+    """
+    if not force and is_suppressed():
         return
-    if is_tag_inheritance_enabled(instance):
-        # TODO: Is this change OK to make?
-        # tag_list = instance._tags_tagulous.get_tag_list()
-        tag_list = instance.tags.get_tag_list()
-        if propagate_inheritance(instance, tag_list=tag_list):
-            instance.inherit_tags(tag_list)
+    products = get_products_to_inherit_tags_from(instance)
+    if not products:
+        return
+    tag_list = instance.tags.get_tag_list()
+    product_inherited_tags = [tag.name for product in products for tag in product.tags.all()]
+    existing_inherited_tags = [tag.name for tag in instance.inherited_tags.all()]
+    # Skip the write if both: stored inherited_tags already match and all are
+    # present in the instance's tag_list (already applied).
+    if (
+        product_inherited_tags == existing_inherited_tags
+        and set(product_inherited_tags) <= set(tag_list)
+    ):
+        return
+    # Suppress reentrancy: the inherit_tags() write fires m2m_changed on
+    # the tags through-table, which would dispatch make_inherited_tags_sticky
+    # back into this function. We're already writing the correct state, so
+    # the signal has nothing to enforce. Without this guard, get_tag_list()'s
+    # cached value during the inner m2m_changed can be stale, defeating the
+    # in-sync early-exit and causing infinite signal recursion.
+    with suppress_tag_inheritance():
+        instance.inherit_tags(tag_list)
 
 
 # ---------------------------------------------------------------------------

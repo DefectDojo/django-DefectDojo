@@ -9,7 +9,7 @@ from dojo.location.models import Location, LocationFindingReference, LocationPro
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.product import helpers as async_product_funcs
 from dojo.tags import inheritance as tag_inheritance
-from dojo.tags.inheritance import is_tag_inheritance_enabled, propagate_inheritance
+from dojo.tags.inheritance import is_tag_inheritance_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -32,18 +32,19 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
 @receiver(signals.m2m_changed, sender=Finding.tags.through)
 @receiver(signals.m2m_changed, sender=Location.tags.through)
 def make_inherited_tags_sticky(sender, instance, action, **kwargs):
-    """Make sure inherited tags are added back in if they are removed"""
-    # Inside a `tag_inheritance.batch()` block the caller takes responsibility
-    # for applying inheritance in bulk; per-row signal work would defeat the
-    # purpose. This replaces the old `signals.m2m_changed.disconnect(...)`
-    # pattern, which was process-global and unsafe under threaded workers.
-    if tag_inheritance.is_suppressed():
-        return
+    """
+    Make sure inherited tags are added back in if they are removed.
+
+    Inside a ``tag_inheritance.suppress_tag_inheritance()`` block the caller takes
+    responsibility for applying inheritance in bulk; per-row signal work
+    would defeat the purpose. This replaces the old
+    ``signals.m2m_changed.disconnect(...)`` pattern, which was
+    process-global and unsafe under threaded workers.
+    ``inherit_instance_tags`` itself early-returns when suppression is
+    active.
+    """
     if action in {"post_add", "post_remove"}:
-        if is_tag_inheritance_enabled(instance):
-            tag_list = [tag.name for tag in instance.tags.all()]
-            if propagate_inheritance(instance, tag_list=tag_list):
-                instance.inherit_tags(tag_list)
+        tag_inheritance.inherit_instance_tags(instance)
 
 
 @receiver(signals.post_save, sender=Endpoint)
