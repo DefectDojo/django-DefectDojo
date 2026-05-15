@@ -468,6 +468,11 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
         self.product = self.create_product("Tag Perf Import Product", tags=["inherit", "these"])
         self.engagement = self.create_engagement("Tag Perf Import Engagement", self.product)
         self.scan_path = get_unit_tests_scans_path("zap") / "dvwa_baseline_dojo.xml"
+        # Subset of the full report (10 findings vs 19) used to exercise the
+        # reimport-with-new-findings code path: initial import uses the subset,
+        # then reimport uses the full report so 9 findings get created during
+        # reimport while 10 match existing ones.
+        self.scan_path_subset = get_unit_tests_scans_path("zap") / "dvwa_baseline_dojo_subset.xml"
 
     @override_settings(V3_FEATURE_LOCATIONS=False)
     def test_baseline_zap_scan_import_v2(self):
@@ -534,6 +539,42 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
         finding = Finding.objects.filter(test_id=test_id).first()
         self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
 
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_zap_scan_reimport_with_new_findings_v2(self):
+        """
+        V2: import 10-finding subset, then reimport 19-finding full report.
+
+        9 findings are NEW (must run inheritance), 10 are matched (skip).
+        Exercises the realistic "scheduled rescan with drift" path where a
+        reimport actually creates findings.
+        """
+        response = self.import_scan_with_params(
+            self.scan_path_subset,
+            engagement=self.engagement.id,
+        )
+        test_id = response["test"]
+
+        with self.assertNumQueries(self.EXPECTED_ZAP_REIMPORT_WITH_NEW_V2):
+            self.reimport_scan_with_params(test_id, str(self.scan_path))
+
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_zap_scan_reimport_with_new_findings_v3(self):
+        """V3: same as V2 but Location-backed."""
+        response = self.import_scan_with_params(
+            self.scan_path_subset,
+            engagement=self.engagement.id,
+        )
+        test_id = response["test"]
+
+        with self.assertNumQueries(self.EXPECTED_ZAP_REIMPORT_WITH_NEW_V3):
+            self.reimport_scan_with_params(test_id, str(self.scan_path))
+
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
     # Pinned baselines per mode. Each test forces its own V3_FEATURE_LOCATIONS
     # via @override_settings so all four import paths run in a single suite
     # invocation regardless of the ambient `DD_V3_FEATURE_LOCATIONS` env var.
@@ -548,3 +589,5 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     EXPECTED_ZAP_IMPORT_V3 = 444
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 81
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 169
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 198
