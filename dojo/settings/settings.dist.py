@@ -118,6 +118,10 @@ env = environ.FileAwareEnv(
     # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
     DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
+    # When True, the async watson indexer auto-derives select_related/prefetch_related
+    # paths from each adapter's `fields`/`store` to avoid N+1 queries during indexing.
+    # Falls back to a plain queryset on any error (logged).
+    DD_WATSON_INDEX_PREFETCH_ENABLED=(bool, True),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
@@ -871,6 +875,7 @@ CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 # Watson async index update settings
 WATSON_ASYNC_INDEX_UPDATE_THRESHOLD = env("DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD")
 WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
+WATSON_INDEX_PREFETCH_ENABLED = env("DD_WATSON_INDEX_PREFETCH_ENABLED")
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {

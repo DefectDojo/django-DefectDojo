@@ -305,7 +305,10 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             batch_size = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
             batches = [pk_list[i:i + batch_size] for i in range(0, len(pk_list), batch_size)]
 
-            # Create tasks for each batch and log each one
+            # Create tasks for each batch and log each one. force_async=True
+            # keeps indexing off the request path even for users with
+            # block_execution=True — index updates are slow and never need to
+            # be synchronous from the user's perspective.
             for i, batch in enumerate(batches, 1):
                 logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
-                dojo_dispatch_task(update_watson_search_index_for_model, model_name, batch)
+                dojo_dispatch_task(update_watson_search_index_for_model, model_name, batch, force_async=True)

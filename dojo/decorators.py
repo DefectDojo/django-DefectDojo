@@ -58,6 +58,11 @@ dojo_async_task_counter = ThreadLocalTaskCounter()
 def we_want_async(*args, func=None, **kwargs):
     from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
+    force_async = kwargs.get("force_async", False)
+    if force_async:
+        logger.debug("dojo_async_task %s: running task in the background as force_async=True has been found as kwarg", func)
+        return True
+
     sync = kwargs.get("sync", False)
     if sync:
         logger.debug("dojo_async_task %s: running task in the foreground as sync=True has been found as kwarg", func)

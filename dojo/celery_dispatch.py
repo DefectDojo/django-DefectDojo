@@ -62,6 +62,9 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     - Inject `async_user_id` if missing.
     - Capture and inject pghistory context if available.
     - Respect `sync=True` (foreground execution) and user `block_execution`.
+    - Respect `force_async=True` (background execution even when the caller
+      would otherwise run synchronously, e.g. user has `block_execution`).
+      `force_async` wins over `sync` and `block_execution`.
     - Support `countdown=<seconds>` for async dispatch.
 
     Returns:
