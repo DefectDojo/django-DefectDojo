@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+    {{ block.super }}
+    <h3> Disable Note Type {{ nt.name }}</h3>
+    <form class="form-horizontal" action="{% url 'disable_note_type' nt.id %}" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=nt_form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input aria-label="Disable Note type" class="btn btn-danger" name="disable_note_type" type="submit" value="Disable"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

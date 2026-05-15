@@ -4,11 +4,11 @@
 <div class="panel panel-default table-responsive">
     <div class="panel-heading">
         <h4>Notes <span class="pull-right"><a data-toggle="collapse" href="#vuln_notes"><i
-                class="glyphicon glyphicon-chevron-up"></i></a></span></h4>
+                class="fa-solid fa-chevron-up"></i></a></span></h4>
     </div>
-    {% if object|has_object_permission:"Note_Add" %}
+    {% if object|has_object_permission:"add" %}
     <div id="vuln_notes" class="panel-body collapse in">
-      <form class="form-horizontal" action="" method="post">{% csrf_token %}
+      <form class="" action="" method="post">{% csrf_token %}
           {% include "dojo/form_fields.html" with form=form %}
           <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
@@ -23,7 +23,7 @@
   <div>
     <div class="panel panel-default">
       <div class="panel-comments">
-        {% if user.username == note.author.username or object|has_object_permission:"Note_Delete" or user.is_superuser %}
+        {% if user.username == note.author.username or object|has_object_permission:"delete" or user.is_superuser %}
           <div class="pull-right">
             <form method="post" action="{% url 'delete_note' note.id destination object.id %}">
                 {% csrf_token %}
@@ -34,7 +34,7 @@
             </form>
           </div>
           {% endif %}
-          {% if user.username == note.author.username or object|has_object_permission:"Note_Edit" %}
+          {% if user.username == note.author.username or object|has_object_permission:"edit" %}
           <div class="pull-right">
             <form method="get" action="{% url 'edit_note' note.id destination object.id %}">
                 {% csrf_token %}
@@ -45,7 +45,7 @@
             </form>
           </div>
           {% endif %}
-          {% if user.username == note.author.username or object|has_object_permission:"Note_View_History" %}
+          {% if user.username == note.author.username or object|has_object_permission:"view" %}
           <div class="pull-right">
             <form method="get" action="{% url 'note_history' note.id destination object.id %}">
                 {% csrf_token %}

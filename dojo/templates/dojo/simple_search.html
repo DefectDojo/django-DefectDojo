@@ -5,7 +5,7 @@
 
 {% block content %}
     {{ block.super }}
-    <h2> {{ name }} <i class="fa-solid fa-circle-question has-popover" data-trigger="hover"
+    <h2> {{ name }} <i class="fa-solid fa-circle-question has-popover"
                        data-content="{% blocktrans %}This simple search function will return results whose findings or finding templates
                                      title, URL, description, endpoints, tags, references, languages or technologies contain the search query and products whose
                                      name, tags or description contain the search query.</br> Advanced search operators: (Restrict results to a certain type) product:,
@@ -13,7 +13,7 @@
                                      test-tags shows findings in tests that are tagged with provided tag, similar for engagement-tags and product-tags.
                                      After submitting the search query, tabbed results will be displayed. The findings tab will have the possibility to
                                      to perform more finegrained filtering on status fields, test type, etc.{% endblocktrans %}"
-                       data-placement="right" data-container="body" data-original-title="" title="">
+                      >
                     </i>
         </h2>
 
@@ -35,79 +35,79 @@
         <p></p>
     </div>
 
-    <div role="tabpanel">
+    <div role="tabpanel" x-data="{ activeTab: '{% if activetab == 'findings' %}tabs-1{% elif activetab == 'vulnerability_ids' %}tabs-2{% elif activetab == 'products' %}tabs-3{% elif activetab == 'engagements' %}tabs-4{% elif activetab == 'tests' %}tabs-5{% elif activetab == 'endpoints' %}tabs-6{% elif activetab == 'tagged' %}tabs-10{% elif activetab == 'generic' %}tabs-11{% else %}tabs-1{% endif %}' }">
 
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
             {% if findings %}
-                <li role="presentation" {% if activetab == 'findings' %}class="active"{% endif %}>
-                    <a href="#tabs-1" role="tab" data-toggle="tab">{% trans "Findings" %} ({{ findings.paginator.count }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-1' && 'active'">
+                    <a href="#tabs-1" role="tab" @click.prevent="activeTab = 'tabs-1'">{% trans "Findings" %} ({{ findings.paginator.count }})</a>
                 </li>
             {% endif %}
             {% if vulnerability_ids %}
-                <li role="presentation" {% if activetab == 'vulnerability_ids' %}class="active"{% endif %}>
-                    <a href="#tabs-2" role="tab" data-toggle="tab">{% trans "Vulnerability Ids" %} ({{ vulnerability_ids|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-2' && 'active'">
+                    <a href="#tabs-2" role="tab" @click.prevent="activeTab = 'tabs-2'">{% trans "Vulnerability Ids" %} ({{ vulnerability_ids|length }})</a>
                 </li>
             {% endif %}
             {% if products %}
-                <li role="presentation" {% if activetab == 'products' %}class="active"{% endif %}>
-                    <a href="#tabs-3" role="tab" data-toggle="tab">{% trans "Products" %} ({{ products|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-3' && 'active'">
+                    <a href="#tabs-3" role="tab" @click.prevent="activeTab = 'tabs-3'">{% trans "Products" %} ({{ products|length }})</a>
                 </li>
             {% endif %}
             {% if engagements %}
-                <li role="presentation" {% if activetab == 'engagements' %}class="active"{% endif %}>
-                    <a href="#tabs-4" role="tab" data-toggle="tab">{% trans "Engagements" %} ({{ engagements|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-4' && 'active'">
+                    <a href="#tabs-4" role="tab" @click.prevent="activeTab = 'tabs-4'">{% trans "Engagements" %} ({{ engagements|length }})</a>
                 </li>
             {% endif %}
             {% if tests %}
-                <li role="presentation" {% if activetab == 'tests' %}class="active"{% endif %}>
-                    <a href="#tabs-5" role="tab" data-toggle="tab">{% trans "Tests" %} ({{ tests|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-5' && 'active'">
+                    <a href="#tabs-5" role="tab" @click.prevent="activeTab = 'tabs-5'">{% trans "Tests" %} ({{ tests|length }})</a>
                 </li>
             {% endif %}
             {% if endpoints %}
-                <li role="presentation" {% if activetab == 'endpoints' %}class="active"{% endif %}>
-                    <a href="#tabs-6" role="tab" data-toggle="tab">{% trans "Endpoints" %} ({{ endpoints|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-6' && 'active'">
+                    <a href="#tabs-6" role="tab" @click.prevent="activeTab = 'tabs-6'">{% trans "Endpoints" %} ({{ endpoints|length }})</a>
                 </li>
             {% endif %}
             {% if finding_templates %}
-                <li role="presentation">
-                    <a href="#tabs-7" role="tab" data-toggle="tab">{% trans "Finding Templates" %} ({{ finding_templates|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-7' && 'active'">
+                    <a href="#tabs-7" role="tab" @click.prevent="activeTab = 'tabs-7'">{% trans "Finding Templates" %} ({{ finding_templates|length }})</a>
                 </li>
             {% endif %}
             {% if languages %}
-                <li role="presentation">
-                    <a href="#tabs-8" role="tab" data-toggle="tab">{% trans "Languages" %} ({{ languages|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-8' && 'active'">
+                    <a href="#tabs-8" role="tab" @click.prevent="activeTab = 'tabs-8'">{% trans "Languages" %} ({{ languages|length }})</a>
                 </li>
             {% endif %}
             {% if app_analysis %}
-                <li role="presentation">
-                    <a href="#tabs-9" role="tab" data-toggle="tab">{% trans "Application Technolgies" %} ({{ app_analysis|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-9' && 'active'">
+                    <a href="#tabs-9" role="tab" @click.prevent="activeTab = 'tabs-9'">{% trans "Application Technolgies" %} ({{ app_analysis|length }})</a>
                 </li>
             {% endif %}
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
-                <li role="presentation" {% if activetab == 'tagged' %}class="active"{% endif %}>
-                    <a href="#tabs-10" role="tab" data-toggle="tab">Tagged
+                <li role="presentation" :class="activeTab === 'tabs-10' && 'active'">
+                    <a href="#tabs-10" role="tab" @click.prevent="activeTab = 'tabs-10'">Tagged
                         ({{ tagged_findings|length }}, {{ tagged_products|length }}, {{ tagged_engagements|length }}, {{ tagged_tests|length }}, {{ tagged_endpoints|length }},
                         {{ tagged_finding_templates|length }})
                     </a>
                 </li>
             {% endif %}
             {% if generic %}
-                <li role="presentation" {% if activetab == 'generic' %}class="active"{% endif %}>
-                    <a href="#tabs-11" role="tab" data-toggle="tab">Experimental ({{ generic|length }})</a>
+                <li role="presentation" :class="activeTab === 'tabs-11' && 'active'">
+                    <a href="#tabs-11" role="tab" @click.prevent="activeTab = 'tabs-11'">Experimental ({{ generic|length }})</a>
                 </li>
             {% endif %}
         </ul>
         <!-- Tab panes -->
         <div class="tab-content">
             {% if findings %}
-                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'findings' %}active{% endif %}" id="tabs-1">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-1" x-show="activeTab === 'tabs-1'" x-cloak>
                     {% comment %} include inherits the current context so findings, filtered and other variables {% endcomment %}
                     {% include "dojo/findings_list_snippet.html" with form_id="custom_search_filter" %}
                 </div>
             {% endif %}
             {% if vulnerability_ids %}
-                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'vulnerability_ids' %}active{% endif %}" id="tabs-2">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-2" x-show="activeTab === 'tabs-2'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -160,7 +160,7 @@
                 </div>
             {% endif %}
             {% if products %}
-                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'products' %}active{% endif %}" id="tabs-3">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-3" x-show="activeTab === 'tabs-3'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -186,7 +186,7 @@
                 </div>
             {% endif %}
             {% if engagements %}
-                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'engagements' %}active{% endif %}" id="tabs-4">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-4" x-show="activeTab === 'tabs-4'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -219,7 +219,7 @@
                 </div>
             {% endif %}
             {% if tests %}
-                <div role="tabpanel" class="table-responsive tab-pane  {% if activetab == 'tests' %}active{% endif %}" id="tabs-5">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-5" x-show="activeTab === 'tabs-5'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -257,7 +257,7 @@
                 </div>
             {% endif %}
             {% if endpoints %}
-                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'endpoints' %}active{% endif %}" id="tabs-6">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-6" x-show="activeTab === 'tabs-6'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -295,7 +295,7 @@
                 </div>
             {% endif %}
             {% if finding_templates %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-7">
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-7" x-show="activeTab === 'tabs-7'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -320,7 +320,7 @@
             {% if languages %}
             <div role="tabpanel"
                  class="table-responsive tab-pane"
-                 id="tabs-8">
+                 id="tabs-8" x-show="activeTab === 'tabs-8'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -345,7 +345,7 @@
             {% if app_analysis %}
             <div role="tabpanel"
                  class="table-responsive tab-pane"
-                 id="tabs-9">
+                 id="tabs-9" x-show="activeTab === 'tabs-9'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -369,8 +369,8 @@
             {% endif %}
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
                 <div role="tabpanel"
-                     class="table-responsive tab-pane {% if activetab == 'tagged' %}active{% endif %}"
-                     id="tabs-10">
+                     class="table-responsive tab-pane"
+                     id="tabs-10" x-show="activeTab === 'tabs-10'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -439,8 +439,8 @@
                 </div>
             {% endif %}
             {% if generic %}
-                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'generic' %}active{% endif %}"
-                     id="tabs-11">
+                <div role="tabpanel" class="table-responsive tab-pane"
+                     id="tabs-11" x-show="activeTab === 'tabs-11'" x-cloak>
                     <table class="table table-striped">
                         <thead>
                         <tr>

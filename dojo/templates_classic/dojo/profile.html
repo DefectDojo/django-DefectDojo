@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% load i18n %}
+{% block content %}
+    {{ block.super }}
+    <h3>{% blocktrans with full_name=user.get_full_name %} User Profile - {{ full_name }}{% endblocktrans %}</h3>
+    <div class="row">
+        <div class="col-md-7">
+            <form class="form-horizontal" method="post">{% csrf_token %}
+                <fieldset>
+                    <legend>{% trans "Default Information" %}</legend>
+                    {% include "dojo/form_fields.html" with form=form %}
+                </fieldset>
+                        <fieldset>
+                    <legend>{% trans "Additional Contact Information" %}</legend>
+                    {% include "dojo/form_fields.html" with form=contact_form %}
+                </fieldset>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input class="btn btn-primary" type="submit" value="{% trans "Submit" %}"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <div class="well">
+                <ul class="list-unstyled">
+                    <li><b>{% trans "Last Login:" %} </b>{{ user.last_login }}</li>
+                    <li><b>{% trans "Date Joined:" %} </b>{{ user.date_joined }}</li>
+                </ul>
+                <div class="center" style="margin: auto; text-align: center;">
+                {% if user.has_usable_password %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'change_password' %}">{% trans "Change Password" %}</a>
+                {% endif %}
+                {% if API_TOKENS_ENABLED %}
+                    <a class="btn btn-sm btn-primary" href="{% url 'api_v2_key' %}">{% trans "API Key" %}</a>
+                {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -15,7 +15,7 @@
         <div class="panel-heading">
             <div class="clearfix">
                 <h3 class="pull-left">Tracked Files, Paths and Artifacts</h3>
-                {% if product|has_object_permission:"Product_Tracking_Files_Add" %}
+                {% if product|has_object_permission:"add" %}
                 <div id="test-pulldown" class="dropdown pull-right">
                     <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
                             data-toggle="dropdown" aria-expanded="true" aria-label="Add tracked files">
@@ -52,11 +52,11 @@
                     <td>{{ object.review_status }}</td>
                     <td>
                        <div class="btn-group">
-                        {% if product|has_object_permission:"Product_Tracking_Files_Edit" %}
+                        {% if product|has_object_permission:"edit" %}
                            <a class="btn btn-sm btn-warning"
                               href="{% url 'edit_object' object.product.id object.id %}">Edit</a>
                         {% endif %}
-                        {% if product|has_object_permission:"Product_Tracking_Files_Delete" %}
+                        {% if product|has_object_permission:"delete" %}
                            <a class="btn btn-sm btn-danger"
                               href="{% url 'delete_object' object.product.id object.id %}">Delete</a>
                         {% endif %}
@@ -72,7 +72,6 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="text/javascript">
         $(function () {
             $('form#bulk_change_form').on('submit', function(e){

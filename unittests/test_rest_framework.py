@@ -8,6 +8,7 @@ from datetime import timedelta
 from enum import Enum
 from json import dumps
 from pathlib import Path
+from unittest import skip
 from unittest.mock import ANY, MagicMock, PropertyMock, call, patch
 
 from django.conf import settings
@@ -41,14 +42,11 @@ from dojo.api_v2.views import (
     BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
-    DojoGroupMemberViewSet,
-    DojoGroupViewSet,
     EndpointStatusViewSet,
     EndPointViewSet,
     EngagementViewSet,
     FindingTemplatesViewSet,
     FindingViewSet,
-    GlobalRoleViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -59,14 +57,9 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     ProductAPIScanConfigurationViewSet,
-    ProductGroupViewSet,
-    ProductMemberViewSet,
-    ProductTypeGroupViewSet,
-    ProductTypeMemberViewSet,
     ProductTypeViewSet,
     ProductViewSet,
     RiskAcceptanceViewSet,
-    RoleViewSet,
     SonarqubeIssueViewSet,
     TestsViewSet,
     TestTypesViewSet,
@@ -78,11 +71,9 @@ from dojo.api_v2.views import (
 )
 from dojo.asset.api.views import (
     AssetAPIScanConfigurationViewSet,
-    AssetGroupViewSet,
-    AssetMemberViewSet,
     AssetViewSet,
 )
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.roles_permissions import Permissions, permission_to_action
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.views import LocationFindingReferenceViewSet, LocationProductReferenceViewSet, LocationViewSet
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -91,8 +82,6 @@ from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
     Development_Environment,
-    Dojo_Group,
-    Dojo_Group_Member,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -100,7 +89,6 @@ from dojo.models import (
     FileUpload,
     Finding,
     Finding_Template,
-    Global_Role,
     JIRA_Instance,
     JIRA_Issue,
     JIRA_Project,
@@ -112,13 +100,8 @@ from dojo.models import (
     Notifications,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
     Risk_Acceptance,
-    Role,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
     Test,
@@ -131,8 +114,6 @@ from dojo.models import (
 )
 from dojo.notifications.api.views import NotificationsViewSet, NotificationWebhooksViewSet
 from dojo.organization.api.views import (
-    OrganizationGroupViewSet,
-    OrganizationMemberViewSet,
     OrganizationViewSet,
 )
 from dojo.url.api.views import URLViewSet
@@ -584,7 +565,7 @@ class BaseClass:
             self.check_schema_response("post", "201", response)
 
         @skipIfNotSubclass(CreateModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_create_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -595,7 +576,7 @@ class BaseClass:
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 ANY,
-                self.permission_create)
+                permission_to_action(self.permission_create))
 
         @skipIfNotSubclass(CreateModelMixin)
         def test_create_configuration_not_authorized(self):
@@ -646,7 +627,7 @@ class BaseClass:
             self.check_schema_response("put", "200", response, detail=True)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -669,13 +650,13 @@ class BaseClass:
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 permission_object,
-                self.permission_update)
+                permission_to_action(self.permission_update))
 
             response = self.client.put(relative_url, self.payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 permission_object,
-                self.permission_update)
+                permission_to_action(self.permission_update))
 
         @skipIfNotSubclass(UpdateModelMixin)
         def test_update_configuration_not_authorized(self):
@@ -737,7 +718,7 @@ class BaseClass:
             self.assertEqual(self.deleted_objects, len(response.data["results"]), response.content)
 
         @skipIfNotSubclass(DestroyModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_delete_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -759,7 +740,7 @@ class BaseClass:
 
             mock.assert_called_with(User.objects.get(username="admin"),
                 permission_object,
-                self.permission_delete)
+                permission_to_action(self.permission_delete))
 
         @skipIfNotSubclass(DestroyModelMixin)
         def test_delete_configuration_not_authorized(self):
@@ -798,7 +779,7 @@ class BaseClass:
             self.check_schema_response("put", "200", response, detail=True)
 
         @skipIfNotSubclass(UpdateModelMixin)
-        @patch("dojo.api_v2.permissions.user_has_permission")
+        @patch("dojo.authorization.api_permissions.user_has_permission")
         def test_update_object_not_authorized(self, mock):
             if self.test_type != TestType.OBJECT_PERMISSIONS:
                 self.skipTest("Authorization is not object based")
@@ -812,7 +793,7 @@ class BaseClass:
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 self.permission_check_class.objects.get(id=current_objects["results"][0]["id"]),
-                self.permission_update)
+                permission_to_action(self.permission_update))
 
     class AuthenticatedViewTest(BaseClassTest):
         @skipIfNotSubclass(ListModelMixin)
@@ -838,6 +819,14 @@ class BaseClass:
             self.assertEqual(200, response.status_code, response.content[:1000])
 
     class RelatedObjectsTest(BaseClassTest):
+        @skip(
+            "Legacy authorization: Global_Role(Reader) is inert and the test "
+            "user has no Product_Member / authorized_users entry, so the "
+            "list endpoint returns no objects. The test asserts the RBAC-era "
+            "claim that 'Reader can view + add notes' which doesn't translate "
+            "to legacy semantics (membership is single-bit; non-members are "
+            "hidden via 404).",
+        )
         def test_notes_can_be_added_by_users_with_read_only_permissions(self):
             self.setUp_global_reader()
             response = self.client.get(self.url, format="json")
@@ -862,6 +851,11 @@ class BaseClass:
             engagement edit permissions since that is what is defined in the
             UserHasEngagementRelatedObjectPermission class
             """
+            # Legacy authorization collapses Reader/Writer per-product, so
+            # the RBAC distinction this test asserts (Reader 403 / Writer 200)
+            # doesn't exist. Cross-product IDOR is still covered by
+            # test_permissions_audit.
+            self.skipTest("Obsolete under legacy: Reader/Writer collapse to single-bit membership.")
             self.setUp_global_reader()
             # Skip tags for engagement and tests
             if related_object_path == "tags" and self.endpoint_model in {Engagement, Test}:
@@ -1349,7 +1343,7 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         self.assertEqual(403, response.status_code, response.content[:1000])
         self.assertEqual(self.endpoint_model.objects.count(), length)
 
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_object_not_authorized(self, mock):
         length = self.endpoint_model.objects.count()
         response = self.client.post(self.url, self.payload)
@@ -1367,7 +1361,7 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         self.assertEqual(403, response.status_code, response.content[:1000])
         self.assertEqual(self.endpoint_model.objects.count(), length)
 
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_delete_object_not_authorized(self, mock):
         length = self.endpoint_model.objects.count()
         current_objects = self.client.get(self.url, format="json").data
@@ -1386,7 +1380,7 @@ class V3EndpointStatusTest(BaseClass.BaseClassTest):
         response = self.client.put(relative_url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_update_object_not_authorized(self, mock):
         current_objects = self.client.get(self.url, format="json").data
         relative_url = self.url + "{}/".format(current_objects["results"][0]["id"])
@@ -2730,7 +2724,7 @@ class UsersTest(BaseClass.BaseClassTest):
         }
         self.update_fields = {"first_name": "test changed", "configuration_permissions": [219, 220]}
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
-        self.deleted_objects = 13
+        self.deleted_objects = 12
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
     def test_create(self):
@@ -2843,7 +2837,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2867,13 +2861,13 @@ class ImportScanTest(BaseClass.BaseClassTest):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Engagement.objects.get(id=2),  # engagement id found via product name and engagement name
-                Permissions.Import_Scan_Result)
+                permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2898,13 +2892,13 @@ class ImportScanTest(BaseClass.BaseClassTest):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Product.objects.get(id=1),
-                Permissions.Engagement_Add)
+                permission_to_action(Permissions.Engagement_Add))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2930,13 +2924,13 @@ class ImportScanTest(BaseClass.BaseClassTest):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
-                Permissions.Product_Type_Add_Product)
+                permission_to_action(Permissions.Product_Type_Add_Product))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -2961,13 +2955,13 @@ class ImportScanTest(BaseClass.BaseClassTest):
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
-                Permissions.Product_Type_Add)
+                permission_to_action(Permissions.Product_Type_Add))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
@@ -2994,17 +2988,17 @@ class ImportScanTest(BaseClass.BaseClassTest):
             mock.assert_has_calls([
                 call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
-                    Permissions.Engagement_Add),
+                    permission_to_action(Permissions.Engagement_Add)),
                 call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
-                    Permissions.Import_Scan_Result),
+                    permission_to_action(Permissions.Import_Scan_Result)),
             ])
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3029,13 +3023,13 @@ class ImportScanTest(BaseClass.BaseClassTest):
             self.assertEqual(201, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
-                Permissions.Product_Type_Add_Product)
+                permission_to_action(Permissions.Product_Type_Add_Product))
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3060,7 +3054,7 @@ class ImportScanTest(BaseClass.BaseClassTest):
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
-                Permissions.Product_Type_Add)
+                permission_to_action(Permissions.Product_Type_Add))
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
@@ -3104,7 +3098,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3128,13 +3122,13 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type
-                Permissions.Import_Scan_Result)
+                permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_scan_type_title_auto_create(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3158,13 +3152,13 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(201, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Engagement.objects.get(id=4),
-                Permissions.Import_Scan_Result)
+                permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         """Test creating a new engagement should also check for import scan permission in the product"""
         mock.return_value = True
@@ -3191,17 +3185,17 @@ class ReimportScanTest(DojoAPITestCase):
             mock.assert_has_calls([
                 call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
-                    Permissions.Engagement_Add),
+                    permission_to_action(Permissions.Engagement_Add)),
                 call(User.objects.get(username="admin"),
                     Product.objects.get(id=1),
-                    Permissions.Import_Scan_Result),
+                    permission_to_action(Permissions.Import_Scan_Result)),
             ])
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3227,13 +3221,13 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(201, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
-                Permissions.Product_Type_Add_Product)
+                permission_to_action(Permissions.Product_Type_Add_Product))
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = True
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3258,13 +3252,13 @@ class ReimportScanTest(DojoAPITestCase):
             response = self.client.post(self.url, payload)
             self.assertEqual(201, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
-                Permissions.Product_Type_Add)
+                permission_to_action(Permissions.Product_Type_Add))
             importer_mock.assert_called_once()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_test_id(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3284,7 +3278,7 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=3),
-                Permissions.Import_Scan_Result)
+                permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
@@ -3292,7 +3286,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_engagement(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3317,13 +3311,13 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Product.objects.get(id=1),
-                Permissions.Engagement_Add)
+                permission_to_action(Permissions.Engagement_Add))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3349,13 +3343,13 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Product_Type.objects.get(id=1),
-                Permissions.Product_Type_Add_Product)
+                permission_to_action(Permissions.Product_Type_Add_Product))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_global_permission")
+    @patch("dojo.authorization.api_permissions.user_has_global_permission")
     def test_create_not_authorized_product_name_engagement_name_auto_create_product_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3380,13 +3374,13 @@ class ReimportScanTest(DojoAPITestCase):
             response = self.client.post(self.url, payload)
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
-                Permissions.Product_Type_Add)
+                permission_to_action(Permissions.Product_Type_Add))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_scan_type(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3408,13 +3402,13 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=4),  # engagement id found via product name and engagement name
-                Permissions.Import_Scan_Result)
+                permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_create_not_authorized_product_name_engagement_name_scan_type_title(self, mock, importer_mock, reimporter_mock):
         mock.return_value = False
         importer_mock.return_value = IMPORTER_MOCK_RETURN_VALUE
@@ -3437,7 +3431,7 @@ class ReimportScanTest(DojoAPITestCase):
             self.assertEqual(403, response.status_code, response.content[:1000])
             mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=4),  # test id found via product name and engagement name and scan_type and test_title
-                Permissions.Import_Scan_Result)
+                permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
@@ -3445,7 +3439,7 @@ class ReimportScanTest(DojoAPITestCase):
 
     @patch("dojo.importers.default_reimporter.DefaultReImporter.process_scan")
     @patch("dojo.importers.default_importer.DefaultImporter.process_scan")
-    @patch("dojo.api_v2.permissions.user_has_permission")
+    @patch("dojo.authorization.api_permissions.user_has_permission")
     def test_reimport_engagement_param_ignored_permission_checked_on_name_resolved_target(self, mock, importer_mock, reimporter_mock):
         """
         Engagement is not a declared field on ReImportScanSerializer — verify
@@ -3475,7 +3469,7 @@ class ReimportScanTest(DojoAPITestCase):
             # NOT on Test 3 (which belongs to the engagement=1 param)
             mock.assert_called_with(User.objects.get(username="admin"),
                 Test.objects.get(id=4),
-                Permissions.Import_Scan_Result)
+                permission_to_action(Permissions.Import_Scan_Result))
             importer_mock.assert_not_called()
             reimporter_mock.assert_not_called()
 
@@ -3566,11 +3560,9 @@ class ProductTypeTest(BaseClass.BaseClassTest):
         response = self.client.post(self.url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
-    def test_create_authorized_owner(self):
-        self.setUp_global_owner()
-
-        response = self.client.post(self.url, self.payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
+    # test_create_authorized_owner: legacy authorization has no
+    # Global_Role(Owner) concept — create-permission collapses to
+    # is_superuser, which test_create is already exercising.
 
 
 @versioned_fixtures
@@ -3608,327 +3600,9 @@ class OrganizationTest(BaseClass.BaseClassTest):
         response = self.client.post(self.url, self.payload)
         self.assertEqual(403, response.status_code, response.content[:1000])
 
-    def test_create_authorized_owner(self):
-        self.setUp_global_owner()
-
-        response = self.client.post(self.url, self.payload)
-        self.assertEqual(201, response.status_code, response.content[:1000])
-
-
-@versioned_fixtures
-class DojoGroupsTest(BaseClass.BaseClassTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Dojo_Group
-        self.endpoint_path = "dojo_groups"
-        self.viewname = "dojo_group"
-        self.viewset = DojoGroupViewSet
-        self.payload = {
-            "name": "Test Group",
-            "description": "Test",
-            "configuration_permissions": [217, 218],
-        }
-        self.update_fields = {"description": "changed", "configuration_permissions": [219, 220]}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Dojo_Group
-        self.permission_update = Permissions.Group_Edit
-        self.permission_delete = Permissions.Group_Delete
-        self.deleted_objects = 4
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-    def test_list_object_not_authorized(self):
-        self.setUp_not_authorized()
-
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-    def test_detail_object_not_authorized(self):
-        self.setUp_not_authorized()
-
-        current_objects = self.endpoint_model.objects.all()
-        relative_url = self.url + f"{current_objects[0].id}/"
-        response = self.client.get(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-    def test_create_object_not_authorized(self):
-        self.setUp_not_authorized()
-
-        response = self.client.post(self.url, self.payload)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-    def test_create_group_with_non_configuration_permissions(self):
-        payload = self.payload.copy()
-        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
-        response = self.client.post(self.url, payload)
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("object does not exist", response.data["message"])
-
-    def test_update_group_with_non_configuration_permissions(self):
-        payload = {}
-        payload["configuration_permissions"] = [25, 26]  # these permissions exist but user can not assign them becaause they are not "configuration_permissions"
-        response = self.client.patch(self.url + "2/", payload)
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("object does not exist", response.data["message"])
-
-    def test_update_group_other_permissions_will_not_leak_and_stay_untouched(self):
-        Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.set([218, 220, 26, 28])  # I was trying to set this in 'dojo_testdata.json' but it hasn't sucessful
-        payload = {}
-        payload["configuration_permissions"] = [217, 218, 219]
-        response = self.client.patch(self.url + "1/", payload)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["configuration_permissions"], payload["configuration_permissions"])
-        permissions = Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.all().values_list("id", flat=True)
-        self.assertEqual(set(permissions), set(payload["configuration_permissions"] + [26, 28]))
-        Dojo_Group.objects.get(name="Group 1 Testdata").auth_group.permissions.clear()
-
-
-@versioned_fixtures
-class DojoGroupsUsersTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Dojo_Group_Member
-        self.endpoint_path = "dojo_group_members"
-        self.viewname = "dojo_group_member"
-        self.viewset = DojoGroupMemberViewSet
-        self.payload = {
-            "group": 1,
-            "user": 3,
-            "role": 4,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Dojo_Group_Member
-        self.permission_create = Permissions.Group_Manage_Members
-        self.permission_update = Permissions.Group_Manage_Members
-        self.permission_delete = Permissions.Group_Member_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class RolesTest(BaseClass.BaseClassTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Role
-        self.endpoint_path = "roles"
-        self.viewname = "role"
-        self.viewset = RoleViewSet
-        self.test_type = TestType.STANDARD
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class GlobalRolesTest(BaseClass.BaseClassTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Global_Role
-        self.endpoint_path = "global_roles"
-        self.viewname = "global_role"
-        self.viewset = GlobalRoleViewSet
-        self.payload = {
-            "user": 2,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.STANDARD
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class ProductTypeMemberTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Type_Member
-        self.endpoint_path = "product_type_members"
-        self.viewname = "product_type_member"
-        self.viewset = ProductTypeMemberViewSet
-        self.payload = {
-            "product_type": 1,
-            "user": 3,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Type_Member
-        self.permission_create = Permissions.Product_Type_Manage_Members
-        self.permission_update = Permissions.Product_Type_Manage_Members
-        self.permission_delete = Permissions.Product_Type_Member_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class OrganizationMemberTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Type_Member
-        self.endpoint_path = "organization_members"
-        self.viewname = "organization_member"
-        self.viewset = OrganizationMemberViewSet
-        self.payload = {
-            "organization": 1,
-            "user": 3,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Type_Member
-        self.permission_create = Permissions.Product_Type_Manage_Members
-        self.permission_update = Permissions.Product_Type_Manage_Members
-        self.permission_delete = Permissions.Product_Type_Member_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class ProductMemberTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Member
-        self.endpoint_path = "product_members"
-        self.viewname = "product_member"
-        self.viewset = ProductMemberViewSet
-        self.payload = {
-            "product": 3,
-            "user": 2,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Member
-        self.permission_create = Permissions.Product_Manage_Members
-        self.permission_update = Permissions.Product_Manage_Members
-        self.permission_delete = Permissions.Product_Member_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class AssetMemberTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Member
-        self.endpoint_path = "asset_members"
-        self.viewname = "asset_member"
-        self.viewset = AssetMemberViewSet
-        self.payload = {
-            "asset": 3,
-            "user": 2,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Member
-        self.permission_create = Permissions.Product_Manage_Members
-        self.permission_update = Permissions.Product_Manage_Members
-        self.permission_delete = Permissions.Product_Member_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class ProductTypeGroupTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Type_Group
-        self.endpoint_path = "product_type_groups"
-        self.viewname = "product_type_group"
-        self.viewset = ProductTypeGroupViewSet
-        self.payload = {
-            "product_type": 1,
-            "group": 2,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Type_Group
-        self.permission_create = Permissions.Product_Type_Group_Add
-        self.permission_update = Permissions.Product_Type_Group_Edit
-        self.permission_delete = Permissions.Product_Type_Group_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class OrganiazationGroupTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Type_Group
-        self.endpoint_path = "organization_groups"
-        self.viewname = "organization_group"
-        self.viewset = OrganizationGroupViewSet
-        self.payload = {
-            "organization": 1,
-            "group": 2,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Type_Group
-        self.permission_create = Permissions.Product_Type_Group_Add
-        self.permission_update = Permissions.Product_Type_Group_Edit
-        self.permission_delete = Permissions.Product_Type_Group_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class ProductGroupTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Group
-        self.endpoint_path = "product_groups"
-        self.viewname = "product_group"
-        self.viewset = ProductGroupViewSet
-        self.payload = {
-            "product": 1,
-            "group": 2,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Group
-        self.permission_create = Permissions.Product_Group_Add
-        self.permission_update = Permissions.Product_Group_Edit
-        self.permission_delete = Permissions.Product_Group_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-
-@versioned_fixtures
-class AssetGroupTest(BaseClass.MemberEndpointTest):
-    fixtures = ["dojo_testdata.json"]
-
-    def __init__(self, *args, **kwargs):
-        self.endpoint_model = Product_Group
-        self.endpoint_path = "asset_groups"
-        self.viewname = "asset_group"
-        self.viewset = AssetGroupViewSet
-        self.payload = {
-            "asset": 1,
-            "group": 2,
-            "role": 2,
-        }
-        self.update_fields = {"role": 3}
-        self.test_type = TestType.OBJECT_PERMISSIONS
-        self.permission_check_class = Product_Group
-        self.permission_create = Permissions.Product_Group_Add
-        self.permission_update = Permissions.Product_Group_Edit
-        self.permission_delete = Permissions.Product_Group_Delete
-        self.deleted_objects = 1
-        BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+    # test_create_authorized_owner: legacy authorization has no
+    # Global_Role(Owner) concept — create-permission collapses to
+    # is_superuser, which test_create is already exercising.
 
 
 @versioned_fixtures
@@ -4167,14 +3841,8 @@ class UserProfileTest(DojoAPITestCase):
         self.assertTrue(data["user"]["is_superuser"])
         self.assertEqual(1, data["user_contact_info"]["user"])
         self.assertEqual("#admin", data["user_contact_info"]["twitter_username"])
-        self.assertEqual(1, data["global_role"]["user"])
-        self.assertEqual(4, data["global_role"]["role"])
-        self.assertEqual(1, data["dojo_group_member"][0]["user"])
-        self.assertEqual(1, data["dojo_group_member"][0]["group"])
-        self.assertEqual(1, data["product_type_member"][0]["user"])
-        self.assertEqual(1, data["product_type_member"][0]["product_type"])
-        self.assertEqual(1, data["product_member"][1]["user"])
-        self.assertEqual(3, data["product_member"][1]["product"])
+        # Legacy authorization removed Global_Role, Dojo_Group_Member,
+        # Product_Member, and Product_Type_Member from the OS profile payload.
 
 
 @versioned_fixtures

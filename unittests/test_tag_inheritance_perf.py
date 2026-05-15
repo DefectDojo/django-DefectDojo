@@ -491,9 +491,9 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Pinned baselines per mode. Each test forces its own V3_FEATURE_LOCATIONS
     # via @override_settings so all four import paths run in a single suite
     # invocation regardless of the ambient `DD_V3_FEATURE_LOCATIONS` env var.
+    # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
     # Phase A nudges these slightly downward (post_save gated on created=True
     # avoids re-running inheritance on no-op finding updates during reimport).
-    # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
     # Phase B Stage 1 (thread-safe batch context) adds ~20 queries on the V3
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for

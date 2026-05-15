@@ -9,7 +9,6 @@ from dojo.api_helpers.filters import StaticMethodFilters
 
 # from tagulous.forms import TagWidget
 # import tagulous
-from dojo.authorization.roles_permissions import Permissions
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 
@@ -60,4 +59,4 @@ class URLFilter(StaticMethodFilters):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_locations(Permissions.Location_View, parent)
+        return get_authorized_locations("view", parent)
