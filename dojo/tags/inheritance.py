@@ -19,7 +19,7 @@ Provides:
   ``dojo/tags/signals.py``, ``dojo/models.py``, and ``dojo/product/helpers.py``
   (``_manage_inherited_tags``, ``get_products``, ``inherit_product_tags``,
   ``get_products_to_inherit_tags_from``, ``propagate_inheritance``,
-  ``inherit_instance_tags``, ``inherit_linked_instance_tags``).
+  ``inherit_instance_tags``).
 
 - The bulk product-wide inheritance sync (``propagate_tags_on_product_sync``)
   plus per-batch importer helpers (``apply_inherited_tags_for_findings`` /
@@ -134,22 +134,18 @@ def get_products(instance):
     return []
 
 
-def inherit_product_tags(instance) -> bool:
-    # System-wide setting is cached, so check it first to short-circuit
-    # before walking related products.
-    if get_system_setting("enable_product_tag_inheritance"):
-        return True
-    products = get_products(instance)
-    return any(product.enable_product_tag_inheritance for product in products if product)
-
-
 def get_products_to_inherit_tags_from(instance):
-    products = get_products(instance)
+    products = [p for p in get_products(instance) if p]
     # System-wide setting is cached — short-circuit before reading the
     # per-product flag on every related product.
     if get_system_setting("enable_product_tag_inheritance"):
         return products
     return [product for product in products if product.enable_product_tag_inheritance]
+
+
+def is_tag_inheritance_enabled(instance) -> bool:
+    # delegate so we have logic centralized. no products -> no inheritance enabled.
+    return bool(get_products_to_inherit_tags_from(instance))
 
 
 def propagate_inheritance(instance, tag_list=None):
@@ -177,16 +173,12 @@ def inherit_instance_tags(instance):
     # apply at exit.
     if is_suppressed():
         return
-    if inherit_product_tags(instance):
+    if is_tag_inheritance_enabled(instance):
         # TODO: Is this change OK to make?
         # tag_list = instance._tags_tagulous.get_tag_list()
         tag_list = instance.tags.get_tag_list()
         if propagate_inheritance(instance, tag_list=tag_list):
             instance.inherit_tags(tag_list)
-
-
-def inherit_linked_instance_tags(instance):
-    inherit_instance_tags(instance.location)
 
 
 # ---------------------------------------------------------------------------

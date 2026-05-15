@@ -9,14 +9,7 @@ from dojo.location.models import Location, LocationFindingReference, LocationPro
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.product import helpers as async_product_funcs
 from dojo.tags import inheritance as tag_inheritance
-from dojo.tags.inheritance import (
-    get_products,  # noqa: F401 -- backward compat re-export
-    get_products_to_inherit_tags_from,  # noqa: F401 -- backward compat re-export
-    inherit_instance_tags,  # noqa: F401 -- backward compat re-export
-    inherit_linked_instance_tags,  # noqa: F401 -- backward compat re-export
-    inherit_product_tags,
-    propagate_inheritance,
-)
+from dojo.tags.inheritance import is_tag_inheritance_enabled, propagate_inheritance
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +21,7 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
         with contextlib.suppress(AttributeError):
             running_async_process = instance.running_async_process
         # Check if the async process is already running to avoid calling it a second time
-        if not running_async_process and inherit_product_tags(instance):
+        if not running_async_process and is_tag_inheritance_enabled(instance):
             dojo_dispatch_task(async_product_funcs.propagate_tags_on_product, instance.id, countdown=5)
             instance.running_async_process = True
 
@@ -47,7 +40,7 @@ def make_inherited_tags_sticky(sender, instance, action, **kwargs):
     if tag_inheritance.is_suppressed():
         return
     if action in {"post_add", "post_remove"}:
-        if inherit_product_tags(instance):
+        if is_tag_inheritance_enabled(instance):
             tag_list = [tag.name for tag in instance.tags.all()]
             if propagate_inheritance(instance, tag_list=tag_list):
                 instance.inherit_tags(tag_list)
@@ -72,4 +65,4 @@ def inherit_tags_on_instance(sender, instance, created, **kwargs):
 @receiver(signals.post_save, sender=LocationFindingReference)
 @receiver(signals.post_save, sender=LocationProductReference)
 def inherit_tags_on_linked_instance(sender, instance, created, **kwargs):
-    tag_inheritance.inherit_linked_instance_tags(instance)
+    tag_inheritance.inherit_instance_tags(instance.location)
