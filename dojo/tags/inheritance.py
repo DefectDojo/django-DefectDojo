@@ -124,6 +124,7 @@ def _sync_inherited_tags(obj, incoming_inherited_tags):
                 existing = obj.tags.get_tag_list()
                 obj.tags.set_tag_list(list(dict.fromkeys([*existing, *target])))
             else:
+                # avoid reentrancy: the `add(*target)` write fires m2m_changed
                 with suppress_tag_inheritance():
                     obj.tags.add(*target)
         return
@@ -136,6 +137,7 @@ def _sync_inherited_tags(obj, incoming_inherited_tags):
     # to_add (user-driven m2m_changed stripped it). Re-add separately.
     sticky_missing = (target - current_tags) - to_add
 
+    # avoid reentrancy: the `remove(*to_remove)` / `add(*to_add)` / `add(*sticky_missing)` writes fire m2m_changed
     with suppress_tag_inheritance():
         if to_remove:
             obj.inherited_tags.remove(*to_remove)
