@@ -1,34 +1,3 @@
-"""
-Tag inheritance — central coordination module.
-
-Provides:
-
-- ``batch_mode()`` — thread-local context manager that suppresses
-  per-instance inheritance work driven by ``m2m_changed`` and ``post_save``
-  signals. While inside a batch, the signal handlers in
-  ``dojo/tags/signals.py`` early-return; the calling code is responsible for
-  applying inheritance in bulk (e.g. via the importer's existing
-  ``_bulk_inherit_tags`` path or ``propagate_tags_on_product_sync``).
-
-  This replaces the previous pattern of ``signals.m2m_changed.disconnect(...)``
-  in importer hot loops, which was process-global and unsafe under threaded
-  gunicorn / Celery thread pools / ASGI threadpools (see PR description for
-  the full rationale).
-
-- The per-instance inheritance helpers previously scattered across
-  ``dojo/tags/signals.py`` and ``dojo/models.py``
-  (``_sync_inherited_tags``, ``get_products``, ``inherit_product_tags``,
-  ``get_products_to_inherit_tags_from``, ``inherit_instance_tags``).
-
-- The bulk product-wide inheritance sync (``propagate_tags_on_product_sync``),
-  its Celery entrypoint (``propagate_tags_on_product``),
-  plus per-batch importer helpers (``apply_inherited_tags_for_findings`` /
-  ``apply_inherited_tags_for_endpoints``) and their shared ``_sync_inheritance_for_qs``
-  primitive.
-
-Model imports are deferred to function bodies to keep this module loadable
-before ``dojo.models`` finishes initialising.
-"""
 from __future__ import annotations
 
 import logging
@@ -86,12 +55,6 @@ def suppress_tag_inheritance():
             # Clean up the attribute so leak-free thread reuse stays simple.
             with suppress(AttributeError):
                 del _state.depth
-
-
-# ---------------------------------------------------------------------------
-# Per-instance inheritance helpers (relocated from dojo/models.py +
-# dojo/tags/signals.py). Logic unchanged.
-# ---------------------------------------------------------------------------
 
 
 def _sync_inherited_tags(obj, incoming_inherited_tags):
