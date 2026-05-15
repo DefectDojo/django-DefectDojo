@@ -1546,6 +1546,7 @@ class FindingViewSet(
     )
     @action(detail=True, methods=["post"], url_path=r"duplicate/reset", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def reset_finding_duplicate_status(self, request, pk):
+        self.get_object()
         checked_duplicate_id = reset_finding_duplicate_status_internal(
             request.user, pk,
         )
@@ -1566,6 +1567,7 @@ class FindingViewSet(
         detail=True, methods=["post"], url_path=r"original/(?P<new_fid>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def set_finding_as_original(self, request, pk, new_fid):
+        self.get_object()
         success = set_finding_as_original_internal(request.user, pk, new_fid)
         if not success:
             return Response(status=status.HTTP_400_BAD_REQUEST)
