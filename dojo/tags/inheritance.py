@@ -380,6 +380,7 @@ def apply_inherited_tags_for_locations(locations, *, product):
     ):
         product_ids_by_location[loc_id].add(prod_id)
 
+    # prefetch all tags for all linked products up front so we can pass a callable to the sync function
     all_product_ids = {pid for pids in product_ids_by_location.values() for pid in pids}
     product_qs = Product.objects.filter(id__in=all_product_ids).prefetch_related("tags")
     if not system_wide:
@@ -388,7 +389,7 @@ def apply_inherited_tags_for_locations(locations, *, product):
         p.id: {t.name for t in p.tags.all()} for p in product_qs
     }
 
-    def _target_for_location_pk(pk):
+    def _target_tag_names_for_location_pk(pk):
         names: set[str] = set()
         for pid in product_ids_by_location[pk]:
             # product_ids_by_location may contain products that shouldn't contribute
@@ -401,7 +402,7 @@ def apply_inherited_tags_for_locations(locations, *, product):
     _sync_inheritance_for_ids(
         Location,
         [loc.id for loc in locations],
-        target_tag_names=_target_for_location_pk,
+        target_tag_names=_target_tag_names_for_location_pk,
     )
 
 
