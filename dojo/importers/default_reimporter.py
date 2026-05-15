@@ -968,7 +968,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding_from_report: Finding,
         *,
         is_matched_finding: bool = False,
-        tag_accumulator: list | None = None,
+        tag_accumulator: list,
     ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
@@ -990,15 +990,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 finding_from_report.unsaved_tags = merged_tags
             if finding_from_report.unsaved_tags:
                 cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
-                if tag_accumulator is not None:
-                    if isinstance(cleaned_tags, list):
-                        tag_accumulator.append((finding, cleaned_tags))
-                    elif isinstance(cleaned_tags, str):
-                        tag_accumulator.append((finding, [cleaned_tags]))
-                elif isinstance(cleaned_tags, list):
-                    finding.tags.add(*cleaned_tags)
+                if isinstance(cleaned_tags, list):
+                    tag_accumulator.append((finding, cleaned_tags))
                 elif isinstance(cleaned_tags, str):
-                    finding.tags.add(cleaned_tags)
+                    tag_accumulator.append((finding, [cleaned_tags]))
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
