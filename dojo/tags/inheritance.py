@@ -69,7 +69,8 @@ def _sync_inherited_tags(obj, incoming_inherited_tags):
     signal fired by each ``.add()``/``.remove()`` does not dispatch
     ``make_inherited_tags_sticky`` back into this function. The context
     manager is reentrant so callers that already opened a batch (e.g.
-    ``inherit_instance_tags`` or ``LocationManager._bulk_inherit_tags``)
+    ``auto_inherit_product_tags`` in ``dojo.tags.signals``, or the importer's
+    bulk path)
     nest harmlessly.
     """
     target = set(incoming_inherited_tags or [])
@@ -141,23 +142,6 @@ def get_products_to_inherit_tags_from(instance):
 def is_tag_inheritance_enabled(instance) -> bool:
     # delegate so we have logic centralized. no products -> no inheritance enabled.
     return bool(get_products_to_inherit_tags_from(instance))
-
-
-def inherit_instance_tags(instance, *, force=False):
-    """
-    Apply product-inherited tags to ``instance``.
-
-    Unless ``force=True``, respects ``suppress_tag_inheritance()`` so bulk
-    callers can defer per-instance work. The underlying ``_sync_inherited_tags``
-    diffs the current vs target inherited set and only writes the delta.
-    """
-    if not force and is_suppressed():
-        return
-    products = get_products_to_inherit_tags_from(instance)
-    if not products:
-        return
-    incoming_inherited_tags = [tag.name for product in products for tag in product.tags.all()]
-    _sync_inherited_tags(instance, incoming_inherited_tags)
 
 
 # ---------------------------------------------------------------------------

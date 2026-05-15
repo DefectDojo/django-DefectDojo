@@ -29,10 +29,10 @@ from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Te
 from dojo.tags.inheritance import (
     _sync_inherited_tags,  # noqa: PLC2701 -- private API tested directly
     get_products,
-    inherit_instance_tags,
     is_tag_inheritance_enabled,
     propagate_tags_on_product_sync,
 )
+from dojo.tags.signals import auto_inherit_product_tags
 from dojo.tools.locations import LocationData
 from unittests.dojo_test_case import (
     DojoAPITestCase,
@@ -217,13 +217,13 @@ class TestManageInheritedTagsDiff(unittest.TestCase):
 
 class TestInheritInstanceTagsEarlyExit(unittest.TestCase):
 
-    """No-products case: inherit_instance_tags must short-circuit before touching the instance."""
+    """No-products case: auto_inherit_product_tags must short-circuit before touching the instance."""
 
-    @patch("dojo.tags.inheritance.get_products_to_inherit_tags_from")
+    @patch("dojo.tags.signals.get_products_to_inherit_tags_from")
     def test_no_products_skips_write(self, mock_get):
         instance = MagicMock()
         mock_get.return_value = []
-        inherit_instance_tags(instance)
+        auto_inherit_product_tags(instance)
         instance.inherit_tags.assert_not_called()
         instance.inherited_tags.add.assert_not_called()
         instance.tags.add.assert_not_called()
@@ -440,7 +440,7 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
     linked to many products via LocationProductReference. These tests verify that
     all_related_products() is used correctly and tags are merged from every linked product,
     and that the per-product flag filters correctly when the system setting is off.
-    inherit_instance_tags() is called directly rather than relying on signal chaining.
+    auto_inherit_product_tags() is called directly rather than relying on signal chaining.
     Skipped when V3_FEATURE_LOCATIONS is disabled.
     """
 
@@ -450,7 +450,7 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
         self.system_settings(enable_product_tag_inheritance=True)
 
     def test_location_inherits_from_multiple_products(self):
-        from dojo.tags.inheritance import inherit_instance_tags  # noqa: PLC0415
+        from dojo.tags.signals import auto_inherit_product_tags  # noqa: PLC0415
 
         p1 = self.create_product("Product A", tags=["p1-tag"])
         p2 = self.create_product("Product B", tags=["p2-tag"])
@@ -464,7 +464,7 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
             location=location, product=p2, status=ProductLocationStatus.Active,
         )
 
-        inherit_instance_tags(location)
+        auto_inherit_product_tags(location)
         location.refresh_from_db()
 
         tag_names = sorted(t.name for t in location.tags.all())
@@ -472,7 +472,7 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
         self.assertIn("p2-tag", tag_names)
 
     def test_location_inherits_only_from_flagged_product_when_system_off(self):
-        from dojo.tags.inheritance import inherit_instance_tags  # noqa: PLC0415
+        from dojo.tags.signals import auto_inherit_product_tags  # noqa: PLC0415
 
         self.system_settings(enable_product_tag_inheritance=False)
 
@@ -490,7 +490,7 @@ class TestLocationMultipleProductInheritance(DojoTestCase):
             location=location, product=p_no, status=ProductLocationStatus.Active,
         )
 
-        inherit_instance_tags(location)
+        auto_inherit_product_tags(location)
         location.refresh_from_db()
 
         tag_names = sorted(t.name for t in location.tags.all())

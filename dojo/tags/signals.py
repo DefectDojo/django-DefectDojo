@@ -8,17 +8,49 @@ from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Test
 from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.inheritance import (
+    _sync_inherited_tags,
+    get_products_to_inherit_tags_from,
+    is_suppressed,
+)
 
 logger = logging.getLogger(__name__)
+
+
+def auto_inherit_product_tags(instance):
+    """
+    Apply product-inherited tags to ``instance`` from the auto-inheritance
+    signal path.
+
+    Skipped while a ``suppress_tag_inheritance()`` context is active so bulk
+    callers (e.g. the importer hot loop) can defer per-instance work and run
+    inheritance once at batch time. The underlying ``_sync_inherited_tags``
+    diffs the current vs target inherited set and only writes the delta.
+    """
+    if is_suppressed():
+        return
+    products = get_products_to_inherit_tags_from(instance)
+    if not products:
+        return
+    incoming_inherited_tags = [tag.name for product in products for tag in product.tags.all()]
+    _sync_inherited_tags(instance, incoming_inherited_tags)
 
 
 @receiver(signals.m2m_changed, sender=Product.tags.through)
 def product_tags_post_add_remove(sender, instance, action, **kwargs):
     if action in {"post_add", "post_remove"}:
+        # `running_async_process` is an in-memory dedup flag on the Product
+        # instance. `tags.set([...])` fires m2m_changed twice on the SAME
+        # instance — once `post_remove` for dropped tags, once `post_add` for
+        # added tags — and we only want one `propagate_tags_on_product` task
+        # per Python-level operation. Not persisted: scope is exactly the
+        # lifetime of this in-memory instance. Two separate `Product.objects
+        # .get(id=X).tags.add(...)` calls still dispatch twice; the
+        # downstream task is idempotent (diff-based sync, no-op when nothing
+        # changed) so duplicates waste a slot but don't corrupt state.
         running_async_process = False
         with contextlib.suppress(AttributeError):
             running_async_process = instance.running_async_process
-        # Check if the async process is already running to avoid calling it a second time
         if not running_async_process and tag_inheritance.is_tag_inheritance_enabled(instance):
             dojo_dispatch_task(tag_inheritance.propagate_tags_on_product, instance.id, countdown=5)
             instance.running_async_process = True
@@ -32,7 +64,7 @@ def product_tags_post_add_remove(sender, instance, action, **kwargs):
 def make_inherited_tags_sticky(sender, instance, action, **kwargs):
     """Make sure inherited tags are added back in if they are removed."""
     if action in {"post_add", "post_remove"}:
-        tag_inheritance.inherit_instance_tags(instance)
+        auto_inherit_product_tags(instance)
 
 
 @receiver(signals.post_save, sender=Endpoint)
@@ -40,18 +72,20 @@ def make_inherited_tags_sticky(sender, instance, action, **kwargs):
 @receiver(signals.post_save, sender=Test)
 @receiver(signals.post_save, sender=Finding)
 @receiver(signals.post_save, sender=Location)
-def inherit_tags_on_instance(sender, instance, created, **kwargs):
-    # Only inherit on creation. The previous behavior fired on every save
-    # (create OR update), repeatedly re-applying inherited tags to children
-    # whose tag state had not changed. Sticky enforcement on user-driven
-    # tag edits is handled by `make_inherited_tags_sticky` (m2m_changed).
-    # `inherit_instance_tags` itself early-returns when a batch is active.
-    if not created:
-        return
-    tag_inheritance.inherit_instance_tags(instance)
-
-
 @receiver(signals.post_save, sender=LocationFindingReference)
 @receiver(signals.post_save, sender=LocationProductReference)
-def inherit_tags_on_linked_instance(sender, instance, created, **kwargs):
-    tag_inheritance.inherit_instance_tags(instance.location)
+def inherit_tags_on_instance(sender, instance, created, **kwargs):
+    # Only inherit on creation. Previously fired on every save (create OR
+    # update), repeatedly re-applying inherited tags to children whose tag
+    # state had not changed. Sticky enforcement on user-driven tag edits is
+    # handled by `make_inherited_tags_sticky` (m2m_changed).
+    # `auto_inherit_product_tags` itself early-returns when suppressed.
+    #
+    # For LocationFindingReference / LocationProductReference, the new link
+    # means the referenced Location may have a different set of related
+    # Products, so re-sync the Location's inherited tags. Ref status updates
+    # via `set_status` don't change the related-product set and are skipped.
+    if not created:
+        return
+    target = instance.location if isinstance(instance, LocationFindingReference | LocationProductReference) else instance
+    auto_inherit_product_tags(target)
