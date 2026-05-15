@@ -4,6 +4,12 @@ import logging
 import threading
 from collections import defaultdict
 from contextlib import contextmanager, suppress
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
+    from django.db.models import Model
 
 from django.conf import settings
 from django.db.models import Q
@@ -166,37 +172,47 @@ def propagate_tags_on_product_sync(product):
     inherited_tag_names = {tag.name for tag in product.tags.all()}
 
     logger.debug("Propagating tags from %s to all engagements", product)
-    _sync_inheritance_for_qs(
-        Engagement.objects.filter(product=product),
-        target_tag_names_per_child=lambda _child: inherited_tag_names,
+    _sync_inheritance_for_ids(
+        Engagement,
+        Engagement.objects.filter(product=product).values_list("pk", flat=True),
+        target_tag_names=inherited_tag_names,
     )
     logger.debug("Propagating tags from %s to all tests", product)
-    _sync_inheritance_for_qs(
-        Test.objects.filter(engagement__product=product),
-        target_tag_names_per_child=lambda _child: inherited_tag_names,
+    _sync_inheritance_for_ids(
+        Test,
+        Test.objects.filter(engagement__product=product).values_list("pk", flat=True),
+        target_tag_names=inherited_tag_names,
     )
     logger.debug("Propagating tags from %s to all findings", product)
-    _sync_inheritance_for_qs(
-        Finding.objects.filter(test__engagement__product=product),
-        target_tag_names_per_child=lambda _child: inherited_tag_names,
+    _sync_inheritance_for_ids(
+        Finding,
+        Finding.objects.filter(test__engagement__product=product).values_list("pk", flat=True),
+        target_tag_names=inherited_tag_names,
     )
     if settings.V3_FEATURE_LOCATIONS:
         logger.debug("Propagating tags from %s to all locations", product)
-        location_qs = Location.objects.filter(
-            Q(products__product=product)
-            | Q(findings__finding__test__engagement__product=product),
-        ).distinct().prefetch_related(*_LOCATION_PREFETCH_FOR_INHERITANCE)
         # Locations can be linked to multiple products, so the inherited target
-        # is the union of every related product's tags. Compute per-location.
-        _sync_inheritance_for_qs(
-            location_qs,
-            target_tag_names_per_child=_inherited_tag_names_for_location,
+        # is the union of every related product's tags. Materialize the full
+        # Locations (with the related-product prefetch chain) into a pk-keyed
+        # dict so the per-pk callback can look up each Location's instance.
+        locations_by_pk = {
+            loc.pk: loc
+            for loc in Location.objects.filter(
+                Q(products__product=product)
+                | Q(findings__finding__test__engagement__product=product),
+            ).distinct().prefetch_related(*_LOCATION_PREFETCH_FOR_INHERITANCE)
+        }
+        _sync_inheritance_for_ids(
+            Location,
+            locations_by_pk.keys(),
+            target_tag_names=lambda pk: _inherited_tag_names_for_location(locations_by_pk[pk]),
         )
     else:
         logger.debug("Propagating tags from %s to all endpoints", product)
-        _sync_inheritance_for_qs(
-            Endpoint.objects.filter(product=product),
-            target_tag_names_per_child=lambda _child: inherited_tag_names,
+        _sync_inheritance_for_ids(
+            Endpoint,
+            Endpoint.objects.filter(product=product).values_list("pk", flat=True),
+            target_tag_names=inherited_tag_names,
         )
 
 
@@ -230,9 +246,10 @@ def apply_inherited_tags_for_endpoints(endpoints):
     if not (get_system_setting("enable_product_tag_inheritance") or product.enable_product_tag_inheritance):
         return
     inherited_tag_names = {tag.name for tag in product.tags.all()}
-    _sync_inheritance_for_qs(
-        Endpoint.objects.filter(id__in=[e.pk for e in endpoints]),
-        target_tag_names_per_child=lambda _child: inherited_tag_names,
+    _sync_inheritance_for_ids(
+        Endpoint,
+        [e.pk for e in endpoints],
+        target_tag_names=inherited_tag_names,
     )
 
 
@@ -260,19 +277,28 @@ def apply_inherited_tags_for_findings(findings):
     inherited_tag_names = {tag.name for tag in product.tags.all()}
     finding_ids = [f.pk for f in findings]
 
-    _sync_inheritance_for_qs(
-        Finding.objects.filter(id__in=finding_ids),
-        target_tag_names_per_child=lambda _child: inherited_tag_names,
+    _sync_inheritance_for_ids(
+        Finding,
+        finding_ids,
+        target_tag_names=inherited_tag_names,
     )
     if settings.V3_FEATURE_LOCATIONS:
-        _sync_inheritance_for_qs(
-            Location.objects.filter(findings__finding_id__in=finding_ids).distinct().prefetch_related(*_LOCATION_PREFETCH_FOR_INHERITANCE),
-            target_tag_names_per_child=_inherited_tag_names_for_location,
+        locations_by_pk = {
+            loc.pk: loc
+            for loc in Location.objects.filter(
+                findings__finding_id__in=finding_ids,
+            ).distinct().prefetch_related(*_LOCATION_PREFETCH_FOR_INHERITANCE)
+        }
+        _sync_inheritance_for_ids(
+            Location,
+            locations_by_pk.keys(),
+            target_tag_names=lambda pk: _inherited_tag_names_for_location(locations_by_pk[pk]),
         )
     else:
-        _sync_inheritance_for_qs(
-            Endpoint.objects.filter(status_endpoint__finding_id__in=finding_ids).distinct(),
-            target_tag_names_per_child=lambda _child: inherited_tag_names,
+        _sync_inheritance_for_ids(
+            Endpoint,
+            Endpoint.objects.filter(status_endpoint__finding_id__in=finding_ids).distinct().values_list("pk", flat=True),
+            target_tag_names=inherited_tag_names,
         )
 
 
@@ -288,7 +314,7 @@ def _inherited_tag_names_for_location(location):
     Products whose own `enable_product_tag_inheritance` flag is on (or where
     the system-wide setting is on).
 
-    Used as the `target_tag_names_per_child` callback for `_sync_inheritance_for_qs`
+    Used as the `target_tag_names` callback for `_sync_inheritance_for_ids`
     on Location querysets; it must be called per Location because each Location
     has its own set of related Products. Uses `iter_related_products()` so
     that an upstream `prefetch_related(...)` reduces per-call cost to 0
@@ -362,9 +388,9 @@ def apply_inherited_tags_for_locations(locations, *, product):
         p.id: {t.name for t in p.tags.all()} for p in product_qs
     }
 
-    def _target_for_location(loc):
+    def _target_for_location_pk(pk):
         names: set[str] = set()
-        for pid in product_ids_by_location[loc.id]:
+        for pid in product_ids_by_location[pk]:
             # product_ids_by_location may contain products that shouldn't contribute
             # (ref lookups weren't flag-filtered); check membership in tags_by_product.
             tags = tags_by_product.get(pid)
@@ -372,7 +398,11 @@ def apply_inherited_tags_for_locations(locations, *, product):
                 names |= tags
         return names
 
-    _sync_inheritance_for_qs(locations, target_tag_names_per_child=_target_for_location)
+    _sync_inheritance_for_ids(
+        Location,
+        [loc.id for loc in locations],
+        target_tag_names=_target_for_location_pk,
+    )
 
 
 _LOCATION_PREFETCH_FOR_INHERITANCE = (
@@ -381,20 +411,61 @@ _LOCATION_PREFETCH_FOR_INHERITANCE = (
 )
 
 
-def _sync_inheritance_for_qs(queryset, *, target_tag_names_per_child):
+def _sync_inheritance_for_ids(
+    model_class: type[Model],
+    child_ids: Iterable[int],
+    *,
+    target_tag_names: set[str] | Callable[[int], set[str]],
+) -> None:
     """
-    Sync inherited_tags + tags for every child in `queryset` to its target tag set.
+    Sync ``inherited_tags`` and ``tags`` for every child pk to its target tag set.
 
-    target_tag_names_per_child: callable(child) -> set[str].
+    Parameters
+    ----------
+    model_class
+        The child model class (``Finding``, ``Engagement``, ``Endpoint``,
+        ``Location``, …). Used to resolve the ``inherited_tags`` field's
+        through-table and to build minimal pk-only stubs for the bulk helpers.
+    child_ids
+        Iterable of primary keys for ``model_class``. Pass a ``values_list("pk",
+        flat=True)`` queryset directly to avoid materializing model instances
+        — fetching full rows for 14000 findings was the bottleneck (~22s per
+        product-tag toggle) that motivated the pk-based design.
+    target_tag_names
+        The desired inherited-tag-name set for each child, in one of two forms:
 
-    Issues bulk SQL: one through-table read for current inherited_tags, then
-    bulk add/remove on `tags` and `inherited_tags` fields.
+        - ``set[str]`` — **constant target**. All children share the same
+          inherited set (Product → Engagement/Test/Finding/Endpoint
+          propagation, where every child has the same one parent product).
+          The value is hoisted out of the per-pk loop so there is no per-row
+          function-call overhead.
+        - ``Callable[[int], set[str]]`` — **per-pk target**. Looks up the
+          target set for each pk. Used for ``Location``, which can be linked
+          to multiple Products via ``LocationProductReference`` /
+          ``LocationFindingReference``, so the inherited set is the per-row
+          union of every linked Product's tags. Callers typically build a
+          ``{pk: location}`` dict with the relevant ``prefetch_related`` chain
+          and close over it inside the callback.
+
+    Implementation notes
+    --------------------
+
+
+    Avoids materializing children as full model instances. The previous
+    ``list(queryset)`` path fetched all 70+ columns per Finding row, which
+    dominated wall-clock time on large products. ``bulk_add_tag_mapping`` /
+    ``bulk_remove_tags_from_instances`` only ever read ``instance.pk`` and
+    ``instance.__class__``, so a bare ``model_class(pk=pid)`` stub is enough.
+
+    Issues bulk SQL: one through-table read for the current ``inherited_tags``
+    rows, then one INSERT per added tag-name and one DELETE per removed
+    tag-name (each batched if needed by the helpers).
+
     """
-    children = list(queryset)
-    if not children:
+    child_ids = list(child_ids)
+    if not child_ids:
         return
 
-    model_class = type(children[0])
     inherited_field = model_class._meta.get_field("inherited_tags")
     inherited_through = inherited_field.remote_field.through
     inherited_tag_model = inherited_field.related_model
@@ -406,7 +477,6 @@ def _sync_inheritance_for_qs(queryset, *, target_tag_names_per_child):
             source_field_name = field.name
             break
 
-    child_ids = [c.pk for c in children]
     # One query: pull every (child_id, tag_name) pair from the inherited_tags through table.
     existing_pairs = inherited_through.objects.filter(
         **{f"{source_field_name}__in": child_ids},
@@ -416,16 +486,31 @@ def _sync_inheritance_for_qs(queryset, *, target_tag_names_per_child):
     for child_id, tag_name in existing_pairs:
         old_inherited_by_child[child_id].add(tag_name)
 
-    # Compute per-child diff and bucket by tag name.
+    # Per-pk stub instances reused across tag buckets (bulk helpers only read
+    # .pk and .__class__).
+    stubs: dict[int, object] = {}
+
+    def _stub(pk):
+        s = stubs.get(pk)
+        if s is None:
+            s = model_class(pk=pk)
+            stubs[pk] = s
+        return s
+
+    constant_target: set[str] | None = None if callable(target_tag_names) else target_tag_names
+
+    # Compute per-pk diff and bucket by tag name.
     add_map: dict[str, list] = defaultdict(list)
     remove_map: dict[str, list] = defaultdict(list)
-    for child in children:
-        target = target_tag_names_per_child(child)
-        old = old_inherited_by_child.get(child.pk, set())
+    for pk in child_ids:
+        target = constant_target if constant_target is not None else target_tag_names(pk)
+        old = old_inherited_by_child.get(pk, set())
+        if target == old:
+            continue
         for name in target - old:
-            add_map[name].append(child)
+            add_map[name].append(_stub(pk))
         for name in old - target:
-            remove_map[name].append(child)
+            remove_map[name].append(_stub(pk))
 
     # Apply adds. Both `tags` and `inherited_tags` get the same set of new
     # inherited names — `_sync_inherited_tags` did the same.

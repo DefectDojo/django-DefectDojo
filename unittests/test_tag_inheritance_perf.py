@@ -214,6 +214,24 @@ class TagInheritancePerfBaselines(DojoTestCase):
         self.assertIn("user-only", finding_tag_names)
         self.assertIn("inherited", finding_tag_names)  # still sticky
 
+    def _do_propagate_sync_only(self, name: str, expected: int, *, with_endpoints: bool, with_locations: bool) -> None:
+        """
+        Measure `propagate_tags_on_product_sync(product)` in isolation — no tag change.
+
+        Captures the raw sweep cost for a product with a realistic mix of children:
+        N findings + (V2) N endpoints or (V3) N locations. Should be roughly idempotent
+        (no add/remove to apply) so the number reflects diff-detection overhead.
+        """
+        product = _make_product_with_findings(name, n_findings=100, tags=["t1", "t2"])
+        if with_endpoints:
+            _make_endpoints(product, n=100)
+        if with_locations:
+            _make_locations(product, n=100)
+        with self.assertNumQueries(expected):
+            propagate_tags_on_product_sync(product)
+        finding = Finding.objects.filter(test__engagement__product=product).first()
+        self.assertEqual({"t1", "t2"}, {t.name for t in finding.tags.all()})
+
     def _do_finding_remove_inherited(self, name: str, expected: int) -> None:
         product = _make_product_with_findings(name, n_findings=1, tags=["inherited"])
         finding = Finding.objects.filter(test__engagement__product=product).first()
@@ -281,6 +299,29 @@ class TagInheritancePerfBaselines(DojoTestCase):
     @override_settings(V3_FEATURE_LOCATIONS=True)
     def test_baseline_finding_remove_inherited_tag_sticky_re_adds_v3(self):
         self._do_finding_remove_inherited("perf-sticky-rm-v3", self.EXPECTED_FINDING_REMOVE_INHERITED_V3)
+
+    # ------------------------------------------------------------------
+    # propagate_tags_on_product_sync direct invocation (no tag change).
+    # Measures the raw sweep cost over a product's children.
+    # ------------------------------------------------------------------
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_propagate_tags_on_product_sync_v2(self):
+        self._do_propagate_sync_only(
+            "perf-sync-v2",
+            self.EXPECTED_PROPAGATE_SYNC_V2,
+            with_endpoints=True,
+            with_locations=False,
+        )
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_propagate_tags_on_product_sync_v3(self):
+        self._do_propagate_sync_only(
+            "perf-sync-v3",
+            self.EXPECTED_PROPAGATE_SYNC_V3,
+            with_endpoints=False,
+            with_locations=True,
+        )
 
     # ------------------------------------------------------------------
     # V2: propagation to Endpoints (skipped under V3_FEATURE_LOCATIONS)
@@ -381,6 +422,11 @@ class TagInheritancePerfBaselines(DojoTestCase):
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
     EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 125
     EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 75
+
+    # propagate_tags_on_product_sync direct invocation (no tag change).
+    # Product with 100 findings + 100 endpoints (V2) or + 100 locations (V3).
+    EXPECTED_PROPAGATE_SYNC_V2 = 9
+    EXPECTED_PROPAGATE_SYNC_V3 = 18
 
 
 @override_settings(
@@ -498,7 +544,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 422
-    EXPECTED_ZAP_IMPORT_V3 = 445
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 75
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 101
+    EXPECTED_ZAP_IMPORT_V2 = 420
+    EXPECTED_ZAP_IMPORT_V3 = 444
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 100
