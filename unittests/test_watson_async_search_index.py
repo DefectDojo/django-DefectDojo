@@ -10,9 +10,10 @@ from dojo.models import Development_Environment, Engagement, Finding, Product, P
 from .dojo_test_case import DojoAPITestCase
 
 
+@override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class TestWatsonAsyncSearchIndex(DojoAPITestCase):
 
-    """Test Watson search indexing works correctly for both sync and async updates."""
+    """Test Watson search indexing dispatches async and finding becomes searchable."""
 
     def setUp(self):
         """Set up test data and API client."""
@@ -89,25 +90,8 @@ class TestWatsonAsyncSearchIndex(DojoAPITestCase):
 
         return finding
 
-    def test_sync_watson_indexing_single_finding(self):
-        """Test that single finding import uses sync indexing and finding is searchable."""
-        # Default threshold is 100, so single finding should use sync indexing
-        self._import_and_check_watson_index(
-            "Finding {finding_id} should be found in Watson search index",
-        )
-
-    @override_settings(WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=0, CELERY_TASK_ALWAYS_EAGER=True)
-    def test_async_watson_indexing_single_finding(self):
-        """Test that with threshold=0, single finding uses async indexing and is searchable."""
-        # With threshold=0, even single finding should trigger async indexing
+    def test_watson_indexing_single_finding(self):
+        """Single finding import dispatches async indexing and finding is searchable."""
         self._import_and_check_watson_index(
             "Finding {finding_id} should be found in Watson search index after async update",
-        )
-
-    @override_settings(WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=-1)
-    def test_disabled_async_watson_indexing(self):
-        """Test that with threshold=-1, async is disabled and sync indexing works."""
-        # With threshold=-1, async should be completely disabled
-        self._import_and_check_watson_index(
-            "Finding {finding_id} should be found in Watson search index with sync update",
         )

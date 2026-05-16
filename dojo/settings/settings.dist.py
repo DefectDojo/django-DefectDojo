@@ -115,8 +115,12 @@ env = environ.FileAwareEnv(
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
-    # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
+    # Batch size for async watson search-index update tasks. Also doubles as
+    # the per-request intermediate-flush threshold: once the in-memory watson
+    # context reaches this many pending objects mid-request,
+    # AsyncSearchContextMiddleware flushes them to async celery tasks instead
+    # of waiting for end-of-request. Set to 0 (or negative) to disable the
+    # intermediate flush.
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
     # When True, the async watson indexer auto-derives select_related/prefetch_related
     # paths from each adapter's `fields`/`store` to avoid N+1 queries during indexing.
@@ -873,7 +877,6 @@ if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
 CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 
 # Watson async index update settings
-WATSON_ASYNC_INDEX_UPDATE_THRESHOLD = env("DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD")
 WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
 WATSON_INDEX_PREFETCH_ENABLED = env("DD_WATSON_INDEX_PREFETCH_ENABLED")
 
