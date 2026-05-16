@@ -96,7 +96,7 @@ class TestWatsonAsyncSearchIndex(DojoAPITestCase):
             "Finding {finding_id} should be found in Watson search index",
         )
 
-    @override_settings(WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=0)
+    @override_settings(WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=0, CELERY_TASK_ALWAYS_EAGER=True)
     def test_async_watson_indexing_single_finding(self):
         """Test that with threshold=0, single finding uses async indexing and is searchable."""
         # With threshold=0, even single finding should trigger async indexing

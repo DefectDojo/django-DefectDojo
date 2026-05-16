@@ -501,7 +501,10 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # to the full active-user set (legacy doesn't filter by RBAC role) but
     # the per-Alert ForeignKey.validate EXISTS probe is gone, netting -7
     # against the pre-Track-B numbers.
-    EXPECTED_ZAP_IMPORT_V2 = 1378
-    EXPECTED_ZAP_IMPORT_V3 = 1256
+    # perf/watson-index-prefetch: -52 queries on both V2/V3 paths from
+    # adapter-derived select_related/prefetch_related in the async watson
+    # indexer (executed inline under CELERY_TASK_ALWAYS_EAGER).
+    EXPECTED_ZAP_IMPORT_V2 = 1326
+    EXPECTED_ZAP_IMPORT_V3 = 1204
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
