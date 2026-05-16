@@ -35,7 +35,11 @@ class TestIntermediateFlushHook(DojoTestCase):
         self.prod_type = Product_Type.objects.create(name="Intermediate Flush PT")
         # Pre-create some products to add to the watson context manually.
         self.products = [
-            Product.objects.create(name=f"intermediate-flush-prod-{i}", prod_type=self.prod_type)
+            Product.objects.create(
+                name=f"intermediate-flush-prod-{i}",
+                description="intermediate flush fixture",
+                prod_type=self.prod_type,
+            )
             for i in range(5)
         ]
 
