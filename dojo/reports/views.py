@@ -15,6 +15,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.filters import (
     EndpointFilter,
     EndpointFilterWithoutObjectLookups,
