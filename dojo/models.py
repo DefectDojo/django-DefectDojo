@@ -22,7 +22,6 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
@@ -274,36 +273,9 @@ class UserContactInfo(models.Model):
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text=_("Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion."))
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
+    ui_use_tailwind = models.BooleanField(default=False, verbose_name=_("Use new UI (beta)"), help_text=_("Opt in to the new Tailwind-based UI. Leave off for the classic UI."))
     token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
     password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
-
-
-class Dojo_Group(models.Model):
-    AZURE = "AzureAD"
-    REMOTE = "Remote"
-    SOCIAL_CHOICES = (
-        (AZURE, _("AzureAD")),
-        (REMOTE, _("Remote")),
-    )
-    name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True, blank=True)
-    users = models.ManyToManyField(Dojo_User, through="Dojo_Group_Member", related_name="users", blank=True)
-    auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
-    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text=_("Group imported from a social provider."), verbose_name=_("Social Authentication Provider"))
-
-    def __str__(self):
-        return self.name
-
-
-class Role(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    is_owner = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return self.name
 
 
 class System_Settings(models.Model):
@@ -551,11 +523,6 @@ class System_Settings(models.Model):
     risk_acceptance_form_default_days = models.IntegerField(null=True, blank=True, default=180, help_text=_("Default expiry period for risk acceptance form."))
     risk_acceptance_notify_before_expiration = models.IntegerField(null=True, blank=True, default=10,
                     verbose_name=_("Risk acceptance expiration heads up days"), help_text=_("Notify X days before risk acceptance expires. Leave empty to disable."))
-    enable_credentials = models.BooleanField(
-        default=True,
-        blank=False,
-        verbose_name=_("Enable credentials"),
-        help_text=_("With this setting turned off, credentials will be disabled in the user interface."))
     enable_questionnaires = models.BooleanField(
         default=True,
         blank=False,
@@ -606,23 +573,6 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable CVSS4 Display"),
         help_text=_("With this setting turned off, CVSS4 fields will be hidden in the user interface."))
-    default_group = models.ForeignKey(
-        Dojo_Group,
-        null=True,
-        blank=True,
-        help_text=_("New users will be assigned to this group."),
-        on_delete=models.RESTRICT)
-    default_group_role = models.ForeignKey(
-        Role,
-        null=True,
-        blank=True,
-        help_text=_("New users will be assigned to their default group with this role."),
-        on_delete=models.RESTRICT)
-    default_group_email_pattern = models.CharField(
-        max_length=200,
-        default="",
-        blank=True,
-        help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
     minimum_password_length = models.IntegerField(
         default=9,
         verbose_name=_("Minimum password length"),
@@ -695,18 +645,6 @@ def get_current_date():
 
 def get_current_datetime():
     return timezone.now()
-
-
-class Dojo_Group_Member(models.Model):
-    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, help_text=_("This role determines the permissions of the user to manage the group."), verbose_name=_("Group role"))
-
-
-class Global_Role(models.Model):
-    user = models.OneToOneField(Dojo_User, null=True, blank=True, on_delete=models.CASCADE)
-    group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text=_("The global role will be applied to all product types and products."), verbose_name=_("Global role"))
 
 
 class Contact(models.Model):
@@ -852,8 +790,7 @@ class Product_Type(BaseModel):
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
-    members = models.ManyToManyField(Dojo_User, through="Product_Type_Member", related_name="prod_type_members", blank=True)
-    authorization_groups = models.ManyToManyField(Dojo_Group, through="Product_Type_Group", related_name="product_type_groups", blank=True)
+    authorized_users = models.ManyToManyField(Dojo_User, related_name="authorized_product_types", blank=True)
 
     class Meta:
         ordering = ("name",)
@@ -1197,8 +1134,7 @@ class Product(BaseModel):
                                           default=1,
                                           on_delete=models.RESTRICT)
     tid = models.IntegerField(default=0, editable=False)
-    members = models.ManyToManyField(Dojo_User, through="Product_Member", related_name="product_members", blank=True)
-    authorization_groups = models.ManyToManyField(Dojo_Group, through="Product_Group", related_name="product_groups", blank=True)
+    authorized_users = models.ManyToManyField(Dojo_User, related_name="authorized_products", blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
@@ -1375,30 +1311,6 @@ class Product(BaseModel):
                                           active=True,
                                           sla_expiration_date__lt=timezone.now().date())
         return findings.count() > 0
-
-
-class Product_Member(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-
-
-class Product_Group(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-
-
-class Product_Type_Member(models.Model):
-    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
-    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-
-
-class Product_Type_Group(models.Model):
-    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
-    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
@@ -3677,27 +3589,6 @@ class Vulnerability_Id(models.Model):
         return reverse("view_finding", args=[str(self.finding.id)])
 
 
-class Stub_Finding(models.Model):
-    title = models.TextField(max_length=1000, blank=False, null=False)
-    date = models.DateField(default=get_current_date, blank=False, null=False)
-    severity = models.CharField(max_length=200, blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    test = models.ForeignKey(Test, editable=False, on_delete=models.CASCADE)
-    reporter = models.ForeignKey(Dojo_User, editable=False, default=1, on_delete=models.RESTRICT)
-
-    class Meta:
-        ordering = ("-date", "title")
-
-    def __str__(self):
-        return self.title
-
-    def get_breadcrumbs(self):
-        bc = self.test.get_breadcrumbs()
-        bc += [{"title": "Potential Finding: " + str(self),
-                "url": reverse("view_potential_finding", args=(self.id,))}]
-        return bc
-
-
 class Finding_Group(TimeStampedModel):
 
     GROUP_BY_OPTIONS = [("component_name", "Component Name"),
@@ -4149,55 +4040,6 @@ class Tool_Product_History(models.Model):
                                              blank=True)
 
 
-class Cred_User(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    username = models.CharField(max_length=200, null=False)
-    password = models.CharField(max_length=600, null=False)
-    role = models.CharField(max_length=200, null=False)
-    authentication = models.CharField(max_length=15,
-                                      choices=(
-                                          ("Form", "Form Authentication"),
-                                          ("SSO", "SSO Redirect")),
-                                      default="Form")
-    http_authentication = models.CharField(max_length=15,
-                                           choices=(
-                                               ("Basic", "Basic"),
-                                               ("NTLM", "NTLM")),
-                                           null=True, blank=True)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.URLField(max_length=2000, null=False)
-    environment = models.ForeignKey(Development_Environment, null=False, on_delete=models.RESTRICT)
-    login_regex = models.CharField(max_length=200, null=True, blank=True)
-    logout_regex = models.CharField(max_length=200, null=True, blank=True)
-    notes = models.ManyToManyField(Notes, blank=True, editable=False)
-    is_valid = models.BooleanField(default=True, verbose_name=_("Login is valid"))
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name + " (" + self.role + ")"
-
-
-class Cred_Mapping(models.Model):
-    cred_id = models.ForeignKey(Cred_User, null=False,
-                                related_name="cred_user",
-                                verbose_name=_("Credential"), on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, null=True, blank=True,
-                                related_name="product", on_delete=models.CASCADE)
-    finding = models.ForeignKey(Finding, null=True, blank=True,
-                                related_name="finding", on_delete=models.CASCADE)
-    engagement = models.ForeignKey(Engagement, null=True, blank=True,
-                                   related_name="engagement", on_delete=models.CASCADE)
-    test = models.ForeignKey(Test, null=True, blank=True, related_name="test", on_delete=models.CASCADE)
-    is_authn_provider = models.BooleanField(default=False,
-                                            verbose_name=_("Authentication Provider"))
-    url = models.URLField(max_length=2000, null=True, blank=True)
-
-    def __str__(self):
-        return self.cred_id.name + " (" + self.cred_id.role + ")"
-
-
 class Language_Type(models.Model):
     language = models.CharField(max_length=100, null=False, unique=True)
     color = models.CharField(max_length=7, null=True, blank=True, verbose_name=_("HTML color"))
@@ -4618,7 +4460,6 @@ admin.site.register(Test)
 admin.site.register(Finding, FindingAdmin)
 admin.site.register(FileUpload)
 admin.site.register(FileAccessToken)
-admin.site.register(Stub_Finding)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)
@@ -4634,12 +4475,21 @@ admin.site.register(Note_Type)
 admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
 admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
-admin.site.register(Cred_User)
-admin.site.register(Cred_Mapping)
 admin.site.register(System_Settings)
 admin.site.register(SLA_Configuration)
 admin.site.register(CWE)
 admin.site.register(Regulation)
+from dojo.authorization.models import (  # noqa: E402
+    Dojo_Group,
+    Dojo_Group_Member,
+    Global_Role,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+    Role,
+)
+
 admin.site.register(Global_Role)
 admin.site.register(Role)
 admin.site.register(Dojo_Group)

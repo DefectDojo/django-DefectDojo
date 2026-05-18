@@ -6,8 +6,9 @@
     {{ form.media.js }}
 {% endblock %}
 {% if form.non_field_errors %}
-    <div class="alert alert-danger alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+    <div class="alert alert-danger alert-dismissible" role="alert"
+         x-data="{ show: true }" x-show="show" x-transition>
+        <button type="button" class="close" @click="show = false" aria-label="Close"><span
                 aria-hidden="true">&times;</span></button>
         {{ form.non_field_errors }}
     </div>
@@ -27,7 +28,7 @@
                         </label>
                     {% endif %}
                     {% if field.help_text %}
-                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
+                        <i class="fa-solid fa-circle-question has-popover" data-content="{{ field.help_text }}">
                         </i>
                     {% endif %}
                     {% for error in field.errors %}
@@ -56,7 +57,7 @@
                 {% endfor %}
 
                 {% if field.help_text %}
-                    <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
+                    <i class="fa-solid fa-circle-question has-popover" data-content="{{ field.help_text }}">
                     </i>
                 {% endif %}
             </div>
@@ -66,14 +67,14 @@
                         {% if field.field.required %}{{ form.required_css_class }}{% endif %}"
                        for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}
                         {% if field.help_text %}
-                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="{{ field.help_text }}" data-placement="right" data-container="body">
+                            <i class="fa-solid fa-circle-question has-popover" data-content="{{ field.help_text }}">
                             </i>
                         {% endif %}
                 </label>
             {% endif %}
             <div class="col-sm-10 {{ classes.value }} {% if field|is_multiple_checkbox %}multiple-checkbox{% endif %}">
                 {{ field|addcss:"class:form-control" }}
-                <p style="width: 70%; font-style: italic; margin-bottom: 0px;">{{ field.field.widget.attrs.message }}</p>
+                <p style="font-style: italic; margin-bottom: 0px;">{{ field.field.widget.attrs.message }}</p>
                 {% for error in field.errors %}
                     <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
                 {% endfor %}

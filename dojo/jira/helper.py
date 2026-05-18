@@ -30,7 +30,6 @@ from dojo.models import (
     Notes,
     Product,
     Risk_Acceptance,
-    Stub_Finding,
     System_Settings,
     Test,
     User,
@@ -176,10 +175,6 @@ def can_be_pushed_to_jira(obj, form=None):
     if not hasattr(obj, "has_jira_issue"):
         return False, f"{to_str_typed(obj)} cannot be pushed to jira as there is no jira_issue attribute.", "error_no_jira_issue_attribute"
 
-    if isinstance(obj, Stub_Finding):
-        # stub findings don't have active/verified/etc and can always be pushed
-        return True, None, None
-
     if obj.has_jira_issue:
         # findings or groups already having an existing jira issue can always be pushed
         return True, None, None
@@ -247,7 +242,7 @@ def get_jira_project(obj, *, use_inheritance=True, jira_enabled: bool = False):
             return get_jira_project(obj.finding, use_inheritance=use_inheritance, jira_enabled=jira_enabled)
         return None
 
-    if isinstance(obj, Finding | Stub_Finding):
+    if isinstance(obj, Finding):
         finding = obj
         return get_jira_project(finding.test, jira_enabled=jira_enabled)
 

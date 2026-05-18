@@ -137,13 +137,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
         )
-        # Apply tags to findings and endpoints
-        self.apply_import_tags(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-            reactivated_findings=reactivated_findings,
-            untouched_findings=untouched_findings,
-        )
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
@@ -173,7 +166,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
     def get_reimport_match_candidates_for_batch(
         self,
-        batch_findings: list[Finding],
+        unsaved_findings_batch: list[Finding],
     ) -> tuple[dict, dict, dict]:
         """
         Fetch candidate matches for a batch of *unsaved* findings during reimport.
@@ -195,23 +188,23 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.deduplication_algorithm == "hash_code":
             candidates_by_hash = find_candidates_for_deduplication_hash(
                 self.test,
-                batch_findings,
+                unsaved_findings_batch,
                 mode="reimport",
             )
         elif self.deduplication_algorithm == "unique_id_from_tool":
             candidates_by_uid = find_candidates_for_deduplication_unique_id(
                 self.test,
-                batch_findings,
+                unsaved_findings_batch,
                 mode="reimport",
             )
         elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             candidates_by_uid, candidates_by_hash = find_candidates_for_deduplication_uid_or_hash(
                 self.test,
-                batch_findings,
+                unsaved_findings_batch,
                 mode="reimport",
             )
         elif self.deduplication_algorithm == "legacy":
-            candidates_by_key = find_candidates_for_reimport_legacy(self.test, batch_findings)
+            candidates_by_key = find_candidates_for_reimport_legacy(self.test, unsaved_findings_batch)
 
         return candidates_by_hash, candidates_by_uid, candidates_by_key
 
@@ -308,6 +301,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             cleaned_findings.append(sanitized)
 
         batch_finding_ids: list[int] = []
+        batch_findings: list[Finding] = []
         findings_with_parser_tags: list[tuple] = []
         # Batch size for deduplication/post-processing (only new findings)
         dedupe_batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
@@ -318,13 +312,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # This avoids the 1+N query problem by fetching all candidates for a batch at once
         for batch_start in range(0, len(cleaned_findings), match_batch_max_size):
             batch_end = min(batch_start + match_batch_max_size, len(cleaned_findings))
-            batch_findings = cleaned_findings[batch_start:batch_end]
+            unsaved_findings_batch = cleaned_findings[batch_start:batch_end]
             is_final_batch = batch_end == len(cleaned_findings)
 
             logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
 
             # Prepare findings in batch: set test, service, calculate hash codes
-            for unsaved_finding in batch_findings:
+            for unsaved_finding in unsaved_findings_batch:
                 # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
                 # Finding.mitigated is DateTimeField and it requires timezone
                 if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
@@ -342,12 +336,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
             # Fetch all candidates for this batch at once (batch candidate finding)
             candidates_by_hash, candidates_by_uid, candidates_by_key = self.get_reimport_match_candidates_for_batch(
-                batch_findings,
+                unsaved_findings_batch,
             )
 
             # Process each finding in the batch using pre-fetched candidates
-            for idx, unsaved_finding in enumerate(batch_findings):
-                is_final = is_final_batch and idx == len(batch_findings) - 1
+            for idx, unsaved_finding in enumerate(unsaved_findings_batch):
+                is_final = is_final_batch and idx == len(unsaved_findings_batch) - 1
 
                 # Match any findings to this new one coming in using pre-fetched candidates
                 matched_findings = self.match_finding_to_candidate_reimport(
@@ -403,6 +397,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
                     batch_finding_ids.append(finding.id)
+                    batch_findings.append(finding)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
                     # These batches only contain "new" findings that were saved (not matched to existing findings).
@@ -425,6 +420,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         # so rules/deduplication tasks see the tags already on the findings.
                         bulk_apply_parser_tags(findings_with_parser_tags)
                         findings_with_parser_tags.clear()
+                        # Apply import-time tags before post-processing so rules/deduplication see them.
+                        self.apply_import_tags_for_batch(batch_findings)
+                        batch_findings.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
                         dojo_dispatch_task(

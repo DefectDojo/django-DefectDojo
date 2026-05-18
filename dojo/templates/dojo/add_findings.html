@@ -7,15 +7,6 @@
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
-{% block add_styles %}
-    {{ block.super }}
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <div>
@@ -23,7 +14,7 @@
     </div>
     <div>
         {% if temp %}
-            <form id="add_finding" class="form-horizontal" action="{% url 'add_finding_from_template' tid fid %}" method="post">
+            <form id="add_finding" class="" action="{% url 'add_finding_from_template' tid fid %}" method="post">
                 {% csrf_token %}
                 {% include "dojo/form_fields.html" with form=form %}
                 {% if jform %}
@@ -31,7 +22,7 @@
                     <h4>
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-content="JIRA URL connected to this findings product or engagement">
                             </i>
                         </label>
                         <div class="col-sm-10 form-control-static">
@@ -54,7 +45,7 @@
                 </div>
             </form>
         {% else %}
-            <form id="add_finding" class="form-horizontal" action="{% url 'add_findings' tid %}" method="post">
+            <form id="add_finding" class="" action="{% url 'add_findings' tid %}" method="post">
                 {% csrf_token %}
                 {% include "dojo/form_fields.html" with form=form %}
                 {% block additional_forms %}
@@ -64,7 +55,7 @@
                     <hr>
                     <div class="form-group">
                         <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                            <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                            <i class="fa-solid fa-circle-question has-popover" data-content="JIRA URL connected to this findings product or engagement">
                             </i>
                         </label>
                         <div class="col-sm-10 form-control-static">

@@ -2,7 +2,6 @@ import logging
 from datetime import datetime, timedelta
 from typing import Any
 
-from crum import get_current_user
 from django.db import transaction
 from django.http.request import QueryDict
 from django.utils import timezone
@@ -10,13 +9,10 @@ from django.utils import timezone
 from dojo.models import (
     Engagement,
     Product,
-    Product_Member,
     Product_Type,
-    Product_Type_Member,
-    Role,
     Test,
 )
-from dojo.utils import get_last_object_or_none, get_object_or_none
+from dojo.utils import get_current_user, get_last_object_or_none, get_object_or_none
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -231,20 +227,14 @@ class AutoCreateContextManager:
     ) -> Product_Type:
         """
         Fetches a product type by name if one already exists. If not,
-        a new product type will be created with the current user being
-        added as product type member
+        a new product type will be created. RBAC ownership of the new row
+        is bootstrapped by Pro's post_save signal on Product_Type.
         """
         # Look for an existing object
         if product_type := self.get_target_product_type_if_exists(product_type_name=product_type_name):
             return product_type
         with transaction.atomic():
-            product_type, created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
-            if created:
-                Product_Type_Member.objects.create(
-                    user=get_current_user(),
-                    product_type=product_type,
-                    role=Role.objects.get(is_owner=True),
-                )
+            product_type, _created = Product_Type.objects.select_for_update().get_or_create(name=product_type_name)
             return product_type
 
     def get_or_create_product(
@@ -257,8 +247,8 @@ class AutoCreateContextManager:
     ) -> Product:
         """
         Fetches a product by name if it exists. When `auto_create_context` is
-        enabled the product will be created with the current user being added
-        as product member
+        enabled the product will be created. RBAC ownership of the new row is
+        bootstrapped by Pro's post_save signal on Product.
         """
         # try to find the product (within the provided product_type)
         if product := self.get_target_product_if_exists(product_name, product_type_name):
@@ -271,13 +261,7 @@ class AutoCreateContextManager:
         product_type = self.get_or_create_product_type(product_type_name=product_type_name)
         # Create the product
         with transaction.atomic():
-            product, created = Product.objects.select_for_update().get_or_create(name=product_name, prod_type=product_type, description=product_name)
-            if created:
-                Product_Member.objects.create(
-                    user=get_current_user(),
-                    product=product,
-                    role=Role.objects.get(is_owner=True),
-                )
+            product, _created = Product.objects.select_for_update().get_or_create(name=product_name, prod_type=product_type, description=product_name)
 
         return product
 

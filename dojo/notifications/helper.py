@@ -17,7 +17,6 @@ from django.urls import get_script_prefix, reverse
 from django.utils.translation import gettext as _
 
 from dojo import __version__ as dd_version
-from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import we_want_async
 from dojo.labels import get_labels
 from dojo.models import (
@@ -608,8 +607,13 @@ class AlertNotificationManger(NotificationManagerHelpers):
                 icon=icon[:25],
                 source=source,
             )
-            # relative urls will fail validation
-            alert.clean_fields(exclude=["url"])
+            # ``url`` skips validation (relative URLs are valid here but
+            # URLField.validate rejects them). ``user_id`` skips the FK
+            # existence probe — the user was just fetched from our own
+            # DB by the caller, so the ``SELECT 1 FROM auth_user WHERE id=N
+            # LIMIT 1`` round-trip every ForeignKey.validate would issue
+            # is pure overhead at fan-out time.
+            alert.clean_fields(exclude=["url", "user_id"])
             alert.save()
         except Exception as exception:
             logger.exception("Unable to create Alert Notification")
@@ -742,13 +746,13 @@ class NotificationManager(NotificationManagerHelpers):
             users = get_authorized_users_for_product_and_product_type(
                 users,
                 self.product,
-                Permissions.Product_View,
+                "view",
             )
         elif self.product_type is not None:
             users = get_authorized_users_for_product_type(
                 users,
                 self.product_type,
-                Permissions.Product_Type_View,
+                "view",
             )
         else:
             # nor product_type nor product defined, we should not make noise and send only notifications to admins

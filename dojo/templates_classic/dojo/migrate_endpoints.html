@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load display_tags %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">{{ name }}</h3>
+                </div>
+            </div>
+            <h5>
+                This migration will convert existing Endpoints to the new Location model. Please ensure you have a full backup of your database before proceeding. This operation may take some time depending on the number of endpoints in your system.
+                Please consult the documentation for more information.
+            </h5>
+            <br/>
+            <h5>
+                If you would prefer to run this migration from the command line, you can do so by executing:
+                <pre><code>python manage.py migrate_endpoints_to_locations</code></pre>
+            </h5>
+            <div class="panel-heading">
+                <form class="form-horizontal" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <button class="btn btn-primary" type="submit" name="run_migration">Run migration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

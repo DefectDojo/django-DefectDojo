@@ -1,0 +1,16 @@
+{% load i18n %}
+{% for alert in alerts %}
+    <a href="{{ alert.url }}" class="block px-4 py-2 text-sm hover:bg-gray-50 border-b border-gray-100" title="{{ alert.description|truncatechars:100 }}">
+        <i class="fa-solid fa-{{ alert.icon }} fa-fw text-gray-400"></i>
+        {{ alert.title|default:alert.description|truncatechars:50 }}
+        <span class="float-right text-xs text-gray-400">{{ alert.source }}</span>
+    </a>
+{% endfor %}
+{% if alerts %}
+    <div class="border-t border-gray-200 px-4 py-2 flex justify-between">
+        <a href="{% url 'alerts' %}" class="text-sm font-medium text-blue-600 hover:text-blue-800">{% trans "See All Alerts" %}</a>
+        <a href="{% url 'delete_alerts' %}" class="text-sm font-medium text-red-500 hover:text-red-700">{% trans "Clear All" %}</a>
+    </div>
+{% else %}
+    <div class="px-4 py-6 text-center text-sm text-gray-500">{% trans "No alerts found" %}</div>
+{% endif %}

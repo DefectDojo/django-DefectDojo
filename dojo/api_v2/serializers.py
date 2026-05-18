@@ -9,7 +9,7 @@ from datetime import datetime
 import six
 import tagulous
 from django.conf import settings
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
@@ -26,7 +26,6 @@ from rest_framework.fields import DictField
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
@@ -35,7 +34,6 @@ from dojo.finding.helper import (
     save_vulnerability_ids_template,
 )
 from dojo.finding.queries import get_authorized_findings
-from dojo.group.utils import get_auth_group_name
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
@@ -48,18 +46,10 @@ from dojo.models import (
     SEVERITY_CHOICES,
     STATS_FIELDS,
     Announcement,
-    Answer,
-    Answered_Survey,
     App_Analysis,
     BurpRawRequestResponse,
     Check_List,
-    ChoiceAnswer,
-    ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
-    Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     DojoMeta,
     Endpoint,
@@ -67,13 +57,10 @@ from dojo.models import (
     Endpoint_Status,
     Engagement,
     Engagement_Presets,
-    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Group,
     Finding_Template,
-    General_Survey,
-    Global_Role,
     Language_Type,
     Languages,
     Network_Locations,
@@ -82,26 +69,17 @@ from dojo.models import (
     Notes,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
-    Question,
     Regulation,
     Risk_Acceptance,
-    Role,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    TextAnswer,
-    TextQuestion,
     Tool_Configuration,
     Tool_Product_Settings,
     Tool_Type,
@@ -531,6 +509,7 @@ class UserSerializer(serializers.ModelSerializer):
             "date_joined",
             "last_login",
             "is_active",
+            "is_staff",
             "is_superuser",
             "token_last_reset",
             "password_last_reset",
@@ -664,187 +643,6 @@ class UserStubSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "first_name", "last_name")
 
 
-class RoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-
-class DojoGroupSerializer(serializers.ModelSerializer):
-    configuration_permissions = serializers.PrimaryKeyRelatedField(
-        allow_null=True,
-        queryset=Permission.objects.filter(
-            codename__in=get_configuration_permissions_codenames(),
-        ),
-        many=True,
-        required=False,
-        source="auth_group.permissions",
-    )
-
-    class Meta:
-        model = Dojo_Group
-        exclude = ("auth_group",)
-
-    def to_representation(self, instance):
-        if not instance.auth_group:
-            auth_group = Group(name=get_auth_group_name(instance))
-            auth_group.save()
-            instance.auth_group = auth_group
-            members = instance.users.all()
-            for member in members:
-                auth_group.user_set.add(member)
-            instance.save()
-        ret = super().to_representation(instance)
-        # This will show only "configuration_permissions" even if user has also
-        # other permissions
-        all_permissions = set(ret["configuration_permissions"])
-        allowed_configuration_permissions = set(
-            self.fields[
-                "configuration_permissions"
-            ].child_relation.queryset.values_list("id", flat=True),
-        )
-        ret["configuration_permissions"] = list(
-            all_permissions.intersection(allowed_configuration_permissions),
-        )
-
-        return ret
-
-    def create(self, validated_data):
-        new_configuration_permissions = None
-        if (
-            "auth_group" in validated_data
-            and "permissions" in validated_data["auth_group"]
-        ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("auth_group")["permissions"],
-            )
-
-        instance = super().create(validated_data)
-
-        # This will update only Permissions from category
-        # "configuration_permissions". There are no other Permissions.
-        if new_configuration_permissions:
-            instance.auth_group.permissions.set(new_configuration_permissions)
-
-        return instance
-
-    def update(self, instance, validated_data):
-        permissions_in_payload = None
-        new_configuration_permissions = None
-        if (
-            "auth_group" in validated_data
-            and "permissions" in validated_data["auth_group"]
-        ):  # This field was renamed from "configuration_permissions" in the meantime
-            permissions_in_payload = validated_data.pop("auth_group")["permissions"]
-            new_configuration_permissions = set(permissions_in_payload)
-
-        instance = super().update(instance, validated_data)
-
-        # This will update only Permissions from category
-        # "configuration_permissions". Others will be untouched
-        if new_configuration_permissions:
-            allowed_configuration_permissions = set(
-                self.fields[
-                    "configuration_permissions"
-                ].child_relation.queryset.all(),
-            )
-            non_configuration_permissions = (
-                set(instance.auth_group.permissions.all())
-                - allowed_configuration_permissions
-            )
-            new_permissions = non_configuration_permissions.union(
-                new_configuration_permissions,
-            )
-            instance.auth_group.permissions.set(new_permissions)
-
-        # Clear all configuration permissions if an empty list is provided
-        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
-            instance.auth_group.permissions.clear()
-
-        return instance
-
-
-class DojoGroupMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Dojo_Group_Member
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("group") != self.instance.group
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("group"),
-                Permissions.Group_Manage_Members,
-            )
-        ):
-            msg = "You are not permitted to add a user to this group"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("group") != self.instance.group
-            or data.get("user") != self.instance.user
-        ):
-            members = Dojo_Group_Member.objects.filter(
-                group=data.get("group"), user=data.get("user"),
-            )
-            if members.count() > 0:
-                msg = "Dojo_Group_Member already exists"
-                raise ValidationError(msg)
-
-        if self.instance is not None and not data.get("role").is_owner:
-            owners = (
-                Dojo_Group_Member.objects.filter(
-                    group=data.get("group"), role__is_owner=True,
-                )
-                .exclude(id=self.instance.id)
-                .count()
-            )
-            if owners < 1:
-                msg = "There must be at least one owner"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("group"),
-            Permissions.Group_Add_Owner,
-        ):
-            msg = "You are not permitted to add a user as Owner to this group"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class GlobalRoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Global_Role
-        fields = "__all__"
-
-    def validate(self, data):
-        user = None
-        group = None
-
-        if self.instance is not None:
-            user = self.instance.user
-            group = self.instance.group
-
-        if "user" in data:
-            user = data.get("user")
-        if "group" in data:
-            group = data.get("group")
-
-        if user is None and group is None:
-            msg = "Global_Role must have either user or group"
-            raise ValidationError(msg)
-        if user is not None and group is not None:
-            msg = "Global_Role cannot have both user and group"
-            raise ValidationError(msg)
-
-        return data
-
-
 class AddUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -923,182 +721,6 @@ class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
         fields = ["path"]
 
 
-class ProductMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Member
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product"),
-                Permissions.Product_Manage_Members,
-            )
-        ):
-            msg = "You are not permitted to add a member to this product"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product") != self.instance.product
-            or data.get("user") != self.instance.user
-        ):
-            members = Product_Member.objects.filter(
-                product=data.get("product"), user=data.get("user"),
-            )
-            if members.count() > 0:
-                msg = "Product_Member already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product"),
-            Permissions.Product_Member_Add_Owner,
-        ):
-            msg = "You are not permitted to add a member as Owner to this product"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class ProductGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Group
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product"),
-                Permissions.Product_Group_Add,
-            )
-        ):
-            msg = "You are not permitted to add a group to this product"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product") != self.instance.product
-            or data.get("group") != self.instance.group
-        ):
-            members = Product_Group.objects.filter(
-                product=data.get("product"), group=data.get("group"),
-            )
-            if members.count() > 0:
-                msg = "Product_Group already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product"),
-            Permissions.Product_Group_Add_Owner,
-        ):
-            msg = "You are not permitted to add a group as Owner to this product"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class ProductTypeMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Type_Member
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product_type") != self.instance.product_type
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product_type"),
-                Permissions.Product_Type_Manage_Members,
-            )
-        ):
-            msg = "You are not permitted to add a member to this product type"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product_type") != self.instance.product_type
-            or data.get("user") != self.instance.user
-        ):
-            members = Product_Type_Member.objects.filter(
-                product_type=data.get("product_type"), user=data.get("user"),
-            )
-            if members.count() > 0:
-                msg = "Product_Type_Member already exists"
-                raise ValidationError(msg)
-
-        if self.instance is not None and not data.get("role").is_owner:
-            owners = (
-                Product_Type_Member.objects.filter(
-                    product_type=data.get("product_type"), role__is_owner=True,
-                )
-                .exclude(id=self.instance.id)
-                .count()
-            )
-            if owners < 1:
-                msg = "There must be at least one owner"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product_type"),
-            Permissions.Product_Type_Member_Add_Owner,
-        ):
-            msg = "You are not permitted to add a member as Owner to this product type"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class ProductTypeGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Type_Group
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product_type") != self.instance.product_type
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product_type"),
-                Permissions.Product_Type_Group_Add,
-            )
-        ):
-            msg = "You are not permitted to add a group to this product type"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product_type") != self.instance.product_type
-            or data.get("group") != self.instance.group
-        ):
-            members = Product_Type_Group.objects.filter(
-                product_type=data.get("product_type"), group=data.get("group"),
-            )
-            if members.count() > 0:
-                msg = "Product_Type_Group already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product_type"),
-            Permissions.Product_Type_Group_Add_Owner,
-        ):
-            msg = "You are not permitted to add a group as Owner to this product type"
-            raise PermissionDenied(msg)
-
-        return data
-
-
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
@@ -1124,7 +746,7 @@ class EngagementSerializer(serializers.ModelSerializer):
             and not user_has_permission(
                 self.context["request"].user,
                 data.get("product"),
-                Permissions.Engagement_Edit,
+                "edit",
             )
         ):
             msg = "You are not permitted to edit engagements in the destination product"
@@ -1577,7 +1199,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings = data.get("accepted_findings", [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
-        authed_findings = get_authorized_findings(Permissions.Risk_Acceptance).filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings("edit").filter(id__in=findings_ids)
         if len(findings) != len(authed_findings):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
@@ -1762,7 +1384,7 @@ class FindingSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         if request is None:
             return []
-        if not user_has_permission(request.user, obj, Permissions.Risk_Acceptance):
+        if not user_has_permission(request.user, obj, "edit"):
             return []
         return RiskAcceptanceSerializer(
             obj.risk_acceptance_set.all(), many=True,
@@ -2152,47 +1774,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
             save_endpoints_template(instance, endpoint_urls)
 
         return super().update(instance, validated_data)
-
-
-class CredentialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_User
-        exclude = ("password",)
-
-
-class CredentialMappingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_Mapping
-        fields = "__all__"
-
-
-class StubFindingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
-
-
-class StubFindingCreateSerializer(serializers.ModelSerializer):
-    test = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all())
-
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-        extra_kwargs = {
-            "reporter": {"default": serializers.CurrentUserDefault()},
-        }
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -2950,7 +2531,7 @@ class FindingCloseSerializer(serializers.ModelSerializer):
                 })
 
             # Ensure selected user is authorized (Finding_Edit)
-            authorized_users = get_authorized_users(Permissions.Finding_Edit, user=request_user)
+            authorized_users = get_authorized_users("edit", user=request_user)
             if not authorized_users.filter(id=mitigated_by_user.id).exists():
                 raise serializers.ValidationError({
                     "mitigated_by": [
@@ -3022,24 +2603,6 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
         model = System_Settings
         fields = "__all__"
 
-    def validate(self, data):
-        if self.instance is not None:
-            default_group = self.instance.default_group
-            default_group_role = self.instance.default_group_role
-
-        if "default_group" in data:
-            default_group = data["default_group"]
-        if "default_group_role" in data:
-            default_group_role = data["default_group_role"]
-
-        if (default_group is None and default_group_role is not None) or (
-            default_group is not None and default_group_role is None
-        ):
-            msg = "default_group and default_group_role must either both be set or both be empty."
-            raise ValidationError(msg)
-
-        return data
-
 
 class CeleryStatusSerializer(serializers.Serializer):
     worker_status = serializers.BooleanField(read_only=True)
@@ -3102,10 +2665,6 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.Serializer):
     user = UserSerializer(many=False)
     user_contact_info = UserContactInfoSerializer(many=False, required=False)
-    global_role = GlobalRoleSerializer(many=False, required=False)
-    dojo_group_member = DojoGroupMemberSerializer(many=True)
-    product_type_member = ProductTypeMemberSerializer(many=True)
-    product_member = ProductMemberSerializer(many=True)
 
 
 class DeletePreviewSerializer(serializers.Serializer):
@@ -3118,111 +2677,6 @@ class ConfigurationPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         exclude = ("content_type",)
-
-
-class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        if isinstance(instance, TextQuestion):
-            return TextQuestionSerializer(instance=instance).data
-        if isinstance(instance, ChoiceQuestion):
-            return ChoiceQuestionSerializer(instance=instance).data
-        return QuestionSerializer(instance=instance).data
-
-    class Meta:
-        model = Question
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        exclude = ("polymorphic_ctype",)
-
-
-class TextQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TextQuestion
-        exclude = ("polymorphic_ctype",)
-
-
-class ChoiceQuestionSerializer(serializers.ModelSerializer):
-    choices = serializers.StringRelatedField(many=True)
-
-    class Meta:
-        model = ChoiceQuestion
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionnaireAnsweredSurveySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Answered_Survey
-        fields = "__all__"
-
-
-class QuestionnaireAnswerSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        if isinstance(instance, TextAnswer):
-            return TextAnswerSerializer(instance=instance).data
-        if isinstance(instance, ChoiceAnswer):
-            return ChoiceAnswerSerializer(instance=instance).data
-        return AnswerSerializer(instance=instance).data
-
-    class Meta:
-        model = Answer
-        exclude = ("polymorphic_ctype",)
-
-
-class AnswerSerializer(serializers.ModelSerializer):
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = Answer
-        exclude = ("polymorphic_ctype",)
-
-
-class TextAnswerSerializer(serializers.ModelSerializer):
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = TextAnswer
-        exclude = ("polymorphic_ctype",)
-
-
-class ChoiceAnswerSerializer(serializers.ModelSerializer):
-    answer = serializers.StringRelatedField(many=True)
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = ChoiceAnswer
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionnaireEngagementSurveySerializer(serializers.ModelSerializer):
-    questions = serializers.SerializerMethodField()
-
-    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    def get_questions(self, obj):
-        questions = obj.questions.all()
-        formated_questions = []
-        for question in questions:
-            formated_question = f"Order #{question.order} - {question.text}{' (Optional)' if question.optional else ''}"
-            formated_questions.append(formated_question)
-        return formated_questions
-
-    class Meta:
-        model = Engagement_Survey
-        fields = "__all__"
-
-
-class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
-    survey = QuestionnaireEngagementSurveySerializer()
-
-    class Meta:
-        model = General_Survey
-        fields = "__all__"
 
 
 class AnnouncementSerializer(serializers.ModelSerializer):

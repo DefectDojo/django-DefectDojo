@@ -3,7 +3,6 @@ import logging
 from datetime import timedelta
 
 import hyperlink
-from crum import get_current_user
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin.utils import NestedObjects
@@ -29,34 +28,26 @@ from rest_framework.exceptions import PermissionDenied as RFPermissionDenied
 from rest_framework.exceptions import ValidationError as RFValidationError
 
 from dojo.authorization.authorization import user_is_superuser_or_global_owner
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.decorators import dojo_ratelimit
 from dojo.filters import UserFilter
 from dojo.forms import (
-    Add_Group_Member_UserForm,
-    Add_Product_Member_UserForm,
-    Add_Product_Type_Member_UserForm,
     AddDojoUserForm,
     APIKeyForm,
+    Authorize_User_For_ProductsForm,
+    Authorize_User_For_ProductTypesForm,
     ChangePasswordForm,
     ConfigurationPermissionsForm,
     DeleteUserForm,
     DojoUserForm,
     EditDojoUserForm,
-    GlobalRoleForm,
     UserContactInfoForm,
 )
-from dojo.group.queries import get_authorized_group_members_for_user
 from dojo.labels import get_labels
-from dojo.models import Alerts, Dojo_Group_Member, Dojo_User, Product_Member, Product_Type_Member, UserContactInfo
-from dojo.product.queries import get_authorized_product_members_for_user
-from dojo.product_type.queries import get_authorized_product_type_members_for_user
+from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
 from dojo.user.authentication import reset_token_for_user
 from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
-
 
 labels = get_labels()
 
@@ -81,8 +72,8 @@ class DojoLoginView(LoginView):
             extra_tags="alert-success")
         return response
 
-
 # #  Django Rest Framework API v2
+
 
 def api_v2_key(request):
     # This check should not be necessary because url should not be in 'urlpatterns' but we never know
@@ -127,21 +118,11 @@ def api_v2_key(request):
 @dojo_ratelimit(key="post:username")
 @dojo_ratelimit(key="post:password")
 def login_view(request):
-    try:
-        from dojo.sso.views import get_sso_auto_redirect  # noqa: PLC0415
-        redirect_response = get_sso_auto_redirect(request)
-        if redirect_response is not None:
-            return redirect_response
-    except ImportError:
-        pass
     return DojoLoginView.as_view(template_name="dojo/login.html", authentication_form=AuthenticationForm)(request)
 
 
 def logout_view(request):
     logout(request)
-
-    if not settings.SHOW_LOGIN_FORM:
-        return login_view(request)
     messages.add_message(request,
                      messages.SUCCESS,
                      _("You have logged out successfully."),
@@ -205,53 +186,54 @@ def alertcount(request):
     return JsonResponse({"count": 0})
 
 
+def alertcount_text(request):
+    """Return alert count as plain text for htmx polling."""
+    count = Alerts.objects.filter(user_id=request.user).count() if not settings.DISABLE_ALERT_COUNTER else 0
+    return HttpResponse(str(count), content_type="text/plain")
+
+
+@login_required
+def alerts_partial(request):
+    """Return alert dropdown HTML partial for htmx."""
+    limit = request.GET.get("limit")
+    if limit:
+        alerts = Alerts.objects.filter(user_id=request.user)[:int(limit)]
+    else:
+        alerts = Alerts.objects.filter(user_id=request.user)
+    return render(request, "dojo/partials/alerts_dropdown.html", {"alerts": alerts})
+
+
 def view_profile(request):
     user = get_object_or_404(Dojo_User, pk=request.user.id)
     form = DojoUserForm(instance=user)
-    group_members = get_authorized_group_members_for_user(user)
 
     user_contact = user.usercontactinfo if hasattr(user, "usercontactinfo") else None
     contact_form = UserContactInfoForm(user=user) if user_contact is None else UserContactInfoForm(instance=user_contact, user=user)
 
-    global_role = user.global_role if hasattr(user, "global_role") else None
-    if global_role is None:
-        previous_global_role = None
-        global_role_form = GlobalRoleForm()
-    else:
-        previous_global_role = global_role.role
-        global_role_form = GlobalRoleForm(instance=global_role)
-
     if request.method == "POST":
         form = DojoUserForm(request.POST, instance=user)
         contact_form = UserContactInfoForm(request.POST, instance=user_contact, user=user)
-        global_role_form = GlobalRoleForm(request.POST, instance=global_role)
-        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
+        if form.is_valid() and contact_form.is_valid():
             form.save()
             contact = contact_form.save(commit=False)
             contact.user = user
             contact.save()
-            request_user = get_current_user()
-            global_role = global_role_form.save(commit=False)
-            if global_role.role != previous_global_role and not request_user.is_superuser:
-                global_role.role = previous_global_role
-                messages.add_message(request,
-                                    messages.WARNING,
-                                    _("Only superusers are allowed to change their global role."),
-                                    extra_tags="alert-warning")
-            global_role.user = user
-            global_role.save()
 
             messages.add_message(request,
                                  messages.SUCCESS,
                                  _("Profile updated successfully."),
                                  extra_tags="alert-success")
+            # Redirect so the response renders against a fresh request — this
+            # ensures UIPreferenceLoader and the UI-toggle banner read the
+            # just-saved usercontactinfo (e.g. ui_use_tailwind) instead of any
+            # state cached on the POST request. Also prevents form
+            # resubmission on refresh.
+            return HttpResponseRedirect(reverse("view_profile"))
     add_breadcrumb(title=_("User Profile - %(user_full_name)s") % {"user_full_name": user.get_full_name()}, top_level=True, request=request)
     return render(request, "dojo/profile.html", {
         "user": user,
         "form": form,
-        "contact_form": contact_form,
-        "global_role_form": global_role_form,
-        "group_members": group_members})
+        "contact_form": contact_form})
 
 
 def change_password(request):
@@ -283,11 +265,10 @@ def change_password(request):
     return render(request, "dojo/change_pwd.html", {"form": form})
 
 
-@user_is_configuration_authorized("auth.view_user")
 def user(request):
     page_name = _("All Users")
     users = Dojo_User.objects.all() \
-        .select_related("usercontactinfo", "global_role") \
+        .select_related("usercontactinfo") \
         .order_by("username", "last_name", "first_name")
     users = UserFilter(request.GET, queryset=users)
     paged_users = get_page_items(request, users.qs, 25)
@@ -299,28 +280,25 @@ def user(request):
     })
 
 
-@user_is_configuration_authorized("auth.add_user")
 def add_user(request):
     page_name = _("Add User")
     form = AddDojoUserForm()
     contact_form = UserContactInfoForm()
-    global_role_form = GlobalRoleForm()
     user = None
 
     if request.method == "POST":
         form = AddDojoUserForm(request.POST)
         contact_form = UserContactInfoForm(request.POST)
-        global_role_form = GlobalRoleForm(request.POST)
-        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
+        if form.is_valid() and contact_form.is_valid():
             if not request.user.is_superuser and form.cleaned_data["is_superuser"]:
                 messages.add_message(request,
                                     messages.ERROR,
                                     _("Only superusers are allowed to add superusers. User was not saved."),
                                     extra_tags="alert-danger")
-            elif not request.user.is_superuser and global_role_form.cleaned_data["role"]:
+            elif not request.user.is_superuser and form.cleaned_data["is_staff"]:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    _("Only superusers are allowed to add users with a global role. User was not saved."),
+                                    _("Only superusers are allowed to grant staff status. User was not saved."),
                                     extra_tags="alert-danger")
             else:
                 user = form.save(commit=False)
@@ -334,9 +312,6 @@ def add_user(request):
                 contact = contact_form.save(commit=False)
                 contact.user = user
                 contact.save()
-                global_role = global_role_form.save(commit=False)
-                global_role.user = user
-                global_role.save()
                 messages.add_message(request,
                                     messages.SUCCESS,
                                     _("User added successfully."),
@@ -352,28 +327,29 @@ def add_user(request):
         "name": page_name,
         "form": form,
         "contact_form": contact_form,
-        "global_role_form": global_role_form,
         "to_add": True})
 
 
-@user_is_configuration_authorized("auth.view_user")
 def view_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
-    product_members = get_authorized_product_members_for_user(user, Permissions.Product_View)
-    product_type_members = get_authorized_product_type_members_for_user(user, Permissions.Product_Type_View)
-    group_members = get_authorized_group_members_for_user(user)
+    # Legacy access lists: Product / Product_Type the user is on
+    # via authorized_users (with cascade Product_Type → Product).
+    accessible_product_types = Product_Type.objects.filter(
+        authorized_users=user,
+    ).order_by("name")
+    accessible_products = Product.objects.filter(
+        Q(authorized_users=user) | Q(prod_type__authorized_users=user),
+    ).distinct().order_by("name")
     configuration_permission_form = ConfigurationPermissionsForm(user=user)
 
     add_breadcrumb(title=_("View User"), top_level=False, request=request)
     return render(request, "dojo/view_user.html", {
         "user": user,
-        "product_members": product_members,
-        "product_type_members": product_type_members,
-        "group_members": group_members,
+        "accessible_product_types": accessible_product_types,
+        "accessible_products": accessible_products,
         "configuration_permission_form": configuration_permission_form})
 
 
-@user_is_configuration_authorized("auth.change_user")
 def edit_user(request, uid):
     page_name = _("Edit User")
     user = get_object_or_404(Dojo_User, id=uid)
@@ -382,9 +358,6 @@ def edit_user(request, uid):
     user_contact = user.usercontactinfo if hasattr(user, "usercontactinfo") else None
     contact_form = UserContactInfoForm(user=user) if user_contact is None else UserContactInfoForm(instance=user_contact, user=user)
 
-    global_role = user.global_role if hasattr(user, "global_role") else None
-    global_role_form = GlobalRoleForm() if global_role is None else GlobalRoleForm(instance=global_role)
-
     if request.method == "POST":
         form = EditDojoUserForm(request.POST, instance=user)
         if user_contact is None:
@@ -392,30 +365,22 @@ def edit_user(request, uid):
         else:
             contact_form = UserContactInfoForm(request.POST, instance=user_contact, user=user)
 
-        if global_role is None:
-            global_role_form = GlobalRoleForm(request.POST)
-        else:
-            global_role_form = GlobalRoleForm(request.POST, instance=global_role)
-
-        if form.is_valid() and contact_form.is_valid() and global_role_form.is_valid():
+        if form.is_valid() and contact_form.is_valid():
             if not request.user.is_superuser and form.cleaned_data["is_superuser"]:
                 messages.add_message(request,
                                     messages.ERROR,
                                     _("Only superusers are allowed to edit superusers. User was not saved."),
                                     extra_tags="alert-danger")
-            elif not request.user.is_superuser and global_role_form.cleaned_data["role"]:
+            elif not request.user.is_superuser and form.cleaned_data["is_staff"] != user.is_staff:
                 messages.add_message(request,
                                     messages.ERROR,
-                                    _("Only superusers are allowed to edit users with a global role. User was not saved."),
+                                    _("Only superusers are allowed to change staff status. User was not saved."),
                                     extra_tags="alert-danger")
             else:
                 form.save()
                 contact = contact_form.save(commit=False)
                 contact.user = user
                 contact.save()
-                global_role = global_role_form.save(commit=False)
-                global_role.user = user
-                global_role.save()
 
                 # Handle API token reset if checkbox is checked
                 # Only allow superusers or global owners to reset tokens
@@ -457,11 +422,9 @@ def edit_user(request, uid):
         "name": page_name,
         "form": form,
         "contact_form": contact_form,
-        "global_role_form": global_role_form,
         "to_edit": user})
 
 
-@user_is_configuration_authorized("auth.delete_user")
 def delete_user(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     form = DeleteUserForm(instance=user)
@@ -481,11 +444,6 @@ def delete_user(request, uid):
                     messages.add_message(request,
                                         messages.ERROR,
                                         _("Only superusers are allowed to delete superusers. User was not removed."),
-                                        extra_tags="alert-danger")
-                elif not request.user.is_superuser and hasattr(user, "global_role") and user.global_role.role:
-                    messages.add_message(request,
-                                        messages.ERROR,
-                                        _("Only superusers are allowed to delete users with a global role. User was not removed."),
                                         extra_tags="alert-danger")
                 else:
                     try:
@@ -516,97 +474,94 @@ def delete_user(request, uid):
                    })
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def add_product_type_member(request, uid):
-    page_name = str(labels.ORG_USERS_ADD_LABEL)
+@user_passes_test(lambda u: u.is_staff)
+def authorize_user_for_products(request, uid):
+    """OS legacy: add this user to one or more products' authorized_users."""
+    page_name = _("Authorize User for Products")
     user = get_object_or_404(Dojo_User, id=uid)
-    memberform = Add_Product_Type_Member_UserForm(initial={"user": user.id})
+    form = Authorize_User_For_ProductsForm(user=user)
     if request.method == "POST":
-        memberform = Add_Product_Type_Member_UserForm(request.POST, initial={"user": user.id})
-        if memberform.is_valid():
-            if "product_types" in memberform.cleaned_data and len(memberform.cleaned_data["product_types"]) > 0:
-                for product_type in memberform.cleaned_data["product_types"]:
-                    existing_members = Product_Type_Member.objects.filter(product_type=product_type, user=user)
-                    if existing_members.count() == 0:
-                        product_type_member = Product_Type_Member()
-                        product_type_member.product_type = product_type
-                        product_type_member.user = user
-                        product_type_member.role = memberform.cleaned_data["role"]
-                        product_type_member.save()
-                messages.add_message(request,
-                                    messages.SUCCESS,
-                                    labels.ORG_USERS_ADD_SUCCESS_MESSAGE,
-                                    extra_tags="alert-success")
-                return HttpResponseRedirect(reverse("view_user", args=(uid, )))
-    add_breadcrumb(title=page_name, top_level=False, request=request)
-    return render(request, "dojo/new_product_type_member_user.html", {
-        "name": page_name,
-        "user": user,
-        "form": memberform,
-    })
-
-
-@user_passes_test(lambda u: u.is_superuser)
-def add_product_member(request, uid):
-    page_name = str(labels.ASSET_USERS_MEMBER_ADD_LABEL)
-    user = get_object_or_404(Dojo_User, id=uid)
-    memberform = Add_Product_Member_UserForm(initial={"user": user.id})
-    if request.method == "POST":
-        memberform = Add_Product_Member_UserForm(request.POST, initial={"user": user.id})
-        if memberform.is_valid():
-            if "products" in memberform.cleaned_data and len(memberform.cleaned_data["products"]) > 0:
-                for product in memberform.cleaned_data["products"]:
-                    existing_members = Product_Member.objects.filter(product=product, user=user)
-                    if existing_members.count() == 0:
-                        product_member = Product_Member()
-                        product_member.product = product
-                        product_member.user = user
-                        product_member.role = memberform.cleaned_data["role"]
-                        product_member.save()
-            messages.add_message(request,
-                                messages.SUCCESS,
-                                labels.ASSET_USERS_MEMBER_ADD_SUCCESS_MESSAGE,
-                                extra_tags="alert-success")
-            return HttpResponseRedirect(reverse("view_user", args=(uid, )))
-    add_breadcrumb(title=page_name, top_level=False, request=request)
-    return render(request, "dojo/new_product_member_user.html", {
-        "name": page_name,
-        "user": user,
-        "form": memberform,
-    })
-
-
-@user_passes_test(lambda u: u.is_superuser)
-def add_group_member(request, uid):
-    user = get_object_or_404(Dojo_User, id=uid)
-    memberform = Add_Group_Member_UserForm(initial={"user": user.id})
-
-    if request.method == "POST":
-        memberform = Add_Group_Member_UserForm(request.POST, initial={"user": user.id})
-        if memberform.is_valid():
-            if "groups" in memberform.cleaned_data and len(memberform.cleaned_data["groups"]) > 0:
-                for group in memberform.cleaned_data["groups"]:
-                    existing_groups = Dojo_Group_Member.objects.filter(user=user, group=group)
-                    if existing_groups.count() == 0:
-                        group_member = Dojo_Group_Member()
-                        group_member.group = group
-                        group_member.user = user
-                        group_member.role = memberform.cleaned_data["role"]
-                        group_member.save()
-            messages.add_message(request,
-                                 messages.SUCCESS,
-                                 _("Groups added successfully."),
-                                 extra_tags="alert-success")
+        form = Authorize_User_For_ProductsForm(request.POST, user=user)
+        if form.is_valid():
+            products = form.cleaned_data["products"]
+            for product in products:
+                product.authorized_users.add(user)
+            messages.add_message(
+                request, messages.SUCCESS,
+                _("Authorized %(username)s for %(count)d product(s).") % {
+                    "username": user.username, "count": len(products),
+                },
+                extra_tags="alert-success",
+            )
             return HttpResponseRedirect(reverse("view_user", args=(uid,)))
-
-    add_breadcrumb(title=_("Add Group Member"), top_level=False, request=request)
-    return render(request, "dojo/new_group_member_user.html", {
-        "user": user,
-        "form": memberform,
+    add_breadcrumb(title=page_name, top_level=False, request=request)
+    return render(request, "dojo/authorize_user_for_products.html", {
+        "name": page_name, "user": user, "form": form,
     })
 
 
-@user_is_configuration_authorized("auth.change_permission")
+@user_passes_test(lambda u: u.is_staff)
+def authorize_user_for_product_types(request, uid):
+    """OS legacy: add this user to one or more product_types' authorized_users."""
+    page_name = _("Authorize User for Product Types")
+    user = get_object_or_404(Dojo_User, id=uid)
+    form = Authorize_User_For_ProductTypesForm(user=user)
+    if request.method == "POST":
+        form = Authorize_User_For_ProductTypesForm(request.POST, user=user)
+        if form.is_valid():
+            product_types = form.cleaned_data["product_types"]
+            for pt in product_types:
+                pt.authorized_users.add(user)
+            messages.add_message(
+                request, messages.SUCCESS,
+                _("Authorized %(username)s for %(count)d product type(s).") % {
+                    "username": user.username, "count": len(product_types),
+                },
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse("view_user", args=(uid,)))
+    add_breadcrumb(title=page_name, top_level=False, request=request)
+    return render(request, "dojo/authorize_user_for_product_types.html", {
+        "name": page_name, "user": user, "form": form,
+    })
+
+
+@user_passes_test(lambda u: u.is_staff)
+def revoke_user_from_product(request, uid, pid):
+    """OS legacy: remove user from a product's authorized_users."""
+    if request.method != "POST":
+        raise PermissionDenied
+    user = get_object_or_404(Dojo_User, id=uid)
+    product = get_object_or_404(Product, id=pid)
+    product.authorized_users.remove(user)
+    messages.add_message(
+        request, messages.SUCCESS,
+        _("Revoked %(username)s from %(product)s.") % {
+            "username": user.username, "product": product.name,
+        },
+        extra_tags="alert-success",
+    )
+    return HttpResponseRedirect(reverse("view_user", args=(uid,)))
+
+
+@user_passes_test(lambda u: u.is_staff)
+def revoke_user_from_product_type(request, uid, ptid):
+    """OS legacy: remove user from a product_type's authorized_users."""
+    if request.method != "POST":
+        raise PermissionDenied
+    user = get_object_or_404(Dojo_User, id=uid)
+    pt = get_object_or_404(Product_Type, id=ptid)
+    pt.authorized_users.remove(user)
+    messages.add_message(
+        request, messages.SUCCESS,
+        _("Revoked %(username)s from %(pt)s.") % {
+            "username": user.username, "pt": pt.name,
+        },
+        extra_tags="alert-success",
+    )
+    return HttpResponseRedirect(reverse("view_user", args=(uid,)))
+
+
 def edit_permissions(request, uid):
     user = get_object_or_404(Dojo_User, id=uid)
     if request.method == "POST":

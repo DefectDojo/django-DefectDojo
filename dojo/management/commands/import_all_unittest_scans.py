@@ -7,6 +7,7 @@ from importlib.util import find_spec
 from inspect import isclass
 from pathlib import Path
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.urls import reverse
 from django.utils import timezone
@@ -43,6 +44,7 @@ class Command(BaseCommand):
         parser.add_argument("--engagements-per-product", type=int, default=50, help="Number of engagements per product before a new product is created, defaults to 50")
         parser.add_argument("--products-per-product-type", type=int, default=15, help="Number of products per product type before a new product type is created, defaults to 15")
         parser.add_argument("--number-of-runs", type=int, default=1, help="Number of times to run the import of all sample scans, defaults to 1")
+        parser.add_argument("--background-import", action="store_true", default=False, help="Use async/background imports (Pro feature, default: False)")
 
     def get_test_admin(self, *args, **kwargs):
         return User.objects.get(username="admin")
@@ -64,7 +66,7 @@ class Command(BaseCommand):
     def import_scan_with_params(self, filename, scan_type="ZAP Scan", engagement=1, minimum_severity="Low", *, active=True, verified=False,
                                 push_to_jira=None, endpoint_to_add=None, tags=None, close_old_findings=False, group_by=None, engagement_name=None,
                                 product_name=None, product_type_name=None, auto_create_context=None, expected_http_status_code=201, test_title=None,
-                                scan_date=None, service=None, force_active=True, force_verified=True):
+                                scan_date=None, service=None, force_active=True, force_verified=True, background_import=False):
 
         with (Path("unittests/scans") / filename).open(encoding="utf-8") as testfile:
             payload = {
@@ -73,6 +75,7 @@ class Command(BaseCommand):
                     "file": testfile,
                     "version": "1.0.1",
                     "close_old_findings": close_old_findings,
+                    "background_import": background_import,
             }
 
             if active is not None:
@@ -119,7 +122,7 @@ class Command(BaseCommand):
 
             return self.import_scan(payload, expected_http_status_code)
 
-    def import_all_unittest_scans(self, product_name_prefix=None, tests_per_engagement=10, engagements_per_product=50, products_per_product_type=15, *, include_very_big_scans=False, **kwargs):
+    def import_all_unittest_scans(self, product_name_prefix=None, tests_per_engagement=10, engagements_per_product=50, products_per_product_type=15, *, include_very_big_scans=False, background_import=False, **kwargs):
         logger.info("product_name_prefix: %s, tests_per_engagement: %s, engagements_per_product: %s, products_per_product_type: %s", product_name_prefix, tests_per_engagement, engagements_per_product, products_per_product_type)
         product_type_prefix = "Sample scans " + datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         product_type_index = 1
@@ -172,6 +175,7 @@ class Command(BaseCommand):
                                                 filename=module_name + "/" + scan_file.name,
                                                 scan_type=parser.get_scan_types()[0],
                                                 engagement=eng.id,
+                                                background_import=background_import,
                                             )
                                             # logger.debug(f"Result of import: {result}")
                                             # raise Exception(f"Scan {scan_file.name} is not expected to be imported, but it was.")
@@ -191,6 +195,7 @@ class Command(BaseCommand):
             logger.error("Error importing scan %s: %s", scan, message)
 
     def handle(self, *args, **options):
+        settings.SECURE_SSL_REDIRECT = False
         logger.info("EXPERIMENTAL: This command may be changed/deprecated/removed without prior notice.")
         for i in range(options.get("number_of_runs", 1)):
             product_name_prefix = options.get("product_name_prefix")
@@ -203,4 +208,5 @@ class Command(BaseCommand):
                 engagements_per_product=options.get("engagements_per_product"),
                 products_per_product_type=options.get("products_per_product_type"),
                 include_very_big_scans=options.get("include_very_big_scans"),
+                background_import=options.get("background_import"),
             )

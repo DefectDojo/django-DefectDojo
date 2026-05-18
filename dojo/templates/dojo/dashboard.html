@@ -6,106 +6,85 @@
 {% block add_styles %}
     {{ block.super }}
     .chart {height: 300px}
-    .status .panel {min-height: 140px;background-color: #f5f5f5;}
     #punchcard {height: 350px}
 {% endblock %}
 
 {% block content %}
     {{ block.super }}
     {% block finding_stats_tiles %}
-        <div class="row status">
+        <div class="row">
             {% block active_engagements %}
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-blue">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa-solid fa-bullseye fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">{{ engagement_count }}</div>
-                                    <div>{% trans "Active Engagements" %}</div>
-                                </div>
+                    <div class="stat-card stat-card--blue">
+                        <div class="stat-card-body">
+                            <div class="stat-card-icon">
+                                <i class="fa-solid fa-bullseye"></i>
+                            </div>
+                            <div class="stat-card-content">
+                                <span class="stat-card-value">{{ engagement_count }}</span>
+                                <span class="stat-card-label">{% trans "Active Engagements" %}</span>
                             </div>
                         </div>
-                        <a href="{% url 'engagement' %}">
-                            <div class="panel-footer">
-                                <span class="pull-left">{% trans "View Engagement Details" %}</span>
-                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
-                                <div class="clearfix"></div>
-                            </div>
+                        <a href="{% url 'engagement' %}" class="stat-card-link">
+                            <span>{% trans "View Engagement Details" %}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             {% endblock %}
             {% block last_seven_days %}
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-red">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa-solid fa-bug fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">{{ finding_count }}</div>
-                                    <div>{% trans "Last Seven Days" %}</div>
-                                </div>
+                    <div class="stat-card stat-card--red">
+                        <div class="stat-card-body">
+                            <div class="stat-card-icon">
+                                <i class="fa-solid fa-bug"></i>
+                            </div>
+                            <div class="stat-card-content">
+                                <span class="stat-card-value">{{ finding_count }}</span>
+                                <span class="stat-card-label">{% trans "Last Seven Days" %}</span>
                             </div>
                         </div>
-                        <a href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date">
-                            <div class="panel-footer">
-                                <span class="pull-left">{% trans "View Finding Details" %}</span>
-                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
-                                <div class="clearfix"></div>
-                            </div>
+                        <a href="{% url 'all_findings' %}?duplicate=2&date=2&o=-date" class="stat-card-link">
+                            <span>{% trans "View Finding Details" %}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             {% endblock %}
             {% block closed_last_seven_days %}
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-green">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa-solid fa-fire-extinguisher fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">{{ mitigated_count }}</div>
-                                    <div>{% trans "Closed In Last Seven Days" %}</div>
-                                </div>
+                    <div class="stat-card stat-card--green">
+                        <div class="stat-card-body">
+                            <div class="stat-card-icon">
+                                <i class="fa-solid fa-fire-extinguisher"></i>
+                            </div>
+                            <div class="stat-card-content">
+                                <span class="stat-card-value">{{ mitigated_count }}</span>
+                                <span class="stat-card-label">{% trans "Closed In Last Seven Days" %}</span>
                             </div>
                         </div>
-                        <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2">
-                            <div class="panel-footer">
-                                <span class="pull-left">{% trans "View Finding Details" %}</span>
-                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
-                                <div class="clearfix"></div>
-                            </div>
+                        <a href="{% url 'closed_findings' %}?duplicate=2&mitigated=2" class="stat-card-link">
+                            <span>{% trans "View Finding Details" %}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
             {% endblock %}
             {% block risk_accepted_last_seven_days %}
                 <div class="col-lg-3 col-md-6">
-                    <div class="panel panel-yellow">
-                        <div class="panel-heading">
-                            <div class="row">
-                                <div class="col-xs-3">
-                                    <i class="fa-solid fa-check fa-5x"></i>
-                                </div>
-                                <div class="col-xs-9 text-right">
-                                    <div class="huge">{{ accepted_count }}</div>
-                                    <div>{% trans "Risk Accepted In Last Seven Days" %}</div>
-                                </div>
+                    <div class="stat-card stat-card--yellow">
+                        <div class="stat-card-body">
+                            <div class="stat-card-icon">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <div class="stat-card-content">
+                                <span class="stat-card-value">{{ accepted_count }}</span>
+                                <span class="stat-card-label">{% trans "Risk Accepted In Last Seven Days" %}</span>
                             </div>
                         </div>
-                        <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2">
-                            <div class="panel-footer">
-                                <span class="pull-left">{% trans "View Finding Details" %}</span>
-                                <span class="pull-right"><i class="fa-solid fa-circle-right"></i></span>
-                                <div class="clearfix"></div>
-                            </div>
+                        <a href="{% url 'accepted_findings' %}?duplicate=2&risk_acceptance__created__date=2" class="stat-card-link">
+                            <span>{% trans "View Finding Details" %}</span>
+                            <i class="fa-solid fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
@@ -331,19 +310,9 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <!-- Flot Charts JavaScript -->
-    <script src="{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
-    {% if punchcard %}
-        <script src="{% static "JUMFlot/javascripts/JUMFlot.min.js" %}"></script>
-        <script src="{% static "JUMFlot/javascripts/jquery.flot.mouse.js" %}"></script>
-        <script src="{% static "JUMFlot/javascripts/jquery.flot.bubbles.js" %}"></script>
-    {% endif %}
+    <!-- Chart.js (moment.js loaded in base.html) -->
+    <script src="{% static "chart.js/dist/chart.umd.js" %}"></script>
+    <script src="{% static "chartjs-adapter-moment/dist/chartjs-adapter-moment.js" %}"></script>
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}

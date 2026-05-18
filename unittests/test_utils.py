@@ -4,29 +4,24 @@ from unittest.mock import Mock, patch
 
 from django.conf import settings
 
-from dojo.authorization.roles_permissions import Roles
 from dojo.location.models import Location
 from dojo.models import (
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
     IMPORT_REACTIVATED_FINDING,
     IMPORT_UNTOUCHED_FINDING,
-    Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Engagement,
     Notifications,
     Product,
     Product_Type,
-    Role,
-    System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
 )
 from dojo.notifications.signals import create_default_notifications
-from dojo.utils import dojo_crypto_encrypt, prepare_for_view, user_post_save
+from dojo.utils import dojo_crypto_encrypt, prepare_for_view
 
 from .dojo_test_case import DojoTestCase
 
@@ -86,57 +81,13 @@ class TestUtils(DojoTestCase):
         mock_notifications.objects.get.assert_called_with(template=True)
         template.save.assert_called_once()
 
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    def test_user_post_save_email_pattern_matches(self, mock_member, mock_settings):
-        user = Dojo_User()
-        user.id = 1
-        user.email = "john.doe@example.com"
-
-        group = Dojo_Group()
-        group.id = 1
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-        system_settings_group.default_group_email_pattern = ".*@example.com"
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_called_with(group=group, user=user, role=role)
-        save_mock_member.save.assert_called_once()
-
-    @patch("dojo.models.System_Settings.objects")
-    @patch("dojo.utils.Dojo_Group_Member")
-    def test_user_post_save_email_pattern_does_not_match(self, mock_member, mock_settings):
-        user = Dojo_User()
-        user.id = 1
-        user.email = "john.doe@partner.example.com"
-
-        group = Dojo_Group()
-        group.id = 1
-
-        role = Role.objects.get(id=Roles.Reader)
-
-        system_settings_group = System_Settings()
-        system_settings_group.default_group = group
-        system_settings_group.default_group_role = role
-        system_settings_group.default_group_email_pattern = ".*@example.com"
-
-        mock_settings.get.return_value = system_settings_group
-        save_mock_member = Mock(return_value=Dojo_Group_Member())
-        mock_member.return_value = save_mock_member
-
-        user_post_save(None, user, created=True)
-
-        mock_member.assert_not_called()
-        save_mock_member.save.assert_not_called()
+    # The ``default_group`` / ``default_group_role`` /
+    # ``default_group_email_pattern`` knobs were relocated from
+    # ``dojo.System_Settings`` onto ``pro.EnhancedSystemSettings``, and the
+    # auto-assignment-to-default-group lifecycle that consumed them now
+    # lives in ``pro.authorization.signals.user_post_save_default_group``.
+    # OS-only deployments don't auto-assign new users to a group; the
+    # equivalent Pro tests live in ``dojo-pro/unit_tests/authorization/``.
 
 
 class assertNumOfModelsCreated:
