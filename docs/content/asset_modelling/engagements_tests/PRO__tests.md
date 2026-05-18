@@ -2,7 +2,7 @@
 title: "Tests"
 description: "Understanding Tests in DefectDojo Pro"
 audience: pro
-weight: 2
+weight: 4
 ---
 Organizations → Assets → Engagements → **TESTS** → Findings
 
