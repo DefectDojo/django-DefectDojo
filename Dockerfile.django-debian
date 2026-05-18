@@ -67,7 +67,8 @@ RUN \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt
+  -r ./requirements.txt && \
+  apt-get -y purge --auto-remove git
 
 COPY \
   docker/entrypoint-celery-beat.sh \

@@ -24,7 +24,7 @@ def prefetch_related_findings_for_report(findings: QuerySet) -> QuerySet:
     )
 
 
-def prefetch_related_endpoints_for_report(endpoints: QuerySet) -> QuerySet:
+def prefetch_related_endpoints_for_report(endpoints: QuerySet, product=None) -> QuerySet:
     if settings.V3_FEATURE_LOCATIONS:
         return annotate_location_counts_and_status(
             endpoints.prefetch_related(
@@ -39,23 +39,24 @@ def prefetch_related_endpoints_for_report(endpoints: QuerySet) -> QuerySet:
             ),
         )
     # TODO: Delete this after the move to Locations
+    findings_qs = Finding.objects.filter(
+        active=True,
+        out_of_scope=False,
+        mitigated__isnull=True,
+        false_p=False,
+        duplicate=False,
+        status_finding__false_positive=False,
+        status_finding__out_of_scope=False,
+        status_finding__risk_accepted=False,
+    )
+    if product is not None:
+        findings_qs = findings_qs.filter(test__engagement__product=product)
     return endpoints.prefetch_related(
         "product",
         "tags",
         Prefetch(
             "findings",
-            queryset=prefetch_for_findings(
-                Finding.objects.filter(
-                    active=True,
-                    out_of_scope=False,
-                    mitigated__isnull=True,
-                    false_p=False,
-                    duplicate=False,
-                    status_finding__false_positive=False,
-                    status_finding__out_of_scope=False,
-                    status_finding__risk_accepted=False,
-                ).order_by("numerical_severity"),
-            ),
+            queryset=prefetch_for_findings(findings_qs.order_by("numerical_severity")),
             to_attr="active_annotated_findings",
         ),
     )

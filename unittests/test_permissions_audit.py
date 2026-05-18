@@ -1641,18 +1641,16 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
         self.assertEqual(response.status_code, 200, response.content)
 
     # ── Finding: duplicate status actions ──────────────────────────────
-    # NOTE: reset_finding_duplicate_status and set_finding_as_original
-    # bypass self.get_object(), so DRF object-level permission checks
-    # (has_object_permission) never fire. The internal helpers do their
-    # own permission checks. These tests verify current behaviour.
+    # reset_finding_duplicate_status and set_finding_as_original call
+    # self.get_object() so DRF's object-level permission check runs via
+    # UserHasFindingRelatedObjectPermission (POST -> Finding_Edit).
 
-    def test_finding_reset_duplicate_reader(self):
-        """View bypasses get_object() — internal helper checks permissions."""
+    def test_finding_reset_duplicate_reader_denied(self):
+        """Reader lacks Finding_Edit — POST must be denied before the helper runs."""
         client = self._client_for_user(self.reader_user)
         url = reverse("finding-reset-finding-duplicate-status", args=(self.finding.id,))
         response = client.post(url, format="json")
-        # Returns 400 (not a duplicate) — internal helper runs before perm check
-        self.assertEqual(response.status_code, 400, response.content)
+        self.assertEqual(response.status_code, 403, response.content)
 
     def test_finding_reset_duplicate_writer(self):
         client = self._client_for_user(self.writer_user)

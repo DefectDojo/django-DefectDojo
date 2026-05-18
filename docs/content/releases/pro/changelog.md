@@ -19,6 +19,13 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## May 2026: v2.58
 
+### May 11, 2026: v2.58.2
+
+* **(Connectors)** Connectors now support subtypes, so a single connector type can be configured against multiple flavors of the same upstream tool.
+* **(Pro UI)** Jira push success/error messages are now displayed correctly in the Pro UI, so it's clear whether the push actually reached Jira.
+* **(MCP)** MCP acknowledgement settings are now consistent across superusers, so toggling acknowledgement no longer drifts between admin accounts.
+* **(Classic UI)** The Celery Status page is now gated behind the `celery_status` feature flag, off by default.
+
 ### May 6, 2026: v2.58.1
 
 * **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
