@@ -2,7 +2,7 @@
 title: "Tests"
 description: "Understanding Tests in DefectDojo OS"
 audience: opensource
-weight: 2
+weight: 4
 ---
 Organizations → Assets → Engagements → **TESTS** → Findings
 

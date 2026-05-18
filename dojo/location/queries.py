@@ -92,30 +92,34 @@ def get_authorized_location_finding_reference(permission, queryset=None, user=No
         return location_finding_reference
 
     roles = get_roles_for_permission(permission)
+    # Authorization is anchored to the finding's product, not to any product
+    # that happens to share the location. A finding belongs to exactly one
+    # product (via test → engagement → product), so the user must have
+    # access to *that* product to see the reference.
     authorized_product_type_roles = Product_Type_Member.objects.filter(
-        product_type=OuterRef("location__products__product__prod_type_id"),
+        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
         user=user,
         role__in=roles)
     authorized_product_roles = Product_Member.objects.filter(
-        product=OuterRef("location__products__product_id"),
+        product=OuterRef("finding__test__engagement__product_id"),
         user=user,
         role__in=roles)
     authorized_product_type_groups = Product_Type_Group.objects.filter(
-        product_type=OuterRef("location__products__product__prod_type_id"),
+        product_type=OuterRef("finding__test__engagement__product__prod_type_id"),
         group__users=user,
         role__in=roles)
     authorized_product_groups = Product_Group.objects.filter(
-        product=OuterRef("location__products__product_id"),
+        product=OuterRef("finding__test__engagement__product_id"),
         group__users=user,
         role__in=roles)
     location_finding_reference = location_finding_reference.annotate(
-        location__product__prod_type__member=Exists(authorized_product_type_roles),
-        location__product__member=Exists(authorized_product_roles),
-        location__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
-        location__product__authorized_group=Exists(authorized_product_groups))
+        finding__product__prod_type__member=Exists(authorized_product_type_roles),
+        finding__product__member=Exists(authorized_product_roles),
+        finding__product__prod_type__authorized_group=Exists(authorized_product_type_groups),
+        finding__product__authorized_group=Exists(authorized_product_groups))
     return location_finding_reference.filter(
-        Q(location__product__prod_type__member=True) | Q(location__product__member=True)
-        | Q(location__product__prod_type__authorized_group=True) | Q(location__product__authorized_group=True))
+        Q(finding__product__prod_type__member=True) | Q(finding__product__member=True)
+        | Q(finding__product__prod_type__authorized_group=True) | Q(finding__product__authorized_group=True))
 
 
 def get_authorized_location_product_reference(permission, queryset=None, user=None):

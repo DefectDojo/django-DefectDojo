@@ -274,13 +274,6 @@ else
     # The below tests are commented out because they are still an unstable work in progress
     ## Once Ready they can be uncommented.
 
-    # echo "Import Scanner integration test"
-    # if python3 tests/import_scanner_test.py ; then
-    #     echo "Success: Import Scanner integration tests passed"
-    # else
-    #     echo "Error: Import Scanner integration test failed"; exit 1
-    # fi
-
     # echo "Zap integration test"
     # if python3 tests/zap.py ; then
     #     echo "Success: zap integration tests passed"
