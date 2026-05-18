@@ -1645,7 +1645,7 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
     # self.get_object() so DRF's object-level permission check runs via
     # UserHasFindingRelatedObjectPermission (POST -> Finding_Edit).
 
-    def test_finding_reset_duplicate_reader(self):
+    def test_finding_reset_duplicate_reader_denied(self):
         """Reader lacks Finding_Edit — POST must be denied before the helper runs."""
         client = self._client_for_user(self.reader_user)
         url = reverse("finding-reset-finding-duplicate-status", args=(self.finding.id,))
