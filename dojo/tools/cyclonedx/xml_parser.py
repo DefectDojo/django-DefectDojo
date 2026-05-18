@@ -161,6 +161,7 @@ class CycloneDXXMLParser:
             references=references,
             component_name=component_name,
             component_version=component_version,
+            component_purl=component_purl,
             vuln_id_from_tool=vuln_id,
             nb_occurences=1,
         )

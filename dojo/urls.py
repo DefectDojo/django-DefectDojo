@@ -9,6 +9,8 @@ from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken import views as tokenviews
 from rest_framework.routers import DefaultRouter
 
+from dojo.vex.api.views import VexCycloneDxEngagementView, VexCycloneDxProductView
+
 from dojo import views
 from dojo.announcement.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
@@ -242,6 +244,8 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/vex/cyclonedx/product/(?P<pk>\d+)/".format(get_system_setting("url_prefix")), VexCycloneDxProductView.as_view(), name="vex-cyclonedx-product"),
+    re_path(r"^{}api/v2/vex/cyclonedx/engagement/(?P<pk>\d+)/".format(get_system_setting("url_prefix")), VexCycloneDxEngagementView.as_view(), name="vex-cyclonedx-engagement"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):

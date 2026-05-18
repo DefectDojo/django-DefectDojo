@@ -74,6 +74,7 @@ class CycloneDXJSONParser:
                 )
                 if not description:
                     description = "Description was not provided."
+                component_purl = components.get(reference, {}).get("purl")
                 finding = Finding(
                     title=f"{component_name}:{component_version} | {vulnerability.get('id')}",
                     test=test,
@@ -82,6 +83,7 @@ class CycloneDXJSONParser:
                     mitigation=vulnerability.get("recommendation", ""),
                     component_name=component_name,
                     component_version=component_version,
+                    component_purl=component_purl,
                     references=references,
                     static_finding=True,
                     dynamic_finding=False,

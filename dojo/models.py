@@ -2704,6 +2704,11 @@ class Finding(BaseModel):
                                          max_length=100,
                                          verbose_name=_("Component version"),
                                          help_text=_("Version of the affected component."))
+    component_purl = models.CharField(null=True,
+                                      blank=True,
+                                      max_length=500,
+                                      verbose_name=_("Component PURL"),
+                                      help_text=_("Package URL (PURL) of the affected component (e.g. pkg:pypi/requests@2.25.1)."))
     found_by = models.ManyToManyField(Test_Type,
                                       editable=False,
                                       verbose_name=_("Found by"),
