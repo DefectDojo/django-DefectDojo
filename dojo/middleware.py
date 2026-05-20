@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db import models
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from rest_framework.authentication import TokenAuthentication as DRFTokenAuthentication
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -312,10 +313,8 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
                 dojo_dispatch_task(update_watson_search_index_for_model, model_name, batch)
 
 
-from rest_framework.authentication import TokenAuthentication as DRFTokenAuthentication
-
-
 class DojoTokenAuthentication(DRFTokenAuthentication):
+
     """Custom token authentication that logs the username to uWSGI."""
 
     def authenticate(self, request):
