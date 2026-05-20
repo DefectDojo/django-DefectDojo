@@ -346,10 +346,10 @@ JUMFlot@jumjum123/JUMFlot#*:
   version "0.0.0"
   resolved "https://codeload.github.com/jumjum123/JUMFlot/tar.gz/203147fa2ace27db89e2defcde0800654015ae23"
 
-alpinejs@^3.14:
-  version "3.15.11"
-  resolved "https://registry.yarnpkg.com/alpinejs/-/alpinejs-3.15.11.tgz#fa0d97d080bbb0dced9b314b1584a6c8f87f4443"
-  integrity sha512-m26gkTg/MId8O+F4jHKK3vB3SjbFxxk/JHP+qzmw1H6aQrZuPAg4CUoAefnASzzp/eNroBjrRQe7950bNeaBJw==
+alpinejs@^3.15:
+  version "3.15.12"
+  resolved "https://registry.yarnpkg.com/alpinejs/-/alpinejs-3.15.12.tgz#2ccd224961ba6236ca379c2abbcfa0bfeade07ee"
+  integrity sha512-nJvPAQVNPdZZ0NrExJ/kzQco3ijR8LwvCOadQecllESiqT4NyZ/57sN9V2XyvhlBGAbmlKYgeWZvYdKq99ij/Q==
   dependencies:
     "@vue/reactivity" "~3.1.1"
 
@@ -452,7 +452,7 @@ core-util-is@~1.0.0:
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.3.tgz#a6042d3634c2b27e9328f837b965fac83808db85"
   integrity sha512-ZQBvi1DcpJ4GDqanjucZ2Hj3wEO5pZDS89BWbkcrvdxksJorwUDDZamX9ldFkp9aw2lmBDLgkObEA4DWNJ9FYQ==
 
-datatables.net-bs@^2, datatables.net-bs@^2.3.7:
+datatables.net-bs@^2:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/datatables.net-bs/-/datatables.net-bs-2.3.8.tgz#1dd57f2320e2fb1e928aa4a809fca7b65550f37e"
   integrity sha512-lM8sriL2WNDPimRi/Yh5tD+u1mWcaUa8EOo34dyDWaIBcOwWy78tdSnIjVobngyFYer3AieR83QEEyih+IR+Aw==
@@ -469,7 +469,7 @@ datatables.net-buttons-bs@^3.2.6:
     datatables.net-buttons "3.2.6"
     jquery ">=1.7"
 
-datatables.net-buttons@3.2.6, datatables.net-buttons@^3.2.0:
+datatables.net-buttons@3.2.6:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/datatables.net-buttons/-/datatables.net-buttons-3.2.6.tgz#dad80c8f28eb18741cec49fb33397073217ca63e"
   integrity sha512-rLqkB3xLIAYwVLt+lUSxybo/1WqveTAxhQm6wj6yvXlJiWq+oJ8MKW6H1q90QrXbNp0fGngnfD0cmpMZnNnnNw==
@@ -485,14 +485,7 @@ datatables.net-colreorder@^2.1.2:
     datatables.net "^2"
     jquery ">=1.7"
 
-datatables.net@2.3.2:
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.2.tgz#6821f6288e6ad3cb6879c33e0e7e11d4091d330b"
-  integrity sha512-31TzwIQM0+pr2ZOEOEH6dsHd/WSAl5GDDGPezOHPI3mM2NK4lcDyOoG8xXeWmSbVfbi852LNK5C84fpp4Q+qxg==
-  dependencies:
-    jquery ">=1.7"
-
-datatables.net@^2, datatables.net@^2.3.8:
+datatables.net@2.3.8, datatables.net@^2, datatables.net@^2.3.8:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/datatables.net/-/datatables.net-2.3.8.tgz#55a8dbe3bd2196951c498ab79bf44602a2bf3229"
   integrity sha512-uhViowhlDlheAuo5a8TrkQqADsjrtGeOyvrigvr4t0+K3MyAWqClORXWAYIcN9VLX6iIX0C8O9gwJNd01hITRg==
