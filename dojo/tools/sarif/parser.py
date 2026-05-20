@@ -384,12 +384,12 @@ class SarifParser:
 
 def get_rules(run):
     rules = {}
-    rules_array = run['tool']['driver'].get('rules', [])
+    rules_array = run["tool"]["driver"].get("rules", [])
     if not rules_array:
-        for extension in run['tool'].get('extensions', []):
-            rules_array.extend(extension.get('rules', []))
+        for extension in run["tool"].get("extensions", []):
+            rules_array.extend(extension.get("rules", []))
     for item in rules_array:
-        rules[item['id']] = item
+        rules[item["id"]] = item
     return rules
 
 
