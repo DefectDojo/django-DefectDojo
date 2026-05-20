@@ -54,7 +54,7 @@ def migrate_tool_configs_to_cicd_infrastructure(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0263_language_type_unique_language"),
+        ("dojo", "0268_release_authorization_to_pro"),
     ]
 
     operations = [
