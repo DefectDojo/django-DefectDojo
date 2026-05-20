@@ -94,7 +94,7 @@ from dojo.models import (
     User,
 )
 from dojo.notifications.helper import create_notification
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.test.queries import get_authorized_tests
 from dojo.tools import tool_issue_updater
 from dojo.utils import (

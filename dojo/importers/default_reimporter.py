@@ -24,7 +24,9 @@ from dojo.models import (
     Test,
     Test_Import,
 )
-from dojo.tag_utils import bulk_apply_parser_tags
+from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.inheritance import apply_inherited_tags_for_findings
+from dojo.tags.utils import bulk_apply_parser_tags
 from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 
@@ -263,6 +265,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
+        # Whole hot loop runs under `batch_mode()`: per-row inheritance signals
+        # for the findings/endpoints/locations created below are suppressed.
+        # Inheritance is then applied in bulk per-batch (right before
+        # `post_process_findings_batch` dispatch) so rules/dedup see inherited
+        # tags on `finding.tags`.
+        with tag_inheritance.suppress_tag_inheritance():
+            return self._process_findings_internal(parsed_findings, **kwargs)
+
+    def _process_findings_internal(
+        self,
+        parsed_findings: list[Finding],
+        **kwargs: dict,
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         # Only process findings with the same service value (or None)
         # Even though the service values is used in the hash_code calculation,
@@ -302,6 +317,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         batch_finding_ids: list[int] = []
         batch_findings: list[Finding] = []
+        # Findings that were newly created (else branch below) — pass these to
+        # `apply_inherited_tags_for_findings` instead of `batch_findings` so
+        # matched/existing findings (which already have correct inherited tags)
+        # don't trigger a redundant through-table read on no-change reimports.
+        new_findings_in_batch: list[Finding] = []
         findings_with_parser_tags: list[tuple] = []
         # Batch size for deduplication/post-processing (only new findings)
         dedupe_batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
@@ -384,6 +404,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         candidates_by_uid,
                         candidates_by_key,
                     )
+                    if finding:
+                        new_findings_in_batch.append(finding)
 
                 # This condition __appears__ to always be true, but am afraid to remove it
                 if finding:
@@ -422,6 +444,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         findings_with_parser_tags.clear()
                         # Apply import-time tags before post-processing so rules/deduplication see them.
                         self.apply_import_tags_for_batch(batch_findings)
+                        # Apply inherited Product tags to NEWLY CREATED findings only
+                        # (and their endpoints/locations) BEFORE post_process_findings_batch
+                        # dispatches, so rules/dedup see inherited tags on .tags.
+                        # Matched/existing findings already have inheritance applied from
+                        # their original creation; re-running it on no-change reimports
+                        # would be ~8 wasted queries per batch.
+                        apply_inherited_tags_for_findings(new_findings_in_batch)
+                        new_findings_in_batch.clear()
                         batch_findings.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
@@ -949,7 +979,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding_from_report: Finding,
         *,
         is_matched_finding: bool = False,
-        tag_accumulator: list | None = None,
+        tag_accumulator: list,
     ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
@@ -971,15 +1001,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 finding_from_report.unsaved_tags = merged_tags
             if finding_from_report.unsaved_tags:
                 cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
-                if tag_accumulator is not None:
-                    if isinstance(cleaned_tags, list):
-                        tag_accumulator.append((finding, cleaned_tags))
-                    elif isinstance(cleaned_tags, str):
-                        tag_accumulator.append((finding, [cleaned_tags]))
-                elif isinstance(cleaned_tags, list):
-                    finding.tags.add(*cleaned_tags)
+                if isinstance(cleaned_tags, list):
+                    tag_accumulator.append((finding, cleaned_tags))
                 elif isinstance(cleaned_tags, str):
-                    finding.tags.add(cleaned_tags)
+                    tag_accumulator.append((finding, [cleaned_tags]))
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files

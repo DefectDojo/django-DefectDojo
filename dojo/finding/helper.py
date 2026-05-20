@@ -742,7 +742,7 @@ def bulk_clear_finding_m2m(finding_qs):
     FileUpload.delete() fires and removes files from disk storage.
     Tags are handled via bulk_remove_all_tags to maintain tag counts.
     """
-    from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+    from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
 
     finding_ids = finding_qs.values_list("id", flat=True)
 
