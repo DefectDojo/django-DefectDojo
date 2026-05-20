@@ -45,7 +45,7 @@
   "devDependencies": {
     "@tailwindcss/cli": "^4.1",
     "@tailwindcss/forms": "^0.5",
-    "tailwindcss": "^4.1"
+    "tailwindcss": "^4.3"
   },
   "scripts": {
     "copy:fonts": "mkdir -p ../dojo/static/dojo/css/files && cp node_modules/@fontsource-variable/work-sans/files/work-sans-*-wght-normal.woff2 ../dojo/static/dojo/css/files/",
