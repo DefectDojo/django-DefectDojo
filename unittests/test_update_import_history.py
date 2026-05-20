@@ -72,7 +72,7 @@ class UpdateImportHistoryTests(TransactionTestCase):
             minimum_severity="Info",
             active=True,
             verified=True,
-            sync=True,
+            force_sync=True,
             scan_type="StackHawk HawkScan",
         )
         # Explicitly create the Test similar to Engagement creation
