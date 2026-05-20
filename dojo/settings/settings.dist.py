@@ -672,7 +672,7 @@ REST_FRAMEWORK = {
 }
 
 if API_TOKENS_ENABLED:
-    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("rest_framework.authentication.TokenAuthentication",)
+    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("dojo.middleware.DojoTokenAuthentication",)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "DefectDojo API v2",

@@ -310,3 +310,25 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
             for i, batch in enumerate(batches, 1):
                 logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
                 dojo_dispatch_task(update_watson_search_index_for_model, model_name, batch)
+
+
+from rest_framework.authentication import TokenAuthentication as DRFTokenAuthentication
+
+
+class DojoTokenAuthentication(DRFTokenAuthentication):
+    """Custom token authentication that logs the username to uWSGI."""
+
+    def authenticate(self, request):
+        result = super().authenticate(request)
+
+        if result is not None:
+            user, _token = result
+            username = str(user)
+
+            request.META["REMOTE_USER"] = username
+
+            with suppress(ModuleNotFoundError):
+                uwsgi = __import__("uwsgi", globals(), locals(), ["set_logvar"], 0)
+                uwsgi.set_logvar("dd_user", username)
+
+        return result
