@@ -1345,12 +1345,13 @@ class CICDInfrastructure(models.Model):
     )
 
     name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.URLField(max_length=2000, null=True, blank=True, help_text=_("Public URL of the tool (e.g., https://jenkins.company.com)"))
+    description = models.CharField(max_length=2000, blank=True, default="")
+    url = models.URLField(max_length=2000, blank=True, default="", help_text=_("Public URL of the tool (e.g., https://jenkins.company.com)"))
     infrastructure_type = models.CharField(max_length=30, choices=INFRASTRUCTURE_TYPE_CHOICES)
 
     class Meta:
         ordering = ["name"]
+        unique_together = [("name", "infrastructure_type")]
 
     def __str__(self):
         return self.name

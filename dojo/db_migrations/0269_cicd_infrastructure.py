@@ -64,12 +64,13 @@ class Migration(migrations.Migration):
             fields=[
                 ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
                 ("name", models.CharField(max_length=200)),
-                ("description", models.CharField(blank=True, max_length=2000, null=True)),
-                ("url", models.URLField(blank=True, help_text="Public URL of the tool (e.g., https://jenkins.company.com)", max_length=2000, null=True)),
+                ("description", models.CharField(blank=True, default="", max_length=2000)),
+                ("url", models.URLField(blank=True, default="", help_text="Public URL of the tool (e.g., https://jenkins.company.com)", max_length=2000)),
                 ("infrastructure_type", models.CharField(choices=[("build_server", "Build Server"), ("scm_server", "SCM Server"), ("orchestration", "Orchestration Engine")], max_length=30)),
             ],
             options={
                 "ordering": ["name"],
+                "unique_together": {("name", "infrastructure_type")},
             },
         ),
         # Step 2: Add new FK fields to Engagement (before removing old ones)
