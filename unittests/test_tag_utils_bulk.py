@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.tag_utils import bulk_add_tag_mapping, bulk_add_tags_to_instances, bulk_apply_parser_tags
+from dojo.tags.utils import bulk_add_tag_mapping, bulk_add_tags_to_instances, bulk_apply_parser_tags
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 

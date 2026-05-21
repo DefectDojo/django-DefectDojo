@@ -22,7 +22,6 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
@@ -42,7 +41,7 @@ from polymorphic.base import ManagerInheritanceWarning
 from polymorphic.managers import PolymorphicManager
 from polymorphic.models import PolymorphicModel
 from tagulous.models import TagField
-from tagulous.models.managers import FakeTagRelatedManager
+from tagulous.models.managers import FakeTagRelatedManager  # noqa: F401 -- backward compat re-export
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
@@ -111,28 +110,12 @@ def _get_statistics_for_queryset(qs, annotation_factory):
     return stats
 
 
-def _manage_inherited_tags(obj, incoming_inherited_tags, potentially_existing_tags=None):
-    # get copies of the current tag lists
-    if potentially_existing_tags is None:
-        potentially_existing_tags = []
-    current_inherited_tags = [] if isinstance(obj.inherited_tags, FakeTagRelatedManager) else [tag.name for tag in obj.inherited_tags.all()]
-    tag_list = potentially_existing_tags if isinstance(obj.tags, FakeTagRelatedManager) or len(potentially_existing_tags) > 0 else [tag.name for tag in obj.tags.all()]
-    # Clean existing tag list from the old inherited tags. This represents the tags on the object and not the product
-    cleaned_tag_list = [tag for tag in tag_list if tag not in current_inherited_tags]
-    # Add the incoming inherited tag list
-    if incoming_inherited_tags:
-        for tag in incoming_inherited_tags:
-            if tag not in cleaned_tag_list:
-                cleaned_tag_list.append(tag)
-    # Update the current list of inherited tags. iteratively do this because of tagulous object restraints
-    if isinstance(obj.inherited_tags, FakeTagRelatedManager):
-        obj.inherited_tags.set_tag_list(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set_tag_list(cleaned_tag_list)
-    else:
-        obj.inherited_tags.set(incoming_inherited_tags)
-        if incoming_inherited_tags:
-            obj.tags.set(cleaned_tag_list)
+def _sync_inherited_tags(obj, incoming_inherited_tags):
+    # Backward-compat shim. Implementation lives in dojo.tags.inheritance; lazy
+    # import keeps dojo.models loadable before dojo.tags.inheritance (which
+    # transitively imports dojo.utils -> dojo.models) is ready.
+    from dojo.tags.inheritance import _sync_inherited_tags as _impl  # noqa: PLC0415
+    return _impl(obj, incoming_inherited_tags)
 
 
 def copy_model_util(model_in_database, exclude_fields: list[str] | None = None):
@@ -274,36 +257,9 @@ class UserContactInfo(models.Model):
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
     block_execution = models.BooleanField(default=False, help_text=_("Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion."))
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
+    ui_use_tailwind = models.BooleanField(default=False, verbose_name=_("Use new UI (beta)"), help_text=_("Opt in to the new Tailwind-based UI. Leave off for the classic UI."))
     token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
     password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
-
-
-class Dojo_Group(models.Model):
-    AZURE = "AzureAD"
-    REMOTE = "Remote"
-    SOCIAL_CHOICES = (
-        (AZURE, _("AzureAD")),
-        (REMOTE, _("Remote")),
-    )
-    name = models.CharField(max_length=255, unique=True)
-    description = models.CharField(max_length=4000, null=True, blank=True)
-    users = models.ManyToManyField(Dojo_User, through="Dojo_Group_Member", related_name="users", blank=True)
-    auth_group = models.ForeignKey(Group, null=True, blank=True, on_delete=models.CASCADE)
-    social_provider = models.CharField(max_length=10, choices=SOCIAL_CHOICES, blank=True, null=True, help_text=_("Group imported from a social provider."), verbose_name=_("Social Authentication Provider"))
-
-    def __str__(self):
-        return self.name
-
-
-class Role(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    is_owner = models.BooleanField(default=False)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return self.name
 
 
 class System_Settings(models.Model):
@@ -601,23 +557,6 @@ class System_Settings(models.Model):
         blank=False,
         verbose_name=_("Enable CVSS4 Display"),
         help_text=_("With this setting turned off, CVSS4 fields will be hidden in the user interface."))
-    default_group = models.ForeignKey(
-        Dojo_Group,
-        null=True,
-        blank=True,
-        help_text=_("New users will be assigned to this group."),
-        on_delete=models.RESTRICT)
-    default_group_role = models.ForeignKey(
-        Role,
-        null=True,
-        blank=True,
-        help_text=_("New users will be assigned to their default group with this role."),
-        on_delete=models.RESTRICT)
-    default_group_email_pattern = models.CharField(
-        max_length=200,
-        default="",
-        blank=True,
-        help_text=_("New users will only be assigned to the default group, when their email address matches this regex pattern. This is optional condition."))
     minimum_password_length = models.IntegerField(
         default=9,
         verbose_name=_("Minimum password length"),
@@ -690,18 +629,6 @@ def get_current_date():
 
 def get_current_datetime():
     return timezone.now()
-
-
-class Dojo_Group_Member(models.Model):
-    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, help_text=_("This role determines the permissions of the user to manage the group."), verbose_name=_("Group role"))
-
-
-class Global_Role(models.Model):
-    user = models.OneToOneField(Dojo_User, null=True, blank=True, on_delete=models.CASCADE)
-    group = models.OneToOneField(Dojo_Group, null=True, blank=True, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE, null=True, blank=True, help_text=_("The global role will be applied to all product types and products."), verbose_name=_("Global role"))
 
 
 class Contact(models.Model):
@@ -847,8 +774,7 @@ class Product_Type(BaseModel):
     description = models.CharField(max_length=4000, null=True, blank=True)
     critical_product = models.BooleanField(default=False)
     key_product = models.BooleanField(default=False)
-    members = models.ManyToManyField(Dojo_User, through="Product_Type_Member", related_name="prod_type_members", blank=True)
-    authorization_groups = models.ManyToManyField(Dojo_Group, through="Product_Type_Group", related_name="product_type_groups", blank=True)
+    authorized_users = models.ManyToManyField(Dojo_User, related_name="authorized_product_types", blank=True)
 
     class Meta:
         ordering = ("name",)
@@ -1192,8 +1118,7 @@ class Product(BaseModel):
                                           default=1,
                                           on_delete=models.RESTRICT)
     tid = models.IntegerField(default=0, editable=False)
-    members = models.ManyToManyField(Dojo_User, through="Product_Member", related_name="product_members", blank=True)
-    authorization_groups = models.ManyToManyField(Dojo_Group, through="Product_Group", related_name="product_groups", blank=True)
+    authorized_users = models.ManyToManyField(Dojo_User, related_name="authorized_products", blank=True)
     prod_numeric_grade = models.IntegerField(null=True, blank=True)
 
     # Metadata
@@ -1370,30 +1295,6 @@ class Product(BaseModel):
                                           active=True,
                                           sla_expiration_date__lt=timezone.now().date())
         return findings.count() > 0
-
-
-class Product_Member(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-
-
-class Product_Group(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-
-
-class Product_Type_Member(models.Model):
-    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
-    user = models.ForeignKey(Dojo_User, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
-
-
-class Product_Type_Group(models.Model):
-    product_type = models.ForeignKey(Product_Type, on_delete=models.CASCADE)
-    group = models.ForeignKey(Dojo_Group, on_delete=models.CASCADE)
-    role = models.ForeignKey(Role, on_delete=models.CASCADE)
 
 
 class Tool_Type(models.Model):
@@ -1667,11 +1568,6 @@ class Engagement(BaseModel):
             # related objects in a separate task
             from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
             perform_product_grading(self.product)
-
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 class CWE(models.Model):
@@ -2118,11 +2014,6 @@ class Endpoint(models.Model):
             fragment=fragment,
         )
 
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
-
 
 class Development_Environment(models.Model):
     name = models.CharField(max_length=200)
@@ -2322,11 +2213,6 @@ class Test(models.Model):
     def statistics(self):
         """Queries the database, no prefetching, so could be slow for lists of model instances"""
         return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
-
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.engagement.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
 
 
 class Test_Import(TimeStampedModel):
@@ -3627,11 +3513,6 @@ class Finding(BaseModel):
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
 
-    def inherit_tags(self, potentially_existing_tags):
-        # get a copy of the tags to be inherited
-        incoming_inherited_tags = [tag.name for tag in self.test.engagement.product.tags.all()]
-        _manage_inherited_tags(self, incoming_inherited_tags, potentially_existing_tags=potentially_existing_tags)
-
     @property
     def violates_sla(self):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
@@ -4562,6 +4443,17 @@ admin.site.register(System_Settings)
 admin.site.register(SLA_Configuration)
 admin.site.register(CWE)
 admin.site.register(Regulation)
+from dojo.authorization.models import (  # noqa: E402
+    Dojo_Group,
+    Dojo_Group_Member,
+    Global_Role,
+    Product_Group,
+    Product_Member,
+    Product_Type_Group,
+    Product_Type_Member,
+    Role,
+)
+
 admin.site.register(Global_Role)
 admin.site.register(Role)
 admin.site.register(Dojo_Group)

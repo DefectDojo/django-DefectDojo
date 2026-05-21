@@ -97,7 +97,7 @@
       "first_name": "User",
       "last_name": "Five",
       "is_active": true,
-      "is_superuser": false,
+      "is_superuser": true,
       "is_staff": false,
       "last_login": null,
       "groups": [],

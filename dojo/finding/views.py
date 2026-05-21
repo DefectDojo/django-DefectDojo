@@ -31,11 +31,6 @@ from imagekit.processors import ResizeToFill
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
-from dojo.authorization.authorization_decorators import (
-    user_has_global_permission,
-    user_is_authorized,
-)
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.filters import (
     AcceptedFindingFilter,
@@ -99,7 +94,7 @@ from dojo.models import (
     User,
 )
 from dojo.notifications.helper import create_notification
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.test.queries import get_authorized_tests
 from dojo.tools import tool_issue_updater
 from dojo.utils import (
@@ -278,7 +273,7 @@ class BaseListFindings:
         )
 
     def get_filtered_findings(self):
-        findings = get_authorized_findings(Permissions.Finding_View)
+        findings = get_authorized_findings("view")
         # Annotate computed SLA age in days: sla_expiration_date - (sla_start_date or date)
         # Handle NULL sla_expiration_date by using Coalesce to provide a large default value
         # so NULLs sort last when sorting ascending (most urgent first)
@@ -319,7 +314,7 @@ class ListFindings(View, BaseListFindings):
         # Look to see if the product was used
         if product_id := self.get_product_id():
             product = get_object_or_404(Product, id=product_id)
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, "view")
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(product, title="Findings", tab="findings")
             context["jira_project"] = jira_services.get_project(product)
@@ -327,7 +322,7 @@ class ListFindings(View, BaseListFindings):
                 context["github_config"] = github_config.git_conf_id
         elif engagement_id := self.get_engagement_id():
             engagement = get_object_or_404(Engagement, id=engagement_id)
-            user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
+            user_has_permission_or_403(request.user, engagement, "view")
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
             context["jira_project"] = jira_services.get_project(engagement)
@@ -527,7 +522,7 @@ class ViewFinding(View):
         finding_filter_class = SimilarFindingFilterWithoutObjectLookups if filter_string_matching else SimilarFindingFilter
         similar_findings_filter = finding_filter_class(
             request.GET,
-            queryset=get_authorized_findings(Permissions.Finding_View)
+            queryset=get_authorized_findings("view")
             .filter(test__engagement__product=finding.test.engagement.product)
             .exclude(id=finding.id),
             user=request.user,
@@ -669,7 +664,7 @@ class ViewFinding(View):
         finding = self.get_finding(finding_id)
         user = self.get_dojo_user(request)
         # Make sure the user is authorized
-        user_has_permission_or_403(user, finding, Permissions.Finding_View)
+        user_has_permission_or_403(user, finding, "view")
         # Set up the initial context
         context = self.get_initial_context(request, finding, user)
         # Add in the other extras
@@ -687,9 +682,9 @@ class ViewFinding(View):
         finding = self.get_finding(finding_id)
         user = self.get_dojo_user(request)
         # Make sure the user is authorized
-        user_has_permission_or_403(user, finding, Permissions.Finding_View)
+        user_has_permission_or_403(user, finding, "view")
         # Quick perms check to determine if the user has access to add a note to the finding
-        user_has_permission_or_403(user, finding, Permissions.Note_Add)
+        user_has_permission_or_403(user, finding, "add")
         # Set up the initial context
         context = self.get_initial_context(request, finding, user)
         # Determine the validity of the form
@@ -1049,7 +1044,7 @@ class EditFinding(View):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, finding, Permissions.Finding_Edit)
+        user_has_permission_or_403(request.user, finding, "edit")
         # Set up the initial context
         context = self.get_initial_context(request, finding)
         # Render the form
@@ -1059,7 +1054,7 @@ class EditFinding(View):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, finding, Permissions.Finding_Edit)
+        user_has_permission_or_403(request.user, finding, "edit")
         # Set up the initial context
         context = self.get_initial_context(request, finding)
         # Process the form
@@ -1120,7 +1115,7 @@ class DeleteFinding(View):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, finding, Permissions.Finding_Delete)
+        user_has_permission_or_403(request.user, finding, "delete")
         # Get the finding form
         context = {
             "form": DeleteFindingForm(request.POST, instance=finding),
@@ -1133,7 +1128,6 @@ class DeleteFinding(View):
         raise PermissionDenied
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def close_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -1203,7 +1197,6 @@ def close_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def verify_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1262,7 +1255,6 @@ def verify_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -1348,11 +1340,6 @@ def defect_finding_review(request, fid):
     )
 
 
-@user_is_authorized(
-    Finding,
-    Permissions.Finding_Edit,
-    "fid",
-)
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -1399,11 +1386,10 @@ def reopen_finding(request, fid):
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def copy_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     product = finding.test.engagement.product
-    tests = get_authorized_tests(Permissions.Test_Edit).filter(
+    tests = get_authorized_tests("edit").filter(
         engagement=finding.test.engagement,
     )
     form = CopyFindingForm(tests=tests)
@@ -1456,7 +1442,6 @@ def copy_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def remediation_date(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1493,7 +1478,6 @@ def remediation_date(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1504,7 +1488,6 @@ def touch_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1522,7 +1505,6 @@ def simple_risk_accept(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(request.user, finding)
@@ -1539,7 +1521,6 @@ def risk_unaccept(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1629,7 +1610,6 @@ def request_finding_review(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1709,8 +1689,8 @@ def clear_finding_review(request, fid):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Add)
 def mktemplate(request, fid):
+    user_has_global_permission_or_403(request.user, "add")
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
     if len(templates) > 0:
@@ -1769,11 +1749,10 @@ def mktemplate(request, fid):
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def find_template_to_apply(request, fid):
     # Templates may contain sensitive data from any product; require global permission
     # to match the authorization level of the /template list view
-    user_has_global_permission_or_403(request.user, Permissions.Finding_Edit)
+    user_has_global_permission_or_403(request.user, "edit")
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
     templates_by_cve = (
@@ -1840,9 +1819,9 @@ def find_template_to_apply(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
+    user_has_permission_or_403(request.user, finding, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__.copy()
     # Remove tags and other non-serializable fields
@@ -1928,9 +1907,9 @@ def choose_finding_template_options(request, tid, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
+    user_has_permission_or_403(request.user, finding, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
 
     if request.method == "POST":
@@ -1994,7 +1973,6 @@ def apply_template_to_finding(request, fid, tid):
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
 
-@user_has_global_permission(Permissions.Finding_Edit)
 def templates(request):
     templates = Finding_Template.objects.all().order_by("cwe")
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -2014,7 +1992,6 @@ def templates(request):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Edit)
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize("json", Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type="application/json")
@@ -2108,7 +2085,6 @@ def apply_cwe_mitigation(apply_to_findings, template, *, update=True):
     return count
 
 
-@user_has_global_permission(Permissions.Finding_Add)
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == "POST":
@@ -2150,7 +2126,6 @@ def add_template(request):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Edit)
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     initial_data = {"vulnerability_ids": "\n".join(template.vulnerability_ids)}
@@ -2212,7 +2187,6 @@ def edit_template(request, tid):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Delete)
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     if request.method == "POST":
@@ -2290,7 +2264,6 @@ def download_finding_pic(request, token):
         return response
 
 
-@user_is_authorized(Product, Permissions.Finding_Edit, "pid")
 def merge_finding_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     finding_to_update = request.GET.getlist("finding_to_update")
@@ -2470,7 +2443,6 @@ def merge_finding_product(request, pid):
         },
     )
 
-
 # bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
 
 
@@ -2480,11 +2452,11 @@ def _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_fi
         if pid is not None:
             product = get_object_or_404(Product, id=pid)
             user_has_permission_or_403(
-                request.user, product, Permissions.Finding_Delete,
+                request.user, product, "delete",
             )
 
         finds = get_authorized_findings_for_queryset(
-            Permissions.Finding_Delete, finds,
+            "delete", finds,
         ).distinct()
 
         skipped_find_count = total_find_count - finds.count()
@@ -2924,12 +2896,12 @@ def finding_bulk_update_all(request, pid=None):
             if pid is not None:
                 product = get_object_or_404(Product, id=pid)
                 user_has_permission_or_403(
-                    request.user, product, Permissions.Finding_Edit,
+                    request.user, product, "edit",
                 )
 
             # make sure users are not editing stuff they are not authorized for
             finds = get_authorized_findings_for_queryset(
-                Permissions.Finding_Edit, finds,
+                "edit", finds,
             ).distinct()
 
             skipped_find_count = total_find_count - finds.count()
@@ -3065,7 +3037,6 @@ def get_missing_mandatory_notetypes(finding):
     return Note_Type.objects.filter(id__in=notes_to_be_added)
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "original_id")
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
 
@@ -3134,7 +3105,6 @@ def reset_finding_duplicate_status_internal(user, duplicate_id):
     return duplicate.id
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "duplicate_id")
 @require_POST
 def reset_finding_duplicate_status(request, duplicate_id):
     checked_duplicate_id = reset_finding_duplicate_status_internal(
@@ -3216,7 +3186,6 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     return True
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "finding_id")
 @require_POST
 def set_finding_as_original(request, finding_id, new_original_id):
     success = set_finding_as_original_internal(
@@ -3236,7 +3205,6 @@ def set_finding_as_original(request, finding_id, new_original_id):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 @require_POST
 def unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
@@ -3272,7 +3240,6 @@ def unlink_jira(request, fid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 @require_POST
 def push_to_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)

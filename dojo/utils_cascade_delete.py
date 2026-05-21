@@ -190,7 +190,7 @@ def cascade_delete_related_objects(from_model, instance_pk_query, skip_relations
         # Clear M2M through tables before deleting (not discovered by _meta.related_objects).
         # Skip if the caller already handled M2M cleanup for this model (e.g. bulk_clear_finding_m2m).
         if from_model not in skip_m2m_for:
-            from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+            from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
 
             bulk_remove_all_tags(from_model, instance_pk_query)
 

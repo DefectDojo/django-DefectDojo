@@ -13,8 +13,6 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import (
     FindingFilter,
     FindingFilterWithoutObjectLookups,
@@ -23,14 +21,13 @@ from dojo.filters import (
 from dojo.finding.queries import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.jira import services as jira_services
-from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Global_Role, Product
+from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
 from dojo.product.queries import get_authorized_products
 from dojo.utils import Product_Tab, add_breadcrumb, get_page_items, get_setting, get_system_setting, get_words_for_field
 
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_View, "fgid")
 def view_finding_group(request, fgid):
     finding_group = get_object_or_404(Finding_Group, pk=fgid)
     findings = finding_group.findings.all()
@@ -46,7 +43,7 @@ def view_finding_group(request, fgid):
     if finding_group.test.engagement.product.id:
         pid = finding_group.test.engagement.product.id
         product = get_object_or_404(Product, id=pid)
-        user_has_permission_or_403(request.user, product, Permissions.Product_View)
+        user_has_permission_or_403(request.user, product, "view")
         product_tab = Product_Tab(product, title="Findings", tab="findings")
         jira_project = jira_services.get_project(product)
         github_config = GITHUB_PKey.objects.filter(product=pid).first()
@@ -54,7 +51,7 @@ def view_finding_group(request, fgid):
     elif finding_group.test.engagement.id:
         eid = finding_group.test.engagement.id
         engagement = get_object_or_404(Engagement, id=eid)
-        user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
+        user_has_permission_or_403(request.user, engagement, "view")
         product_tab = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
         jira_project = jira_services.get_project(engagement)
         github_config = GITHUB_PKey.objects.filter(product__engagement=eid).first()
@@ -100,7 +97,7 @@ def view_finding_group(request, fgid):
                 elif not finding_group.has_jira_issue:
                     jira_services.link_finding_group(request, finding_group, jira_issue)
             elif push_to_jira:
-                jira_services.push(finding_group, sync=True)
+                jira_services.push(finding_group, force_sync=True)
 
             finding_group.save()
             return HttpResponseRedirect(reverse("view_test", args=(finding_group.test.id,)))
@@ -121,7 +118,6 @@ def view_finding_group(request, fgid):
     })
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Delete, "fgid")
 @require_POST
 def delete_finding_group(request, fgid):
     finding_group = get_object_or_404(Finding_Group, pk=fgid)
@@ -154,7 +150,6 @@ def delete_finding_group(request, fgid):
     })
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, "fgid")
 @require_POST
 def unlink_jira(request, fgid):
     logger.debug("/finding_group/%s/jira/unlink", fgid)
@@ -189,7 +184,6 @@ def unlink_jira(request, fgid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Finding_Group, Permissions.Finding_Group_Edit, "fgid")
 @require_POST
 def push_to_jira(request, fgid):
     logger.debug("/finding_group/%s/jira/push", fgid)
@@ -200,7 +194,7 @@ def push_to_jira(request, fgid):
 
         # it may look like success here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
-        if jira_services.push(group, sync=True):
+        if jira_services.push(group, force_sync=True):
             messages.add_message(
                 request,
                 messages.SUCCESS,
@@ -299,9 +293,8 @@ class ListFindingGroups(View):
         return paginator.get_page(page_number)
 
     def get(self, request: HttpRequest) -> HttpResponse:
-        global_role = Global_Role.objects.filter(user=request.user).first()
-        products = get_authorized_products(Permissions.Product_View)
-        if request.user.is_superuser or (global_role and global_role.role):
+        products = get_authorized_products("view")
+        if request.user.is_superuser:
             finding_groups = self.get_finding_groups(request)
         elif products.exists():
             finding_groups = self.get_finding_groups(request, products)

@@ -15,8 +15,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.filters import (
     EndpointFilter,
     EndpointFilterWithoutObjectLookups,
@@ -29,6 +29,7 @@ from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.labels import get_labels
 from dojo.location.models import Location
+from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
@@ -56,9 +57,7 @@ from dojo.utils import (
 
 logger = logging.getLogger(__name__)
 
-
 labels = get_labels()
-
 
 EXCEL_CHAR_LIMIT = 32767
 
@@ -86,7 +85,7 @@ class ReportBuilder(View):
         return render(request, self.get_template(), self.get_context(request))
 
     def get_findings(self, request: HttpRequest):
-        findings = get_authorized_findings(Permissions.Finding_View)
+        findings = get_authorized_findings("view")
         filter_string_matching = get_system_setting("filter_string_matching", False)
         filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
         return filter_class(self.request.GET, queryset=findings)
@@ -189,7 +188,7 @@ class CustomReport(View):
 
 
 def report_findings(request):
-    findings = Finding.objects.filter()
+    findings = get_authorized_findings(Permissions.Finding_View)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
     findings = filter_class(request.GET, queryset=findings)
@@ -212,11 +211,12 @@ def report_findings(request):
 
 def report_endpoints(request):
     if settings.V3_FEATURE_LOCATIONS:
-        endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+        endpoints = get_authorized_locations(Permissions.Location_View)
+        endpoints = endpoints.filter(findings__status=FindingLocationStatus.Active).distinct()
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
-        endpoints = Endpoint.objects.filter(
+        endpoints = get_authorized_endpoints(Permissions.Location_View).filter(
             finding__active=True,
             finding__false_p=False,
             finding__duplicate=False,
@@ -251,36 +251,31 @@ def report_cover_page(request):
                    "report_info": report_info})
 
 
-@user_is_authorized(Product_Type, Permissions.Product_Type_View, "ptid")
 def product_type_report(request, ptid):
     product_type = get_object_or_404(Product_Type, id=ptid)
     return generate_report(request, product_type)
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_report(request, pid):
     product = get_object_or_404(Product, id=pid)
     return generate_report(request, product)
 
 
 def product_findings_report(request):
-    findings = get_authorized_findings(Permissions.Finding_View)
+    findings = get_authorized_findings("view")
     return generate_report(request, findings)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def engagement_report(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     return generate_report(request, engagement)
 
 
-@user_is_authorized(Test, Permissions.Test_View, "tid")
 def test_report(request, tid):
     test = get_object_or_404(Test, id=tid)
     return generate_report(request, test)
 
 
-@user_is_authorized(Product, Permissions.Product_View, "pid")
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
     if settings.V3_FEATURE_LOCATIONS:
@@ -289,13 +284,14 @@ def product_endpoint_report(request, pid):
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
-        endpoints = Endpoint.objects.filter(finding__active=True,
+        endpoints = Endpoint.objects.filter(product=product,
+                                            finding__active=True,
                                             finding__false_p=False,
                                             finding__duplicate=False,
                                             finding__out_of_scope=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             endpoints = endpoints.filter(finding__active=True)
-        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), product=product)
         endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
@@ -357,16 +353,8 @@ def generate_report(request, obj, *, host_view=False):
     endpoints = None
     report_title = None
 
-    if isinstance(obj, Product_Type):
-        user_has_permission_or_403(request.user, obj, Permissions.Product_Type_View)
-    elif isinstance(obj, Product):
-        user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-    elif isinstance(obj, Engagement):
-        user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-    elif isinstance(obj, Test):
-        user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-    elif isinstance(obj, (Endpoint, Location)):
-        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
+    if isinstance(obj, (Product_Type, Product, Engagement, Test, Endpoint, Location)):
+        user_has_permission_or_403(request.user, obj, "view")
     elif type(obj).__name__ in {"QuerySet", "CastTaggedQuerySet", "TagulousCastTaggedQuerySet"}:
         # authorization taken care of by only selecting findings from product user is authed to see
         pass
@@ -759,15 +747,15 @@ def get_findings(request):
         if "product" in obj_name:
             pid = obj_id
             obj = get_object_or_404(Product, id=pid)
-            user_has_permission_or_403(request.user, obj, Permissions.Product_View)
+            user_has_permission_or_403(request.user, obj, "view")
         elif "engagement" in obj_name:
             eid = obj_id
             obj = get_object_or_404(Engagement, id=eid)
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+            user_has_permission_or_403(request.user, obj, "view")
         elif "test" in obj_name:
             tid = obj_id
             obj = get_object_or_404(Test, id=tid)
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
+            user_has_permission_or_403(request.user, obj, "view")
 
     request.GET = QueryDict(query)
     list_findings = BaseListFindings(

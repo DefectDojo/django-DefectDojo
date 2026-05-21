@@ -1,18 +1,20 @@
 from unittest.mock import patch
 
-from dojo.authorization.roles_permissions import Permissions
-from dojo.models import (
-    Dojo_Group,
+from dojo.authorization.models import (
     Dojo_Group_Member,
-    Dojo_User,
     Global_Role,
-    Product,
     Product_Group,
     Product_Member,
-    Product_Type,
     Product_Type_Group,
     Product_Type_Member,
     Role,
+)
+from dojo.authorization.roles_permissions import Permissions
+from dojo.models import (
+    Dojo_Group,
+    Dojo_User,
+    Product,
+    Product_Type,
 )
 from dojo.user.queries import (
     get_authorized_users,
@@ -71,34 +73,41 @@ class TestUserQueries(DojoTestCase):
         self.product_type_user.delete()
         self.invisible_user.delete()
 
-    @patch("dojo.user.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_none(self, mock_current_user):
         mock_current_user.return_value = None
 
         self.assertQuerySetEqual(Dojo_User.objects.none(), get_authorized_users(Permissions.Product_View))
 
-    @patch("dojo.user.queries.get_current_user")
+    @patch("dojo.authorization.query_registrations.get_current_user")
     def test_user_admin(self, mock_current_user):
+        # Superuser: returns every Dojo_User in first_name/last_name order.
         mock_current_user.return_value = self.admin_user
 
-        users = Dojo_User.objects.all().order_by("first_name", "last_name", "username")
+        users = Dojo_User.objects.all().order_by("first_name", "last_name")
         self.assertQuerySetEqual(users, get_authorized_users(Permissions.Product_View))
 
-    @patch("dojo.user.queries.get_current_user")
-    def test_user_global_permission(self, mock_current_user):
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_user_global_permission_legacy(self, mock_current_user):
+        # Legacy: Global_Role(role=Reader) is inert. The user has no
+        # is_staff / is_superuser flag, so only their own row is returned.
         mock_current_user.return_value = self.global_permission_user
 
-        users = Dojo_User.objects.all().order_by("first_name", "last_name", "username")
-        self.assertQuerySetEqual(users, get_authorized_users(Permissions.Product_View))
+        self.assertQuerySetEqual(
+            Dojo_User.objects.filter(pk=self.global_permission_user.pk),
+            get_authorized_users(Permissions.Product_View),
+        )
 
-    @patch("dojo.user.queries.get_current_user")
-    @patch("dojo.product.queries.get_current_user")
-    def test_user_regular(self, mock_current_user_1, mock_current_user_2):
-        mock_current_user_1.return_value = self.regular_user
-        mock_current_user_2.return_value = self.regular_user
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_user_regular_legacy(self, mock_current_user):
+        # Legacy: per-product RBAC role is inert. A non-staff non-superuser
+        # only sees themselves.
+        mock_current_user.return_value = self.regular_user
 
-        users = Dojo_User.objects.exclude(username="invisible_user").order_by("first_name", "last_name", "username")
-        self.assertQuerySetEqual(users, get_authorized_users(Permissions.Product_View))
+        self.assertQuerySetEqual(
+            Dojo_User.objects.filter(pk=self.regular_user.pk),
+            get_authorized_users(Permissions.Product_View),
+        )
 
 
 class TestGetAuthorizedUsersForProductType(DojoTestCase):
@@ -160,50 +169,42 @@ class TestGetAuthorizedUsersForProductType(DojoTestCase):
             role=cls.reader_role,
         )
 
-    def test_superuser_included(self):
-        """Superusers should always be included"""
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_superuser_caller_sees_all(self, mock_get_current_user):
+        # Legacy: this query is gated on the calling user, not on the
+        # listed users' RBAC roles. A superuser caller sees the input
+        # queryset unchanged.
+        mock_get_current_user.return_value = self.superuser
         users = get_authorized_users_for_product_type(
             Dojo_User.objects.all(),
             self.product_type,
             Permissions.Product_Type_View,
         )
         self.assertIn(self.superuser, users)
-
-    def test_global_role_user_included(self):
-        """Users with global roles should be included"""
-        users = get_authorized_users_for_product_type(
-            Dojo_User.objects.all(),
-            self.product_type,
-            Permissions.Product_Type_View,
-        )
+        self.assertIn(self.user_no_perms, users)
         self.assertIn(self.user_global_reader, users)
 
-    def test_product_type_member_included(self):
-        """Product type members with sufficient role should be included"""
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_non_staff_caller_sees_none(self, mock_get_current_user):
+        # Legacy: a non-staff non-superuser caller can't enumerate users
+        # for a product_type — including users with explicit memberships.
+        mock_get_current_user.return_value = self.user_product_type_member
         users = get_authorized_users_for_product_type(
             Dojo_User.objects.all(),
             self.product_type,
             Permissions.Product_Type_View,
         )
-        self.assertIn(self.user_product_type_member, users)
+        self.assertEqual(users.count(), 0)
 
-    def test_no_perms_user_excluded(self):
-        """Users without any relevant permissions should be excluded"""
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_anonymous_caller_sees_none(self, mock_get_current_user):
+        mock_get_current_user.return_value = None
         users = get_authorized_users_for_product_type(
             Dojo_User.objects.all(),
             self.product_type,
             Permissions.Product_Type_View,
         )
-        self.assertNotIn(self.user_no_perms, users)
-
-    def test_group_member_included(self):
-        """Users in groups with product type access should be included"""
-        users = get_authorized_users_for_product_type(
-            Dojo_User.objects.all(),
-            self.product_type,
-            Permissions.Product_Type_View,
-        )
-        self.assertIn(self.user_group_member, users)
+        self.assertEqual(users.count(), 0)
 
 
 class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
@@ -296,77 +297,50 @@ class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
             role=cls.reader_role,
         )
 
-    def test_superuser_included(self):
-        """Superusers should always be included"""
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_superuser_caller_sees_all(self, mock_get_current_user):
+        # Legacy: gated on the calling user. None defaults to all users.
+        mock_get_current_user.return_value = self.superuser
         users = get_authorized_users_for_product_and_product_type(
             None,
             self.product,
             Permissions.Product_View,
         )
         self.assertIn(self.superuser, users)
-
-    def test_global_role_user_included(self):
-        """Users with global roles should be included"""
-        users = get_authorized_users_for_product_and_product_type(
-            None,
-            self.product,
-            Permissions.Product_View,
-        )
+        self.assertIn(self.user_no_perms, users)
         self.assertIn(self.user_global_reader, users)
 
-    def test_product_member_included(self):
-        """Product members with sufficient role should be included"""
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_non_staff_caller_sees_none(self, mock_get_current_user):
+        mock_get_current_user.return_value = self.user_product_member
         users = get_authorized_users_for_product_and_product_type(
             None,
             self.product,
             Permissions.Product_View,
         )
-        self.assertIn(self.user_product_member, users)
+        self.assertEqual(users.count(), 0)
 
-    def test_product_type_member_included(self):
-        """Product type members should be included (inheritance)"""
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_anonymous_caller_sees_none(self, mock_get_current_user):
+        mock_get_current_user.return_value = None
         users = get_authorized_users_for_product_and_product_type(
             None,
             self.product,
             Permissions.Product_View,
         )
-        self.assertIn(self.user_product_type_member, users)
+        self.assertEqual(users.count(), 0)
 
-    def test_no_perms_user_excluded(self):
-        """Users without any relevant permissions should be excluded"""
-        users = get_authorized_users_for_product_and_product_type(
-            None,
-            self.product,
-            Permissions.Product_View,
-        )
-        self.assertNotIn(self.user_no_perms, users)
-
-    def test_group_product_member_included(self):
-        """Users in groups with product access should be included"""
-        users = get_authorized_users_for_product_and_product_type(
-            None,
-            self.product,
-            Permissions.Product_View,
-        )
-        self.assertIn(self.user_group_product_member, users)
-
-    def test_group_product_type_member_included(self):
-        """Users in groups with product type access should be included"""
-        users = get_authorized_users_for_product_and_product_type(
-            None,
-            self.product,
-            Permissions.Product_View,
-        )
-        self.assertIn(self.user_group_product_type_member, users)
-
-    def test_users_parameter_filters_base_queryset(self):
-        """Passing a users queryset should filter within that queryset"""
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_users_parameter_filters_base_queryset(self, mock_get_current_user):
+        # Legacy: when the caller is staff/superuser, the function returns
+        # the input queryset unchanged — the caller's pre-filter (here
+        # is_active=True) is preserved.
+        mock_get_current_user.return_value = self.superuser
         active_users = Dojo_User.objects.filter(is_active=True)
         users = get_authorized_users_for_product_and_product_type(
             active_users,
             self.product,
             Permissions.Product_View,
         )
-        # All returned users should be active
         for user in users:
             self.assertTrue(user.is_active)

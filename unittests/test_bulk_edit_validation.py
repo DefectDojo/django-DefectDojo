@@ -5,14 +5,16 @@ from django.contrib.messages import get_messages
 from django.urls import reverse
 from django.utils import timezone
 
+from dojo.authorization.models import (
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Roles
 from dojo.models import (
     Engagement,
     Finding,
     Product,
     Product_Type,
-    Product_Type_Member,
-    Role,
     Test,
     Test_Type,
 )

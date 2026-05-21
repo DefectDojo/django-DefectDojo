@@ -5,7 +5,7 @@ weight: 1
 audience: pro
 ---
 
-DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. Open-Source users should refer to the [Open-Source SAML guide](/admin/sso/os__saml/).
+DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
 
 ## Setup
 
@@ -40,6 +40,19 @@ DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. 
 DefectDojo can use the SAML assertion to automatically assign users to [User Groups](../../user_management/create_user_group/). Groups in DefectDojo assign permissions to all of their members, so Group Mapping allows you to manage permissions in bulk. This is the only way to set permissions via SAML.
 
 The **Group Name Attribute** field specifies which attribute in the SAML assertion contains the user's group memberships. When a user logs in, DefectDojo reads this attribute and assigns the user to any matching groups. To limit which groups from the assertion are considered, use the **Group Limiter Regex Expression** field.
+
+The value must match the attribute name your Identity Provider emits in the assertion exactly, including any namespace prefix. A short, friendly name like `groups` will only work if your IdP is configured to emit that literal attribute name — many IdPs use a fully qualified claim URI instead.
+
+### Group Name Attribute by Identity Provider
+
+| Identity Provider | Default attribute name to use |
+|---|---|
+| **Entra ID / Azure AD** | `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` |
+| **Okta** | `groups` (the attribute name you configured on the SAML app's Group Attribute Statement) |
+| **Keycloak** | `groups` (or whatever you set as the "SAML Attribute Name" on the Group List mapper) |
+| **PingFederate / generic** | Whatever value you configured on the IdP side — check your IdP's assertion before assuming `groups` |
+
+If group mapping appears to do nothing — users log in successfully but no groups are created or assigned — the most common cause is a mismatch between this field and the attribute name your IdP is actually sending. Enable **Enable SAML Debugging** (see [Additional Options](#additional-options)) to see the raw attributes coming back from the IdP.
 
 If no group with a matching name exists, DefectDojo will automatically create one. Note that a newly created group will not have any permissions configured — those can be set later by a Superuser.
 

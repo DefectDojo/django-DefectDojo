@@ -129,7 +129,7 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element(By.ID, "id_password").send_keys(
             os.environ["DD_ADMIN_PASSWORD"],
         )
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
 
         self.assertFalse(
             self.is_element_by_css_selector_present(
@@ -145,7 +145,7 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element(By.ID, "id_username").send_keys("propersahm")
         driver.find_element(By.ID, "id_password").clear()
         driver.find_element(By.ID, "id_password").send_keys("Def3ctD0jo&")
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
 
         self.assertFalse(
             self.is_element_by_css_selector_present(

@@ -23,7 +23,7 @@ from django.utils import timezone
 
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.product.helpers import propagate_tags_on_product_sync
+from dojo.tags.inheritance import propagate_tags_on_product_sync
 from unittests.dojo_test_case import (
     DojoAPITestCase,
     DojoTestCase,
@@ -214,6 +214,24 @@ class TagInheritancePerfBaselines(DojoTestCase):
         self.assertIn("user-only", finding_tag_names)
         self.assertIn("inherited", finding_tag_names)  # still sticky
 
+    def _do_propagate_sync_only(self, name: str, expected: int, *, with_endpoints: bool, with_locations: bool) -> None:
+        """
+        Measure `propagate_tags_on_product_sync(product)` in isolation — no tag change.
+
+        Captures the raw sweep cost for a product with a realistic mix of children:
+        N findings + (V2) N endpoints or (V3) N locations. Should be roughly idempotent
+        (no add/remove to apply) so the number reflects diff-detection overhead.
+        """
+        product = _make_product_with_findings(name, n_findings=100, tags=["t1", "t2"])
+        if with_endpoints:
+            _make_endpoints(product, n=100)
+        if with_locations:
+            _make_locations(product, n=100)
+        with self.assertNumQueries(expected):
+            propagate_tags_on_product_sync(product)
+        finding = Finding.objects.filter(test__engagement__product=product).first()
+        self.assertEqual({"t1", "t2"}, {t.name for t in finding.tags.all()})
+
     def _do_finding_remove_inherited(self, name: str, expected: int) -> None:
         product = _make_product_with_findings(name, n_findings=1, tags=["inherited"])
         finding = Finding.objects.filter(test__engagement__product=product).first()
@@ -281,6 +299,29 @@ class TagInheritancePerfBaselines(DojoTestCase):
     @override_settings(V3_FEATURE_LOCATIONS=True)
     def test_baseline_finding_remove_inherited_tag_sticky_re_adds_v3(self):
         self._do_finding_remove_inherited("perf-sticky-rm-v3", self.EXPECTED_FINDING_REMOVE_INHERITED_V3)
+
+    # ------------------------------------------------------------------
+    # propagate_tags_on_product_sync direct invocation (no tag change).
+    # Measures the raw sweep cost over a product's children.
+    # ------------------------------------------------------------------
+
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_propagate_tags_on_product_sync_v2(self):
+        self._do_propagate_sync_only(
+            "perf-sync-v2",
+            self.EXPECTED_PROPAGATE_SYNC_V2,
+            with_endpoints=True,
+            with_locations=False,
+        )
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_propagate_tags_on_product_sync_v3(self):
+        self._do_propagate_sync_only(
+            "perf-sync-v3",
+            self.EXPECTED_PROPAGATE_SYNC_V3,
+            with_endpoints=False,
+            with_locations=True,
+        )
 
     # ------------------------------------------------------------------
     # V2: propagation to Endpoints (skipped under V3_FEATURE_LOCATIONS)
@@ -364,28 +405,34 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 53
     EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 53
 
-    EXPECTED_CREATE_ONE_FINDING_V2 = 64
-    EXPECTED_CREATE_ONE_FINDING_V3 = 64
-    EXPECTED_CREATE_100_FINDINGS_V2 = 4024
-    EXPECTED_CREATE_100_FINDINGS_V3 = 4024
+    EXPECTED_CREATE_ONE_FINDING_V2 = 55
+    EXPECTED_CREATE_ONE_FINDING_V3 = 55
+    EXPECTED_CREATE_100_FINDINGS_V2 = 3124
+    EXPECTED_CREATE_100_FINDINGS_V3 = 3124
 
     EXPECTED_FINDING_ADD_USER_TAG_V2 = 17
     EXPECTED_FINDING_ADD_USER_TAG_V3 = 17
-    EXPECTED_FINDING_REMOVE_INHERITED_V2 = 44
-    EXPECTED_FINDING_REMOVE_INHERITED_V3 = 44
+    EXPECTED_FINDING_REMOVE_INHERITED_V2 = 18
+    EXPECTED_FINDING_REMOVE_INHERITED_V3 = 18
 
     # V2 endpoint paths. Pre-Phase-A: 3958 add, 3740 remove.
     EXPECTED_PRODUCT_TAG_ADD_100_ENDPOINTS = 91
     EXPECTED_PRODUCT_TAG_REMOVE_100_ENDPOINTS = 53
 
     # V3 location paths. Pre-Phase-A: 4532 add, 4307 remove.
-    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 316
-    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 266
+    EXPECTED_PRODUCT_TAG_ADD_100_LOCATIONS = 125
+    EXPECTED_PRODUCT_TAG_REMOVE_100_LOCATIONS = 75
+
+    # propagate_tags_on_product_sync direct invocation (no tag change).
+    # Product with 100 findings + 100 endpoints (V2) or + 100 locations (V3).
+    EXPECTED_PROPAGATE_SYNC_V2 = 9
+    EXPECTED_PROPAGATE_SYNC_V3 = 18
 
 
 @override_settings(
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
+    SECURE_SSL_REDIRECT=False,
 )
 @versioned_fixtures
 class TagInheritanceImportPerfBaselines(DojoAPITestCase):
@@ -394,10 +441,10 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     Pinned query-count baselines for the importer hot path.
 
     Real production tag-inheritance cost lives in scan import / reimport: the
-    importer creates findings + endpoints/locations, then `_manage_inherited_tags`
+    importer creates findings + endpoints/locations, then `_sync_inherited_tags`
     runs per row. Phase A (bulk product-side propagation + post_save gated on
     create) doesn't touch this loop because the importer's hot path is
-    creation-driven. Phase B's `tag_inheritance.batch()` context manager
+    creation-driven. Phase B's `tag_inheritance.suppress_tag_inheritance()` context manager
     targets it.
 
     Two scenarios:
@@ -421,6 +468,11 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
         self.product = self.create_product("Tag Perf Import Product", tags=["inherit", "these"])
         self.engagement = self.create_engagement("Tag Perf Import Engagement", self.product)
         self.scan_path = get_unit_tests_scans_path("zap") / "dvwa_baseline_dojo.xml"
+        # Subset of the full report (10 findings vs 19) used to exercise the
+        # reimport-with-new-findings code path: initial import uses the subset,
+        # then reimport uses the full report so 9 findings get created during
+        # reimport while 10 match existing ones.
+        self.scan_path_subset = get_unit_tests_scans_path("zap") / "dvwa_baseline_dojo_subset.xml"
 
     @override_settings(V3_FEATURE_LOCATIONS=False)
     def test_baseline_zap_scan_import_v2(self):
@@ -429,7 +481,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
 
         Captures total query count for: scan parse + finding creation + endpoint
         attachment + per-row inherit_tags signal chain. Production hot path.
-        Phase A leaves this number ~unchanged; Phase B's `tag_inheritance.batch()`
+        Phase A leaves this number ~unchanged; Phase B's `tag_inheritance.suppress_tag_inheritance()`
         targets it.
         """
         with self.assertNumQueries(self.EXPECTED_ZAP_IMPORT_V2):
@@ -487,17 +539,55 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
         finding = Finding.objects.filter(test_id=test_id).first()
         self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
 
+    @override_settings(V3_FEATURE_LOCATIONS=False)
+    def test_baseline_zap_scan_reimport_with_new_findings_v2(self):
+        """
+        V2: import 10-finding subset, then reimport 19-finding full report.
+
+        9 findings are NEW (must run inheritance), 10 are matched (skip).
+        Exercises the realistic "scheduled rescan with drift" path where a
+        reimport actually creates findings.
+        """
+        response = self.import_scan_with_params(
+            self.scan_path_subset,
+            engagement=self.engagement.id,
+        )
+        test_id = response["test"]
+
+        with self.assertNumQueries(self.EXPECTED_ZAP_REIMPORT_WITH_NEW_V2):
+            self.reimport_scan_with_params(test_id, str(self.scan_path))
+
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
+    @override_settings(V3_FEATURE_LOCATIONS=True)
+    def test_baseline_zap_scan_reimport_with_new_findings_v3(self):
+        """V3: same as V2 but Location-backed."""
+        response = self.import_scan_with_params(
+            self.scan_path_subset,
+            engagement=self.engagement.id,
+        )
+        test_id = response["test"]
+
+        with self.assertNumQueries(self.EXPECTED_ZAP_REIMPORT_WITH_NEW_V3):
+            self.reimport_scan_with_params(test_id, str(self.scan_path))
+
+        finding = Finding.objects.filter(test_id=test_id).first()
+        self.assertEqual({"inherit", "these"}, {t.name for t in finding.tags.all()})
+
     # Pinned baselines per mode. Each test forces its own V3_FEATURE_LOCATIONS
     # via @override_settings so all four import paths run in a single suite
     # invocation regardless of the ambient `DD_V3_FEATURE_LOCATIONS` env var.
+    # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
     # Phase A nudges these slightly downward (post_save gated on created=True
     # avoids re-running inheritance on no-op finding updates during reimport).
-    # Pre-Phase-A: 1461/1319 import, 77/95 reimport.
     # Phase B Stage 1 (thread-safe batch context) adds ~20 queries on the V3
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 1385
-    EXPECTED_ZAP_IMPORT_V3 = 1263
+    EXPECTED_ZAP_IMPORT_V2 = 420
+    EXPECTED_ZAP_IMPORT_V3 = 444
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 81
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 169
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 198

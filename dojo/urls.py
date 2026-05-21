@@ -18,8 +18,6 @@ from dojo.api_v2.views import (
     CeleryViewSet,
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
-    DojoGroupMemberViewSet,
-    DojoGroupViewSet,
     DojoMetaViewSet,
     EndpointMetaImporterView,
     EndpointStatusViewSet,
@@ -28,7 +26,6 @@ from dojo.api_v2.views import (
     EngagementViewSet,
     FindingTemplatesViewSet,
     FindingViewSet,
-    GlobalRoleViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -40,16 +37,11 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     ProductAPIScanConfigurationViewSet,
-    ProductGroupViewSet,
-    ProductMemberViewSet,
-    ProductTypeGroupViewSet,
-    ProductTypeMemberViewSet,
     ProductTypeViewSet,
     ProductViewSet,
     RegulationsViewSet,
     ReImportScanView,
     RiskAcceptanceViewSet,
-    RoleViewSet,
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
     SonarqubeIssueViewSet,
@@ -76,7 +68,6 @@ from dojo.engagement.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github.ui.urls import urlpatterns as github_urls
-from dojo.group.urls import urlpatterns as group_urls
 from dojo.home.urls import urlpatterns as home_urls
 from dojo.jira.urls import urlpatterns as jira_urls
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
@@ -119,14 +110,14 @@ v2_api = DefaultRouter()
 v2_api.register(r"announcements", AnnouncementViewSet, basename="announcement")
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
 v2_api.register(r"development_environments", DevelopmentEnvironmentViewSet, basename="development_environment")
-v2_api.register(r"dojo_groups", DojoGroupViewSet, basename="dojo_group")
-v2_api.register(r"dojo_group_members", DojoGroupMemberViewSet, basename="dojo_group_member")
+# RBAC endpoints moved to Pro under legacy authorization:
+#   dojo_groups, dojo_group_members → pro/groups, pro/group_members
 v2_api.register(r"endpoint_meta_import", EndpointMetaImporterView, basename="endpointmetaimport")
 v2_api.register(r"engagements", EngagementViewSet, basename="engagement")
 v2_api.register(r"engagement_presets", EngagementPresetsViewset, basename="engagement_presets")
 v2_api.register(r"finding_templates", FindingTemplatesViewSet, basename="finding_template")
 v2_api.register(r"findings", FindingViewSet, basename="finding")
-v2_api.register(r"global_roles", GlobalRoleViewSet, basename="global_role")
+# RBAC endpoint moved to Pro under legacy authorization: global_roles → pro/global_roles
 v2_api.register(r"import-languages", ImportLanguagesView, basename="importlanguages")
 v2_api.register(r"import-scan", ImportScanView, basename="importscan")
 v2_api.register(r"jira_instances", JiraInstanceViewSet, basename="jira_instance")
@@ -143,16 +134,16 @@ v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
 add_notifications_urls(v2_api)
 v2_api.register(r"products", ProductViewSet, basename="product")
 v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
-v2_api.register(r"product_groups", ProductGroupViewSet, basename="product_group")
-v2_api.register(r"product_members", ProductMemberViewSet, basename="product_member")
+# RBAC endpoints moved to Pro under legacy authorization:
+#   product_groups, product_members → pro/product_groups, pro/product_members
 v2_api.register(r"product_types", ProductTypeViewSet, basename="product_type")
-v2_api.register(r"product_type_members", ProductTypeMemberViewSet, basename="product_type_member")
-v2_api.register(r"product_type_groups", ProductTypeGroupViewSet, basename="product_type_group")
+# RBAC endpoints moved to Pro under legacy authorization:
+#   product_type_members, product_type_groups → pro/product_type_members, pro/product_type_groups
 v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")
 v2_api.register(r"reimport-scan", ReImportScanView, basename="reimportscan")
 v2_api.register(r"request_response_pairs", BurpRawRequestResponseViewSet, basename="request_response_pairs")
 v2_api.register(r"risk_acceptance", RiskAcceptanceViewSet, basename="risk_acceptance")
-v2_api.register(r"roles", RoleViewSet, basename="role")
+# RBAC endpoint moved to Pro under legacy authorization: roles → pro/roles
 v2_api.register(r"sla_configurations", SLAConfigurationViewset, basename="sla_configurations")
 v2_api.register(r"sonarqube_issues", SonarqubeIssueViewSet, basename="sonarqube_issue")
 v2_api.register(r"sonarqube_transitions", SonarqubeIssueTransitionViewSet, basename="sonarqube_issue_transition")
@@ -195,7 +186,6 @@ ur += search_urls
 ur += test_type_urls
 ur += test_urls
 ur += user_urls
-ur += group_urls
 ur += jira_urls
 ur += github_urls
 ur += tool_type_urls
@@ -263,12 +253,6 @@ urlpatterns += survey_urls
 if hasattr(settings, "DJANGO_METRICS_ENABLED"):
     if settings.DJANGO_METRICS_ENABLED:
         urlpatterns += [re_path(r"^{}django_metrics/".format(get_system_setting("url_prefix")), include("django_prometheus.urls"))]
-
-try:
-    from dojo.sso.urls import urlpatterns as sso_urlpatterns
-    urlpatterns += sso_urlpatterns
-except ImportError:
-    pass
 
 if hasattr(settings, "DJANGO_ADMIN_ENABLED"):
     if settings.DJANGO_ADMIN_ENABLED:

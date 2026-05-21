@@ -16,7 +16,6 @@ from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoint_status_for_queryset
 from dojo.filters import (
     MetricsEndpointFilter,
@@ -47,7 +46,7 @@ def finding_queries(
 ) -> dict[str, Any]:
     # Get the initial list of findings the user is authorized to see
     all_authorized_findings: QuerySet[Finding] = get_authorized_findings(
-        Permissions.Finding_View,
+        "view",
         user=request.user,
     ).select_related(
         "reporter",
@@ -186,7 +185,7 @@ def endpoint_queries(
         "finding__reporter",
     )
 
-    endpoints_query = get_authorized_endpoint_status_for_queryset(Permissions.Location_View, endpoints_query, request.user)
+    endpoints_query = get_authorized_endpoint_status_for_queryset("view", endpoints_query, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = MetricsEndpointFilterWithoutObjectLookups if filter_string_matching else MetricsEndpointFilter
     endpoints = filter_class(request.GET, queryset=endpoints_query)
@@ -232,8 +231,8 @@ def endpoint_queries(
             "finding__test__engagement__product",
         )
 
-    endpoints_closed = get_authorized_endpoint_status_for_queryset(Permissions.Location_View, endpoints_closed, request.user)
-    accepted_endpoints = get_authorized_endpoint_status_for_queryset(Permissions.Location_View, accepted_endpoints, request.user)
+    endpoints_closed = get_authorized_endpoint_status_for_queryset("view", endpoints_closed, request.user)
+    accepted_endpoints = get_authorized_endpoint_status_for_queryset("view", accepted_endpoints, request.user)
     accepted_endpoints_counts = severity_count(accepted_endpoints, "aggregate", "finding__severity")
 
     weeks_between, months_between = period_deltas(start_date, end_date)

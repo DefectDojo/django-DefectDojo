@@ -7,7 +7,6 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import ToolTypeForm
 from dojo.models import Tool_Type
 from dojo.utils import add_breadcrumb
@@ -15,7 +14,6 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized("dojo.add_tool_type")
 def new_tool_type(request):
     if request.method == "POST":
         tform = ToolTypeForm(request.POST, instance=Tool_Type())
@@ -35,7 +33,6 @@ def new_tool_type(request):
     return render(request, "dojo/new_tool_type.html", {"tform": tform})
 
 
-@user_is_configuration_authorized("dojo.change_tool_type")
 def edit_tool_type(request, ttid):
     tool_type = Tool_Type.objects.get(pk=ttid)
     if request.method == "POST":
@@ -55,7 +52,6 @@ def edit_tool_type(request, ttid):
     return render(request, "dojo/edit_tool_type.html", {"tform": tform})
 
 
-@user_is_configuration_authorized("dojo.view_tool_type")
 def tool_type(request):
     confs = Tool_Type.objects.all().order_by("name")
     add_breadcrumb(title=_("Tool Type List"), top_level=not len(request.GET), request=request)

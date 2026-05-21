@@ -5,7 +5,7 @@
     <h3> Review Finding from Jira</h3>
     <h4>{{ finding.title }}</h4>
     <p>Please provide a description on why the finding should be closed or marked as not fixed.</p>
-    <form class="form-horizontal" action="{% url 'defect_finding_review' finding.id %}" method="post">
+    <form class="" action="{% url 'defect_finding_review' finding.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
