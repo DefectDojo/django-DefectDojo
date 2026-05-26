@@ -1,0 +1,182 @@
+:root {
+
+  /* ==============================================================================================================
+  =================================================================================================================
+     COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS COLORS
+  =================================================================================================================
+  ============================================================================================================== */
+
+  /* =======================================================
+     BRAND / PRIMARY
+  ======================================================= */
+
+  --color-primary: #546474;
+  --color-primary-hover: #38434d;
+  --color-primary-light: #73879c;
+
+  /* =======================================================
+     BACKGROUNDS
+  ======================================================= */
+
+  --color-bg-page: #ffffff;
+  --color-bg-subtle: #f8f8f8;
+  --color-bg-muted: #f5f5f5;
+  --color-bg-soft: #f0f0f0;
+  --color-commercial-bg: #1d4565;
+  --color-commercial-hover: #235175;
+  --color-action-secondary-bg: #149b7e;
+  --color-action-secondary-hover: #11876e;
+  
+
+  /* =======================================================
+     TEXT
+  ======================================================= */
+
+  --color-text-primary: #333333;
+  --color-text-secondary: #777777;
+  --color-text-muted: #888888;
+  --color-text-muted-dark: #4b4b4b;
+  --color-text-white: #ffffff;
+  --color-text-black: #000000;
+  --color-footer-accent-text: #246c91;
+
+
+  /* =======================================================
+     BORDERS
+  ======================================================= */
+
+  --color-border-default: #dddddd;
+  --color-border-light: #e7e7e7;
+  --color-border-panel: #dddedf;
+  --color-border-white: #ffffff;
+  --color-border-grey: #d0d0d0;
+  --color-tab-border: rgb(148, 168, 187);
+  --color-panel-heading-bg: rgba(32, 166, 216, 0.75);
+  --color-border-shadow: rgba(0, 0, 0, .15);
+
+  /* =======================================================
+     STATUS / SEVERITY
+  ======================================================= */
+
+  --color-critical: #d9534f;
+  --color-high: #f09835;
+  --color-medium: #FBE413;
+  --color-low: #4CAE4C;
+  --color-info: #357ABD;
+  --color-success: #468847;
+  --color-warning: #ffc107;
+  --color-danger: #b94a48;
+  --color-warning-text: #c09853;
+
+  /* =======================================================
+     PANELS
+  ======================================================= */
+
+  --color-panel-heading: rgba(32, 166, 216, 0.75);
+  --color-panel-heading-border: #A1C0D7;
+
+    /* =======================================================
+     LINKS / ACCENTS
+  ======================================================= */
+
+  --color-link: #09d;
+  --color-link-hover: #0077aa;
+  --color-focus-ring: #599fd0;
+  --color-tab-active-muted: #72879b;
+
+  /* =======================================================
+   HIGHLIGHTS / ANNOTATIONS
+  ======================================================= */
+
+  --color-highlight-yellow: #ff0;
+  --color-highlight-success: #A9DBA9;
+  --color-highlight-danger: #F8B9B7;
+  --color-highlight-info: #BCE8F1;
+
+  /* =======================================================
+     TABLES / FILTERS
+  ======================================================= */
+
+  --color-table-header-bg: #DCEDFB;
+  --color-filter-header-bg: #EBF4FB;
+
+  /* =======================================================
+     TAGS / BADGES
+  ======================================================= */
+
+  --color-tag-bg: #3498db;
+  --color-tag-secondary: #556270;
+
+  /* =======================================================
+     SURFACES
+  ======================================================= */
+
+  --color-surface-light: #ECECEC;
+  --color-surface-alt: #eaedf2;
+  --color-benchmark-pass: #dff0d8;
+  --color-benchmark-fail: #f2dede;
+  --color-benchmark-disabled: #eaedf2;
+
+  /* =======================================================
+     GRADES
+  ======================================================= */
+
+  --color-grade-a: #4ec83d;
+  --color-grade-b: #ffa100;
+  --color-grade-c: #FFBD33;
+  --color-grade-d: #cc3300;
+  --color-grade-f: #ef251e;
+
+  /* ==============================================================================================================
+  =================================================================================================================
+   SPACING SPACING SPACING SPACING SPACING SPACING SPACING SPACING SPACING SPACING SPACING SPACING SPACING SPACING 
+  =================================================================================================================
+  ============================================================================================================== */
+
+  --space-2xs: var(--size-1);
+  --space-xs: var(--size-2);
+  --space-sm: var(--size-3);
+  --space-md: var(--size-4);
+  --space-lg: var(--size-5);
+  --space-xl: var(--size-6);
+  --space-2xl: var(--size-7);
+  --space-3xl: var(--size-8);
+
+  /* ==============================================================================================================
+  =================================================================================================================
+   RADIUS READIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS RADIUS 
+  =================================================================================================================
+  ============================================================================================================== */
+
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+
+  /* ==============================================================================================================
+  =================================================================================================================
+   BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS BORDERS 
+  =================================================================================================================
+  ============================================================================================================== */
+
+  --border-light: 1px solid var(--color-border-light);
+  --border-default: 1px solid var(--color-border-default);
+  --border-panel: 1px solid var(--color-border-panel);
+
+  --border-focus: 1px solid var(--color-primary);
+  --border-subtle: 1px solid rgba(0, 0, 0, 0.15);
+
+  /* ==============================================================================================================
+  =================================================================================================================
+   TRANSITIONS TRANSITIONS TRANSITIONS TRANSITIONS TRANSITIONS TRANSITIONS TRANSITIONS TRANSITIONS TRANSITIONS TRANSITIONS
+  =================================================================================================================
+  ============================================================================================================== */
+
+  --transition-fast: 150ms ease-in-out;
+  --transition-default: 250ms ease-in-out;
+  --transition-slow: 500ms ease-in-out;
+
+}
