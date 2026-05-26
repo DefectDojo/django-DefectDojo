@@ -30,6 +30,7 @@ from drf_spectacular.utils import (
 )
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework import mixins, status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
@@ -46,7 +47,7 @@ from dojo.api_v2 import (
 )
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.authorization import api_permissions as permissions
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization import user_has_permission_or_403, user_is_superuser_or_global_owner
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -2286,6 +2287,35 @@ class UserContactInfoViewSet(
 
     def get_queryset(self):
         return UserContactInfo.objects.all().order_by("id")
+
+
+# Authorization: superuser/global-owner (all tokens) or self (own token only)
+class ApiTokenViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet,
+):
+    serializer_class = serializers.ApiTokenSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["user_id"]
+    lookup_field = "user_id"
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        qs = Token.objects.select_related("user", "user__usercontactinfo").order_by("user_id")
+        if not user_is_superuser_or_global_owner(self.request.user):
+            qs = qs.filter(user=self.request.user)
+        return qs
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        uci = getattr(instance.user, "usercontactinfo", None)
+        if uci:
+            uci.token_expiry = None
+            uci.save(update_fields=["token_expiry"])
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # Authorization: authenticated users

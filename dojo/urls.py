@@ -13,6 +13,7 @@ from dojo import views
 from dojo.announcement.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
     AnnouncementViewSet,
+    ApiTokenViewSet,
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
     CeleryViewSet,
@@ -155,6 +156,7 @@ v2_api.register(r"test_imports", TestImportViewSet, basename="test_imports")
 v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
 v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
+v2_api.register(r"api-tokens", ApiTokenViewSet, basename="api-token")
 v2_api.register(r"users", UsersViewSet, basename="user")
 v2_api.register(r"user_contact_infos", UserContactInfoViewSet, basename="usercontactinfo")
 # Add the location routes

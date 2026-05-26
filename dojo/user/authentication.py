@@ -1,12 +1,24 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+from rest_framework.authtoken.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied, ValidationError
 
 from dojo.authorization.authorization import user_is_superuser_or_global_owner
 from dojo.models import Dojo_User, UserContactInfo
 from dojo.notifications.helper import create_notification
+
+
+class ExpiringTokenAuthentication(TokenAuthentication):
+    def authenticate_credentials(self, key):
+        user, token = super().authenticate_credentials(key)
+        uci = getattr(user, "usercontactinfo", None)
+        if uci and uci.token_expiry and uci.token_expiry < timezone.now():
+            raise AuthenticationFailed("Token has expired.")
+        return user, token
 
 
 def reset_token_for_user(*, acting_user: Dojo_User, target_user: Dojo_User, allow_self_reset: bool = False) -> None:
@@ -31,9 +43,11 @@ def reset_token_for_user(*, acting_user: Dojo_User, target_user: Dojo_User, allo
     Token.objects.filter(user=target_user).delete()
     Token.objects.create(user=target_user)
 
+    expiry_days = getattr(settings, "API_TOKEN_DEFAULT_EXPIRY_DAYS", 0)
     uci, _ = UserContactInfo.objects.get_or_create(user=target_user)
     uci.token_last_reset = timezone.now()
-    uci.save(update_fields=["token_last_reset"])
+    uci.token_expiry = timezone.now() + timedelta(days=expiry_days) if expiry_days else None
+    uci.save(update_fields=["token_last_reset", "token_expiry"])
 
     # Send notification to the target user
     if acting_user == target_user:
