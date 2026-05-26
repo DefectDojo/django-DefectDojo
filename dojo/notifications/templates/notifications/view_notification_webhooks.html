@@ -60,7 +60,7 @@
                               <td><a>{{ nwh.url }}</a></td>
                               <td><a>{{ nwh.get_status_display }}
                                 {% if nwh.first_error or nwh.last_error %}
-                                    <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="First error: {{ nwh.first_error | display_date_with_secs }}, Last error: {{ nwh.last_error | display_date_with_secs }}" data-placement="right" data-container="body" data-original-title="" title=""></i>
+                                    <i class="fa-solid fa-circle-question has-popover" data-content="First error: {{ nwh.first_error | display_date_with_secs }}, Last error: {{ nwh.last_error | display_date_with_secs }}"></i>
                                 {% endif %}    
                               </a></td>
                               <td><a>{{ nwh.note }}</a></td>

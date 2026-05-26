@@ -4,15 +4,17 @@ from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
 
+from dojo.authorization.models import (
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Roles
 from dojo.models import (
     Engagement,
     Finding,
     Product,
     Product_Type,
-    Product_Type_Member,
     Risk_Acceptance,
-    Role,
     Test,
     Test_Type,
     User,
@@ -175,6 +177,19 @@ class TestRiskAcceptanceApi(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
         self.url = reverse("risk_acceptance-list")
+
+    # Helper method to create a risk acceptance for testing filters
+    def create_risk_acceptance(self):
+        risk_acceptance = Risk_Acceptance.objects.create(
+            name="Filter Test RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+        )
+        risk_acceptance.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(risk_acceptance)
+        return risk_acceptance
 
     def test_create_risk_acceptance_links_to_engagement(self):
         """Test that risk acceptance created via API appears in engagement.risk_acceptance"""
@@ -358,3 +373,49 @@ class TestRiskAcceptanceApi(APITestCase):
         response = self.client.put(f"{self.url}{ra.id}/", payload, format="json")
         self.assertEqual(403, response.status_code, response.content)
         self.assertIn("multiple engagements", str(response.data))
+
+    def test_risk_acceptance_created_filter(self):
+        # 1. Create a baseline Risk Acceptance using the existing test setup
+        risk_acceptance = self.create_risk_acceptance()
+
+        # 2. Manually backdate the created date to test ranges
+        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=10)
+        risk_acceptance.created = past_date
+        risk_acceptance.save()
+
+        # 3. Test `created__lt` (Less than / Before)
+        # Should return the risk acceptance because it was created 10 days ago
+        future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        response = self.client.get(reverse("risk_acceptance-list") + f"?created__lt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertIn(risk_acceptance.id, result_ids)
+
+        # 4. Test `created__gt` (Greater than / After)
+        # Should NOT return the risk acceptance because it is not newer than today
+        response = self.client.get(reverse("risk_acceptance-list") + f"?created__gt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertNotIn(risk_acceptance.id, result_ids)
+
+    def test_risk_acceptance_updated_filter(self):
+        risk_acceptance = self.create_risk_acceptance()
+
+        # Manually backdate the updated date
+        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=10)
+        # We use .update() to bypass the auto_now=True behavior on the updated field
+        type(risk_acceptance).objects.filter(pk=risk_acceptance.id).update(updated=past_date)
+
+        future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+        # Test updated__lt
+        response = self.client.get(reverse("risk_acceptance-list") + f"?updated__lt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertIn(risk_acceptance.id, result_ids)
+
+        # Test updated__gt
+        response = self.client.get(reverse("risk_acceptance-list") + f"?updated__gt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertNotIn(risk_acceptance.id, result_ids)

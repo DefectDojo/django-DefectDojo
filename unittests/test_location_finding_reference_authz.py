@@ -5,6 +5,7 @@ from dojo.location.models import Location, LocationFindingReference, LocationPro
 from dojo.location.queries import get_authorized_location_finding_reference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
+    Dojo_User,
     Engagement,
     Finding,
     Product,
@@ -61,6 +62,11 @@ class TestLocationFindingReferenceAuthorization(DojoTestCase):
         )
         Product_Member.objects.create(user=cls.alice, product=cls.product_a, role=reader_role)
         Product_Member.objects.create(user=cls.bob, product=cls.product_b, role=reader_role)
+        # Legacy authorization collapses Reader/Writer/Maintainer/Owner into
+        # a single ``authorized_users`` membership; mirror the RBAC rows so
+        # the users are visible to ``get_authorized_*`` queries.
+        cls.product_a.authorized_users.add(Dojo_User.objects.get(pk=cls.alice.pk))
+        cls.product_b.authorized_users.add(Dojo_User.objects.get(pk=cls.bob.pk))
 
         cls.finding_a = cls._make_finding(cls.product_a, test_type, title="Finding A")
         cls.finding_b = cls._make_finding(cls.product_b, test_type, title="Finding B")

@@ -3,6 +3,7 @@ from django.utils.timezone import now
 
 from dojo.authorization.roles_permissions import Roles
 from dojo.models import (
+    Dojo_User,
     Endpoint,
     Endpoint_Status,
     Engagement,
@@ -67,6 +68,10 @@ class TestProductEndpointReportScoping(DojoTestCase):
             product=cls.product_a,
             role=reader_role,
         )
+        # Legacy authorization collapses Reader/Writer/Maintainer/Owner into
+        # a single ``authorized_users`` membership; mirror the RBAC row so
+        # the user is visible to ``get_authorized_*`` queries.
+        cls.product_a.authorized_users.add(Dojo_User.objects.get(pk=cls.restricted_user.pk))
 
     @classmethod
     def _create_finding_with_endpoint(cls, product, title, description, *, host):

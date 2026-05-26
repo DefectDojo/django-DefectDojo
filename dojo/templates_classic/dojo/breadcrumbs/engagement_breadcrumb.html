@@ -1,0 +1,16 @@
+{% if product_tab.tab == "engagements" and not custom_breadcrumb %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li><a data-toggle="tooltip" data-placement="top" title="Engagements" href="{% url 'view_engagements' product_tab.product.id %}">Engagements</a></li>
+  {% if product_tab.engagement.id %}
+    <li><a data-toggle="tooltip" data-placement="top" title="Engagement" href="{% url 'view_engagement' product_tab.engagement.id %}">{{product_tab.engagement.name}}</a></li>
+  {% endif %}
+  {% if test.id %}
+    <li><a data-toggle="tooltip" data-placement="top" title="Test" href="{% url 'view_test' test.id %}">{{test}}</a></li>
+  {% endif %}
+  {% if product_tab.title %}
+    <li class="breadcrumb-item active" aria-current="page">{{product_tab.title}}</li>
+  {% endif %}
+  </ol>
+</nav>
+{% endif %}

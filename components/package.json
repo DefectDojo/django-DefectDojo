@@ -1,14 +1,18 @@
 {
   "name": "defectdojo",
   "version": "2.59.0-dev",
-  "license" : "BSD-3-Clause",
+  "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
+    "@fontsource-variable/work-sans": "^5.1",
     "JUMFlot": "jumjum123/JUMFlot#*",
+    "alpinejs": "^3.15",
     "bootstrap": "^3.4.1",
     "bootstrap-select": "^1.13.18",
     "bootstrap-social": "^4.0.0",
     "bootstrap-wysiwyg": "^2.0.0",
+    "chart.js": "^4.4",
+    "chartjs-adapter-moment": "^1.0",
     "chosen-bootstrap": "https://github.com/dbtek/chosen-bootstrap",
     "chosen-js": "^1.8.7",
     "clipboard": "^2.0.11",
@@ -17,11 +21,13 @@
     "datatables.net-colreorder": "^2.1.2",
     "drmonty-datatables-plugins": "^1.0.0",
     "drmonty-datatables-responsive": "^1.0.0",
-    "easymde": "^2.20.0",
+    "easymde": "^2.21.0",
+    "flatpickr": "^4.6",
     "flot": "flot/flot#~0.8.3",
     "font-awesome": "^4.0.0",
     "fullcalendar": "^3.10.2",
     "google-code-prettify": "^1.0.0",
+    "htmx.org": "^2.0",
     "jquery": "^3.7.1",
     "jquery-highlight": "3.5.0",
     "jquery-ui": "1.14.2",
@@ -33,8 +39,18 @@
     "metismenu": "~3.0.7",
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.3.7",
+    "pdfmake": "^0.3.8",
     "startbootstrap-sb-admin-2": "1.0.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3",
+    "@tailwindcss/forms": "^0.5",
+    "tailwindcss": "^4.1"
+  },
+  "scripts": {
+    "copy:fonts": "mkdir -p ../dojo/static/dojo/css/files && cp node_modules/@fontsource-variable/work-sans/files/work-sans-*-wght-normal.woff2 ../dojo/static/dojo/css/files/",
+    "build:css": "npm run copy:fonts && npx @tailwindcss/cli -i tailwind.css -o ../dojo/static/dojo/css/tailwind-out.css --minify",
+    "watch:css": "npm run copy:fonts && npx @tailwindcss/cli -i tailwind.css -o ../dojo/static/dojo/css/tailwind-out.css --watch"
   },
   "engines": {
     "yarn": ">= 1.0.0"

@@ -152,3 +152,4 @@ docs/.hugo_build.lock
 
 # claude etc
 MEMORY.md
+.claude/

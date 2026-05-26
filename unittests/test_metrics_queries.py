@@ -51,7 +51,15 @@ class FindingQueriesTest(DojoTestCase):
     fixtures = ["dojo_testdata.json", "unit_metrics_additional_data.json"]
 
     def setUp(self):
+        # user1 is a fixture-defined non-staff non-superuser. Under legacy
+        # authorization the Global_Role / Product_Member rows the fixture
+        # gives them are inert; without is_staff or is_superuser they
+        # cannot see any findings, so the metrics queries return empty
+        # querysets. Promote to is_staff for this test so the metrics
+        # logic has data to aggregate.
         user = User.objects.get(username="user1")
+        user.is_staff = True
+        user.save(update_fields=["is_staff"])
         self.request = RequestFactory().get(reverse("metrics"), {
             "start_date": "2017-12-26",
             "end_date": "2018-01-05",
@@ -80,8 +88,9 @@ class FindingQueriesTest(DojoTestCase):
         mock_datetime = datetime(2020, 12, 9, tzinfo=zoneinfo.ZoneInfo("UTC"))
         mock_timezone.return_value = mock_datetime
 
-        # Queries over Finding
-        with self.assertNumQueries(29):
+        # Queries over Finding (legacy auth: fewer auth-layer queries
+        # than RBAC since per-action role-permission lookups are gone).
+        with self.assertNumQueries(27):
             product_types = []
             finding_queries = utils.finding_queries(
                 product_types,
@@ -262,7 +271,11 @@ class EndpointQueriesTest(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
     def setUp(self):
+        # Same legacy-auth promotion as FindingQueriesTest — see that
+        # class's setUp comment.
         user = User.objects.get(username="user1")
+        user.is_staff = True
+        user.save(update_fields=["is_staff"])
         self.request = RequestFactory().get(reverse("metrics"))
         self.request.user = user
         self.request._messages = MockMessages()
@@ -287,8 +300,9 @@ class EndpointQueriesTest(DojoTestCase):
         fake_now = datetime(2020, 7, 1, tzinfo=zoneinfo.ZoneInfo("UTC"))
         mock_now.return_value = fake_now
 
-        # Queries over Finding and Endpoint_Status
-        with self.assertNumQueries(45):
+        # Queries over Finding and Endpoint_Status (legacy auth: fewer
+        # auth-layer queries than RBAC).
+        with self.assertNumQueries(41):
             product_types = Product_Type.objects.all()
             endpoint_queries = utils.endpoint_queries(
                 product_types,

@@ -4,7 +4,6 @@ from django.db.models import Count, Q
 from django.db.models.expressions import Value
 from django.shortcuts import render
 
-from dojo.authorization.roles_permissions import Permissions
 from dojo.components.sql_group_concat import Sql_GroupConcat
 from dojo.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
 from dojo.finding.queries import get_authorized_findings
@@ -17,7 +16,7 @@ def components(request):
     # Get components ordered by component_name and concat component versions
     # to the same row
 
-    component_query = get_authorized_findings(Permissions.Finding_View)
+    component_query = get_authorized_findings("view")
 
     if connection.vendor == "postgresql":
         component_query = (

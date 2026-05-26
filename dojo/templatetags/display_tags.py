@@ -16,6 +16,7 @@ from django import template
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.staticfiles import finders
 from django.db.models import Case, IntegerField, Sum, Value, When
 from django.template.defaultfilters import stringfilter
 from django.urls import reverse
@@ -141,6 +142,23 @@ def dojo_version():
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
     return f"v. {version}"
+
+
+@register.simple_tag
+def static_v(static_path):
+    """
+    Cache-busting query value for a static asset.
+
+    Returns the integer mtime of the file under STATIC_ROOT (or
+    STATICFILES_DIRS) so any local edit forces a fresh fetch. Falls
+    back to the dojo version string when the file isn't found, which
+    is enough granularity for release deploys.
+    """
+    with contextlib.suppress(Exception):
+        path = finders.find(static_path)
+        if path:
+            return str(int(Path(path).stat().st_mtime))
+    return __version__.replace(".", "")
 
 
 @register.simple_tag
