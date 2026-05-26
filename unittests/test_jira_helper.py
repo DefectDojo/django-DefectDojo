@@ -1,8 +1,8 @@
 import logging
+from unittest import TestCase
 from unittest.mock import Mock
 
 import dojo.jira.helper as jira_helper
-from unittest import TestCase
 
 logger = logging.getLogger(__name__)
 

@@ -1223,8 +1223,8 @@ def get_jira_issue_from_jira(find):
         return None
 
 
-def issue_status_category_is_done(statusCategoryKey: str | None) -> bool:
-    return statusCategoryKey == "done"
+def issue_status_category_is_done(status_category_key: str | None) -> bool:
+    return status_category_key == "done"
 
 
 def issue_from_jira_is_active(issue_from_jira):
