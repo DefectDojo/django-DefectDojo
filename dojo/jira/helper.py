@@ -1223,32 +1223,16 @@ def get_jira_issue_from_jira(find):
         return None
 
 
+def issue_status_category_is_done(statusCategoryKey: str | None) -> bool:
+    return statusCategoryKey == "done"
+
+
 def issue_from_jira_is_active(issue_from_jira):
-    if not hasattr(issue_from_jira, "fields"):
-        logger.debug("No jira data fields found, treating as active")
-        return True
-
-    key = getattr(getattr(getattr(issue_from_jira.fields, "status", None), "statusCategory", None), "key", None)
-    if key:
-        match key:
-            case "new" | "indeterminate":
-                logger.debug("Jira issue status category is '%s', treating as active", key)
-                return True
-            case "done":
-                logger.debug("Jira issue status category is 'done', treating as inactive")
-                return False
-            case "undefined":
-                logger.debug("Jira issue status category is 'undefined', no decision possible")
-            case _:
-                logger.warning("Unknown Jira status category key '%s', falling back to resolution check", key)
-
-    # the statusCategory is not specified or "undefined", fallback: checking if a resolution is set and evaluate it
-    if not hasattr(issue_from_jira.fields, "resolution") or not issue_from_jira.fields.resolution:
-        logger.debug("No resolution found, treating as active")
-        return True
-
-    # some kind of resolution is present that is not None
-    return False
+    try:
+        statusCategoryKey = issue_from_jira.fields.status.statusCategory.key
+    except AttributeError:
+        statusCategoryKey = None
+    return not issue_status_category_is_done(statusCategoryKey)
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
@@ -1933,7 +1917,7 @@ def process_resolution_from_jira(
     # classify "done" issues as risk-accepted, false-positive, or the
     # default mitigated category (see jira_instance.accepted_resolutions
     # and .false_positive_resolutions below).
-    resolved = status_category_key == "done"
+    resolved = issue_status_category_is_done(status_category_key)
     jira_instance = get_jira_instance(finding)
 
     if resolved:
