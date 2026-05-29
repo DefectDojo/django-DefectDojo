@@ -259,6 +259,7 @@ class UserContactInfo(models.Model):
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
     ui_use_tailwind = models.BooleanField(default=False, verbose_name=_("Use new UI (beta)"), help_text=_("Opt in to the new Tailwind-based UI. Leave off for the classic UI."))
     token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
+    token_expiry = models.DateTimeField(null=True, blank=True, help_text=_("Optional expiry datetime for this user's API token. When set, requests using an expired token are rejected."))
     password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
 
 
