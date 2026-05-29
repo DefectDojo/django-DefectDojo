@@ -88,7 +88,8 @@ class ApiTokenTest(APITestCase):
         uci.token_expiry = timezone.now() + timedelta(days=30)
         uci.save(update_fields=["token_expiry"])
 
-        self.client.delete("{}{}/".format(reverse("api-token-list"), user.id))
+        r = self.client.delete("{}{}/".format(reverse("api-token-list"), user.id))
+        self.assertEqual(r.status_code, 204, r.content[:1000])
 
         uci.refresh_from_db()
         self.assertIsNone(uci.token_expiry)
@@ -103,6 +104,19 @@ class ApiTokenTest(APITestCase):
         r = client.get(reverse("user-list"))
         self.assertEqual(r.status_code, 403, r.content[:1000])
         self.assertIn("API token has expired.", r.content.decode("utf-8"))
+
+    def test_user_serializer_exposes_token_expiry(self):
+        user, _, _ = self._create_user("api-token-user-serializer")
+        uci, _ = UserContactInfo.objects.get_or_create(user=user)
+        expiry = timezone.now() + timedelta(days=14)
+        uci.token_expiry = expiry
+        uci.save(update_fields=["token_expiry"])
+
+        r = self.client.get("{}{}/".format(reverse("user-list"), user.id))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        body = r.json()
+        self.assertIn("token_expiry", body)
+        self.assertIsNotNone(body["token_expiry"])
 
     @override_settings(API_TOKEN_DEFAULT_EXPIRY_DAYS=7)
     def test_default_expiry_applied_on_reset(self):
