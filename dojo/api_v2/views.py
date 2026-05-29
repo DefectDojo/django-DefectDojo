@@ -2296,6 +2296,19 @@ class ApiTokenViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
+
+    """
+    Manage API tokens. Tokens are looked up by the owner's user ID.
+
+    Superusers and Global Owners can list, retrieve, and revoke tokens for any user.
+    Regular users can only list, retrieve, and revoke their own token.
+
+    Revoking a token (DELETE) immediately invalidates it. The user must generate
+    a new token via the UI or POST /api/v2/users/{id}/reset_api_token/ to regain access.
+
+    Token expiry is managed via the user_contact_infos endpoint.
+    """
+
     serializer_class = serializers.ApiTokenSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ["user_id"]

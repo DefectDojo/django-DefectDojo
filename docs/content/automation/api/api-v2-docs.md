@@ -47,6 +47,74 @@ If you use [an alternative authentication method](/admin/sso/) for users, you ma
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
+### Token management
+
+DefectDojo provides API endpoints to list, inspect, and revoke API tokens programmatically.
+
+#### Listing tokens
+
+Superusers and Global Owners can list all active tokens across all users. Regular users can only see their own token.
+
+```
+GET /api/v2/api-tokens/
+Authorization: Token <api_key>
+```
+
+Response fields: `user_id`, `username`, `created`, `expiry` (null if the token does not expire).
+
+To filter to a specific user:
+
+```
+GET /api/v2/api-tokens/?user_id=5
+```
+
+#### Retrieving a token
+
+```
+GET /api/v2/api-tokens/{user_id}/
+```
+
+Superusers can retrieve any user's token. Regular users are restricted to their own user ID. Any attempt by a regular user to retrieve another user's ID is met with a 404.
+
+#### Revoking a token
+
+```
+DELETE /api/v2/api-tokens/{user_id}/
+Authorization: Token <api_key>
+```
+
+Returns 204 on success. The token is immediately invalidated. The user will need to generate a new token via the UI (`/api_v2_key/`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
+
+Like retrieval, superuser can revoke any user's token. Regular users can only revoke their own.
+
+#### Token expiry
+
+An optional expiry datetime can be set per user via the `user_contact_infos` endpoint (superuser only):
+
+```
+PATCH /api/v2/user_contact_infos/{id}/
+Authorization: Token <api_key>
+Content-Type: application/json
+
+{"token_expiry": "2026-12-31T23:59:59Z"}
+```
+
+Once set, any request using that user's token after the expiry datetime will receive a `401 Unauthorized` response with `{"detail": "Token has expired."}`. The user must generate a new token to regain access.
+
+To remove an expiry and make a token permanent again, set `token_expiry` to `null`.
+
+#### Default token lifetime
+
+To enforce a maximum token lifetime across all users, set the environment variable:
+
+```
+DD_API_TOKEN_DEFAULT_EXPIRY_DAYS=90
+```
+
+When set to a value greater than `0`, every token rotation (via `POST /api/v2/users/{id}/reset_api_token/` or the UI) will automatically set `token_expiry` to the current time plus the configured number of days. The default is `0`, meaning tokens do not expire unless explicitly set.
+
+Note: resetting a token always snaps the expiry back to the instance default. Per-user expiry overrides set via `user_contact_infos` do not persist across token resets.
+
 ## Sample Code
 
 Here are some simple python examples and their results produced against

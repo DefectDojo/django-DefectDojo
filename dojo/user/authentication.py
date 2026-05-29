@@ -17,7 +17,7 @@ class ExpiringTokenAuthentication(TokenAuthentication):
         user, token = super().authenticate_credentials(key)
         uci = getattr(user, "usercontactinfo", None)
         if uci and uci.token_expiry and uci.token_expiry < timezone.now():
-            msg = "API Token has expired."
+            msg = "API token has expired."
             raise AuthenticationFailed(msg)
         return user, token
 
