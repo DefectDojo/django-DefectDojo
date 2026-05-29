@@ -99,7 +99,7 @@ Content-Type: application/json
 {"token_expiry": "2026-12-31T23:59:59Z"}
 ```
 
-Once set, any request using that user's token after the expiry datetime will receive a `401 Unauthorized` response with `{"detail": "Token has expired."}`. The user must generate a new token to regain access.
+Once set, any request using that user's token after the expiry datetime will receive a `403 Forbidden` response with `{"detail": "API token has expired."}`. The user must generate a new token to regain access.
 
 To remove an expiry and make a token permanent again, set `token_expiry` to `null`.
 

@@ -60,7 +60,7 @@ class ApiTokenTest(APITestCase):
         self.assertEqual(results[0]["user_id"], user.id)
 
     def test_api_token_retrieve_other_user_non_superuser_returns_404(self):
-        user1, token1, _ = self._create_user("api-token-retrieve-user1")
+        _user1, token1, _ = self._create_user("api-token-retrieve-user1")
         user2, _, _ = self._create_user("api-token-retrieve-user2")
         client = self._client_for(token1.key)
 
@@ -101,8 +101,8 @@ class ApiTokenTest(APITestCase):
 
         client = self._client_for(token.key)
         r = client.get(reverse("user-list"))
-        self.assertEqual(r.status_code, 401, r.content[:1000])
-        self.assertIn("Token has expired.", r.content.decode("utf-8"))
+        self.assertEqual(r.status_code, 403, r.content[:1000])
+        self.assertIn("API token has expired.", r.content.decode("utf-8"))
 
     @override_settings(API_TOKEN_DEFAULT_EXPIRY_DAYS=7)
     def test_default_expiry_applied_on_reset(self):
