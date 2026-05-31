@@ -15,6 +15,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
+from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.filters import (
     EndpointFilter,
     EndpointFilterWithoutObjectLookups,
@@ -27,6 +29,7 @@ from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.labels import get_labels
 from dojo.location.models import Location
+from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Dojo_User, Endpoint, Engagement, Finding, Product, Product_Type, Test
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
@@ -185,7 +188,7 @@ class CustomReport(View):
 
 
 def report_findings(request):
-    findings = Finding.objects.filter()
+    findings = get_authorized_findings(Permissions.Finding_View)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = ReportFindingFilterWithoutObjectLookups if filter_string_matching else ReportFindingFilter
     findings = filter_class(request.GET, queryset=findings)
@@ -208,11 +211,12 @@ def report_findings(request):
 
 def report_endpoints(request):
     if settings.V3_FEATURE_LOCATIONS:
-        endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active).distinct()
+        endpoints = get_authorized_locations(Permissions.Location_View)
+        endpoints = endpoints.filter(findings__status=FindingLocationStatus.Active).distinct()
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
-        endpoints = Endpoint.objects.filter(
+        endpoints = get_authorized_endpoints(Permissions.Location_View).filter(
             finding__active=True,
             finding__false_p=False,
             finding__duplicate=False,
@@ -280,13 +284,14 @@ def product_endpoint_report(request, pid):
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
-        endpoints = Endpoint.objects.filter(finding__active=True,
+        endpoints = Endpoint.objects.filter(product=product,
+                                            finding__active=True,
                                             finding__false_p=False,
                                             finding__duplicate=False,
                                             finding__out_of_scope=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             endpoints = endpoints.filter(finding__active=True)
-        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), product=product)
         endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)

@@ -337,7 +337,7 @@ TEST_RUNNER = env("DD_TEST_RUNNER")
 _populate_notifications_settings(env, globals())
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
-# Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
+# Tag bulk add batch size (used by dojo.tags.utils.bulk_add_tag_to_instances)
 TAG_BULK_ADD_BATCH_SIZE = env("DD_TAG_BULK_ADD_BATCH_SIZE")
 
 

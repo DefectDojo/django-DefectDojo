@@ -14,7 +14,7 @@ from dojo.models import (
     Finding,
     Product,
 )
-from dojo.tags_signals import inherit_instance_tags
+from dojo.tags.inheritance import apply_inherited_tags_for_endpoints
 
 logger = logging.getLogger(__name__)
 
@@ -231,10 +231,16 @@ class EndpointManager(BaseLocationManager):
             if to_create:
                 created = Endpoint.objects.bulk_create(to_create, batch_size=1000)
                 endpoints_by_key.update(zip(to_create_keys, created, strict=True))
-                # bulk_create bypasses post_save signals, so manually trigger tag inheritance
-                # this is not ideal, but we need to take a separate look at the tag inheritance feature itself later
-                for ep in created:
-                    inherit_instance_tags(ep)
+                # bulk_create bypasses post_save so per-row inheritance signals never
+                # fire here. The importer hot path already covers these endpoints via
+                # the per-batch `apply_inherited_tags_for_findings` sweep (it picks
+                # them up through `Endpoint.status_finding.finding`), so this call is
+                # redundant for the importer. We keep a bulk call anyway as a defensive
+                # measure: if anything outside the importer ever bulk-creates endpoints
+                # through this manager, they still receive their inherited Product tags
+                # instead of silently missing them. The bulk helper costs ~2 queries
+                # when there's nothing to apply, vs N per-row signal fires.
+                apply_inherited_tags_for_endpoints(created)
 
         self._endpoints_to_create.clear()
         return endpoints_by_key, created

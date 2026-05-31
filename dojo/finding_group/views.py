@@ -97,7 +97,7 @@ def view_finding_group(request, fgid):
                 elif not finding_group.has_jira_issue:
                     jira_services.link_finding_group(request, finding_group, jira_issue)
             elif push_to_jira:
-                jira_services.push(finding_group, sync=True)
+                jira_services.push(finding_group, force_sync=True)
 
             finding_group.save()
             return HttpResponseRedirect(reverse("view_test", args=(finding_group.test.id,)))
@@ -194,7 +194,7 @@ def push_to_jira(request, fgid):
 
         # it may look like success here, but the push_to_jira are swallowing exceptions
         # but cant't change too much now without having a test suite, so leave as is for now with the addition warning message to check alerts for background errors.
-        if jira_services.push(group, sync=True):
+        if jira_services.push(group, force_sync=True):
             messages.add_message(
                 request,
                 messages.SUCCESS,

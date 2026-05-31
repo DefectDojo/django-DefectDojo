@@ -467,7 +467,7 @@ def post_process_findings_batch(
     push_to_jira=False,
     jira_instance_id=None,
     user=None,
-    sync=False,
+    force_sync=False,
     **kwargs,
 ):
 
@@ -510,7 +510,7 @@ def post_process_findings_batch(
     if product_grading_option and system_settings.enable_product_grade:
         from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id, sync=sync)
+        dojo_dispatch_task(calculate_grade, findings[0].test.engagement.product.id, force_sync=force_sync)
 
     # If we received the ID of a jira instance, then we need to determine the keep in sync behavior
     jira_instance = None
@@ -742,7 +742,7 @@ def bulk_clear_finding_m2m(finding_qs):
     FileUpload.delete() fires and removes files from disk storage.
     Tags are handled via bulk_remove_all_tags to maintain tag counts.
     """
-    from dojo.tag_utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
+    from dojo.tags.utils import bulk_remove_all_tags  # noqa: PLC0415 circular import
 
     finding_ids = finding_qs.values_list("id", flat=True)
 
