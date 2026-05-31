@@ -19,7 +19,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 from rest_framework.fields import DictField
@@ -643,21 +642,6 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
             msg = "Password resets are not allowed for users authorized through SSO."
             raise ValidationError(msg)
         return super().validate(data)
-
-
-class ApiTokenSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="user.id", read_only=True)
-    username = serializers.CharField(source="user.username", read_only=True)
-    expiry = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Token
-        fields = ["user_id", "username", "created", "expiry"]
-
-    @extend_schema_field(serializers.DateTimeField(allow_null=True))
-    def get_expiry(self, obj):
-        uci = getattr(obj.user, "usercontactinfo", None)
-        return getattr(uci, "token_expiry", None)
 
 
 class UserStubSerializer(serializers.ModelSerializer):

@@ -32,6 +32,7 @@ from drf_spectacular.views import SpectacularAPIView
 from rest_framework import mixins, status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -47,7 +48,7 @@ from dojo.api_v2 import (
 )
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.authorization import api_permissions as permissions
-from dojo.authorization.authorization import user_has_permission_or_403, user_is_superuser_or_global_owner
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
@@ -2289,45 +2290,41 @@ class UserContactInfoViewSet(
         return UserContactInfo.objects.all().order_by("id")
 
 
-# Authorization: superuser/global-owner (all tokens) or self (own token only)
-class ApiTokenViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet,
-):
+# Authorization: superuser/global-owner only
+class RevokeApiTokenView(GenericAPIView):
 
     """
-    Manage API tokens. Tokens are looked up by the owner's user ID.
+    Revoke an API token by its key value.
 
-    Superusers and Global Owners can list, retrieve, and revoke tokens for any user.
-    Regular users can only list, retrieve, and revoke their own token.
+    Accepts {"key": "<token>"} and immediately invalidates the matching token.
+    Intended for incident response when a token is discovered to be leaked
+    and the owning user may not be known.
 
-    Revoking a token (DELETE) immediately invalidates it. The user must generate
-    a new token via the UI or POST /api/v2/users/{id}/reset_api_token/ to regain access.
-
-    Token expiry is managed via the user_contact_infos endpoint.
+    Only superusers and Global Owners may call this endpoint.
     """
 
-    serializer_class = serializers.ApiTokenSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["user_id"]
-    lookup_field = "user_id"
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (permissions.IsSuperUserOrGlobalOwner,)
+    pagination_class = None
 
-    def get_queryset(self):
-        qs = Token.objects.select_related("user", "user__usercontactinfo").order_by("user_id")
-        if not user_is_superuser_or_global_owner(self.request.user):
-            qs = qs.filter(user=self.request.user)
-        return qs
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        uci = getattr(instance.user, "usercontactinfo", None)
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"key": {"type": "string"}}, "required": ["key"]}},
+        responses={204: None},
+        summary="Revoke an API token by its key value",
+    )
+    def post(self, request, *args, **kwargs):
+        key = request.data.get("key")
+        if not key:
+            return Response({"detail": "key is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = Token.objects.select_related("user", "user__usercontactinfo").get(key=key)
+        except Token.DoesNotExist:
+            msg = "No token matching the provided key."
+            raise NotFound(msg)
+        uci = getattr(token.user, "usercontactinfo", None)
         if uci:
             uci.token_expiry = None
             uci.save(update_fields=["token_expiry"])
-        self.perform_destroy(instance)
+        token.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

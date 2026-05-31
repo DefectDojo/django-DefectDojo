@@ -13,7 +13,7 @@ from unittests.dojo_test_case import versioned_fixtures
 @versioned_fixtures
 class ApiTokenTest(APITestCase):
 
-    """Test the ApiToken APIv2 endpoint."""
+    """Test API token expiry enforcement and the revoke-by-key endpoint."""
 
     fixtures = ["dojo_testdata.json"]
 
@@ -39,60 +39,42 @@ class ApiTokenTest(APITestCase):
         client.credentials(HTTP_AUTHORIZATION="Token " + token_key)
         return client
 
-    def test_api_token_list_superuser_sees_all(self):
-        r = self.client.get(reverse("api-token-list"))
-        self.assertEqual(r.status_code, 200, r.content[:1000])
-        results = r.json()["results"]
-        self.assertGreaterEqual(len(results), 1)
-        for item in results:
-            for field in ["user_id", "username", "created", "expiry"]:
-                self.assertIn(field, item)
-            self.assertNotIn("key", item)
+    def _revoke_url(self):
+        return reverse("api-token-revoke")
 
-    def test_api_token_list_non_superuser_sees_only_own(self):
-        user, token, _ = self._create_user("api-token-list-user")
-        client = self._client_for(token.key)
+    # --- revoke
 
-        r = client.get(reverse("api-token-list"))
-        self.assertEqual(r.status_code, 200, r.content[:1000])
-        results = r.json()["results"]
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["user_id"], user.id)
+    def test_revoke_by_key_as_superuser(self):
+        user, token, _ = self._create_user("api-token-revoke-super")
 
-    def test_api_token_retrieve_other_user_non_superuser_returns_404(self):
-        _user1, token1, _ = self._create_user("api-token-retrieve-user1")
-        user2, _, _ = self._create_user("api-token-retrieve-user2")
-        client = self._client_for(token1.key)
-
-        r = client.get("{}{}/".format(reverse("api-token-list"), user2.id))
-        self.assertEqual(r.status_code, 404, r.content[:1000])
-
-    def test_api_token_revoke_as_superuser(self):
-        user, _, _ = self._create_user("api-token-revoke-super")
-
-        r = self.client.delete("{}{}/".format(reverse("api-token-list"), user.id))
+        r = self.client.post(self._revoke_url(), {"key": token.key}, format="json")
         self.assertEqual(r.status_code, 204, r.content[:1000])
         self.assertFalse(Token.objects.filter(user=user).exists())
 
-    def test_api_token_revoke_own(self):
-        user, token, _ = self._create_user("api-token-revoke-self")
-        client = self._client_for(token.key)
-
-        r = client.delete("{}{}/".format(reverse("api-token-list"), user.id))
-        self.assertEqual(r.status_code, 204, r.content[:1000])
-        self.assertFalse(Token.objects.filter(user=user).exists())
-
-    def test_api_token_revoke_clears_expiry(self):
-        user, _, _ = self._create_user("api-token-revoke-expiry")
+    def test_revoke_by_key_clears_expiry(self):
+        user, token, _ = self._create_user("api-token-revoke-expiry")
         uci, _ = UserContactInfo.objects.get_or_create(user=user)
         uci.token_expiry = timezone.now() + timedelta(days=30)
         uci.save(update_fields=["token_expiry"])
 
-        r = self.client.delete("{}{}/".format(reverse("api-token-list"), user.id))
+        r = self.client.post(self._revoke_url(), {"key": token.key}, format="json")
         self.assertEqual(r.status_code, 204, r.content[:1000])
 
         uci.refresh_from_db()
         self.assertIsNone(uci.token_expiry)
+
+    def test_revoke_unknown_key_returns_404(self):
+        r = self.client.post(self._revoke_url(), {"key": "notarealtoken"}, format="json")
+        self.assertEqual(r.status_code, 404, r.content[:1000])
+
+    def test_revoke_by_key_non_superuser_forbidden(self):
+        _user, token, _ = self._create_user("api-token-revoke-nonsuperuser")
+        client = self._client_for(token.key)
+
+        r = client.post(self._revoke_url(), {"key": token.key}, format="json")
+        self.assertEqual(r.status_code, 403, r.content[:1000])
+
+    # --- expiry enforcement ---
 
     def test_expired_token_rejected(self):
         user, token, _ = self._create_user("api-token-expired")

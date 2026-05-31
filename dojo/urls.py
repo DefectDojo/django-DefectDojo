@@ -13,7 +13,6 @@ from dojo import views
 from dojo.announcement.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
     AnnouncementViewSet,
-    ApiTokenViewSet,
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
     CeleryViewSet,
@@ -42,6 +41,7 @@ from dojo.api_v2.views import (
     ProductViewSet,
     RegulationsViewSet,
     ReImportScanView,
+    RevokeApiTokenView,
     RiskAcceptanceViewSet,
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
@@ -156,7 +156,6 @@ v2_api.register(r"test_imports", TestImportViewSet, basename="test_imports")
 v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
 v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
-v2_api.register(r"api-tokens", ApiTokenViewSet, basename="api-token")
 v2_api.register(r"users", UsersViewSet, basename="user")
 v2_api.register(r"user_contact_infos", UserContactInfoViewSet, basename="usercontactinfo")
 # Add the location routes
@@ -216,6 +215,7 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/api-tokens/revoke/".format(get_system_setting("url_prefix")), RevokeApiTokenView.as_view(), name="api-token-revoke"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):
