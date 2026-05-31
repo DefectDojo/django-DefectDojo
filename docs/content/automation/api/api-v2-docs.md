@@ -49,43 +49,23 @@ Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOK
 
 ### Token management
 
-DefectDojo provides API endpoints to list, inspect, and revoke API tokens programmatically.
+DefectDojo provides API endpoints to revoke and set expiry on API tokens programmatically.
 
-#### Listing tokens
+#### Revoking a token by key
 
-Superusers and Global Owners can list all active tokens across all users. Regular users can only see their own token.
+When a token value is compromised, a superuser or Global Owner can revoke it directly by its key, without needing to know which user it belongs to:
 
 ```
-GET /api/v2/api-tokens/
+POST /api/v2/api-tokens/revoke/
 Authorization: Token <api_key>
+Content-Type: application/json
+
+{"key": "<token_to_revoke>"}
 ```
 
-Response fields: `user_id`, `username`, `created`, `expiry` (null if the token does not expire).
+Returns 204 on success. The token is immediately revoked and the expiry date is cleared. The owner will need to generate a new token via the UI (`/api/key-v2`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
 
-To filter to a specific user:
-
-```
-GET /api/v2/api-tokens/?user_id=5
-```
-
-#### Retrieving a token
-
-```
-GET /api/v2/api-tokens/{user_id}/
-```
-
-Superusers can retrieve any user's token. Regular users are restricted to their own user ID. Any attempt by a regular user to retrieve another user's ID is met with a 404.
-
-#### Revoking a token
-
-```
-DELETE /api/v2/api-tokens/{user_id}/
-Authorization: Token <api_key>
-```
-
-Returns 204 on success. The token is immediately invalidated. The user will need to generate a new token via the UI (`/api_v2_key/`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
-
-Like retrieval, superuser can revoke any user's token. Regular users can only revoke their own.
+Returns 404 if no token matches the supplied key, 400 if `key` is missing, and 403 for non-superusers.
 
 #### Token expiry
 
