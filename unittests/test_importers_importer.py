@@ -994,6 +994,11 @@ class ReimportDuplicateReactivationTest(DojoTestCase):
             verified=True,
             do_not_reactivate=False,
         )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
 
         result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing_duplicate)
 
@@ -1026,6 +1031,11 @@ class ReimportDuplicateReactivationTest(DojoTestCase):
             verified=True,
             do_not_reactivate=False,
         )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
 
         result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing)
 
