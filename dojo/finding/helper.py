@@ -603,6 +603,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
             duplicate=False,
             duplicate_finding=None,
             active=original.active,
+            verified=original.verified,
             is_mitigated=original.is_mitigated,
         )
         new_original.found_by.set(original.found_by.all())
