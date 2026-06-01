@@ -34,8 +34,6 @@ from openpyxl.styles import Font
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
@@ -55,7 +53,6 @@ from dojo.finding.views import find_available_notetypes
 from dojo.forms import (
     AddFindingsRiskAcceptanceForm,
     CheckForm,
-    CredMappingForm,
     DeleteEngagementForm,
     DoneForm,
     EditRiskAcceptanceForm,
@@ -78,7 +75,6 @@ from dojo.location.models import Location
 from dojo.location.utils import save_locations_to_add
 from dojo.models import (
     Check_List,
-    Cred_Mapping,
     Development_Environment,
     Dojo_User,
     Endpoint,
@@ -133,7 +129,7 @@ def engagement_calendar(request):
         raise Resolver404
 
     if "lead" not in request.GET or "0" in request.GET.getlist("lead"):
-        engagements = get_authorized_engagements(Permissions.Engagement_View)
+        engagements = get_authorized_engagements("view")
     else:
         filters = []
         leads = request.GET.getlist("lead", "")
@@ -141,7 +137,7 @@ def engagement_calendar(request):
             leads.remove("-1")
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
-        engagements = get_authorized_engagements(Permissions.Engagement_View).filter(reduce(operator.or_, filters))
+        engagements = get_authorized_engagements("view").filter(reduce(operator.or_, filters))
 
     engagements = engagements.select_related("lead")
     engagements = engagements.prefetch_related("product")
@@ -156,7 +152,7 @@ def engagement_calendar(request):
             "caltype": "engagements",
             "leads": request.GET.getlist("lead", ""),
             "engagements": engagements,
-            "users": get_authorized_users(Permissions.Engagement_View),
+            "users": get_authorized_users("view"),
         })
 
 
@@ -165,7 +161,7 @@ def get_filtered_engagements(request, view):
         msg = f"View {view} is not allowed"
         raise ValidationError(msg)
 
-    engagements = get_authorized_engagements(Permissions.Engagement_View).order_by("-target_start")
+    engagements = get_authorized_engagements("view").order_by("-target_start")
 
     if view == "active":
         engagements = engagements.filter(active=True)
@@ -199,8 +195,8 @@ def engagements(request, view):
     filtered_engagements = get_filtered_engagements(request, view)
 
     engs = get_page_items(request, filtered_engagements.qs, 25)
-    product_name_words = sorted(get_authorized_products(Permissions.Product_View).values_list("name", flat=True))
-    engagement_name_words = sorted(get_authorized_engagements(Permissions.Engagement_View).values_list("name", flat=True).distinct())
+    product_name_words = sorted(get_authorized_products("view").values_list("name", flat=True))
+    engagement_name_words = sorted(get_authorized_engagements("view").values_list("name", flat=True).distinct())
 
     add_breadcrumb(
         title=f"{view.capitalize()} Engagements",
@@ -219,7 +215,7 @@ def engagements(request, view):
 
 def engagements_all(request):
 
-    products_with_engagements = get_authorized_products(Permissions.Engagement_View)
+    products_with_engagements = get_authorized_products("view")
     products_with_engagements = products_with_engagements.filter(~Q(engagement=None)).distinct()
 
     # count using prefetch instead of just using 'engagement__set_test_test` to avoid loading all test in memory just to count them
@@ -254,7 +250,7 @@ def engagements_all(request):
     prods = get_page_items(request, filtered.qs, 25)
     prods.paginator.count = sum(len(prod.engagement_set.all()) for prod in prods)
     name_words = products_with_engagements.values_list("name", flat=True)
-    eng_words = get_authorized_engagements(Permissions.Engagement_View).values_list("name", flat=True).distinct()
+    eng_words = get_authorized_engagements("view").values_list("name", flat=True).distinct()
 
     add_breadcrumb(
         title="All Engagements",
@@ -271,7 +267,6 @@ def engagements_all(request):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def edit_engagement(request, eid):
     engagement = Engagement.objects.get(pk=eid)
     is_ci_cd = engagement.engagement_type == "CI/CD"
@@ -290,7 +285,7 @@ def edit_engagement(request, eid):
                 user_has_permission_or_403(
                     request.user,
                     form.cleaned_data.get("product"),
-                    Permissions.Engagement_Edit,
+                    "edit",
                 )
             engagement.product = form.cleaned_data.get("product")
             engagement = form.save(commit=False)
@@ -347,7 +342,6 @@ def edit_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Delete, "eid")
 def delete_engagement(request, eid):
     engagement = get_object_or_404(Engagement, pk=eid)
     product = engagement.product
@@ -389,7 +383,6 @@ def delete_engagement(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def copy_engagement(request, eid):
     engagement = get_object_or_404(Engagement, id=eid)
     product = engagement.product
@@ -456,7 +449,7 @@ class ViewEngagement(View):
     def get(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
+        user_has_permission_or_403(request.user, eng, "view")
         tests = eng.test_set.all().order_by("test_type__name", "-updated")
         default_page_num = 10
         tests_filter = self.get_filtered_tests(request, tests, eng)
@@ -486,11 +479,6 @@ class ViewEngagement(View):
         files = eng.files.all()
         form = TypedNoteForm(available_note_types=available_note_types) if note_type_activation else NoteForm()
 
-        creds = Cred_Mapping.objects.filter(
-            product=eng.product).select_related("cred_id").order_by("cred_id")
-        cred_eng = Cred_Mapping.objects.filter(
-            engagement=eng.id).select_related("cred_id").order_by("cred_id")
-
         add_breadcrumb(parent=eng, top_level=False, request=request)
 
         title = ""
@@ -513,8 +501,6 @@ class ViewEngagement(View):
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
                 "jira_project": jira_project,
-                "creds": creds,
-                "cred_eng": cred_eng,
                 "network": network,
                 "preset_test_type": preset_test_type,
             })
@@ -522,7 +508,7 @@ class ViewEngagement(View):
     def post(self, request, eid, *args, **kwargs):
         eng = get_object_or_404(Engagement, id=eid)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, eng, Permissions.Engagement_View)
+        user_has_permission_or_403(request.user, eng, "view")
         tests = eng.test_set.all().order_by("test_type__name", "-updated")
         default_page_num = 10
 
@@ -553,7 +539,7 @@ class ViewEngagement(View):
             available_note_types = find_available_notetypes(notes)
         form = DoneForm()
         files = eng.files.all()
-        user_has_permission_or_403(request.user, eng, Permissions.Note_Add)
+        user_has_permission_or_403(request.user, eng, "add")
         eng.progress = "check_list"
         eng.save()
 
@@ -573,10 +559,6 @@ class ViewEngagement(View):
                                  messages.SUCCESS,
                                  "Note added successfully.",
                                  extra_tags="alert-success")
-        creds = Cred_Mapping.objects.filter(
-            product=eng.product).select_related("cred_id").order_by("cred_id")
-        cred_eng = Cred_Mapping.objects.filter(
-            engagement=eng.id).select_related("cred_id").order_by("cred_id")
 
         add_breadcrumb(parent=eng, top_level=False, request=request)
 
@@ -600,8 +582,6 @@ class ViewEngagement(View):
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
                 "jira_project": jira_project,
-                "creds": creds,
-                "cred_eng": cred_eng,
                 "network": network,
                 "preset_test_type": preset_test_type,
             })
@@ -634,18 +614,11 @@ def prefetch_for_view_tests(tests):
     )
 
 
-@user_is_authorized(Engagement, Permissions.Test_Add, "eid")
 def add_tests(request, eid):
     eng = Engagement.objects.get(id=eid)
-    cred_form = CredMappingForm()
-    cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-        engagement=eng).order_by("cred_id")
 
     if request.method == "POST":
         form = TestForm(request.POST, engagement=eng)
-        cred_form = CredMappingForm(request.POST)
-        cred_form.fields["cred_user"].queryset = Cred_Mapping.objects.filter(
-            engagement=eng).order_by("cred_id")
         if form.is_valid():
             new_test = form.save(commit=False)
             # set default scan_type as it's used in reimport
@@ -662,19 +635,6 @@ def add_tests(request, eid):
                 eng.save()
 
             new_test.save()
-
-            # Save the credential to the test
-            if cred_form.is_valid():
-                if cred_form.cleaned_data["cred_user"]:
-                    # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
-                    cred_user = Cred_Mapping.objects.filter(
-                        pk=cred_form.cleaned_data["cred_user"].id,
-                        engagement=eid).first()
-
-                    new_f = cred_form.save(commit=False)
-                    new_f.test = new_test
-                    new_f.cred_id = cred_user.cred_id
-                    new_f.save()
 
             messages.add_message(
                 request,
@@ -713,7 +673,6 @@ def add_tests(request, eid):
     return render(request, "dojo/add_tests.html", {
         "product_tab": product_tab,
         "form": form,
-        "cred_form": cred_form,
         "eid": eid,
         "eng": eng,
     })
@@ -755,7 +714,7 @@ class ImportScanResultsView(View):
             msg = "Either Engagement or Product has to be provided"
             raise Exception(msg)
         # Ensure the supplied user has access to import to the engagement or product
-        user_has_permission_or_403(user, engagement_or_product, Permissions.Import_Scan_Result)
+        user_has_permission_or_403(user, engagement_or_product, "import")
 
         return engagement, product, engagement_or_product
 
@@ -768,30 +727,6 @@ class ImportScanResultsView(View):
         if request.method == "POST":
             return ImportScanForm(request.POST, request.FILES, **kwargs)
         return ImportScanForm(**kwargs)
-
-    def get_credential_form(
-        self,
-        request: HttpRequest,
-        engagement: Engagement,
-    ) -> CredMappingForm:
-        """
-        Return a new instance of a form managing credentials. If an engagement
-        it present at this time any existing credential objects will be attempted
-        to be fetched to populate the form
-        """
-        if request.method == "POST":
-            return CredMappingForm(request.POST)
-        # If the engagement is not present, return an empty form
-        if engagement is None:
-            return CredMappingForm()
-        # Otherwise get all creds in the associated engagement
-        return CredMappingForm(
-            initial={
-                "cred_user_queryset": Cred_Mapping.objects.filter(
-                    engagement=engagement,
-                ).order_by("cred_id"),
-            },
-        )
 
     def get_jira_form(
         self,
@@ -871,8 +806,6 @@ class ImportScanResultsView(View):
             endpoints=endpoints,
             api_scan_configuration=Product_API_Scan_Configuration.objects.filter(product__id=product_tab.product.id),
         )
-        # Get the credential mapping form
-        cred_form = self.get_credential_form(request, engagement)
         # Get the jira form
         jira_form, push_all_jira_issues = self.get_jira_form(request, engagement_or_product)
         # Return the request and the context
@@ -887,7 +820,6 @@ class ImportScanResultsView(View):
             "engagement_or_product": engagement_or_product,
             "custom_breadcrumb": custom_breadcrumb,
             "title": "Import Scan Results",
-            "cred_form": cred_form,
             "jform": jira_form,
             "scan_types": get_scan_types_sorted(),
             "push_all_jira_issues": push_all_jira_issues,
@@ -902,7 +834,7 @@ class ImportScanResultsView(View):
         level are bubbled up to the user first before we process too much
         """
         form_validation_list = []
-        for form_name in ["form", "jform", "cred_form"]:
+        for form_name in ["form", "jform"]:
             if (form := context.get(form_name)) is not None:
                 if errors := form.errors:
                     form_validation_list.append(errors)
@@ -1069,28 +1001,6 @@ class ImportScanResultsView(View):
         context["push_to_jira"] = push_all_jira_issues or (form and form.cleaned_data.get("push_to_jira"))
         return None
 
-    def process_credentials_form(
-        self,
-        request: HttpRequest,
-        form: CredMappingForm,
-        context: dict,
-    ) -> str | None:
-        """Process the credentials form by creating"""
-        if cred_user := form.cleaned_data["cred_user"]:
-            # Select the credential mapping object from the selected list and only allow if the credential is associated with the product
-            cred_user = Cred_Mapping.objects.filter(
-                pk=cred_user.id,
-                engagement=context.get("engagement"),
-            ).first()
-            # Create the new credential mapping object
-            new_cred_mapping = form.save(commit=False)
-            new_cred_mapping.test = context.get("test")
-            new_cred_mapping.cred_id = cred_user.cred_id
-            new_cred_mapping.save()
-            # update the context
-            context["cred_user"] = cred_user
-        return None
-
     def success_redirect(
         self,
         request: HttpRequest,
@@ -1174,15 +1084,10 @@ class ImportScanResultsView(View):
         # Add test_id to pghistory context now that test is created
         if test := context.get("test"):
             pghistory.context(test_id=test.id)
-        # Process the credential form
-        if form_error := self.process_credentials_form(request, context.get("cred_form"), context):
-            add_error_message_to_response(form_error)
-            return self.failure_redirect(request, context)
         # Otherwise return the user back to the engagement (if present) or the product
         return self.success_redirect(request, context)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
@@ -1194,7 +1099,6 @@ def close_eng(request, eid):
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 @require_POST
 def unlink_jira(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
@@ -1228,7 +1132,6 @@ def unlink_jira(request, eid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
@@ -1247,7 +1150,6 @@ method to complete checklists from the engagement view
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def complete_checklist(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     try:
@@ -1297,7 +1199,6 @@ def complete_checklist(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def add_risk_acceptance(request, eid, fid=None):
     eng = get_object_or_404(Engagement, id=eid)
     finding = None
@@ -1370,12 +1271,10 @@ def add_risk_acceptance(request, eid, fid=None):
                   })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=False)
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def edit_risk_acceptance(request, eid, raid):
     return view_edit_risk_acceptance(request, eid=eid, raid=raid, edit_mode=True)
 
@@ -1541,7 +1440,6 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         })
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     # Validate the engagement ID exists before moving forward
@@ -1552,7 +1450,6 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
@@ -1564,7 +1461,6 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
-@user_is_authorized(Engagement, Permissions.Risk_Acceptance, "eid")
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
@@ -1578,7 +1474,6 @@ def delete_risk_acceptance(request, eid, raid):
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def download_risk_acceptance(request, eid, raid):
     mimetypes.init()
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
@@ -1603,7 +1498,6 @@ under media folder
 """
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_Edit, "eid")
 def upload_threatmodel(request, eid):
     eng = Engagement.objects.get(id=eid)
     add_breadcrumb(
@@ -1636,13 +1530,11 @@ def upload_threatmodel(request, eid):
     })
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def view_threatmodel(request, eid):
     eng = get_object_or_404(Engagement, pk=eid)
     return generate_file_response_from_file_path(eng.tmodel_path)
 
 
-@user_is_authorized(Engagement, Permissions.Engagement_View, "eid")
 def engagement_ics(request, eid):
     eng = get_object_or_404(Engagement, id=eid)
     start_date = datetime.combine(eng.target_start, datetime.min.time())

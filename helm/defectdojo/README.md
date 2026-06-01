@@ -511,7 +511,7 @@ The HELM schema will be generated for you.
 
 # General information about chart values
 
-![Version: 1.9.29](https://img.shields.io/badge/Version-1.9.29-informational?style=flat-square) ![AppVersion: 2.58.4](https://img.shields.io/badge/AppVersion-2.58.4-informational?style=flat-square)
+![Version: 1.9.30](https://img.shields.io/badge/Version-1.9.30-informational?style=flat-square) ![AppVersion: 2.59.0](https://img.shields.io/badge/AppVersion-2.59.0-informational?style=flat-square)
 
 A Helm chart for Kubernetes to install DefectDojo
 
@@ -525,7 +525,7 @@ A Helm chart for Kubernetes to install DefectDojo
 
 | Repository | Name | Version |
 |------------|------|---------|
-| oci://registry-1.docker.io/cloudpirates | valkey | 0.20.0 |
+| oci://registry-1.docker.io/cloudpirates | valkey | 0.20.2 |
 | oci://us-docker.pkg.dev/os-public-container-registry/defectdojo | postgresql | 16.7.27 |
 
 ## Values

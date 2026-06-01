@@ -8,8 +8,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
 from dojo.models import (
     Benchmark_Category,
@@ -39,7 +37,6 @@ def add_benchmark(queryset, product):
     Benchmark_Product.objects.bulk_create(requirements)
 
 
-@user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def update_benchmark(request, pid, _type):
     if request.method == "POST":
         bench_id = request.POST.get("bench_id")
@@ -88,7 +85,6 @@ def update_benchmark(request, pid, _type):
     )
 
 
-@user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def update_benchmark_summary(request, pid, _type, summary):
     if request.method == "POST":
         product = get_object_or_404(Product, id=pid)
@@ -190,7 +186,6 @@ def score_asvs(product, benchmark_type):
     benchmark_product_summary.save()
 
 
-@user_is_authorized(Product, Permissions.Benchmark_Edit, "pid")
 def benchmark_view(request, pid, benchmark_type, cat=None):
     product = get_object_or_404(Product, id=pid)
     benchmark_type = get_object_or_404(Benchmark_Type, id=benchmark_type)
@@ -289,7 +284,6 @@ def benchmark_view(request, pid, benchmark_type, cat=None):
     )
 
 
-@user_is_authorized(Product, Permissions.Benchmark_Delete, "pid")
 def delete(request, pid, benchmark_type):
     product = get_object_or_404(Product, id=pid)
     benchmark_product_summary = get_object_or_404(

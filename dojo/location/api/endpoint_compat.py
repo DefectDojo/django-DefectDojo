@@ -25,11 +25,10 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from dojo.api_v2 import serializers
-from dojo.api_v2.permissions import check_object_permission
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from dojo.api_v2.serializers import TagListSerializerField
 from dojo.api_v2.views import report_generate
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.api_permissions import check_object_permission
 from dojo.filters import CharFieldFilterANDExpression, CharFieldInFilter, OrderingFilter
 from dojo.location.models import LocationFindingReference, LocationProductReference
 from dojo.location.queries import get_authorized_location_finding_reference, get_authorized_location_product_reference
@@ -64,9 +63,9 @@ class UserHasLocationRefPermission(BasePermission):
         return check_object_permission(
             request,
             obj,
-            Permissions.Location_View,
-            Permissions.Location_Edit,
-            Permissions.Location_Delete,
+            "view",
+            "edit",
+            "delete",
         )
 
 
@@ -156,7 +155,7 @@ class V3EndpointCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin, view
             ),
             group_field="location",
         )
-        return get_authorized_location_product_reference(Permissions.Location_View).filter(
+        return get_authorized_location_product_reference("view").filter(
             location__location_type=URL.LOCATION_TYPE,
         ).annotate(
             active_finding_count=Coalesce(active_finding_subquery, Value(0)),
@@ -316,4 +315,4 @@ class V3EndpointStatusCompatibleViewSet(PrefetchListMixin, PrefetchRetrieveMixin
 
     def get_queryset(self):
         """Get authorized URLs using Endpoint authorization logic."""
-        return get_authorized_location_finding_reference(Permissions.Location_View).filter(location__location_type=URL.LOCATION_TYPE).distinct()
+        return get_authorized_location_finding_reference("view").filter(location__location_type=URL.LOCATION_TYPE).distinct()

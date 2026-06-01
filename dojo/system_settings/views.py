@@ -54,14 +54,7 @@ class SystemSettingsView(View):
         context: dict,
     ) -> tuple[HttpRequest, bool]:
         if context["form"].is_valid():
-            if (context["form"].cleaned_data["default_group"] is None and context["form"].cleaned_data["default_group_role"] is not None) or \
-               (context["form"].cleaned_data["default_group"] is not None and context["form"].cleaned_data["default_group_role"] is None):
-                messages.add_message(
-                    request,
-                    messages.WARNING,
-                    "Settings cannot be saved: Default group and Default group role must either both be set or both be empty.",
-                    extra_tags="alert-warning")
-            elif context["form"].cleaned_data["minimum_password_length"] >= context["form"].cleaned_data["maximum_password_length"]:
+            if context["form"].cleaned_data["minimum_password_length"] >= context["form"].cleaned_data["maximum_password_length"]:
                 messages.add_message(
                     request,
                     messages.WARNING,
