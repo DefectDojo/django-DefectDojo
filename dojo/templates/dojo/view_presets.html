@@ -28,7 +28,7 @@
                             <td>
                                 {{ preset.title }}
                             </td>
-                            <td style="width: 400px;">
+                            <td style="min-width: 200px; max-width: 400px;">
                               {% if preset.test_type.all.count > 1 %}
                                 {% for test in preset.test_type.all %}
                                    {{test.name}}{%if not forloop.last%},{%endif%}
@@ -37,7 +37,7 @@
                                 {{ preset.test_type.all.0.name }}
                               {% endif %}
                             </td>
-                            <td style="width: 400px;">
+                            <td style="min-width: 200px; max-width: 400px;">
                               {% if preset.network_locations.all.count > 1 %}
                                 {% for net in preset.network_locations.all %}
                                    {{ net.location }}{%if not forloop.last%},{%endif%}

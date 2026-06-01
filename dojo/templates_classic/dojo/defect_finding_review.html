@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% block content %}
+    {{ block.super }}
+    <h3> Review Finding from Jira</h3>
+    <h4>{{ finding.title }}</h4>
+    <p>Please provide a description on why the finding should be closed or marked as not fixed.</p>
+    <form class="form-horizontal" action="{% url 'defect_finding_review' finding.id %}" method="post">
+        {% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" name="submit" type="submit" value="Finished"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}

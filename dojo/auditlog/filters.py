@@ -9,7 +9,6 @@ from django_filters import (
 )
 from django_filters.filters import ChoiceFilter
 
-from dojo.authorization.roles_permissions import Permissions
 from dojo.filters import DateRangeFilter, DojoFilter
 from dojo.models import Dojo_User
 from dojo.user.queries import get_authorized_users
@@ -23,7 +22,7 @@ class LogEntryFilter(DojoFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.form.fields["actor"].queryset = get_authorized_users(Permissions.Product_View)
+        self.form.fields["actor"].queryset = get_authorized_users("view")
 
     class Meta:
         model = LogEntry
@@ -87,7 +86,7 @@ class PgHistoryFilter(DojoFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.form.fields["user"].queryset = get_authorized_users(Permissions.Product_View)
+        self.form.fields["user"].queryset = get_authorized_users("view")
 
     def filter_pgh_diff_contains(self, queryset, name, value):
         """

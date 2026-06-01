@@ -36,7 +36,6 @@ from polymorphic.base import ManagerInheritanceWarning
 
 # from tagulous.forms import TagWidget
 # import tagulous
-from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.helper import (
@@ -62,9 +61,7 @@ from dojo.models import (
     SEVERITY_CHOICES,
     App_Analysis,
     ChoiceQuestion,
-    Cred_Mapping,
     Development_Environment,
-    Dojo_Group,
     Dojo_User,
     DojoMeta,
     Endpoint,
@@ -1059,9 +1056,9 @@ class ComponentFilter(ProductComponentFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form.fields[
-            "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+            "test__engagement__product__prod_type"].queryset = get_authorized_product_types("view")
         self.form.fields[
-            "test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+            "test__engagement__product"].queryset = get_authorized_products("view")
 
 
 class EngagementDirectFilterHelper(FilterSet):
@@ -1115,8 +1112,8 @@ class EngagementDirectFilter(EngagementDirectFilterHelper, DojoFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.form.fields["product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-        self.form.fields["lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
+        self.form.fields["product__prod_type"].queryset = get_authorized_product_types("view")
+        self.form.fields["lead"].queryset = get_authorized_users("view") \
             .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
@@ -1198,8 +1195,8 @@ class EngagementFilter(EngagementFilterHelper, DojoFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.form.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-        self.form.fields["engagement__lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
+        self.form.fields["prod_type"].queryset = get_authorized_product_types("view")
+        self.form.fields["engagement__lead"].queryset = get_authorized_users("view") \
             .filter(engagement__lead__isnull=False).distinct()
         self.form.fields["tags"].help_text = labels.ASSET_FILTERS_TAGS_HELP
         self.form.fields["not_tags"].help_text = labels.ASSET_FILTERS_NOT_TAGS_HELP
@@ -1219,7 +1216,7 @@ class ProductEngagementsFilter(DojoFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.form.fields["engagement__lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
+        self.form.fields["engagement__lead"].queryset = get_authorized_users("view") \
             .filter(engagement__lead__isnull=False).distinct()
 
     class Meta:
@@ -1306,7 +1303,7 @@ class ProductEngagementFilter(ProductEngagementFilterHelper, DojoFilter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form.fields["lead"].queryset = get_authorized_users(
-            Permissions.Product_Type_View).filter(engagement__lead__isnull=False).distinct()
+            "view").filter(engagement__lead__isnull=False).distinct()
 
 
 class ProductEngagementFilterWithoutObjectLookups(ProductEngagementFilterHelper, DojoFilter):
@@ -1465,7 +1462,7 @@ class ProductFilter(ProductFilterHelper, DojoFilter):
         if "user" in kwargs:
             self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
-        self.form.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.form.fields["prod_type"].queryset = get_authorized_product_types("view")
         self.form.fields["tags"].help_text = labels.ASSET_FILTERS_TAGS_HELP
         self.form.fields["not_tags"].help_text = labels.ASSET_FILTERS_NOT_TAGS_HELP
 
@@ -1624,6 +1621,7 @@ class ApiFindingFilter(DojoFilter):
     verified = BooleanFilter(field_name="verified")
     has_jira = BooleanFilter(field_name="jira_issue", lookup_expr="isnull", exclude=True)
     fix_available = BooleanFilter(field_name="fix_available")
+    mitigation_available = BooleanFilter(method="filter_mitigation_available", label="Mitigation Available")
     # CharFilter
     component_version = CharFilter(lookup_expr="icontains")
     component_name = CharFilter(lookup_expr="icontains")
@@ -1796,6 +1794,11 @@ class ApiFindingFilter(DojoFilter):
 
         return queryset.filter(mitigated=value)
 
+    def filter_mitigation_available(self, queryset, name, value):
+        if value:
+            return queryset.exclude(mitigation__isnull=True).exclude(mitigation__exact="")
+        return queryset.filter(Q(mitigation__isnull=True) | Q(mitigation__exact=""))
+
 
 class PercentageFilter(NumberFilter):
     def __init__(self, *args, **kwargs):
@@ -1830,6 +1833,8 @@ class FindingFilterHelper(FilterSet):
     duplicate = ReportBooleanFilter()
     is_mitigated = ReportBooleanFilter()
     fix_available = ReportBooleanFilter()
+    mitigation = CharFilter(lookup_expr="icontains")
+    mitigation_available = BooleanFilter(method="filter_mitigation_available", label="Mitigation Available")
     mitigated = DateRangeFilter(field_name="mitigated", label="Mitigated Date")
     mitigated_on = DateTimeFilter(field_name="mitigated", lookup_expr="exact", label="Mitigated On", method="filter_mitigated_on")
     mitigated_before = DateTimeFilter(field_name="mitigated", lookup_expr="lt", label="Mitigated Before")
@@ -2020,6 +2025,11 @@ class FindingFilterHelper(FilterSet):
             return queryset.filter(mitigated__gte=value, mitigated__lt=nextday)
 
         return queryset.filter(mitigated=value)
+
+    def filter_mitigation_available(self, queryset, name, value):
+        if value:
+            return queryset.exclude(mitigation__isnull=True).exclude(mitigation__exact="")
+        return queryset.filter(Q(mitigation__isnull=True) | Q(mitigation__exact=""))
 
 
 def get_finding_group_queryset_for_context(pid=None, eid=None, tid=None):
@@ -2264,7 +2274,7 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
             # Filter tests by engagement - get_authorized_tests doesn't support engagement param
             engagement = Engagement.objects.filter(id=self.eid).select_related("product").first()
             if engagement:
-                self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=engagement.product).filter(engagement_id=self.eid).prefetch_related("test_type")
+                self.form.fields["test"].queryset = get_authorized_tests("view", product=engagement.product).filter(engagement_id=self.eid).prefetch_related("test_type")
         elif self.pid is not None:
             # Product context: filter finding groups by product
             if "test__engagement__product" in self.form.fields:
@@ -2277,20 +2287,20 @@ class FindingFilter(FindingFilterHelper, FindingTagFilter):
                     product_id=self.pid,
                 ).all()
             if "test" in self.form.fields:
-                self.form.fields["test"].queryset = get_authorized_tests(Permissions.Test_View, product=self.pid).prefetch_related("test_type")
+                self.form.fields["test"].queryset = get_authorized_tests("view", product=self.pid).prefetch_related("test_type")
         else:
             # Global context: show all authorized finding groups
             self.form.fields[
-                "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
-            self.form.fields["test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
+                "test__engagement__product__prod_type"].queryset = get_authorized_product_types("view")
+            self.form.fields["test__engagement"].queryset = get_authorized_engagements("view")
             if "test" in self.form.fields:
                 del self.form.fields["test"]
 
         if self.form.fields.get("test__engagement__product"):
-            self.form.fields["test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+            self.form.fields["test__engagement__product"].queryset = get_authorized_products("view")
         if self.form.fields.get("finding_group", None):
-            self.form.fields["finding_group"].queryset = get_authorized_finding_groups_for_queryset(Permissions.Finding_Group_View, finding_group_query, user=self.user)
-        self.form.fields["reporter"].queryset = get_authorized_users(Permissions.Finding_View)
+            self.form.fields["finding_group"].queryset = get_authorized_finding_groups_for_queryset("view", finding_group_query, user=self.user)
+        self.form.fields["reporter"].queryset = get_authorized_users("view")
         self.form.fields["reviewers"].queryset = self.form.fields["reporter"].queryset
 
 
@@ -2324,8 +2334,8 @@ class FindingGroupsFilter(FilterSet):
             if "product" in self.form.fields:
                 del self.form.fields["product"]
         else:
-            self.form.fields["product"].queryset = get_authorized_products(Permissions.Product_View)
-            self.form.fields["engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
+            self.form.fields["product"].queryset = get_authorized_products("view")
+            self.form.fields["engagement"].queryset = get_authorized_engagements("view")
 
 
 class AcceptedFindingFilter(FindingFilter):
@@ -2339,8 +2349,8 @@ class AcceptedFindingFilter(FindingFilter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.form.fields["risk_acceptance__owner"].queryset = get_authorized_users(Permissions.Finding_View)
-        self.form.fields["risk_acceptance"].queryset = get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
+        self.form.fields["risk_acceptance__owner"].queryset = get_authorized_users("view")
+        self.form.fields["risk_acceptance"].queryset = get_authorized_risk_acceptances("edit")
 
 
 class AcceptedFindingFilterWithoutObjectLookups(FindingFilterWithoutObjectLookups):
@@ -2396,7 +2406,7 @@ class SimilarFindingHelper(FilterSet):
 
     def filter_queryset(self, *args: list, **kwargs: dict):
         queryset = super().filter_queryset(*args, **kwargs)
-        queryset = get_authorized_findings_for_queryset(Permissions.Finding_View, queryset, self.user)
+        queryset = get_authorized_findings_for_queryset("view", queryset, self.user)
         return queryset.exclude(pk=self.finding.pk)
 
 
@@ -2689,11 +2699,11 @@ class MetricsEndpointFilter(MetricsEndpointFilterHelper):
                 product_id=self.pid,
             ).all()
         else:
-            self.form.fields["finding__test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View).order_by("name")
+            self.form.fields["finding__test__engagement"].queryset = get_authorized_engagements("view").order_by("name")
 
         if "finding__test__engagement__product__prod_type" in self.form.fields:
             self.form.fields[
-                "finding__test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+                "finding__test__engagement__product__prod_type"].queryset = get_authorized_product_types("view")
 
     class Meta:
         model = Endpoint_Status
@@ -2941,12 +2951,12 @@ class EndpointFilter(EndpointFilterHelper, DojoFilter):
         if "user" in kwargs:
             self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
-        self.form.fields["product"].queryset = get_authorized_products(Permissions.Product_View)
+        self.form.fields["product"].queryset = get_authorized_products("view")
 
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints_for_queryset(Permissions.Location_View, parent)
+        return get_authorized_endpoints_for_queryset("view", parent)
 
     class Meta:
         model = Endpoint
@@ -3087,7 +3097,7 @@ class EndpointFilterWithoutObjectLookups(EndpointFilterHelper):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_endpoints_for_queryset(Permissions.Location_View, parent)
+        return get_authorized_endpoints_for_queryset("view", parent)
 
     class Meta:
         model = Endpoint
@@ -3214,7 +3224,7 @@ class EngagementTestFilter(EngagementTestFilterHelper, DojoFilter):
         super(DojoFilter, self).__init__(*args, **kwargs)
         self.form.fields["test_type"].queryset = Test_Type.objects.filter(test__engagement=self.engagement).distinct().order_by("name")
         self.form.fields["api_scan_configuration"].queryset = Product_API_Scan_Configuration.objects.filter(product=self.engagement.product).distinct()
-        self.form.fields["lead"].queryset = get_authorized_users(Permissions.Product_Type_View) \
+        self.form.fields["lead"].queryset = get_authorized_users("view") \
             .filter(test__lead__isnull=False).distinct()
 
 
@@ -3361,12 +3371,6 @@ class ApiAppAnalysisFilter(DojoFilter):
         fields = ["product", "name", "user", "version"]
 
 
-class ApiCredentialsFilter(DojoFilter):
-    class Meta:
-        model = Cred_Mapping
-        fields = "__all__"
-
-
 class EndpointReportFilter(DojoFilter):
     protocol = CharFilter(lookup_expr="icontains")
     userinfo = CharFilter(lookup_expr="icontains")
@@ -3417,6 +3421,7 @@ class ReportFindingFilterHelper(FilterSet):
     out_of_scope = ReportBooleanFilter()
     outside_of_sla = FindingSLAFilter(label="Outside of SLA")
     file_path = CharFilter(lookup_expr="icontains")
+    mitigation_available = BooleanFilter(method="filter_mitigation_available", label="Mitigation Available")
 
     o = OrderingFilter(
         fields=(
@@ -3439,6 +3444,11 @@ class ReportFindingFilterHelper(FilterSet):
                    "numerical_severity", "reporter", "last_reviewed",
                    "jira_creation", "jira_change", "files"]
 
+    def filter_mitigation_available(self, queryset, name, value):
+        if value:
+            return queryset.exclude(mitigation__isnull=True).exclude(mitigation__exact="")
+        return queryset.filter(Q(mitigation__isnull=True) | Q(mitigation__exact=""))
+
     def manage_kwargs(self, kwargs):
         self.prod_type = None
         self.product = None
@@ -3456,7 +3466,7 @@ class ReportFindingFilterHelper(FilterSet):
     @property
     def qs(self):
         parent = super().qs
-        return get_authorized_findings_for_queryset(Permissions.Finding_View, parent)
+        return get_authorized_findings_for_queryset("view", parent)
 
 
 class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
@@ -3476,7 +3486,7 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
         # duplicate_finding queryset needs to restricted in line with permissions
         # and inline with report scope to avoid a dropdown with 100K entries
         duplicate_finding_query_set = self.form.fields["duplicate_finding"].queryset
-        duplicate_finding_query_set = get_authorized_findings_for_queryset(Permissions.Finding_View, duplicate_finding_query_set)
+        duplicate_finding_query_set = get_authorized_findings_for_queryset("view", duplicate_finding_query_set)
 
         if self.test:
             duplicate_finding_query_set = duplicate_finding_query_set.filter(test=self.test)
@@ -3499,12 +3509,12 @@ class ReportFindingFilter(ReportFindingFilterHelper, FindingTagFilter):
 
         if "test__engagement__product__prod_type" in self.form.fields:
             self.form.fields[
-                "test__engagement__product__prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+                "test__engagement__product__prod_type"].queryset = get_authorized_product_types("view")
         if "test__engagement__product" in self.form.fields:
             self.form.fields[
-                "test__engagement__product"].queryset = get_authorized_products(Permissions.Product_View)
+                "test__engagement__product"].queryset = get_authorized_products("view")
         if "test__engagement" in self.form.fields:
-            self.form.fields["test__engagement"].queryset = get_authorized_engagements(Permissions.Engagement_View)
+            self.form.fields["test__engagement"].queryset = get_authorized_engagements("view")
 
 
 class ReportFindingFilterWithoutObjectLookups(ReportFindingFilterHelper, FindingTagStringFilter):
@@ -3678,6 +3688,7 @@ class UserFilter(DojoFilter):
             ("email", "email"),
             ("is_active", "is_active"),
             ("is_superuser", "is_superuser"),
+            ("is_staff", "is_staff"),
             ("date_joined", "date_joined"),
             ("last_login", "last_login"),
         ),
@@ -3685,22 +3696,13 @@ class UserFilter(DojoFilter):
             "username": "User Name",
             "is_active": "Active",
             "is_superuser": "Superuser",
+            "is_staff": "Staff",
         },
     )
 
     class Meta:
         model = Dojo_User
-        fields = ["is_superuser", "is_active", "first_name", "last_name", "username", "email"]
-
-
-class GroupFilter(DojoFilter):
-    name = CharFilter(lookup_expr="icontains")
-    description = CharFilter(lookup_expr="icontains")
-
-    class Meta:
-        model = Dojo_Group
-        fields = ["name", "description"]
-        exclude = ["users"]
+        fields = ["is_superuser", "is_staff", "is_active", "first_name", "last_name", "username", "email"]
 
 
 # This class is used exclusively by Findings

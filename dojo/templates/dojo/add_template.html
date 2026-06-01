@@ -6,20 +6,11 @@
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
-{% block add_styles %}
-    {{ block.super }}
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <h3> {{ name }} {{ template }}</h3>
 
-    <form id="add_template" class="form-horizontal" method="post">{% csrf_token %}
+    <form id="add_template" class="" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -28,9 +19,9 @@
         </div>
     </form>
     {% if template %}
-        {% if "Finding_Delete"|has_global_permission %}
+        {% if "delete"|has_global_permission %}
             <form method="post" action="{% url 'delete_template' template.id %}"
-                style="display: inline" class="form-horizontal">
+                style="display: inline" class="">
                 {% csrf_token %}
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">

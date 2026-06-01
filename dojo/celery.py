@@ -67,7 +67,7 @@ class DojoAsyncTask(Task):
             kwargs["async_user_id"] = user.id if user else None
 
         # Control flag used for sync/async decision; never pass into the task itself
-        kwargs.pop("sync", None)
+        kwargs.pop("force_sync", None)
 
         # Track dispatch
         dojo_async_task_counter.incr(

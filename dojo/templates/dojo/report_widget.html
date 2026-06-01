@@ -11,7 +11,7 @@
                 {{ extra_help }}
             </div>
         {% endif %}
-        <form id="{{ title|slugify }}" class="form-horizontal">
+        <form id="{{ title|slugify }}" class="">
             <fieldset>
                 {% include "dojo/form_fields.html" with form=form %}
             </fieldset>

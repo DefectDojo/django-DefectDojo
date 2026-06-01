@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
     {{ block.super }}
     <h3>Add Choice</h3>
 
-    <form class="form-horizontal" method="post">{% csrf_token %}
+    <form class="" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
@@ -14,5 +15,5 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <script type="application/javascript" src="{{ STATIC_URL }}admin/js/admin/RelatedObjectLookups.js"></script>
+    <script type="application/javascript" src="{% static "admin/js/admin/RelatedObjectLookups.js" %}"></script>
 {% endblock %}

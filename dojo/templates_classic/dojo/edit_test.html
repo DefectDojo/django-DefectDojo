@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block add_styles %}
+    {{ block.super }}
+.chosen-container {
+    width: 70% !important;
+}
+{% endblock %}
+
+{% block content %}
+    {{ block.super }}
+    <h3> Edit Test Details </h3>
+    <form class="form-horizontal" method="post">{% csrf_token %}
+        {% include "dojo/form_fields.html" with form=form %}
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input class="btn btn-primary" type="submit" name="edit_test" value="Submit"/>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+{% endblock %}
