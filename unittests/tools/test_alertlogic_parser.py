@@ -97,8 +97,9 @@ class TestAlertlogicParser(DojoTestCase):
     def test_endpoint_single_ipv4(self):
         # Row 0 has a single IPv4 address
         finding = self._findings("many_vulns.csv")[0]
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        endpoint = finding.unsaved_endpoints[0]
+        endpoints = self.get_unsaved_locations(finding)
+        self.assertEqual(1, len(endpoints))
+        endpoint = endpoints[0]
         self.assertEqual("192.0.2.20", endpoint.host)
         self.assertEqual("tcp", endpoint.protocol)
         self.assertEqual(8080, endpoint.port)
@@ -106,27 +107,29 @@ class TestAlertlogicParser(DojoTestCase):
     def test_endpoint_multi_ipv4_and_ipv6(self):
         # Row 1: "198.51.100.30, fe80::250:56ff:fe96:b97"
         finding = self._findings("many_vulns.csv")[1]
-        self.assertEqual(2, len(finding.unsaved_endpoints))
-        hosts = {ep.host for ep in finding.unsaved_endpoints}
+        endpoints = self.get_unsaved_locations(finding)
+        self.assertEqual(2, len(endpoints))
+        hosts = {ep.host for ep in endpoints}
         self.assertEqual({"198.51.100.30", "fe80::250:56ff:fe96:b97"}, hosts)
 
     def test_endpoint_ipv6_only(self):
         # Row 6 has IPv6-only address
         finding = self._findings("many_vulns.csv")[6]
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        self.assertEqual("2001:db8::1:80", finding.unsaved_endpoints[0].host)
+        endpoints = self.get_unsaved_locations(finding)
+        self.assertEqual(1, len(endpoints))
+        self.assertEqual("2001:db8::1:80", endpoints[0].host)
 
     def test_endpoint_port_zero_is_omitted(self):
         # Row 2 has Protocol/Port "TCP/0" — port should not be set
         finding = self._findings("many_vulns.csv")[2]
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        self.assertIsNone(finding.unsaved_endpoints[0].port)
+        endpoints = self.get_unsaved_locations(finding)
+        self.assertEqual(1, len(endpoints))
+        self.assertIsNone(endpoints[0].port)
 
     def test_endpoint_clean_succeeds(self):
-        # Hard guardrail: every endpoint must pass clean()
-        for finding in self._findings("many_vulns.csv"):
-            for endpoint in finding.unsaved_endpoints or []:
-                endpoint.clean()
+        # Hard guardrail: every endpoint/location must pass clean()
+        # (get_unsaved_locations cleans each entry internally)
+        self.validate_locations(self._findings("many_vulns.csv"))
 
     def test_cve_present(self):
         # Row 0 has CVE-2021-44228 (Log4Shell)

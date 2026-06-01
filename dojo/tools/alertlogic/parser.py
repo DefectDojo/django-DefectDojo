@@ -1,7 +1,10 @@
 import csv
 import io
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 SEVERITY_MAPPING = {
     "Info": "Info",
@@ -67,12 +70,11 @@ class AlertlogicParser:
             if cve:
                 finding.unsaved_vulnerability_ids = [cve]
 
-            endpoints = _build_endpoints(
+            _add_locations(
+                finding,
                 row.get("IP Address"),
                 row.get("Protocol/Port"),
             )
-            if endpoints:
-                finding.unsaved_endpoints = endpoints
 
             tags = _build_tags(row)
             if tags:
@@ -124,22 +126,26 @@ def _parse_cvss(value):
         return None
 
 
-def _build_endpoints(ip_field, protoport_field):
+def _add_locations(finding, ip_field, protoport_field):
     if not ip_field:
-        return []
+        return
     protocol, port = _parse_proto_port(protoport_field)
-    endpoints = []
     for raw_host in ip_field.split(","):
         host = raw_host.strip()
         if not host:
             continue
-        kwargs = {"host": host}
-        if protocol:
-            kwargs["protocol"] = protocol
-        if port:
-            kwargs["port"] = port
-        endpoints.append(Endpoint(**kwargs))
-    return endpoints
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(
+                LocationData.url(host=host, protocol=protocol or "", port=port),
+            )
+        else:
+            # TODO: Delete this after the move to Locations
+            kwargs = {"host": host}
+            if protocol:
+                kwargs["protocol"] = protocol
+            if port:
+                kwargs["port"] = port
+            finding.unsaved_endpoints.append(Endpoint(**kwargs))
 
 
 def _parse_proto_port(value):
