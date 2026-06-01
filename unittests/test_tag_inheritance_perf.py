@@ -585,9 +585,14 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 420
-    EXPECTED_ZAP_IMPORT_V3 = 444
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 81
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 169
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 198
+    # perf/watson-index-prefetch on top of upstream batch_mode baseline:
+    # -52 import queries (adapter-derived select_related/prefetch_related in
+    # the async watson indexer, executed inline under CELERY_TASK_ALWAYS_EAGER);
+    # +5 reimport (no-change + with-new) queries from removal of
+    # WATSON_ASYNC_INDEX_UPDATE_THRESHOLD making async dispatch unconditional.
+    EXPECTED_ZAP_IMPORT_V2 = 368
+    EXPECTED_ZAP_IMPORT_V3 = 392
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 170
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 199
