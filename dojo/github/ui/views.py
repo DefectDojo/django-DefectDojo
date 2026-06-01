@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.github.models import GITHUB_Conf
 from dojo.github.services import validate_github_credentials
 from dojo.github.ui.forms import DeleteGITHUBConfForm, GITHUBForm
@@ -24,7 +23,6 @@ def webhook(request):
     return HttpResponse("")
 
 
-@user_is_configuration_authorized("dojo.add_github_conf")
 def new_github(request):
     if request.method == "POST":
         gform = GITHUBForm(request.POST, instance=GITHUB_Conf())
@@ -55,7 +53,6 @@ def new_github(request):
                 {"gform": gform})
 
 
-@user_is_configuration_authorized("dojo.view_github_conf")
 def github(request):
     confs = GITHUB_Conf.objects.all()
     add_breadcrumb(title="GitHub List", top_level=not len(request.GET), request=request)
@@ -65,7 +62,6 @@ def github(request):
                    })
 
 
-@user_is_configuration_authorized("dojo.delete_github_conf")
 def delete_github(request, tid):
     github_instance = get_object_or_404(GITHUB_Conf, pk=tid)
     # eng = test.engagement

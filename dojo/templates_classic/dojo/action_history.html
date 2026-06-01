@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% load display_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            {% if pghistory_history %}
+                <div class="panel panel-default">
+                    <div class="panel-heading tight">
+                        <h4>
+                            PostgreSQL History (pghistory)
+                            <div class="dropdown pull-right">
+                                <button id="show-pghistory-filters" data-toggle="collapse" data-target="#pghistory-filters" class="btn btn-primary toggle-filters" aria-label="Filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            </div>
+                        </h4>
+                    </div>
+                    <div id="pghistory-filters" class="is-filters panel-body collapse {% if pghistory_filter.form.has_changed %}in{% endif %}">
+                        {% include "dojo/filter_snippet.html" with form=pghistory_filter.form %}
+                    </div>
+                    <div class="clearfix">
+                        {% include "dojo/paging_snippet.html" with page=pghistory_history %}
+                    </div>
+                    <div class="table-responsive">
+                        <table class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Label</th>
+                                <th>Object</th>
+                                <th>User</th>
+                                <th>URL</th>
+                                <th>IP Address</th>
+                                <th>Data</th>
+                                <th>Context</th>
+                                <th>Object ID</th>
+                                <th>Changes</th>
+                            </tr>
+                            {% for h in pghistory_history %}
+                                <tr>
+                                    <td>{{ h.pgh_created_at }}</td>
+                                    <td>{{ h.pgh_label }}</td>
+                                    <td>
+                                        {% if h.object_url %}
+                                            <a href="{{ h.object_url }}">{{ h.object_str|default:"N/A" }}</a>
+                                        {% else %}
+                                            {{ h.object_str|default:"N/A" }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ h.user|default:"N/A" }}</td>
+                                    <td>
+                                        {% if h.url and h.url != "N/A" %}
+                                            <a href="{{ h.url }}" target="_blank" title="{{ h.url }}">{{ h.url|truncatechars:50 }}</a>
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ h.remote_addr|default:"N/A" }}</td>
+                                    <td>
+                                        <details>
+                                            <summary style="cursor: pointer; color: #007bff; text-decoration: underline; font-weight: 500;">
+                                                <i class="fa fa-plus-circle" style="margin-right: 5px;"></i>View
+                                            </summary>
+                                            <pre>{{ h.pgh_data|pprint|default:"N/A" }}</pre>
+                                        </details>
+                                    </td>
+                                    <td>
+                                        {% if h.pgh_context %}
+                                            <details>
+                                                <summary style="cursor: pointer; color: #007bff; text-decoration: underline; font-weight: 500;">
+                                                    <i class="fa fa-plus-circle" style="margin-right: 5px;"></i>View
+                                                </summary>
+                                                <pre>{{ h.pgh_context|pprint|default:"N/A" }}</pre>
+                                            </details>
+                                        {% else %}
+                                            <span class="text-muted">None</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if h.object_url and h.pgh_obj_id %}
+                                            <a href="{{ h.object_url }}">{{ h.pgh_obj_id }}</a>
+                                        {% else %}
+                                            {{ h.pgh_obj_id|default:"N/A" }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if h.pgh_label == "initial_backfill" %}
+                                            <span class="badge badge-info">Initial Backfill</span>
+                                        {% elif h.pgh_diff %}
+                                            <div>
+                                                {% for field, values in h.pgh_diff.items %}
+                                                    <div style="margin-bottom: 4px;">
+                                                        <strong>{{ field }}:</strong>
+                                                        <span class="text-danger">
+                                                            {% if values.0 is None %}
+                                                                <em>None</em>
+                                                            {% elif values.0 == "" %}
+                                                                <em>''</em>
+                                                            {% else %}
+                                                                {{ values.0|truncatechars:50 }}
+                                                            {% endif %}
+                                                        </span>
+                                                        to
+                                                        <span class="text-success">
+                                                            {% if values.1 is None %}
+                                                                <em>None</em>
+                                                            {% elif values.1 == "" %}
+                                                                <em>''</em>
+                                                            {% else %}
+                                                                {{ values.1|truncatechars:50 }}
+                                                            {% endif %}
+                                                        </span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-muted">No Changes</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="clearfix">
+                        {% include "dojo/paging_snippet.html" with page=pghistory_history %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if auditlog_history %}
+                <div class="panel panel-default">
+                    <div class="panel-heading tight">
+                        <h4>
+                            Audit Log History (django-auditlog)
+                            <div class="dropdown pull-right">
+                                <button id="show-filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters" aria-label="Filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
+                            </div>
+                        </h4>
+                    </div>
+                    <div id="the-filters" class="is-filters panel-body collapse {% if log_entry_filter.form.has_changed %}in{% endif %}">
+                        {% include "dojo/filter_snippet.html" with form=log_entry_filter.form %}
+                    </div>
+                    <div class="clearfix">
+                        {% include "dojo/paging_snippet.html" with page=auditlog_history %}
+                    </div>
+                    <div class="table-responsive">
+                        <table class="tablesorter-bootstrap table table-bordered table-condensed table-striped table-hover">
+                            <tr>
+                                <th>Action</th>
+                                <th>Actor</th>
+                                <th>Date/Time</th>
+                                <th>Changes</th>
+                            </tr>
+                            {% for h in auditlog_history %}
+                                <tr>
+                                    <td>{{ h }}</td>
+                                    <td>{{ h.actor }}</td>
+                                    <td>{{ h.timestamp }}</td>
+                                    <td>
+                                        {{ h.changes|action_log_entry|linebreaks}}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                    <div class="clearfix">
+                        {% include "dojo/paging_snippet.html" with page=auditlog_history %}
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if not pghistory_history and not auditlog_history %}
+                <p class="text-center">No update history found for this object</p>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    {% include "dojo/filter_js_snippet.html" %}
+    <style>
+        /* Style for collapsible data view */
+        details summary {
+            transition: color 0.2s ease;
+        }
+        details summary:hover {
+            color: #0056b3 !important;
+        }
+        /* Change icon when expanded */
+        details[open] summary .fa-plus-circle:before {
+            content: "\f056"; /* fa-minus-circle */
+        }
+    </style>
+{% endblock %}

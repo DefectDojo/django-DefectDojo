@@ -71,9 +71,8 @@
                                     <td>{{ survey.expiration }}</td> 
                                     <td>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-sm btn-secondary" data-toggle="modal"
-                                                    data-target="#shareQuestionnaireModal"
-                                                    data-whatever="/empty_questionnaire/{{ survey.id }}/answer">
+                                            <button type="button" class="btn btn-sm btn-secondary"
+                                                    onclick="openShareModal('/empty_questionnaire/{{ survey.id }}/answer')">
                                                 <i class="fa-solid fa-share"></i> Share Questionnaire
                                             </button>
                                             {% if "dojo.delete_engagement_survey"|has_configuration_permission:request %}
@@ -127,44 +126,36 @@
         </div>
     </div>
 
-    <div class="modal fade" id="shareQuestionnaireModal" tabindex="-1" role="dialog" aria-labelledby="shareQuestionnaireModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="shareQuestionnaireModalLabel">Share Questionnaire Link</h4>
+    <dialog class="modal" id="shareQuestionnaireModal" aria-labelledby="shareQuestionnaireModalLabel">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="this.closest('dialog').close()" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="shareQuestionnaireModalLabel">Share Questionnaire Link</h4>
+            </div>
+            <div class="modal-body">
+                <p id="questionnaireURL"></p>
+                <div class="alert alert-info" role="alert">
+                    <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
+                    this questionnaire.
                 </div>
-                <div class="modal-body">
-                    <p id="questionnaireURL"></p>
-                    <div class="alert alert-info" role="alert">
-                        <b>Note:</b> Only users that are authorized for {{ eng.product}} will be allowed to answer
-                        this questionnaire.
-                    </div>
 
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="this.closest('dialog').close()">Close</button>
             </div>
         </div>
-    </div>
+    </dialog>
 {% endblock %}
 
 {% block postscript %}
     {{ block.super }}
     <script type="application/javascript">
-        $('#shareQuestionnaireModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget) // Button that triggered the modal
-            var path = button.data('whatever') // Extract info from data-* attributes
-            // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-            // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-            var modal = $(this)
-            var http = location.protocol;
-            var slashes = http.concat("//");
-            var host = slashes.concat(window.location.host);
-            modal.find('p#questionnaireURL').text('Questionnaire URL: ' + host + path)
-        })
+        function openShareModal(path) {
+            var host = location.protocol + '//' + window.location.host;
+            document.getElementById('questionnaireURL').textContent = 'Questionnaire URL: ' + host + path;
+            document.getElementById('shareQuestionnaireModal').showModal();
+        }
     </script>
 {% endblock postscript %}
 

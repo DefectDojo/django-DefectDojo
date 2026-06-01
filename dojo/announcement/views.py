@@ -7,9 +7,6 @@ from django.urls import reverse
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from dojo.authorization.authorization_decorators import (
-    user_is_configuration_authorized,
-)
 from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
 from dojo.models import Announcement, UserAnnouncement
 from dojo.utils import add_breadcrumb
@@ -17,7 +14,6 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized("dojo.change_announcement")
 def configure_announcement(request):
     remove = False
     if request.method == "GET":
