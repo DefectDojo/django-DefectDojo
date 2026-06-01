@@ -182,6 +182,8 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     """
     from watson.search import SearchContextManager, default_search_engine  # noqa: PLC0415 circular import
 
+    from dojo.utils_watson_prefetch import build_indexing_queryset  # noqa: PLC0415 circular import
+
     logger.debug(f"Starting async watson index update for {len(pk_list)} {model_name} instances")
 
     try:
@@ -194,8 +196,11 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
         app_label, model_name = model_name.split(".")
         model_class = apps.get_model(app_label, model_name)
 
-        # Bulk load instances and add them to the context
-        instances = model_class.objects.filter(pk__in=pk_list)
+        # Bulk load instances and add them to the context. The queryset auto-derives
+        # select_related/prefetch_related from the adapter's fields/store paths to
+        # avoid N+1 queries during indexing. Disable via DD_WATSON_INDEX_PREFETCH_ENABLED=False.
+        adapter = engine.get_adapter(model_class)
+        instances = build_indexing_queryset(model_class, pk_list, adapter)
         instances_added = 0
         instances_skipped = 0
 

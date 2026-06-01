@@ -19,6 +19,18 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## May 2026: v2.58
 
+### May 26, 2026: v2.58.4
+
+* **(Pro UI)** Migrated the Pro UI select buttons to the new shared component for consistent behavior across forms.
+* **(Reports)** Lowered the minimum permission required to access reporting, so more roles can reach reports without elevated privileges.
+* **(Tools)** CycloneDX parser no longer drops the `vector` field on import.
+
+### May 18, 2026: v2.58.3
+
+* **(Licensing)** Pro features are now blocked at 130% license usage, with weekly finding-usage enforcement backed by a new auditable multi-enforcement License Policy. The capacity alert threshold was raised from 80% to 90%.
+* **(Pro UI)** Added UI support for relative location relationships.
+* **(Permissions)** Finding duplicate API actions now enforce object-level permission checks, report views are scoped to the requesting user's authorized products, and location finding references are anchored to the finding's own product.
+
 ### May 11, 2026: v2.58.2
 
 * **(Connectors)** Connectors now support subtypes, so a single connector type can be configured against multiple flavors of the same upstream tool.

@@ -106,6 +106,9 @@ class DojoAppConfig(AppConfig):
         register_django_pghistory_models()
         configure_audit_system()
 
+        from dojo.middleware import install_intermediate_flush_hook  # noqa: PLC0415
+        install_intermediate_flush_hook()
+
 
 def get_model_fields_with_extra(model, extra_fields=()):
     return get_model_fields(get_model_default_fields(model), extra_fields)

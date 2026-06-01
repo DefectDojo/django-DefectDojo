@@ -1,5 +1,5 @@
 ---
-title: "Authorized Users"
+title: "Open-Source Permissions"
 description: "How access to Products and Product Types is granted in open-source DefectDojo"
 weight: 1
 audience: opensource

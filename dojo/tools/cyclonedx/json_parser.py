@@ -112,7 +112,7 @@ class CycloneDXJSONParser:
                         rating.get("method") == "CVSSv3"
                         or rating.get("method") == "CVSSv31"
                     ):
-                        raw_vector = rating["vector"]
+                        raw_vector = rating.get("vector", "")
                         cvssv3 = Cyclonedxhelper()._get_cvssv3(raw_vector)
                         severity = rating.get("severity")
                         if cvssv3:
