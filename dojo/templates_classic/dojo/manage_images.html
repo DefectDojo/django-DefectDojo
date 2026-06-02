@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    {{ block.super }}
+    <h3> Add images to {{ finding }}</h3>
+    <div class="alert alert-info" role="alert">
+        You may add as many images to this finding as needed (three new images at a time). To delete an image, check the
+        "Delete" checkbox under it.
+    </div>
+
+    <form class="form-horizontal" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% for pic_form in images_formset %}
+            <fieldset>
+                {% include "dojo/form_fields.html" with form=pic_form %}
+            </fieldset>
+        {% endfor %}
+        <fieldset>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    {{ images_formset.management_form }}
+                    <button class="btn btn-success">Save</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

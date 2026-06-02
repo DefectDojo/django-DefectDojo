@@ -72,11 +72,15 @@ class DojoAppConfig(AppConfig):
 
         register_check(check_configuration_deduplication, "dojo")
 
+        # Trigger registration of the OS authorization queryset filters.
+        # query_registrations.py is no longer imported by the package
+        # __init__ (to avoid circular import edge cases during early model
+        # loading) — we do it here once all models are ready.
         # Load any signals here that will be ready for runtime
         # Importing the signals file is good enough if using the receiver decorator
         import dojo.announcement.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.authorization.query_registrations  # noqa: PLC0415, F401
         import dojo.benchmark.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
-        import dojo.cred.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
 
         # TODO: Delete this after the move to Locations
         import dojo.endpoint.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
@@ -90,7 +94,7 @@ class DojoAppConfig(AppConfig):
         import dojo.product_type.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.risk_acceptance.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.sla_config.helpers  # noqa: PLC0415, F401 raised: AppRegistryNotReady
-        import dojo.tags_signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
+        import dojo.tags.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.test.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.tool_product.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
         import dojo.url.signals  # noqa: PLC0415, F401 raised: AppRegistryNotReady
@@ -101,6 +105,9 @@ class DojoAppConfig(AppConfig):
         # during startup
         register_django_pghistory_models()
         configure_audit_system()
+
+        from dojo.middleware import install_intermediate_flush_hook  # noqa: PLC0415
+        install_intermediate_flush_hook()
 
 
 def get_model_fields_with_extra(model, extra_fields=()):

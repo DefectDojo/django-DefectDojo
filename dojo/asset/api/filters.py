@@ -16,8 +16,6 @@ from dojo.labels import get_labels
 from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
 )
 
 labels = get_labels()
@@ -104,19 +102,3 @@ class ApiAssetFilter(DojoFilter):
             ("user_records", "user_records"),
         ),
     )
-
-
-class AssetMemberFilterSet(FilterSet):
-    asset_id = NumberFilter(field_name="product_id")
-
-    class Meta:
-        model = Product_Member
-        fields = ("id", "user_id")
-
-
-class AssetGroupFilterSet(FilterSet):
-    asset_id = NumberFilter(field_name="product_id")
-
-    class Meta:
-        model = Product_Group
-        fields = ("id", "group_id")
