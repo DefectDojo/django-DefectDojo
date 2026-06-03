@@ -613,6 +613,12 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit superusers."
             raise ValidationError(msg)
 
+        instance_is_staff = self.instance.is_staff if self.instance is not None else False
+        data_is_staff = data.get("is_staff", instance_is_staff)
+        if not self.context["request"].user.is_superuser and data_is_staff != instance_is_staff:
+            msg = "Only superusers are allowed to add or edit staff users."
+            raise ValidationError(msg)
+
         if self.context["request"].method in {"PATCH", "PUT"} and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
