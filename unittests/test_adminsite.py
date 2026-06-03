@@ -1,7 +1,8 @@
 import django.apps
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.urls import reverse
+from django.contrib.auth.models import AnonymousUser
+from django.http import HttpRequest
 
 from .dojo_test_case import DojoTestCase
 
@@ -30,37 +31,48 @@ class AdminAccessGate(DojoTestCase):
     is_staff is a near-superuser bypass under the legacy OS auth model, so
     /admin/ must require is_superuser. Django's default UserAdmin change
     form would otherwise let any is_staff user with auth.change_user tick
-    is_superuser on themselves.
+    is_superuser on themselves. Tested at the gate-function level so the
+    assertions hold regardless of whether DD_DJANGO_ADMIN_ENABLED mounts
+    the admin URLConf in the current environment.
     """
 
-    def test_staff_non_superuser_blocked_from_admin(self):
+    @staticmethod
+    def _request_for(user):
+        req = HttpRequest()
+        req.user = user
+        return req
+
+    def test_staff_non_superuser_denied(self):
         User = get_user_model()
         password = "testTEST1234!@#$"
         staff = User.objects.create_user(
             username="staff-no-root", password=password, is_staff=True,
         )
-        self.client.force_login(staff)
+        self.assertFalse(admin.site.has_permission(self._request_for(staff)))
 
-        for url in (
-            reverse("admin:index"),
-            reverse("admin:auth_user_changelist"),
-            reverse("admin:auth_user_change", args=[staff.id]),
-        ):
-            with self.subTest(url=url):
-                resp = self.client.get(url)
-                self.assertEqual(resp.status_code, 302, url)
-                self.assertIn("/admin/login/", resp["Location"], url)
+    def test_non_staff_non_superuser_denied(self):
+        User = get_user_model()
+        password = "testTEST1234!@#$"
+        plain = User.objects.create_user(username="plain-user", password=password)
+        self.assertFalse(admin.site.has_permission(self._request_for(plain)))
 
-    def test_superuser_can_reach_admin(self):
+    def test_anonymous_denied(self):
+        self.assertFalse(admin.site.has_permission(self._request_for(AnonymousUser())))
+
+    def test_inactive_superuser_denied(self):
+        User = get_user_model()
+        password = "testTEST1234!@#$"
+        root = User.objects.create_superuser(
+            username="inactive-root", email="i@example.com", password=password,
+        )
+        root.is_active = False
+        root.save(update_fields=["is_active"])
+        self.assertFalse(admin.site.has_permission(self._request_for(root)))
+
+    def test_active_superuser_allowed(self):
         User = get_user_model()
         password = "testTEST1234!@#$"
         root = User.objects.create_superuser(
             username="root-test", email="r@example.com", password=password,
         )
-        self.client.force_login(root)
-
-        self.assertEqual(self.client.get(reverse("admin:index")).status_code, 200)
-        self.assertEqual(
-            self.client.get(reverse("admin:auth_user_changelist")).status_code,
-            200,
-        )
+        self.assertTrue(admin.site.has_permission(self._request_for(root)))

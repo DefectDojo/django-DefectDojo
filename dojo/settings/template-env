@@ -1,8 +1,9 @@
 # Django Debug, don't enable on production!
 DD_DEBUG=False
 
-# Enables Django Admin
-DD_DJANGO_ADMIN_ENABLED=True
+# Enables the Django admin interface at /admin/. Off by default; uncomment
+# this line to expose it. Access is restricted to superusers regardless.
+# DD_DJANGO_ADMIN_ENABLED=True
 
 # A secret key for a particular Django installation.
 DD_SECRET_KEY=#DD_SECRET_KEY#
