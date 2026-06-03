@@ -35,8 +35,9 @@ class AdminAccessGate(DojoTestCase):
 
     def test_staff_non_superuser_blocked_from_admin(self):
         User = get_user_model()
+        password = "testTEST1234!@#$"
         staff = User.objects.create_user(
-            username="staff-no-root", password="x", is_staff=True,
+            username="staff-no-root", password=password, is_staff=True,
         )
         self.client.force_login(staff)
 
@@ -52,8 +53,9 @@ class AdminAccessGate(DojoTestCase):
 
     def test_superuser_can_reach_admin(self):
         User = get_user_model()
+        password = "testTEST1234!@#$"
         root = User.objects.create_superuser(
-            username="root-test", email="r@example.com", password="x",
+            username="root-test", email="r@example.com", password=password,
         )
         self.client.force_login(root)
 
