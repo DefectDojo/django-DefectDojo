@@ -104,7 +104,7 @@ Tests can be accessed from various sections of the DefectDojo UI.
 
 ![image](images/tests_ss16.png)
 
-## Test Lifecycle 
+## Working with Tests 
 
 ### Create Tests
 
