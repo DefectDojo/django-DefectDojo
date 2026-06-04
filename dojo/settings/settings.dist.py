@@ -224,6 +224,10 @@ env = environ.FileAwareEnv(
     DD_RATE_LIMITER_ACCOUNT_LOCKOUT=(bool, False),
     # when enabled SonarQube API parser will download the security hotspots
     DD_SONARQUBE_API_PARSER_HOTSPOTS=(bool, True),
+    # When enabled, Lacework API importer will also import host vulnerabilities (in addition to containers)
+    DD_LACEWORK_API_IMPORTER_INCLUDE_HOSTS=(bool, True),
+    # Time delta in hours for Lacework API import queries (max 168 hours / 7 days)
+    DD_LACEWORK_API_IMPORTER_TIMEDELTA_HOURS=(int, 24),
     # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
     # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement
     DD_ASYNC_OBJECT_DELETE=(bool, False),
@@ -1008,6 +1012,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "SonarQube Scan": ["cwe", "severity", "file_path"],
     "SonarQube API Import": ["title", "file_path", "line"],
     "Sonatype Application Scan": ["title", "cwe", "file_path", "component_name", "component_version", "vulnerability_ids"],
+    "Lacework API Import": ["vuln_id_from_tool", "component_name", "file_path"],
     "Dependency Check Scan": ["title", "cwe", "file_path"],
     "Dockle Scan": ["title", "description", "vuln_id_from_tool"],
     "Dependency Track Finding Packaging Format (FPF) Export": ["component_name", "component_version", "vulnerability_ids"],
@@ -1264,6 +1269,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "SonarQube Scan": DEDUPE_ALGO_HASH_CODE,
     "SonarQube API Import": DEDUPE_ALGO_HASH_CODE,
     "Sonatype Application Scan": DEDUPE_ALGO_HASH_CODE,
+    "Lacework API Import": DEDUPE_ALGO_HASH_CODE,
     "Dependency Check Scan": DEDUPE_ALGO_HASH_CODE,
     "Dockle Scan": DEDUPE_ALGO_HASH_CODE,
     "Tenable Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1579,6 +1585,10 @@ DUPLICATE_CLUSTER_CASCADE_DELETE = env("DD_DUPLICATE_CLUSTER_CASCADE_DELETE")
 
 # Deside if SonarQube API parser should download the security hotspots
 SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
+
+# Lacework API Import configuration
+LACEWORK_API_IMPORTER_INCLUDE_HOSTS = env("DD_LACEWORK_API_IMPORTER_INCLUDE_HOSTS")
+LACEWORK_API_IMPORTER_TIMEDELTA_HOURS = env("DD_LACEWORK_API_IMPORTER_TIMEDELTA_HOURS")
 
 # When enabled, deleting objects will be occur from the bottom up. In the example of deleting an engagement
 # The objects will be deleted as follows Endpoints -> Findings -> Tests -> Engagement

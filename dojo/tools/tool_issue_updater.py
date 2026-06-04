@@ -5,6 +5,8 @@ import pghistory
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.models import Finding
+from dojo.tools.api_lacework.parser import SCAN_LACEWORK_API
+from dojo.tools.api_lacework.updater import LaceworkApiUpdater
 from dojo.tools.api_sonarqube.parser import SCAN_SONARQUBE_API
 from dojo.tools.api_sonarqube.updater import SonarQubeApiUpdater
 from dojo.tools.api_sonarqube.updater_from_source import SonarQubeApiUpdaterFromSource
@@ -20,7 +22,7 @@ def async_tool_issue_update(finding, *args, **kwargs):
 
 def is_tool_issue_updater_needed(finding, *args, **kwargs):
     test_type = finding.test.test_type
-    return test_type.name == SCAN_SONARQUBE_API
+    return test_type.name in (SCAN_SONARQUBE_API, SCAN_LACEWORK_API)
 
 
 @app.task
@@ -34,6 +36,8 @@ def tool_issue_updater(finding_id, *args, **kwargs):
 
     if test_type.name == SCAN_SONARQUBE_API:
         SonarQubeApiUpdater().update_sonarqube_finding(finding)
+    elif test_type.name == SCAN_LACEWORK_API:
+        LaceworkApiUpdater().update_lacework_finding(finding)
 
 
 @app.task
