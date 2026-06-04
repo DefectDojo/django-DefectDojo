@@ -1,4 +1,5 @@
 {% load event_tags %}
+{% load display_tags %}
 {% block css %}
     {{ form.media.css }}
 {% endblock %}
@@ -16,6 +17,16 @@
 {% for field in form.hidden_fields %}
     {{ field }}
 {% endfor %}
+
+{% if form|has_required_field %}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <p class="help-block">
+                <em>Required fields are marked with an asterisk</em><sup>*</sup>
+            </p>
+        </div>
+    </div>
+{% endif %}
 
 {% for field in form.visible_fields %}
     <div class="form-group{% if field.errors %} has-error{% endif %}">
