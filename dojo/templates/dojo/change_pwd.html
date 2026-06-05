@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block content %}
     {{ block.super }}
-    <form method="post" class="form-horizontal" autocomplete="off">
+    <form method="post" class="" autocomplete="off">
         {% csrf_token %}
         <fieldset>
             <legend>{% trans "Change Password" %}</legend>

@@ -36,16 +36,8 @@ logger = logging.getLogger(__name__)
 
 root = environ.Path(__file__) - 3  # Three folders back
 
-# SSO env schema is merged in if dojo.sso is available
-_sso_env_schema = {}
-try:
-    from dojo.sso.settings import SSO_ENV_SCHEMA
-    _sso_env_schema = SSO_ENV_SCHEMA
-except ImportError:
-    pass
-
 # reference: https://pypi.org/project/django-environ/
-env = environ.FileAwareEnv(**{**dict(
+env = environ.FileAwareEnv(
     # Set casting and default values
     DD_SITE_URL=(str, "http://localhost:8080"),
     DD_DEBUG=(bool, False),
@@ -59,7 +51,7 @@ env = environ.FileAwareEnv(**{**dict(
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, "/"),
     DD_LOGIN_URL=(str, "/login"),
-    DD_DJANGO_ADMIN_ENABLED=(bool, True),
+    DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
@@ -123,9 +115,17 @@ env = environ.FileAwareEnv(**{**dict(
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
-    # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
+    # Batch size for async watson search-index update tasks. Also doubles as
+    # the per-request intermediate-flush threshold: once the in-memory watson
+    # context reaches this many pending objects mid-request,
+    # AsyncSearchContextMiddleware flushes them to async celery tasks instead
+    # of waiting for end-of-request. Set to 0 (or negative) to disable the
+    # intermediate flush.
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
+    # When True, the async watson indexer auto-derives select_related/prefetch_related
+    # paths from each adapter's `fields`/`store` to avoid N+1 queries during indexing.
+    # Falls back to a plain queryset on any error (logged).
+    DD_WATSON_INDEX_PREFETCH_ENABLED=(bool, True),
     DD_FOOTER_VERSION=(str, ""),
     # models should be passed to celery by ID, default is False (for now)
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
@@ -146,8 +146,6 @@ env = environ.FileAwareEnv(**{**dict(
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
-    DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
-    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
     # Some security policies require allowing users to have only one active session
     DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -246,7 +244,6 @@ env = environ.FileAwareEnv(**{**dict(
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
     # Enable endpoint which allow user to get API token when user+pass is provided
-    # It is useful to disable when non-local authentication (like SAML, Azure, ...) is in place
     DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
@@ -270,7 +267,7 @@ env = environ.FileAwareEnv(**{**dict(
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
     # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
     **NOTIFICATIONS_ENV_DEFAULTS,
-), **_sso_env_schema})
+)
 
 
 def generate_url(scheme, double_slashes, user, password, host, port, path, params):
@@ -340,7 +337,7 @@ TEST_RUNNER = env("DD_TEST_RUNNER")
 _populate_notifications_settings(env, globals())
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
-# Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
+# Tag bulk add batch size (used by dojo.tags.utils.bulk_add_tag_to_instances)
 TAG_BULK_ADD_BATCH_SIZE = env("DD_TAG_BULK_ADD_BATCH_SIZE")
 
 
@@ -476,9 +473,6 @@ FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
 REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
-# Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
-SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
-SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
 
 DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 
@@ -699,20 +693,44 @@ if not env("DD_DEFAULT_SWAGGER_UI"):
 # TEMPLATES
 # ------------------------------------------------------------------------------
 
+# Two parallel template trees coexist on this branch: the new Tailwind v4 UI at
+# dojo/templates/ (the default Django app dir) and the classic Bootstrap 3 / SB
+# Admin 2 UI at dojo/templates_classic/. Per-user resolution is handled by
+# UIPreferenceLoader; see dojo/template_loaders.py.
+_DOJO_TAILWIND_TEMPLATES_DIR = root("dojo/templates")
+_DOJO_CLASSIC_TEMPLATES_DIR = root("dojo/templates_classic")
+# Sub-package template dirs (dojo/notifications, dojo/github, ...) share a
+# single list that the FilesystemLoader below reads by reference, so any
+# late-binding settings can append a template dir at startup and have it
+# picked up at render time.
+_DOJO_EXTRA_TEMPLATE_DIRS = [
+    root("dojo/auditlog/templates"),
+    root("dojo/notifications/templates"),
+    root("dojo/github/templates"),
+]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # dojo.auditlog/notifications/github are subpackages of the dojo Django
-        # app, so APP_DIRS does not auto-discover their templates/ directories.
-        # Add them explicitly.
-        "DIRS": [
-            root("dojo/auditlog/templates"),
-            root("dojo/notifications/templates"),
-            root("dojo/github/templates"),
-        ],
-        "APP_DIRS": True,
+        # DIRS shares the _DOJO_EXTRA_TEMPLATE_DIRS list reference with the
+        # FilesystemLoader entry below; later append()s land in both places.
+        "DIRS": _DOJO_EXTRA_TEMPLATE_DIRS,
+        # APP_DIRS is False because dojo's templates are loaded explicitly via
+        # UIPreferenceLoader; the FilesystemLoader entry below picks up
+        # template dirs from the dojo/auditlog, dojo/notifications and
+        # dojo/github consolidations; other apps' templates are loaded via the
+        # app_directories.Loader entry.
+        "APP_DIRS": False,
         "OPTIONS": {
             "debug": env("DD_DEBUG"),
+            "loaders": [
+                ("dojo.template_loaders.UIPreferenceLoader",
+                 _DOJO_TAILWIND_TEMPLATES_DIR,
+                 _DOJO_CLASSIC_TEMPLATES_DIR),
+                ("django.template.loaders.filesystem.Loader",
+                 _DOJO_EXTRA_TEMPLATE_DIRS),
+                "django.template.loaders.app_directories.Loader",
+            ],
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
@@ -760,6 +778,7 @@ INSTALLED_APPS = (
     "pgtrigger",
     "pghistory",
     "single_session",
+    "django_htmx",
 )
 
 # ------------------------------------------------------------------------------
@@ -775,10 +794,12 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
     "crum.CurrentRequestUserMiddleware",
+    "dojo.authorization.middleware.AuthorizationMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
@@ -809,15 +830,6 @@ EMAIL_CONFIG = env.email_url(
     "DD_EMAIL_URL", default="smtp://user@:password@localhost:25")
 
 vars().update(EMAIL_CONFIG)
-
-# ------------------------------------------------------------------------------
-# SSO (loaded from dojo.sso if available)
-# ------------------------------------------------------------------------------
-try:
-    from dojo.sso.settings import apply_sso_settings
-    apply_sso_settings(env, globals())
-except ImportError:
-    pass
 
 # ------------------------------------------------------------------------------
 # SINGLE_USER_SESSION
@@ -865,8 +877,8 @@ if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
 CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 
 # Watson async index update settings
-WATSON_ASYNC_INDEX_UPDATE_THRESHOLD = env("DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD")
 WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
+WATSON_INDEX_PREFETCH_ENABLED = env("DD_WATSON_INDEX_PREFETCH_ENABLED")
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -1093,6 +1105,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "n0s1 Scanner": ["description"],
     "IriusRisk Threats Scan": ["title", "component_name"],
     "Orca Security Alerts": ["title", "component_name"],
+    "Xygeni SCA Scan": ["vulnerability_ids", "component_name", "component_version"],
     "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
 }
 
@@ -1168,6 +1181,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
     "OpenReports": True,
+    "Xygeni SCA Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1363,6 +1377,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OpenReports": DEDUPE_ALGO_HASH_CODE,
     "IriusRisk Threats Scan": DEDUPE_ALGO_HASH_CODE,
     "Orca Security Alerts": DEDUPE_ALGO_HASH_CODE,
+    "Xygeni SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Xygeni SCA Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Xygeni Secrets Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
 }
 
@@ -1490,11 +1507,6 @@ LOGGING = {
             "propagate": False,
         },
         "dojo.specific-loggers.deduplication": {
-            "handlers": [rf"{LOGGING_HANDLER}"],
-            "level": str(LOG_LEVEL),
-            "propagate": False,
-        },
-        "saml2": {
             "handlers": [rf"{LOGGING_HANDLER}"],
             "level": str(LOG_LEVEL),
             "propagate": False,

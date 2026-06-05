@@ -44,7 +44,7 @@
                     <ul class="dropdown-menu dropdown-menu-right"
                         role="menu"
                         aria-labelledby="dropdownMenu1">
-                        {% if test|has_object_permission:"Test_Edit" %}
+                        {% if test|has_object_permission:"edit" %}
                             <li role="presentation">
                                 <a href="{% url 'edit_test' test.id %}">
                                     <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit Test" %}
@@ -57,7 +57,7 @@
                             </li>
                         {% endif %}
                         {% if show_re_upload %}
-                            {% if test|has_object_permission:"Import_Scan_Result" %}
+                            {% if test|has_object_permission:"import" %}
                                 <li role="presentation">
                                     <a href="{% url 're_import_scan_results' test.id %}">
                                         <i class="fa-solid fa-upload"></i> {% trans "Re-Upload Scan" %}
@@ -65,7 +65,7 @@
                                 </li>
                             {% endif %}
                         {% endif %}
-                        {% if test|has_object_permission:"Note_Add" %}
+                        {% if test|has_object_permission:"add" %}
                             <li role="presentation">
                                 <a id="add_notes_link" href="#add_notes">
                                     <i class="fa-solid fa-comments"></i> {% trans "Add Notes" %}
@@ -87,7 +87,7 @@
                                 <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                             </a>
                         </li>
-                        {% if test|has_object_permission:"Test_Delete" %}
+                        {% if test|has_object_permission:"delete" %}
                             <li role="separator" class="divider"></li>
                             <li role="presentation">
                                 <a class="text-danger" href="{% url 'delete_test' test.id %}">
@@ -114,12 +114,7 @@
                         <th>
                             {% trans "Reimports" %}
                             <i class="fa-solid fa-circle-question has-popover"
-                            data-trigger="hover"
-                            data-content="Total numbers of reimports done for this test."
-                            data-placement="right"
-                            data-container="body"
-                            data-original-title=""
-                            title="">
+                            data-content="Total numbers of reimports done for this test.">
                             </i>
                         </th>
                     {% endif %}
@@ -142,7 +137,7 @@
                     <td>
                         <a target="_blank"
                         data-toggle="tooltip"
-                        data-placement="bottom"
+                       
                         title="{{ test.updated }}">{{ test.updated|date }}</a>
                     </td>
                     {% if test.percent_complete > 0 %}
@@ -166,11 +161,11 @@
                     {% endif %}
                     {% if test.api_scan_configuration %}
                         <td>
-                            {% if prod|has_object_permission:"Product_Edit" %}
+                            {% if prod|has_object_permission:"edit" %}
                                 <a href="{% url 'edit_api_scan_configuration' prod.id test.api_scan_configuration.id %}">
                                 {% endif %}
                                 {{ test.api_scan_configuration }}
-                                {% if prod|has_object_permission:"Product_Edit" %}
+                                {% if prod|has_object_permission:"edit" %}
                                 </a>
                             {% endif %}
                         </td>
@@ -186,7 +181,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4>
-                            {% trans "Details" %} <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i class="glyphicon glyphicon-chevron-up"></i></a></span>
+                            {% trans "Details" %} <span class="pull-right"><a data-toggle="collapse" href="#vuln_desc"><i class="fa-solid fa-chevron-up"></i></a></span>
                         </h4>
                     </div>
                     <div id="vuln_desc" class="panel-body finding-description collapse in">{{ test.description|markdown_render }}</div>
@@ -203,12 +198,7 @@
                     <h4 class="has-filters">
                         {% trans "Import History" %} ({{  test.total_reimport_count }})
                         <i class="fa-solid fa-circle-question has-popover"
-                        data-trigger="hover"
-                        data-content="List of imports/reimports that created/closed/reactivated any findings in this test."
-                        data-placement="right"
-                        data-container="body"
-                        data-original-title=""
-                        title="">
+                        data-content="List of imports/reimports that created/closed/reactivated any findings in this test.">
                         </i>
                         <div class="dropdown pull-right">
                             <button id="show-filters"
@@ -221,7 +211,7 @@
                             &nbsp;
                             <span class="pull-right">
                                 <a data-toggle="collapse" href="#import_history">
-                                    <i class="glyphicon glyphicon-chevron-down"></i>
+                                    <i class="fa-solid fa-chevron-down"></i>
                                 </a>
                             </span>
                         </div>
@@ -317,7 +307,7 @@
                         <div class="dropdown pull-right">
                             <span class="pull-right">
                                 <a data-toggle="collapse" href="#finding_groups_panel">
-                                    <i class="glyphicon glyphicon-chevron-down"></i>
+                                    <i class="fa-solid fa-chevron-down"></i>
                                 </a>
                             </span>
                         </div>
@@ -390,14 +380,14 @@
                                         <div class="dropdown">
                                             <a href="#" class="dropdown-toggle pull-left" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
                                             <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                                                {% if group|has_object_permission:"Finding_Group_Edit" %}
+                                                {% if group|has_object_permission:"edit" %}
                                                     <li>
                                                         <a class="" href="{% url 'view_finding_group' group.id %}">
                                                             <i class="fa-solid fa-pen-to-square"></i> {% trans "View/Edit" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}
-                                                {% if group|has_object_permission:"Finding_Group_Delete" %}
+                                                {% if group|has_object_permission:"delete" %}
                                                     <li>
                                                         <form method="post"
                                                             action="{% url 'delete_finding_group' group.id %}"
@@ -426,11 +416,11 @@
                                     <a href="{% url 'view_finding_group' group.id %}">{{ group.name|truncatechars_html:60 }}</a>
                                 </td>
                                 <td>
-                                    <i class="has-popover" data-trigger="hover" data-placement="right" data-html="true" data-content="
+                                    <i class="has-popover" data-html="true" data-content="
                                         {% for finding in group.findings.all %}
                                             {{ finding.title }}<br>
                                         {% endfor %}
-                                        " data-container="body" data-original-title="Findings" title="">
+                                        ">
                                         <a href="{% url 'view_test' test.id %}?finding_group={{ group.id }}">{{ group.findings.all|length }}</a>
                                     </i>
                                 </td>
@@ -482,17 +472,30 @@
                                                 <i id="unlink_group_jira_{{ group.id }}"
                                                 data-group-id="{{ group.id }}"
                                                 class="fa-solid fa-trash unlink_group_jira"
-                                                title="Unlink JIRA issue from this group of findings."></i>
+                                                title="Unlink JIRA issue from this group of findings."
+                                                hx-post="{% url 'finding_group_unlink_jira' group.id %}"
+                                                hx-swap="none"
+                                                hx-on::after-request="window.location.reload()"
+                                                hx-confirm="Are you sure you want to unlink this JIRA issue?"
+                                                style="cursor:pointer"></i>
                                                 <i id="push_group_to_jira_{{ group.id }}"
                                                 data-group-id="{{ group.id }}"
                                                 class="fa-solid fa-share-from-square push_group_to_jira"
-                                                title="Update JIRA issue with current data from this group of findings."></i>
+                                                title="Update JIRA issue with current data from this group of findings."
+                                                hx-post="{% url 'finding_group_push_to_jira' group.id %}"
+                                                hx-swap="none"
+                                                hx-on::after-request="window.location.reload()"
+                                                style="cursor:pointer"></i>
                                             {% else %}
                                                 {% trans "None" %}
                                                 <i id="push_group_to_jira_{{ group.id }}"
                                                 data-group-id="{{ group.id }}"
                                                 class="fa-solid fa-share-from-square push_group_to_jira"
-                                                title="Create JIRA issue for this group of findings"></i>
+                                                title="Create JIRA issue for this group of findings"
+                                                hx-post="{% url 'finding_group_push_to_jira' group.id %}"
+                                                hx-swap="none"
+                                                hx-on::after-request="window.location.reload()"
+                                                style="cursor:pointer"></i>
                                                 {% comment %} <a href="{% url 'finding_link_to_jira' group.id %}" title="Link existing JIRA issue to finding.">
                                                             <i class="fa-solid fa-asterisk" title="Link existing JIRA issue to finding."></i>
                                                 </a> {% endcomment %}
@@ -536,7 +539,7 @@
                                 class="btn btn-primary toggle-filters">
                             <i class="fa-solid fa-filter"></i> <i class="caret"></i>
                         </button>
-                        {% if test|has_object_permission:"Finding_Add" %}
+                        {% if test|has_object_permission:"add" %}
                             <button class="btn btn-primary dropdown-toggle"
                                     type="button"
                                     id="dropdownMenu_test_add"
@@ -603,11 +606,11 @@
             <div class="clearfix pagination-in-panel">
                 {% include "dojo/paging_snippet.html" with page=findings prefix='findings' page_size=True %}
             </div>
-            {% if test|has_object_permission:"Finding_Edit" or test|has_object_permission:"Finding_Delete" %}
+            {% if test|has_object_permission:"edit" or test|has_object_permission:"delete" %}
                 <div class="dropdown hidden"
                     style="padding-bottom: 5px;"
                     id="bulk_edit_menu">
-                    {% if test|has_object_permission:"Finding_Edit" %}
+                    {% if test|has_object_permission:"edit" %}
                         <button class="btn btn-info btn-sm btn-secondary dropdown-toggle"
                                 type="button"
                                 id="dropdownMenu2"
@@ -624,18 +627,18 @@
                                     id="merge_findings"
                                     class="btn btn-info btn-sm btn-secondary"
                                     data-toggle="tooltip"
-                                    data-placement="bottom"
+                                   
                                     title="Merge Findings">
                                 <a class="white-color merge" href="#" alt="Merge Findings">
                                     <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
                                 </a>
                             </button>
                         {% endif %}
-                        {% if test|has_object_permission:"Finding_Delete" %}
+                        {% if test|has_object_permission:"delete" %}
                             <button type="button"
                                     class="btn btn-info btn-sm btn-secondary"
                                     data-toggle="tooltip"
-                                    data-placement="bottom"
+                                   
                                     title="Delete Findings">
                                 <a class="white-color delete-bulk" href="#" alt="Delete Findings">
                                     <i class="fa-solid fa-trash"></i>
@@ -884,7 +887,7 @@
                     <thead>
                         <tr>
                             {% block header %}
-                                {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
+                                {% if test|has_object_permission:"edit" or test|has_object_permission:"delete" %}
                                     <th class="centered" title="Select all visible findings.">
                                         <div class="dropdown">
                                             <button class="btn btn-primary dropdown-toggle"
@@ -997,7 +1000,7 @@
                         {% for finding in findings %}
                             <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                                 {% block body %}
-                                    {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
+                                    {% if test|has_object_permission:"edit" or test|has_object_permission:"delete" %}
                                         <td class="centered">
                                             <form action="#">
                                                 <input type="checkbox"
@@ -1019,7 +1022,7 @@
                                                             <i class="fa-solid fa-circle-right"></i> {% trans "View" %}
                                                         </a>
                                                     </li>
-                                                    {% if finding|has_object_permission:"Finding_Edit" %}
+                                                    {% if finding|has_object_permission:"edit" %}
                                                         <li>
                                                             <a class=""
                                                             href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -1033,9 +1036,9 @@
                                                         </li>
                                                         <li class="divider"></li>
                                                     {% endif %}
-                                                    {% if finding|has_object_permission:"Finding_View" %}
+                                                    {% if finding|has_object_permission:"view" %}
                                                         {% user_can_clear_peer_review finding request.user as clear_peer_review %}
-                                                        {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                                                        {% if finding|has_object_permission:"edit" and clear_peer_review %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'clear_finding_review' finding.id %}">
                                                                     <i class="icon-user-check"></i> {% trans "Clear Review" %}
@@ -1049,21 +1052,21 @@
                                                             </li>
                                                         {% endif %}
                                                     {% endif %}
-                                                    {% if finding|has_object_permission:"Finding_Edit" %}
+                                                    {% if finding|has_object_permission:"edit" %}
                                                         <li role="presentation">
                                                             <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
                                                                 <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
-                                                    {% if finding|has_object_permission:"Finding_Add" %}
+                                                    {% if finding|has_object_permission:"add" %}
                                                         <li role="presentation">
                                                             <a href="{% url 'mktemplate' finding.id %}">
                                                                 <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                             </a>
                                                         </li>
                                                     {% endif %}
-                                                    {% if finding|has_object_permission:"Finding_Edit" %}
+                                                    {% if finding|has_object_permission:"edit" %}
                                                         <li role="presentation">
                                                             <a href="{% url 'find_template_to_apply' finding.id %}">
                                                                 <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
@@ -1083,7 +1086,7 @@
                                                             </li>
                                                         {% endif %}
                                                     {% endif %}
-                                                    {% if finding|has_object_permission:"Risk_Acceptance" %}
+                                                    {% if finding|has_object_permission:"edit" %}
                                                         {% if finding.risk_accepted %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
@@ -1115,7 +1118,7 @@
                                                             <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                         </a>
                                                     </li>
-                                                    {% if finding|has_object_permission:"Finding_Delete" %}
+                                                    {% if finding|has_object_permission:"delete" %}
                                                         <li class="divider"></li>
                                                         <li>
                                                             <form method="post"
@@ -1151,19 +1154,14 @@
                                         {% endif %}
                                         {% if finding.file_path %}
                                             <i class="fa-solid fa-folder has-popover dojo-sup"
-                                            data-trigger="hover"
                                             data-html="true"
                                             data-content="
                                                 {{ finding.file_path }}{% if finding.line %}:{{finding.line}}{% endif %}
-                                            "
-                                            data-placement="right"
-                                            data-container="body"
-                                            data-original-title="Files"
-                                            title=""></i>
+                                            "></i>
                                         {% endif %}
                                         {% if V3_FEATURE_LOCATIONS %}
                                             {% if finding.locations.exists %}
-                                                <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                                <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-content="
                                                 {% for ref in finding.locations.all %}
                                                     {% if ref.status == "Mitigated" %} &#10003; {{ ref.location }}
                                                         <br/>
@@ -1172,12 +1170,12 @@
                                                             <br/>
                                                     {% endif %}
                                                 {% endfor %}
-                                                " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                                "></i>
                                             {% endif %}
                                         {% else %}
                                             {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
                                             {% if finding.endpoints.all %}
-                                                <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                                <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-content="
                                                 {% for endpoint_status in finding.status_finding.all %}
                                                     {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}
                                                         <br/>
@@ -1186,26 +1184,16 @@
                                                             <br/>
                                                     {% endif %}
                                                 {% endfor %}
-                                                " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                                "></i>
                                             {% endif %}
                                         {% endif %}
                                         {% if finding.component_name %}
                                             <i class="fa-solid fa-file has-popover dojo-sup"
-                                            data-trigger="hover"
-                                            data-placement="right"
-                                            data-content="{{ finding.component_name }} - {{ finding.component_version }}"
-                                            data-container="body"
-                                            data-original-title="Component"
-                                            title=""></i>
+                                            data-content="{{ finding.component_name }} - {{ finding.component_version }}"></i>
                                         {% endif %}
                                         {% if finding.notes.all %}
-                                            <i class="glyphicon glyphicon-comment has-popover dojo-sup"
-                                            data-trigger="hover"
-                                            data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"
-                                            data-placement="left"
-                                            data-container="body"
-                                            data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
-                                            title=""></i>
+                                            <i class="fa-solid fa-comment has-popover dojo-sup"
+                                            data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"></i>
                                             <a href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                 class="dojo-sup"
                                                 alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
@@ -1270,14 +1258,14 @@
                                                     target="_blank"
                                                     alt="Jira Bug - {{ finding.finding_group | jira_key }} (group)"
                                                     data-toggle="tooltip"
-                                                    data-placement="bottom"
+                                                   
                                                     title="{{ finding.finding_group | jira_key }} (group)">{{ finding.finding_group | jira_key }}</a>
                                                 {% elif finding.has_jira_issue %}
                                                     <a href="{{ finding | jira_issue_url }}"
                                                     target="_blank"
                                                     alt="Jira Bug - {{ finding | jira_key }}"
                                                     data-toggle="tooltip"
-                                                    data-placement="bottom"
+                                                   
                                                     title="{{ finding | jira_key }}">{{ finding | jira_key }}</a>
                                                 {% endif %}
                                             </td>
@@ -1325,248 +1313,6 @@
         {% endif %}
     </div>
     <!-- Findings end-->
-    <!-- Stub Findings begin -->
-    <div class="panel panel-default table-responsive potential-finding">
-        <div class="panel-heading">
-            <div class="clearfix">
-                <h4 class="pull-left">
-                    {% trans "Potential Findings" %}
-                </h4>
-                {% if test|has_object_permission:"Finding_Add" %}
-                    <form id="quick-add-form" method="post" class="pull-right">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            <input id="quick_add_finding"
-                                name="title"
-                                type="text"
-                                placeholder="Add a potential finding..."
-                                class="form-control"/>
-                            <input type="hidden" value="tid" name="{{ test.id }}"/>
-                            <span class="input-group-btn">
-                                <button id="the_button" class="btn btn-success" type="submit">
-                                    <i id="fa-icon" class="fa-solid fa-plus fa-fw"></i>
-                                    {% trans "Add Potential Finding" %}
-                                </button>
-                            </span>
-                        </div>
-                    </form>
-                {% endif %}
-            </div>
-        </div>
-        <table id="stub_findings"
-            class="table table-condensed table-hover {% if not stub_findings %}hidden{% endif %}">
-            <thead>
-                <tr>
-                    <th>
-                        {% trans "Name" %}
-                    </th>
-                    <th>
-                        {% trans "Severity" %}
-                    </th>
-                    <th>
-                        {% trans "Reporter" %}
-                    </th>
-                    <th>
-                        {% trans "Date" %}
-                    </th>
-                    <th>
-                        {% trans "Actions" %}
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for finding in stub_findings %}
-                    <tr>
-                        <td name="stub_finding_name">
-                            {% if test|has_object_permission:"Finding_Add" %}
-                                <a href="{% url 'promote_to_finding' finding.id %}">{{ finding.title }}</a>
-                            {% else %}
-                                {{ finding.title }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if finding.severity == "Critical" or finding.severity == "High" %}
-                                <span class="text-error">
-                            {% else %}
-                                <span>{{ finding.severity }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if finding.reporter.get_full_name and finding.reporter.get_full_name.strip %}
-                                {{ finding.reporter.get_full_name }}
-                            {% else %}
-                                {{ finding.reporter }}
-                            {% endif %}
-                        </td>
-                        <td>
-                            {{ finding.date }}
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                {% if test|has_object_permission:"Finding_Add" %}
-                                    <a class="btn btn-sm btn-warning"href="{% url 'promote_to_finding' finding.id %}">{% trans "Promote To Finding" %}</a>
-                                {% endif %}
-                                {% if test|has_object_permission:"Finding_Edit" %}
-                                    <form method="post"
-                                            action="{% url 'delete_stub_finding' finding.id %}"
-                                            style="display: inline"
-                                            class="form-inline form">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="id" value="{{ finding.id }}"/>
-                                        <button name="stub_finding_delete"
-                                                type="submit"
-                                                class="btn btn-danger btn-sm delete-finding">
-                                            Delete
-                                        </button>
-                                    </form>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div class="panel-body {% if stub_findings %}show{% else %}hidden{% endif %}">
-            {% include "dojo/paging_snippet.html" with page=stub_findings %}
-        </div>
-    </div>
-    <!-- Stub Findings end-->
-    <!--Cred Begin-->
-    {% if system_settings.enable_credentials %}
-        <div class="row">
-            <div class="col-md-12" id="cred">
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4>
-                            {% trans "Credentials" %}
-                            {% if not cred_test and creds and test|has_object_permission:"Test_Edit" %}
-                                <a title="Add New Credential"
-                                class="pull-right btn btn-primary btn-sm"
-                                href="{% url 'new_cred_engagement_test' test.id %}"><span class="fa-solid fa-plus"></span></a>
-                            {% endif %}
-                        </h4>
-                    </div>
-                    {% if creds %}
-                        <table class="tablesorter-bootstrap table table-condensed table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>
-                                        {% trans "Name" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Username" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Role" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Environment" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Authentication Provider" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Login Valid" %}
-                                    </th>
-                                    <th>
-                                        {% trans "Actions" %}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="7">
-                                        {% trans "Credentials Configured for this" %} <strong>{% trans "Test" %}</strong>
-                                        {% if not cred_test %}
-                                            <br />
-                                            <center>{% trans "None configured" %}</center>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% for cred in cred_test %}
-                                    <tr>
-                                        <td>
-                                            <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.username }}
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.role }}
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.environment }}
-                                        </td>
-                                        <td>
-                                            {{ cred.is_authn_provider }}
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.is_valid }}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                {% if user.is_superuser %}
-                                                    <a class="btn btn-sm btn-secondary"
-                                                    href="{% url 'view_cred_engagement_test' cred.test.id cred.id  %}">{% trans "View" %}</a>
-                                                {% endif %}
-                                                {% if test|has_object_permission:"Test_Edit" %}
-                                                    <a class="btn btn-sm btn-danger delete"
-                                                    href="{% url 'delete_cred_test' cred.test.id cred.id  %}">{% trans "Delete" %}</a>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                <tr>
-                                    <td colspan="7">
-                                        {% trans "Credentials Configured for this" %} <strong>{% trans "Engagement" %}</strong>
-                                    </td>
-                                </tr>
-                                {% for cred in creds %}
-                                    <tr>
-                                        <td>
-                                            <a href="{{ cred.cred_id.url }}" target="_blank">{{ cred.cred_id.name }}</a>
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.username }}
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.role }}
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.environment }}
-                                        </td>
-                                        <td>
-                                            {{ cred.is_authn_provider }}
-                                        </td>
-                                        <td>
-                                            {{ cred.cred_id.is_valid }}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                <a class="btn btn-sm btn-primary"
-                                                href="{% url 'view_cred_product_engagement' cred.engagement.id cred.id  %}">{% trans "View" %}</a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <div class="panel-body">
-                            <p>
-                                {% trans "No credentials configured." %}
-                                {% if not creds %}
-                                    {% trans "Configure engagement credentials first, then add credentials to the test." %}
-                                {% endif %}
-                            </p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    {% endif %}
-    <!--Cred end -->
     <!--Files beign -->
     <div class="row">
         <div class="col-md-12" id="cred">
@@ -1575,8 +1321,8 @@
                     <h4>
                         {% trans "Files" %}<span class="pull-right">&nbsp;
                         <a data-toggle="collapse" href="#add_feat_files">
-                            <i class="glyphicon glyphicon-chevron-down"></i></a></span>
-                        {% if test|has_object_permission:"Test_Edit" %}
+                            <i class="fa-solid fa-chevron-down"></i></a></span>
+                        {% if test|has_object_permission:"edit" %}
                             <a title="Manage Files"
                                 name="Manage Files"
                                 class="btn btn-sm btn-primary pull-right"
@@ -1595,7 +1341,7 @@
                                     {% if file|get_thumbnail %}
                                         <img src="{{ image_url }}" alt="thumbnail" style="width:150px">
                                     {% else %}
-                                        <span style="font-size: 50px;" class="glyphicon glyphicon-file"></span>
+                                        <span style="font-size: 50px;" class="fa-solid fa-file"></span>
                                     {% endif %}
                                 </a>
                             </div>
@@ -1618,7 +1364,6 @@
 {% block postscript %}
     {{ block.super }}
     <script type="application/javascript" src="{% static "jquery.hotkeys/jquery.hotkeys.js" %}"></script>
-    <script type="text/javascript" src="{% static "jquery-highlight/jquery.highlight.js" %}"></script>
     <script type="application/javascript">
         {% block datatables_columns %}
             var percentSort = function(data, type, row, meta) {
@@ -1628,7 +1373,7 @@
                 return data;
             }
             var datatables_columns = [
-                {% if test|has_object_permission:"Test_Edit" or test|has_object_permission:"Test_Delete" %}
+                {% if test|has_object_permission:"edit" or test|has_object_permission:"delete" %}
                     { "data": "checkbox" },
                 {% endif %}
                 { "data": "action" },
@@ -1776,7 +1521,7 @@
         $(function () {
             $("a[data-toggle='collapse']").on('click', function () {
                 var i = $($(this).find('i').get(0));
-                i.toggleClass('glyphicon-chevron-up').toggleClass('glyphicon-chevron-down');
+                i.toggleClass('fa-chevron-up').toggleClass('fa-chevron-down');
             })
 
           $(".chosen-select").chosen({
@@ -2059,106 +1804,6 @@
             }
             ;
 
-            $('form#quick-add-form').on("submit", function (e) {
-                if ($("input#quick_add_finding").val().length == 0) {
-                  alert('Potential finding description needs a value.');
-                  e.preventDefault();
-                  return false;
-                }
-                $('form#quick-add-form').removeClass("has-error");
-                $('button#the_button').attr('disabled', true).removeClass("btn-success btn-danger").addClass('btn-warning');
-                $('i#fa-icon').removeClass("fa-plus").addClass("fa-spinner fa-pulse");
-                $.ajax({
-                    type: "post",
-                    dataType:'json',
-                    data: $(this).serialize(),
-                    url: '{% url 'add_stub_finding' test.id %}',
-                    // The ``X-CSRFToken`` evidently can't be set in the
-                    // ``headers`` option, so force it here.
-                    // This method requires jQuery 1.5+.
-                    beforeSend: function (jqXHR, settings) {
-                        // Pull the token out of the DOM.
-                        jqXHR.setRequestHeader('X-CSRFToken', $('input[name=csrfmiddlewaretoken]').val());
-                    },
-                    success: function (data, textStatus, jqXHR) {
-                        // Your processing of the data here. <a href='" + jqXHR.getResponseHeader('Location') + "'>" +  + "</a>
-                        //
-                        $('table#stub_findings').removeClass('hidden');
-                        var fid = data['id'];
-                        var fseverity = data['severity'];
-                        var fdate = data['date'];
-                        var row = $("<tr id='added-" + fid + "' class='success'></tr>");
-                        var link = $('<a></a>');
-
-                        link.attr('href', "/stub_finding/" + fid + "/promote");
-                        link.text($("input#quick_add_finding").val());
-                        var title = $("<td></td>").append(link);
-                        var severity = $("<td></td>").append(fseverity);
-                        var reporter = $("<td>{{ request.user.username }}</td>");
-                        var date = $("<td></td>").append(fdate);
-                        var td_info = '<td><div class="btn-group"><a class="btn btn-sm btn-warning" href="/stub_finding/[id]/promote">Promote To Finding</a> <form method="post" action="/stub_finding/[id]/delete" style="display: inline" class="form-inline form"><input type="hidden" name="id" value="[id]"/><input type="hidden" name="csrfmiddlewaretoken" value="' + $('input[name=csrfmiddlewaretoken]').val() + '"><button type="submit" class="btn btn-danger btn-sm delete-finding">Delete</button></form></div></td>';
-                        var actions = $(td_info.replace(/\[id\]/g, fid));
-
-                        row.append(title, severity, reporter, date, actions).appendTo("#stub_findings tbody");
-                        $("input#quick_add_finding").val("")
-                        $('button#the_button').removeClass("btn-warning btn-danger").addClass('btn-success');
-
-                        $("input#quick_add_finding").focus()
-
-                        setTimeout(function () {
-                            $("tr#added-" + fid + " td").animate({
-                                backgroundColor: "#fff",
-                            })
-                        }, 2000)
-                    },
-                    error: function () {
-                        $('form#quick-add-form').addClass("has-error");
-                        $('button#the_button').removeClass("btn-warning").addClass('btn-danger');
-                    },
-                    complete: function () {
-                        $('i#fa-icon').addClass("fa-plus").removeClass("fa-spinner fa-pulse");
-                        $('button#the_button').attr('disabled', false);
-
-                    }
-                });
-                return false;
-            });
-
-        });
-
-        function jira_action(elem, url) {
-            $(elem).removeClass().addClass('fa-solid fa-spin fa-spinner')
-
-            $.ajax({
-                type: "post",
-                dataType:'json',
-                data: '',
-                context: this,
-                url: url,
-                // The ``X-CSRFToken`` evidently can't be set in the
-                // ``headers`` option, so force it here.
-                // This method requires jQuery 1.5+.
-                beforeSend: function (jqXHR, settings) {
-                    // Pull the token out of the DOM.
-                    jqXHR.setRequestHeader('X-CSRFToken', '{{ csrf_token }}');
-                },
-                success: function (data, textStatus, jqXHR) {
-                },
-                error: function (request, status, error) {
-                    console.log(request.responseText)
-                },
-                complete: function(e) {
-                    location.reload()
-                }
-            });
-        }
-
-        $(".push_group_to_jira").on('click', function(e) {
-            jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/push')
-        });
-
-        $(".unlink_group_jira").on('click', function(e) {
-            jira_action(this, '/finding_group/' + this.dataset.groupId + '/jira/unlink')
         });
 
         $('[id^=delete-finding-group-menu-]').on('click', function () {
@@ -2170,5 +1815,4 @@
 
     </script>
     {% include "dojo/filter_js_snippet.html" %}
-    {% include "dojo/snippets/selectpicker_in_dropdown.html" %}
 {% endblock %}

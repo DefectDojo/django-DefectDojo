@@ -1,0 +1,1 @@
+{% include "notifications/slack/scan_added.tpl" %}

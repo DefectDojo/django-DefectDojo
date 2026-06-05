@@ -9,7 +9,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_configuration_permission
-from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 from dojo.models import Answered_Survey
@@ -21,8 +20,8 @@ def home(request: HttpRequest) -> HttpResponse:
 
 
 def dashboard(request: HttpRequest) -> HttpResponse:
-    engagements = get_authorized_engagements(Permissions.Engagement_View).distinct()
-    findings = get_authorized_findings(Permissions.Finding_View).distinct()
+    engagements = get_authorized_engagements("view").distinct()
+    findings = get_authorized_findings("view").distinct()
 
     findings = findings.filter(duplicate=False)
 

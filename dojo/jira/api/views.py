@@ -2,9 +2,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view
 from rest_framework.permissions import IsAuthenticated
 
-from dojo.api_v2 import permissions
 from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, schema_with_prefetch
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization import api_permissions as permissions
 from dojo.jira.api.serializers import (
     JIRAInstanceSerializer,
     JIRAIssueSerializer,
@@ -58,7 +57,7 @@ class JiraIssuesViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_jira_issues(Permissions.Product_View)
+        return get_authorized_jira_issues("view")
 
 
 # Authorization: object-based
@@ -88,4 +87,4 @@ class JiraProjectViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_jira_projects(Permissions.Product_View)
+        return get_authorized_jira_projects("view")

@@ -11,15 +11,7 @@
     border-bottom: 0;
     }
 
-    .tab-content > .tab-pane,
-    .pill-content > .pill-pane {
-    display: none;
-    }
-
-    .tab-content > .active,
-    .pill-content > .active {
-    display: block;
-    }
+    [x-cloak] { display: none !important; }
 
     .tabs-below > .nav-tabs {
     border-top: 1px solid #ddd;
@@ -155,9 +147,11 @@
                         </h3>
                     </div>
                 </div>
+                {% if form %}
                 <div id="the-filters" class="is-filters panel-body collapse">
                     {% include "dojo/filter_snippet.html" with form=form clear_link="/metrics/product/type" %}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -475,28 +469,28 @@
                             <h3>{% trans "Metric Counts" %}</h3>
                         </div>
                         <div class="col-md-12">
-                            <div class="tabbable tabs-left">
+                            <div class="tabbable tabs-left" x-data="{ activeTab: '{% if top_ten_products %}tabs-1{% else %}tabs-2{% endif %}' }">
                                 <ul class="nav nav-tabs">
                                     {% if top_ten_products %}
-                                        <li class="active">
-                                            <a data-toggle="tab" href="#tabs-1">
+                                        <li :class="activeTab === 'tabs-1' && 'active'">
+                                            <a href="#tabs-1" @click.prevent="activeTab = 'tabs-1'">
                                                 {{ labels.ASSET_METRICS_TOP_TEN_BY_SEVERITY_LABEL }}
                                             </a>
                                         </li>
                                     {% endif %}
-                                    <li><a data-toggle="tab" href="#tabs-2">{% trans "Detail Breakdown" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-3">{% trans "Opened Findings" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-4">{% trans "Accepted Findings" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-5">{% trans "Closed Findings" %}</a></li>
-                                    <li><a data-toggle="tab" href="#tabs-6">{% trans "Trending Open<br/>Bug Count" %}
+                                    <li :class="activeTab === 'tabs-2' && 'active'"><a href="#tabs-2" @click.prevent="activeTab = 'tabs-2'">{% trans "Detail Breakdown" %}</a></li>
+                                    <li :class="activeTab === 'tabs-3' && 'active'"><a href="#tabs-3" @click.prevent="activeTab = 'tabs-3'">{% trans "Opened Findings" %}</a></li>
+                                    <li :class="activeTab === 'tabs-4' && 'active'"><a href="#tabs-4" @click.prevent="activeTab = 'tabs-4'">{% trans "Accepted Findings" %}</a></li>
+                                    <li :class="activeTab === 'tabs-5' && 'active'"><a href="#tabs-5" @click.prevent="activeTab = 'tabs-5'">{% trans "Closed Findings" %}</a></li>
+                                    <li :class="activeTab === 'tabs-6' && 'active'"><a href="#tabs-6" @click.prevent="activeTab = 'tabs-6'">{% trans "Trending Open<br/>Bug Count" %}
                                     </a></li>
-                                    <li><a data-toggle="tab" href="#tabs-7">{% trans "Trending Accepted <br/> Bug Count" %}
+                                    <li :class="activeTab === 'tabs-7' && 'active'"><a href="#tabs-7" @click.prevent="activeTab = 'tabs-7'">{% trans "Trending Accepted <br/> Bug Count" %}
                                     </a></li>
-                                    <li><a data-toggle="tab" href="#tabs-8">{% trans "Age of Issues" %}</a></li>
+                                    <li :class="activeTab === 'tabs-8' && 'active'"><a href="#tabs-8" @click.prevent="activeTab = 'tabs-8'">{% trans "Age of Issues" %}</a></li>
                                 </ul>
                                 <div class="tab-content">
                                     {% if top_ten_products %}
-                                        <div class="table-responsive tab-pane active" id="tabs-1">
+                                        <div class="table-responsive tab-pane" id="tabs-1" x-show="activeTab === 'tabs-1'" x-cloak>
                                             <table
                                                     class="table table-bordered table-condensed table-striped table-400">
                                                 <tr>
@@ -521,7 +515,7 @@
                                             </table>
                                         </div>
                                     {% endif %}
-                                    <div class="tab-pane table-responsive" id="tabs-2">
+                                    <div class="tab-pane table-responsive" id="tabs-2" x-show="activeTab === 'tabs-2'" x-cloak>
                                         {% if findings.count > max_findings_details %}
                                         <div>
                                             <em>Note:</em> {{ max_findings_details }} Findings listed of {{ findings.count }} total.
@@ -563,7 +557,7 @@
                                             {% endfor %}
                                         </table>
                                     </div>
-                                    <div class="tab-pane" id="tabs-3">
+                                    <div class="tab-pane" id="tabs-3" x-show="activeTab === 'tabs-3'" x-cloak>
                                         <div class="table-responsive">
                                             <h4>{% trans "Opened During Period" %}</h4>
                                             <table
@@ -614,7 +608,7 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="tab-pane" id="tabs-4">
+                                    <div class="tab-pane" id="tabs-4" x-show="activeTab === 'tabs-4'" x-cloak>
                                         <div class="table-responsive">
                                             <h4>{% trans "Accepted in Period" %}</h4>
                                             <table
@@ -667,7 +661,7 @@
 
 
                                     </div>
-                                    <div class="tab-pane" id="tabs-5">
+                                    <div class="tab-pane" id="tabs-5" x-show="activeTab === 'tabs-5'" x-cloak>
                                         <div class="table-responsive">
                                             <h4>{% trans "Closed in Period" %}</h4>
                                             <table
@@ -719,7 +713,7 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="tab-pane" id="tabs-6">
+                                    <div class="tab-pane" id="tabs-6" x-show="activeTab === 'tabs-6'" x-cloak>
                                         <div class="metric-half table-responsive">
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
@@ -774,7 +768,7 @@
                                             <p>{% trans "*Closed findings may have been opened outside of requested period." %}</p>
                                         </div>
                                     </div>
-                                    <div class="tab-pane" id="tabs-7">
+                                    <div class="tab-pane" id="tabs-7" x-show="activeTab === 'tabs-7'" x-cloak>
                                         <div class="metric-half table-responsive">
                                             <table class="table table-bordered table-condensed table-striped">
                                                 <tr>
@@ -824,7 +818,7 @@
                                             </table>
                                         </div>
                                     </div>
-                                    <div class="tab-pane table-responsive" id="tabs-8">
+                                    <div class="tab-pane table-responsive" id="tabs-8" x-show="activeTab === 'tabs-8'" x-cloak>
                                         <table
                                                 class="table table-bordered table-condensed table-striped table-400">
                                             <tr>
@@ -861,17 +855,10 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <!-- Flot Charts JavaScript -->
-    <script src="{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+    <!-- Chart.js (moment.js loaded in base.html) -->
+    <script src="{% static "chart.js/dist/chart.umd.js" %}"></script>
+    <script src="{% static "chartjs-adapter-moment/dist/chartjs-adapter-moment.js" %}"></script>
     {% include "dojo/filter_js_snippet.html" %}
-    <script src="{% static "justgage/raphael.min.js" %}"></script>
-    <script src="{% static "justgage/justgage.js" %}"></script>
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}

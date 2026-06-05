@@ -17,7 +17,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.forms import modelformset_factory
 from django.forms.widgets import Select, Widget
 from django.utils import timezone
@@ -28,7 +28,6 @@ from polymorphic.base import ManagerInheritanceWarning
 from tagulous.forms import TagField
 
 from dojo.authorization.authorization import user_has_configuration_permission, user_is_superuser_or_global_owner
-from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_filter, endpoint_get_or_create, validate_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
@@ -40,7 +39,6 @@ from dojo.github.ui.forms import (  # noqa: F401 -- backward compat
     GITHUBFindingForm,
     GITHUBForm,
 )
-from dojo.group.queries import get_authorized_groups, get_group_member_roles
 from dojo.jira import services as jira_services
 from dojo.jira.forms import (  # noqa: F401 backward compat
     JIRA_TEMPLATE_CHOICES,
@@ -71,11 +69,7 @@ from dojo.models import (
     Choice,
     ChoiceAnswer,
     ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
-    Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     DojoMeta,
     Endpoint,
@@ -87,22 +81,16 @@ from dojo.models import (
     Finding_Group,
     Finding_Template,
     General_Survey,
-    Global_Role,
     Note_Type,
     Notes,
     Objects_Product,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
     Question,
     Regulation,
     Risk_Acceptance,
     SLA_Configuration,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Type,
@@ -278,57 +266,21 @@ class Delete_Product_TypeForm(forms.ModelForm):
         fields = ["id"]
 
 
-class Edit_Product_Type_MemberForm(forms.ModelForm):
+class Add_Product_Type_AuthorizedUsersForm(forms.Form):
+    users = forms.ModelMultipleChoiceField(
+        queryset=Dojo_User.objects.none(), required=True, label="Users",
+    )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, product_type=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["product_type"].disabled = True
-        self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
-        self.fields["user"].disabled = True
-
-    class Meta:
-        model = Product_Type_Member
-        fields = ["product_type", "user", "role"]
-
-
-class Add_Product_Type_MemberForm(forms.ModelForm):
-    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label="Users")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        current_members = Product_Type_Member.objects.filter(product_type=self.initial["product_type"]).values_list("user", flat=True)
-        self.fields["users"].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True)
-            | Q(id__in=current_members)).exclude(is_active=False).order_by("first_name", "last_name")
-        self.fields["product_type"].label = labels.ORG_LABEL
-        self.fields["product_type"].disabled = True
-
-    class Meta:
-        model = Product_Type_Member
-        fields = ["product_type", "users", "role"]
-
-
-class Add_Product_Type_Member_UserForm(forms.ModelForm):
-    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True,
-                                                   label=labels.ORG_PLURAL_LABEL)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        current_members = Product_Type_Member.objects.filter(user=self.initial["user"]).values_list("product_type", flat=True)
-        self.fields["product_types"].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
-            .exclude(id__in=current_members)
-        self.fields["user"].disabled = True
-
-    class Meta:
-        model = Product_Type_Member
-        fields = ["product_types", "user", "role"]
-
-
-class Delete_Product_Type_MemberForm(Edit_Product_Type_MemberForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["role"].disabled = True
-        self.fields["product_type"].label = labels.ORG_LABEL
+        self.product_type = product_type
+        current = product_type.authorized_users.values_list("pk", flat=True)
+        self.fields["users"].queryset = (
+            Dojo_User.objects.filter(is_active=True)
+            .exclude(is_superuser=True)
+            .exclude(pk__in=current)
+            .order_by("first_name", "last_name")
+        )
 
 
 class Test_TypeForm(forms.ModelForm):
@@ -381,7 +333,7 @@ class ProductForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["prod_type"].queryset = get_authorized_product_types(Permissions.Product_Type_Add_Product)
+        self.fields["prod_type"].queryset = get_authorized_product_types("add")
         self.fields["enable_product_tag_inheritance"].label = labels.ASSET_TAG_INHERITANCE_ENABLE_LABEL
         self.fields["enable_product_tag_inheritance"].help_text = labels.ASSET_TAG_INHERITANCE_ENABLE_HELP
         if prod_type_id := kwargs.get("instance", Product()).prod_type_id:  # we are editing existing instance
@@ -447,57 +399,48 @@ class DeleteFindingGroupForm(forms.ModelForm):
         fields = ["id"]
 
 
-class Edit_Product_MemberForm(forms.ModelForm):
+class Add_Product_AuthorizedUsersForm(forms.Form):
+    users = forms.ModelMultipleChoiceField(
+        queryset=Dojo_User.objects.none(), required=True, label="Users",
+    )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, product=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["product"].disabled = True
-        self.fields["product"].label = labels.ASSET_LABEL
-        self.fields["user"].queryset = Dojo_User.objects.order_by("first_name", "last_name")
-        self.fields["user"].disabled = True
+        self.product = product
+        current = product.authorized_users.values_list("pk", flat=True)
+        self.fields["users"].queryset = (
+            Dojo_User.objects.filter(is_active=True)
+            .exclude(is_superuser=True)
+            .exclude(pk__in=current)
+            .order_by("first_name", "last_name")
+        )
 
-    class Meta:
-        model = Product_Member
-        fields = ["product", "user", "role"]
 
+class Authorize_User_For_ProductsForm(forms.Form):
+    products = forms.ModelMultipleChoiceField(
+        queryset=Product.objects.none(), required=True, label=labels.ASSET_PLURAL_LABEL,
+    )
 
-class Add_Product_MemberForm(forms.ModelForm):
-    users = forms.ModelMultipleChoiceField(queryset=Dojo_User.objects.none(), required=True, label="Users")
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["product"].disabled = True
-        self.fields["product"].label = labels.ASSET_LABEL
-        current_members = Product_Member.objects.filter(product=self.initial["product"]).values_list("user", flat=True)
-        self.fields["users"].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True)
-            | Q(id__in=current_members)).exclude(is_active=False).order_by("first_name", "last_name")
-
-    class Meta:
-        model = Product_Member
-        fields = ["product", "users", "role"]
+        self.user = user
+        # Show products the user is not already directly authorized for.
+        self.fields["products"].queryset = (
+            Product.objects.exclude(authorized_users=user).order_by("name")
+        )
 
 
-class Add_Product_Member_UserForm(forms.ModelForm):
-    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True,
-                                              label=labels.ASSET_PLURAL_LABEL)
+class Authorize_User_For_ProductTypesForm(forms.Form):
+    product_types = forms.ModelMultipleChoiceField(
+        queryset=Product_Type.objects.none(), required=True, label=labels.ORG_PLURAL_LABEL,
+    )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        current_members = Product_Member.objects.filter(user=self.initial["user"]).values_list("product", flat=True)
-        self.fields["products"].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
-            .exclude(id__in=current_members)
-        self.fields["user"].disabled = True
-
-    class Meta:
-        model = Product_Member
-        fields = ["products", "user", "role"]
-
-
-class Delete_Product_MemberForm(Edit_Product_MemberForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["role"].disabled = True
+        self.user = user
+        self.fields["product_types"].queryset = (
+            Product_Type.objects.exclude(authorized_users=user).order_by("name")
+        )
 
 
 class NoteTypeForm(forms.ModelForm):
@@ -974,7 +917,7 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
             # logger.debug('setting default expiration_date: %s', expiration_date)
             self.fields["expiration_date"].initial = expiration_date
         # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
-        self.fields["accepted_findings"].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        self.fields["accepted_findings"].queryset = get_authorized_findings("edit")
         if disclaimer := get_system_setting("disclaimer_notes"):
             self.disclaimer = disclaimer.strip()
 
@@ -1031,7 +974,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["accepted_findings"].queryset = get_authorized_findings(Permissions.Risk_Acceptance)
+        self.fields["accepted_findings"].queryset = get_authorized_findings("edit")
 
 
 class CheckForm(forms.ModelForm):
@@ -1104,11 +1047,11 @@ class EngForm(forms.ModelForm):
 
         if product:
             self.fields["preset"] = forms.ModelChoiceField(help_text="Settings and notes for performing this engagement.", required=False, queryset=Engagement_Presets.objects.filter(product=product))
-            self.fields["lead"].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
+            self.fields["lead"].queryset = get_authorized_users_for_product_and_product_type(None, product, "view").filter(is_active=True)
         else:
-            self.fields["lead"].queryset = get_authorized_users(Permissions.Engagement_View).filter(is_active=True)
+            self.fields["lead"].queryset = get_authorized_users("view").filter(is_active=True)
 
-        self.fields["product"].queryset = get_authorized_products(Permissions.Engagement_Add)
+        self.fields["product"].queryset = get_authorized_products("add")
 
         # Don't show CICD fields on a interactive engagement
         if cicd is False:
@@ -1182,10 +1125,10 @@ class TestForm(forms.ModelForm):
 
         if obj:
             product = get_product(obj)
-            self.fields["lead"].queryset = get_authorized_users_for_product_and_product_type(None, product, Permissions.Product_View).filter(is_active=True)
+            self.fields["lead"].queryset = get_authorized_users_for_product_and_product_type(None, product, "view").filter(is_active=True)
             self.fields["api_scan_configuration"].queryset = Product_API_Scan_Configuration.objects.filter(product=product)
         else:
-            self.fields["lead"].queryset = get_authorized_users(Permissions.Test_View).filter(is_active=True)
+            self.fields["lead"].queryset = get_authorized_users("view").filter(is_active=True)
 
     def is_valid(self):
         valid = super().is_valid()
@@ -1595,7 +1538,7 @@ class FindingForm(forms.ModelForm):
             if self.instance and self.instance.pk:
                 self.fields["endpoints"].initial = self.instance.endpoints.all()
 
-        self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
+        self.fields["mitigated_by"].queryset = get_authorized_users("edit")
 
         # do not show checkbox if finding is not accepted and simple risk acceptance is disabled
         # if checked, always show to allow unaccept also with full risk acceptance enabled
@@ -1685,28 +1628,6 @@ class FindingForm(forms.ModelForm):
         exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue",
                    "endpoints", "endpoint_status")
-
-
-class StubFindingForm(forms.ModelForm):
-    title = forms.CharField(required=True, max_length=1000)
-
-    class Meta:
-        model = Stub_Finding
-        order = ("title",)
-        exclude = (
-            "date", "description", "severity", "reporter", "test", "is_mitigated")
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if "title" in cleaned_data:
-            if len(cleaned_data["title"]) <= 0:
-                msg = "The title is required."
-                raise forms.ValidationError(msg)
-        else:
-            msg = "The title is required."
-            raise forms.ValidationError(msg)
-
-        return cleaned_data
 
 
 class ApplyFindingTemplateForm(forms.Form):
@@ -2029,7 +1950,7 @@ class AddEndpointForm(forms.Form):
             product = kwargs.pop("product")
         super().__init__(*args, **kwargs)
         self.fields["product"] = forms.ModelChoiceField(
-            queryset=get_authorized_products(Permissions.Location_Add),
+            queryset=get_authorized_products("add"),
             label=labels.ASSET_LABEL,
             help_text=labels.ASSET_ENDPOINT_HELP)
         if product is not None:
@@ -2151,7 +2072,7 @@ class CloseFindingForm(forms.ModelForm):
             self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label="Note Type", required=True)
 
         if self.can_edit_mitigated_data:
-            self.fields["mitigated_by"].queryset = get_authorized_users(Permissions.Finding_Edit)
+            self.fields["mitigated_by"].queryset = get_authorized_users("edit")
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
         if disclaimer := get_system_setting("disclaimer_notes"):
@@ -2255,16 +2176,13 @@ class ReviewFindingForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         finding = kwargs.pop("finding", None)
-        user = kwargs.pop("user", None)
+        kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
-            users = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, Permissions.Finding_Edit)
+            users = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, "edit")
         else:
-            users = get_authorized_users(Permissions.Finding_Edit).filter(is_active=True)
-        # Remove the current user
-        if user is not None:
-            users = users.exclude(id=user.id)
+            users = get_authorized_users("edit").filter(is_active=True)
         # Save a copy of the original query to be used in the validator
         self.reviewer_queryset = users
         # Set the users in the form
@@ -2362,180 +2280,6 @@ class MetricsFilterForm(forms.Form):
             del self.fields["exclude_product_types"]
 
 
-class DojoGroupForm(forms.ModelForm):
-
-    name = forms.CharField(max_length=255, required=True)
-    description = forms.CharField(widget=forms.Textarea(attrs={}), required=False)
-
-    class Meta:
-        model = Dojo_Group
-        fields = ["name", "description"]
-        exclude = ["users"]
-
-
-class DeleteGroupForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Dojo_Group
-        fields = ["id"]
-
-
-class Add_Group_MemberForm(forms.ModelForm):
-    users = forms.ModelMultipleChoiceField(queryset=Dojo_Group_Member.objects.none(), required=True, label="Users")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["group"].disabled = True
-        current_members = Dojo_Group_Member.objects.filter(group=self.initial["group"]).values_list("user", flat=True)
-        self.fields["users"].queryset = Dojo_User.objects.exclude(
-            Q(is_superuser=True)
-            | Q(id__in=current_members)).exclude(is_active=False).order_by("first_name", "last_name")
-        self.fields["role"].queryset = get_group_member_roles()
-
-    class Meta:
-        model = Dojo_Group_Member
-        fields = ["group", "users", "role"]
-
-
-class Add_Group_Member_UserForm(forms.ModelForm):
-    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label="Groups")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["user"].disabled = True
-        current_groups = Dojo_Group_Member.objects.filter(user=self.initial["user"]).values_list("group", flat=True)
-        self.fields["groups"].queryset = Dojo_Group.objects.exclude(id__in=current_groups)
-        self.fields["role"].queryset = get_group_member_roles()
-
-    class Meta:
-        model = Dojo_Group_Member
-        fields = ["groups", "user", "role"]
-
-
-class Edit_Group_MemberForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["group"].disabled = True
-        self.fields["user"].disabled = True
-        self.fields["role"].queryset = get_group_member_roles()
-
-    class Meta:
-        model = Dojo_Group_Member
-        fields = ["group", "user", "role"]
-
-
-class Delete_Group_MemberForm(Edit_Group_MemberForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["role"].disabled = True
-
-
-class Add_Product_GroupForm(forms.ModelForm):
-    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label="Groups")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["product"].disabled = True
-        self.fields["product"].label = labels.ASSET_LABEL
-        current_groups = Product_Group.objects.filter(product=self.initial["product"]).values_list("group", flat=True)
-        authorized_groups = get_authorized_groups(Permissions.Group_View)
-        authorized_groups = authorized_groups.exclude(id__in=current_groups)
-        self.fields["groups"].queryset = authorized_groups
-
-    class Meta:
-        model = Product_Group
-        fields = ["product", "groups", "role"]
-
-
-class Add_Product_Group_GroupForm(forms.ModelForm):
-    products = forms.ModelMultipleChoiceField(queryset=Product.objects.none(), required=True,
-                                              label=labels.ASSET_PLURAL_LABEL)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        current_members = Product_Group.objects.filter(group=self.initial["group"]).values_list("product", flat=True)
-        self.fields["products"].queryset = get_authorized_products(Permissions.Product_Member_Add_Owner) \
-            .exclude(id__in=current_members)
-        self.fields["group"].disabled = True
-
-    class Meta:
-        model = Product_Group
-        fields = ["products", "group", "role"]
-
-
-class Edit_Product_Group_Form(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["product"].disabled = True
-        self.fields["product"].label = labels.ASSET_LABEL
-        self.fields["group"].disabled = True
-
-    class Meta:
-        model = Product_Group
-        fields = ["product", "group", "role"]
-
-
-class Delete_Product_GroupForm(Edit_Product_Group_Form):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["role"].disabled = True
-
-
-class Add_Product_Type_GroupForm(forms.ModelForm):
-    groups = forms.ModelMultipleChoiceField(queryset=Dojo_Group.objects.none(), required=True, label="Groups")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        current_groups = Product_Type_Group.objects.filter(product_type=self.initial["product_type"]).values_list("group", flat=True)
-        authorized_groups = get_authorized_groups(Permissions.Group_View)
-        authorized_groups = authorized_groups.exclude(id__in=current_groups)
-        self.fields["groups"].queryset = authorized_groups
-        self.fields["product_type"].disabled = True
-        self.fields["product_type"].label = labels.ORG_LABEL
-
-    class Meta:
-        model = Product_Type_Group
-        fields = ["product_type", "groups", "role"]
-
-
-class Add_Product_Type_Group_GroupForm(forms.ModelForm):
-    product_types = forms.ModelMultipleChoiceField(queryset=Product_Type.objects.none(), required=True,
-                                                   label=labels.ORG_PLURAL_LABEL)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        current_members = Product_Type_Group.objects.filter(group=self.initial["group"]).values_list("product_type", flat=True)
-        self.fields["product_types"].queryset = get_authorized_product_types(Permissions.Product_Type_Member_Add_Owner) \
-            .exclude(id__in=current_members)
-        self.fields["group"].disabled = True
-
-    class Meta:
-        model = Product_Type_Group
-        fields = ["product_types", "group", "role"]
-
-
-class Edit_Product_Type_Group_Form(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["product_type"].disabled = True
-        self.fields["product_type"].label = labels.ORG_LABEL
-        self.fields["group"].disabled = True
-
-    class Meta:
-        model = Product_Type_Group
-        fields = ["product_type", "group", "role"]
-
-
-class Delete_Product_Type_GroupForm(Edit_Product_Type_Group_Form):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["role"].disabled = True
-
-
 class DojoUserForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -2598,12 +2342,13 @@ class AddDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        fields = ["username", "password", "first_name", "last_name", "email", "is_active", "is_superuser"]
+        fields = ["username", "password", "first_name", "last_name", "email", "is_active", "is_staff", "is_superuser"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
+            self.fields["is_staff"].disabled = True
             self.fields["is_superuser"].disabled = True
         self.fields["password"].help_text = get_password_requirements_string()
 
@@ -2613,12 +2358,13 @@ class EditDojoUserForm(forms.ModelForm):
 
     class Meta:
         model = Dojo_User
-        fields = ["username", "first_name", "last_name", "email", "is_active", "is_superuser"]
+        fields = ["username", "first_name", "last_name", "email", "is_active", "is_staff", "is_superuser"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         current_user = get_current_user()
         if not current_user.is_superuser:
+            self.fields["is_staff"].disabled = True
             self.fields["is_superuser"].disabled = True
 
 
@@ -2644,7 +2390,7 @@ class UserContactInfoForm(forms.ModelForm):
         # Swap order: password_last_reset before token_last_reset
         field_order = [
             "title", "phone_number", "cell_number", "twitter_username", "github_username",
-            "slack_username", "block_execution", "force_password_reset", "reset_api_token",
+            "slack_username", "ui_use_tailwind", "block_execution", "force_password_reset", "reset_api_token",
             "password_last_reset", "token_last_reset",
         ]
 
@@ -2678,19 +2424,6 @@ class UserContactInfoForm(forms.ModelForm):
             self.fields.pop("reset_api_token", None)
 
 
-class GlobalRoleForm(forms.ModelForm):
-    class Meta:
-        model = Global_Role
-        exclude = ["user", "group"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        current_user = get_current_user()
-        self.fields["role"].help_text = labels.ASSET_GLOBAL_ROLE_HELP
-        if not current_user.is_superuser:
-            self.fields["role"].disabled = True
-
-
 def get_years():
     now = timezone.now()
     return [(now.year, now.year), (now.year - 1, now.year - 1), (now.year - 2, now.year - 2)]
@@ -2712,7 +2445,7 @@ class ProductTypeCountsForm(ProductCountsFormBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["product_type"].queryset = get_authorized_product_types(Permissions.Product_Type_View)
+        self.fields["product_type"].queryset = get_authorized_product_types("view")
 
 
 class ProductTagCountsForm(ProductCountsFormBase):
@@ -2724,7 +2457,7 @@ class ProductTagCountsForm(ProductCountsFormBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        prods = get_authorized_products(Permissions.Product_View)
+        prods = get_authorized_products("view")
         tags_available_to_user = Product.tags.tag_model.objects.filter(product__in=prods)
         self.fields["product_tag"].queryset = tags_available_to_user
 
@@ -2793,15 +2526,6 @@ class FindingFormID(forms.ModelForm):
     class Meta:
         model = Finding
         fields = ("id",)
-
-
-class DeleteStubFindingForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Stub_Finding
-        fields = ["id"]
 
 
 class Benchmark_Product_SummaryForm(forms.ModelForm):
@@ -3019,32 +2743,6 @@ class ObjectSettingsForm(forms.ModelForm):
         return self.cleaned_data
 
 
-class CredMappingForm(forms.ModelForm):
-    cred_user = forms.ModelChoiceField(
-        queryset=Cred_Mapping.objects.all().select_related("cred_id"),
-        required=False,
-        label="Select a Credential",
-    )
-
-    class Meta:
-        model = Cred_Mapping
-        fields = ["cred_user"]
-        exclude = ["product", "finding", "engagement", "test", "url", "is_authn_provider"]
-
-    def __init__(self, *args, **kwargs):
-        cred_user_queryset = kwargs.pop("cred_user_queryset", None)
-        super().__init__(*args, **kwargs)
-        if cred_user_queryset is not None:
-            self.fields["cred_user"].queryset = cred_user_queryset
-
-
-class CredMappingFormProd(forms.ModelForm):
-    class Meta:
-        model = Cred_Mapping
-        fields = ["cred_id", "url", "is_authn_provider"]
-        exclude = ["product", "finding", "engagement", "test"]
-
-
 class EngagementPresetsForm(forms.ModelForm):
 
     notes = forms.CharField(widget=forms.Textarea(attrs={}),
@@ -3077,7 +2775,6 @@ class SystemSettingsForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["default_group_role"].queryset = get_group_member_roles()
 
         self.fields["enable_product_tracking_files"].label = labels.SETTINGS_TRACKED_FILES_ENABLE_LABEL
         self.fields["enable_product_tracking_files"].help_text = labels.SETTINGS_TRACKED_FILES_ENABLE_HELP
@@ -3105,7 +2802,7 @@ class SystemSettingsForm(forms.ModelForm):
 
     class Meta:
         model = System_Settings
-        fields = "__all__"
+        exclude = ()
 
 
 class BenchmarkForm(forms.ModelForm):
@@ -3133,17 +2830,6 @@ from dojo.notifications.ui.forms import (  # noqa: E402, F401  -- backward compa
 class AjaxChoiceField(forms.ChoiceField):
     def valid_value(self, value):
         return True
-
-
-class CredUserForm(forms.ModelForm):
-    # selenium_script = forms.FileField(widget=forms.widgets.FileInput(
-    #    attrs={"accept": ".py"}),
-    #    label="Select a Selenium Script", required=False)
-
-    class Meta:
-        model = Cred_User
-        exclude = [""]
-        # fields = ['selenium_script']
 
 
 class LoginBanner(forms.Form):
@@ -3553,7 +3239,7 @@ class AssignUserForm(forms.ModelForm):
             assignee = kwargs.pop("asignees")
         super().__init__(*args, **kwargs)
         if assignee is None:
-            self.fields["assignee"] = forms.ModelChoiceField(queryset=get_authorized_users(Permissions.Engagement_View), empty_label="Not Assigned", required=False)
+            self.fields["assignee"] = forms.ModelChoiceField(queryset=get_authorized_users("view"), empty_label="Not Assigned", required=False)
         else:
             self.fields["assignee"].initial = assignee
 
@@ -3571,7 +3257,7 @@ class AddEngagementForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["product"].queryset = get_authorized_products(Permissions.Engagement_Add)
+        self.fields["product"].queryset = get_authorized_products("add")
 
 
 class ExistingEngagementForm(forms.Form):
@@ -3583,7 +3269,7 @@ class ExistingEngagementForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["engagement"].queryset = get_authorized_engagements(Permissions.Engagement_Edit).order_by("-target_start")
+        self.fields["engagement"].queryset = get_authorized_engagements("edit").order_by("-target_start")
 
 
 class ConfigurationPermissionsForm(forms.Form):

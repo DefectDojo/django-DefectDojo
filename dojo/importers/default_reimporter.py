@@ -24,7 +24,9 @@ from dojo.models import (
     Test,
     Test_Import,
 )
-from dojo.tag_utils import bulk_apply_parser_tags
+from dojo.tags import inheritance as tag_inheritance
+from dojo.tags.inheritance import apply_inherited_tags_for_findings
+from dojo.tags.utils import bulk_apply_parser_tags
 from dojo.utils import perform_product_grading
 from dojo.validators import clean_tags
 
@@ -137,13 +139,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             reactivated_findings=reactivated_findings,
             untouched_findings=untouched_findings,
         )
-        # Apply tags to findings and endpoints
-        self.apply_import_tags(
-            new_findings=new_findings,
-            closed_findings=closed_findings,
-            reactivated_findings=reactivated_findings,
-            untouched_findings=untouched_findings,
-        )
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
         updated_count = (
@@ -173,7 +168,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
     def get_reimport_match_candidates_for_batch(
         self,
-        batch_findings: list[Finding],
+        unsaved_findings_batch: list[Finding],
     ) -> tuple[dict, dict, dict]:
         """
         Fetch candidate matches for a batch of *unsaved* findings during reimport.
@@ -195,23 +190,23 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.deduplication_algorithm == "hash_code":
             candidates_by_hash = find_candidates_for_deduplication_hash(
                 self.test,
-                batch_findings,
+                unsaved_findings_batch,
                 mode="reimport",
             )
         elif self.deduplication_algorithm == "unique_id_from_tool":
             candidates_by_uid = find_candidates_for_deduplication_unique_id(
                 self.test,
-                batch_findings,
+                unsaved_findings_batch,
                 mode="reimport",
             )
         elif self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             candidates_by_uid, candidates_by_hash = find_candidates_for_deduplication_uid_or_hash(
                 self.test,
-                batch_findings,
+                unsaved_findings_batch,
                 mode="reimport",
             )
         elif self.deduplication_algorithm == "legacy":
-            candidates_by_key = find_candidates_for_reimport_legacy(self.test, batch_findings)
+            candidates_by_key = find_candidates_for_reimport_legacy(self.test, unsaved_findings_batch)
 
         return candidates_by_hash, candidates_by_uid, candidates_by_key
 
@@ -270,6 +265,19 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         the finding may be appended to a new or existing group based upon user selection
         at import time
         """
+        # Whole hot loop runs under `batch_mode()`: per-row inheritance signals
+        # for the findings/endpoints/locations created below are suppressed.
+        # Inheritance is then applied in bulk per-batch (right before
+        # `post_process_findings_batch` dispatch) so rules/dedup see inherited
+        # tags on `finding.tags`.
+        with tag_inheritance.suppress_tag_inheritance():
+            return self._process_findings_internal(parsed_findings, **kwargs)
+
+    def _process_findings_internal(
+        self,
+        parsed_findings: list[Finding],
+        **kwargs: dict,
+    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         # Only process findings with the same service value (or None)
         # Even though the service values is used in the hash_code calculation,
@@ -308,6 +316,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             cleaned_findings.append(sanitized)
 
         batch_finding_ids: list[int] = []
+        batch_findings: list[Finding] = []
+        # Findings that were newly created (else branch below) — pass these to
+        # `apply_inherited_tags_for_findings` instead of `batch_findings` so
+        # matched/existing findings (which already have correct inherited tags)
+        # don't trigger a redundant through-table read on no-change reimports.
+        new_findings_in_batch: list[Finding] = []
         findings_with_parser_tags: list[tuple] = []
         # Batch size for deduplication/post-processing (only new findings)
         dedupe_batch_max_size = getattr(settings, "IMPORT_REIMPORT_DEDUPE_BATCH_SIZE", 1000)
@@ -318,13 +332,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # This avoids the 1+N query problem by fetching all candidates for a batch at once
         for batch_start in range(0, len(cleaned_findings), match_batch_max_size):
             batch_end = min(batch_start + match_batch_max_size, len(cleaned_findings))
-            batch_findings = cleaned_findings[batch_start:batch_end]
+            unsaved_findings_batch = cleaned_findings[batch_start:batch_end]
             is_final_batch = batch_end == len(cleaned_findings)
 
             logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
 
             # Prepare findings in batch: set test, service, calculate hash codes
-            for unsaved_finding in batch_findings:
+            for unsaved_finding in unsaved_findings_batch:
                 # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
                 # Finding.mitigated is DateTimeField and it requires timezone
                 if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
@@ -342,12 +356,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
             # Fetch all candidates for this batch at once (batch candidate finding)
             candidates_by_hash, candidates_by_uid, candidates_by_key = self.get_reimport_match_candidates_for_batch(
-                batch_findings,
+                unsaved_findings_batch,
             )
 
             # Process each finding in the batch using pre-fetched candidates
-            for idx, unsaved_finding in enumerate(batch_findings):
-                is_final = is_final_batch and idx == len(batch_findings) - 1
+            for idx, unsaved_finding in enumerate(unsaved_findings_batch):
+                is_final = is_final_batch and idx == len(unsaved_findings_batch) - 1
 
                 # Match any findings to this new one coming in using pre-fetched candidates
                 matched_findings = self.match_finding_to_candidate_reimport(
@@ -390,6 +404,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         candidates_by_uid,
                         candidates_by_key,
                     )
+                    if finding:
+                        new_findings_in_batch.append(finding)
 
                 # This condition __appears__ to always be true, but am afraid to remove it
                 if finding:
@@ -403,6 +419,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
                     batch_finding_ids.append(finding.id)
+                    batch_findings.append(finding)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
                     # These batches only contain "new" findings that were saved (not matched to existing findings).
@@ -425,6 +442,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         # so rules/deduplication tasks see the tags already on the findings.
                         bulk_apply_parser_tags(findings_with_parser_tags)
                         findings_with_parser_tags.clear()
+                        # Apply import-time tags before post-processing so rules/deduplication see them.
+                        self.apply_import_tags_for_batch(batch_findings)
+                        # Apply inherited Product tags to NEWLY CREATED findings only
+                        # (and their endpoints/locations) BEFORE post_process_findings_batch
+                        # dispatches, so rules/dedup see inherited tags on .tags.
+                        # Matched/existing findings already have inheritance applied from
+                        # their original creation; re-running it on no-change reimports
+                        # would be ~8 wasted queries per batch.
+                        apply_inherited_tags_for_findings(new_findings_in_batch)
+                        new_findings_in_batch.clear()
+                        batch_findings.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
                         dojo_dispatch_task(
@@ -436,7 +464,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
                             jira_instance_id=getattr(self.jira_instance, "id", None),
-                            sync=kwargs.get("sync", False),
+                            force_sync=kwargs.get("force_sync", False),
                         )
 
         # No chord: tasks are dispatched immediately above per batch
@@ -773,9 +801,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         existing_finding.mitigated = None
         existing_finding.is_mitigated = False
         existing_finding.mitigated_by = None
-        existing_finding.active = True
-        if self.verified is not None:
-            existing_finding.verified = self.verified
+        # A duplicate finding must stay inactive/unverified (see set_duplicate and the
+        # "Duplicate findings cannot be verified or active" form validation). Un-mitigate it
+        # but do not reactivate it, otherwise we create an invalid active/verified duplicate state.
+        if existing_finding.duplicate:
+            existing_finding.active = False
+            existing_finding.verified = False
+        else:
+            existing_finding.active = True
+            if self.verified is not None:
+                existing_finding.verified = self.verified
 
         component_name = getattr(unsaved_finding, "component_name", None)
         component_version = getattr(unsaved_finding, "component_version", None)
@@ -791,7 +826,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # don't dedupe before endpoints/locations are added, postprocessing will be done on next save (in calling method)
         existing_finding.save_no_options()
 
-        note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
+        if existing_finding.duplicate:
+            note_entry = f"Un-mitigated by {self.scan_type} re-upload but kept inactive because the finding is a duplicate."
+        else:
+            note_entry = f"Re-activated by {self.scan_type} re-upload."
+        note = Notes(entry=note_entry, author=self.user)
         note.save()
         self.location_handler.record_reactivations_for_finding(existing_finding)
         existing_finding.notes.add(note)
@@ -951,7 +990,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding_from_report: Finding,
         *,
         is_matched_finding: bool = False,
-        tag_accumulator: list | None = None,
+        tag_accumulator: list,
     ) -> Finding:
         """
         Save all associated objects to the finding after it has been saved
@@ -973,15 +1012,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 finding_from_report.unsaved_tags = merged_tags
             if finding_from_report.unsaved_tags:
                 cleaned_tags = clean_tags(finding_from_report.unsaved_tags)
-                if tag_accumulator is not None:
-                    if isinstance(cleaned_tags, list):
-                        tag_accumulator.append((finding, cleaned_tags))
-                    elif isinstance(cleaned_tags, str):
-                        tag_accumulator.append((finding, [cleaned_tags]))
-                elif isinstance(cleaned_tags, list):
-                    finding.tags.add(*cleaned_tags)
+                if isinstance(cleaned_tags, list):
+                    tag_accumulator.append((finding, cleaned_tags))
                 elif isinstance(cleaned_tags, str):
-                    finding.tags.add(cleaned_tags)
+                    tag_accumulator.append((finding, [cleaned_tags]))
         # Process any files
         if finding_from_report.unsaved_files:
             finding.unsaved_files = finding_from_report.unsaved_files
