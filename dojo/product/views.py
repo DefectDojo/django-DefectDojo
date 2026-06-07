@@ -29,16 +29,18 @@ import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.components.sql_group_concat import Sql_GroupConcat
-from dojo.filters import (
+from dojo.engagement.ui.filters import (
     EngagementFilter,
     EngagementFilterWithoutObjectLookups,
+    ProductEngagementFilter,
+    ProductEngagementFilterWithoutObjectLookups,
+)
+from dojo.filters import (
     MetricsEndpointFilter,
     MetricsEndpointFilterWithoutObjectLookups,
     MetricsFindingFilter,
     MetricsFindingFilterWithoutObjectLookups,
     ProductComponentFilter,
-    ProductEngagementFilter,
-    ProductEngagementFilterWithoutObjectLookups,
     ProductFilter,
     ProductFilterWithoutObjectLookups,
 )

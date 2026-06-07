@@ -42,7 +42,7 @@ from dojo.engagement.services import (
 from dojo.engagement.services import (
     copy_engagement as copy_engagement_service,
 )
-from dojo.filters import (
+from dojo.engagement.ui.filters import (
     EngagementDirectFilter,
     EngagementDirectFilterWithoutObjectLookups,
     EngagementFilter,
@@ -52,15 +52,14 @@ from dojo.filters import (
     ProductEngagementsFilter,
     ProductEngagementsFilterWithoutObjectLookups,
 )
+from dojo.engagement.ui.forms import DeleteEngagementForm, EngForm
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
 from dojo.finding.views import find_available_notetypes
 from dojo.forms import (
     AddFindingsRiskAcceptanceForm,
     CheckForm,
-    DeleteEngagementForm,
     DoneForm,
     EditRiskAcceptanceForm,
-    EngForm,
     ImportScanForm,
     JIRAEngagementForm,
     JIRAImportScanForm,
