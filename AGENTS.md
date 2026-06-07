@@ -144,6 +144,8 @@ docker compose exec -T uwsgi python manage.py shell -c "from dojo.models import 
 
 ### Phase 2: Extract Services
 
+**This phase is conditional.** If the module's views are pure CRUD (form save/delete, simple field add/remove) with none of the "belongs in services" items below, there is NO `services.py` — skip the phase (the `url`/`location` reference modules have none). Don't invent a service just to have one.
+
 Create `dojo/{module}/services.py` with business logic extracted from UI views.
 
 **What belongs in services.py:**
@@ -185,8 +187,14 @@ Update UI views and API viewsets to call the service instead of containing logic
 ### Phase 4: Extract UI Filters to `ui/filters.py`
 
 1. Create `dojo/{module}/ui/filters.py` — move module-specific filters from `dojo/filters.py`
-2. Shared base classes (`DojoFilter`, `DateRangeFilter`, `ReportBooleanFilter`) stay in `dojo/filters.py`
-3. Add re-exports in `dojo/filters.py`
+2. Shared base classes (`DojoFilter`, `DateRangeFilter`, `ReportBooleanFilter`) stay in `dojo/filters.py`. **Keep the original base class** (`class XFilter(DojoFilter)`) — do NOT switch to `FilterSet` to dodge an import.
+3. **Circular-import caveat**: a re-export in `dojo/filters.py` (`from dojo.{module}.ui.filters import XFilter`) while `ui/filters.py` imports `DojoFilter` back from `dojo.filters` creates a real cycle (fails when `ui/filters.py` loads first). Resolve per the re-export rule below — usually: **drop the `dojo/filters.py` re-export** when the filter's only consumer is the module's own view, and import the filter directly from `dojo.{module}.ui.filters` in that view (matches the `url` module).
+
+> **Re-export decisions (Phases 3,4,6,8) — decide per symbol, by actual remaining consumers:**
+> - `grep -rn` the symbol across `dojo/` and `unittests/` first. Account for multi-line `from x import (\n  ...\n)` blocks — a one-line grep misses them.
+> - If a symbol is still referenced by code that REMAINS in the monolith (e.g. `ProductTypeSerializer` used by `ReportGenerateSerializer` in `api_v2/serializers.py`) → **keep** the re-export (`# noqa: E402` + `F401` as needed).
+> - If the ONLY consumers are code you are moving/updating anyway (the module's own views/tests) → **omit** the re-export and point those consumers at the new path. This is required when a re-export would cycle (filter↔`dojo.filters`, `api_v2.views`↔`{module}.api.views`).
+> - After dropping any re-export, run the module's real unit tests (not just `manage.py check`) — `check` won't catch a broken import in a test module.
 
 ### Phase 5: Move UI Views/URLs into `ui/`
 
@@ -225,6 +233,8 @@ Update UI views and API viewsets to call the service instead of containing logic
        return router
    ```
 2. Update `dojo/urls.py` — replace `v2_api.register(...)` with `add_{module}_urls(v2_api)`
+
+**Preserve the exact route and basename** from the original `v2_api.register(...)` call. They often differ (e.g. route `product_types`, `basename="product_type"`); `path` in `api/__init__.py` should be the route string, and pass `basename=` explicitly if the original did. Changing either breaks DRF URL reversing and the API tests. Verify with `reverse('{basename}-list')`.
 
 ### After Each Phase: Verify
 
