@@ -209,7 +209,9 @@ Update UI views and API viewsets to call the service instead of containing logic
 
 1. Create `dojo/{module}/api/__init__.py` with `path = "{module}"`
 2. Create `dojo/{module}/api/serializer.py` — move from `dojo/api_v2/serializers.py`
-3. Add re-exports in `dojo/api_v2/serializers.py`
+3. Re-export ONLY the serializers still referenced by code REMAINING in `api_v2/serializers.py` (e.g. one nested by `ReportGenerateSerializer` / used in a `RiskAcceptance` representation). Serializers consumed only by the viewset are imported by their new path in Phase 8, so omit those re-exports.
+
+**Cycle-break for serializers that reference api_v2 serializers** (matches `dojo/test/api/serializer.py`, `dojo/engagement/api/serializer.py`): a moved serializer cannot import `NoteSerializer`/`FileSerializer`/`TagListSerializerField` etc. from `dojo.api_v2.serializers` at module level — that cycles once `api_v2/serializers.py` re-imports your serializer. Convert class-body field assignments (`tags = TagListSerializerField(...)`, `notes = NoteSerializer(many=True)`) into a lazy `get_fields()` override that imports inside the method (`# noqa: PLC0415`); `build_relational_field` lazy-imports the same way. The extracted module then carries ZERO top-level `dojo.api_v2.serializers` import.
 
 ### Phase 7: Extract API Filters to `api/filters.py`
 
@@ -219,7 +221,9 @@ Update UI views and API viewsets to call the service instead of containing logic
 ### Phase 8: Extract API ViewSets to `api/views.py`
 
 1. Create `dojo/{module}/api/views.py` — move from `dojo/api_v2/views.py`
-2. Add re-exports in `dojo/api_v2/views.py`
+2. Do NOT re-export the viewset in `dojo/api_v2/views.py` — it would cycle (`api_v2.views` ↔ `{module}.api.views`, because the viewset imports its base classes back from `api_v2.views`). Update the consumers instead: the `dojo/urls.py` registration (Phase 9) and `unittests/test_rest_framework.py`, which imports viewsets by name (a dropped re-export there is an ImportError that `manage.py check` won't catch — only the test run does).
+
+**Viewset import pattern (matches `dojo/test/api/views.py`, `dojo/engagement/api/views.py`):** `from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, report_generate, schema_with_prefetch` — base classes and helpers stay in the monolith. Requalify every `serializers.X` reference that stays in `api_v2` to `api_v2_serializers.X` via `from dojo.api_v2 import serializers as api_v2_serializers`; import the MOVED serializers by name from `dojo.{module}.api.serializer`. PRESERVE active class decorators such as `@extend_schema_view(**schema_with_prefetch())` — they are easy to drop when copying a viewset and silently change the generated schema. After moving, prune the now-unused engagement-specific imports left behind in `api_v2/views.py` (filter, services, queries, models) — ruff flags them.
 
 ### Phase 9: Extract API URL Registration
 
@@ -237,6 +241,8 @@ Update UI views and API viewsets to call the service instead of containing logic
 **Preserve the exact route and basename** from the original `v2_api.register(...)` call. They often differ (e.g. route `product_types`, `basename="product_type"`); `path` in `api/__init__.py` should be the route string, and pass `basename=` explicitly if the original did. Changing either breaks DRF URL reversing and the API tests. Verify with `reverse('{basename}-list')`.
 
 ### After Each Phase: Verify
+
+**When copying a class/function out, capture through to the next top-level `class`/dedent.** A fixed-line-window read can silently truncate a long class (trailing fields + `Meta` + `__init__`), yielding a partial copy that still imports cleanly but drops behavior. Confirm the last line of the source class before deleting it from the monolith.
 
 ```bash
 docker compose exec -T uwsgi python manage.py check
