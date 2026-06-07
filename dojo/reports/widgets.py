@@ -15,6 +15,8 @@ from django.utils.safestring import mark_safe
 from dojo.filters import (
     EndpointFilter,
     EndpointFilterWithoutObjectLookups,
+)
+from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )

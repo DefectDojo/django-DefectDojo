@@ -33,7 +33,13 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import get_authorized_endpoints
-from dojo.filters import (
+from dojo.finding.deduplication import (
+    _fetch_fp_candidates_for_batch,
+    do_false_positive_history_batch,
+    match_finding_to_existing_findings,
+)
+from dojo.finding.queries import get_authorized_findings, get_authorized_findings_for_queryset, prefetch_for_findings
+from dojo.finding.ui.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
     FindingFilter,
@@ -42,13 +48,7 @@ from dojo.filters import (
     SimilarFindingFilterWithoutObjectLookups,
     TemplateFindingFilter,
 )
-from dojo.finding.deduplication import (
-    _fetch_fp_candidates_for_batch,
-    do_false_positive_history_batch,
-    match_finding_to_existing_findings,
-)
-from dojo.finding.queries import get_authorized_findings, get_authorized_findings_for_queryset, prefetch_for_findings
-from dojo.forms import (
+from dojo.finding.ui.forms import (
     ApplyFindingTemplateForm,
     ClearFindingReviewForm,
     CloseFindingForm,
@@ -60,11 +60,13 @@ from dojo.forms import (
     FindingBulkUpdateForm,
     FindingForm,
     FindingTemplateForm,
+    MergeFindings,
+    ReviewFindingForm,
+)
+from dojo.forms import (
     GITHUBFindingForm,
     JIRAFindingForm,
-    MergeFindings,
     NoteForm,
-    ReviewFindingForm,
     TypedNoteForm,
 )
 from dojo.jira import services as jira_services

@@ -21,10 +21,12 @@ from dojo.filters import (
     EndpointFilter,
     EndpointFilterWithoutObjectLookups,
     EndpointReportFilter,
+)
+from dojo.finding.queries import get_authorized_findings
+from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.finding.queries import get_authorized_findings
 from dojo.finding.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.labels import get_labels

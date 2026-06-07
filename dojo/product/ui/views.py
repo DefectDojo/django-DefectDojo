@@ -38,6 +38,8 @@ from dojo.engagement.ui.filters import (
 from dojo.filters import (
     MetricsEndpointFilter,
     MetricsEndpointFilterWithoutObjectLookups,
+)
+from dojo.finding.ui.filters import (
     MetricsFindingFilter,
     MetricsFindingFilterWithoutObjectLookups,
 )
