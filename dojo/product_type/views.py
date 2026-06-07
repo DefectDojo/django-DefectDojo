@@ -15,7 +15,7 @@ from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
-from dojo.filters import ProductFilter, ProductFilterWithoutObjectLookups, ProductTypeFilter
+from dojo.filters import ProductFilter, ProductFilterWithoutObjectLookups
 from dojo.forms import (
     Add_Product_Type_AuthorizedUsersForm,
     Delete_Product_TypeForm,
@@ -27,6 +27,7 @@ from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_product_types,
 )
+from dojo.product_type.ui.filters import ProductTypeFilter
 from dojo.query_utils import build_count_subquery
 from dojo.utils import (
     add_breadcrumb,
