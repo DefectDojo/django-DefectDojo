@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import re_path
 
-from dojo.product import views as product_views
+from dojo.product.ui import views as product_views
 from dojo.product_type.ui import views
 from dojo.utils import redirect_view
 
