@@ -62,7 +62,7 @@ URL_PERMISSIONS = {
     "delete_api_scan_configuration": [("object", Product_API_Scan_Configuration, "delete", "pascid")],
 
     # -----------------------------------------------------------------------
-    # Engagement (dojo/engagement/views.py  ->  dojo/engagement/urls.py)
+    # Engagement (dojo/engagement/ui/views.py  ->  dojo/engagement/ui/urls.py)
     # -----------------------------------------------------------------------
     "edit_engagement": [("object", Engagement, "edit", "eid")],
     "delete_engagement": [("object", Engagement, "delete", "eid")],

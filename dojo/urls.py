@@ -60,7 +60,7 @@ from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
-from dojo.engagement.urls import urlpatterns as eng_urls
+from dojo.engagement.ui.urls import urlpatterns as eng_urls
 from dojo.finding.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github.ui.urls import urlpatterns as github_urls
