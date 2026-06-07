@@ -5,8 +5,8 @@ from django.db.models.expressions import Value
 from django.shortcuts import render
 
 from dojo.components.sql_group_concat import Sql_GroupConcat
-from dojo.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
 from dojo.finding.queries import get_authorized_findings
+from dojo.product.ui.filters import ComponentFilter, ComponentFilterWithoutObjectLookups
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting
 
 

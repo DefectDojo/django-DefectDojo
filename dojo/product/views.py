@@ -40,18 +40,12 @@ from dojo.filters import (
     MetricsEndpointFilterWithoutObjectLookups,
     MetricsFindingFilter,
     MetricsFindingFilterWithoutObjectLookups,
-    ProductComponentFilter,
-    ProductFilter,
-    ProductFilterWithoutObjectLookups,
 )
 from dojo.forms import (
-    Add_Product_AuthorizedUsersForm,
     AdHocFindingForm,
     AppAnalysisForm,
     DeleteAppAnalysisForm,
     DeleteEngagementPresetsForm,
-    DeleteProduct_API_Scan_ConfigurationForm,
-    DeleteProductForm,
     DojoMetaFormSet,
     EngagementPresetsForm,
     EngForm,
@@ -60,8 +54,6 @@ from dojo.forms import (
     JIRAEngagementForm,
     JIRAFindingForm,
     JIRAProjectForm,
-    Product_API_Scan_ConfigurationForm,
-    ProductForm,
     ProductNotificationsForm,
     SLA_Configuration,
 )
@@ -93,6 +85,18 @@ from dojo.models import (
 )
 from dojo.product.queries import (
     get_authorized_products,
+)
+from dojo.product.ui.filters import (
+    ProductComponentFilter,
+    ProductFilter,
+    ProductFilterWithoutObjectLookups,
+)
+from dojo.product.ui.forms import (
+    Add_Product_AuthorizedUsersForm,
+    DeleteProduct_API_Scan_ConfigurationForm,
+    DeleteProductForm,
+    Product_API_Scan_ConfigurationForm,
+    ProductForm,
 )
 from dojo.product_type.queries import (
     get_authorized_product_types,
