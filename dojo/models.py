@@ -26,7 +26,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, validate_ipv46_address
 from django.db import connection, models
-from django.db.models import Count, F, JSONField, Q
+from django.db.models import Count, F, Q
 from django.db.models.expressions import Case, When
 from django.db.models.functions import Lower
 from django.urls import reverse
@@ -65,18 +65,6 @@ EFFORT_FOR_FIXING_CHOICES = (("", ""), ("Low", "Low"), ("Medium", "Medium"), ("H
 STATS_FIELDS = ["active", "verified", "duplicate", "false_p", "out_of_scope", "is_mitigated", "risk_accepted", "total"]
 # default template with all values set to 0
 DEFAULT_STATS = {sev.lower(): dict.fromkeys(STATS_FIELDS, 0) for sev in SEVERITIES}
-
-IMPORT_CREATED_FINDING = "N"
-IMPORT_CLOSED_FINDING = "C"
-IMPORT_REACTIVATED_FINDING = "R"
-IMPORT_UNTOUCHED_FINDING = "U"
-
-IMPORT_ACTIONS = [
-    (IMPORT_CREATED_FINDING, "created"),
-    (IMPORT_CLOSED_FINDING, "closed"),
-    (IMPORT_REACTIVATED_FINDING, "reactivated"),
-    (IMPORT_UNTOUCHED_FINDING, "untouched"),
-]
 
 
 def _get_annotations_for_statistics():
@@ -759,6 +747,17 @@ class FileUpload(models.Model):
 
 
 from dojo.product_type.models import Product_Type  # noqa: E402 -- re-export; mid-file as Product FK uses it below
+from dojo.test.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
+    IMPORT_ACTIONS,  # noqa: F401 -- re-export
+    IMPORT_CLOSED_FINDING,  # noqa: F401 -- re-export
+    IMPORT_CREATED_FINDING,  # noqa: F401 -- re-export
+    IMPORT_REACTIVATED_FINDING,  # noqa: F401 -- re-export
+    IMPORT_UNTOUCHED_FINDING,  # noqa: F401 -- re-export
+    Test,
+    Test_Import,  # noqa: F401 -- re-export
+    Test_Import_Finding_Action,  # noqa: F401 -- re-export
+    Test_Type,
+)
 
 
 class Product_Line(models.Model):
@@ -771,26 +770,6 @@ class Product_Line(models.Model):
 
 class Report_Type(models.Model):
     name = models.CharField(max_length=255)
-
-
-class Test_Type(models.Model):
-    name = models.CharField(max_length=200, unique=True)
-    static_tool = models.BooleanField(default=False)
-    dynamic_tool = models.BooleanField(default=False)
-    active = models.BooleanField(default=True)
-    dynamically_generated = models.BooleanField(
-        default=False,
-        help_text=_("Set to True for test types that are created at import time"))
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return self.name
-
-    def get_breadcrumbs(self):
-        return [{"title": str(self),
-               "url": None}]
 
 
 class DojoMeta(models.Model):
@@ -1976,235 +1955,6 @@ class Sonarqube_Issue_Transition(models.Model):
 
     class Meta:
         ordering = ("-created", )
-
-
-class Test(models.Model):
-    engagement = models.ForeignKey(Engagement, editable=False, on_delete=models.CASCADE)
-    lead = models.ForeignKey(Dojo_User, editable=True, null=True, blank=True, on_delete=models.RESTRICT)
-    test_type = models.ForeignKey(Test_Type, on_delete=models.CASCADE)
-    scan_type = models.TextField(null=True)
-    title = models.CharField(max_length=255, null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    target_start = models.DateTimeField()
-    target_end = models.DateTimeField()
-    percent_complete = models.IntegerField(null=True, blank=True,
-                                           editable=True)
-    notes = models.ManyToManyField(Notes, blank=True,
-                                   editable=False)
-    files = models.ManyToManyField(FileUpload, blank=True, editable=False)
-    environment = models.ForeignKey(Development_Environment, null=True,
-                                    blank=False, on_delete=models.RESTRICT)
-
-    updated = models.DateTimeField(auto_now=True, null=True)
-    created = models.DateTimeField(auto_now_add=True, null=True)
-
-    tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this test. Choose from the list or add new tags. Press Enter key to add."))
-    inherited_tags = TagField(blank=True, force_lowercase=True, help_text=_("Internal use tags sepcifically for maintaining parity with product. This field will be present as a subset in the tags field"))
-
-    version = models.CharField(max_length=100, null=True, blank=True)
-
-    build_id = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text=_("Build ID that was tested, a reimport may update this field."), verbose_name=_("Build ID"))
-    commit_hash = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text=_("Commit hash tested, a reimport may update this field."), verbose_name=_("Commit Hash"))
-    branch_tag = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text=_("Tag or branch that was tested, a reimport may update this field."), verbose_name=_("Branch/Tag"))
-    api_scan_configuration = models.ForeignKey(Product_API_Scan_Configuration, null=True, editable=True, blank=True, on_delete=models.CASCADE, verbose_name=_("API Scan Configuration"))
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["engagement", "test_type"]),
-        ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.unsaved_metadata: list = []
-
-    def __str__(self):
-        if self.title:
-            return f"{self.title} ({self.test_type})"
-        return str(self.test_type)
-
-    def get_absolute_url(self):
-        return reverse("view_test", args=[str(self.id)])
-
-    def test_type_name(self) -> str:
-        return self.test_type.name
-
-    def get_breadcrumbs(self):
-        bc = self.engagement.get_breadcrumbs()
-        bc += [{"title": str(self),
-                "url": reverse("view_test", args=(self.id,))}]
-        return bc
-
-    def copy(self, engagement=None):
-        copy = copy_model_util(self)
-        # Save the necessary ManyToMany relationships
-        old_notes = list(self.notes.all())
-        old_files = list(self.files.all())
-        old_tags = list(self.tags.all())
-        old_findings = list(Finding.objects.filter(test=self))
-        if engagement:
-            copy.engagement = engagement
-        # Save the object before setting any ManyToMany relationships
-        copy.save()
-        # Copy the notes
-        for notes in old_notes:
-            copy.notes.add(notes.copy())
-        # Copy the files
-        for files in old_files:
-            copy.files.add(files.copy())
-        # Copy the Findings
-        for finding in old_findings:
-            finding.copy(test=copy)
-        # Assign any tags
-        copy.tags.set(old_tags)
-
-        return copy
-
-    # only used by bulk risk acceptance api
-    @property
-    def unaccepted_open_findings(self):
-        from dojo.utils import get_system_setting  # noqa: PLC0415 circular import
-        findings = Finding.objects.filter(risk_accepted=False, active=True, duplicate=False, test=self)
-        if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
-            findings = findings.filter(verified=True)
-
-        return findings
-
-    def accept_risks(self, accepted_risks):
-        self.engagement.risk_acceptance.add(*accepted_risks)
-
-    @property
-    def deduplication_algorithm(self):
-        deduplicationAlgorithm = settings.DEDUPE_ALGO_LEGACY
-
-        if hasattr(settings, "DEDUPLICATION_ALGORITHM_PER_PARSER"):
-            if (self.test_type.name in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationLogger.debug(f"using DEDUPLICATION_ALGORITHM_PER_PARSER for test_type.name: {self.test_type.name}")
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.test_type.name]
-            elif (self.scan_type in settings.DEDUPLICATION_ALGORITHM_PER_PARSER):
-                deduplicationLogger.debug(f"using DEDUPLICATION_ALGORITHM_PER_PARSER for scan_type: {self.scan_type}")
-                deduplicationAlgorithm = settings.DEDUPLICATION_ALGORITHM_PER_PARSER[self.scan_type]
-        else:
-            deduplicationLogger.debug("Section DEDUPLICATION_ALGORITHM_PER_PARSER not found in settings.dist.py")
-
-        deduplicationLogger.debug(f"DEDUPLICATION_ALGORITHM_PER_PARSER is: {deduplicationAlgorithm}")
-        return deduplicationAlgorithm
-
-    @property
-    def hash_code_fields(self):
-        """Retrieve OS HASH_CODE_FIELDS_PER_SCANNER settings. Be aware when calling this to make sure Pro doesn't use these OS seetings"""
-        hashCodeFields = None
-
-        if hasattr(settings, "HASHCODE_FIELDS_PER_SCANNER"):
-            if (self.test_type.name in settings.HASHCODE_FIELDS_PER_SCANNER):
-                deduplicationLogger.debug(f"using HASHCODE_FIELDS_PER_SCANNER for test_type.name: {self.test_type.name}")
-                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.test_type.name]
-            elif (self.scan_type in settings.HASHCODE_FIELDS_PER_SCANNER):
-                deduplicationLogger.debug(f"using HASHCODE_FIELDS_PER_SCANNER for scan_type: {self.scan_type}")
-                hashCodeFields = settings.HASHCODE_FIELDS_PER_SCANNER[self.scan_type]
-            else:
-                deduplicationLogger.warning(f"test_type name {self.test_type.name} and scan_type {self.scan_type} not found in HASHCODE_FIELDS_PER_SCANNER")
-        else:
-            deduplicationLogger.debug("Section HASHCODE_FIELDS_PER_SCANNER not found in settings.dist.py")
-
-        hash_code_fields_always = getattr(settings, "HASH_CODE_FIELDS_ALWAYS", [])
-        deduplicationLogger.debug(f"HASHCODE_FIELDS_PER_SCANNER is: {hashCodeFields} + HASH_CODE_FIELDS_ALWAYS: {hash_code_fields_always}")
-
-        return hashCodeFields
-
-    @property
-    def hash_code_allows_null_cwe(self):
-        hashCodeAllowsNullCwe = True
-
-        if hasattr(settings, "HASHCODE_ALLOWS_NULL_CWE"):
-            if (self.test_type.name in settings.HASHCODE_ALLOWS_NULL_CWE):
-                deduplicationLogger.debug(f"using HASHCODE_ALLOWS_NULL_CWE for test_type.name: {self.test_type.name}")
-                hashCodeAllowsNullCwe = settings.HASHCODE_ALLOWS_NULL_CWE[self.test_type.name]
-            elif (self.scan_type in settings.HASHCODE_ALLOWS_NULL_CWE):
-                deduplicationLogger.debug(f"using HASHCODE_ALLOWS_NULL_CWE for scan_type: {self.scan_type}")
-                hashCodeAllowsNullCwe = settings.HASHCODE_ALLOWS_NULL_CWE[self.scan_type]
-        else:
-            deduplicationLogger.debug("Section HASHCODE_ALLOWS_NULL_CWE not found in settings.dist.py")
-
-        deduplicationLogger.debug(f"HASHCODE_ALLOWS_NULL_CWE is: {hashCodeAllowsNullCwe}")
-        return hashCodeAllowsNullCwe
-
-    def delete(self, *args, product_grading_option=True, **kwargs):
-        logger.debug("%d test delete", self.id)
-        super().delete(*args, **kwargs)
-        if product_grading_option:
-            with suppress(Test.DoesNotExist, Engagement.DoesNotExist, Product.DoesNotExist):
-                # Suppressing a potential issue created from async delete removing
-                # related objects in a separate task
-                from dojo.utils import perform_product_grading  # noqa: PLC0415 circular import
-                perform_product_grading(self.engagement.product)
-
-    @property
-    def statistics(self):
-        """Queries the database, no prefetching, so could be slow for lists of model instances"""
-        return _get_statistics_for_queryset(Finding.objects.filter(test=self), _get_annotations_for_statistics)
-
-
-class Test_Import(TimeStampedModel):
-
-    IMPORT_TYPE = "import"
-    REIMPORT_TYPE = "reimport"
-
-    test = models.ForeignKey(Test, editable=False, null=False, blank=False, on_delete=models.CASCADE)
-    findings_affected = models.ManyToManyField("Finding", through="Test_Import_Finding_Action")
-    import_settings = JSONField(null=True)
-    type = models.CharField(max_length=64, null=False, blank=False, default="unknown")
-
-    version = models.CharField(max_length=100, null=True, blank=True)
-    build_id = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text=_("Build ID that was tested, a reimport may update this field."), verbose_name=_("Build ID"))
-    commit_hash = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text=_("Commit hash tested, a reimport may update this field."), verbose_name=_("Commit Hash"))
-    branch_tag = models.CharField(editable=True, max_length=150,
-                                   null=True, blank=True, help_text=_("Tag or branch that was tested, a reimport may update this field."), verbose_name=_("Branch/Tag"))
-
-    def get_queryset(self):
-        logger.debug("prefetch test_import counts")
-        super_query = super().get_queryset()
-        super_query = super_query.annotate(created_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_CREATED_FINDING)))
-        super_query = super_query.annotate(closed_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_CLOSED_FINDING)))
-        super_query = super_query.annotate(reactivated_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_REACTIVATED_FINDING)))
-        return super_query.annotate(untouched_findings_count=Count("findings", filter=Q(test_import_finding_action__action=IMPORT_UNTOUCHED_FINDING)))
-
-    class Meta:
-        ordering = ("-id",)
-        indexes = [
-            models.Index(fields=["created", "test", "type"]),
-        ]
-
-    def __str__(self):
-        return self.created.strftime("%Y-%m-%d %H:%M:%S")
-
-    @property
-    def statistics(self):
-        """Queries the database, no prefetching, so could be slow for lists of model instances"""
-        stats = {}
-        for action in IMPORT_ACTIONS:
-            stats[action[1].lower()] = _get_statistics_for_queryset(Finding.objects.filter(test_import_finding_action__test_import=self, test_import_finding_action__action=action[0]), _get_annotations_for_statistics)
-        return stats
-
-
-class Test_Import_Finding_Action(TimeStampedModel):
-    test_import = models.ForeignKey(Test_Import, editable=False, null=False, blank=False, on_delete=models.CASCADE)
-    finding = models.ForeignKey("Finding", editable=False, null=False, blank=False, on_delete=models.CASCADE)
-    action = models.CharField(max_length=100, null=True, blank=True, choices=IMPORT_ACTIONS)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["finding", "action", "test_import"]),
-        ]
-        unique_together = (("test_import", "finding"))
-        ordering = ("test_import", "action", "finding")
-
-    def __str__(self):
-        return f"{self.finding.id}: {self.action}"
 
 
 class Finding(BaseModel):
@@ -4352,14 +4102,12 @@ admin.site.register(Objects_Review)
 admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
-admin.site.register(Test)
 admin.site.register(Finding, FindingAdmin)
 admin.site.register(FileUpload)
 admin.site.register(FileAccessToken)
 admin.site.register(Engagement)
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)
-admin.site.register(Test_Type)
 admin.site.register(Endpoint_Params)
 admin.site.register(Endpoint_Status)
 admin.site.register(Endpoint)
@@ -4414,6 +4162,4 @@ admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)
 admin.site.register(Tool_Product_History)
 admin.site.register(General_Survey)
-admin.site.register(Test_Import)
-admin.site.register(Test_Import_Finding_Action)
 admin.site.register(Finding_Group)
