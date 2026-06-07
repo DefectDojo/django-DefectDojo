@@ -803,14 +803,15 @@ class TestImporterUtils(DojoAPITestCase):
         }
 
     def test_handle_vulnerability_ids_references_and_cve(self):
-        # Why doesn't this test use the test db and query for one?
         vulnerability_ids = ["CVE", "REF-1", "REF-2"]
         finding = Finding()
         finding.unsaved_vulnerability_ids = vulnerability_ids
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
@@ -827,7 +828,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
 
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
@@ -841,7 +844,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.reporter = self.testuser
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("REF-1", finding.vulnerability_ids[0])
         self.assertEqual("REF-1", finding.cve)
@@ -854,7 +859,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
         self.assertEqual(finding.cve, None)
         self.assertEqual(finding.unsaved_vulnerability_ids, None)
         self.assertEqual(finding.vulnerability_ids, [])
