@@ -59,11 +59,13 @@ from dojo.filters import (
     ApiRiskAcceptanceFilter,
     ApiTemplateFindingFilter,
     ApiUserFilter,
-    ReportFindingFilter,
-    ReportFindingFilterWithoutObjectLookups,
 )
 from dojo.finding.queries import (
     get_authorized_findings,
+)
+from dojo.finding.ui.filters import (
+    ReportFindingFilter,
+    ReportFindingFilterWithoutObjectLookups,
 )
 from dojo.finding.views import (
     duplicate_cluster,
