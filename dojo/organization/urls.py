@@ -2,7 +2,7 @@ from django.conf import settings
 from django.urls import re_path
 
 from dojo.product import views as product_views
-from dojo.product_type import views
+from dojo.product_type.ui import views
 from dojo.utils import redirect_view
 
 # TODO: remove the else: branch once v3 migration is complete
