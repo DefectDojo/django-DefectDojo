@@ -22,8 +22,6 @@ from dojo.api_v2.views import (
     EndpointMetaImporterView,
     EndpointStatusViewSet,
     EndPointViewSet,
-    FindingTemplatesViewSet,
-    FindingViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -58,6 +56,7 @@ from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
 from dojo.engagement.api.urls import add_engagement_urls
 from dojo.engagement.ui.urls import urlpatterns as eng_urls
+from dojo.finding.api.urls import add_finding_urls
 from dojo.finding.ui.urls import urlpatterns as finding_urls
 from dojo.finding_group.urls import urlpatterns as finding_group_urls
 from dojo.github.ui.urls import urlpatterns as github_urls
@@ -109,8 +108,6 @@ v2_api.register(r"development_environments", DevelopmentEnvironmentViewSet, base
 # RBAC endpoints moved to Pro under legacy authorization:
 #   dojo_groups, dojo_group_members → pro/groups, pro/group_members
 v2_api.register(r"endpoint_meta_import", EndpointMetaImporterView, basename="endpointmetaimport")
-v2_api.register(r"finding_templates", FindingTemplatesViewSet, basename="finding_template")
-v2_api.register(r"findings", FindingViewSet, basename="finding")
 # RBAC endpoint moved to Pro under legacy authorization: global_roles → pro/global_roles
 v2_api.register(r"import-languages", ImportLanguagesView, basename="importlanguages")
 v2_api.register(r"import-scan", ImportScanView, basename="importscan")
@@ -131,6 +128,7 @@ v2_api = add_product_urls(v2_api)
 #   product_groups, product_members → pro/product_groups, pro/product_members
 v2_api = add_product_type_urls(v2_api)
 v2_api = add_engagement_urls(v2_api)
+v2_api = add_finding_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   product_type_members, product_type_groups → pro/product_type_members, pro/product_type_groups
 v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")

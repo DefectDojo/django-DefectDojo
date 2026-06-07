@@ -20,8 +20,10 @@ class TestSerializer(serializers.ModelSerializer):
 
     def get_fields(self):
         from dojo.api_v2.serializers import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
-            FindingGroupSerializer,
             TagListSerializerField,
+        )
+        from dojo.finding.api.serializer import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
+            FindingGroupSerializer,
         )
         fields = super().get_fields()
         fields["tags"] = TagListSerializerField(required=False)
