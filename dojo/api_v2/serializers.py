@@ -466,12 +466,6 @@ class MetaMainSerializer(serializers.Serializer):
         return data
 
 
-class ProductMetaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DojoMeta
-        fields = ("name", "value")
-
-
 class UserSerializer(serializers.ModelSerializer):
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)
@@ -728,6 +722,16 @@ class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
 # RiskAcceptanceSerializer (below) still reference it. The other engagement
 # serializers are imported directly from dojo.engagement.api by their consumers.
 from dojo.engagement.api.serializer import EngagementSerializer  # noqa: E402 -- backward compat
+
+# Product serializers live in dojo/product/api/serializer.py. ProductSerializer is
+# re-exported because ReportGenerateSerializer (below) still references it;
+# ProductMetaSerializer because dojo/asset/api/serializers.py imports it.
+# ProductAPIScanConfigurationSerializer is imported directly from
+# dojo.product.api.serializer by its only consumer (the viewset).
+from dojo.product.api.serializer import (  # noqa: E402 -- backward compat
+    ProductMetaSerializer,  # noqa: F401 -- backward compat
+    ProductSerializer,
+)
 from dojo.product_type.api.serializer import ProductTypeSerializer  # noqa: E402
 
 
@@ -959,12 +963,6 @@ class SonarqubeIssueSerializer(serializers.ModelSerializer):
 class SonarqubeIssueTransitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sonarqube_Issue_Transition
-        fields = "__all__"
-
-
-class ProductAPIScanConfigurationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_API_Scan_Configuration
         fields = "__all__"
 
 
@@ -1636,44 +1634,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
             save_endpoints_template(instance, endpoint_urls)
 
         return super().update(instance, validated_data)
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    findings_count = serializers.SerializerMethodField()
-    findings_list = serializers.SerializerMethodField()
-
-    business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)
-    platform = serializers.ChoiceField(choices=Product.PLATFORM_CHOICES, allow_blank=True, allow_null=True, required=False)
-    lifecycle = serializers.ChoiceField(choices=Product.LIFECYCLE_CHOICES, allow_blank=True, allow_null=True, required=False)
-    origin = serializers.ChoiceField(choices=Product.ORIGIN_CHOICES, allow_blank=True, allow_null=True, required=False)
-
-    tags = TagListSerializerField(required=False)
-    product_meta = ProductMetaSerializer(read_only=True, many=True)
-
-    class Meta:
-        model = Product
-        exclude = (
-            "tid",
-            "updated",
-            "async_updating",
-        )
-
-    def validate(self, data):
-        async_updating = getattr(self.instance, "async_updating", None)
-        if async_updating:
-            new_sla_config = data.get("sla_configuration", None)
-            old_sla_config = getattr(self.instance, "sla_configuration", None)
-            if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
-                msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
-                raise serializers.ValidationError(msg)
-        return data
-
-    def get_findings_count(self, obj) -> int:
-        return obj.findings_count
-
-    # TODO: maybe extend_schema_field is needed here?
-    def get_findings_list(self, obj) -> list[int]:
-        return obj.open_findings_list()
 
 
 class CommonImportScanSerializer(serializers.Serializer):
