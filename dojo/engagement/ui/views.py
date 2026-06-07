@@ -54,7 +54,7 @@ from dojo.engagement.ui.filters import (
 )
 from dojo.engagement.ui.forms import DeleteEngagementForm, EngForm
 from dojo.finding.helper import NOT_ACCEPTED_FINDINGS_QUERY
-from dojo.finding.views import find_available_notetypes
+from dojo.finding.ui.views import find_available_notetypes
 from dojo.forms import (
     AddFindingsRiskAcceptanceForm,
     CheckForm,

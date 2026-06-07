@@ -27,7 +27,7 @@ from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter
-from dojo.finding.views import find_available_notetypes
+from dojo.finding.ui.views import find_available_notetypes
 from dojo.forms import (
     AddFindingForm,
     FindingBulkUpdateForm,

@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from dojo.finding import views
+from dojo.finding.ui import views
 
 urlpatterns = [
     # CRUD operations

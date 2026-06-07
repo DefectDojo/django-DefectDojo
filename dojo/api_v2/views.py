@@ -67,7 +67,7 @@ from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.finding.views import (
+from dojo.finding.ui.views import (
     duplicate_cluster,
     reset_finding_duplicate_status_internal,
     set_finding_as_original_internal,
