@@ -117,17 +117,29 @@ grep -rn "from dojo.models import.*{Model}" dojo/ unittests/
 5. Remove original model code (keep re-export line)
 
 **Import rules for models.py:**
-- Upward FKs (e.g., Test -> Engagement): import from `dojo.models` if not yet extracted, or `dojo.{module}.models` if already extracted
-- Downward references (e.g., Product_Type querying Finding): use lazy imports inside method bodies
-- Shared utilities (`copy_model_util`, `_manage_inherited_tags`, `get_current_date`, etc.): import from `dojo.models`
+- **Prefer string FK refs to break circular imports.** Convert EVERY ForeignKey/ManyToMany/OneToOne whose target is NOT a class being moved into a string ref `"dojo.<Model>"` (e.g. `models.ForeignKey(Engagement, ...)` → `models.ForeignKey("dojo.Engagement", ...)`). This lets the extracted `models.py` carry ZERO top-level `from dojo.models import ...`, which is what actually prevents circular imports. String refs produce identical migrations (Django resolves via the app registry) — `makemigrations --check` must still say "No changes detected".
+- References AMONG the classes being moved together also use string refs, for uniformity and to avoid in-file ordering issues.
+- Downward/other dojo references inside METHOD bodies: lazy imports inside the method.
+- Shared utilities (`copy_model_util`, `_manage_inherited_tags`, `get_current_date`, `tomorrow`, etc.): import from `dojo.models`. CAVEAT: if a utility is used as a class-body field default (e.g. `default=get_current_date`), it must be imported (not redefined locally) so its `__module__` stays `dojo.models` — otherwise migration serialization changes and `makemigrations` flags a diff. These utils are defined early in `dojo.models` (before the re-export that loads your module), so a top-level `from dojo.models import get_current_date, tomorrow, copy_model_util` resolves correctly despite the partial circular load.
 - Do NOT set `app_label` in Meta — all models inherit `dojo` app_label automatically
 
-**Verify:**
+**Lint conventions (the repo pre-commit ruff is strict — match exactly):**
+- Method-body lazy imports need `# noqa: PLC0415 -- lazy import, avoids circular dependency`.
+- Mid-file / non-top re-exports in `dojo/models.py` need `# noqa: E402`, plus `# noqa: F401` ONLY on names not referenced elsewhere in `dojo/models.py` (a name still used by a remaining class body must NOT get F401).
+- Self-check before committing: `/home/valentijn/.local/bin/ruff check --config ruff.toml <files>` (ruff is a host binary, NOT in the uwsgi container). Never let `ruff --fix` wrap a re-export into a parenthesized multiline — shorten the comment instead.
+
+**Re-export placement:** use ONE consolidated re-export block per module, placed at the earliest moved class's original position. A name referenced in a class-body FK at load-time must be re-exported BEFORE that line.
+
+**Constants:** single-source module-level constants in the extracted module and re-export from `dojo/models.py` (done for `IMPORT_ACTIONS`, `ENGAGEMENT_STATUS_CHOICES`). Do not duplicate.
+
+**Watch for load-bearing imports:** some imports in `dojo/models.py` exist for side effects, not the imported name (e.g. `from dojo.utils import parse_cvss_data` transitively registers `dojo.location` models for `apps.py:ready()`). If you remove the last consumer of such an import, keep it as a re-export or `apps.py` breaks.
+
+**Verify** (runs in docker; model imports need `manage.py shell -c`, not bare `python -c`):
 ```bash
-python manage.py check
-python manage.py makemigrations --check
-python -c "from dojo.{module}.models import {Model}"
-python -c "from dojo.models import {Model}"
+docker compose exec -T uwsgi python manage.py check
+docker compose exec -T uwsgi python manage.py makemigrations --check --dry-run   # must say "No changes detected"
+docker compose exec -T uwsgi python manage.py shell -c "from dojo.{module}.models import {Model}; print('ok')"
+docker compose exec -T uwsgi python manage.py shell -c "from dojo.models import {Model}; print('ok')"
 ```
 
 ### Phase 2: Extract Services
@@ -217,9 +229,10 @@ Update UI views and API viewsets to call the service instead of containing logic
 ### After Each Phase: Verify
 
 ```bash
-python manage.py check
-python manage.py makemigrations --check
-python -m pytest unittests/ -x --timeout=120
+docker compose exec -T uwsgi python manage.py check
+docker compose exec -T uwsgi python manage.py makemigrations --check --dry-run
+# Tests run via the wrapper (NOT pytest/manage.py test directly); tee to capture output:
+./run-unittest.sh --test-case unittests.{relevant_test_module} 2>&1 | tee /tmp/test.log
 ```
 
 ---
