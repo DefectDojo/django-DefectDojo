@@ -27,7 +27,7 @@ from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.finding.views import BaseListFindings
+from dojo.finding.ui.views import BaseListFindings
 from dojo.forms import ReportOptionsForm
 from dojo.labels import get_labels
 from dojo.location.models import Location
