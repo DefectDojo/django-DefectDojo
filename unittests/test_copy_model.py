@@ -1,6 +1,9 @@
 
+from unittest.mock import patch
+
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
+from dojo.test.services import copy_test
 from dojo.url.models import URL
 
 from .dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
@@ -274,6 +277,34 @@ class TestCopyTestModel(DojoTestCase):
         self.assertQuerySetEqual(test.notes.all(), test_copy.notes.all())
         # Do the tags match
         self.assertEqual(test.tags, test_copy.tags)
+
+
+class TestCopyTestService(DojoTestCase):
+
+    """Phase 2: the copy_test service holds the copy workflow extracted from the UI view."""
+
+    @patch("dojo.test.services.create_notification")
+    @patch("dojo.test.services.dojo_dispatch_task")
+    def test_copy_test_service(self, mock_dispatch, mock_notification):
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("svc_pt_test")
+        product = self.create_product("svc_copy_test_product", prod_type=product_type)
+        engagement = self.create_engagement("svc_eng_test", product)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="test")
+        _ = Finding.objects.create(test=test, reporter=user)
+        before_tests = Test.objects.filter(engagement=engagement).count()
+        before_findings = Finding.objects.filter(test__engagement=engagement).count()
+        # Run the service (copy into the same engagement)
+        test_copy = copy_test(test, engagement, user)
+        # A new test was created under the engagement, with its findings
+        self.assertEqual(before_tests + 1, Test.objects.filter(engagement=engagement).count())
+        self.assertNotEqual(test.id, test_copy.id)
+        self.assertEqual(engagement, test_copy.engagement)
+        self.assertEqual(before_findings + 1, Finding.objects.filter(test__engagement=engagement).count())
+        # Side effects: grade recalculation dispatched and a notification raised
+        mock_dispatch.assert_called_once()
+        mock_notification.assert_called_once()
+        self.assertEqual(mock_notification.call_args.kwargs["event"], "test_copied")
 
 
 class TestCopyEngagementModel(DojoTestCase):
