@@ -57,7 +57,6 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     ProductAPIScanConfigurationViewSet,
-    ProductTypeViewSet,
     ProductViewSet,
     RiskAcceptanceViewSet,
     SonarqubeIssueViewSet,
@@ -116,6 +115,7 @@ from dojo.notifications.api.views import NotificationsViewSet, NotificationWebho
 from dojo.organization.api.views import (
     OrganizationViewSet,
 )
+from dojo.product_type.api.views import ProductTypeViewSet
 from dojo.url.api.views import URLViewSet
 from dojo.url.models import URL
 

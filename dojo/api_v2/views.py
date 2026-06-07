@@ -104,7 +104,6 @@ from dojo.models import (
     Notes,
     Product,
     Product_API_Scan_Configuration,
-    Product_Type,
     Regulation,
     Risk_Acceptance,
     SLA_Configuration,
@@ -127,9 +126,6 @@ from dojo.product.queries import (
     get_authorized_languages,
     get_authorized_product_api_scan_configurations,
     get_authorized_products,
-)
-from dojo.product_type.queries import (
-    get_authorized_product_types,
 )
 from dojo.query_utils import build_count_subquery
 from dojo.reports.views import (
@@ -1780,86 +1776,6 @@ class ProductViewSet(
             )
 
         data = report_generate(request, product, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductTypeViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductTypeSerializer
-    queryset = Product_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "critical_product",
-        "key_product",
-        "created",
-        "updated",
-    ]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductTypePermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_types(
-            "view",
-        ).distinct()
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if get_setting("ASYNC_OBJECT_DELETE"):
-            async_del = async_delete()
-            async_del.delete(instance)
-        else:
-            with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
-                instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=True, methods=["post"],
-        # IsAuthenticated only: report generation requires View permission,
-        # enforced by the permission-filtered get_queryset(). The viewset's
-        # permission_classes would check Edit (POST), which is too restrictive.
-        permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request, pk=None):
-        product_type = self.get_object()
-
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, product_type, options)
         report = serializers.ReportGenerateSerializer(data)
         return Response(report.data)
 
