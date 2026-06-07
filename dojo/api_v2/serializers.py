@@ -48,7 +48,6 @@ from dojo.models import (
     Announcement,
     App_Analysis,
     BurpRawRequestResponse,
-    Check_List,
     Development_Environment,
     Dojo_User,
     DojoMeta,
@@ -56,7 +55,6 @@ from dojo.models import (
     Endpoint_Params,
     Endpoint_Status,
     Engagement,
-    Engagement_Presets,
     FileUpload,
     Finding,
     Finding_Group,
@@ -725,36 +723,12 @@ class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
         fields = ["path"]
 
 
+# Engagement serializers live in dojo/engagement/api/serializer.py.
+# EngagementSerializer is re-exported here because ReportGenerateSerializer and
+# RiskAcceptanceSerializer (below) still reference it. The other engagement
+# serializers are imported directly from dojo.engagement.api by their consumers.
+from dojo.engagement.api.serializer import EngagementSerializer  # noqa: E402 -- backward compat
 from dojo.product_type.api.serializer import ProductTypeSerializer  # noqa: E402
-
-
-class EngagementSerializer(serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
-
-    class Meta:
-        model = Engagement
-        exclude = ("inherited_tags",)
-
-    def validate(self, data):
-        if self.context["request"].method == "POST":
-            if data.get("target_start") > data.get("target_end"):
-                msg = "Your target start date exceeds your target end date"
-                raise serializers.ValidationError(msg)
-        return data
-
-    def build_relational_field(self, field_name, relation_info):
-        if field_name == "notes":
-            return NoteSerializer, {"many": True, "read_only": True}
-        if field_name == "files":
-            return FileSerializer, {"many": True, "read_only": True}
-        return super().build_relational_field(field_name, relation_info)
-
-
-class EngagementToNotesSerializer(serializers.Serializer):
-    engagement_id = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement.objects.all(), many=False, allow_null=True,
-    )
-    notes = NoteSerializer(many=True)
 
 
 class RiskAcceptanceToNotesSerializer(serializers.Serializer):
@@ -762,34 +736,6 @@ class RiskAcceptanceToNotesSerializer(serializers.Serializer):
         queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
     )
     notes = NoteSerializer(many=True)
-
-
-class EngagementToFilesSerializer(serializers.Serializer):
-    engagement_id = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement.objects.all(), many=False, allow_null=True,
-    )
-    files = FileSerializer(many=True)
-
-    def to_representation(self, data):
-        engagement = data.get("engagement_id")
-        files = data.get("files")
-        new_files = [{
-                "id": file.id,
-                "file": "{site_url}/{file_access_url}".format(
-                    site_url=settings.SITE_URL,
-                    file_access_url=file.get_accessible_url(
-                        engagement, engagement.id,
-                    ),
-                ),
-                "title": file.title,
-            } for file in files]
-        return {"engagement_id": engagement.id, "files": new_files}
-
-
-class EngagementCheckListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Check_List
-        fields = "__all__"
 
 
 class AppAnalysisSerializer(serializers.ModelSerializer):
@@ -2545,12 +2491,6 @@ class FindingNoteSerializer(serializers.Serializer):
 
 
 from dojo.notifications.api.serializer import NotificationsSerializer  # noqa: E402, F401  -- backward compat
-
-
-class EngagementPresetsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Engagement_Presets
-        fields = "__all__"
 
 
 class NetworkLocationsSerializer(serializers.ModelSerializer):
