@@ -86,7 +86,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
-from dojo.test.urls import urlpatterns as test_urls
+from dojo.test.ui.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
 from dojo.tool_product.urls import urlpatterns as tool_product_urls

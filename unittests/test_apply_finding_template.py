@@ -28,7 +28,7 @@ from dojo.models import (
     Test_Type,
     Vulnerability_Id,
 )
-from dojo.test import views as test_views
+from dojo.test.ui import views as test_views
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
