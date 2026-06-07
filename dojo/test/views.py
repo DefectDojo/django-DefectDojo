@@ -24,7 +24,6 @@ from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
 from dojo.finding.queries import prefetch_for_findings
@@ -63,6 +62,7 @@ from dojo.product_announcements import (
     ScanTypeProductAnnouncement,
 )
 from dojo.test.queries import get_authorized_tests
+from dojo.test.services import copy_test as copy_test_service
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.user.queries import get_authorized_users
 from dojo.utils import (
@@ -72,7 +72,6 @@ from dojo.utils import (
     add_field_errors_to_response,
     add_success_message_to_response,
     async_delete,
-    calculate_grade,
     get_cal_event,
     get_page_items,
     get_page_items_and_count,
@@ -325,21 +324,12 @@ def copy_test(request, tid):
         form = CopyTestForm(request.POST, engagements=engagement_list)
         if form.is_valid():
             engagement = form.cleaned_data.get("engagement")
-            product = test.engagement.product
-            test_copy = test.copy(engagement=engagement)
-            dojo_dispatch_task(calculate_grade, product.id)
+            copy_test_service(test, engagement, request.user)
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 "Test Copied successfully.",
                 extra_tags="alert-success")
-            create_notification(event="test_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                                title=f"Copying of {test.title}",
-                                description=f'The test "{test.title}" was copied by {request.user} to {engagement.name}',
-                                product=product,
-                                url=request.build_absolute_uri(reverse("view_test", args=(test_copy.id,))),
-                                recipients=[test.engagement.lead],
-                                icon="exclamation-triangle")
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(engagement.id, )))
         messages.add_message(
             request,
