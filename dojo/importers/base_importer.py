@@ -80,6 +80,7 @@ class BaseImporter(ImporterOptions):
         ImporterOptions.__init__(self, *args, **kwargs)
         self.pending_vulnerability_ids: list[Vulnerability_Id] = []
         self.pending_vuln_id_deletes: list[int] = []
+        self.pending_burp_rr: list[BurpRawRequestResponse] = []
 
     def check_child_implementation_exception(self):
         """
@@ -719,24 +720,26 @@ class BaseImporter(ImporterOptions):
         Create BurpRawRequestResponse objects linked to the finding without
         returning the finding afterward
         """
-        if len(unsaved_req_resp := getattr(finding, "unsaved_req_resp", [])) > 0:
-            for req_resp in unsaved_req_resp:
-                burp_rr = BurpRawRequestResponse(
-                    finding=finding,
-                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
-                burp_rr.clean()
-                burp_rr.save()
+        for req_resp in getattr(finding, "unsaved_req_resp", []):
+            self.pending_burp_rr.append(BurpRawRequestResponse(
+                finding=finding,
+                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
+            ))
 
         unsaved_request = getattr(finding, "unsaved_request", None)
         unsaved_response = getattr(finding, "unsaved_response", None)
         if unsaved_request is not None and unsaved_response is not None:
-            burp_rr = BurpRawRequestResponse(
+            self.pending_burp_rr.append(BurpRawRequestResponse(
                 finding=finding,
                 burpRequestBase64=base64.b64encode(unsaved_request.encode()),
-                burpResponseBase64=base64.b64encode(unsaved_response.encode()))
-            burp_rr.clean()
-            burp_rr.save()
+                burpResponseBase64=base64.b64encode(unsaved_response.encode()),
+            ))
+
+    def flush_burp_request_response(self) -> None:
+        if self.pending_burp_rr:
+            BurpRawRequestResponse.objects.bulk_create(self.pending_burp_rr, batch_size=1000)
+            self.pending_burp_rr.clear()
 
     def process_locations(
         self,
