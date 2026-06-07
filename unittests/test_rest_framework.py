@@ -60,8 +60,6 @@ from dojo.api_v2.views import (
     ProductViewSet,
     RiskAcceptanceViewSet,
     SonarqubeIssueViewSet,
-    TestsViewSet,
-    TestTypesViewSet,
     ToolConfigurationsViewSet,
     ToolProductSettingsViewSet,
     ToolTypesViewSet,
@@ -116,6 +114,7 @@ from dojo.organization.api.views import (
     OrganizationViewSet,
 )
 from dojo.product_type.api.views import ProductTypeViewSet
+from dojo.test.api.views import TestsViewSet, TestTypesViewSet
 from dojo.url.api.views import URLViewSet
 from dojo.url.models import URL
 

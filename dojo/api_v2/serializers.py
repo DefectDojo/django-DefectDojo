@@ -77,8 +77,6 @@ from dojo.models import (
     Sonarqube_Issue_Transition,
     System_Settings,
     Test,
-    Test_Import,
-    Test_Import_Finding_Action,
     Test_Type,
     Tool_Configuration,
     Tool_Product_Settings,
@@ -1038,96 +1036,7 @@ class FindingGroupSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "test", "jira_issue")
 
 
-class TestSerializer(serializers.ModelSerializer):
-    tags = TagListSerializerField(required=False)
-    test_type_name = serializers.ReadOnlyField()
-    finding_groups = FindingGroupSerializer(
-        source="finding_group_set", many=True, read_only=True,
-    )
-
-    class Meta:
-        model = Test
-        exclude = ("inherited_tags",)
-
-    def build_relational_field(self, field_name, relation_info):
-        if field_name == "notes":
-            return NoteSerializer, {"many": True, "read_only": True}
-        if field_name == "files":
-            return FileSerializer, {"many": True, "read_only": True}
-        return super().build_relational_field(field_name, relation_info)
-
-
-class TestCreateSerializer(serializers.ModelSerializer):
-    engagement = serializers.PrimaryKeyRelatedField(
-        queryset=Engagement.objects.all(),
-    )
-    notes = serializers.PrimaryKeyRelatedField(
-        allow_null=True,
-        queryset=Notes.objects.all(),
-        many=True,
-        required=False,
-    )
-    tags = TagListSerializerField(required=False)
-
-    class Meta:
-        model = Test
-        exclude = ("inherited_tags",)
-
-
-class TestTypeCreateSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Test_Type
-        exclude = ("dynamically_generated",)
-
-
-class TestTypeSerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField()
-
-    class Meta:
-        model = Test_Type
-        exclude = ("dynamically_generated",)
-
-
-class TestToNotesSerializer(serializers.Serializer):
-    test_id = serializers.PrimaryKeyRelatedField(
-        queryset=Test.objects.all(), many=False, allow_null=True,
-    )
-    notes = NoteSerializer(many=True)
-
-
-class TestToFilesSerializer(serializers.Serializer):
-    test_id = serializers.PrimaryKeyRelatedField(
-        queryset=Test.objects.all(), many=False, allow_null=True,
-    )
-    files = FileSerializer(many=True)
-
-    def to_representation(self, data):
-        test = data.get("test_id")
-        files = data.get("files")
-        new_files = [{
-                "id": file.id,
-                "file": f"{settings.SITE_URL}/{file.get_accessible_url(test, test.id)}",
-                "title": file.title,
-            } for file in files]
-        return {"test_id": test.id, "files": new_files}
-
-
-class TestImportFindingActionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Test_Import_Finding_Action
-        fields = "__all__"
-
-
-class TestImportSerializer(serializers.ModelSerializer):
-    # findings = TestImportFindingActionSerializer(source='test_import_finding_action', many=True, read_only=True)
-    test_import_finding_action_set = TestImportFindingActionSerializer(
-        many=True, read_only=True,
-    )
-
-    class Meta:
-        model = Test_Import
-        fields = "__all__"
+from dojo.test.api.serializer import TestSerializer  # noqa: E402 -- backward compat re-export
 
 
 class RiskAcceptanceSerializer(serializers.ModelSerializer):
