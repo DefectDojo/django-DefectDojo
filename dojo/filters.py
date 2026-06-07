@@ -3780,22 +3780,6 @@ class TestImportAPIFilter(DojoFilter):
 # re-exported at the bottom of this module for backward compatibility.
 
 
-class ProductTypeFilter(DojoFilter):
-    name = CharFilter(lookup_expr="icontains")
-
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ("name", "name"),
-        ),
-    )
-
-    class Meta:
-        model = Product_Type
-        exclude = []
-        include = ("name",)
-
-
 class TestTypeFilter(DojoFilter):
     name = CharFilter(lookup_expr="icontains")
 
