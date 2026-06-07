@@ -3,7 +3,7 @@ import datetime
 from django.test import TestCase
 from django.utils import timezone
 
-from dojo.filters import ApiFindingFilter
+from dojo.finding.api.filters import ApiFindingFilter
 from dojo.finding.ui.filters import FindingFilterHelper
 from dojo.models import (
     Dojo_User,
