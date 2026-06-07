@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from dojo.engagement import views
+from dojo.engagement.ui import views
 
 urlpatterns = [
     #  engagements and calendar
