@@ -24,7 +24,6 @@ from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonRes
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
-from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_POST
@@ -34,10 +33,15 @@ from openpyxl.styles import Font
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.engagement.services import (
+    close_engagement,
+    reopen_engagement,
+)
+from dojo.engagement.services import (
+    copy_engagement as copy_engagement_service,
+)
 from dojo.filters import (
     EngagementDirectFilter,
     EngagementDirectFilterWithoutObjectLookups,
@@ -107,7 +111,6 @@ from dojo.utils import (
     add_error_message_to_response,
     add_success_message_to_response,
     async_delete,
-    calculate_grade,
     generate_file_response_from_file_path,
     get_cal_event,
     get_page_items,
@@ -391,20 +394,12 @@ def copy_engagement(request, eid):
     if request.method == "POST":
         form = DoneForm(request.POST)
         if form.is_valid():
-            engagement_copy = engagement.copy()
-            dojo_dispatch_task(calculate_grade, product.id)
+            copy_engagement_service(engagement, request.user)
             messages.add_message(
                 request,
                 messages.SUCCESS,
                 "Engagement Copied successfully.",
                 extra_tags="alert-success")
-            create_notification(event="engagement_copied",  # TODO: - if 'copy' functionality will be supported by API as well, 'create_notification' needs to be migrated to place where it will be able to cover actions from both interfaces
-                                title=_("Copying of %s") % engagement.name,
-                                description=f'The engagement "{engagement.name}" was copied by {request.user}',
-                                product=product,
-                                url=request.build_absolute_uri(reverse("view_engagement", args=(engagement_copy.id, ))),
-                                recipients=[engagement.lead],
-                                icon="exclamation-triangle")
             return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
         messages.add_message(
             request,
