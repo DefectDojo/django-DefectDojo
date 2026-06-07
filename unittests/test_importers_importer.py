@@ -887,7 +887,9 @@ class TestImporterUtils(DojoAPITestCase):
 
         # Process with empty list - should clear all IDs
         finding.unsaved_vulnerability_ids = []
-        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+        reimporter.reconcile_vulnerability_ids(finding)
+        reimporter.flush_vulnerability_ids()
         # Save the finding to persist the cve=None change
         finding.save()
 
@@ -924,7 +926,9 @@ class TestImporterUtils(DojoAPITestCase):
         # Process with different IDs - should replace old IDs
         new_vulnerability_ids = ["CVE-2021-9999", "GHSA-xxxx-yyyy"]
         finding.unsaved_vulnerability_ids = new_vulnerability_ids
-        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+        reimporter.reconcile_vulnerability_ids(finding)
+        reimporter.flush_vulnerability_ids()
         # Save the finding to persist the cve change
         finding.save()
 
@@ -939,4 +943,91 @@ class TestImporterUtils(DojoAPITestCase):
         # Verify only new Vulnerability_Id objects exist
         vuln_ids = list(Vulnerability_Id.objects.filter(finding=finding).values_list("vulnerability_id", flat=True))
         self.assertEqual(set(new_vulnerability_ids), set(vuln_ids))
+        finding.delete()
+
+    def test_reconcile_vulnerability_ids_cross_finding_batch(self):
+        """Multiple findings accumulated before flush — one delete+insert pair per changed finding."""
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+
+        # finding_a: IDs change (CVE-A → CVE-B)
+        finding_a = Finding(test=self.test, reporter=self.testuser)
+        finding_a.save()
+        Vulnerability_Id.objects.create(finding=finding_a, vulnerability_id="CVE-A-OLD")
+        finding_a.cve = "CVE-A-OLD"
+        finding_a.save()
+
+        # finding_b: IDs change (CVE-B1, CVE-B2 → CVE-B-NEW)
+        finding_b = Finding(test=self.test, reporter=self.testuser)
+        finding_b.save()
+        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B1")
+        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B2")
+        finding_b.cve = "CVE-B1"
+        finding_b.save()
+
+        # finding_c: IDs unchanged — should not appear in delete/insert buffers
+        finding_c = Finding(test=self.test, reporter=self.testuser)
+        finding_c.save()
+        Vulnerability_Id.objects.create(finding=finding_c, vulnerability_id="CVE-C-SAME")
+        finding_c.cve = "CVE-C-SAME"
+        finding_c.save()
+
+        finding_a.unsaved_vulnerability_ids = ["CVE-A-NEW"]
+        finding_b.unsaved_vulnerability_ids = ["CVE-B-NEW"]
+        finding_c.unsaved_vulnerability_ids = ["CVE-C-SAME"]
+
+        # Accumulate all three before any flush
+        reimporter.reconcile_vulnerability_ids(finding_a)
+        reimporter.reconcile_vulnerability_ids(finding_b)
+        reimporter.reconcile_vulnerability_ids(finding_c)
+
+        # pending_vuln_id_deletes only contains changed findings, not finding_c
+        self.assertIn(finding_a.id, reimporter.pending_vuln_id_deletes)
+        self.assertIn(finding_b.id, reimporter.pending_vuln_id_deletes)
+        self.assertNotIn(finding_c.id, reimporter.pending_vuln_id_deletes)
+        self.assertEqual(2, len(reimporter.pending_vulnerability_ids))
+
+        # Old IDs still in DB (not yet deleted)
+        self.assertEqual(1, Vulnerability_Id.objects.filter(finding=finding_a).count())
+        self.assertEqual(2, Vulnerability_Id.objects.filter(finding=finding_b).count())
+
+        reimporter.flush_vulnerability_ids()
+
+        # Buffers cleared
+        self.assertEqual([], reimporter.pending_vuln_id_deletes)
+        self.assertEqual([], reimporter.pending_vulnerability_ids)
+
+        # finding_a: old deleted, new inserted
+        vuln_ids_a = list(Vulnerability_Id.objects.filter(finding=finding_a).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-A-NEW"], vuln_ids_a)
+        self.assertEqual("CVE-A-NEW", finding_a.cve)
+
+        # finding_b: both old deleted, new inserted
+        vuln_ids_b = list(Vulnerability_Id.objects.filter(finding=finding_b).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-B-NEW"], vuln_ids_b)
+        self.assertEqual("CVE-B-NEW", finding_b.cve)
+
+        # finding_c: unchanged — IDs untouched
+        vuln_ids_c = list(Vulnerability_Id.objects.filter(finding=finding_c).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-C-SAME"], vuln_ids_c)
+
+        finding_a.delete()
+        finding_b.delete()
+        finding_c.delete()
+
+    def test_reconcile_vulnerability_ids_unchanged_no_db_write(self):
+        """Early-exit path: unchanged IDs never touch pending buffers."""
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+
+        finding = Finding(test=self.test, reporter=self.testuser)
+        finding.save()
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
+        finding.cve = "CVE-2020-1234"
+        finding.save()
+
+        finding.unsaved_vulnerability_ids = ["CVE-2020-1234"]
+        reimporter.reconcile_vulnerability_ids(finding)
+
+        self.assertEqual([], reimporter.pending_vuln_id_deletes)
+        self.assertEqual([], reimporter.pending_vulnerability_ids)
+
         finding.delete()

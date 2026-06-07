@@ -79,6 +79,7 @@ class BaseImporter(ImporterOptions):
         """
         ImporterOptions.__init__(self, *args, **kwargs)
         self.pending_vulnerability_ids: list[Vulnerability_Id] = []
+        self.pending_vuln_id_deletes: list[int] = []
 
     def check_child_implementation_exception(self):
         """
@@ -797,7 +798,10 @@ class BaseImporter(ImporterOptions):
         return finding
 
     def flush_vulnerability_ids(self) -> None:
-        """Bulk-insert all accumulated Vulnerability_Id objects and clear the buffer."""
+        """Delete stale and bulk-insert accumulated Vulnerability_Id objects, then clear buffers."""
+        if self.pending_vuln_id_deletes:
+            Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
+            self.pending_vuln_id_deletes.clear()
         if self.pending_vulnerability_ids:
             Vulnerability_Id.objects.bulk_create(self.pending_vulnerability_ids, batch_size=1000)
             self.pending_vulnerability_ids.clear()
