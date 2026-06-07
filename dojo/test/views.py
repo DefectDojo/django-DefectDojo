@@ -25,13 +25,11 @@ from django.views.decorators.vary import vary_on_cookie
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
+from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter
 from dojo.finding.queries import prefetch_for_findings
 from dojo.finding.views import find_available_notetypes
 from dojo.forms import (
     AddFindingForm,
-    CopyTestForm,
-    DeleteTestForm,
     FindingBulkUpdateForm,
     JIRAFindingForm,
     JIRAImportScanForm,
@@ -63,6 +61,8 @@ from dojo.product_announcements import (
 )
 from dojo.test.queries import get_authorized_tests
 from dojo.test.services import copy_test as copy_test_service
+from dojo.test.ui.filters import TestImportFilter
+from dojo.test.ui.forms import CopyTestForm, DeleteTestForm
 from dojo.tools.factory import get_choices_sorted, get_scan_types_sorted
 from dojo.user.queries import get_authorized_users
 from dojo.utils import (
