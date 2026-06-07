@@ -727,10 +727,7 @@ class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
         fields = ["path"]
 
 
-class ProductTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Type
-        fields = "__all__"
+from dojo.product_type.api.serializer import ProductTypeSerializer  # noqa: E402
 
 
 class EngagementSerializer(serializers.ModelSerializer):

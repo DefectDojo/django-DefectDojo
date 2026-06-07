@@ -37,7 +37,6 @@ from dojo.api_v2.views import (
     NotesViewSet,
     NoteTypeViewSet,
     ProductAPIScanConfigurationViewSet,
-    ProductTypeViewSet,
     ProductViewSet,
     RegulationsViewSet,
     ReImportScanView,
@@ -80,6 +79,7 @@ from dojo.notifications.ui.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
 from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
+from dojo.product_type.api.urls import add_product_type_urls
 from dojo.regulations.urls import urlpatterns as regulations
 from dojo.reports.urls import urlpatterns as reports_urls
 from dojo.search.urls import urlpatterns as search_urls
@@ -136,7 +136,7 @@ v2_api.register(r"products", ProductViewSet, basename="product")
 v2_api.register(r"product_api_scan_configurations", ProductAPIScanConfigurationViewSet, basename="product_api_scan_configuration")
 # RBAC endpoints moved to Pro under legacy authorization:
 #   product_groups, product_members → pro/product_groups, pro/product_members
-v2_api.register(r"product_types", ProductTypeViewSet, basename="product_type")
+v2_api = add_product_type_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   product_type_members, product_type_groups → pro/product_type_members, pro/product_type_groups
 v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")
