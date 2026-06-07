@@ -45,9 +45,6 @@ from dojo.api_v2.views import (
     SonarqubeIssueTransitionViewSet,
     SonarqubeIssueViewSet,
     SystemSettingsViewSet,
-    TestImportViewSet,
-    TestsViewSet,
-    TestTypesViewSet,
     ToolConfigurationsViewSet,
     ToolProductSettingsViewSet,
     ToolTypesViewSet,
@@ -86,6 +83,7 @@ from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.survey.urls import urlpatterns as survey_urls
 from dojo.system_settings.urls import urlpatterns as system_settings_urls
+from dojo.test.api.urls import add_test_urls
 from dojo.test.ui.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
 from dojo.tool_config.urls import urlpatterns as tool_config_urls
@@ -149,9 +147,7 @@ v2_api.register(r"sonarqube_issues", SonarqubeIssueViewSet, basename="sonarqube_
 v2_api.register(r"sonarqube_transitions", SonarqubeIssueTransitionViewSet, basename="sonarqube_issue_transition")
 v2_api.register(r"system_settings", SystemSettingsViewSet, basename="system_settings")
 v2_api.register(r"technologies", AppAnalysisViewSet, basename="app_analysis")
-v2_api.register(r"tests", TestsViewSet, basename="test")
-v2_api.register(r"test_types", TestTypesViewSet, basename="test_type")
-v2_api.register(r"test_imports", TestImportViewSet, basename="test_imports")
+v2_api = add_test_urls(v2_api)
 v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
 v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
