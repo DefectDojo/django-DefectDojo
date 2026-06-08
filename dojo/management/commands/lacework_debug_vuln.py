@@ -10,6 +10,7 @@ so you can see what fields are available for mapping.
 
 import json
 import logging
+from datetime import UTC, datetime, timedelta
 
 from django.core.management.base import BaseCommand, CommandError
 
@@ -44,8 +45,9 @@ class Command(BaseCommand):
         try:
             tool_config = Tool_Configuration.objects.get(id=tool_config_id)
         except Tool_Configuration.DoesNotExist:
+            msg = f"Tool Configuration with id {tool_config_id} not found"
             raise CommandError(
-                f"Tool Configuration with id {tool_config_id} not found"
+                msg,
             )
 
         self.stdout.write(f"Using Tool Configuration: {tool_config.name}")
@@ -53,20 +55,19 @@ class Command(BaseCommand):
 
         client = LaceworkAPI(tool_config)
 
-        from datetime import datetime, timedelta, timezone
-        end_time = datetime.now(timezone.utc)
+        end_time = datetime.now(UTC)
         start_time = end_time - timedelta(hours=24)
         start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
         end_time_str = end_time.strftime("%Y-%m-%dT%H:%M:%SZ")
 
         if vuln_type == "containers":
-            self.stdout.write(f"\nFetching container vulnerabilities...")
+            self.stdout.write("\nFetching container vulnerabilities...")
             vulns = client.search_container_vulnerabilities(
                 start_time=start_time_str,
                 end_time=end_time_str,
             )
         else:
-            self.stdout.write(f"\nFetching host vulnerabilities...")
+            self.stdout.write("\nFetching host vulnerabilities...")
             vulns = client.search_host_vulnerabilities(
                 start_time=start_time_str,
                 end_time=end_time_str,
@@ -92,15 +93,15 @@ class Command(BaseCommand):
         self.stdout.write(f"\nSelected vulnerability: {vuln.get('vulnId')} ({vuln.get('severity')})\n")
         self.stdout.write(
             self.style.SUCCESS(
-                f"\n=== Full JSON structure of 1 {vuln_type} vulnerability ===\n"
-            )
+                f"\n=== Full JSON structure of 1 {vuln_type} vulnerability ===\n",
+            ),
         )
         self.stdout.write(json.dumps(vuln, indent=2, default=str))
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"\n=== TOP-LEVEL FIELDS ===\n"
-            )
+                "\n=== TOP-LEVEL FIELDS ===\n",
+            ),
         )
         for key, value in vuln.items():
             if not isinstance(value, (dict, list)):
@@ -111,8 +112,8 @@ class Command(BaseCommand):
         # Analyze available fields for mapping
         self.stdout.write(
             self.style.SUCCESS(
-                f"\n=== ANALYSIS ===\n"
-            )
+                "\n=== ANALYSIS ===\n",
+            ),
         )
         self.stdout.write(f"vulnId (CVE): {vuln.get('vulnId', 'N/A')}")
         self.stdout.write(f"severity: {vuln.get('severity', 'N/A')}")
@@ -188,6 +189,6 @@ class Command(BaseCommand):
             self.stdout.write(f"  machineTags.Region: {machine_tags.get('Region', 'N/A')}")
 
         # Additional fields
-        self.stdout.write(f"\n  additional top-level keys:")
+        self.stdout.write("\n  additional top-level keys:")
         for key in sorted(vuln.keys()):
             self.stdout.write(f"    - {key}")

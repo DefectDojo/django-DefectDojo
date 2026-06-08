@@ -13,7 +13,7 @@ Optional:
 """
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -45,8 +45,9 @@ class Command(BaseCommand):
         )
 
     def _parse_extras(self, extras: str | None) -> dict:
-        """Parse the Tool Configuration Extras field for options.
-        
+        """
+        Parse the Tool Configuration Extras field for options.
+
         Returns a dict with keys: include_containers, include_hosts
         """
         result = {
@@ -55,8 +56,8 @@ class Command(BaseCommand):
         }
         if not extras:
             return result
-        for entry in extras.split(","):
-            entry = entry.strip().lower()
+        for raw_entry in extras.split(","):
+            entry = raw_entry.strip().lower()
             if "=" in entry:
                 key, value = entry.split("=", 1)
                 key = key.strip()
@@ -74,8 +75,9 @@ class Command(BaseCommand):
         try:
             tool_config = Tool_Configuration.objects.get(id=tool_config_id)
         except Tool_Configuration.DoesNotExist:
+            msg = f"Tool Configuration with id {tool_config_id} not found"
             raise CommandError(
-                f"Tool Configuration with id {tool_config_id} not found"
+                msg,
             )
 
         # Read configuration from Tool Configuration Extras
@@ -109,7 +111,7 @@ class Command(BaseCommand):
 
         # Calculate time range
         hours = 24
-        end_time = datetime.now(timezone.utc)
+        end_time = datetime.now(UTC)
         start_time = end_time - timedelta(hours=hours)
         start_time_str = start_time.strftime("%Y-%m-%dT%H:%M:%SZ")
         end_time_str = end_time.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -117,7 +119,7 @@ class Command(BaseCommand):
         # --- Import container vulnerabilities ---
         if include_containers:
             self.stdout.write(
-                f"\nFetching container vulnerabilities from {start_time_str} to {end_time_str}..."
+                f"\nFetching container vulnerabilities from {start_time_str} to {end_time_str}...",
             )
             try:
                 container_vulns = client.search_container_vulnerabilities(
@@ -126,21 +128,21 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Found {len(container_vulns)} container vulnerabilities"
-                    )
+                        f"Found {len(container_vulns)} container vulnerabilities",
+                    ),
                 )
             except Exception as e:
                 self.stderr.write(
                     self.style.ERROR(
-                        f"Failed to fetch container vulnerabilities: {e}"
-                    )
+                        f"Failed to fetch container vulnerabilities: {e}",
+                    ),
                 )
                 container_vulns = []
 
             # Group container vulns by repository
             container_by_repo = self._group_container_vulns_by_repo(container_vulns)
             self.stdout.write(
-                f"Found {len(container_by_repo)} unique container repositories"
+                f"Found {len(container_by_repo)} unique container repositories",
             )
 
             for repo_name, vulns in container_by_repo.items():
@@ -160,7 +162,7 @@ class Command(BaseCommand):
         # --- Import host vulnerabilities ---
         if include_hosts:
             self.stdout.write(
-                f"\nFetching host vulnerabilities from {start_time_str} to {end_time_str}..."
+                f"\nFetching host vulnerabilities from {start_time_str} to {end_time_str}...",
             )
             try:
                 host_vulns = client.search_host_vulnerabilities(
@@ -169,21 +171,21 @@ class Command(BaseCommand):
                 )
                 self.stdout.write(
                     self.style.SUCCESS(
-                        f"Found {len(host_vulns)} host vulnerabilities"
-                    )
+                        f"Found {len(host_vulns)} host vulnerabilities",
+                    ),
                 )
             except Exception as e:
                 self.stderr.write(
                     self.style.ERROR(
-                        f"Failed to fetch host vulnerabilities: {e}"
-                    )
+                        f"Failed to fetch host vulnerabilities: {e}",
+                    ),
                 )
                 host_vulns = []
 
             # Group host vulns by hostname/machine
             host_by_machine = self._group_host_vulns_by_machine(host_vulns)
             self.stdout.write(
-                f"Found {len(host_by_machine)} unique host machines"
+                f"Found {len(host_by_machine)} unique host machines",
             )
 
             for machine_name, vulns in host_by_machine.items():
@@ -235,11 +237,11 @@ class Command(BaseCommand):
         dev_env,
         test_type,
         engagement_template: str,
+        *,
         is_container: bool,
     ):
         """Import vulnerabilities into a Product, auto-creating if needed."""
         source_type = "container" if is_container else "host"
-        display_name = f"Lacework {source_type}: {repo_name}"
 
         # Sanitize product name (max 255 chars)
         product_name = repo_name[:255]
@@ -255,26 +257,26 @@ class Command(BaseCommand):
             )
             if created:
                 self.stdout.write(
-                    self.style.SUCCESS(f"  Created Product: {product_name}")
+                    self.style.SUCCESS(f"  Created Product: {product_name}"),
                 )
             else:
                 self.stdout.write(f"  Using existing Product: {product_name}")
         except Exception as e:
             self.stderr.write(
-                self.style.ERROR(f"  Failed to get/create Product {product_name}: {e}")
+                self.style.ERROR(f"  Failed to get/create Product {product_name}: {e}"),
             )
             return
 
         # Create Engagement
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
         engagement_name = engagement_template.replace("{date}", today)
         try:
             engagement, created = Engagement.objects.get_or_create(
                 name=engagement_name,
                 product=product,
                 defaults={
-                    "target_start": datetime.now(timezone.utc).date(),
-                    "target_end": datetime.now(timezone.utc).date(),
+                    "target_start": datetime.now(UTC).date(),
+                    "target_end": datetime.now(UTC).date(),
                     "active": True,
                     "status": "In Progress",
                 },
@@ -286,8 +288,8 @@ class Command(BaseCommand):
         except Exception as e:
             self.stderr.write(
                 self.style.ERROR(
-                    f"    Failed to get/create Engagement {engagement_name}: {e}"
-                )
+                    f"    Failed to get/create Engagement {engagement_name}: {e}",
+                ),
             )
             return
 
@@ -298,8 +300,8 @@ class Command(BaseCommand):
                 test_type=test_type,
                 defaults={
                     "title": f"{source_type.capitalize()} scan {today}",
-                    "target_start": datetime.now(timezone.utc),
-                    "target_end": datetime.now(timezone.utc),
+                    "target_start": datetime.now(UTC),
+                    "target_end": datetime.now(UTC),
                     "description": f"Lacework {source_type} vulnerabilities for {repo_name}",
                 },
             )
@@ -309,24 +311,16 @@ class Command(BaseCommand):
                 self.stdout.write(f"    Using existing Test: {test.title}")
         except Exception as e:
             self.stderr.write(
-                self.style.ERROR(f"    Failed to get/create Test: {e}")
+                self.style.ERROR(f"    Failed to get/create Test: {e}"),
             )
             return
 
         # Create Findings from vulnerabilities
         importer = LaceworkApiImporter()
         if is_container:
-            new_findings = [
-                importer._create_finding_from_container_vuln(v, test)
-                for v in vulns
-                if v.get("vulnId")
-            ]
+            new_findings = [importer._create_finding_from_container_vuln(v, test) for v in vulns if v.get("vulnId")]
         else:
-            new_findings = [
-                importer._create_finding_from_host_vuln(v, test)
-                for v in vulns
-                if v.get("vulnId")
-            ]
+            new_findings = [importer._create_finding_from_host_vuln(v, test) for v in vulns if v.get("vulnId")]
 
         # Filter out None values
         new_findings = [f for f in new_findings if f is not None]
@@ -348,9 +342,16 @@ class Command(BaseCommand):
                 if existing:
                     # Update existing finding
                     for field in [
-                        "severity", "description", "references",
-                        "component_version", "cvssv3_score", "cvssv3",
-                        "fix_available", "fix_version", "active", "verified",
+                        "severity",
+                        "description",
+                        "references",
+                        "component_version",
+                        "cvssv3_score",
+                        "cvssv3",
+                        "fix_available",
+                        "fix_version",
+                        "active",
+                        "verified",
                     ]:
                         setattr(existing, field, getattr(finding, field))
                     existing.save()
@@ -361,13 +362,12 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stderr.write(
                     self.style.ERROR(
-                        f"    Failed to save finding {finding.title}: {e}"
-                    )
+                        f"    Failed to save finding {finding.title}: {e}",
+                    ),
                 )
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"    Created {findings_created} findings, "
-                f"updated {findings_updated} existing findings"
-            )
+                f"    Created {findings_created} findings, updated {findings_updated} existing findings",
+            ),
         )

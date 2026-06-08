@@ -22,7 +22,7 @@ def async_tool_issue_update(finding, *args, **kwargs):
 
 def is_tool_issue_updater_needed(finding, *args, **kwargs):
     test_type = finding.test.test_type
-    return test_type.name in (SCAN_SONARQUBE_API, SCAN_LACEWORK_API)
+    return test_type.name in {SCAN_SONARQUBE_API, SCAN_LACEWORK_API}
 
 
 @app.task
