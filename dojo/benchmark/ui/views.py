@@ -8,15 +8,15 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
-from dojo.models import (
+from dojo.benchmark.models import (
     Benchmark_Category,
     Benchmark_Product,
     Benchmark_Product_Summary,
     Benchmark_Requirement,
     Benchmark_Type,
-    Product,
 )
+from dojo.benchmark.ui.forms import Benchmark_Product_SummaryForm, DeleteBenchmarkForm
+from dojo.models import Product
 from dojo.templatetags.display_tags import asvs_level
 from dojo.utils import (
     Product_Tab,

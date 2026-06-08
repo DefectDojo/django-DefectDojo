@@ -1,19 +1,16 @@
 import collections
 import decimal
 import logging
-import warnings
 from datetime import datetime, timedelta
 
 import six
 import tagulous
 from django.apps import apps
 from django.conf import settings
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Q
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
 from django_filters import (
-    BooleanFilter,
     CharFilter,
     DateFilter,
     FilterSet,
@@ -25,7 +22,6 @@ from django_filters import (
 )
 from django_filters import rest_framework as filters
 from django_filters.filters import ChoiceFilter
-from polymorphic.base import ManagerInheritanceWarning
 
 # from tagulous.forms import TagWidget
 # import tagulous
@@ -46,21 +42,17 @@ from dojo.labels import get_labels
 from dojo.models import (
     SEVERITY_CHOICES,
     App_Analysis,
-    ChoiceQuestion,
     Development_Environment,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
     Engagement,
-    Engagement_Survey,
     Finding,
     Note_Type,
     Product,
     Product_Type,
-    Question,
     Risk_Acceptance,
     Test,
-    TextQuestion,
     Vulnerability_Id,
 )
 from dojo.product_type.queries import get_authorized_product_types
@@ -1413,64 +1405,8 @@ class NoteTypesFilter(DojoFilter):
         exclude = []
         include = ("name", "is_single", "description")
 
-# ==============================
-# Defect Dojo Engaegment Surveys
-# ==============================
-
-
-class QuestionnaireFilter(FilterSet):
-    name = CharFilter(lookup_expr="icontains")
-    description = CharFilter(lookup_expr="icontains")
-    active = BooleanFilter()
-
-    class Meta:
-        model = Engagement_Survey
-        exclude = ["questions"]
-
-    survey_set = FilterSet
-
-
-class QuestionTypeFilter(ChoiceFilter):
-    def any(self, qs, name):
-        return qs.all()
-
-    def text_question(self, qs, name):
-        return qs.filter(polymorphic_ctype=ContentType.objects.get_for_model(TextQuestion))
-
-    def choice_question(self, qs, name):
-        return qs.filter(polymorphic_ctype=ContentType.objects.get_for_model(ChoiceQuestion))
-
-    options = {
-        None: (_("Any"), any),
-        1: (_("Text Question"), text_question),
-        2: (_("Choice Question"), choice_question),
-    }
-
-    def __init__(self, *args, **kwargs):
-        kwargs["choices"] = [
-            (key, value[0]) for key, value in six.iteritems(self.options)]
-        super().__init__(*args, **kwargs)
-
-    def filter(self, qs, value):
-        try:
-            value = int(value)
-        except (ValueError, TypeError):
-            value = None
-        return self.options[value][1](self, qs, self.options[value][0])
-
-
 # ApiUserFilter lives in dojo/user/api/filters.py — import from there directly.
-
-with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
-    class QuestionFilter(FilterSet):
-        text = CharFilter(lookup_expr="icontains")
-        type = QuestionTypeFilter()
-
-        class Meta:
-            model = Question
-            exclude = ["polymorphic_ctype", "created", "modified", "order"]
-
-        question_set = FilterSet
+# QuestionnaireFilter, QuestionTypeFilter, QuestionFilter live in dojo/survey/ui/filters.py
 
 
 from dojo.auditlog.filters import LogEntryFilter, PgHistoryFilter  # noqa: E402, F401 -- backward compat

@@ -3,16 +3,9 @@ Created on Feb 18, 2015
 
 @author: jay7958
 """
-from django.apps import apps
-from django.contrib import admin
 from django.urls import re_path
 
-from dojo.survey import views
-
-if not apps.ready:
-    apps.get_models()
-
-admin.autodiscover()
+from dojo.survey.ui import views
 
 urlpatterns = [
     re_path(r"^questionnaire$",

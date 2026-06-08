@@ -18,11 +18,28 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_has_permission_or_403,
 )
-from dojo.filters import QuestionFilter, QuestionnaireFilter
 from dojo.forms import (
+    AddEngagementForm,
+    ExistingEngagementForm,
+)
+from dojo.models import (
+    Engagement,
+    System_Settings,
+)
+from dojo.survey.models import (
+    Answer,
+    Answered_Survey,
+    Choice,
+    ChoiceQuestion,
+    Engagement_Survey,
+    General_Survey,
+    Question,
+    TextQuestion,
+)
+from dojo.survey.ui.filters import QuestionFilter, QuestionnaireFilter
+from dojo.survey.ui.forms import (
     Add_Questionnaire_Form,
     AddChoicesForm,
-    AddEngagementForm,
     AddGeneralQuestionnaireForm,
     AssignUserForm,
     CreateChoiceQuestionForm,
@@ -35,19 +52,6 @@ from dojo.forms import (
     EditChoiceQuestionForm,
     EditQuestionnaireQuestionsForm,
     EditTextQuestionForm,
-    ExistingEngagementForm,
-)
-from dojo.models import (
-    Answer,
-    Answered_Survey,
-    Choice,
-    ChoiceQuestion,
-    Engagement,
-    Engagement_Survey,
-    General_Survey,
-    Question,
-    System_Settings,
-    TextQuestion,
 )
 from dojo.utils import add_breadcrumb, get_page_items, get_setting
 
