@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from dojo.endpoint import views
+from dojo.endpoint.ui import views
 
 urlpatterns = [
     # endpoints
