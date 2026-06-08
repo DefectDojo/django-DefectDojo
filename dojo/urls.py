@@ -26,8 +26,6 @@ from dojo.api_v2.views import (
     LanguageTypeViewSet,
     LanguageViewSet,
     NetworkLocationsViewset,
-    NotesViewSet,
-    NoteTypeViewSet,
     RegulationsViewSet,
     ReImportScanView,
     RiskAcceptanceViewSet,
@@ -55,8 +53,10 @@ from dojo.jira.urls import urlpatterns as jira_urls
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.urls import add_locations_urls
 from dojo.metrics.urls import urlpatterns as metrics_urls
-from dojo.note_type.urls import urlpatterns as note_type_urls
-from dojo.notes.urls import urlpatterns as notes_urls
+from dojo.note_type.api.urls import add_note_type_urls
+from dojo.note_type.ui.urls import urlpatterns as note_type_urls
+from dojo.notes.api.urls import add_notes_urls
+from dojo.notes.ui.urls import urlpatterns as notes_urls
 from dojo.notifications.api.urls import add_notifications_urls
 from dojo.notifications.ui.urls import urlpatterns as notifications_urls
 from dojo.object.urls import urlpatterns as object_urls
@@ -65,7 +65,7 @@ from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.product.api.urls import add_product_urls
 from dojo.product_type.api.urls import add_product_type_urls
 from dojo.regulations.urls import urlpatterns as regulations
-from dojo.reports.urls import urlpatterns as reports_urls
+from dojo.reports.ui.urls import urlpatterns as reports_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.survey.ui.urls import urlpatterns as survey_urls
@@ -116,8 +116,8 @@ v2_api.register(r"languages", LanguageViewSet, basename="languages")
 v2_api.register(r"language_types", LanguageTypeViewSet, basename="language_type")
 v2_api.register(r"metadata", DojoMetaViewSet, basename="metadata")
 v2_api.register(r"network_locations", NetworkLocationsViewset, basename="network_locations")
-v2_api.register(r"notes", NotesViewSet, basename="notes")
-v2_api.register(r"note_type", NoteTypeViewSet, basename="note_type")
+v2_api = add_notes_urls(v2_api)
+v2_api = add_note_type_urls(v2_api)
 add_notifications_urls(v2_api)
 v2_api = add_product_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:

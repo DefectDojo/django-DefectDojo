@@ -5,11 +5,9 @@ from pathlib import Path
 from uuid import uuid4
 
 import tagulous.admin
-from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
 from django.db import models
 from django.db.models import Count
 from django.db.models.expressions import Case, When
@@ -170,130 +168,19 @@ def get_current_datetime():
     return timezone.now()
 
 
-class Note_Type(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.CharField(max_length=200)
-    is_single = models.BooleanField(default=False, null=False)
-    is_active = models.BooleanField(default=True, null=False)
-    is_mandatory = models.BooleanField(default=True, null=False)
-
-    def __str__(self):
-        return self.name
-
-
-class NoteHistory(models.Model):
-    note_type = models.ForeignKey(Note_Type, null=True, blank=True, on_delete=models.CASCADE)
-    data = models.TextField()
-    time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    current_editor = models.ForeignKey(Dojo_User, editable=False, null=True, on_delete=models.CASCADE)
-
-    def copy(self):
-        copy = copy_model_util(self)
-        copy.save()
-        return copy
-
-
-class Notes(models.Model):
-    note_type = models.ForeignKey(Note_Type, related_name="note_type", null=True, blank=True, on_delete=models.CASCADE)
-    entry = models.TextField()
-    date = models.DateTimeField(null=False, editable=False,
-                                default=get_current_datetime)
-    author = models.ForeignKey(Dojo_User, related_name="editor_notes_set", editable=False, on_delete=models.CASCADE)
-    private = models.BooleanField(default=False)
-    edited = models.BooleanField(default=False)
-    editor = models.ForeignKey(Dojo_User, related_name="author_notes_set", editable=False, null=True, on_delete=models.CASCADE)
-    edit_time = models.DateTimeField(null=True, editable=False,
-                                default=get_current_datetime)
-    history = models.ManyToManyField(NoteHistory, blank=True,
-                                   editable=False)
-
-    class Meta:
-        ordering = ["-date"]
-
-    def __str__(self):
-        return self.entry
-
-    def copy(self):
-        copy = copy_model_util(self)
-        # Save the necessary ManyToMany relationships
-        old_history = list(self.history.all())
-        # Save the object before setting any ManyToMany relationships
-        copy.save()
-        # Copy the history
-        for history in old_history:
-            copy.history.add(history.copy())
-
-        return copy
-
-
-class FileUpload(models.Model):
-    title = models.CharField(max_length=100, unique=True)
-    file = models.FileField(upload_to=UniqueUploadNameProvider("uploaded_files"))
-
-    def delete(self, *args, **kwargs):
-        """Delete the model and remove the file from storage."""
-        storage = self.file.storage
-        path = self.file.path
-        super().delete(*args, **kwargs)
-        if path and storage.exists(path):
-            storage.delete(path)
-
-    def copy(self):
-        copy = copy_model_util(self)
-        # Add unique modifier to file name
-        # Truncate title to ensure it doesn't exceed max_length (100) when appending suffix
-        # Suffix " - clone-{8 chars}" is 17 characters, so truncate to 83 chars
-        clone_suffix = f" - clone-{str(uuid4())[:8]}"
-        max_title_length = 100 - len(clone_suffix)
-        truncated_title = self.title[:max_title_length] if len(self.title) > max_title_length else self.title
-        copy.title = f"{truncated_title}{clone_suffix}"
-        # Create new unique file name
-        current_url = self.file.url
-        _, current_full_filename = current_url.rsplit("/", 1)
-        _, extension = current_full_filename.split(".", 1)
-        new_file = ContentFile(self.file.read(), name=f"{uuid4()}.{extension}")
-        copy.file = new_file
-        copy.save()
-
-        return copy
-
-    def get_accessible_url(self, obj, obj_id):
-        if isinstance(obj, Engagement):
-            obj_type = "Engagement"
-        elif isinstance(obj, Test):
-            obj_type = "Test"
-        elif isinstance(obj, Finding):
-            obj_type = "Finding"
-
-        return f"access_file/{self.id}/{obj_id}/{obj_type}"
-
-    def clean(self):
-        if not self.title:
-            self.title = "<No Title>"
-
-        valid_extensions = settings.FILE_UPLOAD_TYPES
-
-        # why does this not work with self.file....
-        file_name = self.file.url if self.file else self.title
-        if Path(file_name).suffix.lower() not in valid_extensions:
-            if accepted_extensions := f"{', '.join(valid_extensions)}":
-                msg = (
-                    _("Unsupported extension. Supported extensions are as follows: %s") % accepted_extensions
-                )
-            else:
-                msg = (
-                    _("File uploads are prohibited due to the list of acceptable file extensions being empty")
-                )
-            raise ValidationError(msg)
-
-
+from dojo.file_uploads.models import FileAccessToken, FileUpload  # noqa: E402, F401 -- re-export
+from dojo.note_type.models import Note_Type  # noqa: E402, F401 -- re-export
+from dojo.notes.models import (  # noqa: E402, F401 -- re-export; Notes used by Risk_Acceptance.notes M2M below
+    NoteHistory,
+    Notes,
+)
 from dojo.product.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
     Product,
     Product_API_Scan_Configuration,  # noqa: F401 -- re-export
     Product_Line,  # noqa: F401 -- re-export
 )
 from dojo.product_type.models import Product_Type  # noqa: E402, F401 -- re-export
+from dojo.reports.models import Report_Type  # noqa: E402, F401 -- re-export
 from dojo.test.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
     IMPORT_ACTIONS,  # noqa: F401 -- re-export
     IMPORT_CLOSED_FINDING,  # noqa: F401 -- re-export
@@ -305,10 +192,6 @@ from dojo.test.models import (  # noqa: E402 -- re-export; class-body FKs below 
     Test_Import_Finding_Action,  # noqa: F401 -- re-export
     Test_Type,  # noqa: F401 -- re-export
 )
-
-
-class Report_Type(models.Model):
-    name = models.CharField(max_length=255)
 
 
 class DojoMeta(models.Model):
@@ -710,32 +593,6 @@ class Risk_Acceptance(models.Model):
         return copy
 
 
-class FileAccessToken(models.Model):
-
-    """
-    This will allow reports to request the images without exposing the
-    media root to the world without
-    authentication
-    """
-
-    user = models.ForeignKey(Dojo_User, null=False, blank=False, on_delete=models.CASCADE)
-    file = models.ForeignKey(FileUpload, null=False, blank=False, on_delete=models.CASCADE)
-    token = models.CharField(max_length=255)
-    size = models.CharField(max_length=9,
-                            choices=(
-                                ("small", "Small"),
-                                ("medium", "Medium"),
-                                ("large", "Large"),
-                                ("thumbnail", "Thumbnail"),
-                                ("original", "Original")),
-                            default="medium")
-
-    def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = uuid4()
-        return super().save(*args, **kwargs)
-
-
 ANNOUNCEMENT_STYLE_CHOICES = (
     ("info", "Info"),
     ("success", "Success"),
@@ -951,12 +808,11 @@ admin.site.register(Objects_Review)
 admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
-admin.site.register(FileUpload)
-admin.site.register(FileAccessToken)
+# FileUpload + FileAccessToken admin registered in dojo/file_uploads/admin.py
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)
-admin.site.register(Notes)
-admin.site.register(Note_Type)
+# Notes + NoteHistory admin registered in dojo/notes/admin.py
+# Note_Type admin registered in dojo/note_type/admin.py
 admin.site.register(SLA_Configuration)
 admin.site.register(Regulation)
 from dojo.authorization.models import (  # noqa: E402
@@ -984,8 +840,8 @@ admin.site.register(Product_Group)
 admin.site.register(Product_Type_Member)
 admin.site.register(Product_Type_Group)
 
-admin.site.register(NoteHistory)
-admin.site.register(Report_Type)
+# NoteHistory admin registered in dojo/notes/admin.py
+# Report_Type admin registered in dojo/reports/admin.py
 admin.site.register(DojoMeta)
 admin.site.register(Development_Environment)
 admin.site.register(Announcement)

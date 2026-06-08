@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.urls import re_path
 
-from dojo.reports import views
+from dojo.reports.ui import views
 from dojo.utils import redirect_view
 
 # TODO: remove the else: branch once v3 migration is complete

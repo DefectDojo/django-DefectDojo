@@ -29,7 +29,7 @@ from dojo.forms import (
 )
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Finding, Product
 from dojo.query_utils import build_count_subquery
-from dojo.reports.views import generate_report
+from dojo.reports.ui.views import generate_report
 from dojo.utils import (
     Product_Tab,
     add_breadcrumb,
