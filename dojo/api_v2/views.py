@@ -9,8 +9,6 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
-from django.db.models import OuterRef, Value
-from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.http import FileResponse
 from django.urls import reverse
@@ -39,15 +37,10 @@ from dojo.api_v2 import (
 )
 from dojo.authorization import api_permissions as permissions
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.endpoint.queries import (
-    get_authorized_endpoint_status,
-    get_authorized_endpoints,
-)
-from dojo.endpoint.views import get_endpoint_ids
+from dojo.endpoint.ui.views import get_endpoint_ids
 from dojo.filters import (
     ApiAppAnalysisFilter,
     ApiDojoMetaFilter,
-    ApiEndpointFilter,
     ApiRiskAcceptanceFilter,
 )
 from dojo.finding.ui.filters import (
@@ -64,7 +57,6 @@ from dojo.models import (
     Dojo_User,
     DojoMeta,
     Endpoint,
-    Endpoint_Status,
     Finding,
     Language_Type,
     Languages,
@@ -87,7 +79,6 @@ from dojo.product.queries import (
     get_authorized_languages,
     get_authorized_products,
 )
-from dojo.query_utils import build_count_subquery
 from dojo.reports.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
@@ -176,104 +167,6 @@ class DeprecationNoticeMixin:
         if self.end_of_life_date is not None:
             response["X-End-Of-Life-Date"] = self.end_of_life_date.isoformat()
         return super().finalize_response(request, response, *args, **kwargs)
-
-
-# Authorization: authenticated users
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class EndPointViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.EndpointSerializer
-    queryset = Endpoint.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiEndpointFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasEndpointPermission,
-    )
-
-    def get_queryset(self):
-        active_finding_subquery = build_count_subquery(
-            Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
-            group_field="endpoints",
-        )
-        return get_authorized_endpoints("view").annotate(
-            active_finding_count=Coalesce(active_finding_subquery, Value(0)),
-        ).distinct()
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=True, methods=["post"],
-        # IsAuthenticated only: report generation requires View permission,
-        # enforced by the permission-filtered get_queryset(). The viewset's
-        # permission_classes would check Edit (POST), which is too restrictive.
-        permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request, pk=None):
-        endpoint = self.get_object()
-
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, endpoint, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class EndpointStatusViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.EndpointStatusSerializer
-    queryset = Endpoint_Status.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "mitigated",
-        "false_positive",
-        "out_of_scope",
-        "risk_accepted",
-        "mitigated_by",
-        "finding",
-        "endpoint",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasEndpointStatusPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_endpoint_status(
-            "view",
-        ).distinct()
 
 
 # @extend_schema_view(**schema_with_prefetch())
@@ -654,38 +547,6 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
 
     def get_queryset(self):
         return get_authorized_tests("import")
-
-
-# Authorization: authenticated users, DjangoModelPermissions
-class EndpointMetaImporterView(
-    mixins.CreateModelMixin, viewsets.GenericViewSet,
-):
-
-    """
-    Imports a CSV file into a product to propagate arbitrary meta and tags on endpoints.
-
-    By Names:
-    - Provide `product_name` of existing product
-
-    By ID:
-    - Provide the id of the product in the `product` parameter
-
-    In this scenario Defect Dojo will look up the product by the provided details.
-    """
-
-    serializer_class = serializers.EndpointMetaImporterSerializer
-    parser_classes = [MultiPartParser]
-    queryset = Product.objects.none()
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasMetaImportPermission,
-    )
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-    def get_queryset(self):
-        return get_authorized_products("edit")
 
 
 # Authorization: configuration

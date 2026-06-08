@@ -18,8 +18,8 @@ from django.utils import timezone
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
+from dojo.endpoint.ui.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
-from dojo.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.forms import (
     AddEndpointForm,
     DeleteEndpointForm,

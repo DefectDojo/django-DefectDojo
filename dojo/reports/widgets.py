@@ -12,10 +12,7 @@ from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from dojo.filters import (
-    EndpointFilter,
-    EndpointFilterWithoutObjectLookups,
-)
+from dojo.endpoint.ui.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
 from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,

@@ -10,7 +10,7 @@ from django.utils.translation import gettext as _
 from watson import search as watson
 
 from dojo.endpoint.queries import get_authorized_endpoints
-from dojo.endpoint.views import prefetch_for_endpoints
+from dojo.endpoint.ui.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids, prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups

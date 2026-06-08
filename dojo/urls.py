@@ -18,9 +18,6 @@ from dojo.api_v2.views import (
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
     DojoMetaViewSet,
-    EndpointMetaImporterView,
-    EndpointStatusViewSet,
-    EndPointViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -45,7 +42,8 @@ from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
-from dojo.endpoint.urls import urlpatterns as endpoint_urls
+from dojo.endpoint.api.urls import add_endpoint_urls, register_endpoint_meta_import
+from dojo.endpoint.ui.urls import urlpatterns as endpoint_urls
 from dojo.engagement.api.urls import add_engagement_urls
 from dojo.engagement.ui.urls import urlpatterns as eng_urls
 from dojo.finding.api.urls import add_finding_urls
@@ -105,7 +103,7 @@ v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, ba
 v2_api.register(r"development_environments", DevelopmentEnvironmentViewSet, basename="development_environment")
 # RBAC endpoints moved to Pro under legacy authorization:
 #   dojo_groups, dojo_group_members → pro/groups, pro/group_members
-v2_api.register(r"endpoint_meta_import", EndpointMetaImporterView, basename="endpointmetaimport")
+v2_api = register_endpoint_meta_import(v2_api)
 # RBAC endpoint moved to Pro under legacy authorization: global_roles → pro/global_roles
 v2_api.register(r"import-languages", ImportLanguagesView, basename="importlanguages")
 v2_api.register(r"import-scan", ImportScanView, basename="importscan")
@@ -151,8 +149,7 @@ if settings.V3_FEATURE_LOCATIONS:
     v2_api.register(r"endpoints", V3EndpointCompatibleViewSet, basename="endpoint")
     v2_api.register(r"endpoint_status", V3EndpointStatusCompatibleViewSet, basename="endpoint_status")
 else:
-    v2_api.register(r"endpoints", EndPointViewSet, basename="endpoint")
-    v2_api.register(r"endpoint_status", EndpointStatusViewSet, basename="endpoint_status")
+    v2_api = add_endpoint_urls(v2_api)
 v2_api.register(r"celery", CeleryViewSet, basename="celery")
 # V3
 add_asset_urls(v2_api)

@@ -41,8 +41,6 @@ from dojo.api_v2.views import (
     AppAnalysisViewSet,
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
-    EndpointStatusViewSet,
-    EndPointViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -60,6 +58,7 @@ from dojo.asset.api.views import (
     AssetViewSet,
 )
 from dojo.authorization.roles_permissions import Permissions, permission_to_action
+from dojo.endpoint.api.views import EndpointStatusViewSet, EndPointViewSet
 from dojo.engagement.api.views import EngagementViewSet
 from dojo.finding.api.views import (
     BurpRawRequestResponseViewSet,
