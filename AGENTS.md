@@ -54,11 +54,12 @@ Modules in various stages of reorganization:
 |--------|-----------|-------------|-----|------|--------|
 | **url** | In module | N/A | Done | Done | **Complete** |
 | **location** | In module | N/A | N/A | Done | **Complete** |
-| **product_type** | In dojo/models.py | Missing | Partial (views at root) | In dojo/api_v2/ | Needs work |
-| **test** | In dojo/models.py | Missing | Partial (views at root) | In dojo/api_v2/ | Needs work |
-| **engagement** | In dojo/models.py | Partial (32 lines) | Partial (views at root) | In dojo/api_v2/ | Needs work |
-| **product** | In dojo/models.py | Missing | Partial (views at root) | In dojo/api_v2/ | Needs work |
-| **finding** | In dojo/models.py | Missing | Partial (views at root) | In dojo/api_v2/ | Needs work |
+| **product_type** | In module | N/A | Done | Done | **Complete** (#14970) |
+| **test** | In module | N/A | Done | Done | **Complete** (#14971) |
+| **engagement** | In module | In module | Done | Done | **Complete** (#14972) |
+| **product** | In module | N/A | Done | Done | **Complete** (#14973) |
+| **finding** | In module | N/A (helper.py) | Done | Done | **Complete** (#14974); CWE+Burp pending |
+| **peripheral (×18)** | In dojo/models.py | — | Partial/none | Partial/none | **Phase 10** (PRs #6–10, see below) |
 
 ### Monolithic Files Being Decomposed
 
@@ -280,3 +281,70 @@ def critical_present(self):
 - **Signal registration**: Handled in `dojo/apps.py` via `import dojo.{module}.signals`. Already set up for test, engagement, product, product_type.
 - **Watson search**: Uses `self.get_model("Product")` in `apps.py` — works via Django's model registry regardless of file location.
 - **Admin registration**: Currently at the bottom of `dojo/models.py` (lines 4888-4973). Must be moved to `{module}/admin.py` and removed from `dojo/models.py` to avoid `AlreadyRegistered` errors.
+
+---
+
+## Phase 10: Peripheral Model Modules — 10-PR Stack Continuation
+
+> **This section is the complete, self-contained brief for a fresh agent session (auto mode) to finish the reorganization.** The 5 core hierarchy modules (`product_type`, `test`, `engagement`, `product`, `finding`) are DONE — they are the templates. What remains is moving the ~45 *peripheral* model classes still defined in `dojo/models.py` into their domain modules, each as a **full vertical slice** (all 9 phases), reusing the playbook above.
+
+### Goal & scope
+
+`dojo/models.py` is now ~2,254 lines and still **defines** these peripheral model classes. Move each into its module (most module dirs already exist with `views.py`/`urls.py`/helpers but NO `models.py`/`admin.py` — only `dojo/url/` and `dojo/location/` are complete-with-models templates). Leave backward-compat re-exports in every monolith (`dojo/models.py`, `forms.py`, `filters.py`, `api_v2/serializers.py`, `api_v2/views.py`) per the rules above.
+
+**Decisions already locked with the user (do NOT relitigate):**
+- **Full vertical slice per module** (Phases 1–9), not models-only. Skip a phase only when the module genuinely has no code for it (e.g. no API serializer/viewset exists → no `api/` layer; no module-specific form → no `ui/forms.py`). Follow the "Phase 2 is conditional" / re-export-by-actual-consumer rules above.
+- **These models STAY in `dojo/models.py`** (no module worth creating — do NOT extract): `DojoMeta`, `Network_Locations`, `Sonarqube_Issue`, `Sonarqube_Issue_Transition`, `Check_List`, `Testing_Guide_Category`, `Testing_Guide`, `Language_Type`, `Languages`, `App_Analysis`. Leave them untouched.
+- **`CWE` + `BurpRawRequestResponse` fold into `finding`** (they are finding-domain), and are done FIRST on the EXISTING finding PR (#14974), not a new PR.
+
+### The 10-PR stack
+
+The 5 core PRs already exist (stacked, merge bottom-up): `dev ← #14970 product_type ← #14971 test ← #14972 engagement ← #14973 product ← #14974 finding`. **The new work CONTINUES this stack on top of #14974.** All branches and PRs follow the same conventions as the existing 5.
+
+| PR | Branch (head) | Base | Contents |
+|----|---------------|------|----------|
+| 1–5 | existing | existing | DONE: product_type, test, engagement, product, finding |
+| **5 (#14974)** | `reorg/finding-models` | `reorg/product-models` | **ADD `CWE` + `BurpRawRequestResponse` to `dojo/finding/`** (full slice). Existing PR — do NOT create a new one. |
+| **6** | `reorg/peripheral-user` | `reorg/finding-models` | **Bundle A**: `user` (`Dojo_User`, `UserContactInfo`, `Contact`) + `system_settings` (`System_Settings`) |
+| **7** | `reorg/peripheral-tools-endpoint` | `reorg/peripheral-user` | **Bundle B**: `endpoint` (`Endpoint_Params`, `Endpoint_Status`, `Endpoint`) + `tool_type` (`Tool_Type`) + `tool_config` (`Tool_Configuration`, + admin classes `ToolConfigForm_Admin`/`Tool_Configuration_Admin`) + `tool_product` (`Tool_Product_Settings`, `Tool_Product_History`) |
+| **8** | `reorg/peripheral-survey-benchmark` | `reorg/peripheral-tools-endpoint` | **Bundle C**: `survey` (`Question`, `TextQuestion`, `Choice`, `ChoiceQuestion`, `Engagement_Survey`, `Answered_Survey`, `General_Survey`, `Answer`, `TextAnswer`, `ChoiceAnswer`) + `benchmark` (`Benchmark_Type`, `Benchmark_Category`, `Benchmark_Requirement`, `Benchmark_Product`, `Benchmark_Product_Summary`) |
+| **9** | `reorg/peripheral-notes-files` | `reorg/peripheral-survey-benchmark` | **Bundle D**: `notes` (`NoteHistory`, `Notes`) + `note_type` (`Note_Type`) + `file_uploads` (`UniqueUploadNameProvider`, `FileUpload`, `FileAccessToken`) + `reports` (`Report_Type`) + `risk_acceptance` (`Risk_Acceptance`) |
+| **10** | `reorg/peripheral-misc` | `reorg/peripheral-notes-files` | **Bundle E**: `regulations` (`Regulation`) + `banner` (`BannerConf`) + `announcement` (`Announcement`, `UserAnnouncement`) + `development_environment` (`Development_Environment`) + `object` (`Objects_Review`, `Objects_Product`) |
+
+**Bundle order is by FK direction**: `user` first (`Dojo_User` is an FK target almost everywhere); everything else references already-moved or string-ref'd models. Inside a bundle, FKs between same-bundle models are real class refs; FKs to anything OUTSIDE the bundle become string refs `"dojo.<Model>"` (per the string-FK rule above — this keeps the extracted `models.py` free of top-level `from dojo.models import`).
+
+### Stack & PR mechanics (locked with user)
+
+- **Branches live on the `upstream` remote** (`git@github.com:DefectDojo/django-DefectDojo.git`), exactly like the existing 5 (their head branches are on upstream, e.g. `upstream/reorg/finding-models`). Push each new branch to `upstream`, and **force-push with `--force-with-lease`** on cascade (`git push --force-with-lease upstream <branch>:<branch>`).
+- **The 5 new PRs are DRAFT PRs.** Create with `gh pr create --draft --repo DefectDojo/django-DefectDojo --base <prev-branch> --head <this-branch>`.
+- Each new branch is created from its predecessor's tip: `git checkout -b reorg/peripheral-user reorg/finding-models`, etc. Merge bottom-up.
+- **PR descriptions**: every PR in the stack (all 10) must include a stack map listing all 10 PRs in order with checkboxes and the bottom-up merge note, so reviewers see the whole picture. Summary section only — NO test-plan section (see CLAUDE.local.md / PR rules). Format PR URLs as markdown links. Read an existing body with `gh pr view <N> --json body -q '.body'` before editing; edit via `--body-file` or the REST `gh api -X PATCH` path (inline `--body` silently fails on this repo).
+- **Cascade after editing a lower branch** (e.g. this AGENTS.md commit on #14970): `git rebase --onto <new-parent> <old-parent-sha> <branch>` up the chain, then force-push all with `--force-with-lease`. AGENTS.md edits always land on the bottom branch (#14970) and cascade.
+
+### Per-module execution = the 9-phase playbook above
+
+For EACH module in a bundle, run **Phase 0 pre-flight first** (the grep block above) to discover its exact forms/filters/serializers/viewsets/urls/admin/signals/consumers — do NOT trust a memorized list. Then Phases 1–9. Reference complete templates: `dojo/url/`, `dojo/location/` (models), and `dojo/finding/`, `dojo/product/`, `dojo/test/`, `dojo/engagement/` (full API+UI slices). Verify gates after each phase (`manage.py check`, `makemigrations --check --dry-run`, `./run-unittest.sh --test-case unittests.<module> 2>&1 | tee /tmp/test.log`). All gates run in docker (`docker compose exec -T uwsgi ...`); model imports need `manage.py shell -c`.
+
+### Model line ranges in `dojo/models.py` (snapshot — re-grep before editing; line numbers shift as you extract)
+
+- **CWE** 1027–1031 · **BurpRawRequestResponse** 1563–1575 → `finding` (PR #14974)
+- **Dojo_User** 174–209 · **UserContactInfo** 211–234 · **Contact** 605–612 · **System_Settings** 236–595
+- **Tool_Type** 940–949 · **Tool_Configuration** 951–979 · **ToolConfigForm_Admin/Tool_Configuration_Admin** 981–1010 · **Endpoint_Params** 1033–1039 · **Endpoint_Status** 1041–1093 · **Endpoint** 1095–1470 · **Tool_Product_Settings** 1765–1777 · **Tool_Product_History** 1779–1785
+- **Benchmark_Type** 1890–1905 · **Benchmark_Category** 1907–1921 · **Benchmark_Requirement** 1923–1939 · **Benchmark_Product** 1941–1957 · **Benchmark_Product_Summary** 1959–1989 · **Question** 1992–2012 · **TextQuestion** 2014–2024 · **Choice** 2026–2039 · **ChoiceQuestion** 2041–2058 · **Engagement_Survey** 2060–2076 · **Answered_Survey** 2078–2101 · **General_Survey** 2107–2123 · **Answer** 2126–2138 · **TextAnswer** 2140–2149 · **ChoiceAnswer** 2151–2253
+- **Note_Type** 614–623 · **NoteHistory** 625–636 · **Notes** 638–669 · **UniqueUploadNameProvider** 108–135 · **FileUpload** 671–749 · **FileAccessToken** 1679–1703 · **Report_Type** 751–753 · **Risk_Acceptance** 1577–1677
+- **Regulation** 136–168 · **Announcement** 1713–1725 · **UserAnnouncement** 1727–1730 · **BannerConf** 1732–1763 · **Development_Environment** 1472–1481 · **Objects_Review** 1829–1835 · **Objects_Product** 1837–1861
+
+### Module-specific gotchas (beyond the generic playbook)
+
+- **`Question` / `Answer` (survey)**: base classes are defined inside a `with warnings.catch_warnings(): ...` block (polymorphic-model deprecation suppression). PRESERVE that block structure when moving to `dojo/survey/models.py` — don't flatten it.
+- **survey & benchmark have NO serializers/viewsets in `api_v2`** (verified). So Bundle C likely has no `api/` layer — skip Phases 6–9 for those modules (confirm with Phase 0). They DO have UI views/urls/forms/filters.
+- **`Benchmark_Requirement` → M2M `CWE`**: `CWE` moves to `finding` in PR #14974 (lands lower in the stack), so by the time Bundle C runs, use string ref `"dojo.CWE"` (the `dojo.models` re-export stays valid). Same for any other `CWE` reference.
+- **`Risk_Acceptance`**: M2M `accepted_findings`→Finding, FK `owner`→Dojo_User, M2M `notes`→Notes — all cross-bundle → string refs. `dojo/risk_acceptance/` already has `api.py`/`helper.py`/`queries.py`/`signals.py` but no `models.py`; reconcile `api.py` vs the playbook's `api/` dir layout.
+- **`Endpoint`**: references `Dojo_User`, `Finding`, `Product`, `Endpoint_Status` — string-ref everything except same-bundle `Endpoint_Params`/`Endpoint_Status`. `dojo/endpoint/` already has `queries.py`/`utils.py`/`signals.py`.
+- **`tool_config` admin**: `ToolConfigForm_Admin` (a `forms.ModelForm`) and `Tool_Configuration_Admin` (an `admin.ModelAdmin`) currently sit in `dojo/models.py` — move them to `dojo/tool_config/admin.py` (form + admin), not `models.py`.
+- **`CWE` / `BurpRawRequestResponse` are heavily imported** (20+ files across `dojo/` and `unittests/`, including tool parsers for CWE and importers for Burp). Run the Phase 0 consumer grep (`grep -rn "import.*\bCWE\b" dojo/ unittests/`, same for `BurpRawRequestResponse`) and rely on the `dojo.models` re-export for external consumers — only repoint finding's own code.
+- **Shared bases (the `FindingTagStringFilter` trap)**: before moving any form/filter, grep for subclasses/consumers OUTSIDE the module. If a base form/filter is also used by a model staying in `dojo/models.py` or another module, KEEP it in the monolith and import it, rather than moving + back-importing (which cycles). The prefetcher full-re-export rule (Phase 6) applies to any moved `ModelSerializer`.
+
+### After the stack is built
+
+Update the **Current State** table above (mark the newly-completed modules **Complete**), and update the monolith line counts in "Monolithic Files Being Decomposed" (they are stale — `dojo/models.py` is ~2,254 lines now, not 4,973).
