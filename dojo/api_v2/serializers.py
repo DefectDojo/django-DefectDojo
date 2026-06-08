@@ -56,7 +56,6 @@ from dojo.models import (
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    System_Settings,
     Test,
     Tool_Configuration,
     Tool_Product_Settings,
@@ -1475,10 +1474,7 @@ class TagSerializer(serializers.Serializer):
     tags = TagListSerializerField(required=True)
 
 
-class SystemSettingsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = System_Settings
-        fields = "__all__"
+from dojo.system_settings.api.serializer import SystemSettingsSerializer  # noqa: E402, F401 -- backward compat
 
 
 class CeleryStatusSerializer(serializers.Serializer):

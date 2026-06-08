@@ -6,8 +6,8 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views import View
 
-from dojo.forms import SystemSettingsForm
-from dojo.models import System_Settings
+from dojo.system_settings.models import System_Settings
+from dojo.system_settings.ui.forms import SystemSettingsForm
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)

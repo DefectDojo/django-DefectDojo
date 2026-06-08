@@ -1188,21 +1188,6 @@ def report_generate(request, obj, options):
     return result
 
 
-# Authorization: superuser
-class SystemSettingsViewSet(
-    mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet,
-):
-
-    """Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations"""
-
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-    serializer_class = serializers.SystemSettingsSerializer
-    queryset = System_Settings.objects.none()
-
-    def get_queryset(self):
-        return System_Settings.objects.all().order_by("id")
-
-
 class CeleryViewSet(viewsets.ViewSet):
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
     queryset = System_Settings.objects.none()
