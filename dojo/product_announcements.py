@@ -1,8 +1,6 @@
 
 import logging
 
-from django.conf import settings
-from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -30,12 +28,8 @@ class ProductAnnouncementManager:
         response_data: dict | None = None,
         **kwargs: dict,
     ):
-        """Skip all this if the CREATE_CLOUD_BANNER is not set"""
-        if not settings.CREATE_CLOUD_BANNER:
-            return
-        # Fill in the vars if the were supplied correctly
         if request is not None and isinstance(request, HttpRequest):
-            self._add_django_message(
+            self._add_session_banner(
                 request=request,
                 message=mark_safe(f"{self.base_message} {self.ui_outreach}"),
             )
@@ -51,18 +45,21 @@ class ProductAnnouncementManager:
             msg = "At least one of request, response, or response_data must be supplied"
             raise ValueError(msg)
 
-    def _add_django_message(self, request: HttpRequest, message: str):
-        """Add a message to the UI"""
+    def _add_session_banner(self, request: HttpRequest, message: str):
+        """Store a banner in the session for rendering via additional_banners."""
         try:
-            messages.add_message(
-                request=request,
-                level=messages.INFO,
-                message=_(message),
-                extra_tags="alert-info",
-            )
+            banners = request.session.get("_product_banners", [])
+            banners.append({
+                "source": "product_announcement",
+                "message": str(_(message)),
+                "style": "info",
+                "url": "",
+                "link_text": "",
+                "expanded_html": None,
+            })
+            request.session["_product_banners"] = banners
         except Exception:
-            # make sure we catch any exceptions that might happen: https://github.com/DefectDojo/django-DefectDojo/issues/14041
-            logger.exception(f"Error adding message to Django: {message}")
+            logger.exception(f"Error storing product announcement banner: {message}")
 
     def _add_api_response_key(self, message: str, data: dict) -> dict:
         """Update the response data in place"""

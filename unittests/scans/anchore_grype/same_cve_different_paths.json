@@ -1,0 +1,136 @@
+{
+    "matches": [
+        {
+            "vulnerability": {
+                "id": "CVE-2021-33574",
+                "dataSource": "https://security-tracker.debian.org/tracker/CVE-2021-33574",
+                "namespace": "debian:10",
+                "severity": "Critical",
+                "urls": [
+                    "https://security-tracker.debian.org/tracker/CVE-2021-33574"
+                ],
+                "cvss": [],
+                "fix": {
+                    "versions": [],
+                    "state": "not-fixed"
+                },
+                "advisories": []
+            },
+            "relatedVulnerabilities": [],
+            "matchDetails": [
+                {
+                    "matcher": "dpkg-matcher",
+                    "searchedBy": {
+                        "distro": {
+                            "type": "debian",
+                            "version": "10"
+                        },
+                        "namespace": "debian:10",
+                        "package": {
+                            "name": "libc6",
+                            "version": "2.28-10"
+                        }
+                    },
+                    "found": {
+                        "versionConstraint": "none (deb)"
+                    }
+                }
+            ],
+            "artifact": {
+                "name": "libc6",
+                "version": "2.28-10",
+                "type": "deb",
+                "locations": [
+                    {
+                        "path": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+                        "layerID": "sha256:e3d73f29c6746d2b19dbcc7bfa7b2464c4951807237658ad483faa014f9f9187"
+                    }
+                ],
+                "language": "",
+                "licenses": [],
+                "cpes": [],
+                "purl": "pkg:deb/debian/libc6@2.28-10?arch=amd64",
+                "metadataType": "DpkgMetadata"
+            }
+        },
+        {
+            "vulnerability": {
+                "id": "CVE-2021-33574",
+                "dataSource": "https://security-tracker.debian.org/tracker/CVE-2021-33574",
+                "namespace": "debian:10",
+                "severity": "Critical",
+                "urls": [
+                    "https://security-tracker.debian.org/tracker/CVE-2021-33574"
+                ],
+                "cvss": [],
+                "fix": {
+                    "versions": [],
+                    "state": "not-fixed"
+                },
+                "advisories": []
+            },
+            "relatedVulnerabilities": [],
+            "matchDetails": [
+                {
+                    "matcher": "dpkg-matcher",
+                    "searchedBy": {
+                        "distro": {
+                            "type": "debian",
+                            "version": "10"
+                        },
+                        "namespace": "debian:10",
+                        "package": {
+                            "name": "libc6",
+                            "version": "2.28-10"
+                        }
+                    },
+                    "found": {
+                        "versionConstraint": "none (deb)"
+                    }
+                }
+            ],
+            "artifact": {
+                "name": "libc6",
+                "version": "2.28-10",
+                "type": "deb",
+                "locations": [
+                    {
+                        "path": "/lib/x86_64-linux-gnu/libc.so.6",
+                        "layerID": "sha256:10bf86ff9f6a0d24fa41491e74b8dcdeb8b23cc654a2a5e36573eac5e40ea25c"
+                    }
+                ],
+                "language": "",
+                "licenses": [],
+                "cpes": [],
+                "purl": "pkg:deb/debian/libc6@2.28-10?arch=amd64",
+                "metadataType": "DpkgMetadata"
+            }
+        }
+    ],
+    "source": {
+        "type": "image",
+        "target": {
+            "userInput": "test-image:latest",
+            "imageID": "sha256:test",
+            "manifestDigest": "sha256:test",
+            "mediaType": "application/vnd.docker.distribution.manifest.v2+json",
+            "tags": [],
+            "imageSize": 100,
+            "layers": [],
+            "manifest": null,
+            "config": null,
+            "repoDigests": [],
+            "architecture": "amd64",
+            "os": "linux"
+        }
+    },
+    "distro": {
+        "name": "debian",
+        "version": "10",
+        "idLike": []
+    },
+    "descriptor": {
+        "name": "grype",
+        "version": "0.36.0"
+    }
+}

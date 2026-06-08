@@ -5,7 +5,7 @@ weight: 1
 audience: pro
 ---
 
-DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. Open-Source users should refer to the [Open-Source SAML guide](../OS__saml/).
+DefectDojo Pro supports SAML authentication via the **Enterprise Settings** UI. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
 
 ## Setup
 
@@ -41,9 +41,36 @@ DefectDojo can use the SAML assertion to automatically assign users to [User Gro
 
 The **Group Name Attribute** field specifies which attribute in the SAML assertion contains the user's group memberships. When a user logs in, DefectDojo reads this attribute and assigns the user to any matching groups. To limit which groups from the assertion are considered, use the **Group Limiter Regex Expression** field.
 
+The value must match the attribute name your Identity Provider emits in the assertion exactly, including any namespace prefix. A short, friendly name like `groups` will only work if your IdP is configured to emit that literal attribute name — many IdPs use a fully qualified claim URI instead.
+
+### Group Name Attribute by Identity Provider
+
+| Identity Provider | Default attribute name to use |
+|---|---|
+| **Entra ID / Azure AD** | `http://schemas.microsoft.com/ws/2008/06/identity/claims/groups` |
+| **Okta** | `groups` (the attribute name you configured on the SAML app's Group Attribute Statement) |
+| **Keycloak** | `groups` (or whatever you set as the "SAML Attribute Name" on the Group List mapper) |
+| **PingFederate / generic** | Whatever value you configured on the IdP side — check your IdP's assertion before assuming `groups` |
+
+If group mapping appears to do nothing — users log in successfully but no groups are created or assigned — the most common cause is a mismatch between this field and the attribute name your IdP is actually sending. Enable **Enable SAML Debugging** (see [Additional Options](#additional-options)) to see the raw attributes coming back from the IdP.
+
 If no group with a matching name exists, DefectDojo will automatically create one. Note that a newly created group will not have any permissions configured — those can be set later by a Superuser.
 
 To activate group mapping, check the **Enable Group Mapping** checkbox at the bottom of the form.
+
+## Cloud vs On-Premise Differences
+
+DefectDojo Cloud does not have the same level of SAML customization as DefectDojo On-Prem.  The only variables that can be set are through the UI.  Here are some of the key differences:
+
+| Capability | Cloud | On-Premise |
+|---|---|---|
+| **Username matching** | NameID only | NameID only (the `SAML_USE_NAME_ID_AS_USERNAME` env var applies to Open Source only, not Pro) |
+| **SAML assertion encryption** | Not currently supported | Not currently supported |
+| **SAML login logs** | Not available in the UI. Contact Support to request logs. | Available via application container logs (`docker logs dojo`) |
+| **Configuration method** | Enterprise Settings UI only | Enterprise Settings UI, Django Admin, or Django Shell |
+| **Environment variables** | Cannot be set by customers directly. Contact Support for changes. | Can be set via `dojo-compose-cli environment add` |
+
+If you need to match users on an attribute other than NameID (such as `uid` or `email`), configure your Identity Provider to send the desired value as the NameID rather than adjusting DefectDojo settings.
 
 ## Additional Options
 

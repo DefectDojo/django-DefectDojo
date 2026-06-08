@@ -31,6 +31,14 @@
       {{- $linkContent = . }}
     {{- end }}
 
+    {{- /* Pro badge for parent pages (from _index.md with child pages) marked audience: pro */ -}}
+    {{- $proBadge := "" -}}
+    {{- with $node.Page }}
+      {{- if and (eq .Params.audience "pro") .Pages }}
+        {{- $proBadge = `<span class="pro-badge" aria-label="Pro feature">Pro</span>` -}}
+      {{- end }}
+    {{- end }}
+
     {{- $ariaCurrent := "" -}}
     {{- $liClass := "" -}}
 
@@ -47,7 +55,7 @@
     <li {{- with $liClass }} class="{{ . }}" {{ end -}}>
       {{- with $node.Page.Pages }}
         <details{{- with $ariaCurrent }} open{{- end }}{{- if ne $node.Page.Params.sidebar.collapsed true }} open{{- end }}>
-          <summary>{{ $linkContent }}</summary>
+          <summary>{{ $linkContent }}{{ $proBadge | safeHTML }}</summary>
           <ul class="list-unstyled list-nested">
             {{- range . }}
               {{- template "walk" (dict "node" . "currentPage" $currentPage "version" $version) }}

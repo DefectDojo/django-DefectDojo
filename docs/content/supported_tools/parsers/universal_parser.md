@@ -1,7 +1,8 @@
 ---
-title: "🌐 Universal Parser (Pro)"
+title: "🌐 Universal Parser"
 description: ""
 draft: "false"
+audience: pro
 weight: 1
 pro-feature: true
 ---
@@ -160,3 +161,14 @@ You can edit the Test_Type associated with your Universal Parser to change:
 * Whether it is "active" or not. If not, it will not appear as an option in the "Scan Type" drop-down on the "Add Findings" page
 * Whether its findings should be marked "static" or "dynamic"
 * You can tweak the same-tool and cross-tool deduplication hash codes, as well as the reimport hash codes, for your Universal Parser under "Enterprise Settings". By default, only same-tool deduplication and reimport hash codes are populated, with the required values Title, Severity, and Description.
+
+### Current limitations: editing and deleting a Universal Parser
+
+The field-mapping configuration of an existing Universal Parser cannot be modified after it is created — only the associated Test_Type (above) is editable. There is also no in-UI option to delete a Universal Parser.
+
+The current workaround for both cases is:
+
+* **To change a parser's field mappings:** create a new Universal Parser with the desired mappings (using a representative sample file as in Step 1), and switch new imports to use the new parser. Existing Tests already imported under the old parser are unaffected.
+* **To "retire" a parser you no longer want to use:** mark its associated Test_Type as inactive (uncheck "active" on the Test_Type). It will stop appearing in the "Scan Type" drop-down on the Add Findings page. The parser configuration itself will remain in the database.
+
+If you need a parser configuration permanently removed (for example, because it contains sensitive field names), contact [DefectDojo Support](mailto:support@defectdojo.com).

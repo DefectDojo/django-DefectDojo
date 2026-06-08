@@ -23,10 +23,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter, TestImportFilter
@@ -46,17 +43,16 @@ from dojo.forms import (
 )
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
-    Cred_Mapping,
     Endpoint,
     Finding,
     Finding_Group,
     Finding_Template,
     Note_Type,
     Product_API_Scan_Configuration,
-    Stub_Finding,
     Test,
     Test_Import,
 )
@@ -94,7 +90,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 class ViewTest(View):
     def get_test(self, test_id: int):
-        test_prefetched = get_authorized_tests(Permissions.Test_View)
+        test_prefetched = get_authorized_tests("view")
         test_prefetched = test_prefetched.annotate(total_reimport_count=Count("test_import__id", distinct=True))
         return get_object_or_404(test_prefetched, pk=test_id)
 
@@ -108,14 +104,6 @@ class ViewTest(View):
         return {
             "paged_test_imports": paged_test_imports,
             "test_import_filter": test_import_filter,
-        }
-
-    def get_stub_findings(self, request: HttpRequest, test: Test):
-        stub_findings = Stub_Finding.objects.filter(test=test)
-        paged_stub_findings = get_page_items(request, stub_findings, 25)
-
-        return {
-            "stub_findings": paged_stub_findings,
         }
 
     def get_findings(self, request: HttpRequest, test: Test):
@@ -181,9 +169,7 @@ class ViewTest(View):
             "person": request.user.username,
             "request": request,
             "show_re_upload": any(test.test_type.name in code for code in get_choices_sorted()),
-            "creds": Cred_Mapping.objects.filter(engagement=test.engagement).select_related("cred_id").order_by("cred_id"),
-            "cred_test": Cred_Mapping.objects.filter(test=test).select_related("cred_id").order_by("cred_id"),
-            "jira_project": jira_helper.get_jira_project(test),
+            "jira_project": jira_services.get_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
             "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
@@ -194,7 +180,6 @@ class ViewTest(View):
         context["form"] = form
         # Add some of the related objects
         context |= self.get_findings(request, test)
-        context |= self.get_stub_findings(request, test)
         context |= self.get_test_import_data(request, test)
 
         return context
@@ -227,9 +212,9 @@ class ViewTest(View):
         # Get the initial objects
         test = self.get_test(test_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, test, Permissions.Test_View)
+        user_has_permission_or_403(request.user, test, "view")
         # Quick perms check to determine if the user has access to add a note to the test
-        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        user_has_permission_or_403(request.user, test, "add")
         # Set up the initial context
         context = self.get_initial_context(request, test)
         # Render the form
@@ -239,9 +224,9 @@ class ViewTest(View):
         # Get the initial objects
         test = self.get_test(test_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, test, Permissions.Test_View)
+        user_has_permission_or_403(request.user, test, "view")
         # Quick perms check to determine if the user has access to add a note to the test
-        user_has_permission_or_403(request.user, test, Permissions.Note_Add)
+        user_has_permission_or_403(request.user, test, "add")
         # Set up the initial context
         context = self.get_initial_context(request, test)
         # Determine the validity of the form
@@ -251,7 +236,6 @@ class ViewTest(View):
             return redirect_to_return_url_or_else(request, reverse("view_test", args=(test_id,)))
         # Render the form
         return render(request, self.get_template(), context)
-
 
 # def prefetch_for_test_imports(test_imports):
 #     prefetched_test_imports = test_imports
@@ -265,7 +249,6 @@ class ViewTest(View):
 #     return prefetch_for_test_imports
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, "tid")
 def edit_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     form = TestForm(instance=test)
@@ -292,7 +275,6 @@ def edit_test(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_Delete, "tid")
 def delete_test(request, tid):
     test = get_object_or_404(Test, pk=tid)
     eng = test.engagement
@@ -333,11 +315,10 @@ def delete_test(request, tid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_Edit, "tid")
 def copy_test(request, tid):
     test = get_object_or_404(Test, id=tid)
     product = test.engagement.product
-    engagement_list = get_authorized_engagements(Permissions.Engagement_Edit).filter(product=product)
+    engagement_list = get_authorized_engagements("edit").filter(product=product)
     form = CopyTestForm(engagements=engagement_list)
 
     if request.method == "POST":
@@ -384,7 +365,7 @@ def test_calendar(request):
         raise Resolver404
 
     if "lead" not in request.GET or "0" in request.GET.getlist("lead"):
-        tests = get_authorized_tests(Permissions.Test_View)
+        tests = get_authorized_tests("view")
     else:
         filters = []
         leads = request.GET.getlist("lead", "")
@@ -392,7 +373,7 @@ def test_calendar(request):
             leads.remove("-1")
             filters.append(Q(lead__isnull=True))
         filters.append(Q(lead__in=leads))
-        tests = get_authorized_tests(Permissions.Test_View).filter(reduce(operator.or_, filters))
+        tests = get_authorized_tests("view").filter(reduce(operator.or_, filters))
 
     tests = tests.prefetch_related("test_type", "lead", "engagement__product")
 
@@ -404,10 +385,9 @@ def test_calendar(request):
         "caltype": "tests",
         "leads": request.GET.getlist("lead", ""),
         "tests": tests,
-        "users": get_authorized_users(Permissions.Test_View)})
+        "users": get_authorized_users("view")})
 
 
-@user_is_authorized(Test, Permissions.Test_View, "tid")
 def test_ics(request, tid):
     test = get_object_or_404(Test, id=tid)
     start_date = datetime.combine(test.target_start, datetime.min.time())
@@ -478,12 +458,12 @@ class AddFindingView(View):
 
     def get_jira_form(self, request: HttpRequest, test: Test, finding_form: AddFindingForm = None):
         # Determine if jira should be used
-        if (jira_project := jira_helper.get_jira_project(test)) is not None:
+        if (jira_project := jira_services.get_project(test)) is not None:
             # Set up the args for the form
             args = [request.POST] if request.method == "POST" else []
             # Set the initial form args
             kwargs = {
-                "push_all": jira_helper.is_push_all_issues(test),
+                "push_all": jira_services.is_push_all_issues(test),
                 "prefix": "jiraform",
                 "jira_project": jira_project,
                 "finding_form": finding_form,
@@ -545,8 +525,8 @@ class AddFindingView(View):
 
         if context["jform"] and context["jform"].is_valid():
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
-            # push_to_jira = jira_helper.is_push_to_jira(finding, jform.cleaned_data.get('push_to_jira'))
-            push_to_jira = jira_helper.is_push_all_issues(finding) or context["jform"].cleaned_data.get("push_to_jira")
+            # push_to_jira = jira_services.is_push_to_jira(finding, jform.cleaned_data.get('push_to_jira'))
+            push_to_jira = jira_services.is_push_all_issues(finding) or context["jform"].cleaned_data.get("push_to_jira")
             jira_message = None
             # if the jira issue key was changed, update database
             new_jira_issue_key = context["jform"].cleaned_data.get("jira_issue")
@@ -556,18 +536,18 @@ class AddFindingView(View):
                 # I have no idea why, but it means we have to retrieve the issue from JIRA to get the internal JIRA id.
                 # we can assume the issue exist, which is already checked in the validation of the jform
                 if not new_jira_issue_key:
-                    jira_helper.finding_unlink_jira(request, finding)
+                    jira_services.unlink_finding(request, finding)
                     jira_message = "Link to JIRA issue removed successfully."
 
                 elif new_jira_issue_key != finding.jira_issue.jira_key:
-                    jira_helper.finding_unlink_jira(request, finding)
-                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_services.unlink_finding(request, finding)
+                    jira_services.link_finding(request, finding, new_jira_issue_key)
                     jira_message = "Changed JIRA link successfully."
             else:
                 logger.debug("finding has no jira issue yet")
                 if new_jira_issue_key:
                     logger.debug("finding has no jira issue yet, but jira issue specified in request. trying to link.")
-                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_services.link_finding(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # Determine if a message should be added
             if jira_message:
@@ -636,7 +616,7 @@ class AddFindingView(View):
         # Get the initial objects
         test = self.get_test(test_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, test, Permissions.Finding_Add)
+        user_has_permission_or_403(request.user, test, "add")
         # Set up the initial context
         context = self.get_initial_context(request, test)
         # Render the form
@@ -646,7 +626,7 @@ class AddFindingView(View):
         # Get the initial objects
         test = self.get_test(test_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, test, Permissions.Finding_Add)
+        user_has_permission_or_403(request.user, test, "add")
         # Set up the initial context
         context = self.get_initial_context(request, test)
         # Process the form
@@ -661,19 +641,19 @@ class AddFindingView(View):
         return render(request, self.get_template(), context)
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, "tid")
 def add_finding_from_template(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
+    user_has_permission_or_403(request.user, test, "add")
     template = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
-    push_all_jira_issues = jira_helper.is_push_all_issues(template)
+    push_all_jira_issues = jira_services.is_push_all_issues(template)
 
     if request.method == "POST":
 
         form = AddFindingForm(request.POST, req_resp=None, product=test.engagement.product)
-        if jira_helper.get_jira_project(test):
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
+        if jira_services.get_project(test):
+            jform = JIRAFindingForm(push_all=jira_services.is_push_all_issues(test), prefix="jiraform", jira_project=jira_services.get_project(test), finding_form=form)
             logger.debug(f"jform valid: {jform.is_valid()}")
 
         if (form["active"].value() is False or form["false_p"].value()) and form["duplicate"].value() is False:
@@ -724,10 +704,10 @@ def add_finding_from_template(request, tid, fid):
 
             new_finding.save()
             if "jiraform-push_to_jira" in request.POST:
-                jform = JIRAFindingForm(request.POST, prefix="jiraform", instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_helper.get_jira_project(test), finding_form=form)
+                jform = JIRAFindingForm(request.POST, prefix="jiraform", instance=new_finding, push_all=push_all_jira_issues, jira_project=jira_services.get_project(test), finding_form=form)
                 if jform.is_valid():
                     if jform.cleaned_data.get("push_to_jira"):
-                        jira_helper.push_to_jira(new_finding)
+                        jira_services.push(new_finding)
                 else:
                     add_error_message_to_response(f"jira form validation failed: {jform.errors}")
             if "request" in form.cleaned_data or "response" in form.cleaned_data:
@@ -809,8 +789,8 @@ def add_finding_from_template(request, tid, fid):
 
         form = AddFindingForm(req_resp=None, product=test.engagement.product, initial=initial_data)
 
-        if jira_helper.get_jira_project(test):
-            jform = JIRAFindingForm(push_all=jira_helper.is_push_all_issues(test), prefix="jiraform", jira_project=jira_helper.get_jira_project(test), finding_form=form)
+        if jira_services.get_project(test):
+            jform = JIRAFindingForm(push_all=jira_services.is_push_all_issues(test), prefix="jiraform", jira_project=jira_services.get_project(test), finding_form=form)
 
     product_tab = Product_Tab(test.engagement.product, title=_("Add Finding"), tab="engagements")
     product_tab.setEngagement(test.engagement)
@@ -826,7 +806,6 @@ def add_finding_from_template(request, tid, fid):
                    })
 
 
-@user_is_authorized(Test, Permissions.Test_View, "tid")
 def search(request, tid):
     test = get_object_or_404(Test, id=tid)
     templates = Finding_Template.objects.all()
@@ -872,9 +851,9 @@ class ReImportScanResultsView(View):
         # Decide if we need to present the Push to JIRA form
         if get_system_setting("enable_jira"):
             # Determine if jira issues should be pushed automatically
-            push_all_jira_issues = jira_helper.is_push_all_issues(test)
+            push_all_jira_issues = jira_services.is_push_all_issues(test)
             # Only return the form if the jira is enabled on this engagement or product
-            if jira_helper.get_jira_project(test):
+            if jira_services.get_project(test):
                 if request.method == "POST":
                     jira_form = JIRAImportScanForm(
                         request.POST,
@@ -900,7 +879,7 @@ class ReImportScanResultsView(View):
         # Get the test object
         test = get_object_or_404(Test, id=test_id)
         # Ensure the supplied user has access to import to the engagement or product
-        user_has_permission_or_403(request.user, test, Permissions.Import_Scan_Result)
+        user_has_permission_or_403(request.user, test, "import")
         # by default we keep a trace of the scan_type used to create the test
         # if it's not here, we use the "name" of the test type
         # this feature exists to provide custom label for tests for some parsers

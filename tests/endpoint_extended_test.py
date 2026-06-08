@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 import unittest
@@ -26,6 +27,38 @@ class EndpointExtendedTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "endpoint/host")
         self.assertTrue(self.is_text_present_on_page(text="All Hosts"))
+
+    def _active_findings_sort_field(self):
+        v3 = os.environ.get("DD_V3_FEATURE_LOCATIONS", "false").lower() == "true"
+        return "active_findings" if v3 else "active_finding_count"
+
+    @on_exception_html_source_logger
+    def test_endpoint_list_sort_by_active_findings_asc(self):
+        driver = self.driver
+        field = self._active_findings_sort_field()
+        driver.get(self.base_url + f"endpoint?o={field}")
+        self.assertTrue(self.is_text_present_on_page(text="Endpoint"))
+
+    @on_exception_html_source_logger
+    def test_endpoint_list_sort_by_active_findings_desc(self):
+        driver = self.driver
+        field = self._active_findings_sort_field()
+        driver.get(self.base_url + f"endpoint?o=-{field}")
+        self.assertTrue(self.is_text_present_on_page(text="Endpoint"))
+
+    @on_exception_html_source_logger
+    def test_endpoint_host_list_sort_by_active_findings_asc(self):
+        driver = self.driver
+        field = self._active_findings_sort_field()
+        driver.get(self.base_url + f"endpoint/host?o={field}")
+        self.assertTrue(self.is_text_present_on_page(text="Hosts"))
+
+    @on_exception_html_source_logger
+    def test_endpoint_host_list_sort_by_active_findings_desc(self):
+        driver = self.driver
+        field = self._active_findings_sort_field()
+        driver.get(self.base_url + f"endpoint/host?o=-{field}")
+        self.assertTrue(self.is_text_present_on_page(text="Hosts"))
 
     @on_exception_html_source_logger
     def test_add_endpoint_meta_data(self):
@@ -92,6 +125,10 @@ def suite():
     suite.addTest(EndpointExtendedTest("test_vulnerable_endpoints_page"))
     suite.addTest(EndpointExtendedTest("test_vulnerable_endpoint_hosts_page"))
     suite.addTest(EndpointExtendedTest("test_endpoint_host_list"))
+    suite.addTest(EndpointExtendedTest("test_endpoint_list_sort_by_active_findings_asc"))
+    suite.addTest(EndpointExtendedTest("test_endpoint_list_sort_by_active_findings_desc"))
+    suite.addTest(EndpointExtendedTest("test_endpoint_host_list_sort_by_active_findings_asc"))
+    suite.addTest(EndpointExtendedTest("test_endpoint_host_list_sort_by_active_findings_desc"))
     suite.addTest(EndpointExtendedTest("test_add_endpoint_meta_data"))
     suite.addTest(EndpointExtendedTest("test_edit_endpoint_meta_data"))
     suite.addTest(ProductTest("test_delete_product"))

@@ -2,7 +2,6 @@
 import base64
 import contextlib
 import copy
-import json
 import logging
 import mimetypes
 from collections import OrderedDict, defaultdict
@@ -21,7 +20,7 @@ from django.db.models.query import Prefetch
 from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
-from django.utils import formats, timezone
+from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 from django.views import View
@@ -30,14 +29,8 @@ from imagekit import ImageSpec
 from imagekit.processors import ResizeToFill
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
-from dojo.authorization.authorization_decorators import (
-    user_has_global_permission,
-    user_is_authorized,
-)
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.filters import (
     AcceptedFindingFilter,
@@ -64,7 +57,6 @@ from dojo.forms import (
     DefectFindingForm,
     DeleteFindingForm,
     DeleteFindingTemplateForm,
-    DeleteStubFindingForm,
     EditPlannedRemediationDateFindingForm,
     FindingBulkUpdateForm,
     FindingForm,
@@ -73,16 +65,14 @@ from dojo.forms import (
     JIRAFindingForm,
     MergeFindings,
     NoteForm,
-    PromoteFindingForm,
     ReviewFindingForm,
-    StubFindingForm,
     TypedNoteForm,
 )
+from dojo.jira import services as jira_services
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
-    Cred_Mapping,
     Dojo_User,
     Endpoint,
     Endpoint_Status,
@@ -97,7 +87,6 @@ from dojo.models import (
     NoteHistory,
     Notes,
     Product,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
@@ -105,7 +94,7 @@ from dojo.models import (
     User,
 )
 from dojo.notifications.helper import create_notification
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.test.queries import get_authorized_tests
 from dojo.tools import tool_issue_updater
 from dojo.utils import (
@@ -284,7 +273,7 @@ class BaseListFindings:
         )
 
     def get_filtered_findings(self):
-        findings = get_authorized_findings(Permissions.Finding_View)
+        findings = get_authorized_findings("view")
         # Annotate computed SLA age in days: sla_expiration_date - (sla_start_date or date)
         # Handle NULL sla_expiration_date by using Coalesce to provide a large default value
         # so NULLs sort last when sorting ascending (most urgent first)
@@ -325,18 +314,18 @@ class ListFindings(View, BaseListFindings):
         # Look to see if the product was used
         if product_id := self.get_product_id():
             product = get_object_or_404(Product, id=product_id)
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, "view")
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(product, title="Findings", tab="findings")
-            context["jira_project"] = jira_helper.get_jira_project(product)
+            context["jira_project"] = jira_services.get_project(product)
             if github_config := GITHUB_PKey.objects.filter(product=product).first():
                 context["github_config"] = github_config.git_conf_id
         elif engagement_id := self.get_engagement_id():
             engagement = get_object_or_404(Engagement, id=engagement_id)
-            user_has_permission_or_403(request.user, engagement, Permissions.Engagement_View)
+            user_has_permission_or_403(request.user, engagement, "view")
             context["show_product_column"] = False
             context["product_tab"] = Product_Tab(engagement.product, title=engagement.name, tab="engagements")
-            context["jira_project"] = jira_helper.get_jira_project(engagement)
+            context["jira_project"] = jira_services.get_project(engagement)
             if github_config := GITHUB_PKey.objects.filter(product__engagement=engagement).first():
                 context["github_config"] = github_config.git_conf_id
 
@@ -471,29 +460,6 @@ class ViewFinding(View):
             "findings_list_lastElement": findings[last_pos],
         }
 
-    def get_credential_objects(self, finding: Finding):
-        cred = (
-            Cred_Mapping.objects.filter(test=finding.test.id)
-            .select_related("cred_id")
-            .order_by("cred_id")
-        )
-        cred_engagement = (
-            Cred_Mapping.objects.filter(engagement=finding.test.engagement.id)
-            .select_related("cred_id")
-            .order_by("cred_id")
-        )
-        cred_finding = (
-            Cred_Mapping.objects.filter(finding=finding.id)
-            .select_related("cred_id")
-            .order_by("cred_id")
-        )
-
-        return {
-            "cred_finding": cred_finding,
-            "cred": cred,
-            "cred_engagement": cred_engagement,
-        }
-
     def get_request_response(self, finding: Finding):
         request_response = None
         burp_request = None
@@ -556,7 +522,7 @@ class ViewFinding(View):
         finding_filter_class = SimilarFindingFilterWithoutObjectLookups if filter_string_matching else SimilarFindingFilter
         similar_findings_filter = finding_filter_class(
             request.GET,
-            queryset=get_authorized_findings(Permissions.Finding_View)
+            queryset=get_authorized_findings("view")
             .filter(test__engagement__product=finding.test.engagement.product)
             .exclude(id=finding.id),
             user=request.user,
@@ -591,7 +557,7 @@ class ViewFinding(View):
             can_be_pushed_to_jira,
             can_be_pushed_to_jira_error,
             error_code,
-        ) = jira_helper.can_be_pushed_to_jira(finding)
+        ) = jira_services.can_be_pushed(finding)
         # Check the error code
         if error_code:
             logger.debug(error_code)
@@ -646,9 +612,9 @@ class ViewFinding(View):
             finding.save()
             # Determine if the note should be sent to jira
             if finding.has_jira_issue:
-                jira_helper.add_comment(finding, new_note)
+                jira_services.add_comment(finding, new_note)
             elif finding.has_jira_group_issue:
-                jira_helper.add_comment(finding.finding_group, new_note)
+                jira_services.add_comment(finding.finding_group, new_note)
             # Send the notification of the note being added
             url = request.build_absolute_uri(
                 reverse("view_finding", args=(finding.id,)),
@@ -698,12 +664,11 @@ class ViewFinding(View):
         finding = self.get_finding(finding_id)
         user = self.get_dojo_user(request)
         # Make sure the user is authorized
-        user_has_permission_or_403(user, finding, Permissions.Finding_View)
+        user_has_permission_or_403(user, finding, "view")
         # Set up the initial context
         context = self.get_initial_context(request, finding, user)
         # Add in the other extras
         context |= self.get_previous_and_next_findings(finding)
-        context |= self.get_credential_objects(finding)
         # Add in more of the other extras
         context |= self.get_request_response(finding)
         context |= self.get_similar_findings(request, finding)
@@ -717,9 +682,9 @@ class ViewFinding(View):
         finding = self.get_finding(finding_id)
         user = self.get_dojo_user(request)
         # Make sure the user is authorized
-        user_has_permission_or_403(user, finding, Permissions.Finding_View)
+        user_has_permission_or_403(user, finding, "view")
         # Quick perms check to determine if the user has access to add a note to the finding
-        user_has_permission_or_403(user, finding, Permissions.Note_Add)
+        user_has_permission_or_403(user, finding, "add")
         # Set up the initial context
         context = self.get_initial_context(request, finding, user)
         # Determine the validity of the form
@@ -764,9 +729,9 @@ class EditFinding(View):
 
     def get_jira_form(self, request: HttpRequest, finding: Finding, finding_form: FindingForm = None):
         # Determine if jira should be used
-        if (jira_project := jira_helper.get_jira_project(finding)) is not None:
+        if (jira_project := jira_services.get_project(finding)) is not None:
             # Determine if push all findings is enabled
-            push_all_findings = jira_helper.is_push_all_issues(finding)
+            push_all_findings = jira_services.is_push_all_issues(finding)
             # Set up the args for the form
             args = [request.POST] if request.method == "POST" else []
             # Set the initial form args
@@ -942,8 +907,8 @@ class EditFinding(View):
                     ra_helper.simple_risk_accept(request.user, new_finding, perform_save=False)
             elif new_finding.risk_accepted:
                 ra_helper.risk_unaccept(request.user, new_finding, perform_save=False)
-            # Save and add new locations
-            associated_locations = finding_helper.add_locations(new_finding, context["form"])
+            # Save and add new locations; replace=True so deselected endpoints are removed
+            associated_locations = finding_helper.add_locations(new_finding, context["form"], replace=True)
             # Remove unrelated endpoints
             if settings.V3_FEATURE_LOCATIONS:
                 for ref in new_finding.locations.all():
@@ -986,8 +951,8 @@ class EditFinding(View):
             logger.debug(JFORM_PUSH_TO_JIRA_MESSAGE, context["jform"].cleaned_data.get("push_to_jira"))
             # can't use helper as when push_all_jira_issues is True, the checkbox gets disabled and is always false
             push_to_jira_checkbox = context["jform"].cleaned_data.get("push_to_jira")
-            push_all_jira_issues = jira_helper.is_push_all_issues(finding)
-            push_to_jira = push_all_jira_issues or push_to_jira_checkbox or jira_helper.is_keep_in_sync_with_jira(finding)
+            push_all_jira_issues = jira_services.is_push_all_issues(finding)
+            push_to_jira = push_all_jira_issues or push_to_jira_checkbox or jira_services.is_keep_in_sync(finding)
             logger.debug("push_to_jira: %s", push_to_jira)
             logger.debug("push_all_jira_issues: %s", push_all_jira_issues)
             logger.debug("has_jira_group_issue: %s", finding.has_jira_group_issue)
@@ -1004,14 +969,14 @@ class EditFinding(View):
                     which is already checked in the validation of the form
                     """
                     if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, finding)
+                        jira_services.unlink_finding(request, finding)
                         jira_message = "Link to JIRA issue removed successfully."
                     elif new_jira_issue_key != finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, finding)
-                        jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                        jira_services.unlink_finding(request, finding)
+                        jira_services.link_finding(request, finding, new_jira_issue_key)
                         jira_message = "Changed JIRA link successfully."
                 elif new_jira_issue_key:
-                    jira_helper.finding_link_jira(request, finding, new_jira_issue_key)
+                    jira_services.link_finding(request, finding, new_jira_issue_key)
                     jira_message = "Linked a JIRA issue successfully."
             # any existing finding should be updated
             # Determine if a message should be added
@@ -1068,7 +1033,7 @@ class EditFinding(View):
             # we only push the group after storing the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding.finding_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
         return request, all_forms_valid
 
@@ -1079,7 +1044,7 @@ class EditFinding(View):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, finding, Permissions.Finding_Edit)
+        user_has_permission_or_403(request.user, finding, "edit")
         # Set up the initial context
         context = self.get_initial_context(request, finding)
         # Render the form
@@ -1089,7 +1054,7 @@ class EditFinding(View):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, finding, Permissions.Finding_Edit)
+        user_has_permission_or_403(request.user, finding, "edit")
         # Set up the initial context
         context = self.get_initial_context(request, finding)
         # Process the form
@@ -1150,7 +1115,7 @@ class DeleteFinding(View):
         # Get the initial objects
         finding = self.get_finding(finding_id)
         # Make sure the user is authorized
-        user_has_permission_or_403(request.user, finding, Permissions.Finding_Delete)
+        user_has_permission_or_403(request.user, finding, "delete")
         # Get the finding form
         context = {
             "form": DeleteFindingForm(request.POST, instance=finding),
@@ -1163,7 +1128,6 @@ class DeleteFinding(View):
         raise PermissionDenied
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def close_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -1233,7 +1197,6 @@ def close_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def verify_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1292,7 +1255,6 @@ def verify_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def defect_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     # in order to close a finding, we need to capture why it was closed
@@ -1336,8 +1298,8 @@ def defect_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
-                jira_instance = jira_helper.get_jira_instance(finding)
-                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                jira_instance = jira_services.get_instance(finding)
+                push_to_jira = jira_services.is_push_all_issues(finding) \
                     or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
@@ -1345,14 +1307,14 @@ def defect_finding_review(request, fid):
                     new_note.entry += "\nJira issue set to resolved."
                 else:
                     new_note.entry += "\nJira issue re-opened."
-                jira_helper.add_comment(finding, new_note, force_push=True)
+                jira_services.add_comment(finding, new_note, force_push=True)
             # Save the finding
             finding.save(push_to_jira=(push_to_jira and not finding_in_group))
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
             messages.add_message(
                 request, messages.SUCCESS, "Defect Reviewed", extra_tags="alert-success",
@@ -1378,11 +1340,6 @@ def defect_finding_review(request, fid):
     )
 
 
-@user_is_authorized(
-    Finding,
-    Permissions.Finding_Edit,
-    "fid",
-)
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -1406,8 +1363,8 @@ def reopen_finding(request, fid):
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
     finding.save(dedupe_option=False, push_to_jira=False)
-    if jira_helper.is_push_all_issues(finding) or jira_helper.is_keep_in_sync_with_jira(finding):
-        jira_helper.push_to_jira(finding)
+    if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
+        jira_services.push(finding)
 
     reopen_external_issue(finding.id, "re-opened by defectdojo", "github")
 
@@ -1429,11 +1386,10 @@ def reopen_finding(request, fid):
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def copy_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     product = finding.test.engagement.product
-    tests = get_authorized_tests(Permissions.Test_Edit).filter(
+    tests = get_authorized_tests("edit").filter(
         engagement=finding.test.engagement,
     )
     form = CopyFindingForm(tests=tests)
@@ -1486,7 +1442,6 @@ def copy_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def remediation_date(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1523,7 +1478,6 @@ def remediation_date(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1534,7 +1488,6 @@ def touch_finding(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1552,7 +1505,6 @@ def simple_risk_accept(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Risk_Acceptance, "fid")
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(request.user, finding)
@@ -1569,7 +1521,6 @@ def risk_unaccept(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_View, "fid")
 def request_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1608,19 +1559,19 @@ def request_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
-                jira_instance = jira_helper.get_jira_instance(finding)
-                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                jira_instance = jira_services.get_instance(finding)
+                push_to_jira = jira_services.is_push_all_issues(finding) \
                     or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
-                jira_helper.add_comment(finding, new_note, force_push=True)
+                jira_services.add_comment(finding, new_note, force_push=True)
             # Save the finding
             finding.save(push_to_jira=(push_to_jira and not finding_in_group))
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
             reviewers = Dojo_User.objects.filter(id__in=form.cleaned_data["reviewers"])
             reviewers_string = ", ".join([f"{user} ({user.id})" for user in reviewers])
@@ -1659,7 +1610,6 @@ def request_finding_review(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def clear_finding_review(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     user = get_object_or_404(Dojo_User, id=request.user.id)
@@ -1703,19 +1653,19 @@ def clear_finding_review(request, fid):
             # Only push if the finding is not in a group
             if jira_issue_exists:
                 # Determine if any automatic sync should occur
-                jira_instance = jira_helper.get_jira_instance(finding)
-                push_to_jira = jira_helper.is_push_all_issues(finding) \
+                jira_instance = jira_services.get_instance(finding)
+                push_to_jira = jira_services.is_push_all_issues(finding) \
                     or (jira_instance and jira_instance.finding_jira_sync)
             # Add the closing note
             if push_to_jira and not finding_in_group:
-                jira_helper.add_comment(finding, new_note, force_push=True)
+                jira_services.add_comment(finding, new_note, force_push=True)
             # Save the finding
             finding.save(push_to_jira=(push_to_jira and not finding_in_group))
 
             # we only push the group after saving the finding to make sure
             # the updated data of the finding is pushed as part of the group
             if push_to_jira and finding_in_group:
-                jira_helper.push_to_jira(finding.finding_group)
+                jira_services.push(finding.finding_group)
 
             messages.add_message(
                 request,
@@ -1739,8 +1689,8 @@ def clear_finding_review(request, fid):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Add)
 def mktemplate(request, fid):
+    user_has_global_permission_or_403(request.user, "add")
     finding = get_object_or_404(Finding, id=fid)
     templates = Finding_Template.objects.filter(title=finding.title)
     if len(templates) > 0:
@@ -1799,11 +1749,10 @@ def mktemplate(request, fid):
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def find_template_to_apply(request, fid):
     # Templates may contain sensitive data from any product; require global permission
     # to match the authorization level of the /template list view
-    user_has_global_permission_or_403(request.user, Permissions.Finding_Edit)
+    user_has_global_permission_or_403(request.user, "edit")
     finding = get_object_or_404(Finding, id=fid)
     test = get_object_or_404(Test, id=finding.test.id)
     templates_by_cve = (
@@ -1870,9 +1819,9 @@ def find_template_to_apply(request, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
+    user_has_permission_or_403(request.user, finding, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__.copy()
     # Remove tags and other non-serializable fields
@@ -1958,9 +1907,9 @@ def choose_finding_template_options(request, tid, fid):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
+    user_has_permission_or_403(request.user, finding, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
 
     if request.method == "POST":
@@ -2024,229 +1973,6 @@ def apply_template_to_finding(request, fid, tid):
     return HttpResponseRedirect(reverse("view_finding", args=(finding.id,)))
 
 
-@user_is_authorized(Test, Permissions.Finding_Add, "tid")
-def add_stub_finding(request, tid):
-    test = get_object_or_404(Test, id=tid)
-    if request.method == "POST":
-        form = StubFindingForm(request.POST)
-        if form.is_valid():
-            stub_finding = form.save(commit=False)
-            stub_finding.test = test
-            stub_finding.reporter = request.user
-            stub_finding.save()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Stub Finding created successfully.",
-                extra_tags="alert-success",
-            )
-            if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                data = {
-                    "message": "Stub Finding created successfully.",
-                    "id": stub_finding.id,
-                    "severity": "None",
-                    "date": formats.date_format(stub_finding.date, "DATE_FORMAT"),
-                }
-                return HttpResponse(json.dumps(data))
-        else:
-            if request.headers.get("x-requested-with") == "XMLHttpRequest":
-                data = {
-                    "message": "Stub Finding form has error, please revise and try again.",
-                }
-                return HttpResponse(json.dumps(data))
-
-            messages.add_message(
-                request,
-                messages.ERROR,
-                "Stub Finding form has error, please revise and try again.",
-                extra_tags="alert-danger",
-            )
-    add_breadcrumb(title="Add Stub Finding", top_level=False, request=request)
-    return HttpResponseRedirect(reverse("view_test", args=(tid,)))
-
-
-@user_is_authorized(Stub_Finding, Permissions.Finding_Delete, "fid")
-def delete_stub_finding(request, fid):
-    finding = get_object_or_404(Stub_Finding, id=fid)
-
-    if request.method == "POST":
-        form = DeleteStubFindingForm(request.POST, instance=finding)
-        if form.is_valid():
-            tid = finding.test.id
-            finding.delete()
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Potential Finding deleted successfully.",
-                extra_tags="alert-success",
-            )
-            return HttpResponseRedirect(reverse("view_test", args=(tid,)))
-        messages.add_message(
-            request,
-            messages.ERROR,
-            "Unable to delete potential finding, please try again.",
-            extra_tags="alert-danger",
-        )
-        return None
-    raise PermissionDenied
-
-
-@user_is_authorized(Stub_Finding, Permissions.Finding_Edit, "fid")
-def promote_to_finding(request, fid):
-    finding = get_object_or_404(Stub_Finding, id=fid)
-    test = finding.test
-    form_error = False
-    push_all_jira_issues = jira_helper.is_push_all_issues(finding)
-    jform = None
-    use_jira = jira_helper.get_jira_project(finding) is not None
-    product_tab = Product_Tab(
-        finding.test.engagement.product, title="Promote Finding", tab="findings",
-    )
-
-    if request.method == "POST":
-        form = PromoteFindingForm(request.POST, product=test.engagement.product)
-        if use_jira:
-            jform = JIRAFindingForm(
-                request.POST,
-                instance=finding,
-                prefix="jiraform",
-                push_all=push_all_jira_issues,
-                jira_project=jira_helper.get_jira_project(finding),
-            )
-
-        if form.is_valid() and (jform is None or jform.is_valid()):
-            if jform:
-                logger.debug(
-                    "jform.jira_issue: %s", jform.cleaned_data.get("jira_issue"),
-                )
-                logger.debug(
-                    JFORM_PUSH_TO_JIRA_MESSAGE, jform.cleaned_data.get("push_to_jira"),
-                )
-
-            new_finding = form.save(commit=False)
-            new_finding.test = test
-            new_finding.reporter = request.user
-            new_finding.numerical_severity = Finding.get_numerical_severity(
-                new_finding.severity,
-            )
-
-            new_finding.active = True
-            new_finding.false_p = False
-            new_finding.duplicate = False
-            new_finding.mitigated = None
-            new_finding.verified = True
-            new_finding.out_of_scope = False
-
-            new_finding.save()
-
-            finding_helper.add_locations(new_finding, form)
-
-            push_to_jira = False
-            if jform and jform.is_valid():
-                # Push to Jira?
-                logger.debug("jira form valid")
-                push_to_jira = push_all_jira_issues or jform.cleaned_data.get(
-                    "push_to_jira",
-                )
-
-                # if the jira issue key was changed, update database
-                new_jira_issue_key = jform.cleaned_data.get("jira_issue")
-                if new_finding.has_jira_issue:
-                    # vaiable "jira_issue" no used
-                    # jira_issue = new_finding.jira_issue
-                    """
-                    everything in DD around JIRA integration is based on the internal id of
-                    the issue in JIRA instead of on the public jira issue key.
-                    I have no idea why, but it means we have to retrieve
-                    the issue from JIRA to get the internal JIRA id. we can assume the issue exist,
-                    which is already checked in the validation of the jform
-                    """
-
-                    if not new_jira_issue_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-
-                    elif new_jira_issue_key != new_finding.jira_issue.jira_key:
-                        jira_helper.finding_unlink_jira(request, new_finding)
-                        jira_helper.finding_link_jira(
-                            request, new_finding, new_jira_issue_key,
-                        )
-                else:
-                    logger.debug("finding has no jira issue yet")
-                    if new_jira_issue_key:
-                        logger.debug(
-                            "finding has no jira issue yet, but jira issue specified in request. trying to link.")
-                        jira_helper.finding_link_jira(
-                            request, new_finding, new_jira_issue_key,
-                        )
-
-            finding_helper.save_vulnerability_ids(
-                new_finding, form.cleaned_data["vulnerability_ids"].split(),
-            )
-
-            new_finding.save(push_to_jira=push_to_jira)
-
-            finding.delete()
-            if "githubform" in request.POST:
-                gform = GITHUBFindingForm(
-                    request.POST,
-                    prefix="githubform",
-                    enabled=GITHUB_PKey.objects.get(
-                        product=test.engagement.product,
-                    ).push_all_issues,
-                )
-                if gform.is_valid():
-                    add_external_issue(new_finding.id, "github")
-
-            messages.add_message(
-                request,
-                messages.SUCCESS,
-                "Finding promoted successfully.",
-                extra_tags="alert-success",
-            )
-
-            return HttpResponseRedirect(reverse("view_test", args=(test.id,)))
-        form_error = True
-        add_error_message_to_response(
-            "The form has errors, please correct them below.",
-        )
-        add_field_errors_to_response(jform)
-        add_field_errors_to_response(form)
-    else:
-        form = PromoteFindingForm(
-            initial={
-                "title": finding.title,
-                "product_tab": product_tab,
-                "date": finding.date,
-                "severity": finding.severity,
-                "description": finding.description,
-                "test": finding.test,
-                "reporter": finding.reporter,
-            },
-            product=test.engagement.product,
-        )
-
-        if use_jira:
-            jform = JIRAFindingForm(
-                prefix="jiraform",
-                push_all=jira_helper.is_push_all_issues(test),
-                jira_project=jira_helper.get_jira_project(test),
-            )
-
-    return render(
-        request,
-        "dojo/promote_to_finding.html",
-        {
-            "form": form,
-            "product_tab": product_tab,
-            "test": test,
-            "stub_finding": finding,
-            "form_error": form_error,
-            "jform": jform,
-        },
-    )
-
-
-@user_has_global_permission(Permissions.Finding_Edit)
 def templates(request):
     templates = Finding_Template.objects.all().order_by("cwe")
     templates = TemplateFindingFilter(request.GET, queryset=templates)
@@ -2266,7 +1992,6 @@ def templates(request):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Edit)
 def export_templates_to_json(request):
     leads_as_json = serializers.serialize("json", Finding_Template.objects.all())
     return HttpResponse(leads_as_json, content_type="application/json")
@@ -2360,7 +2085,6 @@ def apply_cwe_mitigation(apply_to_findings, template, *, update=True):
     return count
 
 
-@user_has_global_permission(Permissions.Finding_Add)
 def add_template(request):
     form = FindingTemplateForm()
     if request.method == "POST":
@@ -2402,7 +2126,6 @@ def add_template(request):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Edit)
 def edit_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     initial_data = {"vulnerability_ids": "\n".join(template.vulnerability_ids)}
@@ -2464,7 +2187,6 @@ def edit_template(request, tid):
     )
 
 
-@user_has_global_permission(Permissions.Finding_Delete)
 def delete_template(request, tid):
     template = get_object_or_404(Finding_Template, id=tid)
     if request.method == "POST":
@@ -2542,7 +2264,6 @@ def download_finding_pic(request, token):
         return response
 
 
-@user_is_authorized(Product, Permissions.Finding_Edit, "pid")
 def merge_finding_product(request, pid):
     product = get_object_or_404(Product, pk=pid)
     finding_to_update = request.GET.getlist("finding_to_update")
@@ -2722,7 +2443,6 @@ def merge_finding_product(request, pid):
         },
     )
 
-
 # bulk update and delete are combined, so we can't have the nice user_is_authorized decorator
 
 
@@ -2732,11 +2452,11 @@ def _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_fi
         if pid is not None:
             product = get_object_or_404(Product, id=pid)
             user_has_permission_or_403(
-                request.user, product, Permissions.Finding_Delete,
+                request.user, product, "delete",
             )
 
         finds = get_authorized_findings_for_queryset(
-            Permissions.Finding_Delete, finds,
+            "delete", finds,
         ).distinct()
 
         skipped_find_count = total_find_count - finds.count()
@@ -3063,8 +2783,8 @@ def _bulk_push_to_jira(finds, form, note):
         for finding in finds
         if finding.has_finding_group
         and (
-            jira_helper.is_push_all_issues(finding)
-            or jira_helper.is_keep_in_sync_with_jira(finding)
+            jira_services.is_push_all_issues(finding)
+            or jira_services.is_keep_in_sync(finding)
             or form.cleaned_data.get("push_to_jira")
         )
     )
@@ -3072,22 +2792,22 @@ def _bulk_push_to_jira(finds, form, note):
     for group in finding_groups:
         if (
             form.cleaned_data.get("push_to_jira")
-            or jira_helper.is_push_all_issues(group)
-            or jira_helper.is_keep_in_sync_with_jira(group)
+            or jira_services.is_push_all_issues(group)
+            or jira_services.is_keep_in_sync(group)
         ):
             (
                 can_be_pushed_to_jira,
                 error_message,
                 _error_code,
-            ) = jira_helper.can_be_pushed_to_jira(group)
+            ) = jira_services.can_be_pushed(group)
             if not can_be_pushed_to_jira:
                 error_counts[error_message] += 1
-                jira_helper.log_jira_cannot_be_pushed_reason(error_message, group)
+                jira_services.log_cannot_be_pushed_reason(error_message, group)
             else:
                 logger.debug(
                     "pushing to jira from finding.finding_bulk_update_all()",
                 )
-                jira_helper.push_to_jira(group)
+                jira_services.push(group)
                 success_count += 1
 
     for error_message, error_count in error_counts.items():
@@ -3107,40 +2827,40 @@ def _bulk_push_to_jira(finds, form, note):
         # not sure yet if we want to support bulk unlink, so leave as commented out for now
         # if form.cleaned_data['unlink_from_jira']:
         #     if finding.has_jira_issue:
-        #         jira_helper.finding_unlink_jira(request, finding)
+        #         jira_services.unlink_finding(request, finding)
 
         # Because we never call finding.save() in a bulk update, we need to actually
         # push the JIRA stuff here, rather than in finding.save()
         # can't use helper as when push_all_jira_issues is True,
         # the checkbox gets disabled and is always false
-        # push_to_jira = jira_helper.is_push_to_jira(new_finding,
+        # push_to_jira = jira_services.is_push_to_jira(new_finding,
         # form.cleaned_data.get('push_to_jira'))
         if (
             form.cleaned_data.get("push_to_jira")
-            or jira_helper.is_push_all_issues(finding)
-            or jira_helper.is_keep_in_sync_with_jira(finding)
+            or jira_services.is_push_all_issues(finding)
+            or jira_services.is_keep_in_sync(finding)
         ) and not finding.has_finding_group:
             (
                 can_be_pushed_to_jira,
                 error_message,
                 _error_code,
-            ) = jira_helper.can_be_pushed_to_jira(finding)
+            ) = jira_services.can_be_pushed(finding)
             if finding.has_jira_group_issue and not finding.has_jira_issue:
                 error_message = (
                     "finding already pushed as part of Finding Group"
                 )
                 error_counts[error_message] += 1
-                jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+                jira_services.log_cannot_be_pushed_reason(error_message, finding)
             elif not can_be_pushed_to_jira:
                 error_counts[error_message] += 1
-                jira_helper.log_jira_cannot_be_pushed_reason(error_message, finding)
+                jira_services.log_cannot_be_pushed_reason(error_message, finding)
             else:
                 logger.debug(
                     "pushing to jira from finding.finding_bulk_update_all()",
                 )
-                jira_helper.push_to_jira(finding)
+                jira_services.push(finding)
                 if note is not None and isinstance(note, Notes):
-                    jira_helper.add_comment(finding, note)
+                    jira_services.add_comment(finding, note)
                 success_count += 1
 
     for error_message, error_count in error_counts.items():
@@ -3176,12 +2896,12 @@ def finding_bulk_update_all(request, pid=None):
             if pid is not None:
                 product = get_object_or_404(Product, id=pid)
                 user_has_permission_or_403(
-                    request.user, product, Permissions.Finding_Edit,
+                    request.user, product, "edit",
                 )
 
             # make sure users are not editing stuff they are not authorized for
             finds = get_authorized_findings_for_queryset(
-                Permissions.Finding_Edit, finds,
+                "edit", finds,
             ).distinct()
 
             skipped_find_count = total_find_count - finds.count()
@@ -3317,7 +3037,6 @@ def get_missing_mandatory_notetypes(finding):
     return Note_Type.objects.filter(id__in=notes_to_be_added)
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "original_id")
 @require_POST
 def mark_finding_duplicate(request, original_id, duplicate_id):
 
@@ -3386,7 +3105,6 @@ def reset_finding_duplicate_status_internal(user, duplicate_id):
     return duplicate.id
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "duplicate_id")
 @require_POST
 def reset_finding_duplicate_status(request, duplicate_id):
     checked_duplicate_id = reset_finding_duplicate_status_internal(
@@ -3468,7 +3186,6 @@ def set_finding_as_original_internal(user, finding_id, new_original_id):
     return True
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "finding_id")
 @require_POST
 def set_finding_as_original(request, finding_id, new_original_id):
     success = set_finding_as_original_internal(
@@ -3488,7 +3205,6 @@ def set_finding_as_original(request, finding_id, new_original_id):
     )
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 @require_POST
 def unlink_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
@@ -3497,7 +3213,7 @@ def unlink_jira(request, fid):
     )
     if finding.has_jira_issue:
         try:
-            jira_helper.finding_unlink_jira(request, finding)
+            jira_services.unlink_finding(request, finding)
 
             messages.add_message(
                 request,
@@ -3524,7 +3240,6 @@ def unlink_jira(request, fid):
         return HttpResponse(status=400)
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 @require_POST
 def push_to_jira(request, fid):
     finding = get_object_or_404(Finding, id=fid)
@@ -3540,7 +3255,7 @@ def push_to_jira(request, fid):
         # but cant't change too much now without having a test suite,
         # so leave as is for now with the addition warning message
         # to check alerts for background errors.
-        if jira_helper.push_to_jira(finding):
+        if jira_services.push(finding):
             messages.add_message(
                 request,
                 messages.SUCCESS,

@@ -3,6 +3,7 @@ import threading
 from functools import wraps
 
 from django.conf import settings
+from django.contrib import messages
 from django.http import Http404
 from django_ratelimit import UNSAFE
 from django_ratelimit.core import is_ratelimited
@@ -57,9 +58,14 @@ dojo_async_task_counter = ThreadLocalTaskCounter()
 def we_want_async(*args, func=None, **kwargs):
     from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
-    sync = kwargs.get("sync", False)
-    if sync:
-        logger.debug("dojo_async_task %s: running task in the foreground as sync=True has been found as kwarg", func)
+    force_async = kwargs.get("force_async", False)
+    if force_async:
+        logger.debug("dojo_async_task %s: running task in the background as force_async=True has been found as kwarg", func)
+        return True
+
+    force_sync = kwargs.get("force_sync", False)
+    if force_sync:
+        logger.debug("dojo_async_task %s: running task in the foreground as force_sync=True has been found as kwarg", func)
         return False
 
     user = get_current_user()
@@ -87,7 +93,7 @@ def dojo_async_task(func=None, *, signature=False):
             from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
             user = get_current_user()
-            kwargs["async_user"] = user
+            kwargs["async_user_id"] = user.id if user else None
 
             # Capture pghistory context to pass to Celery worker
             # The PgHistoryTask base class will apply this context in the worker
@@ -159,6 +165,29 @@ def dojo_ratelimit(key="ip", rate=None, method=UNSAFE, *, block=False):
             return fn(request, *args, **kw)
         return _wrapped
 
+    return decorator
+
+
+def deprecated_view(feature_name, removal_version="X.Y.Z", removal_date="some time in the future"):
+    """
+    Decorator that adds a deprecation warning message to a view.
+
+    Only adds the message on GET requests to avoid duplicate warnings
+    when POST requests redirect.
+    """
+    def decorator(func):
+        @wraps(func)
+        def _wrapped(request, *args, **kwargs):
+            if request.method == "GET":
+                messages.add_message(
+                    request,
+                    messages.WARNING,
+                    f"{feature_name} is deprecated and will be removed in DefectDojo v{removal_version} "
+                    f"({removal_date}). Please plan to migrate away from this feature.",
+                    extra_tags="alert-warning",
+                )
+            return func(request, *args, **kwargs)
+        return _wrapped
     return decorator
 
 

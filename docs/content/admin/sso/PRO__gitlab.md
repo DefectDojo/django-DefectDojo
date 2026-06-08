@@ -5,7 +5,7 @@ weight: 9
 audience: pro
 ---
 
-DefectDojo Pro supports login via GitLab. Open-Source users should refer to the [Open-Source GitLab guide](../OS__gitlab/).
+DefectDojo Pro supports login via GitLab. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
 
 ## Prerequisites
 

@@ -82,7 +82,7 @@
                                               <i class="fa-solid fa-rectangle-list"></i> View
                                           </a>
                                         </li>
-                                        {% if prod|has_object_permission:"Product_Edit" %}
+                                        {% if prod|has_object_permission:"edit" %}
                                           <li role="presentation">
                                             <a class="" href="{% url 'edit_product' prod.id %}">
                                                 <i class="fa-solid fa-pen-to-square"></i> Edit
@@ -91,14 +91,14 @@
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
                                           <li><a href="{% url 'view_engagements' prod.id %}"><i class="fa-solid fa-calendar-days"></i> View Engagements</a></li>
-                                        {% if prod|has_object_permission:"Engagement_Add" %}
+                                        {% if prod|has_object_permission:"add" %}
                                           <li><a href="{% url 'new_eng_for_prod' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Engagement</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
                                           <li><a href="{% url 'product_open_findings' prod.id %}"><i class="fa-solid fa-rectangle-list"></i> View Open Findings</a></li>
                                           <li><a href="{% url 'product_open_findings' prod.id %}?severity=Critical"><i class="fa-solid fa-triangle-exclamation"></i> View Critical Findings</a></li>
                                           <li><a href="{% url 'product_open_findings' prod.id %}?date=2"><i class="fa-solid fa-calendar-days"></i> View Last 7 Days Findings</a></li>
-                                        {% if prod|has_object_permission:"Finding_Add" %}
+                                        {% if prod|has_object_permission:"add" %}
                                           <li><a href="{% url 'ad_hoc_finding' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Finding</a></li>
                                         {% endif %}
                                           <li role="separator" class="divider"></li>
@@ -107,10 +107,10 @@
                                           <li><a href="{% url 'vulnerable_endpoints' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Locations</a></li>
                                           <li><a href="{% url 'vulnerable_endpoint_hosts' %}?product={{ prod.id }}"><i class="fa-solid fa-sitemap"></i> View Vulnerable Hosts</a></li>
                                           <li><a href="{% url 'product_endpoint_report' prod.id %}"><i class="fa-solid fa-file-lines"></i> Location Report</a></li>
-                                        {% if prod|has_object_permission:"Location_Add" %}
+                                        {% if prod|has_object_permission:"add" %}
                                           <li><a href="{% url 'add_endpoint' prod.id %}"><i class="fa-solid fa-plus"></i> Add New Location</a></li>
                                         {% endif %}
-                                        {% if prod|has_object_permission:"Product_Edit" %}
+                                        {% if prod|has_object_permission:"edit" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
                                             <a class="" href="{% url 'add_meta_data' prod.id %}">
@@ -124,7 +124,7 @@
                                           </li>
                                         {% endif %}
                                         <li role="separator" class="divider"></li>
-                                        {% if prod|has_object_permission:"Product_API_Scan_Configuration_Edit" %}  
+                                        {% if prod|has_object_permission:"edit" %}  
                                           <li role="presentation">
                                             <a class="" href="{% url 'add_api_scan_configuration' prod.id %}">
                                               <i class="fa-solid fa-rectangle-list"></i> Add Scan API Configuration
@@ -138,14 +138,14 @@
                                         </li>
                                         {% if system_settings.enable_product_tracking_files %}
                                           <li role="separator" class="divider"></li>
-                                          {% if prod|has_object_permission:"Product_Tracking_Files_Add" %}
+                                          {% if prod|has_object_permission:"add" %}
                                           <li role="presentation">
                                             <a class="" href="{% url 'new_object' prod.id %}">
                                               <i class="fa-solid fa-rectangle-list"></i> Add Tracked File
                                             </a>
                                           </li>
                                           {% endif %}
-                                          {% if prod|has_object_permission:"Product_Tracking_Files_View" %}
+                                          {% if prod|has_object_permission:"view" %}
                                           <li role="presentation">
                                             <a href="{% url 'view_objects' prod.id %}">
                                               <i class="fa-solid fa-clock-rotate-left"></i> View Tracked Files
@@ -159,7 +159,7 @@
                                             <i class="fa-solid fa-file-lines"></i> {{ labels.ASSET_REPORT_LABEL }}
                                           </a>
                                         </li>
-                                        {% if prod|has_object_permission:"Benchmark_Edit" %}
+                                        {% if prod|has_object_permission:"edit" %}
                                           {% if system_settings.enable_benchmark and benchmark_type %}
                                             <li role="separator" class="divider"></li>
                                             {% for bt in benchmark_types %}
@@ -177,7 +177,7 @@
                                               <i class="fa-solid fa-clock-rotate-left"></i> View History
                                           </a>
                                         </li>
-                                        {% if prod|has_object_permission:"Product_Delete" %}
+                                        {% if prod|has_object_permission:"delete" %}
                                           <li role="separator" class="divider"></li>
                                           <li role="presentation">
                                             <a class="text-danger" href="{% url 'delete_product' prod.id %}">
@@ -212,12 +212,12 @@
                                 </td>
                                 <td class="text-center">
                                   {% if prod.last_engagement_date %}
-                                    <i class="fa-solid fa-calendar-days happy-green-color has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-placement="bottom" data-container="body" data-html="true"
+                                    <i class="fa-solid fa-calendar-days happy-green-color has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-html="true"
                                     data-content="{{ prod.active_engagement_count }} Active,
                                     {{ prod.closed_engagement_count }} Closed<br>
                                     <b>Last Assessed:</b> {{ prod.last_engagement_date }}"></i>
                                   {% else %}
-                                    <i class="fa-solid fa-calendar-days text-danger has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-trigger="hover" data-container="body" data-placement="bottom" data-html="true"
+                                    <i class="fa-solid fa-calendar-days text-danger has-popover" title="<i class='fa-solid fa-bullseye'></i> <b>Engagements</b>" data-html="true"
                                     data-content="No Engagements Exist"></i>
                                   {% endif %}
                                 </td>
@@ -231,7 +231,7 @@
                                 <td class="text-center">
                                 {% for github_conf in prod.github_confs %}
                                   {% if github_conf.git_conf is not None %}
-                                    <i class="fa-solid fa-bug has-popover" title="<i class='fa-solid fa-bug'></i> <b>GitHub Configuration</b>" data-trigger="hover" data-container="body" data-html="true" data-placement="bottom"
+                                    <i class="fa-solid fa-bug has-popover" title="<i class='fa-solid fa-bug'></i> <b>GitHub Configuration</b>" data-html="true"
                                       data-content="<b>GitHub:</b> {{ github_conf.git_conf }}<br/>
                                       <b>Project Key:</b> {{ github_conf.git_project }}<br/>
                                       <b>Push Notes:</b> {{ github_conf.push_notes }}">

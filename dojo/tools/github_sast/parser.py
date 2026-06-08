@@ -71,6 +71,7 @@ class GithubSASTParser:
                 static_finding=True,
                 dynamic_finding=False,
                 vuln_id_from_tool=rule_id,
+                unique_id_from_tool=str(vuln["number"]) if vuln.get("number") is not None else None,
             )
 
             # File path & line

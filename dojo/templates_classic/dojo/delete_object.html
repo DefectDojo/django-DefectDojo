@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+    {{ block.super }}
+    <h3>Delete Tracked File, Folder or Artifact</h3>
+
+    <div class="danger-zone panel panel-danger">
+        <div class="panel-heading">
+            <h3>Danger Zone</h3>
+        </div>
+        <form class="form-horizontal" method="post">
+            {% csrf_token %}
+            {{ form }}
+            <br/>
+            <div class="form-group">
+                <button class="btn btn-danger" type="submit" name="delete_object" value="delete_object">Delete Tracked File, Folder or Artifact</button>
+            </div>
+        </form>
+    </div>
+    <br/>
+    <br/>
+{% endblock %}

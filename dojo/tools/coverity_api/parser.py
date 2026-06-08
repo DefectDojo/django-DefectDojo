@@ -26,8 +26,11 @@ class CoverityApiParser:
 
         items = []
         for issue in tree["viewContentsV1"]["rows"]:
-            # get only security findings
-            if issue.get("displayIssueKind") != "Security":
+            # get security findings and Quality RESOURCE_LEAK findings
+            if not (
+                issue.get("displayIssueKind") == "Security"
+                or (issue.get("displayIssueKind") == "Quality" and issue.get("checker") == "RESOURCE_LEAK")
+            ):
                 continue
 
             description_formated = "\n".join(

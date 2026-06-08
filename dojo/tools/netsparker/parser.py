@@ -10,6 +10,25 @@ from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
 
+def _parse_date(date_str):
+    """Parse a Netsparker/Invicti date string into a date object."""
+    if not date_str:
+        return None
+    try:
+        if "UTC" in date_str:
+            return datetime.datetime.strptime(
+                date_str.split(" ")[0], "%d/%m/%Y",
+            ).date()
+        return datetime.datetime.strptime(
+            date_str, "%d/%m/%Y %H:%M %p",
+        ).date()
+    except ValueError:
+        try:
+            return date_parser.parse(date_str).date()
+        except (ValueError, date_parser.ParserError):
+            return None
+
+
 class NetsparkerParser:
     def get_scan_types(self):
         return ["Netsparker Scan"]
@@ -27,20 +46,7 @@ class NetsparkerParser:
         except Exception:
             data = json.loads(tree)
         dupes = {}
-        try:
-            if "UTC" in data["Generated"]:
-                scan_date = datetime.datetime.strptime(
-                    data["Generated"].split(" ")[0], "%d/%m/%Y",
-                ).date()
-            else:
-                scan_date = datetime.datetime.strptime(
-                    data["Generated"], "%d/%m/%Y %H:%M %p",
-                ).date()
-        except ValueError:
-            try:
-                scan_date = date_parser.parse(data["Generated"])
-            except date_parser.ParserError:
-                scan_date = None
+        scan_date = _parse_date(data.get("Generated"))
 
         for item in data["Vulnerabilities"]:
             title = item["Name"]
@@ -62,6 +68,7 @@ class NetsparkerParser:
             dupe_key = title
             request = item["HttpRequest"].get("Content", None)
             response = item["HttpResponse"].get("Content", None)
+            finding_date = (_parse_date(item.get("FirstSeenDate")) or scan_date) if settings.USE_FIRST_SEEN else scan_date
 
             finding = Finding(
                 title=title,
@@ -70,7 +77,7 @@ class NetsparkerParser:
                 severity=sev.title(),
                 mitigation=mitigation,
                 impact=impact,
-                date=scan_date,
+                date=finding_date,
                 references=references,
                 cwe=cwe,
                 static_finding=True,

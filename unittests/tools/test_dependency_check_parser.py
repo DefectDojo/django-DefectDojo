@@ -108,7 +108,7 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[1].mitigation,
                     "Update org.dom4j:dom4j:2.1.1.redhat-00001 to at least the version recommended in the description",
                 )
-                self.assertEqual(items[1].tags, "related")
+                self.assertEqual(items[1].unsaved_tags, ["related"])
                 self.assertEqual(1, len(items[1].unsaved_vulnerability_ids))
                 self.assertEqual("CVE-0000-0001", items[1].unsaved_vulnerability_ids[0])
 
@@ -258,7 +258,7 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[9].mitigation,
                     "**This vulnerability is mitigated and/or suppressed:** Document on why we are suppressing this vulnerability is missing!\nUpdate jquery:3.1.1 to at least the version recommended in the description",
                 )
-                self.assertEqual(items[9].tags, ["suppressed", "no_suppression_document"])
+                self.assertEqual(items[9].unsaved_tags, ["no_suppression_document", "suppressed"])
                 self.assertEqual(items[9].severity, "Critical")
                 self.assertEqual(items[9].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
                 self.assertEqual(items[9].cvssv3_score, 9.8)
@@ -270,7 +270,7 @@ class TestDependencyCheckParser(DojoTestCase):
                     items[10].mitigation,
                     "**This vulnerability is mitigated and/or suppressed:** This is our reason for not to upgrade it.\nUpdate jquery:3.1.1 to at least the version recommended in the description",
                 )
-                self.assertEqual(items[10].tags, "suppressed")
+                self.assertEqual(items[10].unsaved_tags, ["suppressed"])
                 self.assertEqual(items[10].severity, "Critical")
                 self.assertEqual(items[10].cvssv3, "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H")
                 self.assertEqual(items[10].cvssv3_score, 9.8)

@@ -100,13 +100,13 @@ Key Concerns for Kate's Cloud Service:
 
 #### Tagging Shared Services
 
-Because Kate's model contains many shared services that can impact other Products, the team [Tags](/asset_modelling/tags/tagging_objects/) their Products to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be filtered across Products and reported to the relevant teams.  Each of these shared services are in a single Product Type that separates them from the main cloud offerings.
+Because Kate's model contains many shared services that can impact other Products, the team [Tags](/asset_modelling/tags/os__tagging_objects/) their Products to indicate which cloud offerings rely on those services.  This allows any issues with shared services to be filtered across Products and reported to the relevant teams.  Each of these shared services are in a single Product Type that separates them from the main cloud offerings.
 
 ![image](images/example_product_hierarchy_microservices.png)
 
 Because the company is rapidly growing and tech leads are changing frequently, Kate can use Tags to track which tech lead is currently responsible for each cloud product, avoiding the need for constant manual updates to their DefectDojo system. These tech lead associations are tracked by a service that’s external to DefectDojo and can govern the import pipelines or call the DefectDojo API.
 
-For more information on Tagging, see our guide to [Tags](/asset_modelling/tags/tagging_objects/).
+For more information on Tagging, see our guide to [Tags](/asset_modelling/tags/os__tagging_objects/).
 
 #### RBAC Model
 

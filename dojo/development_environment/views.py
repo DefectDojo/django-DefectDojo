@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.filters import DevelopmentEnvironmentFilter
 from dojo.forms import Delete_Dev_EnvironmentForm, Development_EnvironmentForm
 from dojo.models import Development_Environment
@@ -35,7 +34,6 @@ def dev_env(request):
         "name_words": name_words})
 
 
-@user_is_configuration_authorized("dojo.add_development_environment")
 def add_dev_env(request):
     form = Development_EnvironmentForm()
     if request.method == "POST":
@@ -56,7 +54,6 @@ def add_dev_env(request):
     })
 
 
-@user_is_configuration_authorized("dojo.change_development_environment")
 def edit_dev_env(request, deid):
     de = get_object_or_404(Development_Environment, pk=deid)
     form1 = Development_EnvironmentForm(instance=de)

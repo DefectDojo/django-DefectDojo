@@ -5,7 +5,7 @@ weight: 15
 audience: pro
 ---
 
-DefectDojo Pro supports login via Okta. Open-Source users should refer to the [Open-Source Okta guide](../OS__okta/).
+DefectDojo Pro supports login via Okta. Open-source DefectDojo does not include SSO — see [Authorized Users](/admin/user_management/os__authorized_users/) for open-source access control.
 
 ## Prerequisites
 

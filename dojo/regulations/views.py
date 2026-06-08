@@ -8,7 +8,6 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.forms import RegulationForm
 from dojo.models import Regulation
 from dojo.utils import add_breadcrumb
@@ -16,7 +15,6 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized("dojo.add_regulation")
 def new_regulation(request):
     if request.method == "POST":
         tform = RegulationForm(request.POST, instance=Regulation())
@@ -34,7 +32,6 @@ def new_regulation(request):
                   {"form": tform})
 
 
-@user_is_configuration_authorized("dojo.change_regulation")
 def edit_regulations(request, ttid):
     regulation = Regulation.objects.get(pk=ttid)
     if request.method == "POST" and request.POST.get("delete"):

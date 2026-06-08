@@ -11,18 +11,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Hugo
-        uses: peaceiris/actions-hugo@75d2e84710de30f6ff7268e08f310b60ef14033f # v3.0.0
+        uses: peaceiris/actions-hugo@2752ce1d29631191ea3f27c23495fa06139a5b78 # v3.2.1
         with:
-          hugo-version: '0.153.4' # renovate: datasource=github-releases depName=gohugoio/hugo
+          hugo-version: '0.153.4'
           extended: true
 
       - name: Setup Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
-          node-version: '24.14.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
+          node-version: '24.15.0' # TODO: Renovate helper might not be needed here - needs to be fully tested
 
       - name: Cache dependencies
-        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # v5.0.3
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -30,7 +30,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           submodules: recursive
           fetch-depth: 0
@@ -40,3 +40,40 @@ jobs:
           HUGO_ENVIRONMENT: production
           HUGO_ENV: production
         run: cd docs && npm ci && hugo --minify --gc --config config/production/hugo.toml
+
+      - name: Check internal links
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2
+        with:
+          # --remap makes lychee resolve absolute docs.defectdojo.com URLs against
+          # the freshly built site, so absURL-rendered links (e.g. nav menu items)
+          # are verified as 404s instead of being skipped as remote URLs.
+          args: >-
+            --offline --no-progress
+            --root-dir ${{ github.workspace }}/docs/public
+            --remap "https://docs.defectdojo.com file://${{ github.workspace }}/docs/public"
+            './docs/public/**/*.html'
+          fail: true
+
+      - name: Check in-app docs help links
+        # Find every file under dojo/ that hardcodes a docs.defectdojo.com URL
+        # (templates, settings, etc.) and check those links against the freshly
+        # built site. --remap turns the absolute docs URLs into local file lookups;
+        # --exclude '%7[BD]' drops URL-encoded Django template tags ({% ... %})
+        # so only real external docs URLs are checked. lychee is on $PATH from
+        # the previous lychee-action step.
+        run: |
+          set -euo pipefail
+          mapfile -t files < <(grep -rl 'docs\.defectdojo\.com' dojo/ \
+            --include='*.html' --include='*.py' --include='*.tpl')
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "No files reference docs.defectdojo.com — pattern is stale." >&2
+            exit 1
+          fi
+          printf 'Checking in-app docs links in:\n'
+          printf '  %s\n' "${files[@]}"
+          lychee --offline --no-progress \
+            --root-dir "${GITHUB_WORKSPACE}/docs/public" \
+            --remap "https://docs.defectdojo.com file://${GITHUB_WORKSPACE}/docs/public" \
+            --exclude '%7[BD]' \
+            "${files[@]}"
+

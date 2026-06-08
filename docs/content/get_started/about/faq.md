@@ -21,7 +21,7 @@ DefectDojo is meant to be the central source of truth for your organization's se
 
 - Allowing users to identify duplicate findings across scans and tools, minimizing alert fatigue.
 - Enforcing SLAs on vulnerabilities, ensuring that your organization handles each Finding within an appropriate timeframe.
-- Sending tickets to [Jira](/issue_tracking/jira/jira_guide/), ServiceNow or other Project Tracking software, allowing your development team to integrate issue remediation into their standard release process without requiring them to learn another project management tool.
+- [Sending tickets](/issue_tracking/intro/intro/) to Jira, ServiceNow or other Project Tracking software, allowing your development team to integrate issue remediation into their standard release process without requiring them to learn another project management tool.
 - Integrating into automated [CI/CD pipelines](/import_data/import_scan_files/api_pipeline_modelling/) to automatically ingest report data from repositories, even down to the branch level.
 - Creating [reports](/metrics_reports/reports/using_the_report_builder/) on any set of vulnerabilities or software context, to quickly share scan results or status updates with stakeholders.
 - Establishing acceptance and mitigation workflows, supporting formal risk-management tracking.
@@ -34,7 +34,7 @@ DefectDojo is designed to support and standardize your current security workflow
 DefectDojo Pro expands on the above workflows further, adding:
 
 - An [improved UI](/get_started/about/ui_pro_vs_os/) designed for speed and efficiency when navigating through enterprise-level data volumes. It also includes a dark mode.
-- The ability to [pre-triage your Findings](/asset_modelling/hierarchy/pro__priority_sla/) by Priority and Risk, allowing your team to identify and fix your most critical issues first.
+- The ability to [pre-triage your Findings](/asset_modelling/pro_hierarchy/priority_sla/) by Priority and Risk, allowing your team to identify and fix your most critical issues first.
 - A [Rules Engine](/automation/rules_engine/about) to script automated bulk actions and build custom workflows to handle Findings and other objects, no programming experience required.
 - [Enhanced report and metrics generation capabilities](/get_started/about/ui_pro_vs_os/#new-dashboards) to easily share the security posture of your apps and repos.
 - [Advanced deduplication settings](/triage_findings/finding_deduplication/pro__deduplication_tuning/) to fine-tune how DefectDojo identifies and manages duplicate findings.
@@ -54,7 +54,7 @@ Role and permission assignment generally happens at the Product Type / Product l
 
 Whether you’re a one-person security team for a small organization or a CISO overseeing a swath of software projects,you can easily organize [Role-Based Access Control (RBAC)](/admin/user_management/about_perms_and_roles/) in order to properly establish context for each team member and control access to certain parts of Infrastructure.
 
-Generally, role and permission assignment happens at the [Product Type/Product level](/asset_modelling/hierarchy/product_hierarchy/). Each team member can be given a role pertaining to one or more Products or Product Types that governs how they can interact with the vulnerability data within (e.g., read only, read-write, or full control). 
+Generally, role and permission assignment happens at the [Product Type/Product level](/asset_modelling/os_hierarchy/product_hierarchy/). Each team member can be given a role pertaining to one or more Products or Product Types that governs how they can interact with the vulnerability data within (e.g., read only, read-write, or full control). 
 
 ## Import Workflows
 
@@ -85,7 +85,7 @@ DefectDojo supports a wide variety of tools. If you’re seeing inconsistent beh
 
 DefectDojo Pro has a Universal Parser import method which allows you to handle any JSON, CSV or XML file. DefectDojo OS users can write custom parsers for the same purpose.
 
-Finally, third-party report formats have been known to change without warning: Our OS community greatly appreciates [PRs and contributions](/open_source/contributing/how-to-write-a-parser/) to keep our parsers up to date.
+Finally, third-party report formats have been known to change without warning: Our OS community greatly appreciates [PRs and contributions](/get_started/contributing/how-to-write-a-parser/) to keep our parsers up to date.
 
 ### How should I handle large scan files?
 
@@ -129,6 +129,6 @@ DefectDojo Pro users also have access to [executive-level Metrics dashboards](/g
 
 ### How can I integrate a project management tool with DefectDojo?
 
-In both Pro and Open-Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.  We have a [complete guide to Jira](/issue_tracking/jira/jira_guide/) written which describes the process in detail.
+In both Pro and Open-Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.
 
 DefectDojo Pro adds support for [Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab.

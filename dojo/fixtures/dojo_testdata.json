@@ -97,7 +97,7 @@
       "first_name": "User",
       "last_name": "Five",
       "is_active": true,
-      "is_superuser": false,
+      "is_superuser": true,
       "is_staff": false,
       "last_login": null,
       "groups": [],
@@ -202,40 +202,40 @@
       "remote_addr": null,
       "timestamp": "2021-10-22T01:24:54.921Z",
       "additional_data": null
-      }
-    },
-    {
-      "model": "auditlog.logentry",
-      "pk": 804,
-      "fields": {
-        "content_type": 28,
-        "object_pk": "2",
-        "object_id": 2,
-        "object_repr": "Internal CRM App",
-        "action": 0,
-        "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Internal CRM App\"], \"description\": [\"None\", \"* New product in development that attempts to follow all best practices\"], \"product_manager\": [\"None\", \"(product_manager)\"], \"technical_contact\": [\"None\", \"(product_manager)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Commerce\"], \"id\": [\"None\", \"2\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"medium\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"construction\"], \"origin\": [\"None\", \"internal\"], \"external_audience\": [\"None\", \"False\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
-        "actor": null,
-        "remote_addr": null,
-        "timestamp": "2021-10-22T01:24:55.044Z",
-        "additional_data": null
-      }
-    },
-    {
-      "model": "auditlog.logentry",
-      "pk": 805,
-      "fields": {
-        "content_type": 28,
-        "object_pk": "3",
-        "object_id": 3,
-        "object_repr": "Apple Accounting Software",
-        "action": 0,
-        "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Apple Accounting Software\"], \"description\": [\"None\", \"Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\\r\\n\\r\\n**Core modules**\\r\\n\\r\\n* Accounts receivable\\u2014where the company enters money received\\r\\n* Accounts payable\\u2014where the company enters its bills and pays money it owes\\r\\n* General ledger\\u2014the company's \\\"books\\\"\\r\\n* Billing\\u2014where the company produces invoices to clients/customers\"], \"product_manager\": [\"None\", \"(admin)\"], \"technical_contact\": [\"None\", \"(user2)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Billing\"], \"id\": [\"None\", \"3\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"high\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"production\"], \"origin\": [\"None\", \"purchased\"], \"user_records\": [\"None\", \"5000\"], \"external_audience\": [\"None\", \"True\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
-        "actor": null,
-        "remote_addr": null,
-        "timestamp": "2021-10-22T01:24:55.071Z",
-        "additional_data": null
-      }
-    },
+    }
+  },
+  {
+    "model": "auditlog.logentry",
+    "pk": 804,
+    "fields": {
+      "content_type": 28,
+      "object_pk": "2",
+      "object_id": 2,
+      "object_repr": "Internal CRM App",
+      "action": 0,
+      "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Internal CRM App\"], \"description\": [\"None\", \"* New product in development that attempts to follow all best practices\"], \"product_manager\": [\"None\", \"(product_manager)\"], \"technical_contact\": [\"None\", \"(product_manager)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Commerce\"], \"id\": [\"None\", \"2\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"medium\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"construction\"], \"origin\": [\"None\", \"internal\"], \"external_audience\": [\"None\", \"False\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
+      "actor": null,
+      "remote_addr": null,
+      "timestamp": "2021-10-22T01:24:55.044Z",
+      "additional_data": null
+    }
+  },
+  {
+    "model": "auditlog.logentry",
+    "pk": 805,
+    "fields": {
+      "content_type": 28,
+      "object_pk": "3",
+      "object_id": 3,
+      "object_repr": "Apple Accounting Software",
+      "action": 0,
+      "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Apple Accounting Software\"], \"description\": [\"None\", \"Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\\r\\n\\r\\n**Core modules**\\r\\n\\r\\n* Accounts receivable\\u2014where the company enters money received\\r\\n* Accounts payable\\u2014where the company enters its bills and pays money it owes\\r\\n* General ledger\\u2014the company's \\\"books\\\"\\r\\n* Billing\\u2014where the company produces invoices to clients/customers\"], \"product_manager\": [\"None\", \"(admin)\"], \"technical_contact\": [\"None\", \"(user2)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Billing\"], \"id\": [\"None\", \"3\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"high\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"production\"], \"origin\": [\"None\", \"purchased\"], \"user_records\": [\"None\", \"5000\"], \"external_audience\": [\"None\", \"True\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
+      "actor": null,
+      "remote_addr": null,
+      "timestamp": "2021-10-22T01:24:55.071Z",
+      "additional_data": null
+    }
+  },
   {
     "pk": 1,
     "model": "dojo.system_settings",
@@ -2071,42 +2071,6 @@
     }
   },
   {
-    "pk": 2,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 1",
-      "test": 3,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 2",
-      "test": 14,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
-    "pk": 4,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 3",
-      "test": 13,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
     "pk": 1,
     "model": "dojo.finding_template",
     "fields": {
@@ -2906,26 +2870,10 @@
     }
   },
   {
-    "model": "dojo.language_type",
-    "pk": 1,
-    "fields": {
-      "language": "JSON",
-      "color": "#882B0F"
-    }
-  },
-  {
-    "model": "dojo.language_type",
-    "pk": 2,
-    "fields": {
-      "language": "Python",
-      "color": "#3572A5"
-    }
-  },
-  {
     "model": "dojo.languages",
     "pk": 1,
     "fields": {
-      "language": 1,
+      "language": 94,
       "product": 1,
       "user": 1,
       "files": 2,
@@ -3032,38 +2980,6 @@
       "name": "Can view log entry",
       "content_type": 7,
       "codename": "view_logentry"
-    }
-  },
-  {
-    "model": "dojo.cred_user",
-    "pk": 1,
-    "fields": {
-      "name": "Cred Product",
-      "username": "admin",
-      "password": "AES.1:2f3cb6d1d412a0552a46b67d972d14f5:6617146b4d29492551dfc62e4a697aca",
-      "role": "admin",
-      "authentication": "Form",
-      "http_authentication": "Basic",
-      "description": "test",
-      "url": "https://google.com",
-      "environment": 1,
-      "login_regex": null,
-      "logout_regex": null,
-      "is_valid": true,
-      "notes": []
-    }
-  },
-  {
-    "model": "dojo.cred_mapping",
-    "pk": 1,
-    "fields": {
-      "cred_id": 1,
-      "product": 1,
-      "finding": null,
-      "engagement": null,
-      "test": null,
-      "is_authn_provider": false,
-      "url": "https://google.com"
     }
   },
   {
