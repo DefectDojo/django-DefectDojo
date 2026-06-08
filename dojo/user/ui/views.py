@@ -29,22 +29,24 @@ from rest_framework.exceptions import ValidationError as RFValidationError
 
 from dojo.authorization.authorization import user_is_superuser_or_global_owner
 from dojo.decorators import dojo_ratelimit
-from dojo.filters import UserFilter
 from dojo.forms import (
-    AddDojoUserForm,
     APIKeyForm,
     Authorize_User_For_ProductsForm,
     Authorize_User_For_ProductTypesForm,
     ChangePasswordForm,
     ConfigurationPermissionsForm,
+)
+from dojo.labels import get_labels
+from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
+from dojo.user.authentication import reset_token_for_user
+from dojo.user.ui.filters import UserFilter
+from dojo.user.ui.forms import (
+    AddDojoUserForm,
     DeleteUserForm,
     DojoUserForm,
     EditDojoUserForm,
     UserContactInfoForm,
 )
-from dojo.labels import get_labels
-from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
-from dojo.user.authentication import reset_token_for_user
 from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
