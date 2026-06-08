@@ -39,7 +39,7 @@ from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.asset.api.urls import add_asset_urls
 from dojo.asset.urls import urlpatterns as asset_urls
 from dojo.banner.urls import urlpatterns as banner_urls
-from dojo.benchmark.urls import urlpatterns as benchmark_urls
+from dojo.benchmark.ui.urls import urlpatterns as benchmark_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.api.urls import add_endpoint_urls, register_endpoint_meta_import
@@ -68,7 +68,7 @@ from dojo.regulations.urls import urlpatterns as regulations
 from dojo.reports.urls import urlpatterns as reports_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
-from dojo.survey.urls import urlpatterns as survey_urls
+from dojo.survey.ui.urls import urlpatterns as survey_urls
 from dojo.system_settings.api.urls import add_system_settings_urls
 from dojo.system_settings.ui.urls import urlpatterns as system_settings_urls
 from dojo.test.api.urls import add_test_urls

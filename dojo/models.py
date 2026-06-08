@@ -1,6 +1,5 @@
 import copy
 import logging
-import warnings
 from datetime import timedelta
 from pathlib import Path
 from uuid import uuid4
@@ -20,10 +19,6 @@ from django.utils import timezone
 from django.utils.deconstruct import deconstructible
 from django.utils.timezone import now
 from django.utils.translation import gettext as _
-from django_extensions.db.models import TimeStampedModel
-from polymorphic.base import ManagerInheritanceWarning
-from polymorphic.managers import PolymorphicManager
-from polymorphic.models import PolymorphicModel
 from tagulous.models import TagField
 from tagulous.models.managers import FakeTagRelatedManager  # noqa: F401 -- backward compat re-export
 
@@ -552,7 +547,7 @@ class Sonarqube_Issue_Transition(models.Model):
 
 
 from dojo.finding.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
-    CWE,
+    CWE,  # noqa: F401 -- re-export
     BurpRawRequestResponse,  # noqa: F401 -- re-export
     Finding,
     Finding_Group,  # noqa: F401 -- re-export
@@ -905,278 +900,26 @@ class Testing_Guide(models.Model):
         return self.testing_guide_category.name + ": " + self.name
 
 
-class Benchmark_Type(models.Model):
-    name = models.CharField(max_length=300)
-    version = models.CharField(max_length=15)
-    source = (("PCI", "PCI"),
-              ("OWASP ASVS", "OWASP ASVS"),
-              ("OWASP Mobile ASVS", "OWASP Mobile ASVS"))
-    benchmark_source = models.CharField(max_length=20, blank=False,
-                                        null=True, choices=source,
-                                        default="OWASP ASVS")
-    created = models.DateTimeField(auto_now_add=True, null=False)
-    updated = models.DateTimeField(auto_now=True)
-    enabled = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.name + " " + self.version
-
-
-class Benchmark_Category(models.Model):
-    type = models.ForeignKey(Benchmark_Type, verbose_name=_("Benchmark Type"), on_delete=models.CASCADE)
-    name = models.CharField(max_length=300)
-    objective = models.TextField()
-    references = models.TextField(blank=True, null=True)
-    enabled = models.BooleanField(default=True)
-    created = models.DateTimeField(auto_now_add=True, null=False)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ("name",)
-
-    def __str__(self):
-        return self.name + ": " + self.type.name
-
-
-class Benchmark_Requirement(models.Model):
-    category = models.ForeignKey(Benchmark_Category, on_delete=models.CASCADE)
-    objective_number = models.CharField(max_length=15, null=True, blank=True)
-    objective = models.TextField()
-    references = models.TextField(blank=True, null=True)
-    level_1 = models.BooleanField(default=False)
-    level_2 = models.BooleanField(default=False)
-    level_3 = models.BooleanField(default=False)
-    enabled = models.BooleanField(default=True)
-    cwe_mapping = models.ManyToManyField(CWE, blank=True)
-    testing_guide = models.ManyToManyField(Testing_Guide, blank=True)
-    created = models.DateTimeField(auto_now_add=True, null=False)
-    updated = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return str(self.objective_number) + ": " + self.category.name
-
-
-class Benchmark_Product(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    control = models.ForeignKey(Benchmark_Requirement, on_delete=models.CASCADE)
-    pass_fail = models.BooleanField(default=False, verbose_name=_("Pass"),
-                                    help_text=_("Does the product meet the requirement?"))
-    enabled = models.BooleanField(default=True,
-                                  help_text=_("Applicable for this specific product."))
-    notes = models.ManyToManyField(Notes, blank=True, editable=False)
-    created = models.DateTimeField(auto_now_add=True, null=False)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = [("product", "control")]
-
-    def __str__(self):
-        return self.product.name + ": " + self.control.objective_number + ": " + self.control.category.name
-
-
-class Benchmark_Product_Summary(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    benchmark_type = models.ForeignKey(Benchmark_Type, on_delete=models.CASCADE)
-    asvs_level = (("Level 1", "Level 1"),
-                    ("Level 2", "Level 2"),
-                    ("Level 3", "Level 3"))
-    desired_level = models.CharField(max_length=15,
-                                     null=False, choices=asvs_level,
-                                     default="Level 1")
-    current_level = models.CharField(max_length=15, blank=True,
-                                     null=True, choices=asvs_level,
-                                     default="None")
-    asvs_level_1_benchmark = models.IntegerField(null=False, default=0, help_text=_("Total number of active benchmarks for this application."))
-    asvs_level_1_score = models.IntegerField(null=False, default=0, help_text=_("ASVS Level 1 Score"))
-    asvs_level_2_benchmark = models.IntegerField(null=False, default=0, help_text=_("Total number of active benchmarks for this application."))
-    asvs_level_2_score = models.IntegerField(null=False, default=0, help_text=_("ASVS Level 2 Score"))
-    asvs_level_3_benchmark = models.IntegerField(null=False, default=0, help_text=_("Total number of active benchmarks for this application."))
-    asvs_level_3_score = models.IntegerField(null=False, default=0, help_text=_("ASVS Level 3 Score"))
-    publish = models.BooleanField(default=False, help_text=_("Publish score to Product."))
-    created = models.DateTimeField(auto_now_add=True, null=False)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = [("product", "benchmark_type")]
-
-    def __str__(self):
-        return self.product.name + ": " + self.benchmark_type.name
-
-
-# ==========================
-# Defect Dojo Engaegment Surveys
-# ==============================
-with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
-    class Question(PolymorphicModel, TimeStampedModel):
-
-        """Represents a question."""
-
-        class Meta:
-            ordering = ["order"]
-
-        order = models.PositiveIntegerField(default=1,
-                                            help_text=_("The render order"))
-
-        optional = models.BooleanField(
-            default=False,
-            help_text=_("If selected, user doesn't have to answer this question"))
-
-        text = models.TextField(blank=False, help_text=_("The question text"), default="")
-        objects = models.Manager()
-        polymorphic = PolymorphicManager()
-
-        def __str__(self):
-            return self.text
-
-
-class TextQuestion(Question):
-
-    """Question with a text answer"""
-
-    objects = PolymorphicManager()
-
-    def get_form(self):
-        """Returns the form for this model"""
-        from .forms import TextQuestionForm  # noqa: PLC0415
-        return TextQuestionForm
-
-
-class Choice(TimeStampedModel):
-
-    """Model to store the choices for multi choice questions"""
-
-    order = models.PositiveIntegerField(default=1)
-
-    label = models.TextField(default="")
-
-    class Meta:
-        ordering = ["order"]
-
-    def __str__(self):
-        return self.label
-
-
-class ChoiceQuestion(Question):
-
-    """
-    Question with answers that are chosen from a list of choices defined
-    by the user.
-    """
-
-    multichoice = models.BooleanField(default=False,
-                                      help_text=_("Select one or more"))
-    choices = models.ManyToManyField(Choice)
-    objects = PolymorphicManager()
-
-    def get_form(self):
-        """Returns the form for this model"""
-        from .forms import ChoiceQuestionForm  # noqa: PLC0415
-        return ChoiceQuestionForm
-
-
-# meant to be a abstract survey, identified by name for purpose
-class Engagement_Survey(models.Model):
-    name = models.CharField(max_length=200, null=False, blank=False,
-                            editable=True, default="")
-    description = models.TextField(editable=True, default="")
-    questions = models.ManyToManyField(Question)
-    active = models.BooleanField(default=True)
-
-    class Meta:
-        verbose_name = _("Engagement Survey")
-        verbose_name_plural = "Engagement Surveys"
-        ordering = ("-active", "name")
-
-    def __str__(self):
-        return self.name
-
-
-# meant to be an answered survey tied to an engagement
-
-class Answered_Survey(models.Model):
-    # tie this to a specific engagement
-    engagement = models.ForeignKey(Engagement, related_name="engagement+",
-                                   null=True, blank=False, editable=True,
-                                   on_delete=models.CASCADE)
-    # what surveys have been answered
-    survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
-    assignee = models.ForeignKey(Dojo_User, related_name="assignee",
-                                  null=True, blank=True, editable=True,
-                                  default=None, on_delete=models.RESTRICT)
-    # who answered it
-    responder = models.ForeignKey(Dojo_User, related_name="responder",
-                                  null=True, blank=True, editable=True,
-                                  default=None, on_delete=models.RESTRICT)
-    completed = models.BooleanField(default=False)
-    answered_on = models.DateField(null=True)
-
-    class Meta:
-        verbose_name = _("Answered Engagement Survey")
-        verbose_name_plural = _("Answered Engagement Surveys")
-
-    def __str__(self):
-        return self.survey.name
-
-
-def default_expiration():
-    return timezone.now() + timedelta(days=7)
-
-
-class General_Survey(models.Model):
-    survey = models.ForeignKey(Engagement_Survey, on_delete=models.CASCADE)
-    num_responses = models.IntegerField(default=0)
-    generated = models.DateTimeField(auto_now_add=True, null=True)
-    expiration = models.DateTimeField(default=default_expiration)
-
-    class Meta:
-        verbose_name = _("General Engagement Survey")
-        verbose_name_plural = _("General Engagement Surveys")
-
-    def __str__(self):
-        return self.survey.name
-
-    def clean(self):
-        if self.expiration and timezone.is_naive(self.expiration):
-            self.expiration = timezone.make_aware(self.expiration)
-
-
-with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
-    class Answer(PolymorphicModel, TimeStampedModel):
-
-        """Base Answer model"""
-
-        question = models.ForeignKey(Question, on_delete=models.CASCADE)
-
-        answered_survey = models.ForeignKey(Answered_Survey,
-                                            null=False,
-                                            blank=False,
-                                            on_delete=models.CASCADE)
-        objects = models.Manager()
-        polymorphic = PolymorphicManager()
-
-
-class TextAnswer(Answer):
-    answer = models.TextField(
-        blank=False,
-        help_text=_("The answer text"),
-        default="")
-    objects = PolymorphicManager()
-
-    def __str__(self):
-        return self.answer
-
-
-class ChoiceAnswer(Answer):
-    answer = models.ManyToManyField(
-        Choice,
-        help_text=_("The selected choices as the answer"))
-    objects = PolymorphicManager()
-
-    def __str__(self):
-        if len(self.answer.all()):
-            return str(self.answer.all()[0])
-        return "No Response"
-
+from dojo.benchmark.models import (  # noqa: E402, I001 -- re-export; backward compat
+    Benchmark_Category,  # noqa: F401
+    Benchmark_Product,  # noqa: F401
+    Benchmark_Product_Summary,  # noqa: F401
+    Benchmark_Requirement,  # noqa: F401
+    Benchmark_Type,  # noqa: F401
+)
+from dojo.survey.models import (  # noqa: E402 -- re-export; backward compat
+    Answer,  # noqa: F401
+    Answered_Survey,  # noqa: F401
+    Choice,  # noqa: F401
+    ChoiceAnswer,  # noqa: F401
+    ChoiceQuestion,  # noqa: F401
+    Engagement_Survey,  # noqa: F401
+    General_Survey,  # noqa: F401
+    Question,  # noqa: F401
+    TextAnswer,  # noqa: F401
+    TextQuestion,  # noqa: F401
+    default_expiration,  # noqa: F401
+)
 
 # Audit logging registration is now handled in auditlog.py and configured in apps.py
 # This allows for conditional registration of either django-auditlog or django-pghistory
@@ -1197,13 +940,6 @@ tagulous.admin.register(Engagement.inherited_tags)
 tagulous.admin.register(Finding_Template.tags)
 tagulous.admin.register(App_Analysis.tags)
 tagulous.admin.register(Objects_Product.tags)
-
-# Benchmarks
-admin.site.register(Benchmark_Type)
-admin.site.register(Benchmark_Requirement)
-admin.site.register(Benchmark_Category)
-admin.site.register(Benchmark_Product)
-admin.site.register(Benchmark_Product_Summary)
 
 # Testing
 admin.site.register(Testing_Guide_Category)
@@ -1255,4 +991,3 @@ admin.site.register(Development_Environment)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)
-admin.site.register(General_Survey)
