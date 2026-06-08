@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from . import views
+from dojo.notes.ui import views
 
 urlpatterns = [
     re_path(r"^notes/(?P<note_id>\d+)/delete/(?P<page>[\w-]+)/(?P<objid>\d+)$", views.delete_note, name="delete_note"),

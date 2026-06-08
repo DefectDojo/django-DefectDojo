@@ -6,8 +6,8 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from dojo.filters import NoteTypesFilter
-from dojo.forms import DisableOrEnableNoteTypeForm, EditNoteTypeForm, NoteTypeForm
-from dojo.models import Note_Type
+from dojo.note_type.models import Note_Type
+from dojo.note_type.ui.forms import DisableOrEnableNoteTypeForm, EditNoteTypeForm, NoteTypeForm
 from dojo.utils import add_breadcrumb, get_page_items
 
 logger = logging.getLogger(__name__)

@@ -56,8 +56,6 @@ from dojo.models import (
     FileUpload,
     Finding,
     Finding_Group,
-    Note_Type,
-    Notes,
     Objects_Product,
     Product_API_Scan_Configuration,
     Product_Type,
@@ -221,36 +219,11 @@ class Authorize_User_For_ProductTypesForm(forms.Form):
         )
 
 
-class NoteTypeForm(forms.ModelForm):
-    description = forms.CharField(widget=forms.Textarea(attrs={}),
-                                  required=True)
-
-    class Meta:
-        model = Note_Type
-        fields = ["name", "description", "is_single", "is_mandatory"]
-
-
-class EditNoteTypeForm(NoteTypeForm):
-
-    def __init__(self, *args, **kwargs):
-        is_single = kwargs.pop("is_single")
-        super().__init__(*args, **kwargs)
-        if is_single is False:
-            self.fields["is_single"].widget = forms.HiddenInput()
-
-
-class DisableOrEnableNoteTypeForm(NoteTypeForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["name"].disabled = True
-        self.fields["description"].disabled = True
-        self.fields["is_single"].disabled = True
-        self.fields["is_mandatory"].disabled = True
-        self.fields["is_active"].disabled = True
-
-    class Meta:
-        model = Note_Type
-        fields = "__all__"
+from dojo.note_type.ui.forms import (  # noqa: E402, F401 -- backward compat
+    DisableOrEnableNoteTypeForm,
+    EditNoteTypeForm,
+    NoteTypeForm,
+)
 
 
 class DojoMetaDataForm(forms.ModelForm):
@@ -715,42 +688,12 @@ from dojo.engagement.ui.forms import (  # noqa: E402, F401 -- backward compat
     EngForm,
     ExistingEngagementForm,
 )
+from dojo.notes.ui.forms import (  # noqa: E402, F401 -- backward compat
+    DeleteNoteForm,
+    NoteForm,
+    TypedNoteForm,
+)
 from dojo.test.ui.forms import TestForm  # noqa: E402, F401 -- backward compat
-
-
-class NoteForm(forms.ModelForm):
-    entry = forms.CharField(max_length=2400, widget=forms.Textarea(attrs={"rows": 4, "cols": 15}),
-                            label="Notes:")
-
-    class Meta:
-        model = Notes
-        fields = ["entry", "private"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if disclaimer := get_system_setting("disclaimer_notes"):
-            self.disclaimer = disclaimer.strip()
-
-
-class TypedNoteForm(NoteForm):
-
-    def __init__(self, *args, **kwargs):
-        queryset = kwargs.pop("available_note_types")
-        super().__init__(*args, **kwargs)
-        self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label="Note Type", required=True)
-
-    class Meta:
-        model = Notes
-        fields = ["note_type", "entry", "private"]
-
-
-class DeleteNoteForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Notes
-        fields = ["id"]
 
 
 class WeeklyMetricsForm(forms.Form):
@@ -898,31 +841,6 @@ class APIKeyForm(forms.ModelForm):
         exclude = ["username", "first_name", "last_name", "email", "is_active",
                    "is_staff", "is_superuser", "password", "last_login", "groups",
                    "date_joined", "user_permissions"]
-
-
-class ReportOptionsForm(forms.Form):
-    yes_no = (("0", "No"), ("1", "Yes"))
-    include_finding_notes = forms.ChoiceField(choices=yes_no, label="Finding Notes")
-    include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    include_executive_summary = forms.ChoiceField(choices=yes_no, label="Executive Summary")
-    include_table_of_contents = forms.ChoiceField(choices=yes_no, label="Table of Contents")
-    include_disclaimer = forms.ChoiceField(choices=yes_no, label="Disclaimer")
-    report_type = forms.ChoiceField(choices=(("HTML", "HTML"),))
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if get_system_setting("disclaimer_reports_forced"):
-            self.fields["include_disclaimer"].disabled = True
-            self.fields["include_disclaimer"].initial = "1"  # represents yes
-            self.fields["include_disclaimer"].help_text = "Administrator of the system enforced placement of disclaimer in all reports. You are not able exclude disclaimer from this report."
-
-
-class CustomReportOptionsForm(forms.Form):
-    yes_no = (("0", "No"), ("1", "Yes"))
-    report_name = forms.CharField(required=False, max_length=100)
-    include_finding_notes = forms.ChoiceField(required=False, choices=yes_no)
-    include_finding_images = forms.ChoiceField(choices=yes_no, label="Finding Images")
-    report_type = forms.ChoiceField(choices=(("HTML", "HTML"),))
 
 
 from dojo.benchmark.ui.forms import (  # noqa: E402, F401 -- backward compat

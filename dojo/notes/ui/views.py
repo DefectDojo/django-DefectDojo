@@ -16,8 +16,10 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 
 # Local application/library imports
-from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
-from dojo.models import Engagement, Finding, Note_Type, NoteHistory, Notes, Test
+from dojo.models import Engagement, Finding, Test
+from dojo.note_type.models import Note_Type
+from dojo.notes.models import NoteHistory, Notes
+from dojo.notes.ui.forms import DeleteNoteForm, NoteForm, TypedNoteForm
 from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)

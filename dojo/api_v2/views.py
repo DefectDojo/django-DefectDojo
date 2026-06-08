@@ -61,7 +61,6 @@ from dojo.models import (
     Language_Type,
     Languages,
     Network_Locations,
-    Note_Type,
     NoteHistory,
     Notes,
     Product,
@@ -79,7 +78,7 @@ from dojo.product.queries import (
     get_authorized_languages,
     get_authorized_products,
 )
-from dojo.reports.views import (
+from dojo.reports.ui.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
 )
@@ -677,49 +676,8 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             pghistory.context(test_id=test_id_from_response)
 
 
-# Authorization: configuration
-class NoteTypeViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.NoteTypeSerializer
-    queryset = Note_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "description",
-        "is_single",
-        "is_active",
-        "is_mandatory",
-    ]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return Note_Type.objects.all().order_by("id")
-
-
-# Authorization: superuser
-class NotesViewSet(
-    mixins.UpdateModelMixin,
-    viewsets.ReadOnlyModelViewSet,
-):
-    serializer_class = serializers.NoteSerializer
-    queryset = Notes.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "entry",
-        "author",
-        "private",
-        "date",
-        "edited",
-        "edit_time",
-        "editor",
-    ]
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Notes.objects.all().order_by("id")
+from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401 -- re-export; urls.py imports by name
+from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401 -- re-export; urls.py imports by name
 
 
 def report_generate(request, obj, options):

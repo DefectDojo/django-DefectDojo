@@ -43,8 +43,6 @@ from dojo.models import (
     Language_Type,
     Languages,
     Network_Locations,
-    Note_Type,
-    NoteHistory,
     Notes,
     Product,
     Product_API_Scan_Configuration,
@@ -291,6 +289,15 @@ class MetaMainSerializer(serializers.Serializer):
         return data
 
 
+from dojo.file_uploads.api.serializer import (  # noqa: E402, F401 -- re-export; prefetcher + lazy consumers in finding/test/engagement
+    FileSerializer,
+    RawFileSerializer,
+)
+from dojo.note_type.api.serializer import NoteTypeSerializer  # noqa: E402, F401 -- re-export for prefetcher discovery
+from dojo.notes.api.serializer import (  # noqa: E402, F401 -- re-export; prefetcher + RiskAcceptanceToNotesSerializer + lazy consumers
+    NoteHistorySerializer,
+    NoteSerializer,
+)
 from dojo.user.api.serializer import (  # noqa: E402, F401 -- backward compat + prefetcher discovery
     AddUserSerializer,
     UserContactInfoSerializer,
@@ -298,70 +305,6 @@ from dojo.user.api.serializer import (  # noqa: E402, F401 -- backward compat + 
     UserSerializer,
     UserStubSerializer,
 )
-
-
-class NoteTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Note_Type
-        fields = "__all__"
-
-
-class NoteHistorySerializer(serializers.ModelSerializer):
-    current_editor = UserStubSerializer(read_only=True)
-    note_type = NoteTypeSerializer(read_only=True, many=False)
-
-    class Meta:
-        model = NoteHistory
-        fields = "__all__"
-
-
-class NoteSerializer(serializers.ModelSerializer):
-    author = UserStubSerializer(many=False, read_only=True)
-    editor = UserStubSerializer(read_only=True, many=False, allow_null=True)
-    history = NoteHistorySerializer(read_only=True, many=True)
-    note_type = NoteTypeSerializer(read_only=True, many=False)
-
-    def update(self, instance, validated_data):
-        instance.entry = validated_data.get("entry")
-        instance.edited = True
-        instance.editor = self.context["request"].user
-        instance.edit_time = timezone.now()
-        history = NoteHistory(
-            data=instance.entry,
-            time=instance.edit_time,
-            current_editor=instance.editor,
-        )
-        history.save()
-        instance.history.add(history)
-        instance.save()
-        return instance
-
-    class Meta:
-        model = Notes
-        fields = "__all__"
-
-
-class FileSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(required=True)
-
-    class Meta:
-        model = FileUpload
-        fields = "__all__"
-
-    def validate(self, data):
-        if file := data.get("file"):
-            # the clean will validate the file extensions and raise a Validation error if the extensions are not accepted
-            FileUpload(title=file.name, file=file).clean()
-            return data
-        return None
-
-
-class RawFileSerializer(serializers.ModelSerializer):
-    file = serializers.FileField(required=True)
-
-    class Meta:
-        model = FileUpload
-        fields = ["file"]
 
 
 class RiskAcceptanceProofSerializer(serializers.ModelSerializer):

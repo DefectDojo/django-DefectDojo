@@ -17,12 +17,12 @@ from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.forms import CustomReportOptionsForm
 from dojo.labels import get_labels
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
+from dojo.reports.ui.forms import CustomReportOptionsForm
 from dojo.url.filters import URLFilter
 from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
