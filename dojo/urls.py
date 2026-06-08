@@ -41,9 +41,6 @@ from dojo.api_v2.views import (
     ToolConfigurationsViewSet,
     ToolProductSettingsViewSet,
     ToolTypesViewSet,
-    UserContactInfoViewSet,
-    UserProfileView,
-    UsersViewSet,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.asset.api.urls import add_asset_urls
@@ -87,7 +84,9 @@ from dojo.tool_product.urls import urlpatterns as tool_product_urls
 from dojo.tool_type.urls import urlpatterns as tool_type_urls
 from dojo.url.api.urls import add_url_urls
 from dojo.url.ui.urls import urlpatterns as url_patterns
-from dojo.user.urls import urlpatterns as user_urls
+from dojo.user.api.urls import add_user_urls
+from dojo.user.api.views import UserProfileView
+from dojo.user.ui.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -143,8 +142,7 @@ v2_api = add_test_urls(v2_api)
 v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
 v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
-v2_api.register(r"users", UsersViewSet, basename="user")
-v2_api.register(r"user_contact_infos", UserContactInfoViewSet, basename="usercontactinfo")
+v2_api = add_user_urls(v2_api)
 # Add the location routes
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Locations

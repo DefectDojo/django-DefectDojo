@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib.auth import views as auth_views
 from django.urls import re_path, reverse_lazy
 
-from dojo.user import views
+from dojo.user.ui import views
 
 urlpatterns = [
     #  user specific

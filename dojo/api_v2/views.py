@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 
 import pghistory
-from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.models import Permission
@@ -27,7 +26,6 @@ from drf_spectacular.utils import (
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
@@ -51,7 +49,6 @@ from dojo.filters import (
     ApiDojoMetaFilter,
     ApiEndpointFilter,
     ApiRiskAcceptanceFilter,
-    ApiUserFilter,
 )
 from dojo.finding.ui.filters import (
     ReportFindingFilter,
@@ -86,8 +83,6 @@ from dojo.models import (
     Tool_Configuration,
     Tool_Product_Settings,
     Tool_Type,
-    User,
-    UserContactInfo,
 )
 from dojo.product.queries import (
     get_authorized_app_analysis,
@@ -104,7 +99,6 @@ from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
-from dojo.user.authentication import reset_token_for_user
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     get_celery_queue_details,
@@ -652,82 +646,6 @@ class RegulationsViewSet(
 
     def get_queryset(self):
         return Regulation.objects.all().order_by("id")
-
-
-# Authorization: configuration
-class UsersViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.UserSerializer
-    queryset = User.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiUserFilter
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return User.objects.all().order_by("id")
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if request.user == instance:
-            return Response(
-                "Users may not delete themselves",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="reset_api_token",
-        permission_classes=(IsAuthenticated, permissions.IsSuperUserOrGlobalOwner),
-        filter_backends=[],
-        pagination_class=None,
-    )
-    def reset_api_token(self, request, pk=None):
-        target_user = self.get_object()
-        reset_token_for_user(acting_user=request.user, target_user=target_user)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# Authorization: superuser
-@extend_schema_view(**schema_with_prefetch())
-class UserContactInfoViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.UserContactInfoSerializer
-    queryset = UserContactInfo.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return UserContactInfo.objects.all().order_by("id")
-
-
-# Authorization: authenticated users
-class UserProfileView(GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    pagination_class = None
-    serializer_class = serializers.UserProfileSerializer
-
-    @action(
-        detail=True, methods=["get"], filter_backends=[], pagination_class=None,
-    )
-    def get(self, request, _=None):
-        user = get_current_user()
-        user_contact_info = (
-            user.usercontactinfo if hasattr(user, "usercontactinfo") else None
-        )
-        serializer = serializers.UserProfileSerializer(
-            {
-                "user": user,
-                "user_contact_info": user_contact_info,
-            },
-            many=False,
-        )
-        return Response(serializer.data)
 
 
 # Authorization: authenticated users, DjangoModelPermissions

@@ -50,7 +50,6 @@ from dojo.models import (
     App_Analysis,
     ChoiceQuestion,
     Development_Environment,
-    Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -64,7 +63,6 @@ from dojo.models import (
     Risk_Acceptance,
     Test,
     TextQuestion,
-    User,
     Vulnerability_Id,
 )
 from dojo.product.queries import get_authorized_products
@@ -1649,38 +1647,7 @@ class EndpointReportFilter(DojoFilter):
         exclude = ["product"]
 
 
-class UserFilter(DojoFilter):
-    first_name = CharFilter(lookup_expr="icontains")
-    last_name = CharFilter(lookup_expr="icontains")
-    username = CharFilter(lookup_expr="icontains")
-    email = CharFilter(lookup_expr="icontains")
-
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ("username", "username"),
-            ("last_name", "last_name"),
-            ("first_name", "first_name"),
-            ("email", "email"),
-            ("is_active", "is_active"),
-            ("is_superuser", "is_superuser"),
-            ("is_staff", "is_staff"),
-            ("date_joined", "date_joined"),
-            ("last_login", "last_login"),
-        ),
-        field_labels={
-            "username": "User Name",
-            "is_active": "Active",
-            "is_superuser": "Superuser",
-            "is_staff": "Staff",
-        },
-    )
-
-    class Meta:
-        model = Dojo_User
-        fields = ["is_superuser", "is_staff", "is_active", "first_name", "last_name", "username", "email"]
-
-
+# UserFilter lives in dojo/user/ui/filters.py — import from there directly.
 # TestImportFilter and TestImportFindingActionFilter live in dojo/test/ui/filters.py and are
 # re-exported at the bottom of this module for backward compatibility.
 
@@ -1770,43 +1737,7 @@ class QuestionTypeFilter(ChoiceFilter):
         return self.options[value][1](self, qs, self.options[value][0])
 
 
-class ApiUserFilter(filters.FilterSet):
-    last_login = filters.DateFromToRangeFilter()
-    date_joined = filters.DateFromToRangeFilter()
-    is_active = filters.BooleanFilter()
-    is_superuser = filters.BooleanFilter()
-    username = filters.CharFilter(lookup_expr="icontains")
-    first_name = filters.CharFilter(lookup_expr="icontains")
-    last_name = filters.CharFilter(lookup_expr="icontains")
-    email = filters.CharFilter(lookup_expr="icontains")
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "username",
-            "first_name",
-            "last_name",
-            "email",
-            "is_active",
-            "is_superuser",
-            "last_login",
-            "date_joined",
-        ]
-
-    o = OrderingFilter(
-        # tuple-mapping retains order
-        fields=(
-            ("username", "username"),
-            ("last_name", "last_name"),
-            ("first_name", "first_name"),
-            ("email", "email"),
-            ("is_active", "is_active"),
-            ("is_superuser", "is_superuser"),
-            ("date_joined", "date_joined"),
-            ("last_login", "last_login"),
-        ),
-    )
-
+# ApiUserFilter lives in dojo/user/api/filters.py — import from there directly.
 
 with warnings.catch_warnings(action="ignore", category=ManagerInheritanceWarning):
     class QuestionFilter(FilterSet):

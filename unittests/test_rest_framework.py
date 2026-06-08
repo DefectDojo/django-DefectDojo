@@ -57,8 +57,6 @@ from dojo.api_v2.views import (
     ToolConfigurationsViewSet,
     ToolProductSettingsViewSet,
     ToolTypesViewSet,
-    UserContactInfoViewSet,
-    UsersViewSet,
 )
 from dojo.asset.api.views import (
     AssetAPIScanConfigurationViewSet,
@@ -118,6 +116,7 @@ from dojo.product_type.api.views import ProductTypeViewSet
 from dojo.test.api.views import TestsViewSet, TestTypesViewSet
 from dojo.url.api.views import URLViewSet
 from dojo.url.models import URL
+from dojo.user.api.views import UserContactInfoViewSet, UsersViewSet
 
 from .dojo_test_case import (
     DojoAPITestCase,
