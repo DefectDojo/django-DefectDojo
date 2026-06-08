@@ -1,4 +1,3 @@
-import base64
 import contextlib
 import copy
 import logging
@@ -1024,12 +1023,6 @@ from dojo.engagement.models import (  # noqa: E402 -- re-export; class-body FKs 
 )
 
 
-class CWE(models.Model):
-    url = models.CharField(max_length=1000)
-    description = models.CharField(max_length=2000)
-    number = models.IntegerField()
-
-
 class Endpoint_Params(models.Model):
     param = models.CharField(max_length=150)
     value = models.CharField(max_length=150)
@@ -1501,6 +1494,8 @@ class Sonarqube_Issue_Transition(models.Model):
 
 
 from dojo.finding.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
+    CWE,
+    BurpRawRequestResponse,  # noqa: F401 -- re-export
     Finding,
     Finding_Group,  # noqa: F401 -- re-export
     Finding_Template,
@@ -1558,20 +1553,6 @@ class Check_List(models.Model):
                 "url": reverse("complete_checklist",
                                args=(self.engagement.id,))}]
         return bc
-
-
-class BurpRawRequestResponse(models.Model):
-    finding = models.ForeignKey(Finding, blank=True, null=True, on_delete=models.CASCADE)
-    burpRequestBase64 = models.BinaryField()
-    burpResponseBase64 = models.BinaryField()
-
-    def get_request(self):
-        return str(base64.b64decode(self.burpRequestBase64), errors="ignore")
-
-    def get_response(self):
-        res = str(base64.b64decode(self.burpResponseBase64), errors="ignore")
-        # Removes all blank lines
-        return re.sub(r"\n\s*\n", "\n", res)
 
 
 class Risk_Acceptance(models.Model):
@@ -2214,7 +2195,6 @@ admin.site.register(Tool_Product_Settings)
 admin.site.register(Tool_Type)
 admin.site.register(System_Settings)
 admin.site.register(SLA_Configuration)
-admin.site.register(CWE)
 admin.site.register(Regulation)
 from dojo.authorization.models import (  # noqa: E402
     Dojo_Group,
@@ -2246,7 +2226,6 @@ admin.site.register(NoteHistory)
 admin.site.register(Report_Type)
 admin.site.register(DojoMeta)
 admin.site.register(Development_Environment)
-admin.site.register(BurpRawRequestResponse)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)

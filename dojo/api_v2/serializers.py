@@ -1,5 +1,3 @@
-import base64
-import collections
 import json
 import logging
 import re
@@ -21,7 +19,6 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
-from rest_framework.fields import DictField
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
@@ -38,7 +35,6 @@ from dojo.models import (
     STATS_FIELDS,
     Announcement,
     App_Analysis,
-    BurpRawRequestResponse,
     Development_Environment,
     Dojo_User,
     DojoMeta,
@@ -212,150 +208,6 @@ class TagListSerializerField(serializers.ListField):
                 msg = f"unable to convert {type(value).__name__} into list of tags"
                 raise ValueError(msg)
         return value
-
-
-class RequestResponseDict(collections.UserList):
-    def __init__(self, *args, **kwargs):
-        pretty_print = kwargs.pop("pretty_print", True)
-        collections.UserList.__init__(self, *args, **kwargs)
-        self.pretty_print = pretty_print
-
-    def __add__(self, rhs):
-        return RequestResponseDict(list.__add__(self, rhs))
-
-    def __getitem__(self, item):
-        result = list.__getitem__(self, item)
-        try:
-            return RequestResponseDict(result)
-        except TypeError:
-            return result
-
-    def __str__(self):
-        if self.pretty_print:
-            return json.dumps(
-                self, sort_keys=True, indent=4, separators=(",", ": "),
-            )
-        return json.dumps(self)
-
-
-class RequestResponseSerializerField(serializers.ListSerializer):
-    child = DictField(child=serializers.CharField())
-    default_error_messages = {
-        "not_a_list": _(
-            'Expected a list of items but got type "{input_type}".',
-        ),
-        "invalid_json": _(
-            "Invalid json list. A tag list submitted in string"
-            " form must be valid json.",
-        ),
-        "not_a_dict": _(
-            "All list items must be of dict type with keys 'request' and 'response'",
-        ),
-        "not_a_str": _("All values in the dict must be of string type."),
-    }
-    order_by = None
-
-    def __init__(self, **kwargs):
-        pretty_print = kwargs.pop("pretty_print", True)
-
-        style = kwargs.pop("style", {})
-        kwargs["style"] = {"base_template": "textarea.html"}
-        kwargs["style"].update(style)
-
-        if "data" in kwargs:
-            data = kwargs["data"]
-
-            if isinstance(data, list):
-                kwargs["many"] = True
-
-        super().__init__(**kwargs)
-
-        self.pretty_print = pretty_print
-
-    def to_internal_value(self, data):
-        if isinstance(data, six.string_types):
-            if not data:
-                data = []
-            try:
-                data = json.loads(data)
-            except ValueError:
-                self.fail("invalid_json")
-
-        if not isinstance(data, list):
-            self.fail("not_a_list", input_type=type(data).__name__)
-        for s in data:
-            if not isinstance(s, dict):
-                self.fail("not_a_dict", input_type=type(s).__name__)
-
-            request = s.get("request", None)
-            response = s.get("response", None)
-
-            if not isinstance(request, str):
-                self.fail("not_a_str", input_type=type(request).__name__)
-            if not isinstance(response, str):
-                self.fail("not_a_str", input_type=type(request).__name__)
-
-            self.child.run_validation(s)
-        return data
-
-    def to_representation(self, value):
-        if not isinstance(value, RequestResponseDict):
-            if not isinstance(value, list):
-                # this will trigger when a queryset is found...
-                burps = value.all().order_by(*self.order_by) if self.order_by else value.all()
-                value = [
-                    {
-                        "request": burp.get_request(),
-                        "response": burp.get_response(),
-                    }
-                    for burp in burps
-                ]
-
-        return value
-
-
-class BurpRawRequestResponseSerializer(serializers.Serializer):
-    req_resp = RequestResponseSerializerField(required=True)
-
-
-class BurpRawRequestResponseMultiSerializer(serializers.ModelSerializer):
-    burpRequestBase64 = serializers.CharField()
-    burpResponseBase64 = serializers.CharField()
-
-    def to_representation(self, data):
-        return {
-            "id": data.id,
-            "finding": data.finding.id,
-            "burpRequestBase64": data.burpRequestBase64.decode("utf-8"),
-            "burpResponseBase64": data.burpResponseBase64.decode("utf-8"),
-        }
-
-    def validate(self, data):
-        b64request = data.get("burpRequestBase64", None)
-        b64response = data.get("burpResponseBase64", None)
-        finding = data.get("finding", None)
-        # Make sure all fields are present
-        if not b64request or not b64response or not finding:
-            msg = "burpRequestBase64, burpResponseBase64, and finding are required."
-            raise ValidationError(msg)
-        # Verify we have true base64 decoding
-        try:
-            base64.b64decode(b64request, validate=True)
-            base64.b64decode(b64response, validate=True)
-        except Exception as e:
-            msg = "Inputs need to be valid base64 encodings"
-            raise ValidationError(msg) from e
-        # Encode the data in utf-8 to remove any bad characters
-        data["burpRequestBase64"] = b64request.encode("utf-8")
-        data["burpResponseBase64"] = b64response.encode("utf-8")
-        # Run the model validation - an ValidationError will be raised if there is an issue
-        BurpRawRequestResponse(finding=finding, burpRequestBase64=b64request, burpResponseBase64=b64response).clean()
-
-        return data
-
-    class Meta:
-        model = BurpRawRequestResponse
-        fields = "__all__"
 
 
 class MetaSerializer(serializers.ModelSerializer):
@@ -1749,6 +1601,8 @@ class ExecutiveSummarySerializer(serializers.Serializer):
 # (dojo/api_v2/prefetch/prefetcher.py inspects this module to build its model->serializer
 # map); changing that membership would silently change prefetch responses.
 from dojo.finding.api.serializer import (  # noqa: E402 -- backward compat
+    BurpRawRequestResponseMultiSerializer,  # noqa: F401 -- backward compat / prefetcher discovery
+    BurpRawRequestResponseSerializer,  # noqa: F401 -- backward compat
     FindingCloseSerializer,  # noqa: F401 -- backward compat / prefetcher discovery
     FindingCreateSerializer,  # noqa: F401 -- backward compat / prefetcher discovery
     FindingEngagementSerializer,  # noqa: F401 -- backward compat / prefetcher discovery

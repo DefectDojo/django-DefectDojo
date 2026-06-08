@@ -14,7 +14,6 @@ from dojo.announcement.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
-    BurpRawRequestResponseViewSet,
     CeleryViewSet,
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
@@ -133,7 +132,6 @@ v2_api = add_finding_urls(v2_api)
 #   product_type_members, product_type_groups → pro/product_type_members, pro/product_type_groups
 v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")
 v2_api.register(r"reimport-scan", ReImportScanView, basename="reimportscan")
-v2_api.register(r"request_response_pairs", BurpRawRequestResponseViewSet, basename="request_response_pairs")
 v2_api.register(r"risk_acceptance", RiskAcceptanceViewSet, basename="risk_acceptance")
 # RBAC endpoint moved to Pro under legacy authorization: roles → pro/roles
 v2_api.register(r"sla_configurations", SLAConfigurationViewset, basename="sla_configurations")

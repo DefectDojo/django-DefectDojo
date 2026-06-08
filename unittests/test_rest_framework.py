@@ -39,7 +39,6 @@ from dojo.api_v2.prefetch.utils import get_prefetchable_fields
 from dojo.api_v2.views import (
     AnnouncementViewSet,
     AppAnalysisViewSet,
-    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
     EndpointStatusViewSet,
@@ -67,7 +66,11 @@ from dojo.asset.api.views import (
 )
 from dojo.authorization.roles_permissions import Permissions, permission_to_action
 from dojo.engagement.api.views import EngagementViewSet
-from dojo.finding.api.views import FindingTemplatesViewSet, FindingViewSet
+from dojo.finding.api.views import (
+    BurpRawRequestResponseViewSet,
+    FindingTemplatesViewSet,
+    FindingViewSet,
+)
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.views import LocationFindingReferenceViewSet, LocationProductReferenceViewSet, LocationViewSet
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference

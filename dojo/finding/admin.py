@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from dojo.finding.models import Finding, Finding_Group, Finding_Template, Vulnerability_Id
+from dojo.finding.models import (
+    CWE,
+    BurpRawRequestResponse,
+    Finding,
+    Finding_Group,
+    Finding_Template,
+    Vulnerability_Id,
+)
 
 
 @admin.register(Finding)
@@ -29,3 +36,7 @@ class VulnerabilityIdAdmin(admin.ModelAdmin):
 class FindingGroupAdmin(admin.ModelAdmin):
 
     """Admin support for the Finding_Group model."""
+
+
+admin.site.register(CWE)
+admin.site.register(BurpRawRequestResponse)
