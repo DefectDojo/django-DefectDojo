@@ -37,9 +37,6 @@ from dojo.api_v2.views import (
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
     SonarqubeIssueViewSet,
-    ToolConfigurationsViewSet,
-    ToolProductSettingsViewSet,
-    ToolTypesViewSet,
 )
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.asset.api.urls import add_asset_urls
@@ -79,9 +76,12 @@ from dojo.system_settings.ui.urls import urlpatterns as system_settings_urls
 from dojo.test.api.urls import add_test_urls
 from dojo.test.ui.urls import urlpatterns as test_urls
 from dojo.test_type.urls import urlpatterns as test_type_urls
-from dojo.tool_config.urls import urlpatterns as tool_config_urls
-from dojo.tool_product.urls import urlpatterns as tool_product_urls
-from dojo.tool_type.urls import urlpatterns as tool_type_urls
+from dojo.tool_config.api.urls import add_tool_config_urls
+from dojo.tool_config.ui.urls import urlpatterns as tool_config_urls
+from dojo.tool_product.api.urls import add_tool_product_urls
+from dojo.tool_product.ui.urls import urlpatterns as tool_product_urls
+from dojo.tool_type.api.urls import add_tool_type_urls
+from dojo.tool_type.ui.urls import urlpatterns as tool_type_urls
 from dojo.url.api.urls import add_url_urls
 from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.user.api.urls import add_user_urls
@@ -139,9 +139,9 @@ v2_api.register(r"sonarqube_transitions", SonarqubeIssueTransitionViewSet, basen
 v2_api = add_system_settings_urls(v2_api)
 v2_api.register(r"technologies", AppAnalysisViewSet, basename="app_analysis")
 v2_api = add_test_urls(v2_api)
-v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
-v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
-v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
+v2_api = add_tool_config_urls(v2_api)
+v2_api = add_tool_product_urls(v2_api)
+v2_api = add_tool_type_urls(v2_api)
 v2_api = add_user_urls(v2_api)
 # Add the location routes
 if settings.V3_FEATURE_LOCATIONS:

@@ -7,8 +7,8 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.forms import ToolTypeForm
-from dojo.models import Tool_Type
+from dojo.tool_type.models import Tool_Type
+from dojo.tool_type.ui.forms import ToolTypeForm
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)

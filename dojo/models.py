@@ -10,7 +10,6 @@ from uuid import uuid4
 
 import hyperlink
 import tagulous.admin
-from django import forms
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.auth import get_user_model
@@ -507,77 +506,8 @@ class SLA_Configuration(models.Model):
         return f"{self.name} - Critical: {self.critical}, High: {self.high}, Medium: {self.medium}, Low: {self.low}"
 
 
-class Tool_Type(models.Model):
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name
-
-
-class Tool_Configuration(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True, blank=True)
-    tool_type = models.ForeignKey(Tool_Type, related_name="tool_type", on_delete=models.CASCADE)
-    authentication_type = models.CharField(max_length=15,
-                                           choices=(
-                                               ("API", "API Key"),
-                                               ("Password",
-                                                "Username/Password"),
-                                               ("SSH", "SSH")),
-                                           null=True, blank=True)
-    extras = models.CharField(max_length=255, null=True, blank=True, help_text=_("Additional definitions that will be "
-                                                                              "consumed by scanner"))
-    username = models.CharField(max_length=200, null=True, blank=True)
-    password = models.CharField(max_length=600, null=True, blank=True)
-    auth_title = models.CharField(max_length=200, null=True, blank=True,
-                                  verbose_name=_("Title for SSH/API Key"))
-    ssh = models.CharField(max_length=6000, null=True, blank=True)
-    api_key = models.CharField(max_length=600, null=True, blank=True,
-                               verbose_name=_("API Key"))
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.name
-
-
-# declare form here as we can't import forms.py due to circular imports not even locally
-class ToolConfigForm_Admin(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput, required=False)
-    api_key = forms.CharField(widget=forms.PasswordInput, required=False)
-    ssh = forms.CharField(widget=forms.PasswordInput, required=False)
-
-    # django doesn't seem to have an easy way to handle password fields as PasswordInput requires reentry of passwords
-    password_from_db = None
-    ssh_from_db = None
-    api_key_from_db = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        if self.instance:
-            # keep password from db to use if the user entered no password
-            self.password_from_db = self.instance.password
-            self.ssh_from_db = self.instance.ssh
-            self.api_key = self.instance.api_key
-
-    def clean(self):
-        cleaned_data = super().clean()
-        if not cleaned_data["password"] and not cleaned_data["ssh"] and not cleaned_data["api_key"]:
-            cleaned_data["password"] = self.password_from_db
-            cleaned_data["ssh"] = self.ssh_from_db
-            cleaned_data["api_key"] = self.api_key_from_db
-
-        return cleaned_data
-
-
-class Tool_Configuration_Admin(admin.ModelAdmin):
-    form = ToolConfigForm_Admin
+from dojo.tool_config.models import Tool_Configuration  # noqa: E402, F401 -- re-export
+from dojo.tool_type.models import Tool_Type  # noqa: E402, F401 -- re-export
 
 
 class Network_Locations(models.Model):
@@ -1312,28 +1242,7 @@ from dojo.notifications.models import (  # noqa: E402, F401  -- backward compat
     Notification_Webhooks,
     Notifications,
 )
-
-
-class Tool_Product_Settings(models.Model):
-    name = models.CharField(max_length=200, null=False)
-    description = models.CharField(max_length=2000, null=True, blank=True)
-    url = models.CharField(max_length=2000, null=True, blank=True)
-    product = models.ForeignKey(Product, default=1, editable=False, on_delete=models.CASCADE)
-    tool_configuration = models.ForeignKey(Tool_Configuration, null=False,
-                                           related_name="tool_configuration", on_delete=models.CASCADE)
-    tool_project_id = models.CharField(max_length=200, null=True, blank=True)
-    notes = models.ManyToManyField(Notes, blank=True, editable=False)
-
-    class Meta:
-        ordering = ["name"]
-
-
-class Tool_Product_History(models.Model):
-    product = models.ForeignKey(Tool_Product_Settings, editable=False, on_delete=models.CASCADE)
-    last_scan = models.DateTimeField(null=False, editable=False, default=now)
-    succesfull = models.BooleanField(default=True, verbose_name=_("Succesfully"))
-    configuration_details = models.CharField(max_length=2000, null=True,
-                                             blank=True)
+from dojo.tool_product.models import Tool_Product_History, Tool_Product_Settings  # noqa: E402, F401 -- re-export
 
 
 class Language_Type(models.Model):
@@ -1760,10 +1669,6 @@ admin.site.register(Endpoint_Status)
 admin.site.register(Endpoint)
 admin.site.register(Notes)
 admin.site.register(Note_Type)
-admin.site.register(Tool_Configuration, Tool_Configuration_Admin)
-admin.site.register(Tool_Product_Settings)
-admin.site.register(Tool_Type)
-
 admin.site.register(SLA_Configuration)
 admin.site.register(Regulation)
 from dojo.authorization.models import (  # noqa: E402
@@ -1798,5 +1703,4 @@ admin.site.register(Development_Environment)
 admin.site.register(Announcement)
 admin.site.register(UserAnnouncement)
 admin.site.register(BannerConf)
-admin.site.register(Tool_Product_History)
 admin.site.register(General_Survey)

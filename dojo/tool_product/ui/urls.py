@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from . import views
+from dojo.tool_product.ui import views
 
 urlpatterns = [
     re_path(r"^product/(?P<pid>\d+)/tool_product/add$", views.new_tool_product, name="new_tool_product"),
