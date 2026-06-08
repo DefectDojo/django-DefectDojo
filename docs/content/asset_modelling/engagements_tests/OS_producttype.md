@@ -47,7 +47,7 @@ Below are some example structures to inform how you designate your objects as ei
 
 Additionally, the following is an illustrative guide as to whether a something is better represented by a Product Type or an Product: 
 
-| Product Types | Assets |
+| Product Types | Products |
 |--------------|--------|
 | Business units | Individual applications |
 | Departments | Deployments/environments |
