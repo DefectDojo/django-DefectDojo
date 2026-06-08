@@ -80,9 +80,6 @@ from dojo.models import (
     Sonarqube_Issue_Transition,
     System_Settings,
     Test,
-    Tool_Configuration,
-    Tool_Product_Settings,
-    Tool_Type,
 )
 from dojo.product.queries import (
     get_authorized_app_analysis,
@@ -98,7 +95,6 @@ from dojo.reports.views import (
 from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_tests
-from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     get_celery_queue_details,
@@ -572,66 +568,6 @@ class DevelopmentEnvironmentViewSet(
 
     def get_queryset(self):
         return Development_Environment.objects.all().order_by("id")
-
-
-# Authorization: configurations
-@extend_schema_view(**schema_with_prefetch())
-class ToolConfigurationsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ToolConfigurationSerializer
-    queryset = Tool_Configuration.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "tool_type",
-        "url",
-        "authentication_type",
-    ]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return Tool_Configuration.objects.all().order_by("id")
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ToolProductSettingsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ToolProductSettingsSerializer
-    queryset = Tool_Product_Settings.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "product",
-        "tool_configuration",
-        "tool_project_id",
-        "url",
-    ]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasToolProductSettingsPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_tool_product_settings("view")
-
-
-# Authorization: configuration
-class ToolTypesViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.ToolTypeSerializer
-    queryset = Tool_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name", "description"]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return Tool_Type.objects.all().order_by("id")
 
 
 # Authorization: authenticated, configuration

@@ -8,8 +8,9 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm
-from dojo.models import Product, Tool_Product_Settings
+from dojo.models import Product
+from dojo.tool_product.models import Tool_Product_Settings
+from dojo.tool_product.ui.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm
 from dojo.utils import Product_Tab
 
 logger = logging.getLogger(__name__)

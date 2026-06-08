@@ -15,7 +15,6 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator
 from django.db.models import Count
 from django.forms import modelformset_factory
 from django.forms.widgets import Select, Widget
@@ -86,9 +85,6 @@ from dojo.models import (
     Test_Type,
     TextAnswer,
     TextQuestion,
-    Tool_Configuration,
-    Tool_Product_Settings,
-    Tool_Type,
     User,
 )
 from dojo.product.queries import get_authorized_products
@@ -1120,30 +1116,6 @@ class DeleteBenchmarkForm(forms.ModelForm):
         fields = ["id"]
 
 
-class ToolTypeForm(forms.ModelForm):
-    class Meta:
-        model = Tool_Type
-        exclude = ["product"]
-
-    def __init__(self, *args, **kwargs):
-        instance = kwargs.get("instance")
-        self.newly_created = True
-        if instance is not None:
-            self.newly_created = instance.pk is None
-        super().__init__(*args, **kwargs)
-
-    def clean(self):
-        form_data = self.cleaned_data
-        if self.newly_created:
-            name = form_data.get("name")
-            # Make sure this will not create a duplicate test type
-            if Tool_Type.objects.filter(name=name).count() > 0:
-                msg = "A Tool Type with the name already exists"
-                raise forms.ValidationError(msg)
-
-        return form_data
-
-
 class RegulationForm(forms.ModelForm):
     class Meta:
         model = Regulation
@@ -1172,28 +1144,6 @@ class DeleteAppAnalysisForm(forms.ModelForm):
         self.fields["icon"].disabled = True
         self.fields["website"].disabled = True
         self.fields["website_found"].disabled = True
-
-
-class ToolConfigForm(forms.ModelForm):
-    tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label="Tool Type")
-    ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label="SSH Key")
-
-    class Meta:
-        model = Tool_Configuration
-        exclude = ["product"]
-
-    def clean(self):
-        form_data = self.cleaned_data
-
-        try:
-            if form_data["url"] is not None:
-                url_validator = URLValidator(schemes=["ssh", "http", "https"])
-                url_validator(form_data["url"])
-        except forms.ValidationError:
-            msg = "It does not appear as though this endpoint is a valid URL/SSH or IP address."
-            raise forms.ValidationError(msg, code="invalid")
-
-        return form_data
 
 
 class SLAConfigForm(forms.ModelForm):
@@ -1242,38 +1192,6 @@ class DeleteObjectsSettingsForm(forms.ModelForm):
     class Meta:
         model = Objects_Product
         fields = ["id"]
-
-
-class DeleteToolProductSettingsForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Tool_Product_Settings
-        fields = ["id"]
-
-
-class ToolProductSettingsForm(forms.ModelForm):
-    tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label="Tool Configuration")
-
-    class Meta:
-        model = Tool_Product_Settings
-        fields = ["name", "description", "url", "tool_configuration", "tool_project_id"]
-        exclude = ["tool_type"]
-        order = ["name"]
-
-    def clean(self):
-        form_data = self.cleaned_data
-
-        try:
-            if form_data["url"] is not None:
-                url_validator = URLValidator(schemes=["ssh", "http", "https"])
-                url_validator(form_data["url"])
-        except forms.ValidationError:
-            msg = "It does not appear as though this endpoint is a valid URL/SSH or IP address."
-            raise forms.ValidationError(msg, code="invalid")
-
-        return form_data
 
 
 class ObjectSettingsForm(forms.ModelForm):

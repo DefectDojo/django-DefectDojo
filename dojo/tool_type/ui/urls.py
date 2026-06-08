@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from . import views
+from dojo.tool_type.ui import views
 
 urlpatterns = [
     re_path(r"^tool_type/add", views.new_tool_type, name="add_tool_type"),

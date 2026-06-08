@@ -6,9 +6,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from dojo.forms import ToolConfigForm
-from dojo.models import Tool_Configuration
 from dojo.tool_config.factory import create_API
+from dojo.tool_config.models import Tool_Configuration
+from dojo.tool_config.ui.forms import ToolConfigForm
 from dojo.utils import add_breadcrumb, dojo_crypto_encrypt, prepare_for_view
 
 logger = logging.getLogger(__name__)

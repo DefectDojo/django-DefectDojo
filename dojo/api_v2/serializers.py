@@ -57,9 +57,6 @@ from dojo.models import (
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
     Test,
-    Tool_Configuration,
-    Tool_Product_Settings,
-    Tool_Type,
     User,
     get_current_date,
 )
@@ -412,19 +409,7 @@ class AppAnalysisSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ToolTypeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tool_Type
-        fields = "__all__"
-
-    def validate(self, data):
-        if self.context["request"].method == "POST":
-            name = data.get("name")
-            # Make sure this will not create a duplicate test type
-            if Tool_Type.objects.filter(name=name).count() > 0:
-                msg = "A Tool Type with the name already exists"
-                raise serializers.ValidationError(msg)
-        return data
+from dojo.tool_type.api.serializer import ToolTypeSerializer  # noqa: E402, F401 -- re-export
 
 
 class RegulationSerializer(serializers.ModelSerializer):
@@ -433,26 +418,8 @@ class RegulationSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ToolConfigurationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tool_Configuration
-        fields = "__all__"
-        extra_kwargs = {
-            "password": {"write_only": True},
-            "ssh": {"write_only": True},
-            "api_key": {"write_only": True},
-        }
-
-
-class ToolProductSettingsSerializer(serializers.ModelSerializer):
-    setting_url = serializers.CharField(source="url")
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(), required=True,
-    )
-
-    class Meta:
-        model = Tool_Product_Settings
-        fields = "__all__"
+from dojo.tool_config.api.serializer import ToolConfigurationSerializer  # noqa: E402, F401 -- re-export
+from dojo.tool_product.api.serializer import ToolProductSettingsSerializer  # noqa: E402, F401 -- re-export
 
 
 class EndpointStatusSerializer(serializers.ModelSerializer):
