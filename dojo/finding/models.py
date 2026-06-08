@@ -1495,3 +1495,23 @@ class Finding_Template(models.Model):
             return []
         # Parse newline-separated string, remove empty lines
         return [line.strip() for line in self.endpoints_text.split("\n") if line.strip()]
+
+
+class CWE(models.Model):
+    url = models.CharField(max_length=1000)
+    description = models.CharField(max_length=2000)
+    number = models.IntegerField()
+
+
+class BurpRawRequestResponse(models.Model):
+    finding = models.ForeignKey("dojo.Finding", blank=True, null=True, on_delete=models.CASCADE)
+    burpRequestBase64 = models.BinaryField()
+    burpResponseBase64 = models.BinaryField()
+
+    def get_request(self):
+        return str(base64.b64decode(self.burpRequestBase64), errors="ignore")
+
+    def get_response(self):
+        res = str(base64.b64decode(self.burpResponseBase64), errors="ignore")
+        # Removes all blank lines
+        return re.sub(r"\n\s*\n", "\n", res)

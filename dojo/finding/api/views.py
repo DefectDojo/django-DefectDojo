@@ -36,6 +36,8 @@ from dojo.api_v2.views import DojoModelViewSet, report_generate
 from dojo.authorization import api_permissions as permissions
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
+    BurpRawRequestResponseMultiSerializer,
+    BurpRawRequestResponseSerializer,
     FindingCloseSerializer,
     FindingCreateSerializer,
     FindingMetaSerializer,
@@ -316,14 +318,14 @@ class FindingViewSet(
     @extend_schema(
         methods=["GET"],
         responses={
-            status.HTTP_200_OK: api_v2_serializers.BurpRawRequestResponseSerializer,
+            status.HTTP_200_OK: BurpRawRequestResponseSerializer,
         },
     )
     @extend_schema(
         methods=["POST"],
-        request=api_v2_serializers.BurpRawRequestResponseSerializer,
+        request=BurpRawRequestResponseSerializer,
         responses={
-            status.HTTP_201_CREATED: api_v2_serializers.BurpRawRequestResponseSerializer,
+            status.HTTP_201_CREATED: BurpRawRequestResponseSerializer,
         },
     )
     @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
@@ -331,7 +333,7 @@ class FindingViewSet(
         finding = self.get_object()
 
         if request.method == "POST":
-            burps = api_v2_serializers.BurpRawRequestResponseSerializer(
+            burps = BurpRawRequestResponseSerializer(
                 data=request.data, many=isinstance(request.data, list),
             )
             if burps.is_valid():
@@ -362,7 +364,7 @@ class FindingViewSet(
             request = burp.get_request()
             response = burp.get_response()
             burp_list.append({"request": request, "response": response})
-        serialized_burps = api_v2_serializers.BurpRawRequestResponseSerializer(
+        serialized_burps = BurpRawRequestResponseSerializer(
             {"req_resp": burp_list},
         )
         return Response(serialized_burps.data)
@@ -830,4 +832,31 @@ class FindingViewSet(
 
         return Response(
             {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class BurpRawRequestResponseViewSet(
+    DojoModelViewSet,
+):
+    serializer_class = BurpRawRequestResponseMultiSerializer
+    queryset = BurpRawRequestResponse.objects.none()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ["finding"]
+    permission_classes = (
+        IsAuthenticated,
+        permissions.UserHasBurpRawRequestResponsePermission,
+    )
+
+    def get_queryset(self):
+        return (
+            BurpRawRequestResponse.objects.filter(
+                finding__in=get_authorized_findings(
+                    "view",
+                ),
+            )
+            .exclude(
+                burpRequestBase64__exact=b"",
+                burpResponseBase64__exact=b"",
+            )
+            .order_by("id")
         )

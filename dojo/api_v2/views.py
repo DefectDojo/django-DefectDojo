@@ -53,9 +53,6 @@ from dojo.filters import (
     ApiRiskAcceptanceFilter,
     ApiUserFilter,
 )
-from dojo.finding.queries import (
-    get_authorized_findings,
-)
 from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
@@ -66,7 +63,6 @@ from dojo.labels import get_labels
 from dojo.models import (
     Announcement,
     App_Analysis,
-    BurpRawRequestResponse,
     Development_Environment,
     Dojo_User,
     DojoMeta,
@@ -985,33 +981,6 @@ class NoteTypeViewSet(
 
     def get_queryset(self):
         return Note_Type.objects.all().order_by("id")
-
-
-class BurpRawRequestResponseViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.BurpRawRequestResponseMultiSerializer
-    queryset = BurpRawRequestResponse.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["finding"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasBurpRawRequestResponsePermission,
-    )
-
-    def get_queryset(self):
-        return (
-            BurpRawRequestResponse.objects.filter(
-                finding__in=get_authorized_findings(
-                    "view",
-                ),
-            )
-            .exclude(
-                burpRequestBase64__exact=b"",
-                burpResponseBase64__exact=b"",
-            )
-            .order_by("id")
-        )
 
 
 # Authorization: superuser
