@@ -34,7 +34,7 @@ Pillow==12.2.0  # required by django-imagekit
 psycopg[c]==3.3.4
 cryptography==46.0.7
 python-dateutil==2.9.0.post0
-redis==7.4.0
+redis==8.0.0
 requests==2.34.2
 sqlalchemy==2.0.49  # Required by Celery broker transport
 urllib3==2.7.0
@@ -57,7 +57,7 @@ cvss==3.6
 django-fieldsignals==0.8.0
 hyperlink==21.0.0
 drf-spectacular==0.29.0
-drf-spectacular-sidecar==2026.5.1
+drf-spectacular-sidecar==2026.6.1
 django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3

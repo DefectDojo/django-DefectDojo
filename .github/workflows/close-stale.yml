@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Close issues and PRs that are pending closure
-        uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
+        uses: actions/stale@eb5cf3af3ac0a1aa4c9c45633dd1ae542a27a899 # v10.3.0
         with:
           # Disable automatic stale marking - only close manually labeled items
           days-before-stale: -1
@@ -27,7 +27,7 @@ jobs:
           close-pr-message: 'This PR has been automatically closed because it was manually labeled as stale. If you believe this was closed in error, please reopen it and remove the stale label.'
 
       - name: Close stale issues and PRs
-        uses: actions/stale@b5d41d4e1d5dceea10e7104786b73624c18a190f # v10.2.0
+        uses: actions/stale@eb5cf3af3ac0a1aa4c9c45633dd1ae542a27a899 # v10.3.0
         with:
           # Disable automatic stale marking - only close manually labeled items
           days-before-stale: -1
