@@ -1,0 +1,10 @@
+﻿Vulnerability,CVSS Score,Severity,Deployment Name,Asset Name,IP Address,Protocol/Port,First Seen,Last Scanned,Asset Type,Customer Account,CVE,Service,VPC/Network,Category,Asset Key,Description,Evidence,Operating System,Resolution,Vulnerability ID,Vulnerability Span ID,Vulnerability Key,Age (days),CISA Known Exploited,Published Date
+CVE-2023-44487 - HTTP/2 Rapid Reset Attack,5.3,Medium,Production,web-01.example.com,192.0.2.10,TCP/443,5/15/26 0:50,5/27/26 6:37,host,AcmeCorp,CVE-2023-44487,https,prod-vpc-east,agent,/dc/host/AAAA1111-2222-3333-4444-555555555555/vulnerability/aaaaaaaaaaaaaaaaaaaa,"The HTTP/2 protocol allows a denial of service (server resource consumption) because request cancellation can reset many streams quickly, as exploited in the wild in August through October 2023.
+
+CVE-2023-44487 affects multiple HTTP/2 server implementations including nginx, Apache, and load balancers.","Patch Scanning - oval:org.secpod.oval:def:99999001
+
+Refs: KB-HTTP2-RST. Definition: HTTP/2 server detected with vulnerable version.",cpe:2.3:o:ubuntu:ubuntu_linux:22.04:*:*:*:*:*:*:*,"Upgrade affected HTTP/2 implementation to a patched version:
+
+- nginx >= 1.25.3
+- Apache httpd >= 2.4.58
+- HAProxy >= 2.4.24",11111111111111111111111111111111,AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE,/dc/host/AAAA1111-2222-3333-4444-555555555555/vulnerability/1a2b3c4d5e6f7a8b9c0d,12,No,10/10/23

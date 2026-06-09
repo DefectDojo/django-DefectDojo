@@ -1223,29 +1223,16 @@ def get_jira_issue_from_jira(find):
         return None
 
 
+def issue_status_category_is_done(status_category_key: str | None) -> bool:
+    return status_category_key == "done"
+
+
 def issue_from_jira_is_active(issue_from_jira):
-    #         "resolution":{
-    #             "self":"http://www.testjira.com/rest/api/2/resolution/11",
-    #             "id":"11",
-    #             "description":"Cancelled by the customer.",
-    #             "name":"Cancelled"
-    #         },
-
-    # or
-    #         "resolution": null
-
-    # or
-    #         "resolution": "None"
-
-    if not hasattr(issue_from_jira.fields, "resolution"):
-        logger.debug(vars(issue_from_jira))
-        return True
-
-    if not issue_from_jira.fields.resolution:
-        return True
-
-    # some kind of resolution is present that is not null or None
-    return issue_from_jira.fields.resolution == "None"
+    try:
+        statusCategoryKey = issue_from_jira.fields.status.statusCategory.key
+    except AttributeError:
+        statusCategoryKey = None
+    return not issue_status_category_is_done(statusCategoryKey)
 
 
 def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
@@ -1930,7 +1917,7 @@ def process_resolution_from_jira(
     # classify "done" issues as risk-accepted, false-positive, or the
     # default mitigated category (see jira_instance.accepted_resolutions
     # and .false_positive_resolutions below).
-    resolved = status_category_key == "done"
+    resolved = issue_status_category_is_done(status_category_key)
     jira_instance = get_jira_instance(finding)
 
     if resolved:
