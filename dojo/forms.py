@@ -45,7 +45,6 @@ from dojo.location.models import Location
 from dojo.location.utils import validate_locations_to_add
 from dojo.models import (
     SEVERITY_CHOICES,
-    Announcement,
     App_Analysis,
     Check_List,
     Development_Environment,
@@ -54,10 +53,8 @@ from dojo.models import (
     Endpoint,
     FileUpload,
     Finding_Group,
-    Objects_Product,
     Product_API_Scan_Configuration,
     Product_Type,
-    Regulation,
     SLA_Configuration,
     Test_Type,
     User,
@@ -178,17 +175,10 @@ class Test_TypeForm(forms.ModelForm):
         return self.cleaned_data["name"]
 
 
-class Development_EnvironmentForm(forms.ModelForm):
-    class Meta:
-        model = Development_Environment
-        fields = ["name"]
-
-
-class Delete_Dev_EnvironmentForm(forms.ModelForm):
-    class Meta:
-        model = Development_Environment
-        fields = ["id"]
-
+from dojo.development_environment.ui.forms import (  # noqa: E402, F401 -- re-export
+    Delete_Dev_EnvironmentForm,
+    Development_EnvironmentForm,
+)
 
 # Re-exported for external consumers (finding_group/test/engagement/product views + unittests).
 # The remaining finding forms live only in dojo.finding.ui.forms and are imported there by finding's own views.
@@ -788,12 +778,7 @@ from dojo.benchmark.ui.forms import (  # noqa: E402, F401 -- backward compat
     BenchmarkForm,
     DeleteBenchmarkForm,
 )
-
-
-class RegulationForm(forms.ModelForm):
-    class Meta:
-        model = Regulation
-        exclude = ["product"]
+from dojo.regulations.ui.forms import RegulationForm  # noqa: E402, F401 -- re-export
 
 
 class AppAnalysisForm(forms.ModelForm):
@@ -859,39 +844,15 @@ class DeleteSLAConfigForm(forms.ModelForm):
         fields = ["id"]
 
 
-class DeleteObjectsSettingsForm(forms.ModelForm):
-    id = forms.IntegerField(required=True,
-                            widget=forms.widgets.HiddenInput())
-
-    class Meta:
-        model = Objects_Product
-        fields = ["id"]
-
-
-class ObjectSettingsForm(forms.ModelForm):
-
-    # tags = forms.CharField(widget=forms.SelectMultiple(choices=[]),
-    #                        required=False,
-    #                        help_text="Add tags that help describe this object.  "
-    #                                  "Choose from the list or add new tags.  Press TAB key to add.")
-
-    class Meta:
-        model = Objects_Product
-        fields = ["path", "folder", "artifact", "name", "review_status", "tags"]
-        exclude = ["product"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def clean(self):
-        return self.cleaned_data
-
-
 from dojo.notifications.ui.forms import (  # noqa: E402, F401  -- backward compat
     DeleteNotificationsWebhookForm,
     NotificationsForm,
     NotificationsWebhookForm,
     ProductNotificationsForm,
+)
+from dojo.object.ui.forms import (  # noqa: E402, F401 -- re-export
+    DeleteObjectsSettingsForm,
+    ObjectSettingsForm,
 )
 
 
@@ -900,35 +861,11 @@ class AjaxChoiceField(forms.ChoiceField):
         return True
 
 
-class LoginBanner(forms.Form):
-    banner_enable = forms.BooleanField(
-        label="Enable login banner",
-        initial=False,
-        required=False,
-        help_text="Tick this box to enable a text banner on the login page",
-    )
-
-    banner_message = forms.CharField(
-        required=False,
-        label="Message to display on the login page",
-    )
-
-    def clean(self):
-        return super().clean()
-
-
-class AnnouncementCreateForm(forms.ModelForm):
-    class Meta:
-        model = Announcement
-        fields = "__all__"
-
-
-class AnnouncementRemoveForm(AnnouncementCreateForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["dismissable"].disabled = True
-        self.fields["message"].disabled = True
-        self.fields["style"].disabled = True
+from dojo.announcement.ui.forms import (  # noqa: E402, F401 -- re-export
+    AnnouncementCreateForm,
+    AnnouncementRemoveForm,
+)
+from dojo.banner.ui.forms import LoginBanner  # noqa: E402, F401 -- re-export
 
 
 class ConfigurationPermissionsForm(forms.Form):

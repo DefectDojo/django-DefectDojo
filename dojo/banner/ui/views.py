@@ -5,8 +5,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from dojo.forms import LoginBanner
-from dojo.models import BannerConf
+from dojo.banner.models import BannerConf
+from dojo.banner.ui.forms import LoginBanner
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)

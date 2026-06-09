@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from dojo.banner import views
+from dojo.banner.ui import views
 
 urlpatterns = [
     re_path(

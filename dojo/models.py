@@ -119,44 +119,11 @@ class UniqueUploadNameProvider:
         return Path(now().strftime(self.directory)) / filename
 
 
-class Regulation(models.Model):
-    PRIVACY_CATEGORY = "privacy"
-    FINANCE_CATEGORY = "finance"
-    EDUCATION_CATEGORY = "education"
-    MEDICAL_CATEGORY = "medical"
-    CORPORATE_CATEGORY = "corporate"
-    SECURITY_CATEGORY = "security"
-    GOVERNMENT_CATEGORY = "government"
-    OTHER_CATEGORY = "other"
-    CATEGORY_CHOICES = (
-        (PRIVACY_CATEGORY, _("Privacy")),
-        (FINANCE_CATEGORY, _("Finance")),
-        (EDUCATION_CATEGORY, _("Education")),
-        (MEDICAL_CATEGORY, _("Medical")),
-        (CORPORATE_CATEGORY, _("Corporate")),
-        (SECURITY_CATEGORY, _("Security")),
-        (GOVERNMENT_CATEGORY, _("Government")),
-        (OTHER_CATEGORY, _("Other")),
-    )
-
-    name = models.CharField(max_length=128, unique=True, help_text=_("The name of the regulation."))
-    acronym = models.CharField(max_length=20, unique=True, help_text=_("A shortened representation of the name."))
-    category = models.CharField(max_length=16, choices=CATEGORY_CHOICES, help_text=_("The subject of the regulation."))
-    jurisdiction = models.CharField(max_length=64, help_text=_("The territory over which the regulation applies."))
-    description = models.TextField(blank=True, help_text=_("Information about the regulation's purpose."))
-    reference = models.URLField(blank=True, help_text=_("An external URL for more information."))
-
-    class Meta:
-        ordering = ["name"]
-
-    def __str__(self):
-        return self.acronym + " (" + self.jurisdiction + ")"
-
-
 User = get_user_model()
 
 
-from dojo.user.models import Contact, Dojo_User, UserContactInfo  # noqa: E402, F401, I001 -- must precede system_settings (middleware load-order)
+from dojo.regulations.models import Regulation  # noqa: E402, F401, I001 -- re-export; user/system_settings block intentionally out-of-order (load-order)
+from dojo.user.models import Contact, Dojo_User, UserContactInfo  # noqa: E402, F401 -- must precede system_settings (middleware load-order)
 from dojo.system_settings.models import System_Settings  # noqa: E402, F401 -- re-export
 
 
@@ -390,23 +357,13 @@ class Network_Locations(models.Model):
         return self.location
 
 
+from dojo.development_environment.models import Development_Environment  # noqa: E402, F401 -- re-export
 from dojo.endpoint.models import Endpoint, Endpoint_Params, Endpoint_Status  # noqa: E402, F401 -- re-export
 from dojo.engagement.models import (  # noqa: E402 -- re-export; class-body FKs below reference these
     ENGAGEMENT_STATUS_CHOICES,  # noqa: F401 -- re-export
     Engagement,
     Engagement_Presets,  # noqa: F401 -- re-export
 )
-
-
-class Development_Environment(models.Model):
-    name = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-    def get_breadcrumbs(self):
-        return [{"title": str(self),
-                 "url": reverse("edit_dev_env", args=(self.id,))}]
 
 
 class Sonarqube_Issue(models.Model):
@@ -491,40 +448,12 @@ class Check_List(models.Model):
         return bc
 
 
-from dojo.risk_acceptance.models import Risk_Acceptance  # noqa: E402, F401 -- re-export
-
-ANNOUNCEMENT_STYLE_CHOICES = (
-    ("info", "Info"),
-    ("success", "Success"),
-    ("warning", "Warning"),
-    ("danger", "Danger"),
+from dojo.announcement.models import (  # noqa: E402 -- re-export
+    ANNOUNCEMENT_STYLE_CHOICES,  # noqa: F401 -- re-export
+    Announcement,  # noqa: F401 -- re-export
+    UserAnnouncement,  # noqa: F401 -- re-export
 )
-
-
-class Announcement(models.Model):
-    message = models.CharField(max_length=500,
-                                help_text=_("This dismissable message will be displayed on all pages for authenticated users. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"),
-                                default="")
-    style = models.CharField(max_length=64, choices=ANNOUNCEMENT_STYLE_CHOICES, default="info",
-                            help_text=_("The style of banner to display. (info, success, warning, danger)"))
-    dismissable = models.BooleanField(default=False,
-                                      null=False,
-                                      blank=True,
-                                      verbose_name=_("Dismissable?"),
-                                      help_text=_("Ticking this box allows users to dismiss the current announcement"),
-                                      )
-
-
-class UserAnnouncement(models.Model):
-    announcement = models.ForeignKey(Announcement, null=True, editable=False, on_delete=models.CASCADE, related_name="user_announcement")
-    user = models.ForeignKey(Dojo_User, null=True, editable=False, on_delete=models.CASCADE)
-
-
-class BannerConf(models.Model):
-    banner_enable = models.BooleanField(default=False, null=True, blank=True)
-    banner_message = models.CharField(max_length=500, help_text=_("This message will be displayed on the login page. It can contain basic html tags, for example <a href='https://www.fred.com' style='color: #337ab7;' target='_blank'>https://example.com</a>"), default="")
-
-
+from dojo.banner.models import BannerConf  # noqa: E402, F401 -- re-export
 from dojo.github.models import (  # noqa: E402, F401 -- backward compat
     GITHUB_Clone,
     GITHUB_Conf,
@@ -551,6 +480,7 @@ from dojo.notifications.models import (  # noqa: E402, F401  -- backward compat
     Notification_Webhooks,
     Notifications,
 )
+from dojo.risk_acceptance.models import Risk_Acceptance  # noqa: E402, F401 -- re-export
 from dojo.tool_product.models import Tool_Product_History, Tool_Product_Settings  # noqa: E402, F401 -- re-export
 
 
@@ -596,38 +526,7 @@ class App_Analysis(models.Model):
         return self.name + " | " + self.product.name
 
 
-class Objects_Review(models.Model):
-    name = models.CharField(max_length=100, null=True, blank=True)
-    created = models.DateTimeField(auto_now_add=True, null=False)
-
-    def __str__(self):
-        return self.name
-
-
-class Objects_Product(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100, null=True, blank=True)
-    path = models.CharField(max_length=600, verbose_name=_("Full file path"),
-                            null=True, blank=True)
-    folder = models.CharField(max_length=400, verbose_name=_("Folder"),
-                              null=True, blank=True)
-    artifact = models.CharField(max_length=400, verbose_name=_("Artifact"),
-                                null=True, blank=True)
-    review_status = models.ForeignKey(Objects_Review, on_delete=models.CASCADE)
-    created = models.DateTimeField(auto_now_add=True, null=False)
-
-    tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this object. Choose from the list or add new tags. Press Enter key to add."))
-
-    def __str__(self):
-        name = None
-        if self.path is not None:
-            name = self.path
-        elif self.folder is not None:
-            name = self.folder
-        elif self.artifact is not None:
-            name = self.artifact
-
-        return name
+from dojo.object.models import Objects_Product, Objects_Review  # noqa: E402, F401 -- re-export
 
 
 class Testing_Guide_Category(models.Model):
@@ -696,15 +595,14 @@ tagulous.admin.register(Engagement.tags)
 tagulous.admin.register(Engagement.inherited_tags)
 tagulous.admin.register(Finding_Template.tags)
 tagulous.admin.register(App_Analysis.tags)
-tagulous.admin.register(Objects_Product.tags)
+# Objects_Product.tags registered in dojo/object/admin.py
 
 # Testing
 admin.site.register(Testing_Guide_Category)
 admin.site.register(Testing_Guide)
 
 admin.site.register(Network_Locations)
-admin.site.register(Objects_Product)
-admin.site.register(Objects_Review)
+# Objects_Product + Objects_Review admin registered in dojo/object/admin.py
 admin.site.register(Languages)
 admin.site.register(Language_Type)
 admin.site.register(App_Analysis)
@@ -713,7 +611,7 @@ admin.site.register(Check_List)
 # Notes + NoteHistory admin registered in dojo/notes/admin.py
 # Note_Type admin registered in dojo/note_type/admin.py
 admin.site.register(SLA_Configuration)
-admin.site.register(Regulation)
+# Regulation admin registered in dojo/regulations/admin.py
 from dojo.authorization.models import (  # noqa: E402
     Dojo_Group,
     Dojo_Group_Member,
@@ -742,7 +640,6 @@ admin.site.register(Product_Type_Group)
 # NoteHistory admin registered in dojo/notes/admin.py
 # Report_Type admin registered in dojo/reports/admin.py
 admin.site.register(DojoMeta)
-admin.site.register(Development_Environment)
-admin.site.register(Announcement)
-admin.site.register(UserAnnouncement)
-admin.site.register(BannerConf)
+# Development_Environment admin registered in dojo/development_environment/admin.py
+# Announcement + UserAnnouncement admin registered in dojo/announcement/admin.py
+# BannerConf admin registered in dojo/banner/admin.py

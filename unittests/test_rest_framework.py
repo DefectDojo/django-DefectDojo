@@ -33,14 +33,13 @@ from rest_framework.mixins import (
 )
 from rest_framework.test import APIClient
 
+from dojo.announcement.api.views import AnnouncementViewSet
 from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from dojo.api_v2.prefetch.utils import get_prefetchable_fields
 from dojo.api_v2.views import (
-    AnnouncementViewSet,
     AppAnalysisViewSet,
     ConfigurationPermissionViewSet,
-    DevelopmentEnvironmentViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -57,6 +56,7 @@ from dojo.asset.api.views import (
     AssetViewSet,
 )
 from dojo.authorization.roles_permissions import Permissions, permission_to_action
+from dojo.development_environment.api.views import DevelopmentEnvironmentViewSet
 from dojo.endpoint.api.views import EndpointStatusViewSet, EndPointViewSet
 from dojo.engagement.api.views import EngagementViewSet
 from dojo.finding.api.views import (

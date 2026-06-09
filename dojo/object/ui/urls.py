@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from . import views
+from dojo.object.ui import views
 
 urlpatterns = [
     re_path(r"^product/(?P<pid>\d+)/object/add$", views.new_object, name="new_object"),

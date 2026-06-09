@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from . import views
+from dojo.regulations.ui import views
 
 urlpatterns = [
     re_path(r"^regulations/add", views.new_regulation, name="new_regulation"),

@@ -9,9 +9,9 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from dojo.authorization.authorization import user_has_configuration_permission_or_403
+from dojo.development_environment.models import Development_Environment
+from dojo.development_environment.ui.forms import Delete_Dev_EnvironmentForm, Development_EnvironmentForm
 from dojo.filters import DevelopmentEnvironmentFilter
-from dojo.forms import Delete_Dev_EnvironmentForm, Development_EnvironmentForm
-from dojo.models import Development_Environment
 from dojo.utils import add_breadcrumb, get_page_items
 
 logger = logging.getLogger(__name__)

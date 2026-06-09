@@ -46,9 +46,7 @@ from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.jira import services as jira_services
 from dojo.labels import get_labels
 from dojo.models import (
-    Announcement,
     App_Analysis,
-    Development_Environment,
     Dojo_User,
     DojoMeta,
     Endpoint,
@@ -57,7 +55,6 @@ from dojo.models import (
     Languages,
     Network_Locations,
     Product,
-    Regulation,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
@@ -316,31 +313,8 @@ class DojoMetaViewSet(
                 raise ValidationError(msg)
 
 
-# Authorization: authenticated, configuration
-class DevelopmentEnvironmentViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.DevelopmentEnvironmentSerializer
-    queryset = Development_Environment.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (IsAuthenticated, permissions.UserHasDevelopmentEnvironmentPermission)
-
-    def get_queryset(self):
-        return Development_Environment.objects.all().order_by("id")
-
-
-# Authorization: authenticated, configuration
-class RegulationsViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.RegulationSerializer
-    queryset = Regulation.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name", "description"]
-    permission_classes = (IsAuthenticated, permissions.UserHasRegulationPermission)
-
-    def get_queryset(self):
-        return Regulation.objects.all().order_by("id")
+# DevelopmentEnvironmentViewSet moved to dojo/development_environment/api/views.py
+# RegulationsViewSet moved to dojo/regulations/api/views.py
 
 
 # Authorization: authenticated users, DjangoModelPermissions
@@ -924,15 +898,4 @@ class SLAConfigurationViewset(
         return SLA_Configuration.objects.all().order_by("id")
 
 
-# Authorization: configuration
-class AnnouncementViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.AnnouncementSerializer
-    queryset = Announcement.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
-
-    def get_queryset(self):
-        return Announcement.objects.all().order_by("id")
+# AnnouncementViewSet moved to dojo/announcement/api/views.py

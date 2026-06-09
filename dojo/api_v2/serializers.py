@@ -28,7 +28,6 @@ from dojo.models import (
     SEVERITIES,
     SEVERITY_CHOICES,
     STATS_FIELDS,
-    Announcement,
     App_Analysis,
     Development_Environment,
     DojoMeta,
@@ -43,7 +42,6 @@ from dojo.models import (
     Notes,
     Product,
     Product_API_Scan_Configuration,
-    Regulation,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
@@ -327,15 +325,6 @@ class AppAnalysisSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-from dojo.tool_type.api.serializer import ToolTypeSerializer  # noqa: E402, F401 -- re-export
-
-
-class RegulationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Regulation
-        fields = "__all__"
-
-
 from dojo.endpoint.api.serializer import (  # noqa: E402, F401 -- re-export; prefetcher discovery requires all moved ModelSerializers here
     EndpointParamsSerializer,
     EndpointSerializer,
@@ -346,8 +335,10 @@ from dojo.jira.api.serializers import (  # noqa: E402, F401 -- backward compat r
     JIRAIssueSerializer,
     JIRAProjectSerializer,
 )
+from dojo.regulations.api.serializer import RegulationSerializer  # noqa: E402, F401 -- re-export; prefetcher discovery
 from dojo.tool_config.api.serializer import ToolConfigurationSerializer  # noqa: E402, F401 -- re-export
 from dojo.tool_product.api.serializer import ToolProductSettingsSerializer  # noqa: E402, F401 -- re-export
+from dojo.tool_type.api.serializer import ToolTypeSerializer  # noqa: E402, F401 -- re-export; prefetcher discovery
 
 
 class SonarqubeIssueSerializer(serializers.ModelSerializer):
@@ -362,11 +353,9 @@ class SonarqubeIssueTransitionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Development_Environment
-        fields = "__all__"
-
+from dojo.development_environment.api.serializer import (  # noqa: E402 -- re-export; prefetcher discovery
+    DevelopmentEnvironmentSerializer,  # noqa: F401 -- re-export; prefetcher discovery
+)
 
 # Risk acceptance serializers live in dojo/risk_acceptance/api/serializer.py. Re-exported here
 # for backward compat: RiskAcceptanceSerializer is lazy-imported by dojo/finding/api/serializer.py
@@ -1106,21 +1095,7 @@ class ConfigurationPermissionSerializer(serializers.ModelSerializer):
         exclude = ("content_type",)
 
 
-class AnnouncementSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Announcement
-        fields = "__all__"
-
-    def create(self, validated_data):
-        validated_data["id"] = 1
-        try:
-            return super().create(validated_data)
-        except IntegrityError as e:
-            if 'duplicate key value violates unique constraint "dojo_announcement_pkey"' in str(e):
-                msg = "No more than one Announcement is allowed"
-                raise serializers.ValidationError(msg)
-            raise
-
-
+from dojo.announcement.api.serializer import (  # noqa: E402 -- re-export; prefetcher discovery
+    AnnouncementSerializer,  # noqa: F401 -- re-export; prefetcher discovery
+)
 from dojo.notifications.api.serializer import NotificationWebhooksSerializer  # noqa: E402, F401  -- backward compat

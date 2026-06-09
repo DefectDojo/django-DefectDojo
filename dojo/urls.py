@@ -10,13 +10,12 @@ from rest_framework.authtoken import views as tokenviews
 from rest_framework.routers import DefaultRouter
 
 from dojo import views
-from dojo.announcement.urls import urlpatterns as announcement_urls
+from dojo.announcement.api.urls import add_announcement_urls
+from dojo.announcement.ui.urls import urlpatterns as announcement_urls
 from dojo.api_v2.views import (
-    AnnouncementViewSet,
     AppAnalysisViewSet,
     CeleryViewSet,
     ConfigurationPermissionViewSet,
-    DevelopmentEnvironmentViewSet,
     DojoMetaViewSet,
     ImportLanguagesView,
     ImportScanView,
@@ -26,7 +25,6 @@ from dojo.api_v2.views import (
     LanguageTypeViewSet,
     LanguageViewSet,
     NetworkLocationsViewset,
-    RegulationsViewSet,
     ReImportScanView,
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
@@ -35,10 +33,11 @@ from dojo.api_v2.views import (
 from dojo.api_v2.views import DojoSpectacularAPIView as SpectacularAPIView
 from dojo.asset.api.urls import add_asset_urls
 from dojo.asset.urls import urlpatterns as asset_urls
-from dojo.banner.urls import urlpatterns as banner_urls
+from dojo.banner.ui.urls import urlpatterns as banner_urls
 from dojo.benchmark.ui.urls import urlpatterns as benchmark_urls
 from dojo.components.urls import urlpatterns as component_urls
-from dojo.development_environment.urls import urlpatterns as dev_env_urls
+from dojo.development_environment.api.urls import add_development_environment_urls
+from dojo.development_environment.ui.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.api.urls import add_endpoint_urls, register_endpoint_meta_import
 from dojo.endpoint.ui.urls import urlpatterns as endpoint_urls
 from dojo.engagement.api.urls import add_engagement_urls
@@ -58,12 +57,13 @@ from dojo.notes.api.urls import add_notes_urls
 from dojo.notes.ui.urls import urlpatterns as notes_urls
 from dojo.notifications.api.urls import add_notifications_urls
 from dojo.notifications.ui.urls import urlpatterns as notifications_urls
-from dojo.object.urls import urlpatterns as object_urls
+from dojo.object.ui.urls import urlpatterns as object_urls
 from dojo.organization.api.urls import add_organization_urls
 from dojo.organization.urls import urlpatterns as organization_urls
 from dojo.product.api.urls import add_product_urls
 from dojo.product_type.api.urls import add_product_type_urls
-from dojo.regulations.urls import urlpatterns as regulations
+from dojo.regulations.api.urls import add_regulations_urls
+from dojo.regulations.ui.urls import urlpatterns as regulations
 from dojo.reports.ui.urls import urlpatterns as reports_urls
 from dojo.risk_acceptance.api.urls import add_risk_acceptance_urls
 from dojo.search.urls import urlpatterns as search_urls
@@ -98,9 +98,9 @@ handler400 = "dojo.views.custom_bad_request_view"
 
 # v2 api written in django-rest-framework
 v2_api = DefaultRouter()
-v2_api.register(r"announcements", AnnouncementViewSet, basename="announcement")
+v2_api = add_announcement_urls(v2_api)
 v2_api.register(r"configuration_permissions", ConfigurationPermissionViewSet, basename="permission")
-v2_api.register(r"development_environments", DevelopmentEnvironmentViewSet, basename="development_environment")
+v2_api = add_development_environment_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   dojo_groups, dojo_group_members → pro/groups, pro/group_members
 v2_api = register_endpoint_meta_import(v2_api)
@@ -127,7 +127,7 @@ v2_api = add_engagement_urls(v2_api)
 v2_api = add_finding_urls(v2_api)
 # RBAC endpoints moved to Pro under legacy authorization:
 #   product_type_members, product_type_groups → pro/product_type_members, pro/product_type_groups
-v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")
+v2_api = add_regulations_urls(v2_api)
 v2_api.register(r"reimport-scan", ReImportScanView, basename="reimportscan")
 v2_api = add_risk_acceptance_urls(v2_api)
 # RBAC endpoint moved to Pro under legacy authorization: roles → pro/roles

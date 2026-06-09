@@ -7,8 +7,8 @@ from django.urls import reverse
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
-from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
-from dojo.models import Announcement, UserAnnouncement
+from dojo.announcement.models import Announcement, UserAnnouncement
+from dojo.announcement.ui.forms import AnnouncementCreateForm, AnnouncementRemoveForm
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
