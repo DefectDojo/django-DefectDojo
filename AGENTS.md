@@ -58,18 +58,22 @@ Modules in various stages of reorganization:
 | **test** | In module | N/A | Done | Done | **Complete** (#14971) |
 | **engagement** | In module | In module | Done | Done | **Complete** (#14972) |
 | **product** | In module | N/A | Done | Done | **Complete** (#14973) |
-| **finding** | In module | N/A (helper.py) | Done | Done | **Complete** (#14974); CWE+Burp pending |
-| **peripheral (×18)** | In dojo/models.py | — | Partial/none | Partial/none | **Phase 10** (PRs #6–10, see below) |
+| **finding** | In module | N/A (helper.py) | Done | Done | **Complete** (#14974, incl. CWE + BurpRawRequestResponse) |
+| **user / system_settings** | In module | N/A | Done | Done | **Complete** (#14981) |
+| **endpoint / tool_type / tool_config / tool_product** | In module | N/A | Done | Done | **Complete** (#14982) |
+| **survey / benchmark** | In module | N/A | Done | N/A (no API) | **Complete** (#14983) |
+| **notes / note_type / file_uploads / reports / risk_acceptance** | In module | N/A | Done | Done | **Complete** (#14986) |
+| **regulations / banner / announcement / development_environment / object** | In module | N/A | Done | Partial (API where one exists) | **Complete** (#14987) |
 
 ### Monolithic Files Being Decomposed
 
-These files still contain code for multiple modules. Extract code to the target module's subdirectory and leave a re-export stub.
+These files still contain code for multiple modules. Extract code to the target module's subdirectory and leave a re-export stub. (Counts reflect the completed Phase 10 stack; they shrink as branches merge to `dev`.)
 
-- `dojo/models.py` (4,973 lines) — All model definitions
-- `dojo/forms.py` (4,127 lines) — All Django forms
-- `dojo/filters.py` (4,016 lines) — All UI and API filter classes
-- `dojo/api_v2/serializers.py` (3,387 lines) — All DRF serializers
-- `dojo/api_v2/views.py` (3,519 lines) — All API viewsets
+- `dojo/models.py` (~645 lines) — re-export hub + the few models intentionally left here (`DojoMeta`, `Network_Locations`, `Sonarqube_Issue`/`Sonarqube_Issue_Transition`, `Check_List`, `Testing_Guide_Category`/`Testing_Guide`, `Language_Type`/`Languages`, `App_Analysis`, `SLA_Configuration`) plus shared utilities (`copy_model_util`, `get_current_date`, `tomorrow`, `UniqueUploadNameProvider`)
+- `dojo/forms.py` (~914 lines) — remaining/shared Django forms
+- `dojo/filters.py` (~1,376 lines) — remaining/shared filter classes + shared bases
+- `dojo/api_v2/serializers.py` (~1,101 lines) — remaining serializers + re-exports for prefetcher discovery
+- `dojo/api_v2/views.py` (~901 lines) — remaining viewsets + shared base classes/helpers
 
 ---
 
