@@ -1168,10 +1168,10 @@ def import_history(finding, *, autoescape=True):
 
     return mark_safe(html % (list_of_status_changes))
 
+
 @register.filter
 def has_required_field(form):
     """Returns True if the form has at least one required field"""
     if not form:
         return False
     return any(field.field.required for field in form)
-
