@@ -19,7 +19,6 @@ from django.utils.translation import gettext_lazy as _
 from tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
-from dojo.finding.queries import get_authorized_findings
 from dojo.github.ui.forms import (  # noqa: F401 -- backward compat
     DeleteGITHUBConfForm,
     ExpressGITHUBForm,
@@ -54,13 +53,11 @@ from dojo.models import (
     DojoMeta,
     Endpoint,
     FileUpload,
-    Finding,
     Finding_Group,
     Objects_Product,
     Product_API_Scan_Configuration,
     Product_Type,
     Regulation,
-    Risk_Acceptance,
     SLA_Configuration,
     Test_Type,
     User,
@@ -70,7 +67,6 @@ from dojo.tools.factory import get_choices_sorted, requires_file, requires_tool_
 from dojo.user.utils import get_configuration_permissions_fields
 from dojo.utils import (
     get_password_requirements_string,
-    get_system_setting,
     is_finding_groups_enabled,
     is_scan_file_too_large,
 )
@@ -551,64 +547,6 @@ class UploadThreatForm(forms.Form):
                 raise ValidationError(msg)
 
 
-class EditRiskAcceptanceForm(forms.ModelForm):
-    # unfortunately django forces us to repeat many things here. choices, default, required etc.
-    recommendation = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect, label="Security Recommendation")
-    decision = forms.ChoiceField(choices=Risk_Acceptance.TREATMENT_CHOICES, initial=Risk_Acceptance.TREATMENT_ACCEPT, widget=forms.RadioSelect)
-
-    path = forms.FileField(label="Proof", required=False, widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}))
-    expiration_date = forms.DateTimeField(required=False, widget=forms.TextInput(attrs={"class": "datepicker"}))
-
-    class Meta:
-        model = Risk_Acceptance
-        exclude = ["accepted_findings", "notes"]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["path"].help_text = f"Existing proof uploaded: {self.instance.filename()}" if self.instance.filename() else "None"
-        self.fields["expiration_date_warned"].disabled = True
-        self.fields["expiration_date_handled"].disabled = True
-
-    def clean_path(self):
-        if (data := self.cleaned_data.get("path")) is not None:
-            ext = Path(data.name).suffix  # [0] returns path+filename
-            valid_extensions = settings.FILE_UPLOAD_TYPES
-            if ext.lower() not in valid_extensions:
-                if accepted_extensions := f"{', '.join(valid_extensions)}":
-                    msg = f"Unsupported extension. Supported extensions are as follows: {accepted_extensions}"
-                else:
-                    msg = "File uploads are prohibited due to the list of acceptable file extensions being empty"
-                raise ValidationError(msg)
-        return data
-
-
-class RiskAcceptanceForm(EditRiskAcceptanceForm):
-    accepted_findings = forms.ModelMultipleChoiceField(
-        queryset=Finding.objects.none(), required=True,
-        widget=forms.widgets.SelectMultiple(attrs={"size": 10}),
-        help_text=("Active, verified findings listed, please select to add findings."))
-    notes = forms.CharField(required=False, max_length=2400,
-                            widget=forms.Textarea,
-                            label="Notes")
-
-    class Meta:
-        model = Risk_Acceptance
-        fields = "__all__"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        expiration_delta_days = get_system_setting("risk_acceptance_form_default_days")
-        logger.debug("expiration_delta_days: %i", expiration_delta_days)
-        if expiration_delta_days > 0:
-            expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)
-            # logger.debug('setting default expiration_date: %s', expiration_date)
-            self.fields["expiration_date"].initial = expiration_date
-        # self.fields['path'].help_text = 'Existing proof uploaded: %s' % self.instance.filename() if self.instance.filename() else 'None'
-        self.fields["accepted_findings"].queryset = get_authorized_findings("edit")
-        if disclaimer := get_system_setting("disclaimer_notes"):
-            self.disclaimer = disclaimer.strip()
-
-
 class BaseManageFileFormSet(forms.BaseModelFormSet):
     def clean(self):
         """Validate the IP/Mask combo is in CIDR format"""
@@ -638,12 +576,13 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
 ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=["title", "file"], can_delete=True, formset=BaseManageFileFormSet)
 
 
-class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
-    path = forms.FileField(label="Proof", required=True, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
-
-    class Meta:
-        model = Risk_Acceptance
-        fields = ["path"]
+# Risk acceptance forms live in dojo/risk_acceptance/ui/forms.py. Re-exported here for
+# backward compat — engagement's UI views import them from dojo.forms.
+from dojo.risk_acceptance.ui.forms import (  # noqa: E402, F401 -- backward compat
+    EditRiskAcceptanceForm,
+    ReplaceRiskAcceptanceProofForm,
+    RiskAcceptanceForm,
+)
 
 
 class CheckForm(forms.ModelForm):

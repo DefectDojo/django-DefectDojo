@@ -28,7 +28,6 @@ from dojo.api_v2.views import (
     NetworkLocationsViewset,
     RegulationsViewSet,
     ReImportScanView,
-    RiskAcceptanceViewSet,
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
     SonarqubeIssueViewSet,
@@ -66,6 +65,7 @@ from dojo.product.api.urls import add_product_urls
 from dojo.product_type.api.urls import add_product_type_urls
 from dojo.regulations.urls import urlpatterns as regulations
 from dojo.reports.ui.urls import urlpatterns as reports_urls
+from dojo.risk_acceptance.api.urls import add_risk_acceptance_urls
 from dojo.search.urls import urlpatterns as search_urls
 from dojo.sla_config.urls import urlpatterns as sla_urls
 from dojo.survey.ui.urls import urlpatterns as survey_urls
@@ -129,7 +129,7 @@ v2_api = add_finding_urls(v2_api)
 #   product_type_members, product_type_groups → pro/product_type_members, pro/product_type_groups
 v2_api.register(r"regulations", RegulationsViewSet, basename="regulations")
 v2_api.register(r"reimport-scan", ReImportScanView, basename="reimportscan")
-v2_api.register(r"risk_acceptance", RiskAcceptanceViewSet, basename="risk_acceptance")
+v2_api = add_risk_acceptance_urls(v2_api)
 # RBAC endpoint moved to Pro under legacy authorization: roles → pro/roles
 v2_api.register(r"sla_configurations", SLAConfigurationViewset, basename="sla_configurations")
 v2_api.register(r"sonarqube_issues", SonarqubeIssueViewSet, basename="sonarqube_issue")

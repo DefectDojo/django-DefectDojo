@@ -8,10 +8,9 @@ import six
 import tagulous
 from django.conf import settings
 from django.contrib.auth.models import Permission
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.utils import IntegrityError
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from drf_spectacular.utils import extend_schema_field
@@ -19,8 +18,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 
-import dojo.risk_acceptance.helper as ra_helper
-from dojo.finding.queries import get_authorized_findings
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
@@ -47,7 +44,6 @@ from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
     Regulation,
-    Risk_Acceptance,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
@@ -289,6 +285,11 @@ class MetaMainSerializer(serializers.Serializer):
         return data
 
 
+# Engagement serializers live in dojo/engagement/api/serializer.py.
+# EngagementSerializer is re-exported here because ReportGenerateSerializer and
+# RiskAcceptanceSerializer (below) still reference it. The other engagement
+# serializers are imported directly from dojo.engagement.api by their consumers.
+from dojo.engagement.api.serializer import EngagementSerializer  # noqa: E402 -- backward compat
 from dojo.file_uploads.api.serializer import (  # noqa: E402, F401 -- re-export; prefetcher + lazy consumers in finding/test/engagement
     FileSerializer,
     RawFileSerializer,
@@ -298,28 +299,6 @@ from dojo.notes.api.serializer import (  # noqa: E402, F401 -- re-export; prefet
     NoteHistorySerializer,
     NoteSerializer,
 )
-from dojo.user.api.serializer import (  # noqa: E402, F401 -- backward compat + prefetcher discovery
-    AddUserSerializer,
-    UserContactInfoSerializer,
-    UserProfileSerializer,
-    UserSerializer,
-    UserStubSerializer,
-)
-
-
-class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
-    path = serializers.FileField(required=True)
-
-    class Meta:
-        model = Risk_Acceptance
-        fields = ["path"]
-
-
-# Engagement serializers live in dojo/engagement/api/serializer.py.
-# EngagementSerializer is re-exported here because ReportGenerateSerializer and
-# RiskAcceptanceSerializer (below) still reference it. The other engagement
-# serializers are imported directly from dojo.engagement.api by their consumers.
-from dojo.engagement.api.serializer import EngagementSerializer  # noqa: E402 -- backward compat
 
 # Product serializers live in dojo/product/api/serializer.py. ProductSerializer is
 # re-exported because ReportGenerateSerializer (below) still references it;
@@ -331,13 +310,13 @@ from dojo.product.api.serializer import (  # noqa: E402 -- backward compat
     ProductSerializer,
 )
 from dojo.product_type.api.serializer import ProductTypeSerializer  # noqa: E402
-
-
-class RiskAcceptanceToNotesSerializer(serializers.Serializer):
-    risk_acceptance_id = serializers.PrimaryKeyRelatedField(
-        queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
-    )
-    notes = NoteSerializer(many=True)
+from dojo.user.api.serializer import (  # noqa: E402, F401 -- backward compat + prefetcher discovery
+    AddUserSerializer,
+    UserContactInfoSerializer,
+    UserProfileSerializer,
+    UserSerializer,
+    UserStubSerializer,
+)
 
 
 class AppAnalysisSerializer(serializers.ModelSerializer):
@@ -389,116 +368,15 @@ class DevelopmentEnvironmentSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+# Risk acceptance serializers live in dojo/risk_acceptance/api/serializer.py. Re-exported here
+# for backward compat: RiskAcceptanceSerializer is lazy-imported by dojo/finding/api/serializer.py
+# (schema overrides); the ModelSerializers must also stay discoverable by the prefetcher.
+from dojo.risk_acceptance.api.serializer import (  # noqa: E402 -- backward compat / prefetcher discovery
+    RiskAcceptanceProofSerializer,  # noqa: F401
+    RiskAcceptanceSerializer,  # noqa: F401 -- lazy-imported by finding schema overrides + prefetcher
+    RiskAcceptanceToNotesSerializer,  # noqa: F401
+)
 from dojo.test.api.serializer import TestSerializer  # noqa: E402 -- backward compat re-export
-
-
-class RiskAcceptanceSerializer(serializers.ModelSerializer):
-    path = serializers.SerializerMethodField()
-
-    def create(self, validated_data):
-        instance = super().create(validated_data)
-        user = getattr(self.context.get("request", None), "user", None)
-        ra_helper.add_findings_to_risk_acceptance(user, instance, instance.accepted_findings.all())
-
-        # Add risk acceptance to engagement
-        # This is fine as Pro has its own model + relationshop to track links with engagements.
-        if instance.accepted_findings.exists():
-            engagement = instance.accepted_findings.first().test.engagement
-            engagement.risk_acceptance.add(instance)
-
-        return instance
-
-    def update(self, instance, validated_data):
-        # Determine findings to risk accept, and findings to unaccept risk
-        existing_findings = Finding.objects.filter(risk_acceptance=self.instance.id)
-        new_findings_ids = [x.id for x in validated_data.get("accepted_findings", [])]
-        new_findings = Finding.objects.filter(id__in=new_findings_ids)
-        findings_to_add = set(new_findings) - set(existing_findings)
-        findings_to_remove = set(existing_findings) - set(new_findings)
-        findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
-        findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
-        # Make the update in the database
-        instance = super().update(instance, validated_data)
-        user = getattr(self.context.get("request", None), "user", None)
-        # Add the new findings
-        ra_helper.add_findings_to_risk_acceptance(user, instance, findings_to_add)
-        # Remove the ones that were not present in the payload
-        for finding in findings_to_remove:
-            ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
-
-        # Handle orphaned risk acceptances: link to engagement if it now has findings
-        # This is fine as Pro has its own model + relationshop to track links with engagements.
-        if instance.accepted_findings.exists() and not instance.engagement:
-            engagement = instance.accepted_findings.first().test.engagement
-            engagement.risk_acceptance.add(instance)
-
-        return instance
-
-    @extend_schema_field(serializers.CharField())
-    def get_path(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
-        path = "No proof has been supplied"
-        if engagement and obj.filename() is not None:
-            path = reverse(
-                "download_risk_acceptance", args=(engagement.id, obj.id),
-            )
-            request = self.context.get("request")
-            if request:
-                path = request.build_absolute_uri(path)
-        return path
-
-    @extend_schema_field(serializers.IntegerField())
-    def get_engagement(self, obj):
-        engagement = Engagement.objects.filter(
-            risk_acceptance__id__in=[obj.id],
-        ).first()
-        return EngagementSerializer(read_only=True).to_representation(
-            engagement,
-        )
-
-    def validate(self, data):
-        def validate_findings_have_same_engagement(finding_objects: list[Finding]):
-            engagements = finding_objects.values_list("test__engagement__id", flat=True).distinct().count()
-            if engagements > 1:
-                msg = "You are not permitted to add findings from multiple engagements"
-                raise PermissionDenied(msg)
-
-        findings = data.get("accepted_findings", [])
-        findings_ids = [x.id for x in findings]
-        finding_objects = Finding.objects.filter(id__in=findings_ids)
-        authed_findings = get_authorized_findings("edit").filter(id__in=findings_ids)
-        if len(findings) != len(authed_findings):
-            msg = "You are not permitted to add one or more selected findings to this risk acceptance"
-            raise PermissionDenied(msg)
-        if self.context["request"].method == "POST":
-            validate_findings_have_same_engagement(finding_objects)
-
-            # Validate product allows full risk acceptance BEFORE creating instance
-            if finding_objects.exists():
-                engagement = finding_objects.first().test.engagement
-                if not engagement.product.enable_full_risk_acceptance:
-                    msg = "Full risk acceptance is not enabled for this product"
-                    raise PermissionDenied(msg)
-        elif self.context["request"].method in {"PATCH", "PUT"}:
-            # Use the reverse relation instead of filtering
-            existing_findings = self.instance.accepted_findings.all()
-            existing_and_new_findings = existing_findings | finding_objects
-            validate_findings_have_same_engagement(existing_and_new_findings)
-
-            # Explicit check to prevent engagement switching
-            risk_acceptance_engagement = self.instance.engagement
-            if risk_acceptance_engagement and finding_objects.exists():
-                new_findings_engagement = finding_objects.first().test.engagement
-                if risk_acceptance_engagement.id != new_findings_engagement.id:
-                    msg = f"Risk Acceptance belongs to engagement {risk_acceptance_engagement.id}. Cannot add findings from engagement {new_findings_engagement.id}"
-                    raise ValidationError(msg)
-        return data
-
-    class Meta:
-        model = Risk_Acceptance
-        fields = "__all__"
 
 
 class CommonImportScanSerializer(serializers.Serializer):

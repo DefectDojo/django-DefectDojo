@@ -10,10 +10,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from dojo.api_v2.serializers import RiskAcceptanceSerializer
 from dojo.authorization.api_permissions import UserHasRiskAcceptanceRelatedObjectPermission
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.models import Engagement, Risk_Acceptance, User, Vulnerability_Id
+from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
 
 AcceptedRisk = NamedTuple("AcceptedRisk", (("vulnerability_id", str), ("justification", str), ("accepted_by", str)))
 
