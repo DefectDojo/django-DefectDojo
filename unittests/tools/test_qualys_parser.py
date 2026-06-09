@@ -239,3 +239,29 @@ class TestQualysParser(DojoTestCase):
             }
 
             self.assertEqual(expected_counts, counts)
+
+    def test_parse_file_same_qid_different_ports_has_separate_endpoints(self):
+        """Test that findings with same QID but different ports get separate endpoints.
+        Regression test for https://github.com/DefectDojo/django-DefectDojo/issues/13682
+        """
+        with (
+            get_unit_tests_scans_path("qualys") / "qualys_same_qid_different_ports.xml").open(encoding="utf-8",
+        ) as testfile:
+            parser = QualysParser()
+            findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
+            # Same QID on 3 different ports should produce 3 separate findings
+            self.assertEqual(3, len(findings))
+            # All findings should have the same title (QID unchanged)
+            for finding in findings:
+                self.assertEqual(finding.title, "QID-12345 | Test Vulnerability")
+            # Each finding should have a different port on its endpoint
+            ports = set()
+            for finding in findings:
+                locations = self.get_unsaved_locations(finding)
+                self.assertEqual(1, len(locations))
+                self.assertEqual(locations[0].host, "testhost.example.com")
+                ports.add(locations[0].port)
+            # All 3 ports should be present
+            self.assertEqual({80, 443, 8080}, ports)
+
