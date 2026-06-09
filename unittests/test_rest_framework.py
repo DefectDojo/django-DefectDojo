@@ -50,7 +50,6 @@ from dojo.api_v2.views import (
     LanguageViewSet,
     NotesViewSet,
     NoteTypeViewSet,
-    RiskAcceptanceViewSet,
     SonarqubeIssueViewSet,
 )
 from dojo.asset.api.views import (
@@ -109,6 +108,7 @@ from dojo.organization.api.views import (
 )
 from dojo.product.api.views import ProductAPIScanConfigurationViewSet, ProductViewSet
 from dojo.product_type.api.views import ProductTypeViewSet
+from dojo.risk_acceptance.api.views import RiskAcceptanceViewSet
 from dojo.test.api.views import TestsViewSet, TestTypesViewSet
 from dojo.tool_config.api.views import ToolConfigurationsViewSet
 from dojo.tool_product.api.views import ToolProductSettingsViewSet
