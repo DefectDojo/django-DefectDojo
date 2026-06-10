@@ -45,6 +45,7 @@ from tagulous.models.managers import FakeTagRelatedManager  # noqa: F401 -- back
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
+from dojo.cicd_infrastructure.models import CICDInfrastructure
 from dojo.validators import cvss3_validator, cvss4_validator
 
 if TYPE_CHECKING:
@@ -1337,26 +1338,6 @@ class Tool_Configuration(models.Model):
         return self.name
 
 
-class CICDInfrastructure(models.Model):
-    INFRASTRUCTURE_TYPE_CHOICES = (
-        ("build_server", "Build Server"),
-        ("scm_server", "SCM Server"),
-        ("orchestration", "Orchestration Engine"),
-    )
-
-    name = models.CharField(max_length=200)
-    description = models.CharField(max_length=2000, blank=True, default="")
-    url = models.URLField(max_length=2000, blank=True, default="", help_text=_("Public URL of the tool (e.g., https://jenkins.company.com)"))
-    infrastructure_type = models.CharField(max_length=30, choices=INFRASTRUCTURE_TYPE_CHOICES)
-
-    class Meta:
-        ordering = ["name"]
-        unique_together = [("name", "infrastructure_type")]
-
-    def __str__(self):
-        return self.name
-
-
 class Product_API_Scan_Configuration(models.Model):
     product = models.ForeignKey(Product, null=False, blank=False, on_delete=models.CASCADE)
     tool_configuration = models.ForeignKey(Tool_Configuration, null=False, blank=False, on_delete=models.CASCADE)
@@ -1493,9 +1474,9 @@ class Engagement(BaseModel):
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text=_("Tag or branch of the product the engagement tested."), verbose_name=_("Branch/Tag"))
     source_code_management_uri = models.URLField(max_length=600, null=True, blank=True, editable=True, verbose_name=_("Repo"), help_text=_("Resource link to source code"))
-    cicd_build_server = models.ForeignKey("CICDInfrastructure", null=True, blank=True, related_name="engagements_as_build_server", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "build_server"}, verbose_name=_("Build Server"), help_text=_("Build server used for this CI/CD engagement"))
-    cicd_scm_server = models.ForeignKey("CICDInfrastructure", null=True, blank=True, related_name="engagements_as_scm_server", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "scm_server"}, verbose_name=_("SCM Server"), help_text=_("Source code management server used for this CI/CD engagement"))
-    cicd_orchestration_engine = models.ForeignKey("CICDInfrastructure", null=True, blank=True, related_name="engagements_as_orchestration", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "orchestration"}, verbose_name=_("Orchestration Engine"), help_text=_("Orchestration engine used for this CI/CD engagement"))
+    cicd_build_server = models.ForeignKey(CICDInfrastructure, null=True, blank=True, related_name="engagements_as_build_server", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "build_server"}, verbose_name=_("Build Server"), help_text=_("Build server used for this CI/CD engagement"))
+    cicd_scm_server = models.ForeignKey(CICDInfrastructure, null=True, blank=True, related_name="engagements_as_scm_server", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "scm_server"}, verbose_name=_("SCM Server"), help_text=_("Source code management server used for this CI/CD engagement"))
+    cicd_orchestration_engine = models.ForeignKey(CICDInfrastructure, null=True, blank=True, related_name="engagements_as_orchestration", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "orchestration"}, verbose_name=_("Orchestration Engine"), help_text=_("Orchestration engine used for this CI/CD engagement"))
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name=_("Deduplication within this engagement only"), help_text=_("If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
@@ -4445,7 +4426,6 @@ admin.site.register(Finding, FindingAdmin)
 admin.site.register(FileUpload)
 admin.site.register(FileAccessToken)
 admin.site.register(Engagement)
-admin.site.register(CICDInfrastructure)
 admin.site.register(Risk_Acceptance)
 admin.site.register(Check_List)
 admin.site.register(Test_Type)
