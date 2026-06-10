@@ -86,7 +86,6 @@ from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
     Check_List,
-    CICDInfrastructure,
     Development_Environment,
     Dojo_User,
     DojoMeta,
@@ -2210,19 +2209,6 @@ class ToolProductSettingsViewSet(
 
 
 # Authorization: configuration
-class CICDInfrastructureViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.CICDInfrastructureSerializer
-    queryset = CICDInfrastructure.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name", "infrastructure_type"]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return CICDInfrastructure.objects.all().order_by("id")
-
-
 class ToolTypesViewSet(
     DojoModelViewSet,
 ):

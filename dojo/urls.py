@@ -16,7 +16,6 @@ from dojo.api_v2.views import (
     AppAnalysisViewSet,
     BurpRawRequestResponseViewSet,
     CeleryViewSet,
-    CICDInfrastructureViewSet,
     ConfigurationPermissionViewSet,
     DevelopmentEnvironmentViewSet,
     DojoMetaViewSet,
@@ -62,6 +61,7 @@ from dojo.asset.api.urls import add_asset_urls
 from dojo.asset.urls import urlpatterns as asset_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
+from dojo.cicd_infrastructure.api.urls import add_cicd_infrastructure_urls
 from dojo.cicd_infrastructure.urls import urlpatterns as cicd_infrastructure_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
@@ -154,7 +154,6 @@ v2_api.register(r"technologies", AppAnalysisViewSet, basename="app_analysis")
 v2_api.register(r"tests", TestsViewSet, basename="test")
 v2_api.register(r"test_types", TestTypesViewSet, basename="test_type")
 v2_api.register(r"test_imports", TestImportViewSet, basename="test_imports")
-v2_api.register(r"cicd_infrastructure", CICDInfrastructureViewSet, basename="cicd_infrastructure")
 v2_api.register(r"tool_configurations", ToolConfigurationsViewSet, basename="tool_configuration")
 v2_api.register(r"tool_product_settings", ToolProductSettingsViewSet, basename="tool_product_settings")
 v2_api.register(r"tool_types", ToolTypesViewSet, basename="tool_type")
@@ -173,6 +172,7 @@ else:
 v2_api.register(r"celery", CeleryViewSet, basename="celery")
 # V3
 add_asset_urls(v2_api)
+add_cicd_infrastructure_urls(v2_api)
 add_organization_urls(v2_api)
 
 ur = []
