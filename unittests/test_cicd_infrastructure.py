@@ -12,6 +12,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from dojo.forms import CICDInfrastructureForm
 from dojo.models import CICDInfrastructure
+from unittests.dojo_test_case import versioned_fixtures
 
 # ---------------------------------------------------------------------------
 # Model
@@ -91,6 +92,7 @@ class CICDInfrastructureFormTests(APITestCase):
 # API
 # ---------------------------------------------------------------------------
 
+@versioned_fixtures
 class CICDInfrastructureAPITests(APITestCase):
 
     """
