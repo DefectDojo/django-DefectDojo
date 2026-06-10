@@ -1,4 +1,5 @@
-"""Tests for the CICDInfrastructure model, form, and API.
+"""
+Tests for the CICDInfrastructure model, form, and API.
 
 Migration behaviour is tested separately in
 ``test_cicd_infrastructure_migration.py``.
@@ -12,31 +13,33 @@ from rest_framework.test import APIClient, APITestCase
 from dojo.forms import CICDInfrastructureForm
 from dojo.models import CICDInfrastructure
 
-
 # ---------------------------------------------------------------------------
 # Model
 # ---------------------------------------------------------------------------
 
+
 class CICDInfrastructureModelTests(APITestCase):
+
     """Model-level constraints and defaults."""
 
     def test_unique_together_within_same_type_rejects_duplicate(self):
         CICDInfrastructure.objects.create(name="Jenkins", infrastructure_type="build_server")
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                CICDInfrastructure.objects.create(name="Jenkins", infrastructure_type="build_server")
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            CICDInfrastructure.objects.create(name="Jenkins", infrastructure_type="build_server")
 
     def test_same_name_across_different_types_allowed(self):
-        """unique_together is (name, infrastructure_type), so the same name across
+        """
+        unique_together is (name, infrastructure_type), so the same name across
         different types coexists — supports the 'one Jenkins instance, multiple
-        roles' case."""
+        roles' case.
+        """
         CICDInfrastructure.objects.create(name="Jenkins", infrastructure_type="build_server")
         CICDInfrastructure.objects.create(name="Jenkins", infrastructure_type="scm_server")
         CICDInfrastructure.objects.create(name="Jenkins", infrastructure_type="orchestration")
         self.assertEqual(CICDInfrastructure.objects.filter(name="Jenkins").count(), 3)
 
     def test_description_and_url_default_to_empty_string(self):
-        """description and url are non-null with default='' (no None values)."""
+        """Description and url are non-null with default='' (no None values)."""
         infra = CICDInfrastructure.objects.create(name="Bare", infrastructure_type="build_server")
         self.assertEqual(infra.description, "")
         self.assertEqual(infra.url, "")
@@ -47,6 +50,7 @@ class CICDInfrastructureModelTests(APITestCase):
 # ---------------------------------------------------------------------------
 
 class CICDInfrastructureFormTests(APITestCase):
+
     """Form-level behaviour — specifically the type-locked-on-edit rule."""
 
     def test_infrastructure_type_editable_on_create(self):
@@ -61,9 +65,11 @@ class CICDInfrastructureFormTests(APITestCase):
         self.assertTrue(form.fields["infrastructure_type"].disabled)
 
     def test_disabled_field_ignores_posted_value(self):
-        """Django enforces ``disabled=True`` server-side — POSTed values
+        """
+        Django enforces ``disabled=True`` server-side — POSTed values
         for the type field on edit are silently ignored, so users cannot
-        sneak around the UI lock."""
+        sneak around the UI lock.
+        """
         existing = CICDInfrastructure.objects.create(
             name="LockedType2", infrastructure_type="build_server",
         )
@@ -86,8 +92,11 @@ class CICDInfrastructureFormTests(APITestCase):
 # ---------------------------------------------------------------------------
 
 class CICDInfrastructureAPITests(APITestCase):
-    """The /cicd_infrastructure endpoint uses UserHasConfigurationPermissionSuperuser
-    — superusers can do anything; non-superusers need the explicit Django permission."""
+
+    """
+    The /cicd_infrastructure endpoint uses UserHasConfigurationPermissionSuperuser
+    — superusers can do anything; non-superusers need the explicit Django permission.
+    """
 
     fixtures = ["dojo_testdata.json"]
 
