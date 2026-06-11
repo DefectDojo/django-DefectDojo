@@ -18,7 +18,7 @@
     {{ field }}
 {% endfor %}
 
-{% if form|has_required_field %}
+{% if form|has_required_field and SHOW_A11Y_REQUIRED_FIELDS_NOTICE %}
     <div class="form-group">
         <div class="col-sm-offset-2 col-sm-10">
             <p class="help-block">

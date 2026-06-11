@@ -127,7 +127,8 @@ env = environ.FileAwareEnv(
     # Falls back to a plain queryset on any error (logged).
     DD_WATSON_INDEX_PREFETCH_ENABLED=(bool, True),
     DD_FOOTER_VERSION=(str, ""),
-    # models should be passed to celery by ID, default is False (for now)
+    # Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+    DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE=(bool, True),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -624,6 +625,9 @@ TEAM_NAME = env("DD_TEAM_NAME")
 
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
+
+# Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+SHOW_A11Y_REQUIRED_FIELDS_NOTICE = env("DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE")
 
 # V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
