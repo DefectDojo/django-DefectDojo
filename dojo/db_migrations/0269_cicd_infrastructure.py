@@ -73,7 +73,27 @@ class Migration(migrations.Migration):
                 "unique_together": {("name", "infrastructure_type")},
             },
         ),
-        # Step 2: Add new FK fields to Engagement (before removing old ones)
+        # Step 2: Remove old pgtrigger triggers FIRST.
+        # The triggers reference the old column names (build_server_id, etc.). If we left
+        # them in place, the data migration (Step 4) would still fire AFTER UPDATE on each
+        # engagement.save() and write rows to dojo_engagementevent that record the old
+        # columns (untouched, so they look like no-op updates) while missing the actual
+        # change to the new cicd_* columns — misleading audit history. Dropping the old
+        # triggers up front skips that noise; the new triggers are re-added at Step 7
+        # once the column renames are in place.
+        pgtrigger.migrations.RemoveTrigger(
+            model_name='engagement',
+            name='insert_insert',
+        ),
+        pgtrigger.migrations.RemoveTrigger(
+            model_name='engagement',
+            name='update_update',
+        ),
+        pgtrigger.migrations.RemoveTrigger(
+            model_name='engagement',
+            name='delete_delete',
+        ),
+        # Step 3: Add new FK fields to Engagement (before removing old ones)
         migrations.AddField(
             model_name="engagement",
             name="cicd_scm_server",
@@ -113,23 +133,18 @@ class Migration(migrations.Migration):
                 verbose_name="Orchestration Engine",
             ),
         ),
-        # Step 3: Migrate data from Tool_Configuration to CICDInfrastructure
+        # Step 4: Migrate data from Tool_Configuration to CICDInfrastructure
         migrations.RunPython(
             migrate_tool_configs_to_cicd_infrastructure,
             reverse_code=migrations.RunPython.noop,
         ),
-        # Step 4: Remove old pgtrigger triggers (they reference old column names)
-        pgtrigger.migrations.RemoveTrigger(
-            model_name='engagement',
-            name='insert_insert',
-        ),
-        pgtrigger.migrations.RemoveTrigger(
-            model_name='engagement',
-            name='update_update',
-        ),
-        pgtrigger.migrations.RemoveTrigger(
-            model_name='engagement',
-            name='delete_delete',
+        # Step 4a: Force deferred FK constraint checks to fire now. Django creates FKs as
+        # DEFERRABLE INITIALLY DEFERRED, so each engagement.save() in Step 4 queued a
+        # constraint check for commit time. Without flushing those, the next ALTER TABLE
+        # on dojo_engagement (Step 5) trips Postgres' "pending trigger events" guard.
+        migrations.RunSQL(
+            sql="SET CONSTRAINTS ALL IMMEDIATE",
+            reverse_sql=migrations.RunSQL.noop,
         ),
         # Step 5: Remove old FK fields from Engagement
         migrations.RemoveField(
