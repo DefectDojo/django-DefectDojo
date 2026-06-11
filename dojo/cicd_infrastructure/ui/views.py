@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
+from dojo.authorization.authorization import user_has_configuration_permission_or_403
 from dojo.cicd_infrastructure.ui.forms import CICDInfrastructureForm
 from dojo.models import CICDInfrastructure
 from dojo.utils import add_breadcrumb
@@ -20,6 +21,7 @@ def cicd_infrastructure(request):
 
 
 def new_cicd_infrastructure(request):
+    user_has_configuration_permission_or_403(request.user, "dojo.add_cicdinfrastructure")
     if request.method == "POST":
         form = CICDInfrastructureForm(request.POST)
         if form.is_valid():
@@ -35,6 +37,7 @@ def new_cicd_infrastructure(request):
 
 
 def edit_cicd_infrastructure(request, ciid):
+    user_has_configuration_permission_or_403(request.user, "dojo.change_cicdinfrastructure")
     conf = get_object_or_404(CICDInfrastructure, pk=ciid)
     if request.method == "POST":
         form = CICDInfrastructureForm(request.POST, instance=conf)
@@ -51,6 +54,7 @@ def edit_cicd_infrastructure(request, ciid):
 
 
 def delete_cicd_infrastructure(request, ciid):
+    user_has_configuration_permission_or_403(request.user, "dojo.delete_cicdinfrastructure")
     conf = get_object_or_404(CICDInfrastructure, pk=ciid)
     if request.method == "POST":
         conf.delete()
