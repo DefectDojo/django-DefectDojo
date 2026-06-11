@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization_decorators import user_is_configuration_authorized
-from dojo.forms import CICDInfrastructureForm
+from dojo.cicd_infrastructure.ui.forms import CICDInfrastructureForm
 from dojo.models import CICDInfrastructure
 from dojo.utils import add_breadcrumb
 

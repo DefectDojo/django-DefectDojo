@@ -1,6 +1,6 @@
 from django.urls import re_path
 
-from . import views
+from dojo.cicd_infrastructure.ui import views
 
 urlpatterns = [
     re_path(r"^cicd_infrastructure/add$", views.new_cicd_infrastructure, name="add_cicd_infrastructure"),

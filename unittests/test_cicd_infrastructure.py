@@ -10,7 +10,7 @@ from django.urls import reverse
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
-from dojo.forms import CICDInfrastructureForm
+from dojo.cicd_infrastructure.ui.forms import CICDInfrastructureForm
 from dojo.models import CICDInfrastructure
 from unittests.dojo_test_case import versioned_fixtures
 

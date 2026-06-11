@@ -62,7 +62,7 @@ from dojo.asset.urls import urlpatterns as asset_urls
 from dojo.banner.urls import urlpatterns as banner_urls
 from dojo.benchmark.urls import urlpatterns as benchmark_urls
 from dojo.cicd_infrastructure.api.urls import add_cicd_infrastructure_urls
-from dojo.cicd_infrastructure.urls import urlpatterns as cicd_infrastructure_urls
+from dojo.cicd_infrastructure.ui.urls import urlpatterns as cicd_infrastructure_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.development_environment.urls import urlpatterns as dev_env_urls
 from dojo.endpoint.urls import urlpatterns as endpoint_urls
