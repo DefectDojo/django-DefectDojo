@@ -6,7 +6,6 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.authorization.authorization_decorators import user_is_configuration_authorized
 from dojo.cicd_infrastructure.ui.forms import CICDInfrastructureForm
 from dojo.models import CICDInfrastructure
 from dojo.utils import add_breadcrumb
@@ -14,14 +13,12 @@ from dojo.utils import add_breadcrumb
 logger = logging.getLogger(__name__)
 
 
-@user_is_configuration_authorized("dojo.view_cicdinfrastructure")
 def cicd_infrastructure(request):
     confs = CICDInfrastructure.objects.all().order_by("name")
     add_breadcrumb(title=_("CI/CD Infrastructure List"), top_level=not len(request.GET), request=request)
     return render(request, "dojo/cicd_infrastructure.html", {"confs": confs})
 
 
-@user_is_configuration_authorized("dojo.add_cicdinfrastructure")
 def new_cicd_infrastructure(request):
     if request.method == "POST":
         form = CICDInfrastructureForm(request.POST)
@@ -37,7 +34,6 @@ def new_cicd_infrastructure(request):
     return render(request, "dojo/new_cicd_infrastructure.html", {"form": form})
 
 
-@user_is_configuration_authorized("dojo.change_cicdinfrastructure")
 def edit_cicd_infrastructure(request, ciid):
     conf = get_object_or_404(CICDInfrastructure, pk=ciid)
     if request.method == "POST":
@@ -54,7 +50,6 @@ def edit_cicd_infrastructure(request, ciid):
     return render(request, "dojo/edit_cicd_infrastructure.html", {"form": form, "conf": conf})
 
 
-@user_is_configuration_authorized("dojo.delete_cicdinfrastructure")
 def delete_cicd_infrastructure(request, ciid):
     conf = get_object_or_404(CICDInfrastructure, pk=ciid)
     if request.method == "POST":
