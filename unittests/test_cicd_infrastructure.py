@@ -96,8 +96,9 @@ class CICDInfrastructureFormTests(APITestCase):
 class CICDInfrastructureAPITests(APITestCase):
 
     """
-    The /cicd_infrastructure endpoint uses UserHasConfigurationPermissionSuperuser
-    — superusers can do anything; non-superusers need the explicit Django permission.
+    The /cicd_infrastructure endpoint uses UserHasCICDInfrastructurePermission
+    — reads are open to any authenticated user; writes require the configuration
+    permission (superuser/staff on OS, full RBAC under Pro).
     """
 
     fixtures = ["dojo_testdata.json"]
@@ -144,11 +145,25 @@ class CICDInfrastructureAPITests(APITestCase):
         )
         self.assertEqual(r.status_code, 201, r.content[:1000])
 
-    def test_non_superuser_is_rejected(self):
+    def test_non_superuser_can_list(self):
         # 'user1' (pk=2 in dojo_testdata.json) is a non-superuser with a token.
+        # Reads are open to authenticated users.
         try:
             c = self._client_for("user1")
         except Token.DoesNotExist:
             self.skipTest("user1 token not present in dojo_testdata fixture.")
         r = c.get(reverse("cicd_infrastructure-list"))
-        self.assertIn(r.status_code, (401, 403), f"expected 401/403, got {r.status_code}")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+    def test_non_superuser_cannot_create(self):
+        try:
+            c = self._client_for("user1")
+        except Token.DoesNotExist:
+            self.skipTest("user1 token not present in dojo_testdata fixture.")
+        r = c.post(
+            reverse("cicd_infrastructure-list"),
+            {"name": "NonSuperCreate", "infrastructure_type": "build_server"},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 403, r.content[:1000])
+        self.assertFalse(CICDInfrastructure.objects.filter(name="NonSuperCreate").exists())
