@@ -5,6 +5,7 @@ Migration behaviour is tested separately in
 ``test_cicd_infrastructure_migration.py``.
 """
 
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.urls import reverse
 from rest_framework.authtoken.models import Token
@@ -44,6 +45,36 @@ class CICDInfrastructureModelTests(APITestCase):
         infra = CICDInfrastructure.objects.create(name="Bare", infrastructure_type="build_server")
         self.assertEqual(infra.description, "")
         self.assertEqual(infra.url, "")
+
+    def test_save_rejects_infrastructure_type_change_on_existing(self):
+        """
+        Model save() guard: infrastructure_type is immutable once an instance exists.
+        Engagement CICD FKs are scoped by infrastructure_type via limit_choices_to,
+        so flipping the type would leave any referencing engagement pointing at a row
+        whose type contradicts the FK's role.
+        """
+        infra = CICDInfrastructure.objects.create(name="Locked", infrastructure_type="build_server")
+        infra.infrastructure_type = "scm_server"
+        with self.assertRaises(ValidationError) as ctx:
+            infra.save()
+        self.assertIn("infrastructure_type", ctx.exception.message_dict)
+        # The DB row is untouched.
+        self.assertEqual(
+            CICDInfrastructure.objects.get(pk=infra.pk).infrastructure_type,
+            "build_server",
+        )
+
+    def test_save_allows_changing_other_fields_on_existing(self):
+        """name/description/url remain editable post-creation."""
+        infra = CICDInfrastructure.objects.create(name="Editable", infrastructure_type="build_server")
+        infra.name = "Renamed"
+        infra.description = "now has a description"
+        infra.url = "https://renamed.example.com"
+        infra.save()
+        infra.refresh_from_db()
+        self.assertEqual(infra.name, "Renamed")
+        self.assertEqual(infra.description, "now has a description")
+        self.assertEqual(infra.url, "https://renamed.example.com")
 
 
 # ---------------------------------------------------------------------------
@@ -167,3 +198,23 @@ class CICDInfrastructureAPITests(APITestCase):
         )
         self.assertEqual(r.status_code, 403, r.content[:1000])
         self.assertFalse(CICDInfrastructure.objects.filter(name="NonSuperCreate").exists())
+
+    def test_patch_silently_ignores_infrastructure_type_change(self):
+        """
+        Serializer marks infrastructure_type read_only on update, so DRF drops the
+        incoming value from validated_data. The PATCH succeeds (200) but the type is
+        unchanged — same defense the form provides for the legacy UI.
+        """
+        existing = CICDInfrastructure.objects.create(
+            name="ApiLocked", infrastructure_type="build_server",
+        )
+        c = self._client_for("admin")
+        r = c.patch(
+            reverse("cicd_infrastructure-detail", args=[existing.pk]),
+            {"infrastructure_type": "scm_server", "description": "still build"},
+            format="json",
+        )
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        existing.refresh_from_db()
+        self.assertEqual(existing.infrastructure_type, "build_server")
+        self.assertEqual(existing.description, "still build")

@@ -11,7 +11,5 @@ class CICDInfrastructureForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            # Disallow editing of the infra type on an instance; engagement CICD FKs are scoped by infrastructure_type
-            # via limit_choices_to (build_server/scm_server/orchestration), so changing the type would create a
-            # semantic conflict between an engagement and this object.
+            # Disallow editing of infra type on an instance; see the matching comment on CICDInfrastructure#save()
             self.fields["infrastructure_type"].disabled = True
