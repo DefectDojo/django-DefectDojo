@@ -18,8 +18,8 @@ def migrate_tool_configs_to_cicd_infrastructure(apps, schema_editor):
     CICDInfrastructure = apps.get_model("dojo", "CICDInfrastructure")
 
     field_mappings = [
-        ("build_server", "cicd_build_server", "build_server"),
         ("source_code_management_server", "cicd_scm_server", "scm_server"),
+        ("build_server", "cicd_build_server", "build_server"),
         ("orchestration_engine", "cicd_orchestration_engine", "orchestration"),
     ]
 
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=200)),
                 ("description", models.CharField(blank=True, default="", max_length=2000)),
                 ("url", models.URLField(blank=True, default="", help_text="Public URL of the tool (e.g., https://jenkins.company.com)", max_length=2000)),
-                ("infrastructure_type", models.CharField(choices=[("build_server", "Build Server"), ("scm_server", "SCM Server"), ("orchestration", "Orchestration Engine")], max_length=30)),
+                ("infrastructure_type", models.CharField(choices=[("scm_server", "SCM Server"), ("build_server", "Build Server"), ("orchestration", "Orchestration Engine")], max_length=30)),
             ],
             options={
                 "ordering": ["name"],
@@ -74,19 +74,6 @@ class Migration(migrations.Migration):
             },
         ),
         # Step 2: Add new FK fields to Engagement (before removing old ones)
-        migrations.AddField(
-            model_name="engagement",
-            name="cicd_build_server",
-            field=models.ForeignKey(
-                blank=True, null=True,
-                help_text="Build server used for this CI/CD engagement",
-                limit_choices_to={"infrastructure_type": "build_server"},
-                on_delete=django.db.models.deletion.SET_NULL,
-                related_name="engagements_as_build_server",
-                to="dojo.cicdinfrastructure",
-                verbose_name="Build Server",
-            ),
-        ),
         migrations.AddField(
             model_name="engagement",
             name="cicd_scm_server",
@@ -98,6 +85,19 @@ class Migration(migrations.Migration):
                 related_name="engagements_as_scm_server",
                 to="dojo.cicdinfrastructure",
                 verbose_name="SCM Server",
+            ),
+        ),
+        migrations.AddField(
+            model_name="engagement",
+            name="cicd_build_server",
+            field=models.ForeignKey(
+                blank=True, null=True,
+                help_text="Build server used for this CI/CD engagement",
+                limit_choices_to={"infrastructure_type": "build_server"},
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="engagements_as_build_server",
+                to="dojo.cicdinfrastructure",
+                verbose_name="Build Server",
             ),
         ),
         migrations.AddField(
@@ -134,11 +134,11 @@ class Migration(migrations.Migration):
         # Step 5: Remove old FK fields from Engagement
         migrations.RemoveField(
             model_name="engagement",
-            name="build_server",
+            name="source_code_management_server",
         ),
         migrations.RemoveField(
             model_name="engagement",
-            name="source_code_management_server",
+            name="build_server",
         ),
         migrations.RemoveField(
             model_name="engagement",
@@ -147,18 +147,23 @@ class Migration(migrations.Migration):
         # Step 6: Update pghistory event table FK fields to point to CICDInfrastructure
         migrations.RenameField(
             model_name="engagementevent",
-            old_name="build_server",
-            new_name="cicd_build_server",
-        ),
-        migrations.RenameField(
-            model_name="engagementevent",
             old_name="source_code_management_server",
             new_name="cicd_scm_server",
         ),
         migrations.RenameField(
             model_name="engagementevent",
+            old_name="build_server",
+            new_name="cicd_build_server",
+        ),
+        migrations.RenameField(
+            model_name="engagementevent",
             old_name="orchestration_engine",
             new_name="cicd_orchestration_engine",
+        ),
+        migrations.AlterField(
+            model_name='engagementevent',
+            name='cicd_scm_server',
+            field=models.ForeignKey(blank=True, db_constraint=False, db_index=False, help_text='Source code management server used for this CI/CD engagement', limit_choices_to={'infrastructure_type': 'scm_server'}, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', related_query_name='+', to='dojo.cicdinfrastructure', verbose_name='SCM Server'),
         ),
         migrations.AlterField(
             model_name='engagementevent',
@@ -169,11 +174,6 @@ class Migration(migrations.Migration):
             model_name='engagementevent',
             name='cicd_orchestration_engine',
             field=models.ForeignKey(blank=True, db_constraint=False, db_index=False, help_text='Orchestration engine used for this CI/CD engagement', limit_choices_to={'infrastructure_type': 'orchestration'}, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', related_query_name='+', to='dojo.cicdinfrastructure', verbose_name='Orchestration Engine'),
-        ),
-        migrations.AlterField(
-            model_name='engagementevent',
-            name='cicd_scm_server',
-            field=models.ForeignKey(blank=True, db_constraint=False, db_index=False, help_text='Source code management server used for this CI/CD engagement', limit_choices_to={'infrastructure_type': 'scm_server'}, null=True, on_delete=django.db.models.deletion.DO_NOTHING, related_name='+', related_query_name='+', to='dojo.cicdinfrastructure', verbose_name='SCM Server'),
         ),
         # Step 7: Re-create pgtrigger triggers with new column names
         pgtrigger.migrations.AddTrigger(

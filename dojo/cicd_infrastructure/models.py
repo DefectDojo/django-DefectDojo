@@ -5,8 +5,8 @@ from django.utils.translation import gettext as _
 
 class CICDInfrastructure(models.Model):
     INFRASTRUCTURE_TYPE_CHOICES = (
-        ("build_server", "Build Server"),
         ("scm_server", "SCM Server"),
+        ("build_server", "Build Server"),
         ("orchestration", "Orchestration Engine"),
     )
 
