@@ -54,6 +54,7 @@ Modules in various stages of reorganization:
 |--------|-----------|-------------|-----|------|--------|
 | **url** | In module | N/A | Done | Done | **Complete** |
 | **location** | In module | N/A | N/A | Done | **Complete** |
+| **cicd_infrastructure** | In module | N/A | Done | Done | **Complete** |
 | **product_type** | In dojo/models.py | Missing | Partial (views at root) | In dojo/api_v2/ | Needs work |
 | **test** | In dojo/models.py | Missing | Partial (views at root) | In dojo/api_v2/ | Needs work |
 | **engagement** | In dojo/models.py | Partial (32 lines) | Partial (views at root) | In dojo/api_v2/ | Needs work |
