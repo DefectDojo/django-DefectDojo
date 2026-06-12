@@ -136,3 +136,47 @@ class TestPicusParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertIn("| Field | Value |", findings[0].description)
             self.assertIn("| Attack Category | Malicious Code |", findings[0].description)
+
+    def test_mitigation_not_blocked_sentence(self):
+        with (get_unit_tests_scans_path("picus") / "one_vuln.csv").open(encoding="utf-8") as testfile:
+            parser = PicusParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertIn("was NOT blocked by existing preventive controls", findings[0].mitigation)
+
+    def test_mitigation_blocked_sentence(self):
+        with (get_unit_tests_scans_path("picus") / "many_vulns.csv").open(encoding="utf-8") as testfile:
+            parser = PicusParser()
+            findings = parser.get_findings(testfile, Test())
+            # Row index 1 (Credential Dumping) was Blocked.
+            self.assertIn("was blocked by existing preventive controls", findings[1].mitigation)
+
+    def test_mitigation_includes_control_posture(self):
+        with (get_unit_tests_scans_path("picus") / "one_vuln.csv").open(encoding="utf-8") as testfile:
+            parser = PicusParser()
+            findings = parser.get_findings(testfile, Test())
+            mitigation = findings[0].mitigation
+            self.assertIn("**Control posture**", mitigation)
+            self.assertIn("- Prevention: Not Blocked", mitigation)
+            self.assertIn("- Logging: Not Logged", mitigation)
+            self.assertIn("- Alerting: Not Alerted", mitigation)
+
+    def test_mitigation_includes_reference_links(self):
+        with (get_unit_tests_scans_path("picus") / "one_vuln.csv").open(encoding="utf-8") as testfile:
+            parser = PicusParser()
+            findings = parser.get_findings(testfile, Test())
+            mitigation = findings[0].mitigation
+            self.assertIn("**Mitigation & triage references**", mitigation)
+            self.assertIn("- Picus mitigation guidance: https://sample[.]com", mitigation)
+            self.assertIn("- Detection content: https://sample[.]com", mitigation)
+            self.assertIn("- Action payload output: https://sample[.]com", mitigation)
+            self.assertIn("- Action logs: https://sample[.]com", mitigation)
+            self.assertIn("- Detection signature: SIG-T1059 (10001001)", mitigation)
+
+    def test_mitigation_omits_absent_reference_fields(self):
+        with (get_unit_tests_scans_path("picus") / "many_vulns.csv").open(encoding="utf-8") as testfile:
+            parser = PicusParser()
+            findings = parser.get_findings(testfile, Test())
+            # many_vulns.csv leaves detection-content / payload-output links empty.
+            mitigation = findings[0].mitigation
+            self.assertNotIn("- Detection content:", mitigation)
+            self.assertNotIn("- Action payload output:", mitigation)

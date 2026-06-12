@@ -94,14 +94,46 @@ class PicusParser:
 
     def _build_mitigation(self, get):
         prevention = get("threatPreventionResult")
+
+        lines = []
         if prevention == "Not Blocked":
-            return (
+            lines.append(
                 "The simulated attack was NOT blocked by existing preventive controls. "
-                "Review and tune the relevant security controls to block this technique."
+                "Review and tune the relevant security controls to block this technique.",
             )
-        if prevention == "Blocked":
-            return "The simulated attack was blocked by existing preventive controls."
-        return ""
+        elif prevention == "Blocked":
+            lines.append("The simulated attack was blocked by existing preventive controls.")
+
+        # Which control layer failed (prevent -> log -> alert) tells the analyst
+        # which gap to close first.
+        posture = [
+            ("Prevention", prevention),
+            ("Logging", get("threatDetectionLogResult")),
+            ("Alerting", get("threatDetectionAlertResult")),
+        ]
+        posture = [(label, value) for label, value in posture if value]
+        if posture:
+            lines.append("\n**Control posture**")
+            lines.extend(f"- {label}: {value}" for label, value in posture)
+
+        # Links and identifiers from the export that help triage and build a fix.
+        references = [
+            ("Picus mitigation guidance", get("genericMitigationsTabLink")),
+            ("Detection content", get("detectionContentTabLink")),
+            ("Action payload output", get("actionPayloadOutputTabLink")),
+            ("Action logs", get("actionLogsTabLink")),
+        ]
+        signature = " ".join(
+            part for part in (get("signatureName"), f"({get('signatureId')})" if get("signatureId") else "") if part
+        )
+        if signature:
+            references.append(("Detection signature", signature))
+        references = [(label, value) for label, value in references if value]
+        if references:
+            lines.append("\n**Mitigation & triage references**")
+            lines.extend(f"- {label}: {value}" for label, value in references)
+
+        return "\n".join(lines) if lines else None
 
     def _build_description(self, get):
         fields = [
