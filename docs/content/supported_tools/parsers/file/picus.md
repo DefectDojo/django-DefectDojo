@@ -39,8 +39,8 @@ Sample Picus scans can be found in the [sample scan data folder](https://github.
 ### Total Fields in CSV
 
 - Total data fields: 63
-- Total data fields parsed into dedicated Finding fields or the structured description: 20
-- Remaining fields (detection-integration, protocol, hash, and tab-link columns) are not currently mapped
+- Total data fields parsed into dedicated Finding fields, the structured description, or the mitigation: 26
+- Remaining fields (detection-integration, protocol-level, file-hash, and other signature/metadata columns) are not currently mapped
 
 ### CSV Format Field Mapping Details
 
@@ -52,7 +52,14 @@ Sample Picus scans can be found in the [sample scan data folder](https://github.
 | threatName + actionName | title                    | Combined as "threatName - actionName"; truncated to 500 characters with "..." if longer |
 | threatSeverity         | severity                  | Mapped to DefectDojo severity levels; defaults to Info if unrecognized                  |
 | threatPreventionResult | active                    | "Not Blocked" sets active=True (control gap); any other value sets active=False         |
-| threatPreventionResult | mitigation                | Drives a recommendation describing whether controls blocked the simulated attack        |
+| threatPreventionResult | mitigation                | Recommendation sentence plus the "Prevention" line of the control-posture block         |
+| threatDetectionLogResult | mitigation              | "Logging" line of the mitigation control-posture block                                  |
+| threatDetectionAlertResult | mitigation            | "Alerting" line of the mitigation control-posture block                                 |
+| genericMitigationsTabLink | mitigation             | Picus mitigation-guidance link; included in the mitigation references when present       |
+| detectionContentTabLink | mitigation               | Detection-content link; included in the mitigation references when present              |
+| actionPayloadOutputTabLink | mitigation            | Payload-output link; included in the mitigation references when present                 |
+| actionLogsTabLink      | mitigation                | Action-logs link; included in the mitigation references when present                    |
+| signatureName + signatureId | mitigation           | Detection signature reference; included in the mitigation references when present       |
 | actionId               | vuln_id_from_tool         | Native Picus action identifier; drives hashcode deduplication across re-imports          |
 | cve                    | unsaved_vulnerability_ids | Comma-separated CVEs split into a list; omitted when empty                              |
 | cwe                    | cwe                       | Parsed to integer when the field contains digits; omitted otherwise                     |
@@ -117,10 +124,20 @@ Finding titles combine the threat and action names as "threatName - actionName".
 
 The parser builds a markdown table containing the threat, action, attack category, MITRE references, detection/prevention results, affected asset details, payload, and the Picus simulation/action identifiers. Empty source fields are omitted, and pipe characters in values are escaped so the table renders correctly.
 
+### Mitigation Construction
+
+The mitigation field is assembled to give an analyst what they need to remediate the gap, not just a status sentence. It contains up to three parts, and any part with no underlying data is omitted:
+
+1. **Recommendation sentence** — derived from `threatPreventionResult` (a prompt to tune controls when the attack was "Not Blocked", or a confirmation when it was "Blocked").
+2. **Control posture** — the prevent → log → alert results (`threatPreventionResult`, `threatDetectionLogResult`, `threatDetectionAlertResult`) so the analyst can see which control layer failed and where to focus first.
+3. **Mitigation & triage references** — the Picus links and identifiers that help build a fix: mitigation guidance (`genericMitigationsTabLink`), detection content (`detectionContentTabLink`), payload output (`actionPayloadOutputTabLink`), action logs (`actionLogsTabLink`), and the detection signature (`signatureName` / `signatureId`). Each reference is included only when present in the export.
+
+When none of these parts has data, the mitigation field is left unset rather than written as an empty string.
+
 ### Deduplication
 
 Deduplication uses the hashcode algorithm keyed solely on `vuln_id_from_tool`, which the parser populates from the native Picus `actionId`. The `actionId` is stable across simulation runs (the same attack action keeps the same identifier), while `simulationRunId` changes on every run. Keying on `actionId` alone — and deliberately excluding `simulationRunId` — means that when a later run's CSV is re-imported into the same test, each action matches its prior finding. This lets DefectDojo update the status of existing findings (for example, closing an action that was previously "Not Blocked" once a control begins blocking it) rather than creating duplicates. Picus simulations span an asset class such as Network or Email, so deduplication is expected to operate within a single asset/engagement rather than across asset types.
 
 ### Unmapped Fields
 
-Detection-integration, protocol-level prevention/detection, file-hash, signature, and tab-link columns are retained in the source CSV but are not currently mapped to Finding fields. The most operationally relevant columns are surfaced either as dedicated Finding fields or within the structured description table.
+Detection-integration, protocol-level prevention/detection, file-hash, and remaining signature/metadata columns are retained in the source CSV but are not currently mapped to Finding fields. The most operationally relevant columns are surfaced either as dedicated Finding fields, within the structured description table, or in the mitigation references.
