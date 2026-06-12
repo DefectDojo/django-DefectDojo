@@ -923,8 +923,7 @@ class UserHasRegulationPermission(BaseDjangoModelPermission):
 class UserHasCICDInfrastructurePermission(BaseDjangoModelPermission):
     django_model = CICDInfrastructure
     # Reads are open to any authenticated user (engagement views surface CICD
-    # references and need to render them). Writes require the configuration
-    # permission — superuser/staff on OS, full RBAC under Pro shadowing.
+    # references and need to render them). Writes require elevated privileges.
     request_method_permission_map = {
         "POST": "add",
         "PUT": "change",

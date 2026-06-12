@@ -128,8 +128,7 @@ class CICDInfrastructureAPITests(APITestCase):
 
     """
     The /cicd_infrastructure endpoint uses UserHasCICDInfrastructurePermission
-    — reads are open to any authenticated user; writes require the configuration
-    permission (superuser/staff on OS, full RBAC under Pro).
+    — reads are open to any authenticated user; writes require elevated privileges.
     """
 
     fixtures = ["dojo_testdata.json"]
