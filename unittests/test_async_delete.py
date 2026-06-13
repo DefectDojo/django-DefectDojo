@@ -27,21 +27,21 @@ class TestAsyncDelete(DojoTestCase):
     """
     Test async_delete functionality with dojo_dispatch_task kwargs injection.
 
-    These tests use block_execution=True and crum.impersonate to run tasks synchronously,
+    These tests use import_execution_mode="sync" and crum.impersonate to run tasks synchronously,
     which allows errors to surface immediately rather than being lost in background workers.
     """
 
     def setUp(self):
-        """Set up test user with block_execution=True and disable unneeded features."""
+        """Set up test user with import_execution_mode="sync" and disable unneeded features."""
         super().setUp()
 
-        # Create test user with block_execution=True to run tasks synchronously
+        # Create test user with import_execution_mode="sync" to run tasks synchronously
         self.testuser = User.objects.create(
             username="test_async_delete_user",
             is_staff=True,
             is_superuser=True,
         )
-        UserContactInfo.objects.create(user=self.testuser, block_execution=True)
+        UserContactInfo.objects.create(user=self.testuser, import_execution_mode="sync")
 
         # Log in as the test user (for API client)
         self.client.force_login(self.testuser)

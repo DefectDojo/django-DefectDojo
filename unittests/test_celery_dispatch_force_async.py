@@ -3,7 +3,7 @@ Tests for the `force_async` kwarg on dojo_dispatch_task / we_want_async.
 
 `force_async=True` is for callers (e.g. the watson async indexer middleware)
 that should always run their celery task in the background even when the
-current user has `block_execution=True` or the caller passes `force_sync=True`.
+current user has `import_execution_mode="sync"` or the caller passes `force_sync=True`.
 """
 
 from unittest.mock import patch

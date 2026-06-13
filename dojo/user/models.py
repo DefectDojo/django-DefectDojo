@@ -6,6 +6,28 @@ from django.utils.translation import gettext as _
 User = get_user_model()
 
 
+# Import post-processing execution modes.
+# - ASYNC: post-processing (dedup, jira, grading, ...) runs in the background;
+#   the API responds immediately (default, historical behavior).
+# - ASYNC_WAIT: post-processing is dispatched to the background as usual, but the
+#   request waits for the deduplication batches to finish before responding, so
+#   notifications and the returned statistics reflect the deduplicated state.
+# - SYNC: post-processing runs inline in the web process (legacy block_execution).
+IMPORT_EXECUTION_MODE_ASYNC = "async"
+IMPORT_EXECUTION_MODE_ASYNC_WAIT = "async_wait"
+IMPORT_EXECUTION_MODE_SYNC = "sync"
+IMPORT_EXECUTION_MODES = (
+    IMPORT_EXECUTION_MODE_ASYNC,
+    IMPORT_EXECUTION_MODE_ASYNC_WAIT,
+    IMPORT_EXECUTION_MODE_SYNC,
+)
+IMPORT_EXECUTION_MODE_CHOICES = (
+    (IMPORT_EXECUTION_MODE_ASYNC, _("Async (do not wait)")),
+    (IMPORT_EXECUTION_MODE_ASYNC_WAIT, _("Async, wait for deduplication")),
+    (IMPORT_EXECUTION_MODE_SYNC, _("Synchronous (block)")),
+)
+
+
 # proxy class for convenience and UI
 class Dojo_User(User):
     class Meta:
@@ -20,8 +42,25 @@ class Dojo_User(User):
 
     @staticmethod
     def wants_block_execution(user):
-        # this return False if there is no user, i.e. in celery processes, unittests, etc.
-        return hasattr(user, "usercontactinfo") and user.usercontactinfo.block_execution
+        # this returns False if there is no user, i.e. in celery processes, unittests, etc.
+        # The synchronous import execution mode is the successor of the old block_execution
+        # flag and governs whether async tasks run in the foreground for this user.
+        return hasattr(user, "usercontactinfo") and user.usercontactinfo.import_execution_mode == IMPORT_EXECUTION_MODE_SYNC
+
+    @staticmethod
+    def resolve_import_execution_mode(user, override=None):
+        """
+        Resolve the effective import post-processing execution mode.
+
+        Priority: explicit request override > user profile setting > default async.
+        Returns one of IMPORT_EXECUTION_MODE_ASYNC / _ASYNC_WAIT / _SYNC.
+        """
+        if override in IMPORT_EXECUTION_MODES:
+            return override
+        info = getattr(user, "usercontactinfo", None)
+        if info is not None and info.import_execution_mode in IMPORT_EXECUTION_MODES:
+            return info.import_execution_mode
+        return IMPORT_EXECUTION_MODE_ASYNC
 
     @staticmethod
     def force_password_reset(user):
@@ -62,7 +101,21 @@ class UserContactInfo(models.Model):
     github_username = models.CharField(blank=True, null=True, max_length=150)
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text=_("Email address associated with your slack account"), verbose_name=_("Slack Email Address"))
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
-    block_execution = models.BooleanField(default=False, help_text=_("Instead of async deduping a finding the findings will be deduped synchronously and will 'block' the user until completion."))
+    import_execution_mode = models.CharField(
+        max_length=20,
+        choices=IMPORT_EXECUTION_MODE_CHOICES,
+        null=True,
+        blank=True,
+        help_text=_(
+            "Controls how import/reimport post-processing is executed. "
+            "'Async' returns immediately (default). 'Async, wait for deduplication' "
+            "runs post-processing in the background but waits for deduplication to "
+            "finish before responding, so notifications and statistics are accurate. "
+            "'Synchronous' runs everything inline (and blocks all async tasks in the "
+            "foreground for this user, like the old 'block execution' flag). Can be "
+            "overridden per request.",
+        ),
+    )
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
     ui_use_tailwind = models.BooleanField(default=False, verbose_name=_("Use new UI (beta)"), help_text=_("Opt in to the new Tailwind-based UI. Leave off for the classic UI."))
     token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))

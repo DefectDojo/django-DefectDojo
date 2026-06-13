@@ -25,11 +25,13 @@ from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.location.models import Location
 from dojo.models import (
     IMPORT_ACTIONS,
+    IMPORT_EXECUTION_MODE_CHOICES,
     SEVERITIES,
     SEVERITY_CHOICES,
     STATS_FIELDS,
     App_Analysis,
     Development_Environment,
+    Dojo_User,
     DojoMeta,
     Endpoint,
     Engagement,
@@ -431,6 +433,16 @@ class CommonImportScanSerializer(serializers.Serializer):
         allow_null=True, default=None, queryset=User.objects.all(),
     )
     push_to_jira = serializers.BooleanField(default=False)
+    import_execution_mode = serializers.ChoiceField(
+        required=False,
+        allow_null=True,
+        choices=IMPORT_EXECUTION_MODE_CHOICES,
+        help_text="Override how import post-processing (deduplication, jira push, grading, ...) is executed for "
+        "this request. 'async' dispatches post-processing to the background and responds immediately (default). "
+        "'async_wait' dispatches to the background but waits for deduplication to finish before responding, so "
+        "notifications and the returned statistics reflect the deduplicated state. 'sync' runs everything inline. "
+        "If omitted, falls back to the user's profile setting (import_execution_mode).",
+    )
     environment = serializers.CharField(required=False)
     build_id = serializers.CharField(
         required=False, help_text="ID of the build that was scanned.",
@@ -476,6 +488,14 @@ class CommonImportScanSerializer(serializers.Serializer):
         help_text=_("Also referred to as 'Organization' ID."),
     )
     statistics = ImportStatisticsSerializer(read_only=True, required=False)
+    deduplication_complete = serializers.BooleanField(
+        read_only=True,
+        required=False,
+        help_text="Whether deduplication had finished by the time this response was produced. "
+        "True for 'sync' and for 'async_wait' when deduplication completed within the timeout; "
+        "False for 'async' (deduplication is still running in the background) or when an "
+        "'async_wait' import timed out waiting for it.",
+    )
     pro = serializers.ListField(read_only=True, required=False)
     apply_tags_to_findings = serializers.BooleanField(
         help_text="If set to True, the tags will be applied to the findings",
@@ -534,6 +554,7 @@ class CommonImportScanSerializer(serializers.Serializer):
                 data["product_id"] = test.engagement.product.id
                 data["product_type_id"] = test.engagement.product.prod_type.id
                 data["statistics"] = {"after": test.statistics}
+                data["deduplication_complete"] = importer.deduplication_complete
             duration = time.perf_counter() - start_time
             LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
             ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
@@ -631,6 +652,14 @@ class CommonImportScanSerializer(serializers.Serializer):
         eng_end_date = context.get("engagement_end_date")
         if eng_end_date:
             context["target_end"] = context.get("engagement_end_date")
+
+        # Resolve the effective import execution mode: request override (if any)
+        # takes precedence over the user's profile setting, otherwise default async.
+        request = self.context.get("request")
+        user = getattr(request, "user", None)
+        context["import_execution_mode"] = Dojo_User.resolve_import_execution_mode(
+            user, data.get("import_execution_mode"),
+        )
 
         return context
 
@@ -805,11 +834,11 @@ class ReImportScanSerializer(CommonImportScanSerializer):
         try:
             logger.debug(f"process_scan called with context: {context}")
             start_time = time.perf_counter()
+            processor = None
             if test := context.get("test"):
                 statistics_before = test.statistics
-                context["test"], _, _, _, _, _, test_import = self.get_reimporter(
-                    **context,
-                ).process_scan(
+                processor = self.get_reimporter(**context)
+                context["test"], _, _, _, _, _, test_import = processor.process_scan(
                     context.pop("scan", None),
                 )
                 if test_import:
@@ -821,9 +850,10 @@ class ReImportScanSerializer(CommonImportScanSerializer):
                 # Do not close old findings when creating a brand new test: there are no
                 # existing findings to compare against, and close_old_findings would
                 # incorrectly close findings from other tests in the same scope.
-                context["test"], _, _, _, _, _, _ = self.get_importer(
+                processor = self.get_importer(
                     **{**context, "close_old_findings": False},
-                ).process_scan(
+                )
+                context["test"], _, _, _, _, _, _ = processor.process_scan(
                     context.pop("scan", None),
                 )
             else:
@@ -842,6 +872,8 @@ class ReImportScanSerializer(CommonImportScanSerializer):
                 if statistics_delta:
                     data["statistics"]["delta"] = statistics_delta
                 data["statistics"]["after"] = test.statistics
+                if processor is not None:
+                    data["deduplication_complete"] = processor.deduplication_complete
             duration = time.perf_counter() - start_time
             LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
             ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))

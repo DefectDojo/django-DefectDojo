@@ -72,7 +72,7 @@ class ReimportDuplicateFindingsTestBase(DojoTestCase):
     def setUp(self):
         super().setUp()
         testuser, _ = User.objects.get_or_create(username="admin")
-        UserContactInfo.objects.get_or_create(user=testuser, defaults={"block_execution": True})
+        UserContactInfo.objects.get_or_create(user=testuser, defaults={"import_execution_mode": "sync"})
 
         self.system_settings(enable_deduplication=True)
         self.system_settings(enable_product_grade=False)

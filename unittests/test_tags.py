@@ -387,7 +387,7 @@ class TagImportTestAPI(DojoAPITestCase, TagImportMixin):
         super().setUp()
         settings.SECURE_SSL_REDIRECT = False
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.import_execution_mode = "sync"
         testuser.usercontactinfo.save()
         self.login_as_admin()
         TagImportMixin.setUp(self)
@@ -404,7 +404,7 @@ class TagImportTestUI(DojoAPITestCase, TagImportMixin):
         super().setUp()
         settings.SECURE_SSL_REDIRECT = False
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.import_execution_mode = "sync"
         testuser.usercontactinfo.save()
         self.login_as_admin()
         self.client_ui = Client()

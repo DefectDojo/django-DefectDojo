@@ -256,7 +256,7 @@ class TestFindingVulnerabilityIdsAPI(DojoAPITestCase):
         super().setUp()
         self.system_settings(enable_jira=True)
         self.testuser = User.objects.get(username="admin")
-        self.testuser.usercontactinfo.block_execution = True
+        self.testuser.usercontactinfo.import_execution_mode = "sync"
         self.testuser.usercontactinfo.save()
         token = Token.objects.get(user=self.testuser)
         self.client = APIClient()

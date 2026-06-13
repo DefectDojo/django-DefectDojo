@@ -37,7 +37,7 @@ class TestCascadeDeletePreviewModels(DojoTestCase):
             is_staff=True,
             is_superuser=True,
         )
-        UserContactInfo.objects.create(user=self.testuser, block_execution=True)
+        UserContactInfo.objects.create(user=self.testuser, import_execution_mode="sync")
         self.system_settings(enable_deduplication=False)
         self.system_settings(enable_product_grade=False)
 

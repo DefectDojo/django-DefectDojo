@@ -12,6 +12,7 @@ from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
 from dojo.models import (
+    IMPORT_EXECUTION_MODE_ASYNC_WAIT,
     Engagement,
     Finding,
     Test,
@@ -146,6 +147,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             url=reverse("view_test", args=(self.test.id,)),
             url_api=reverse("test-detail", args=(self.test.id,)),
         )
+        # In 'async_wait' mode, block until background deduplication has finished
+        # so notifications and statistics reflect the deduplicated state.
+        self.wait_for_post_processing()
         updated_count = len(new_findings) + len(closed_findings)
         self.notify_scan_added(
             self.test,
@@ -292,7 +296,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 batch_finding_ids.clear()
                 logger.debug("process_findings: dispatching batch with push_to_jira=%s (batch_size=%d, is_final=%s)",
                              push_to_jira, len(finding_ids_batch), is_final_finding)
-                dojo_dispatch_task(
+                result = dojo_dispatch_task(
                     finding_helper.post_process_findings_batch,
                     finding_ids_batch,
                     dedupe_option=True,
@@ -300,8 +304,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     product_grading_option=True,
                     issue_updater_option=True,
                     push_to_jira=push_to_jira,
-                    force_sync=kwargs.get("force_sync", False),
+                    **self.post_processing_dispatch_kwargs(**kwargs),
                 )
+                if self.import_execution_mode == IMPORT_EXECUTION_MODE_ASYNC_WAIT:
+                    self.record_post_processing_result(result)
 
             # No chord: tasks are dispatched immediately above per batch
 

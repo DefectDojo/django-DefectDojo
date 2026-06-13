@@ -19,6 +19,8 @@ from dojo.models import (
     # Import History States
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
+    IMPORT_EXECUTION_MODE_ASYNC_WAIT,
+    IMPORT_EXECUTION_MODE_SYNC,
     IMPORT_REACTIVATED_FINDING,
     IMPORT_UNTOUCHED_FINDING,
     # Finding Severities
@@ -81,6 +83,79 @@ class BaseImporter(ImporterOptions):
         self.pending_vulnerability_ids: list[Vulnerability_Id] = []
         self.pending_vuln_id_deletes: list[int] = []
         self.pending_burp_rr: list[BurpRawRequestResponse] = []
+        # Handles for async post-processing tasks to await in 'async_wait' mode.
+        # Set after ImporterOptions.__init__ so it stays out of field_names
+        # (and the compress/decompress cycle used for async dispatch).
+        self.post_processing_results = []
+        # Whether deduplication is known to be finished by the time the response
+        # is built. True for 'sync' (ran inline) and for 'async_wait' when all
+        # batches completed within the timeout; False for 'async' (dispatched,
+        # not awaited) or when an 'async_wait' join timed out/errored.
+        self.deduplication_complete = False
+
+    def post_processing_dispatch_kwargs(self, **kwargs):
+        """
+        Translate the resolved import execution mode into the force flags that
+        dojo_dispatch_task understands:
+        - SYNC: run inline in the web process (force_sync).
+        - ASYNC_WAIT: guarantee background dispatch (force_async) so we get a
+          handle to await, regardless of the user's profile mode.
+        - ASYNC (default): preserve historical behavior, honoring any externally
+          supplied force_sync and the user's sync mode via we_want_async.
+        """
+        if self.import_execution_mode == IMPORT_EXECUTION_MODE_SYNC:
+            return {"force_sync": True}
+        if self.import_execution_mode == IMPORT_EXECUTION_MODE_ASYNC_WAIT:
+            return {"force_async": True}
+        return {"force_sync": kwargs.get("force_sync", False)}
+
+    def record_post_processing_result(self, result):
+        """
+        Remember an async post-processing dispatch handle so it can be awaited
+        later when running in the 'async_wait' execution mode. No-op for the
+        other modes (no handle is recorded by the caller).
+        """
+        if not hasattr(self, "post_processing_results"):
+            self.post_processing_results = []
+        if result is not None:
+            self.post_processing_results.append(result)
+
+    def wait_for_post_processing(self):
+        """
+        Block until the deduplication (and other batch) post-processing tasks
+        dispatched during this import have finished, so notifications and the
+        returned statistics reflect the deduplicated state.
+
+        Only relevant in the 'async_wait' execution mode; bounded by
+        settings.IMPORT_ASYNC_WAIT_TIMEOUT so a stuck/missing worker degrades
+        to the historical (respond-anyway) behavior instead of hanging.
+        """
+        if self.import_execution_mode == IMPORT_EXECUTION_MODE_SYNC:
+            # Batches ran inline during process_findings, so dedup is already done.
+            self.deduplication_complete = True
+            return
+        if self.import_execution_mode != IMPORT_EXECUTION_MODE_ASYNC_WAIT:
+            # 'async': post-processing was dispatched but is not awaited.
+            self.deduplication_complete = False
+            return
+        results = getattr(self, "post_processing_results", None) or []
+        if not results:
+            # Nothing was dispatched (e.g. empty import) — dedup is trivially done.
+            self.deduplication_complete = True
+            return
+        timeout = getattr(settings, "IMPORT_ASYNC_WAIT_TIMEOUT", 120)
+        logger.debug("async_wait: waiting for %d post-processing task(s) (timeout=%ss)", len(results), timeout)
+        success = True
+        for result in results:
+            if result is None or not hasattr(result, "get"):
+                continue
+            try:
+                result.get(timeout=timeout, propagate=False)
+            except Exception as e:
+                logger.warning("async_wait: error/timeout while waiting for post-processing task: %s", e)
+                success = False
+        self.deduplication_complete = success
+        self.post_processing_results = []
 
     def check_child_implementation_exception(self):
         """

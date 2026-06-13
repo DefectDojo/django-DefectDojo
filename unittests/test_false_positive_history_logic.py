@@ -131,7 +131,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def run(self, result=None):
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.block_execution = True
+        testuser.usercontactinfo.import_execution_mode = "sync"
         testuser.save()
 
         # Unit tests are running without any user, which will result in actions like dedupe happening in the celery process
