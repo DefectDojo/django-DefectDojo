@@ -23,7 +23,7 @@ DefectDojo is meant to be the central source of truth for your organization's se
 - Enforcing SLAs on vulnerabilities, ensuring that your organization handles each Finding within an appropriate timeframe.
 - [Sending tickets](/issue_tracking/intro/intro/) to Jira, ServiceNow or other Project Tracking software, allowing your development team to integrate issue remediation into their standard release process without requiring them to learn another project management tool.
 - Integrating into automated [CI/CD pipelines](/import_data/import_scan_files/api_pipeline_modelling/) to automatically ingest report data from repositories, even down to the branch level.
-- Creating [reports](/metrics_reports/reports/using_the_report_builder/) on any set of vulnerabilities or software context, to quickly share scan results or status updates with stakeholders.
+- Creating [reports](/metrics_reports/reports/) on any set of vulnerabilities or software context, to quickly share scan results or status updates with stakeholders.
 - Establishing acceptance and mitigation workflows, supporting formal risk-management tracking.
 
 
@@ -123,7 +123,7 @@ Findings from DefectDojo can be deleted in a few ways:
 
 ### How can I generate a report in DefectDojo?
 
-You can quickly create a customized report in DefectDojo using the [Report Builder](/metrics_reports/reports/using_the_report_builder/).
+You can quickly create a customized report in DefectDojo using the [Report Builder](/metrics_reports/reports/).
 
 DefectDojo Pro users also have access to [executive-level Metrics dashboards](/get_started/about/ui_pro_vs_os/#new-dashboards) that can report on Product Types, Products or other data in real-time.
 

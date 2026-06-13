@@ -26,7 +26,7 @@ export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 
    - **Executive Summary** — high-level posture; past-SLA, KEV, and asset inventory at a glance.
    - **POA&M (Plan of Action & Milestones)** — open findings with severity, due date, and recommended remediation, plus Critical detail and historical/closed findings.
-   - **Integrated Inventory Workbook** — assets and products in scope with criticality, platform, lifecycle, internet-accessibility, and finding counts.
+   - **Integrated Inventory Workbook** — assets (formerly Products) in scope with criticality, platform, lifecycle, internet-accessibility, and finding counts.
    - **Deviation Request (DRF) Package** — active risk acceptances, DR-tagged findings, and past-SLA candidates for new deviation requests.
    - **Engineering Findings Detail** — full per-finding write-ups (description, impact, mitigation, references).
    - **Compliance / Audit Snapshot** — assets plus risk acceptances plus KEV.
@@ -99,8 +99,9 @@ enum in the OpenAPI schema -- do not invent others):
 
 NOTE: Even if the tenant has REST endpoints like /api/v2/location/,
 /api/v2/location_findings/, or /api/v2/location_products/, those are NOT
-selectable as `model_choice`. Any "location" scoping must flow through asset,
-product, tag, or product-type filters on the supported entities.
+selectable as `model_choice`. Any "location" scoping must flow through asset
+(formerly Product), tag, or organization (formerly Product Type) filters on
+the supported entities.
 
 ================================================================================
 FIELDS (columns) -- discover, never invent
@@ -131,11 +132,11 @@ is the GET query-parameter vocabulary of the underlying REST endpoint for that
 entity. To discover the real filter names for an entity:
 
     finding         -> GET /api/v2/findings/         (look at `parameters`)
-    asset           -> GET /api/v2/assets/
+    asset           -> GET /api/v2/assets/          (formerly Products)
     engagement      -> GET /api/v2/engagements/
     test            -> GET /api/v2/tests/
     test_type       -> GET /api/v2/test_types/
-    organization    -> GET /api/v2/organizations/
+    organization    -> GET /api/v2/organizations/   (formerly Product Types)
     risk_acceptance -> GET /api/v2/risk_acceptance/
 
 The fastest way is to load the full OpenAPI schema once:
@@ -282,7 +283,7 @@ WHAT I WANT YOU TO DO
      Inventory Workbook, Deviation Request package, Engineering Detail,
      Compliance/Audit Snapshot)
    - any specific filters I care about (severity tiers, SLA cutoffs, KEV-only,
-     specific products, tags, etc.)
+     specific assets, tags, etc.)
    - branding for the theme (primary/secondary/accent colors, footer text,
      whether to show page numbers)
    - which output format I want for the run: "pdf" or "html"
@@ -368,7 +369,7 @@ audience goals, theme branding, and my preferred output format.
 ## How to use it
 
 1. **Paste the prompt** above into Claude, ChatGPT, or another capable LLM.
-2. **Answer its discovery questions.** It will ask for your base URL, the environment variable holding your token, your audiences, any specific filters you care about (severity tiers, SLA cutoffs, KEV-only, particular products or tags), your branding, and the output format you want.
+2. **Answer its discovery questions.** It will ask for your base URL, the environment variable holding your token, your audiences, any specific filters you care about (severity tiers, SLA cutoffs, KEV-only, particular assets or tags), your branding, and the output format you want.
 3. **Review the proposed design and approve before it builds.** The model should come back with one shared theme, a reusable block library, and one or more templates — showing, for every data block, the `model_choice`, `fields`, ordering, and exact filter entries. Do not let it create anything against your tenant until you have signed off.
 4. **Let it generate and run the script.** The single Python script (standard library only) creates the theme, blocks, and templates, then runs the report and downloads the finished file.
 5. **It should verify before and after the run.** Expect it to GET each block and template back to confirm filters and ordering persisted, then POST to `generated_reports`, poll until status is `completed`, and download the file.
