@@ -135,6 +135,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             new_findings=new_findings,
             closed_findings=closed_findings,
         )
+        # In 'async_wait' mode, block until background deduplication has finished
+        # so notifications and statistics reflect the deduplicated state.
+        self.wait_for_post_processing()
+
         # Send out some notifications to the user
         logger.debug("IMPORT_SCAN: Generating notifications")
         dojo_dispatch_task(
@@ -147,9 +151,6 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             url=reverse("view_test", args=(self.test.id,)),
             url_api=reverse("test-detail", args=(self.test.id,)),
         )
-        # In 'async_wait' mode, block until background deduplication has finished
-        # so notifications and statistics reflect the deduplicated state.
-        self.wait_for_post_processing()
         updated_count = len(new_findings) + len(closed_findings)
         self.notify_scan_added(
             self.test,
