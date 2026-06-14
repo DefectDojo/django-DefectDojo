@@ -279,7 +279,17 @@
                             </td>
                         </tr>
                         <tr>
-                            <td style="width: 200px;"><strong>{% trans "Import execution mode" %}</strong></td>
+                            <td style="width: 200px;"><strong>{% trans "Block execution" %}</strong></td>
+                            <td>
+                                {% if user.usercontactinfo.block_execution %}
+                                <i class="text-success fa-solid fa-check"></i>
+                                {% else %}
+                                <i class="text-danger fa-solid fa-xmark"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 200px;"><strong>{% trans "Deduplication execution mode" %}</strong></td>
                             <td>
                                 {{ user.usercontactinfo.get_deduplication_execution_mode_display|default:_("Async (do not wait)") }}
                             </td>

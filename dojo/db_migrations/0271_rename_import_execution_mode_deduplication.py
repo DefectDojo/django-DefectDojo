@@ -4,7 +4,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0270_remove_usercontactinfo_block_execution'),
+        ('dojo', '0270_seed_deduplication_execution_mode'),
     ]
 
     operations = [

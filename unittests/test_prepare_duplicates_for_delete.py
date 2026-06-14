@@ -45,7 +45,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
             is_staff=True,
             is_superuser=True,
         )
-        UserContactInfo.objects.create(user=self.testuser, deduplication_execution_mode="sync")
+        UserContactInfo.objects.create(user=self.testuser, block_execution=True)
 
         self.system_settings(enable_deduplication=False)
         self.system_settings(enable_product_grade=False)

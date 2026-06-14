@@ -252,7 +252,7 @@ class JIRAConfigEngagementTest(DojoTestCase, JIRAConfigEngagementBase):
         self.system_settings(enable_jira=True)
         self.user = self.get_test_admin()
         self.client.force_login(self.user)
-        self.user.usercontactinfo.deduplication_execution_mode = "sync"
+        self.user.usercontactinfo.block_execution = True
         self.user.usercontactinfo.save()
         # product 3 has no jira project config, double check to make sure someone didn't molest the fixture
         # running this in __init__ throws database access denied error

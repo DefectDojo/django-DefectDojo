@@ -59,12 +59,31 @@ class ImportExecutionModeResolverTest(DojoTestCase):
     def test_no_user(self):
         self.assertEqual(DEDUPLICATION_EXECUTION_MODE_ASYNC, Dojo_User.resolve_deduplication_execution_mode(None))
 
-    def test_wants_block_execution_only_for_sync_mode(self):
-        self._set_profile(mode=DEDUPLICATION_EXECUTION_MODE_SYNC)
+    def test_block_execution_falls_back_to_sync(self):
+        # legacy global block_execution flag implies synchronous deduplication
+        UserContactInfo.objects.update_or_create(user=self.user, defaults={"block_execution": True})
+        self.user.refresh_from_db()
+        self.assertEqual(DEDUPLICATION_EXECUTION_MODE_SYNC, Dojo_User.resolve_deduplication_execution_mode(self.user))
+
+    def test_mode_takes_precedence_over_block_execution(self):
+        UserContactInfo.objects.update_or_create(
+            user=self.user,
+            defaults={"block_execution": True, "deduplication_execution_mode": DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT},
+        )
+        self.user.refresh_from_db()
+        self.assertEqual(DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT, Dojo_User.resolve_deduplication_execution_mode(self.user))
+
+    def test_wants_block_execution_reads_block_execution_not_mode(self):
+        # wants_block_execution is the global switch and is independent of the dedup mode
+        UserContactInfo.objects.update_or_create(user=self.user, defaults={"block_execution": True})
+        self.user.refresh_from_db()
         self.assertTrue(Dojo_User.wants_block_execution(self.user))
-        self._set_profile(mode=DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT)
-        self.assertFalse(Dojo_User.wants_block_execution(self.user))
-        self._set_profile(mode=None)
+        UserContactInfo.objects.update_or_create(
+            user=self.user,
+            defaults={"block_execution": False, "deduplication_execution_mode": DEDUPLICATION_EXECUTION_MODE_SYNC},
+        )
+        self.user.refresh_from_db()
+        # a 'sync' dedup mode alone does NOT force global foreground execution
         self.assertFalse(Dojo_User.wants_block_execution(self.user))
 
 

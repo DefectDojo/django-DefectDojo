@@ -12,7 +12,7 @@ class ProductGradeTest(DojoTestCase):
 
     def run(self, result=None):
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.deduplication_execution_mode = "sync"
+        testuser.usercontactinfo.block_execution = True
         testuser.save()
 
         # unit tests are running without any user, which will result in actions like dedupe happening in the celery process

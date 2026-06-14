@@ -641,9 +641,9 @@ class TestAsyncNotificationTaskBody(DojoTestCase):
 
     def run(self, result=None):
         # Same sync pattern used by TestNotificationWebhooks: run under an impersonated user
-        # with deduplication_execution_mode="sync" so downstream dojo_dispatch_task calls execute inline.
+        # with block_execution=True so downstream dojo_dispatch_task calls execute inline.
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.deduplication_execution_mode = "sync"
+        testuser.usercontactinfo.block_execution = True
         testuser.save()
         with impersonate(testuser):
             super().run(result)
@@ -677,8 +677,8 @@ class TestAsyncNotificationTaskBody(DojoTestCase):
 
     @patch("dojo.notifications.helper.create_notification")
     def test_dispatch_respects_block_execution(self, mock_create):
-        """With deduplication_execution_mode="sync" on the impersonated user, the post_save signal runs the task body inline."""
-        # The run() wrapper impersonates admin with deduplication_execution_mode="sync", so
+        """With block_execution=True on the impersonated user, the post_save signal runs the task body inline."""
+        # The run() wrapper impersonates admin with block_execution=True, so
         # dojo_dispatch_task takes the sync branch and the task body calls create_notification
         # (module-level helper inside async_create_notification) synchronously.
         prod = Product.objects.first()
@@ -705,7 +705,7 @@ class TestNotificationWebhooks(DojoTestCase):
         if getattr(self, "__unittest_skip__", False):
             return super().run(result)
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.deduplication_execution_mode = "sync"
+        testuser.usercontactinfo.block_execution = True
         testuser.save()
 
         # unit tests are running without any user, which will result in actions like dedupe happening in the celery process
