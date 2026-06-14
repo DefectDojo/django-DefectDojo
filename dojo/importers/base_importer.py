@@ -127,7 +127,7 @@ class BaseImporter(ImporterOptions):
         returned statistics reflect the deduplicated state.
 
         Only relevant in the 'async_wait' execution mode; bounded by
-        settings.IMPORT_ASYNC_WAIT_TIMEOUT so a stuck/missing worker degrades
+        settings.DEDUPLICATION_ASYNC_WAIT_TIMEOUT so a stuck/missing worker degrades
         to the historical (respond-anyway) behavior instead of hanging.
         """
         if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC:
@@ -143,7 +143,7 @@ class BaseImporter(ImporterOptions):
             # Nothing was dispatched (e.g. empty import) — dedup is trivially done.
             self.deduplication_complete = True
             return
-        timeout = getattr(settings, "IMPORT_ASYNC_WAIT_TIMEOUT", 120)
+        timeout = getattr(settings, "DEDUPLICATION_ASYNC_WAIT_TIMEOUT", 60)
         logger.debug("async_wait: waiting for %d post-processing task(s) (timeout=%ss)", len(results), timeout)
         success = True
         for result in results:
