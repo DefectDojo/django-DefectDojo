@@ -3,7 +3,7 @@ title: "Report Builder"
 description: "Build custom, reusable reports in DefectDojo Pro with Themes, Blocks, and Templates"
 draft: false
 audience: pro
-weight: 1
+weight: 20
 slug: report-builder
 aliases:
   - /en/share_your_findings/pro_reports/using_the_report_builder

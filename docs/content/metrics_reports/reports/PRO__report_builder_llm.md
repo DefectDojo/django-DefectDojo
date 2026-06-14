@@ -3,7 +3,7 @@ title: "Building Reports with an LLM"
 description: "Use Claude or another LLM to design, create, run, and download DefectDojo Pro reports via the API"
 draft: false
 audience: pro
-weight: 3
+weight: 22
 slug: report-builder-llm
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Automating the Report Builder with the REST API and an LLM is a DefectDojo Pro feature, currently in beta.</span>

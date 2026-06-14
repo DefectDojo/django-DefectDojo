@@ -3,7 +3,7 @@ title: "Using the Report Builder"
 description: "Build, run, and retrieve a custom report in open-source DefectDojo"
 draft: false
 audience: opensource
-weight: 4
+weight: 24
 slug: using-the-report-builder
 aliases:
   - /en/share_your_findings/pro_reports/working_with_generated_reports

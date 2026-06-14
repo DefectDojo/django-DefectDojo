@@ -3,7 +3,7 @@ title: "Automating Reports with the API"
 description: "Create themes, blocks, and templates, then run reports and download results via the DefectDojo Pro REST API"
 draft: false
 audience: pro
-weight: 2
+weight: 21
 slug: report-builder-api
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Report Builder REST API (report themes, blocks, templates, and generated reports) is a DefectDojo Pro feature, currently in beta.</span>
