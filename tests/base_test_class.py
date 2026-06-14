@@ -10,7 +10,7 @@ from selenium.common.exceptions import NoAlertPresentException, NoSuchElementExc
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.ui import Select, WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
 
 # import time
 logging.basicConfig(
@@ -329,24 +329,22 @@ class BaseTestCase(unittest.TestCase):
         return self.enable_system_setting("id_enable_github")
 
     def set_block_execution(self, *, block_execution=True):
-        # we set the admin user (ourselves) to the synchronous import execution mode
-        # (the successor of the old block_execution flag) when block_execution=True.
-        # This forces dedupe to happen synchronously, among other things like
-        # notifications, rules, ... Otherwise we select the default async mode.
-        target_mode = "sync" if block_execution else "async"
-        logger.info("setting import execution mode to: %s", target_mode)
+        # we set the admin user (ourselves) to have block_execution checked
+        # this will force dedupe to happen synchronously, among other things like notifications, rules, ...
+        logger.info("setting block execution to: %s", block_execution)
         driver = self.driver
         driver.get(self.base_url + "profile")
-        select = Select(driver.find_element(By.ID, "id_import_execution_mode"))
-        if select.first_selected_option.get_attribute("value") != target_mode:
-            select.select_by_value(target_mode)
+        if (
+            driver.find_element(By.ID, "id_block_execution").is_selected()
+            != block_execution
+        ):
+            driver.find_element(By.XPATH, '//*[@id="id_block_execution"]').click()
             # save settings
             driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-            # check if it's applied after reload
-            select = Select(driver.find_element(By.ID, "id_import_execution_mode"))
+            # check if it's enabled after reload
             self.assertEqual(
-                select.first_selected_option.get_attribute("value"),
-                target_mode,
+                driver.find_element(By.ID, "id_block_execution").is_selected(),
+                block_execution,
             )
         return driver
 
