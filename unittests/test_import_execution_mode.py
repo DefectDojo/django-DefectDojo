@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.test import override_settings
 
 from dojo.importers.default_importer import DefaultImporter
@@ -8,6 +10,8 @@ from dojo.models import (
     Development_Environment,
     Dojo_User,
     Engagement,
+    Finding,
+    Test,
     UserContactInfo,
 )
 
@@ -145,3 +149,75 @@ class ImportExecutionModeAPITest(DojoAPITestCase):
             payload = self._payload("not-a-mode")
             payload["file"] = testfile
             self.import_scan(payload, 400)
+
+
+class NotificationDeduplicationRefreshTest(DojoTestCase):
+
+    """notify_scan_added refreshes duplicate status from the DB once dedup is complete."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def _importer(self):
+        test = Test.objects.first()
+        importer = DefaultImporter(
+            scan_type="ZAP Scan",
+            engagement=test.engagement,
+            environment=Development_Environment.objects.first(),
+        )
+        return importer, test
+
+    @patch("dojo.importers.base_importer.create_notification")
+    def test_deduplicated_new_findings_excluded_when_complete(self, mock_notify):
+        importer, test = self._importer()
+        importer.deduplication_complete = True
+
+        real = Finding(test=test, title="real finding", severity="High")
+        real.save()
+        dupe = Finding(test=test, title="dupe finding", severity="High")
+        dupe.save()
+        # Simulate background deduplication having flagged the second finding.
+        Finding.objects.filter(pk=dupe.pk).update(duplicate=True)
+
+        importer.notify_scan_added(test, updated_count=2, new_findings=[real, dupe])
+
+        kwargs = mock_notify.call_args.kwargs
+        self.assertEqual([f.id for f in kwargs["findings_new"]], [real.id])
+        self.assertEqual([f.id for f in kwargs["findings_new_duplicate"]], [dupe.id])
+        # headline count excludes the deduplicated finding
+        self.assertEqual(kwargs["finding_count"], 1)
+        self.assertEqual(kwargs["event"], "scan_added")
+
+    @patch("dojo.importers.base_importer.create_notification")
+    def test_async_mode_does_not_refresh(self, mock_notify):
+        importer, test = self._importer()
+        importer.deduplication_complete = False  # plain async: dedup not awaited
+
+        dupe = Finding(test=test, title="async dupe", severity="High")
+        dupe.save()
+        Finding.objects.filter(pk=dupe.pk).update(duplicate=True)
+
+        importer.notify_scan_added(test, updated_count=1, new_findings=[dupe])
+
+        kwargs = mock_notify.call_args.kwargs
+        # historical behavior: duplicate still listed/counted as new
+        self.assertEqual([f.id for f in kwargs["findings_new"]], [dupe.id])
+        self.assertEqual(kwargs["findings_new_duplicate"], [])
+        self.assertEqual(kwargs["finding_count"], 1)
+
+    @patch("dojo.importers.base_importer.create_notification")
+    def test_all_new_findings_duplicate_yields_empty_event(self, mock_notify):
+        importer, test = self._importer()
+        importer.deduplication_complete = True
+
+        dupe = Finding(test=test, title="only dupe", severity="Low")
+        dupe.save()
+        Finding.objects.filter(pk=dupe.pk).update(duplicate=True)
+
+        importer.notify_scan_added(test, updated_count=1, new_findings=[dupe])
+
+        kwargs = mock_notify.call_args.kwargs
+        self.assertEqual(kwargs["findings_new"], [])
+        self.assertEqual([f.id for f in kwargs["findings_new_duplicate"]], [dupe.id])
+        self.assertEqual(kwargs["finding_count"], 0)
+        # net-new is zero -> empty scan notification
+        self.assertEqual(kwargs["event"], "scan_added_empty")

@@ -955,10 +955,49 @@ class BaseImporter(ImporterOptions):
             new_findings = []
         logger.debug("Scan added notifications")
 
+        # When deduplication has finished (synchronous mode, or async_wait after the
+        # join), the in-memory findings still carry their pre-dedup duplicate=False
+        # flag because deduplication runs on separately-fetched instances. Refresh the
+        # flag from the database and split each list into "real" and duplicate findings
+        # so the notification reflects post-dedup reality instead of counting/listing
+        # deduplicated findings as brand new. In plain async mode dedup has not run yet,
+        # so we leave the lists untouched (best-effort, historical behavior).
+        findings_new_duplicate: list[Finding] = []
+        findings_reactivated_duplicate: list[Finding] = []
+        findings_untouched_duplicate: list[Finding] = []
+        if getattr(self, "deduplication_complete", False):
+            all_ids = [f.id for f in (*new_findings, *findings_reactivated, *findings_untouched)]
+            duplicate_ids = set()
+            if all_ids:
+                duplicate_ids = set(
+                    Finding.objects.filter(id__in=all_ids, duplicate=True).values_list("id", flat=True),
+                )
+
+            def _split(findings):
+                kept, duplicates = [], []
+                for finding in findings:
+                    if finding.id in duplicate_ids:
+                        # refresh the in-memory flag so any template logic is correct
+                        finding.duplicate = True
+                        duplicates.append(finding)
+                    else:
+                        kept.append(finding)
+                return kept, duplicates
+
+            new_findings, findings_new_duplicate = _split(new_findings)
+            findings_reactivated, findings_reactivated_duplicate = _split(findings_reactivated)
+            findings_untouched, findings_untouched_duplicate = _split(findings_untouched)
+            # Recompute the headline count to exclude findings that turned out to be
+            # duplicates of an existing finding (they are not genuinely new activity).
+            updated_count = len(new_findings) + len(findings_reactivated) + len(findings_mitigated)
+
         new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
         findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
         findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
         findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
+        findings_new_duplicate = sorted(findings_new_duplicate, key=lambda x: x.numerical_severity)
+        findings_reactivated_duplicate = sorted(findings_reactivated_duplicate, key=lambda x: x.numerical_severity)
+        findings_untouched_duplicate = sorted(findings_untouched_duplicate, key=lambda x: x.numerical_severity)
 
         title = (
             f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
@@ -975,6 +1014,11 @@ class BaseImporter(ImporterOptions):
             engagement=test.engagement,
             product=test.engagement.product,
             findings_untouched=findings_untouched,
+            # Findings deduplicated during post-processing, split by their import action.
+            # Populated only once deduplication has completed (sync / async_wait).
+            findings_new_duplicate=findings_new_duplicate,
+            findings_reactivated_duplicate=findings_reactivated_duplicate,
+            findings_untouched_duplicate=findings_untouched_duplicate,
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )
