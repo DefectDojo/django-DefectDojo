@@ -15,9 +15,10 @@ from dojo.models import (
     UserContactInfo,
 )
 
-from .dojo_test_case import DojoAPITestCase, DojoTestCase, get_unit_tests_path
+from .dojo_test_case import DojoAPITestCase, DojoTestCase, get_unit_tests_path, versioned_fixtures
 
 
+@versioned_fixtures
 class ImportExecutionModeResolverTest(DojoTestCase):
 
     """resolve_deduplication_execution_mode: request override > profile > default."""
@@ -87,6 +88,7 @@ class ImportExecutionModeResolverTest(DojoTestCase):
         self.assertFalse(Dojo_User.wants_block_execution(self.user))
 
 
+@versioned_fixtures
 class ImporterDispatchKwargsTest(DojoTestCase):
 
     """deduplication_execution_mode -> dojo_dispatch_task force flags."""
@@ -121,6 +123,7 @@ class ImporterDispatchKwargsTest(DojoTestCase):
         self.assertEqual(DEDUPLICATION_EXECUTION_MODE_SYNC, importer.deduplication_execution_mode)
 
 
+@versioned_fixtures
 @override_settings(CELERY_TASK_ALWAYS_EAGER=True)
 class ImportExecutionModeAPITest(DojoAPITestCase):
 
@@ -170,6 +173,7 @@ class ImportExecutionModeAPITest(DojoAPITestCase):
             self.import_scan(payload, 400)
 
 
+@versioned_fixtures
 class NotificationDeduplicationRefreshTest(DojoTestCase):
 
     """notify_scan_added refreshes duplicate status from the DB once dedup is complete."""
