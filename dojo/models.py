@@ -124,11 +124,11 @@ User = get_user_model()
 
 from dojo.regulations.models import Regulation  # noqa: E402, F401, I001 -- re-export; user/system_settings block intentionally out-of-order (load-order)
 from dojo.user.models import (  # noqa: E402, F401 -- must precede system_settings (middleware load-order)
-    IMPORT_EXECUTION_MODE_ASYNC,
-    IMPORT_EXECUTION_MODE_ASYNC_WAIT,
-    IMPORT_EXECUTION_MODE_CHOICES,
-    IMPORT_EXECUTION_MODE_SYNC,
-    IMPORT_EXECUTION_MODES,
+    DEDUPLICATION_EXECUTION_MODE_ASYNC,
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
+    DEDUPLICATION_EXECUTION_MODE_CHOICES,
+    DEDUPLICATION_EXECUTION_MODE_SYNC,
+    DEDUPLICATION_EXECUTION_MODES,
     Contact,
     Dojo_User,
     UserContactInfo,

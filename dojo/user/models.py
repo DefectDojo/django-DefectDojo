@@ -13,18 +13,18 @@ User = get_user_model()
 #   request waits for the deduplication batches to finish before responding, so
 #   notifications and the returned statistics reflect the deduplicated state.
 # - SYNC: post-processing runs inline in the web process (legacy block_execution).
-IMPORT_EXECUTION_MODE_ASYNC = "async"
-IMPORT_EXECUTION_MODE_ASYNC_WAIT = "async_wait"
-IMPORT_EXECUTION_MODE_SYNC = "sync"
-IMPORT_EXECUTION_MODES = (
-    IMPORT_EXECUTION_MODE_ASYNC,
-    IMPORT_EXECUTION_MODE_ASYNC_WAIT,
-    IMPORT_EXECUTION_MODE_SYNC,
+DEDUPLICATION_EXECUTION_MODE_ASYNC = "async"
+DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT = "async_wait"
+DEDUPLICATION_EXECUTION_MODE_SYNC = "sync"
+DEDUPLICATION_EXECUTION_MODES = (
+    DEDUPLICATION_EXECUTION_MODE_ASYNC,
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
+    DEDUPLICATION_EXECUTION_MODE_SYNC,
 )
-IMPORT_EXECUTION_MODE_CHOICES = (
-    (IMPORT_EXECUTION_MODE_ASYNC, _("Async (do not wait)")),
-    (IMPORT_EXECUTION_MODE_ASYNC_WAIT, _("Async, wait for deduplication")),
-    (IMPORT_EXECUTION_MODE_SYNC, _("Synchronous (block)")),
+DEDUPLICATION_EXECUTION_MODE_CHOICES = (
+    (DEDUPLICATION_EXECUTION_MODE_ASYNC, _("Async (do not wait)")),
+    (DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT, _("Async, wait for deduplication")),
+    (DEDUPLICATION_EXECUTION_MODE_SYNC, _("Synchronous (block)")),
 )
 
 
@@ -45,22 +45,22 @@ class Dojo_User(User):
         # this returns False if there is no user, i.e. in celery processes, unittests, etc.
         # The synchronous import execution mode is the successor of the old block_execution
         # flag and governs whether async tasks run in the foreground for this user.
-        return hasattr(user, "usercontactinfo") and user.usercontactinfo.import_execution_mode == IMPORT_EXECUTION_MODE_SYNC
+        return hasattr(user, "usercontactinfo") and user.usercontactinfo.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC
 
     @staticmethod
-    def resolve_import_execution_mode(user, override=None):
+    def resolve_deduplication_execution_mode(user, override=None):
         """
         Resolve the effective import post-processing execution mode.
 
         Priority: explicit request override > user profile setting > default async.
-        Returns one of IMPORT_EXECUTION_MODE_ASYNC / _ASYNC_WAIT / _SYNC.
+        Returns one of DEDUPLICATION_EXECUTION_MODE_ASYNC / _ASYNC_WAIT / _SYNC.
         """
-        if override in IMPORT_EXECUTION_MODES:
+        if override in DEDUPLICATION_EXECUTION_MODES:
             return override
         info = getattr(user, "usercontactinfo", None)
-        if info is not None and info.import_execution_mode in IMPORT_EXECUTION_MODES:
-            return info.import_execution_mode
-        return IMPORT_EXECUTION_MODE_ASYNC
+        if info is not None and info.deduplication_execution_mode in DEDUPLICATION_EXECUTION_MODES:
+            return info.deduplication_execution_mode
+        return DEDUPLICATION_EXECUTION_MODE_ASYNC
 
     @staticmethod
     def force_password_reset(user):
@@ -101,9 +101,9 @@ class UserContactInfo(models.Model):
     github_username = models.CharField(blank=True, null=True, max_length=150)
     slack_username = models.CharField(blank=True, null=True, max_length=150, help_text=_("Email address associated with your slack account"), verbose_name=_("Slack Email Address"))
     slack_user_id = models.CharField(blank=True, null=True, max_length=25)
-    import_execution_mode = models.CharField(
+    deduplication_execution_mode = models.CharField(
         max_length=20,
-        choices=IMPORT_EXECUTION_MODE_CHOICES,
+        choices=DEDUPLICATION_EXECUTION_MODE_CHOICES,
         null=True,
         blank=True,
         help_text=_(

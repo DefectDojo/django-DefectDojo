@@ -37,7 +37,7 @@ class TestDojoImportersDeduplication(DojoAPITestCase):
         testuser.is_superuser = True
         testuser.is_staff = True
         testuser.save()
-        UserContactInfo.objects.create(user=testuser, import_execution_mode="sync")
+        UserContactInfo.objects.create(user=testuser, deduplication_execution_mode="sync")
 
         # Authenticate API client as admin for import endpoints
         self.login_as_admin()

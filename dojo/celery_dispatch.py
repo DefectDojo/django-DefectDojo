@@ -62,7 +62,7 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     - Inject `async_user_id` if missing.
     - Capture and inject pghistory context if available.
     - Respect `force_sync=True` (foreground execution) and the user's
-      synchronous import_execution_mode.
+      synchronous deduplication_execution_mode.
     - Respect `force_async=True` (background execution even when the caller
       would otherwise run synchronously, e.g. user on the synchronous mode).
       `force_async` wins over `force_sync` and the user's mode.

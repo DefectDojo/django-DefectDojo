@@ -24,8 +24,8 @@ from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.location.models import Location
 from dojo.models import (
+    DEDUPLICATION_EXECUTION_MODE_CHOICES,
     IMPORT_ACTIONS,
-    IMPORT_EXECUTION_MODE_CHOICES,
     SEVERITIES,
     SEVERITY_CHOICES,
     STATS_FIELDS,
@@ -433,15 +433,15 @@ class CommonImportScanSerializer(serializers.Serializer):
         allow_null=True, default=None, queryset=User.objects.all(),
     )
     push_to_jira = serializers.BooleanField(default=False)
-    import_execution_mode = serializers.ChoiceField(
+    deduplication_execution_mode = serializers.ChoiceField(
         required=False,
         allow_null=True,
-        choices=IMPORT_EXECUTION_MODE_CHOICES,
+        choices=DEDUPLICATION_EXECUTION_MODE_CHOICES,
         help_text="Override how import post-processing (deduplication, jira push, grading, ...) is executed for "
         "this request. 'async' dispatches post-processing to the background and responds immediately (default). "
         "'async_wait' dispatches to the background but waits for deduplication to finish before responding, so "
         "notifications and the returned statistics reflect the deduplicated state. 'sync' runs everything inline. "
-        "If omitted, falls back to the user's profile setting (import_execution_mode).",
+        "If omitted, falls back to the user's profile setting (deduplication_execution_mode).",
     )
     environment = serializers.CharField(required=False)
     build_id = serializers.CharField(
@@ -657,8 +657,8 @@ class CommonImportScanSerializer(serializers.Serializer):
         # takes precedence over the user's profile setting, otherwise default async.
         request = self.context.get("request")
         user = getattr(request, "user", None)
-        context["import_execution_mode"] = Dojo_User.resolve_import_execution_mode(
-            user, data.get("import_execution_mode"),
+        context["deduplication_execution_mode"] = Dojo_User.resolve_deduplication_execution_mode(
+            user, data.get("deduplication_execution_mode"),
         )
 
         return context

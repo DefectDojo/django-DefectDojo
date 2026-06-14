@@ -20,7 +20,7 @@ class TestWatsonAsyncSearchIndex(DojoAPITestCase):
         super().setUp()
 
         self.testuser = User.objects.create(username="admin", is_staff=True, is_superuser=True)
-        UserContactInfo.objects.create(user=self.testuser, import_execution_mode="sync")
+        UserContactInfo.objects.create(user=self.testuser, deduplication_execution_mode="sync")
 
         self.system_settings(enable_product_grade=False)
         self.system_settings(enable_github=False)

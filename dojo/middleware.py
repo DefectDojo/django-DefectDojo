@@ -281,7 +281,7 @@ def _drain_search_context_to_async(objects, source):
     for model_name, pk_list in model_groups.items():
         batches = [pk_list[i:i + batch_size] for i in range(0, len(pk_list), batch_size)]
         # force_async=True keeps indexing off the request path even for users
-        # on the synchronous import_execution_mode — index updates are slow and
+        # on the synchronous deduplication_execution_mode — index updates are slow and
         # never need to be synchronous from the user's perspective.
         for i, batch in enumerate(batches, 1):
             logger.debug(f"{source}: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")

@@ -67,7 +67,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         super().setUp()
 
         testuser, _ = User.objects.get_or_create(username="admin")
-        UserContactInfo.objects.update_or_create(user=testuser, defaults={"import_execution_mode": None})
+        UserContactInfo.objects.update_or_create(user=testuser, defaults={"deduplication_execution_mode": None})
 
         self.system_settings(enable_product_grade=False)
         self.system_settings(enable_github=False)
@@ -363,7 +363,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
@@ -387,7 +387,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
         self.system_settings(enable_product_grade=True)
 
@@ -541,7 +541,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
@@ -653,7 +653,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
@@ -677,7 +677,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
         self.system_settings(enable_product_grade=True)
 
@@ -805,7 +805,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(

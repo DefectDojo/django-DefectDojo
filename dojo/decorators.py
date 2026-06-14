@@ -76,15 +76,15 @@ def we_want_async(*args, func=None, **kwargs):
         return True
 
     if Dojo_User.wants_block_execution(user):
-        logger.debug("dojo_async_task %s: running task in the foreground as import_execution_mode is 'sync' for %s", func, user)
+        logger.debug("dojo_async_task %s: running task in the foreground as deduplication_execution_mode is 'sync' for %s", func, user)
         return False
 
-    logger.debug("dojo_async_task %s: running task in the background as import_execution_mode is not 'sync' for %s", func, user)
+    logger.debug("dojo_async_task %s: running task in the background as deduplication_execution_mode is not 'sync' for %s", func, user)
     return True
 
 
 # Defect Dojo performs all tasks asynchrnonously using celery
-# *unless* the user initiating the task has set import_execution_mode to 'sync' in their usercontactinfo profile
+# *unless* the user initiating the task has set deduplication_execution_mode to 'sync' in their usercontactinfo profile
 def dojo_async_task(func=None, *, signature=False):
     def decorator(func):
         @wraps(func)

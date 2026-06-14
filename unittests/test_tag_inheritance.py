@@ -713,7 +713,7 @@ class InheritedTagsImportTestAPI(DojoAPITestCase, InheritedTagsImportMixin):
     def setUp(self):
         super().setUp()
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
         self.login_as_admin()
         settings.SECURE_SSL_REDIRECT = False
@@ -731,7 +731,7 @@ class InheritedTagsImportTestUI(DojoAPITestCase, InheritedTagsImportMixin):
     def setUp(self):
         super().setUp()
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.usercontactinfo.save()
         self.login_as_admin()
         settings.SECURE_SSL_REDIRECT = False

@@ -16,11 +16,11 @@ from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
 from dojo.models import (
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
+    DEDUPLICATION_EXECUTION_MODE_SYNC,
     # Import History States
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
-    IMPORT_EXECUTION_MODE_ASYNC_WAIT,
-    IMPORT_EXECUTION_MODE_SYNC,
     IMPORT_REACTIVATED_FINDING,
     IMPORT_UNTOUCHED_FINDING,
     # Finding Severities
@@ -103,9 +103,9 @@ class BaseImporter(ImporterOptions):
         - ASYNC (default): preserve historical behavior, honoring any externally
           supplied force_sync and the user's sync mode via we_want_async.
         """
-        if self.import_execution_mode == IMPORT_EXECUTION_MODE_SYNC:
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC:
             return {"force_sync": True}
-        if self.import_execution_mode == IMPORT_EXECUTION_MODE_ASYNC_WAIT:
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
             return {"force_async": True}
         return {"force_sync": kwargs.get("force_sync", False)}
 
@@ -130,11 +130,11 @@ class BaseImporter(ImporterOptions):
         settings.IMPORT_ASYNC_WAIT_TIMEOUT so a stuck/missing worker degrades
         to the historical (respond-anyway) behavior instead of hanging.
         """
-        if self.import_execution_mode == IMPORT_EXECUTION_MODE_SYNC:
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC:
             # Batches ran inline during process_findings, so dedup is already done.
             self.deduplication_complete = True
             return
-        if self.import_execution_mode != IMPORT_EXECUTION_MODE_ASYNC_WAIT:
+        if self.deduplication_execution_mode != DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
             # 'async': post-processing was dispatched but is not awaited.
             self.deduplication_complete = False
             return

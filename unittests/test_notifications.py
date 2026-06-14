@@ -641,9 +641,9 @@ class TestAsyncNotificationTaskBody(DojoTestCase):
 
     def run(self, result=None):
         # Same sync pattern used by TestNotificationWebhooks: run under an impersonated user
-        # with import_execution_mode="sync" so downstream dojo_dispatch_task calls execute inline.
+        # with deduplication_execution_mode="sync" so downstream dojo_dispatch_task calls execute inline.
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.save()
         with impersonate(testuser):
             super().run(result)
@@ -677,8 +677,8 @@ class TestAsyncNotificationTaskBody(DojoTestCase):
 
     @patch("dojo.notifications.helper.create_notification")
     def test_dispatch_respects_block_execution(self, mock_create):
-        """With import_execution_mode="sync" on the impersonated user, the post_save signal runs the task body inline."""
-        # The run() wrapper impersonates admin with import_execution_mode="sync", so
+        """With deduplication_execution_mode="sync" on the impersonated user, the post_save signal runs the task body inline."""
+        # The run() wrapper impersonates admin with deduplication_execution_mode="sync", so
         # dojo_dispatch_task takes the sync branch and the task body calls create_notification
         # (module-level helper inside async_create_notification) synchronously.
         prod = Product.objects.first()
@@ -705,7 +705,7 @@ class TestNotificationWebhooks(DojoTestCase):
         if getattr(self, "__unittest_skip__", False):
             return super().run(result)
         testuser = User.objects.get(username="admin")
-        testuser.usercontactinfo.import_execution_mode = "sync"
+        testuser.usercontactinfo.deduplication_execution_mode = "sync"
         testuser.save()
 
         # unit tests are running without any user, which will result in actions like dedupe happening in the celery process

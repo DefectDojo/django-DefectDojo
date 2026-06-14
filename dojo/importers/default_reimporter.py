@@ -18,7 +18,7 @@ from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
 from dojo.models import (
-    IMPORT_EXECUTION_MODE_ASYNC_WAIT,
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
     Development_Environment,
     Finding,
     Notes,
@@ -473,7 +473,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             jira_instance_id=getattr(self.jira_instance, "id", None),
                             **self.post_processing_dispatch_kwargs(**kwargs),
                         )
-                        if self.import_execution_mode == IMPORT_EXECUTION_MODE_ASYNC_WAIT:
+                        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
                             self.record_post_processing_result(result)
 
         # No chord: tasks are dispatched immediately above per batch
