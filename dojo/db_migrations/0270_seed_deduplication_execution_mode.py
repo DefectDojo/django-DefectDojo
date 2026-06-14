@@ -10,19 +10,19 @@ def seed_deduplication_execution_mode(apps, schema_editor):
     unchanged for them.
     """
     UserContactInfo = apps.get_model("dojo", "UserContactInfo")
-    UserContactInfo.objects.filter(block_execution=True).update(import_execution_mode="sync")
+    UserContactInfo.objects.filter(block_execution=True).update(deduplication_execution_mode="sync")
 
 
 def unseed_deduplication_execution_mode(apps, schema_editor):
     """Reverse: clear the seeded synchronous mode."""
     UserContactInfo = apps.get_model("dojo", "UserContactInfo")
-    UserContactInfo.objects.filter(import_execution_mode="sync").update(import_execution_mode=None)
+    UserContactInfo.objects.filter(deduplication_execution_mode="sync").update(deduplication_execution_mode=None)
 
 
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0269_usercontactinfo_import_execution_mode'),
+        ('dojo', '0269_usercontactinfo_deduplication_execution_mode'),
     ]
 
     operations = [
