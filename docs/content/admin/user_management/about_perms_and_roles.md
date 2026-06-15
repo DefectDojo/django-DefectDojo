@@ -7,7 +7,7 @@ aliases:
   - /en/customize_dojo/user_management/about_perms_and_roles
 ---
 
-> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [2.59 upgrade notes](/releases/os_upgrading/2.59/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
+> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
 
 If you have a team of users working in DefectDojo, it's important to set up Role\-Based Access Control (RBAC) appropriately so that users can only access specific data. Security data is highly sensitive, and DefectDojo's options for access control allow you to be specific about each team member’s access to information.
 

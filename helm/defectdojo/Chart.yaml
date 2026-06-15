@@ -1,5 +1,5 @@
 apiVersion: v2
-appVersion: "2.59.0"
+appVersion: "2.60.0-dev"
 description: A Helm chart for Kubernetes to install DefectDojo
 name: defectdojo
 version: 1.9.31-dev
@@ -33,5 +33,5 @@ dependencies:
 #   - kind: security
 #     description: Critical bug
 annotations:
-  artifacthub.io/prerelease: "false"
-  artifacthub.io/changes: "- kind: changed\n  description: Update valkey Docker tag from 0.20.0 to v0.20.1 (_/defect_/Chart.yaml)\n- kind: changed\n  description: Update valkey Docker tag from 0.20.1 to v0.20.2 (_/defect_/Chart.yaml)\n- kind: changed\n  description: Bump DefectDojo to 2.59.0\n"
+  artifacthub.io/prerelease: "true"
+  artifacthub.io/changes: "- kind: changed\n  description: chore(deps)_ update gcr.io/cloudsql__/gce_proxy _ tag from 1.37.12 to v1.38.0 (_/defect_/values.yaml)\n"
