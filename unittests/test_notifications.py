@@ -476,7 +476,7 @@ class TestNotificationTriggersApi(APITestCase):
     def test_auditlog_on(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type API")
         self.client.delete(reverse("product_type-detail", args=(prod_type.pk,)), format="json")
-        self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type API" was deleted by admin')
+        self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The Organization "notif prod type API" was deleted by admin')
 
     @patch("dojo.api_v2.serializers.dojo_dispatch_task")
     def test_create_calls_notification_with_auto_assigned_reporter(self, mock_dispatch):

@@ -51,10 +51,10 @@ A few rules of thumb:
 
 ## Coming from a previous version of DefectDojo
 
-DefectDojo open-source moved back to the Authorized Users model in version 2.59. If you're upgrading from a release that had the Members / Groups / Global Roles system, your existing access is carried forward into Authorized Users automatically by the upgrade — no manual mapping is needed.
+DefectDojo open-source moved back to the Authorized Users model in version 3.0. If you're upgrading from a release that had the Members / Groups / Global Roles system, your existing access is carried forward into Authorized Users automatically by the upgrade — no manual mapping is needed.
 
-The upgrade ships with a read-only management command, `preview_legacy_authorization_migration`, that summarizes what an upgrade would change against a copy of your database. The recommended workflow is to install 2.59 in a staging environment with a snapshot of production, run the command, review the summary, and then upgrade production.
+The upgrade ships with a read-only management command, `preview_legacy_authorization_migration`, that summarizes what an upgrade would change against a copy of your database. The recommended workflow is to install 3.0 in a staging environment with a snapshot of production, run the command, review the summary, and then upgrade production.
 
 If you're moving the other direction — from open-source to DefectDojo Pro — Pro ships a `reconcile_authorized_users_to_rbac` command that brings Authorized Users access forward into Pro's RBAC. It supports `--dry-run` and is idempotent.
 
-For more detail on both paths, see the [2.59 upgrade notes](/releases/os_upgrading/2.59/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
+For more detail on both paths, see the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).

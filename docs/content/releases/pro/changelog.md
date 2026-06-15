@@ -10,6 +10,19 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
+## June 2026: v3.0
+
+### June 15, 2026: v3.0.0
+
+* **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
+* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic — API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
+* **(Authorization)** Open Source restores the **Authorized Users** panel on Product/Product Type detail under the legacy authorization model; Pro deployments retain full RBAC and are not impacted. See [Authorized Users panel replaces Members/Groups under legacy authorization](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
+* **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
+* **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
+* **(API)** Removed the Credential Manager feature and its API endpoints. See [Removal: Credential Manager](/releases/os_upgrading/3.0/#removal-credential-manager).
+* **(API)** Removed the Stub Findings feature and its API endpoint. See [Removal: Stub Findings](/releases/os_upgrading/3.0/#removal-stub-findings).
+* **(Search)** Watson search index updates during import/reimport are now batched, tunable via `DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE`. See [Configuration change in Watson Search Indexing](/releases/os_upgrading/3.0/#configuration-change-in-watson-search-indexing).
+
 ## June 2026: v2.59
 
 ### June 1, 2026: v2.59.0
