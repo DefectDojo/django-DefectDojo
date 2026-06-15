@@ -865,6 +865,26 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         model = Endpoint_Status
         fields = "__all__"
 
+    def validate(self, data):
+        endpoint = data.get("endpoint") if self.instance is None else data.get("endpoint", self.instance.endpoint)
+        finding = data.get("finding") if self.instance is None else data.get("finding", self.instance.finding)
+
+        if endpoint is not None and finding is not None:
+            if endpoint.product_id != finding.test.engagement.product_id:
+                msg = "Endpoint and finding must belong to the same product"
+                raise serializers.ValidationError(msg)
+
+        if self.instance is not None:
+            # Check the user has appropriate permissions to the new endpoint/finding if specified
+            user = self.context["request"].user
+            if "endpoint" in data and data["endpoint"] != self.instance.endpoint and not user_has_permission(user, data["endpoint"], "edit"):
+                msg = "You do not have edit access to the target endpoint"
+                raise PermissionDenied(msg)
+            if "finding" in data and data["finding"] != self.instance.finding and not user_has_permission(user, data["finding"], "edit"):
+                msg = "You do not have edit access to the target finding"
+                raise PermissionDenied(msg)
+        return data
+
     def run_validators(self, initial_data):
         try:
             return super().run_validators(initial_data)
