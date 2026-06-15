@@ -22,7 +22,8 @@ from django.utils.timezone import now
 
 from dojo.authorization.middleware import AuthorizationMiddleware
 from dojo.authorization.url_permissions import URL_PERMISSIONS
-from dojo.location.models import Location
+from dojo.location.models import Location, LocationFindingReference
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     Dojo_User,
     Engagement,
@@ -81,20 +82,20 @@ class V3EndpointRouteAuthorizationTests(DojoTestCase):
 
         # A Finding whose product is product_b -- used for add_endpoint_to_finding.
         test_type, _ = Test_Type.objects.get_or_create(name="v3_authz_scan")
-        engagement = Engagement.objects.create(
+        engagement_b = Engagement.objects.create(
             name="v3_authz_eng",
             product=cls.product_b,
             target_start=now(),
             target_end=now(),
         )
-        test = Test.objects.create(
-            engagement=engagement,
+        test_b = Test.objects.create(
+            engagement=engagement_b,
             test_type=test_type,
             target_start=now(),
             target_end=now(),
         )
         cls.finding_in_b = Finding.objects.create(
-            test=test,
+            test=test_b,
             title="v3_authz_finding",
             description="x",
             severity="High",
@@ -103,6 +104,68 @@ class V3EndpointRouteAuthorizationTests(DojoTestCase):
             verified=True,
             reporter=cls.user_b,
         )
+
+        # A Location associated with both products, with a Finding from each
+        # product linked through it. Used for the shared-location scoping
+        # tests.
+        cls.shared_host = "shared.example.test"
+        cls.url_shared = URL.get_or_create_from_object(
+            URL.from_value(f"https://{cls.shared_host}/shared"),
+        )
+        cls.location_shared = cls.url_shared.location
+        cls.location_shared.associate_with_product(cls.product_a)
+        cls.location_shared.associate_with_product(cls.product_b)
+
+        engagement_a = Engagement.objects.create(
+            name="v3_authz_eng_a",
+            product=cls.product_a,
+            target_start=now(),
+            target_end=now(),
+        )
+        test_a = Test.objects.create(
+            engagement=engagement_a,
+            test_type=test_type,
+            target_start=now(),
+            target_end=now(),
+        )
+        cls.finding_in_a_on_shared = Finding.objects.create(
+            test=test_a,
+            title="v3_authz_finding_on_shared_in_a",
+            description="x",
+            severity="High",
+            numerical_severity="S0",
+            active=True,
+            verified=True,
+            reporter=cls.user_a,
+        )
+        cls.finding_in_b_on_shared = Finding.objects.create(
+            test=test_b,
+            title="v3_authz_finding_on_shared_in_b",
+            description="x",
+            severity="High",
+            numerical_severity="S0",
+            active=True,
+            verified=True,
+            reporter=cls.user_b,
+        )
+        LocationFindingReference.objects.create(
+            location=cls.location_shared,
+            finding=cls.finding_in_a_on_shared,
+            status=FindingLocationStatus.Active,
+        )
+        LocationFindingReference.objects.create(
+            location=cls.location_shared,
+            finding=cls.finding_in_b_on_shared,
+            status=FindingLocationStatus.Active,
+        )
+
+        # A second Location on the same host, associated only with product_b.
+        # Used to verify host_view aggregation respects per-product membership.
+        cls.url_unauthorized_on_shared_host = URL.get_or_create_from_object(
+            URL.from_value(f"https://{cls.shared_host}/private-to-b"),
+        )
+        cls.location_unauthorized_on_shared_host = cls.url_unauthorized_on_shared_host.location
+        cls.location_unauthorized_on_shared_host.associate_with_product(cls.product_b)
 
     # ------------------------------------------------------------------
     # Positive control: the authorized user can reach their own Location.
@@ -134,6 +197,37 @@ class V3EndpointRouteAuthorizationTests(DojoTestCase):
         self.client.force_login(self.user_a)
         response = self.client.get(reverse("endpoint_host_report", args=(self.location_b.id,)))
         self.assertEqual(response.status_code, 400)
+
+    # ------------------------------------------------------------------
+    # Reports on shared Locations must not surface data from products
+    # the requesting user is not a member of. Location-level authorization
+    # grants access when *any* associated product is authorized, but the
+    # rendered report must still be reduced to the user's product scope.
+    # ------------------------------------------------------------------
+    def test_endpoint_report_excludes_findings_from_unauthorized_products(self):
+        self.client.force_login(self.user_a)
+        response = self.client.get(
+            reverse("endpoint_report", args=(self.location_shared.id,)) + "?_generate=1",
+            HTTP_HOST="testserver",
+        )
+        self.assertEqual(response.status_code, 200)
+        finding_ids = {f.id for f in response.context["findings"]}
+        self.assertIn(self.finding_in_a_on_shared.id, finding_ids)
+        self.assertNotIn(self.finding_in_b_on_shared.id, finding_ids)
+
+    def test_endpoint_host_report_excludes_locations_from_unauthorized_products(self):
+        self.client.force_login(self.user_a)
+        response = self.client.get(
+            reverse("endpoint_host_report", args=(self.location_shared.id,)) + "?_generate=1",
+            HTTP_HOST="testserver",
+        )
+        self.assertEqual(response.status_code, 200)
+        location_ids = {loc.id for loc in response.context["endpoints"]}
+        self.assertIn(self.location_shared.id, location_ids)
+        self.assertNotIn(self.location_unauthorized_on_shared_host.id, location_ids)
+        finding_ids = {f.id for f in response.context["findings"]}
+        self.assertIn(self.finding_in_a_on_shared.id, finding_ids)
+        self.assertNotIn(self.finding_in_b_on_shared.id, finding_ids)
 
     # ------------------------------------------------------------------
     # Edit / delete routes must reject cross-product mutation.
