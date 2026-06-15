@@ -19,13 +19,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # State only: forget the models and their triggers so they no longer
+        # have to be defined in dojo/models.py. There are no database_operations
+        # so the dojo_cred_user, dojo_cred_mapping, and dojo_cred_userevent
+        # tables and the cred_user pghistory triggers are preserved for
+        # downgrades.
         migrations.SeparateDatabaseAndState(
-            # State only: forget the models, triggers, and field so they no
-            # longer have to be defined in dojo/models.py. database_operations
-            # is intentionally empty so the dojo_cred_user, dojo_cred_mapping,
-            # and dojo_cred_userevent tables, the cred_user pghistory triggers,
-            # and the system_settings.enable_credentials column are all
-            # preserved for downgrades.
             state_operations=[
                 # Drop the pghistory triggers from state before the model they
                 # hang off of is removed.
@@ -52,10 +51,23 @@ class Migration(migrations.Migration):
                 migrations.DeleteModel(
                     name="Cred_User",
                 ),
-                # The UI toggle no longer has anything to gate.
+            ],
+        ),
+        # Drop the enable_credentials field from state but keep the column for
+        # downgrades. The model no longer supplies a value on INSERT, so give
+        # the column a server-side default (the field defaulted to True) to
+        # keep new System_Settings rows satisfying its NOT NULL constraint.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
                 migrations.RemoveField(
                     model_name="system_settings",
                     name="enable_credentials",
+                ),
+            ],
+            database_operations=[
+                migrations.RunSQL(
+                    sql="ALTER TABLE dojo_system_settings ALTER COLUMN enable_credentials SET DEFAULT true;",
+                    reverse_sql="ALTER TABLE dojo_system_settings ALTER COLUMN enable_credentials DROP DEFAULT;",
                 ),
             ],
         ),
