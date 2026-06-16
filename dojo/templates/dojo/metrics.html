@@ -147,9 +147,11 @@
                         </h3>
                     </div>
                 </div>
+                {% if form %}
                 <div id="the-filters" class="is-filters panel-body collapse">
                     {% include "dojo/filter_snippet.html" with form=form clear_link="/metrics/product/type" %}
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>
