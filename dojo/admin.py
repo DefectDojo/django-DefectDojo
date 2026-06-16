@@ -14,6 +14,20 @@ from dojo.models import (
     TextQuestion,
 )
 
+
+# Django's default admin gate is `is_active and is_staff`. Under the legacy
+# OS auth model is_staff is already a near-superuser bypass for queryset
+# filters and most permission checks, so the standard UserAdmin change form
+# would let any is_staff user with auth.change_user tick is_superuser on
+# themselves. Rather than narrowing each ModelAdmin individually, restrict
+# the entire admin site to superusers — there is no DefectDojo OS role that
+# legitimately needs /admin/ access without being a superuser.
+def _admin_site_has_permission(request):
+    return request.user.is_active and request.user.is_superuser
+
+
+admin.site.has_permission = _admin_site_has_permission
+
 # Conditionally unregister LogEntry from auditlog if it's registered
 try:
     from auditlog.models import LogEntry
