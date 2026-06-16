@@ -152,7 +152,7 @@ urlpatterns = [
         name="reopen_finding"),
     re_path(r"^finding/image/(?P<token>[^/]+)$", views.download_finding_pic,
         name="download_finding_pic"),
-    re_path(r"^finding/(?P<fid>\d+)/merge$",
+    re_path(r"^finding/(?P<pid>\d+)/merge$",
         views.merge_finding_product, name="merge_finding"),
     re_path(r"^product/(?P<pid>\d+)/merge$", views.merge_finding_product,
         name="merge_finding_product"),

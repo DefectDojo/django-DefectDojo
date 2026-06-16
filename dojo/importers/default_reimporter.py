@@ -804,9 +804,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         existing_finding.mitigated = None
         existing_finding.is_mitigated = False
         existing_finding.mitigated_by = None
-        existing_finding.active = True
-        if self.verified is not None:
-            existing_finding.verified = self.verified
+        # A duplicate finding must stay inactive/unverified (see set_duplicate and the
+        # "Duplicate findings cannot be verified or active" form validation). Un-mitigate it
+        # but do not reactivate it, otherwise we create an invalid active/verified duplicate state.
+        if existing_finding.duplicate:
+            existing_finding.active = False
+            existing_finding.verified = False
+        else:
+            existing_finding.active = True
+            if self.verified is not None:
+                existing_finding.verified = self.verified
 
         component_name = getattr(unsaved_finding, "component_name", None)
         component_version = getattr(unsaved_finding, "component_version", None)
@@ -822,7 +829,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # don't dedupe before endpoints/locations are added, postprocessing will be done on next save (in calling method)
         existing_finding.save_no_options()
 
-        note = Notes(entry=f"Re-activated by {self.scan_type} re-upload.", author=self.user)
+        if existing_finding.duplicate:
+            note_entry = f"Un-mitigated by {self.scan_type} re-upload but kept inactive because the finding is a duplicate."
+        else:
+            note_entry = f"Re-activated by {self.scan_type} re-upload."
+        note = Notes(entry=note_entry, author=self.user)
         note.save()
         self.location_handler.record_reactivations_for_finding(existing_finding)
         existing_finding.notes.add(note)

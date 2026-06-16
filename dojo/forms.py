@@ -2176,16 +2176,13 @@ class ReviewFindingForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         finding = kwargs.pop("finding", None)
-        user = kwargs.pop("user", None)
+        kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
         # Get the list of users
         if finding is not None:
             users = get_authorized_users_for_product_and_product_type(None, finding.test.engagement.product, "edit")
         else:
             users = get_authorized_users("edit").filter(is_active=True)
-        # Remove the current user
-        if user is not None:
-            users = users.exclude(id=user.id)
         # Save a copy of the original query to be used in the validator
         self.reviewer_queryset = users
         # Set the users in the form
