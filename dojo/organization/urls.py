@@ -38,6 +38,16 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
             product_views.new_product,
             name="add_product_to_product_type",
         ),
+        re_path(
+            r"^organization/(?P<ptid>\d+)/authorized_users/add$",
+            views.add_product_type_authorized_users,
+            name="add_product_type_authorized_users",
+        ),
+        re_path(
+            r"^organization/(?P<ptid>\d+)/authorized_users/(?P<user_id>\d+)/delete$",
+            views.delete_product_type_authorized_user,
+            name="delete_product_type_authorized_user",
+        ),
         # TODO: Backwards compatibility; remove after v3 migration is complete
         re_path(r"^product/type$", redirect_view("product_type")),
         re_path(r"^product/type/(?P<ptid>\d+)$", redirect_view("view_product_type")),
@@ -45,6 +55,8 @@ if settings.ENABLE_V3_ORGANIZATION_ASSET_RELABEL:
         re_path(r"^product/type/(?P<ptid>\d+)/delete$", redirect_view("delete_product_type")),
         re_path(r"^product/type/add$", redirect_view("add_product_type")),
         re_path(r"^product/type/(?P<ptid>\d+)/add_product", redirect_view("add_product_to_product_type")),
+        re_path(r"^product/type/(?P<ptid>\d+)/authorized_users/add$", redirect_view("add_product_type_authorized_users")),
+        re_path(r"^product/type/(?P<ptid>\d+)/authorized_users/(?P<user_id>\d+)/delete$", redirect_view("delete_product_type_authorized_user")),
     ]
 else:
     urlpatterns = [
@@ -74,4 +86,6 @@ else:
         re_path(r"^organization/(?P<ptid>\d+)/delete$", redirect_view("delete_product_type")),
         re_path(r"^organization/add$", redirect_view("add_product_type")),
         re_path(r"^organization/(?P<ptid>\d+)/add_product", redirect_view("add_product_to_product_type")),
+        re_path(r"^organization/(?P<ptid>\d+)/authorized_users/add$", redirect_view("add_product_type_authorized_users")),
+        re_path(r"^organization/(?P<ptid>\d+)/authorized_users/(?P<user_id>\d+)/delete$", redirect_view("delete_product_type_authorized_user")),
     ]
