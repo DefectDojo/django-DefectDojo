@@ -932,4 +932,115 @@ class TestImporterUtils(DojoAPITestCase):
         # Verify only new Vulnerability_Id objects exist
         vuln_ids = list(Vulnerability_Id.objects.filter(finding=finding).values_list("vulnerability_id", flat=True))
         self.assertEqual(set(new_vulnerability_ids), set(vuln_ids))
-        finding.delete()
+
+
+class ReimportDuplicateReactivationTest(DojoTestCase):
+
+    """
+    Regression test for https://github.com/DefectDojo/django-DefectDojo/issues/14910
+
+    Reimport reactivation of a mitigated finding must not produce an invalid
+    active/verified duplicate finding state.
+    """
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="admin", is_superuser=True)
+        Development_Environment.objects.get_or_create(name="Development")
+        self.product_type, _ = Product_Type.objects.get_or_create(name="dup_reactivation_pt")
+        self.product, _ = Product.objects.get_or_create(
+            name="DupReactivationProduct",
+            description="test product",
+            prod_type=self.product_type,
+        )
+        self.engagement = Engagement.objects.create(
+            name="Dup Reactivation Engagement",
+            product=self.product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        self.test = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title="dup reactivation test")
+
+    def _make_finding(self, title, **kwargs):
+        return Finding.objects.create(
+            title=title,
+            test=self.test,
+            severity="High",
+            reporter=self.user,
+            **kwargs,
+        )
+
+    def test_reactivation_keeps_duplicate_inactive_and_unverified(self):
+        # Original active finding
+        original = self._make_finding("original finding", active=True, verified=True)
+        # Mitigated finding that is marked as a duplicate of the original
+        existing_duplicate = self._make_finding(
+            "duplicate finding",
+            active=False,
+            verified=False,
+            duplicate=True,
+            duplicate_finding=original,
+            is_mitigated=True,
+            mitigated=timezone.now(),
+            mitigated_by=self.user,
+        )
+        # The reimported (unsaved) finding that re-matches the duplicate, and is active/not mitigated
+        unsaved_finding = self._make_finding("duplicate finding incoming", active=True, verified=True)
+
+        reimporter = DefaultReImporter(
+            test=self.test,
+            user=self.user,
+            scan_type=NPM_AUDIT_SCAN_TYPE,
+            active=True,
+            verified=True,
+            do_not_reactivate=False,
+        )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
+
+        result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing_duplicate)
+
+        result_finding.refresh_from_db()
+        # The mitigation is cleared (the finding reappeared in the scan)...
+        self.assertFalse(result_finding.is_mitigated)
+        self.assertIsNone(result_finding.mitigated)
+        # ...but a duplicate must never become active or verified (issue #14910)
+        self.assertTrue(result_finding.duplicate)
+        self.assertFalse(result_finding.active)
+        self.assertFalse(result_finding.verified)
+
+    def test_reactivation_of_non_duplicate_still_activates(self):
+        # A regular mitigated finding (not a duplicate) must still reactivate as before
+        existing = self._make_finding(
+            "regular finding",
+            active=False,
+            verified=False,
+            is_mitigated=True,
+            mitigated=timezone.now(),
+            mitigated_by=self.user,
+        )
+        unsaved_finding = self._make_finding("regular finding incoming", active=True, verified=True)
+
+        reimporter = DefaultReImporter(
+            test=self.test,
+            user=self.user,
+            scan_type=NPM_AUDIT_SCAN_TYPE,
+            active=True,
+            verified=True,
+            do_not_reactivate=False,
+        )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
+
+        result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing)
+
+        result_finding.refresh_from_db()
+        self.assertFalse(result_finding.is_mitigated)
+        self.assertIsNone(result_finding.mitigated)
+        self.assertTrue(result_finding.active)
+        self.assertTrue(result_finding.verified)
