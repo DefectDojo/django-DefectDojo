@@ -16,7 +16,7 @@ class MetricsExtendedTest(BaseTestCase):
         time.sleep(1)
         self.assertTrue(
             self.is_text_present_on_page(text="Metrics")
-            or self.is_text_present_on_page(text="Product Type"),
+            or self.is_text_present_on_page(text="Organization"),
         )
 
     @on_exception_html_source_logger
@@ -27,7 +27,7 @@ class MetricsExtendedTest(BaseTestCase):
         time.sleep(1)
         self.assertTrue(
             self.is_text_present_on_page(text="Metric")
-            or self.is_text_present_on_page(text="Product Type"),
+            or self.is_text_present_on_page(text="Organization"),
         )
 
     @on_exception_html_source_logger
@@ -59,7 +59,7 @@ class MetricsExtendedTest(BaseTestCase):
         driver.get(self.base_url + "metrics/product/type/counts")
         time.sleep(1)
         self.assertTrue(
-            self.is_text_present_on_page(text="Product Type")
+            self.is_text_present_on_page(text="Organization")
             or self.is_text_present_on_page(text="Metric")
             or self.is_text_present_on_page(text="Count"),
         )
@@ -72,7 +72,7 @@ class MetricsExtendedTest(BaseTestCase):
         time.sleep(1)
         self.assertTrue(
             self.is_text_present_on_page(text="Metric")
-            or self.is_text_present_on_page(text="Product"),
+            or self.is_text_present_on_page(text="Asset"),
         )
 
 

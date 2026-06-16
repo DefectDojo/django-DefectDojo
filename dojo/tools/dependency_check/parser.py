@@ -86,6 +86,57 @@ class DependencyCheckParser:
         if key not in dupes:
             dupes[key] = finding
 
+    def build_related_dependencies_block(self, dependency, namespace):
+        """
+        Return a markdown block listing related dependencies, or ''.
+
+        Dependency-Check's DependencyBundlingAnalyzer merges co-grouped artifacts
+        into one main dependency and lists the others under <relatedDependencies>.
+        The vulnerability is attached only to the main dependency in the XML; the
+        related entries are metadata pointing to other files in the same logical
+        component. Previously we emitted one finding per related entry, which
+        multiplied a single CVE into N findings sharing the same title and CVE
+        with only the file_path differing — pure noise for the user. Instead we
+        keep one finding for the main dependency and surface the related file
+        paths in its description.
+
+        DC bundles dependencies under five scenarios (see
+        DependencyBundlingAnalyzer.evaluateDependencies):
+
+        1. hashesMatch — identical content (same sha1) found at multiple paths,
+           e.g. the same jar packaged into multiple ear/war archives.
+        2. isShadedJar — a .jar and a pom.xml extracted from inside it share the
+           same CPE; the pom.xml is recorded as related to the jar.
+        3. isWebJar — a .js file extracted from a WebJar matches the jar's CPE
+           (mapped via pkg:maven/org.webjars/<name>@<version>); the js is
+           related to the jar.
+        4. CPE + base path + vulnerabilities + filename match — sibling artifacts
+           in the same project that share a CPE (e.g. spring-boot,
+           spring-boot-actuator, spring-boot-starter all map to the
+           spring_boot CPE).
+        5. NPM same name + version — the same npm package discovered via
+           different resolution paths (e.g. package-lock.json + node_modules).
+
+        Scenario 1 is the only case where the related entries are genuinely
+        separate vulnerable locations; scenarios 2-5 are different files
+        representing one logical component. Listing all related paths in the
+        description preserves the per-location information for scenario 1 while
+        removing the noise from scenarios 2-5.
+        """
+        related = dependency.find(namespace + "relatedDependencies")
+        if related is None:
+            return ""
+        entries = []
+        for rd in related.findall(namespace + "relatedDependency"):
+            file_name = rd.findtext(f"{namespace}fileName")
+            if not file_name:
+                continue
+            file_path = (rd.findtext(f"{namespace}filePath") or "").strip()
+            entries.append(f"- {file_name} ({file_path})" if file_path else f"- {file_name}")
+        if not entries:
+            return ""
+        return "\n**Related Filepaths:**\n" + "\n".join(entries)
+
     def get_filename_and_path_from_dependency(
         self,
         dependency,
@@ -448,6 +499,7 @@ class DependencyCheckParser:
                     namespace + "vulnerabilities",
                 )
                 if vulnerabilities is not None:
+                    related_block = self.build_related_dependencies_block(dependency, namespace)
                     for vulnerability in vulnerabilities.findall(
                         namespace + "vulnerability",
                     ):
@@ -459,28 +511,11 @@ class DependencyCheckParser:
                                 test,
                                 namespace,
                             )
+                            if related_block:
+                                finding.description += related_block
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
-
-                            relatedDependencies = dependency.find(
-                                namespace + "relatedDependencies",
-                            )
-                            if relatedDependencies is not None:
-                                for relatedDependency in relatedDependencies.findall(
-                                    namespace + "relatedDependency",
-                                ):
-                                    finding = self.get_finding_from_vulnerability(
-                                        dependency,
-                                        relatedDependency,
-                                        vulnerability,
-                                        test,
-                                        namespace,
-                                    )
-                                    if finding:  # could be None
-                                        if scan_date:
-                                            finding.date = scan_date
-                                        self.add_finding(finding, dupes)
 
                     for suppressedVulnerability in vulnerabilities.findall(
                         namespace + "suppressedVulnerability",
@@ -493,6 +528,8 @@ class DependencyCheckParser:
                                 test,
                                 namespace,
                             )
+                            if related_block:
+                                finding.description += related_block
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
