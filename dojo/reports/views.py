@@ -557,16 +557,26 @@ def generate_report(request, obj, *, host_view=False):
         endpoint = obj
         if host_view:
             report_name = "Endpoint Host Report: " + endpoint.url.host
-            endpoints = Location.objects.prefetch_related("url").filter(url__host=endpoint.url.host).distinct()
+            endpoints = get_authorized_locations(
+                Permissions.Location_View,
+                queryset=Location.objects.prefetch_related("url").filter(url__host=endpoint.url.host),
+                user=request.user,
+            ).distinct()
             report_title = "Endpoint Host Report"
         else:
             report_name = "Endpoint Report: " + str(endpoint)
             endpoints = Location.objects.filter(id=endpoint.id).distinct()
             report_title = "Endpoint Report"
         template = "dojo/endpoint_pdf_report.html"
+        # Reduce the finding queryset to the requesting user's product scope --
+        # a shared Location's auth check passes for any associated product the
+        # user can see, but rendered findings must still be limited to that scope.
+        findings_for_locations = get_authorized_findings(
+            Permissions.Finding_View, user=request.user,
+        ).filter(locations__location__in=endpoints)
         findings = report_finding_filter_class(
             request.GET,
-            queryset=prefetch_related_findings_for_report(Finding.objects.filter(locations__location__in=endpoints)),
+            queryset=prefetch_related_findings_for_report(findings_for_locations),
         )
 
         context = {
