@@ -1,3 +1,4 @@
+from django.contrib.auth.models import Permission
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -200,6 +201,118 @@ class UserTest(APITestCase):
         url = "{}{}/reset_api_token/".format(reverse("user-list"), target_id)
         r = nonpriv_client.post(url)
         self.assertEqual(r.status_code, 403, r.content[:1000])
+
+    def test_non_superuser_cannot_set_is_staff_via_api(self):
+        """
+        A delegated user-manager (auth.change_user) must not be able to
+        flip is_staff on themselves or anyone else — is_staff is a
+        superuser-only flag under the legacy OS auth model, and granting
+        it via API would let a non-superuser pivot into Django admin /
+        full RBAC bypass.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-mgr",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-user-mgr")
+        mgr.user_permissions.add(
+            Permission.objects.get(codename="change_user"),
+            Permission.objects.get(codename="add_user"),
+        )
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-user-mgr",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        # Self-escalation: setting is_staff on own account must be rejected.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertIn(
+            "Only superusers are allowed to add or edit staff users.",
+            r.content.decode("utf-8"),
+        )
+        mgr.refresh_from_db()
+        self.assertFalse(mgr.is_staff)
+
+        # Target-escalation: setting is_staff on another user must be rejected.
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-target",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        target_id = r.json()["id"]
+
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), target_id), {
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        target = User.objects.get(id=target_id)
+        self.assertFalse(target.is_staff)
+
+        # Create-time escalation must also be rejected.
+        r = mgr_client.post(reverse("user-list"), {
+            "username": "api-user-staff-on-create",
+            "email": "admin@dojo.com",
+            "password": password,
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertFalse(User.objects.filter(username="api-user-staff-on-create").exists())
+
+    def test_non_superuser_can_patch_self_without_touching_is_staff(self):
+        """
+        Negative control for the is_staff guard: a delegated user-manager
+        can still PATCH non-privileged fields on their own account; the
+        new check only fires when is_staff actually changes.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-mgr2",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-user-mgr2")
+        mgr.user_permissions.add(Permission.objects.get(codename="change_user"))
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-user-mgr2",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "first_name": "Renamed",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+    def test_superuser_can_set_is_staff_via_api(self):
+        """Positive control: a superuser is still allowed to toggle is_staff."""
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-user-promotable",
+            "email": "admin@dojo.com",
+            "password": "testTEST1234!@#$",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        user_id = r.json()["id"]
+
+        r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
+            "is_staff": True,
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertTrue(User.objects.get(id=user_id).is_staff)
 
     def test_user_reset_api_token_denies_global_owner_legacy(self):
         """
