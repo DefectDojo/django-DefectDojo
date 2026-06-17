@@ -1,3 +1,6 @@
+from django.conf import settings
+
+from dojo.location.models import Location
 from dojo.models import (
     App_Analysis,
     Endpoint,
@@ -149,17 +152,11 @@ URL_PERMISSIONS = {
     # -----------------------------------------------------------------------
     # URL / Location UI (dojo/url/ui/views.py  ->  dojo/url/ui/urls.py)
     #
-    # These URL names overlap with the endpoint module above. Since Django
-    # uses the last-registered pattern for reverse() and the middleware reads
-    # view_kwargs from the matched pattern, the kwarg names from the actually
-    # matched URL are used. The endpoint entries above use "eid"; if the
-    # url/ui pattern matched instead, "location_id" will be present and the
-    # middleware will fall back (skip checks where the kwarg is missing).
-    #
-    # Unique URL names from url/ui:
+    # When V3_FEATURE_LOCATIONS is enabled, the endpoint URL names above
+    # are remapped below to the active routes' model + kwarg names.
     # -----------------------------------------------------------------------
     "add_endpoint_to_product": [("object", Product, "add", "product_id")],
-    "add_endpoint_to_finding": [("object", Product, "add", "finding_id")],
+    "add_endpoint_to_finding": [("object", Finding, "add", "finding_id")],
 
     # -----------------------------------------------------------------------
     # Reports (dojo/reports/views.py  ->  dojo/reports/urls.py)
@@ -293,3 +290,28 @@ URL_PERMISSIONS = {
     "delete_empty_questionnaire": [("config", "dojo.delete_engagement_survey")],
     "delete_general_questionnaire": [("config", "dojo.delete_engagement_survey")],
 }
+
+
+# When the V3 location routes are active they replace the legacy endpoint
+# routes (dojo/urls.py). The new routes operate on Location rows and carry
+# a "location_id" kwarg, so the URL-name -> check mapping needs to point
+# at the active route's model + kwarg for the middleware to apply the
+# right per-object check.
+if settings.V3_FEATURE_LOCATIONS:
+    URL_PERMISSIONS.update({
+        "view_endpoint":           [("object", Location, "view", "location_id")],
+        "view_endpoint_host":      [("object", Location, "view", "location_id")],
+        "edit_endpoint":           [("object", Location, "edit", "location_id")],
+        "delete_endpoint":         [("object", Location, "delete", "location_id")],
+        "endpoint_report":         [("object", Location, "view", "location_id")],
+        "endpoint_host_report":    [("object", Location, "view", "location_id")],
+        "add_endpoint_meta_data":  [("object", Location, "edit", "location_id")],
+        "edit_endpoint_meta_data": [("object", Location, "edit", "location_id")],
+        # The V3 "add_endpoint" route is an alias for add_endpoint_to_product;
+        # it carries product_id rather than the legacy pid.
+        "add_endpoint":            [("object", Product, "add", "product_id")],
+        # Remaining V3 routes that share a URL name with the legacy module
+        # but carry a different kwarg.
+        "import_endpoint_meta":    [("object", Product, "edit", "product_id")],
+        "endpoints_status_bulk":   [("object", Finding, "edit", "finding_id")],
+    })
