@@ -23,6 +23,7 @@ Active LocationFindingReference, which reproduces the reported scenario.
 
 from django.urls import reverse
 
+from dojo.models import Dojo_User
 from unittests.dojo_test_case import DojoTestCase, skip_unless_v3, versioned_fixtures
 
 
@@ -58,4 +59,16 @@ class TestFindingListLocationBreadcrumb(DojoTestCase):
         # A non-existent location id should still raise 404 (preserves the
         # get_object_or_404 contract, just against the correct model).
         response = self.client.get(reverse("all_findings") + "?endpoints=999999")
+        self.assertEqual(response.status_code, 404)
+
+    def test_unauthorized_location_404s(self):
+        # The breadcrumb lookup is scoped to get_authorized_locations("view"),
+        # so a user who cannot view the location's product cannot confirm its
+        # existence/URL via the breadcrumb: the lookup 404s instead of 200.
+        # Location pk=6 is tied to product 1 in the fixture; this fresh user has
+        # no product membership, global role, or superuser status.
+        # No password needed: force_login authenticates without credentials.
+        no_access = Dojo_User.objects.create_user(username="loc_breadcrumb_no_access")
+        self.client.force_login(no_access)
+        response = self.client.get(reverse("all_findings") + "?endpoints=6")
         self.assertEqual(response.status_code, 404)

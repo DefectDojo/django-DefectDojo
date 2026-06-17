@@ -69,7 +69,7 @@ from dojo.forms import (
     TypedNoteForm,
 )
 from dojo.jira import services as jira_services
-from dojo.location.models import Location
+from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
@@ -340,7 +340,13 @@ class ListFindings(View, BaseListFindings):
             endpoint_ids = request.GET.getlist("endpoints", [])
             if len(endpoint_ids) == 1 and endpoint_ids[0]:
                 endpoint_id = endpoint_ids[0]
-                endpoint = get_object_or_404(Location, id=endpoint_id)
+                # Scope to locations the user may view so the breadcrumb cannot
+                # disclose the existence/URL of a location they cannot access
+                # (404 for both missing and unauthorized ids).
+                endpoint = get_object_or_404(
+                    get_authorized_locations("view", user=request.user),
+                    id=endpoint_id,
+                )
                 context["filter_name"] = "Vulnerable Endpoints"
                 context["custom_breadcrumb"] = OrderedDict(
                     [
