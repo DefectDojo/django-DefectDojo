@@ -15,7 +15,7 @@ from django.db import IntegrityError
 from django.db.models import OuterRef, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -37,20 +37,17 @@ from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
 )
 from dojo.api_v2 import (
-    permissions,
     prefetch,
     serializers,
 )
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
+from dojo.authorization import api_permissions as permissions
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.endpoint.queries import (
     get_authorized_endpoint_status,
     get_authorized_endpoints,
@@ -60,7 +57,6 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import close_engagement, reopen_engagement
 from dojo.filters import (
     ApiAppAnalysisFilter,
-    ApiCredentialsFilter,
     ApiDojoMetaFilter,
     ApiEndpointFilter,
     ApiEngagementFilter,
@@ -76,73 +72,44 @@ from dojo.filters import (
 )
 from dojo.finding.queries import (
     get_authorized_findings,
-    get_authorized_stub_findings,
 )
 from dojo.finding.views import (
     duplicate_cluster,
     reset_finding_duplicate_status_internal,
     set_finding_as_original_internal,
 )
-from dojo.group.queries import (
-    get_authorized_group_members,
-    get_authorized_groups,
-)
 from dojo.importers.auto_create_context import AutoCreateContextManager
-from dojo.jira_link.queries import (
-    get_authorized_jira_issues,
-    get_authorized_jira_projects,
-)
+from dojo.jira import services as jira_services
 from dojo.labels import get_labels
 from dojo.models import (
     Announcement,
-    Answer,
-    Answered_Survey,
     App_Analysis,
     BurpRawRequestResponse,
     Check_List,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
-    Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
     Engagement,
     Engagement_Presets,
-    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Template,
-    General_Survey,
-    Global_Role,
-    JIRA_Instance,
-    JIRA_Issue,
-    JIRA_Project,
     Language_Type,
     Languages,
     Network_Locations,
     Note_Type,
     NoteHistory,
     Notes,
-    Notification_Webhooks,
-    Notifications,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
-    Question,
     Regulation,
     Risk_Acceptance,
-    Role,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
@@ -159,13 +126,9 @@ from dojo.product.queries import (
     get_authorized_engagement_presets,
     get_authorized_languages,
     get_authorized_product_api_scan_configurations,
-    get_authorized_product_groups,
-    get_authorized_product_members,
     get_authorized_products,
 )
 from dojo.product_type.queries import (
-    get_authorized_product_type_groups,
-    get_authorized_product_type_members,
     get_authorized_product_types,
 )
 from dojo.query_utils import build_count_subquery
@@ -183,9 +146,14 @@ from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     async_delete,
     generate_file_response,
+    get_celery_queue_details,
+    get_celery_queue_length,
+    get_celery_worker_status,
     get_setting,
     get_system_setting,
     process_tag_notifications,
+    purge_celery_queue,
+    purge_celery_queue_by_task_name,
 )
 
 logger = logging.getLogger(__name__)
@@ -261,76 +229,6 @@ class DeprecationNoticeMixin:
 
 
 # Authorization: authenticated users
-class RoleViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = serializers.RoleSerializer
-    queryset = Role.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name"]
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        return Role.objects.all().order_by("id")
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class DojoGroupViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.DojoGroupSerializer
-    queryset = Dojo_Group.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name", "social_provider"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasDojoGroupPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_groups(Permissions.Group_View).distinct()
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class DojoGroupMemberViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.DojoGroupMemberSerializer
-    queryset = Dojo_Group_Member.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "group_id", "user_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasDojoGroupMemberPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_group_members(Permissions.Group_View).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: superuser
-@extend_schema_view(**schema_with_prefetch())
-class GlobalRoleViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.GlobalRoleSerializer
-    queryset = Global_Role.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "user", "group", "role"]
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Global_Role.objects.all().order_by("id")
-
-
 # Authorization: object-based
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
@@ -352,7 +250,7 @@ class EndPointViewSet(
             Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
             group_field="endpoints",
         )
-        return get_authorized_endpoints(Permissions.Location_View).annotate(
+        return get_authorized_endpoints("view").annotate(
             active_finding_count=Coalesce(active_finding_subquery, Value(0)),
         ).distinct()
 
@@ -424,7 +322,7 @@ class EndpointStatusViewSet(
 
     def get_queryset(self):
         return get_authorized_endpoint_status(
-            Permissions.Location_View,
+            "view",
         ).distinct()
 
 
@@ -461,7 +359,7 @@ class EngagementViewSet(
 
     def get_queryset(self):
         return (
-            get_authorized_engagements(Permissions.Engagement_View)
+            get_authorized_engagements("view")
             .prefetch_related("notes", "risk_acceptance", "files")
             .distinct()
         )
@@ -469,20 +367,20 @@ class EngagementViewSet(
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def close(self, request, pk=None):
         eng = self.get_object()
         close_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
     )
-    @action(detail=True, methods=["post"])
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission))
     def reopen(self, request, pk=None):
         eng = self.get_object()
         reopen_engagement(eng)
-        return HttpResponse()
+        return Response({}, status=status.HTTP_200_OK)
 
     @extend_schema(
         request=serializers.ReportGenerateOptionSerializer,
@@ -715,15 +613,18 @@ class EngagementViewSet(
     def update_jira_epic(self, request, pk=None):
         engagement = self.get_object()
         try:
-
             if engagement.has_jira_issue:
-                dojo_dispatch_task(jira_helper.update_epic, engagement.id, **request.data)
+                task = jira_services.get_epic_task("update_epic")
+                if task:
+                    dojo_dispatch_task(task, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic update query sent"},
                     status=status.HTTP_200_OK,
                 )
             else:
-                dojo_dispatch_task(jira_helper.add_epic, engagement.id, **request.data)
+                task = jira_services.get_epic_task("add_epic")
+                if task:
+                    dojo_dispatch_task(task, engagement.id, **request.data)
                 response = Response(
                     {"info": "Jira Epic create query sent"},
                     status=status.HTTP_200_OK,
@@ -761,7 +662,7 @@ class RiskAcceptanceViewSet(
 
     def get_queryset(self):
         return (
-            get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
+            get_authorized_risk_acceptances("edit")
             .prefetch_related(
                 "notes", "engagement_set", "owner", "accepted_findings",
             )
@@ -841,6 +742,8 @@ class RiskAcceptanceViewSet(
             )
         # Get the path of the file in media root
         file_path = Path(settings.MEDIA_ROOT) / file_object.name
+        # NOTE: FileResponse takes ownership of closing the file handle when the response is closed.
+        # Explicitly register the closer to avoid potential resource leaks and satisfy static analyzers.
         file_handle = file_path.open("rb")
         # send file
         response = FileResponse(
@@ -848,6 +751,8 @@ class RiskAcceptanceViewSet(
             content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
             status=status.HTTP_200_OK,
         )
+        if hasattr(response, "_resource_closers"):
+            response._resource_closers.append(file_handle.close)
         response["Content-Length"] = file_object.size
         response[
             "Content-Disposition"
@@ -873,41 +778,7 @@ class AppAnalysisViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_app_analysis(Permissions.Product_View)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class CredentialsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.CredentialSerializer
-    queryset = Cred_User.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Cred_User.objects.all().order_by("id")
-
-
-# Authorization: configuration
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class CredentialsMappingViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.CredentialMappingSerializer
-    queryset = Cred_Mapping.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiCredentialsFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasCredentialPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_cred_mappings(Permissions.Credential_View)
+        return get_authorized_app_analysis("view")
 
 
 # Authorization: configuration
@@ -989,7 +860,7 @@ class FindingViewSet(
     def perform_update(self, serializer):
         # IF JIRA is enabled and this product has a JIRA configuration
         push_to_jira = serializer.validated_data.get("push_to_jira")
-        jira_project = jira_helper.get_jira_project(serializer.instance)
+        jira_project = jira_services.get_project(serializer.instance)
         if get_system_setting("enable_jira") and jira_project:
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
@@ -998,7 +869,7 @@ class FindingViewSet(
     def get_queryset(self):
         if settings.V3_FEATURE_LOCATIONS:
             findings = get_authorized_findings(
-                Permissions.Finding_View,
+                "view",
             ).prefetch_related(
                 "locations__location__url",
                 "reviewers",
@@ -1022,7 +893,7 @@ class FindingViewSet(
         else:
             # TODO: Delete this after the move to Locations
             findings = get_authorized_findings(
-                Permissions.Finding_View,
+                "view",
             ).prefetch_related(
                 "endpoints",
                 "reviewers",
@@ -1086,6 +957,32 @@ class FindingViewSet(
                     finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
                 )
         serialized_finding = serializers.FindingCloseSerializer(finding, context={"request": request})
+        return Response(serialized_finding.data)
+
+    @extend_schema(
+        methods=["POST"],
+        request=serializers.FindingVerifySerializer,
+        responses={status.HTTP_200_OK: serializers.FindingSerializer},
+    )
+    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
+    def verify(self, request, pk=None):
+        finding = self.get_object()
+
+        serializer = serializers.FindingVerifySerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Remove prefetched tags to keep queryset state in sync
+        finding.tags._remove_prefetched_objects()
+
+        finding_helper.verify_finding(
+            finding=finding,
+            user=request.user,
+            note_entry=serializer.validated_data.get("note"),
+            note_type=serializer.validated_data.get("note_type"),
+        )
+
+        serialized_finding = serializers.FindingSerializer(finding, context={"request": request})
         return Response(serialized_finding.data)
 
     @extend_schema(
@@ -1236,9 +1133,9 @@ class FindingViewSet(
             )
 
             if finding.has_jira_issue:
-                jira_helper.add_comment(finding, note)
+                jira_services.add_comment(finding, note)
             elif finding.has_jira_group_issue:
-                jira_helper.add_comment(finding.finding_group, note)
+                jira_services.add_comment(finding.finding_group, note)
 
             serialized_note = serializers.NoteSerializer(
                 {"author": author, "entry": entry, "private": private},
@@ -1427,6 +1324,7 @@ class FindingViewSet(
     )
     @action(detail=True, methods=["post"], url_path=r"duplicate/reset", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def reset_finding_duplicate_status(self, request, pk):
+        self.get_object()
         checked_duplicate_id = reset_finding_duplicate_status_internal(
             request.user, pk,
         )
@@ -1447,6 +1345,7 @@ class FindingViewSet(
         detail=True, methods=["post"], url_path=r"original/(?P<new_fid>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
     )
     def set_finding_as_original(self, request, pk, new_fid):
+        self.get_object()
         success = set_finding_as_original_internal(request.user, pk, new_fid)
         if not success:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -1644,74 +1543,11 @@ class FindingViewSet(
 
 
 # Authorization: configuration
-class JiraInstanceViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.JIRAInstanceSerializer
-    queryset = JIRA_Instance.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "url"]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return JIRA_Instance.objects.all().order_by("id")
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class JiraIssuesViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.JIRAIssueSerializer
-    queryset = JIRA_Issue.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "jira_id",
-        "jira_key",
-        "finding",
-        "engagement",
-        "finding_group",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasJiraIssuePermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_jira_issues(Permissions.Product_View)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class JiraProjectViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.JIRAProjectSerializer
-    queryset = JIRA_Project.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "jira_instance",
-        "product",
-        "engagement",
-        "enabled",
-        "component",
-        "project_key",
-        "push_all_issues",
-        "enable_engagement_epic_mapping",
-        "push_notes",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasJiraProductPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_jira_projects(Permissions.Product_View)
+from dojo.jira.api.views import (  # noqa: E402, F401 backward compat
+    JiraInstanceViewSet,
+    JiraIssuesViewSet,
+    JiraProjectViewSet,
+)
 
 
 # Authorization: superuser
@@ -1771,7 +1607,7 @@ class ProductAPIScanConfigurationViewSet(
 
     def get_queryset(self):
         return get_authorized_product_api_scan_configurations(
-            Permissions.Product_API_Scan_Configuration_View,
+            "view",
         )
 
 
@@ -1791,7 +1627,7 @@ class DojoMetaViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_dojo_meta(Permissions.Product_View)
+        return get_authorized_dojo_meta("view")
 
     @extend_schema(
         methods=["post", "patch"],
@@ -1828,9 +1664,9 @@ class DojoMetaViewSet(
     def process_post(self, request):
         data = request.data
         parents = self._fetch_and_authorize_parents(request, {
-            "product": (Product, Permissions.Product_Edit),
-            "finding": (Finding, Permissions.Finding_Edit),
-            "endpoint": (Endpoint, Permissions.Location_Edit),
+            "product": (Product, "edit"),
+            "finding": (Finding, "edit"),
+            "endpoint": (Endpoint, "edit"),
         })
         metalist = data.get("metadata")
         for metadata in metalist:
@@ -1848,9 +1684,9 @@ class DojoMetaViewSet(
     def process_patch(self, request):
         data = request.data
         parents = self._fetch_and_authorize_parents(request, {
-            "product": (Product, Permissions.Product_Edit),
-            "finding": (Finding, Permissions.Finding_Edit),
-            "endpoint": (Endpoint, Permissions.Location_Edit),
+            "product": (Product, "edit"),
+            "finding": (Finding, "edit"),
+            "endpoint": (Endpoint, "edit"),
         })
         metalist = data.get("metadata")
         for metadata in metalist:
@@ -1888,7 +1724,7 @@ class ProductViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Product_View).distinct()
+        return get_authorized_products("view").distinct()
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -1949,60 +1785,6 @@ class ProductViewSet(
 
 # Authorization: object-based
 @extend_schema_view(**schema_with_prefetch())
-class ProductMemberViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductMemberSerializer
-    queryset = Product_Member.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_id", "user_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductMemberPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_members(
-            Permissions.Product_View,
-        ).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductGroupViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductGroupSerializer
-    queryset = Product_Group.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_id", "group_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductGroupPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_groups(
-            Permissions.Product_Group_View,
-        ).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
 # Authorization: object-based
 @extend_schema_view(**schema_with_prefetch())
 class ProductTypeViewSet(
@@ -2026,20 +1808,8 @@ class ProductTypeViewSet(
 
     def get_queryset(self):
         return get_authorized_product_types(
-            Permissions.Product_Type_View,
+            "view",
         ).distinct()
-
-    # Overwrite perfom_create of CreateModelMixin to add current user as owner
-    def perform_create(self, serializer):
-        serializer.save()
-        product_type_data = serializer.data
-        product_type_data.pop("authorization_groups")
-        product_type_data.pop("members")
-        member = Product_Type_Member()
-        member.user = self.request.user
-        member.product_type = Product_Type(**product_type_data)
-        member.role = Role.objects.get(is_owner=True)
-        member.save()
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -2092,102 +1862,6 @@ class ProductTypeViewSet(
         return Response(report.data)
 
 
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductTypeMemberViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductTypeMemberSerializer
-    queryset = Product_Type_Member.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_type_id", "user_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductTypeMemberPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_type_members(
-            Permissions.Product_Type_View,
-        ).distinct()
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.role.is_owner:
-            owners = Product_Type_Member.objects.filter(
-                product_type=instance.product_type, role__is_owner=True,
-            ).count()
-            if owners <= 1:
-                return Response(
-                    "There must be at least one owner",
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductTypeGroupViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductTypeGroupSerializer
-    queryset = Product_Type_Group.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_type_id", "group_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductTypeGroupPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_type_groups(
-            Permissions.Product_Type_Group_View,
-        ).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class StubFindingsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.StubFindingSerializer
-    queryset = Stub_Finding.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "title", "date", "severity", "description"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasFindingPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_stub_findings(
-            Permissions.Finding_View,
-        ).distinct()
-
-    def get_serializer_class(self):
-        if self.request and self.request.method == "POST":
-            return serializers.StubFindingCreateSerializer
-        return serializers.StubFindingSerializer
-
-
 # Authorization: authenticated, configuration
 class DevelopmentEnvironmentViewSet(
     DojoModelViewSet,
@@ -2220,7 +1894,7 @@ class TestsViewSet(
 
     def get_queryset(self):
         return (
-            get_authorized_tests(Permissions.Test_View)
+            get_authorized_tests("view")
             .prefetch_related("notes", "files")
             .distinct()
         )
@@ -2455,7 +2129,7 @@ class TestImportViewSet(
 
     def get_queryset(self):
         return get_authorized_test_imports(
-            Permissions.Test_View,
+            "view",
         ).prefetch_related(
             "test_import_finding_action_set",
             "findings_affected",
@@ -2531,7 +2205,7 @@ class ToolProductSettingsViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_tool_product_settings(Permissions.Product_View)
+        return get_authorized_tool_product_settings("view")
 
 
 # Authorization: configuration
@@ -2628,20 +2302,10 @@ class UserProfileView(GenericAPIView):
         user_contact_info = (
             user.usercontactinfo if hasattr(user, "usercontactinfo") else None
         )
-        global_role = (
-            user.global_role if hasattr(user, "global_role") else None
-        )
-        dojo_group_member = Dojo_Group_Member.objects.filter(user=user)
-        product_type_member = Product_Type_Member.objects.filter(user=user)
-        product_member = Product_Member.objects.filter(user=user)
         serializer = serializers.UserProfileSerializer(
             {
                 "user": user,
                 "user_contact_info": user_contact_info,
-                "global_role": global_role,
-                "dojo_group_member": dojo_group_member,
-                "product_type_member": product_type_member,
-                "product_member": product_member,
             },
             many=False,
         )
@@ -2701,7 +2365,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
             jira_driver = engagement or (product or None)
-            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+            if jira_project := (jira_services.get_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
 
         # Add pghistory context for audit trail (adds to existing middleware context).
@@ -2717,7 +2381,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             pghistory.context(test_id=test_id)
 
     def get_queryset(self):
-        return get_authorized_tests(Permissions.Import_Scan_Result)
+        return get_authorized_tests("import")
 
 
 # Authorization: authenticated users, DjangoModelPermissions
@@ -2749,7 +2413,7 @@ class EndpointMetaImporterView(
         serializer.save()
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Location_Edit)
+        return get_authorized_products("edit")
 
 
 # Authorization: configuration
@@ -2781,7 +2445,7 @@ class LanguageViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_languages(Permissions.Language_View).distinct()
+        return get_authorized_languages("view").distinct()
 
 
 # Authorization: object-based
@@ -2795,7 +2459,7 @@ class ImportLanguagesView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     )
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Language_Add)
+        return get_authorized_products("add")
 
 
 # Authorization: object-based
@@ -2837,7 +2501,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     )
 
     def get_queryset(self):
-        return get_authorized_tests(Permissions.Import_Scan_Result)
+        return get_authorized_tests("import")
 
     def perform_create(self, serializer):
         auto_create = AutoCreateContextManager()
@@ -2859,7 +2523,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
             jira_driver = test or (engagement or (product or None))
-            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+            if jira_project := (jira_services.get_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug("push_to_jira: %s", push_to_jira)
         # Add pghistory context for audit trail (adds to existing middleware context)
@@ -2910,14 +2574,14 @@ class BurpRawRequestResponseViewSet(
     filterset_fields = ["finding"]
     permission_classes = (
         IsAuthenticated,
-        permissions.UserHasFindingRelatedObjectPermission,
+        permissions.UserHasBurpRawRequestResponsePermission,
     )
 
     def get_queryset(self):
         return (
             BurpRawRequestResponse.objects.filter(
                 finding__in=get_authorized_findings(
-                    Permissions.Finding_View,
+                    "view",
                 ),
             )
             .exclude(
@@ -3230,19 +2894,77 @@ class SystemSettingsViewSet(
         return System_Settings.objects.all().order_by("id")
 
 
-# Authorization: superuser
-@extend_schema_view(**schema_with_prefetch())
-class NotificationsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.NotificationsSerializer
-    queryset = Notifications.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "user", "product", "template"]
+class CeleryViewSet(viewsets.ViewSet):
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
+    queryset = System_Settings.objects.none()
 
-    def get_queryset(self):
-        return Notifications.objects.all().order_by("id")
+    @extend_schema(
+        responses=serializers.CeleryStatusSerializer,
+        summary="Get Celery worker and queue status",
+        description=(
+            "Returns Celery worker liveness, pending queue length, and the active task "
+            "timeout/expiry configuration. Uses the Celery control channel (pidbox) for "
+            "worker status so it works correctly even when the task queue is clogged."
+        ),
+    )
+    @action(detail=False, methods=["get"], url_path="status")
+    def status(self, request):
+        queue_length = get_celery_queue_length()
+        data = {
+            "worker_status": get_celery_worker_status(),
+            "broker_status": queue_length is not None,
+            "queue_length": queue_length,
+            "task_time_limit": getattr(settings, "CELERY_TASK_TIME_LIMIT", None),
+            "task_soft_time_limit": getattr(settings, "CELERY_TASK_SOFT_TIME_LIMIT", None),
+            "task_default_expires": getattr(settings, "CELERY_TASK_DEFAULT_EXPIRES", None),
+        }
+        return Response(serializers.CeleryStatusSerializer(data).data)
+
+    @extend_schema(
+        request=None,
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all pending Celery tasks from the queue",
+        description=(
+            "Removes all pending tasks from the default Celery queue. Tasks already being "
+            "executed by workers are not affected. Note: if deduplication tasks were queued, "
+            "you may need to re-run deduplication manually via `python manage.py dedupe`."
+        ),
+    )
+    @action(detail=False, methods=["post"], url_path="queue/purge")
+    def queue_purge(self, request):
+        purged = purge_celery_queue()
+        return Response({"purged": purged})
+
+    @extend_schema(
+        responses=serializers.CeleryQueueTaskDetailSerializer(many=True),
+        summary="Get per-task breakdown of the Celery queue",
+        description=(
+            "Scans every message in the queue (O(N)) and returns task name, count, and "
+            "oldest/newest queue positions. May be slow for large queues."
+        ),
+    )
+    @action(detail=False, methods=["get"], url_path="queue/details")
+    def queue_details(self, request):
+        details = get_celery_queue_details()
+        if details is None:
+            return Response({"error": "Unable to read queue details."}, status=503)
+        return Response(serializers.CeleryQueueTaskDetailSerializer(details, many=True).data)
+
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"task_name": {"type": "string"}}, "required": ["task_name"]}},
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all queued tasks with a given task name",
+        description="Removes all pending tasks matching the given task name from the default Celery queue.",
+    )
+    @action(detail=False, methods=["post"], url_path="queue/task/purge")
+    def queue_task_purge(self, request):
+        task_name = request.data.get("task_name", "").strip()
+        if not task_name:
+            return Response({"error": "task_name is required."}, status=400)
+        purged = purge_celery_queue_by_task_name(task_name)
+        if purged is None:
+            return Response({"error": "Unable to purge tasks."}, status=503)
+        return Response({"purged": purged})
 
 
 @extend_schema_view(**schema_with_prefetch())
@@ -3259,7 +2981,7 @@ class EngagementPresetsViewset(
     )
 
     def get_queryset(self):
-        return get_authorized_engagement_presets(Permissions.Product_View)
+        return get_authorized_engagement_presets("view")
 
 
 class NetworkLocationsViewset(
@@ -3303,196 +3025,6 @@ class SLAConfigurationViewset(
         return SLA_Configuration.objects.all().order_by("id")
 
 
-class QuestionnaireQuestionViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    dojo_mixins.QuestionSubClassFieldsMixin,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireQuestionSerializer
-    queryset = Question.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return Question.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-
-class QuestionnaireAnswerViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    dojo_mixins.AnswerSubClassFieldsMixin,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireAnswerSerializer
-    queryset = Answer.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return Answer.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-
-class QuestionnaireGeneralSurveyViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireGeneralSurveySerializer
-    queryset = General_Survey.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return General_Survey.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-
-class QuestionnaireEngagementSurveyViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireEngagementSurveySerializer
-    queryset = Engagement_Survey.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return Engagement_Survey.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-        request=OpenApiTypes.NONE,
-        parameters=[
-            OpenApiParameter(
-                "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
-            ),
-        ],
-        responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
-    )
-    @action(
-        detail=True, methods=["post"], url_path=r"link_engagement/(?P<engagement_id>\d+)",
-    )
-    def link_engagement(self, request, pk, engagement_id):
-        # Get the answered survey
-        engagement_survey = self.get_object()
-        # Safely get the engagement
-        engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
-        # Link the engagement
-        answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
-        # Send a favorable response
-        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered_survey)
-        return Response(serialized_answered_survey.data)
-
-
-@extend_schema_view(**schema_with_prefetch())
-class QuestionnaireAnsweredSurveyViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    viewsets.ReadOnlyModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
-    queryset = Answered_Survey.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return Answered_Survey.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-
 # Authorization: configuration
 class AnnouncementViewSet(
     DojoModelViewSet,
@@ -3505,13 +3037,3 @@ class AnnouncementViewSet(
 
     def get_queryset(self):
         return Announcement.objects.all().order_by("id")
-
-
-class NotificationWebhooksViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.NotificationWebhooksSerializer
-    queryset = Notification_Webhooks.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users

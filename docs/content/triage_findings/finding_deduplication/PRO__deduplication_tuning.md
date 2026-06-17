@@ -34,7 +34,7 @@ To adjust Same Tool Deduplication:
 
 ### Available Deduplication Algorithms
 
-DefectDojo Pro offers three deduplication methods for same-tool deduplication:
+DefectDojo Pro offers the following deduplication methods for same-tool deduplication:
 
 #### Hash Code
 Uses a combination of selected fields to generate a unique hash. When selected, a third dropdown will appear showing the fields being used to calculate the hash.
@@ -46,6 +46,9 @@ This algorithm can be useful when working with SAST scanners, or situations wher
 
 #### Unique ID From Tool or Hash Code
 Attempts to use the tool's unique ID first, then falls back to the hash code if no unique ID is available. This provides the most flexible deduplication option.
+
+#### Global Component
+Matches findings by component name and version across **all Products** in the instance, rather than within a single Product or Engagement. Intended for SCA tools where the same vulnerable dependency appears in many Products. This algorithm is off by default and must be enabled by DefectDojo Support. See [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) for details.
 
 ## Cross Tool Deduplication
 
@@ -59,7 +62,7 @@ To enable Cross Tool Deduplication:
 2. Change the **Deduplication Algorithm** from "Disabled" to "Hash Code"
 3. Select which fields should be used for generating the hash in the **Hash Code Fields** dropdown
 
-Unlike Same Tool Deduplication, Cross Tool Deduplication only supports the Hash Code algorithm, as different tools rarely share compatible unique identifiers.
+Cross Tool Deduplication supports the Hash Code algorithm, which is suitable for most workflows, as different tools rarely share compatible unique identifiers. For SCA tools reporting the same dependencies, [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) is also available as a cross-tool option (off by default).
 
 ## Reimport Deduplication
 
@@ -76,7 +79,7 @@ When configuring Reimport Deduplication:
 1. Select the **Security Tool** (Universal or Generic Parser)
 2. Choose the appropriate **Deduplication Algorithm**
 
-The same three algorithm options are available for Reimport Deduplication as for Same Tool Deduplication:
+The following algorithm options are available for Reimport Deduplication:
 - Hash Code
 - Unique ID From Tool
 - Unique ID From Tool or Hash Code
@@ -89,7 +92,7 @@ For optimal results with Deduplication Tuning:
 
 - **Start with defaults**: The preconfigured deduplication settings work well for most scenarios
 - **Test changes carefully**: After adjusting deduplication settings, monitor a few imports to ensure proper behavior.
-- **Adjustments to deduplication will retroactively adjust the hash values for findings already imported for the given test type that was changed**.  The recalculation is applied in the background to all findings in the database associated with the given test type that was changed. Please note that since the process is occurring in the background, immediate changes may not be observed.
+- **Adjustments to deduplication will retroactively adjust the hash codes for findings already imported for the given test type that was changed**.  The recalculation is applied in the background to all findings in the database associated with the given test type that was changed. Please note that since the process is occurring in the background, immediate changes may not be observed.
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
 

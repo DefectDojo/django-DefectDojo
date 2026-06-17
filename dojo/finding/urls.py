@@ -142,6 +142,8 @@ urlpatterns = [
         name="choose_finding_template_options"),
     re_path(r"^finding/(?P<fid>\d+)/(?P<tid>\d+)/apply_template_to_finding$",
         views.apply_template_to_finding, name="apply_template_to_finding"),
+    re_path(r"^finding/(?P<fid>\d+)/verify$", views.verify_finding,
+        name="verify_finding"),
     re_path(r"^finding/(?P<fid>\d+)/close$", views.close_finding,
         name="close_finding"),
     re_path(r"^finding/(?P<fid>\d+)/defect_review$",
@@ -150,7 +152,7 @@ urlpatterns = [
         name="reopen_finding"),
     re_path(r"^finding/image/(?P<token>[^/]+)$", views.download_finding_pic,
         name="download_finding_pic"),
-    re_path(r"^finding/(?P<fid>\d+)/merge$",
+    re_path(r"^finding/(?P<pid>\d+)/merge$",
         views.merge_finding_product, name="merge_finding"),
     re_path(r"^product/(?P<pid>\d+)/merge$", views.merge_finding_product,
         name="merge_finding_product"),
@@ -162,13 +164,6 @@ urlpatterns = [
         views.set_finding_as_original, name="set_finding_as_original"),
     re_path(r"^finding/(?P<fid>\d+)/remediation_date$", views.remediation_date,
         name="remediation_date"),
-    # stub findings
-    re_path(r"^stub_finding/(?P<tid>\d+)/add$",
-        views.add_stub_finding, name="add_stub_finding"),
-    re_path(r"^stub_finding/(?P<fid>\d+)/promote$",
-        views.promote_to_finding, name="promote_to_finding"),
-    re_path(r"^stub_finding/(?P<fid>\d+)/delete$",
-        views.delete_stub_finding, name="delete_stub_finding"),
 
     # template findings
 

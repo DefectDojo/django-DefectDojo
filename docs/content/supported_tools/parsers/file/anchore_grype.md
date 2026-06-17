@@ -203,3 +203,31 @@ By default, DefectDojo identifies duplicate Findings using these [hashcode field
 - severity
 - component name
 - component version
+
+### Anchore Grype Detailed
+
+Both scan types accept the same JSON report format. The difference is in how Findings are deduplicated:
+
+- **`Anchore Grype`** — Aggregates all matches for the same CVE, component name, and version into a single Finding, regardless of file path. Deduplication is based on hashcode fields (`title`, `severity`, `component_name`, `component_version`).
+- **`Anchore Grype detailed`** — Creates a separate Finding for each unique file path. Deduplication is based on `unique_id_from_tool`, composed as `{vuln_id}|{component_name}|{component_version}|{file_path}`.
+
+A typical case is a package installed at multiple paths in a container image (e.g., /usr/lib/x86_64-linux-gnu/libc.so.6 and /lib/x86_64-linux-gnu/libc.so.6) — the same CVE would produce one Finding in default mode and two in detailed mode.
+
+**Field mapping:**
+
+| Finding Field | Grype JSON Source |
+|---|---|
+| `title` | `{vulnerability.id} in {artifact.name}:{artifact.version}` |
+| `severity` | `vulnerability.severity` (mapped: `Unknown`/`Negligible` → `Info`) |
+| `description` | `vulnerability.namespace`, `vulnerability.description`, `matchDetails[].matcher`, `artifact.purl` |
+| `component_name` | `artifact.name` |
+| `component_version` | `artifact.version` |
+| `file_path` | `artifact.locations[0].path` |
+| `vuln_id_from_tool` | `vulnerability.id` |
+| `unique_id_from_tool` | `vuln_id\|component_name\|component_version\|file_path` (detailed mode only) |
+| `references` | `vulnerability.dataSource`, `vulnerability.urls`, `relatedVulnerabilities[0].dataSource`, `relatedVulnerabilities[0].urls` |
+| `mitigation` | `vulnerability.fix.versions` |
+| `fix_available` | `true` if `vulnerability.fix.versions` is non-empty |
+| `fix_version` | `vulnerability.fix.versions[0]` (or comma-joined if multiple) |
+| `cvssv3` | `vulnerability.cvss` or `relatedVulnerabilities[0].cvss` |
+| `epss_score` / `epss_percentile` | `vulnerability.epss` or `relatedVulnerabilities[0].epss` |

@@ -1,7 +1,6 @@
 import base64
 import logging
 import time
-from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -13,11 +12,8 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.importers.endpoint_manager import EndpointManager
-from dojo.importers.location_manager import LocationManager, UnsavedLocation
 from dojo.importers.options import ImporterOptions
-from dojo.jira_link.helper import is_keep_in_sync_with_jira
+from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
 from dojo.models import (
     # Import History States
@@ -37,7 +33,7 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.notifications.helper import create_notification
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
@@ -81,11 +77,6 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
-        if settings.V3_FEATURE_LOCATIONS:
-            self.location_manager = LocationManager()
-        else:
-            # TODO: Delete this after the move to Locations
-            self.endpoint_manager = EndpointManager()
 
     def check_child_implementation_exception(self):
         """
@@ -345,86 +336,39 @@ class BaseImporter(ImporterOptions):
         if self.tags is not None and len(self.tags) > 0:
             self.test.tags.set(self.tags)
 
-    def apply_import_tags(
-        self,
-        new_findings: Iterable[Finding] | None = None,
-        closed_findings: Iterable[Finding] | None = None,
-        reactivated_findings: Iterable[Finding] | None = None,
-        untouched_findings: Iterable[Finding] | None = None,
-    ) -> None:
-        """Apply tags to findings and endpoints from an import operation."""
-        # Normalize None values to empty lists and convert sets/other iterables to lists
-        if untouched_findings is None:
-            untouched_findings = []
-        elif not isinstance(untouched_findings, list):
-            untouched_findings = list(untouched_findings)
+    def apply_import_tags_for_batch(self, findings: list[Finding]) -> None:
+        """
+        Apply import-time tags to a batch of already-saved findings and their endpoints.
 
-        if reactivated_findings is None:
-            reactivated_findings = []
-        elif not isinstance(reactivated_findings, list):
-            reactivated_findings = list(reactivated_findings)
-
-        if closed_findings is None:
-            closed_findings = []
-        elif not isinstance(closed_findings, list):
-            closed_findings = list(closed_findings)
-
-        if new_findings is None:
-            new_findings = []
-        elif not isinstance(new_findings, list):
-            new_findings = list(new_findings)
-
-        # Collect all affected findings
-        findings_to_tag = new_findings + closed_findings + reactivated_findings + untouched_findings
-
-        if not findings_to_tag:
+        Called per batch inside process_findings(), before post_process_findings_batch is
+        dispatched, so that rules/deduplication tasks see the import tags on the findings.
+        """
+        if not findings or not self.tags:
             return
-
-        # Add any tags to the findings imported if necessary
-        if self.apply_tags_to_findings and self.tags:
-            findings_qs = Finding.objects.filter(id__in=[f.id for f in findings_to_tag])
+        if self.apply_tags_to_findings:
             try:
                 bulk_add_tags_to_instances(
                     tag_or_tags=self.tags,
-                    instances=findings_qs,
+                    instances=findings,
                     tag_field_name="tags",
                 )
             except IntegrityError:
-                # Fallback to safe per-instance tagging if concurrent deletes occur
-                for finding in findings_to_tag:
+                for finding in findings:
                     for tag in self.tags:
                         self.add_tags_safe(finding, tag)
-
-        if settings.V3_FEATURE_LOCATIONS:
-            # Add any tags to any locations of the findings imported if necessary
-            if self.apply_tags_to_endpoints and self.tags:
-                # Collect all endpoints linked to the affected findings
-                locations_qs = Location.objects.filter(findings__finding__in=findings_to_tag).distinct()
-                try:
-                    bulk_add_tags_to_instances(
-                        tag_or_tags=self.tags,
-                        instances=locations_qs,
-                        tag_field_name="tags",
-                    )
-                except IntegrityError:
-                    for finding in findings_to_tag:
-                        for location in finding.locations.all():
-                            for tag in self.tags:
-                                self.add_tags_safe(location.location, tag)
-        # Add any tags to any endpoints of the findings imported if necessary
-        elif self.apply_tags_to_endpoints and self.tags:
-            endpoints_qs = Endpoint.objects.filter(finding__in=findings_to_tag).distinct()
+        if self.apply_tags_to_endpoints:
+            locations_qs = self.location_handler.get_locations_for_tagging(findings)
             try:
                 bulk_add_tags_to_instances(
                     tag_or_tags=self.tags,
-                    instances=endpoints_qs,
+                    instances=locations_qs,
                     tag_field_name="tags",
                 )
             except IntegrityError:
-                for finding in findings_to_tag:
-                    for endpoint in finding.endpoints.all():
+                for finding in findings:
+                    for location in self.location_handler.get_location_tag_fallback(finding):
                         for tag in self.tags:
-                            self.add_tags_safe(endpoint, tag)
+                            self.add_tags_safe(location, tag)
 
     def update_import_history(
         self,
@@ -463,14 +407,16 @@ class BaseImporter(ImporterOptions):
         import_settings["close_old_findings"] = self.close_old_findings_toggle
         import_settings["push_to_jira"] = self.push_to_jira
         import_settings["tags"] = self.tags
-        if settings.V3_FEATURE_LOCATIONS:
-            # Add the list of locations that were added exclusively at import time
-            if len(self.endpoints_to_add) > 0:
-                import_settings["locations"] = [str(location) for location in self.endpoints_to_add]
-        # TODO: Delete this after the move to Locations
-        # Add the list of endpoints that were added exclusively at import time
-        elif len(self.endpoints_to_add) > 0:
-            import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
+        import_settings["scan_date"] = self.scan_date.isoformat() if self.scan_date_override else None
+        import_settings["service"] = self.service
+        import_settings["close_old_findings_product_scope"] = self.close_old_findings_product_scope
+        import_settings["do_not_reactivate"] = self.do_not_reactivate
+        import_settings["apply_tags_to_findings"] = self.apply_tags_to_findings
+        import_settings["apply_tags_to_endpoints"] = self.apply_tags_to_endpoints
+        import_settings["group_by"] = self.group_by
+        import_settings["create_finding_groups_for_all_findings"] = self.create_finding_groups_for_all_findings
+        if len(self.endpoints_to_add) > 0:
+            import_settings.update(self.location_handler.serialize_extra_locations(self.endpoints_to_add))
         # Create the test import object
         test_import = Test_Import.objects.create(
             test=self.test,
@@ -792,45 +738,13 @@ class BaseImporter(ImporterOptions):
     def process_locations(
         self,
         finding: Finding,
-        locations_to_add: list[UnsavedLocation],
+        extra_locations_to_add: list | None = None,
     ) -> None:
         """
-        Process any locations to add to the finding. Locations could come from two places
-        - Directly from the report
-        - Supplied by the user from the import form
-        These locations will be processed in to Location objects and associated with the
-        finding and product
+        Record locations/endpoints from the finding + any form-added extras.
+        Flushed to DB by location_handler.persist().
         """
-        # Save the unsaved locations
-        self.location_manager.chunk_locations_and_disperse(finding, finding.unsaved_locations)
-        # Check for any that were added in the form
-        if len(locations_to_add) > 0:
-            logger.debug("locations_to_add: %s", locations_to_add)
-            self.location_manager.chunk_locations_and_disperse(finding, locations_to_add)
-
-    # TODO: Delete this after the move to Locations
-    def process_endpoints(
-        self,
-        finding: Finding,
-        endpoints_to_add: list[Endpoint],
-    ) -> None:
-        """
-        Process any endpoints to add to the finding. Endpoints could come from two places
-        - Directly from the report
-        - Supplied by the user from the import form
-        These endpoints will be processed in to endpoints objects and associated with the
-        finding and and product
-        """
-        if settings.V3_FEATURE_LOCATIONS:
-            msg = "BaseImporter#process_endpoints() method is deprecated when V3_FEATURE_LOCATIONS is enabled"
-            raise NotImplementedError(msg)
-
-        # Save the unsaved endpoints
-        self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding.unsaved_endpoints)
-        # Check for any that were added in the form
-        if len(endpoints_to_add) > 0:
-            logger.debug("endpoints_to_add: %s", endpoints_to_add)
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
+        self.location_handler.record_for_finding(finding, extra_locations_to_add)
 
     def sanitize_vulnerability_ids(self, finding) -> None:
         """Remove undisired vulnerability id values"""
@@ -923,31 +837,13 @@ class BaseImporter(ImporterOptions):
         # Remove risk acceptance if present (vulnerability is now fixed)
         # risk_unaccept will check if finding.risk_accepted is True before proceeding
         ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
-        if settings.V3_FEATURE_LOCATIONS:
-            # Mitigate the location statuses
-            dojo_dispatch_task(
-                LocationManager.mitigate_location_status,
-                finding.locations.all(),
-                self.user,
-                kwuser=self.user,
-                sync=True,
-            )
-        else:
-            # TODO: Delete this after the move to Locations
-            # Mitigate the endpoint statuses
-            dojo_dispatch_task(
-                EndpointManager.mitigate_endpoint_status,
-                finding.status_finding.all(),
-                self.user,
-                kwuser=self.user,
-                sync=True,
-            )
+        self.location_handler.record_mitigations_for_finding(finding, self.user)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing
             finding.save(dedupe_option=False, product_grading_option=product_grading_option)
         else:
-            finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync_with_jira(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
+            finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
 
     def notify_scan_added(
         self,

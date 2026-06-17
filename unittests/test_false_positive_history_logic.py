@@ -1,9 +1,12 @@
 import logging
 from datetime import datetime
+from unittest.mock import patch
 
 from crum import impersonate
 from django.conf import settings
 
+from dojo.finding.deduplication import do_false_positive_history_batch
+from dojo.finding.views import EditFinding
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     Endpoint,
@@ -1653,6 +1656,162 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # belongs to a different product and are NOT marked as fp
         self.assert_finding(find_created_before_mark_diff_severity, false_p=False, not_pk=22, not_product_id=2, title=find_22.title, not_severity=find_22.severity)
         self.assert_finding(find_created_after_mark_diff_severity, false_p=False, not_pk=22, not_product_id=2, title=find_22.title, not_severity=find_22.severity)
+
+    # -------------------------------------------------------------------- #
+    # Batch function tests                                                  #
+    # -------------------------------------------------------------------- #
+
+    def test_fp_history_batch_issues_single_candidate_query(self):
+        """do_false_positive_history_batch must call the candidate-fetch helper once for the whole batch."""
+        # Create two copies of finding 2 in the same test (hash_code algorithm).
+        find_a, _f = self.copy_and_reset_finding(find_id=2)
+        find_a.save()
+        find_b, _f = self.copy_and_reset_finding(find_id=2)
+        find_b.save()
+
+        # Mark finding 2 as FP so the batch function has something to match against.
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.active = False
+        find_2.verified = False
+        find_2.save()
+
+        batch = [Finding.objects.get(id=find_a.id), Finding.objects.get(id=find_b.id)]
+
+        with patch("dojo.finding.deduplication._fetch_fp_candidates_for_batch", wraps=__import__("dojo.finding.deduplication", fromlist=["_fetch_fp_candidates_for_batch"])._fetch_fp_candidates_for_batch) as mock_fetch:
+            # 7 queries regardless of batch size:
+            #   1 System_Settings SELECT
+            #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
+            #   1 candidates SELECT (with .only())
+            #   1 bulk UPDATE
+            with self.assertNumQueries(7):
+                do_false_positive_history_batch(batch)
+            # One candidate-fetch call for the whole batch — not one per finding.
+            self.assertEqual(mock_fetch.call_count, 1, "Expected exactly one call to _fetch_fp_candidates_for_batch")
+
+        # Functional check: both findings should now be marked as FP.
+        self.assert_finding(find_a, false_p=True)
+        self.assert_finding(find_b, false_p=True)
+
+    def test_fp_history_batch_retroactive_marks_existing_active_fp(self):
+        """do_false_positive_history_batch retroactively marks pre-existing active findings as FP."""
+        # Create a finding before the batch import so it pre-exists.
+        find_pre, _f = self.copy_and_reset_finding(find_id=2)
+        find_pre.save()
+        self.assert_finding(find_pre, false_p=False)
+
+        # Simulate an incoming batch finding that already carries false_p=True
+        # (e.g. because the scanner reported it as a FP).
+        find_incoming, _f = self.copy_and_reset_finding(find_id=2)
+        find_incoming.false_p = True
+        find_incoming.active = False
+        find_incoming.save()
+
+        batch = [Finding.objects.get(id=find_incoming.id)]
+        # 7 queries regardless of how many findings are retroactively marked:
+        #   1 System_Settings SELECT
+        #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
+        #   1 candidates SELECT (with .only())
+        #   1 bulk UPDATE
+        with self.assertNumQueries(7):
+            do_false_positive_history_batch(batch)
+
+        # The pre-existing active finding must now be retroactively marked FP.
+        self.assert_finding(find_pre, false_p=True)
+
+    def test_fp_history_batch_query_count_does_not_grow_with_affected_findings(self):
+        """
+        Query count must stay flat (7) no matter how many findings are retroactively marked.
+
+        With the old per-finding approach this would have been 7 + N queries where N is the
+        number of pre-existing findings that get marked as FP. With the batch approach it is
+        always 7: System_Settings, 4 lazy-load chain, candidates SELECT, one bulk UPDATE.
+        """
+        NUM_PRE_EXISTING = 5
+
+        # Create several pre-existing active findings with the same hash_code.
+        pre_existing = []
+        for _ in range(NUM_PRE_EXISTING):
+            find, _f = self.copy_and_reset_finding(find_id=2)
+            find.save()
+            pre_existing.append(find)
+
+        # Incoming batch finding already carries false_p=True — triggers retroactive marking.
+        find_incoming, _f = self.copy_and_reset_finding(find_id=2)
+        find_incoming.false_p = True
+        find_incoming.active = False
+        find_incoming.save()
+
+        batch = [Finding.objects.get(id=find_incoming.id)]
+        # 7 queries regardless of NUM_PRE_EXISTING:
+        #   1 System_Settings SELECT
+        #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
+        #   1 candidates SELECT (with .only())
+        #   1 bulk UPDATE covering all retroactively marked findings
+        with self.assertNumQueries(7):
+            do_false_positive_history_batch(batch)
+
+        # All pre-existing findings must now be marked as FP.
+        for find in pre_existing:
+            self.assert_finding(find, false_p=True)
+
+    # -------------------------------------------------------------------- #
+    # Single-finding edit: retroactive reactivation (was dead code pre-fix) #
+    # -------------------------------------------------------------------- #
+
+    def test_process_false_positive_history_reactivation(self):
+        """EditFinding.process_false_positive_history reactivates FP matches when old_false_p=True."""
+        # Set up a known-FP finding and a pre-existing match that is also FP.
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.active = False
+        find_2.verified = False
+        find_2.save()
+
+        find_match, _f = self.copy_and_reset_finding(find_id=2)
+        find_match.false_p = True
+        find_match.active = False
+        find_match.verified = False
+        find_match.save()
+
+        # Now simulate unmarking find_2 as FP (same as a user editing the finding).
+        find_2.false_p = False
+        find_2.active = True
+        find_2.verified = True
+        find_2.save()
+
+        # old_false_p=True reflects the state BEFORE form.save(commit=False).
+        view = EditFinding()
+        view.process_false_positive_history(find_2, old_false_p=True)
+
+        # The matching finding that was FP should now be reactivated.
+        find_match.refresh_from_db()
+        self.assertFalse(find_match.false_p)
+        self.assertEqual(find_match.active, find_2.active)
+        self.assertEqual(find_match.verified, find_2.verified)
+
+    def test_process_false_positive_history_no_reactivation_without_old_false_p(self):
+        """EditFinding.process_false_positive_history must not reactivate when old_false_p is False."""
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.active = False
+        find_2.save()
+
+        find_match, _f = self.copy_and_reset_finding(find_id=2)
+        find_match.false_p = True
+        find_match.active = False
+        find_match.save()
+
+        find_2.false_p = False
+        find_2.active = True
+        find_2.save()
+
+        view = EditFinding()
+        # old_false_p defaults to False — reactivation must NOT fire.
+        view.process_false_positive_history(find_2)
+
+        find_match.refresh_from_db()
+        self.assertTrue(find_match.false_p, "Match should remain FP when old_false_p=False")
 
     # --------------- #
     # Utility Methods #

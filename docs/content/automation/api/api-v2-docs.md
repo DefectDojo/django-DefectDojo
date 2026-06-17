@@ -43,7 +43,7 @@ For example: :
 
 ### Alternative authentication method
 
-If you use [an alternative authentication method](en/customize_dojo/user_management/configure_sso/ for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
+If you use [an alternative authentication method](/admin/sso/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
@@ -189,7 +189,7 @@ Some of the api wrappers contain quite a bit of logic to ease scanning and impor
 ## Import
 Importing via the API is performed via the [import-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
 
-As described in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
+As described in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
 
 An import can be performed by specifying the names of these entities in the API request:
 
@@ -263,6 +263,34 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
     "test": 123,
 }
 ```
+
+## Asynchronous Deletion Behavior
+
+Deletions in DefectDojo (via both the API and UI) are processed **asynchronously** by Celery background workers. When you delete an Engagement, Test, or other object, the API or UI returns a success response immediately, but the actual deletion runs in the background.
+
+This means:
+- Objects may still appear in queries for a period of time after deletion is confirmed.
+- Cascade deletions (e.g., deleting an Engagement also deletes its Tests and Findings) are processed as a chain of background tasks. Child objects are removed in dependency order: Findings, then Tests, then Engagements.
+- For large Engagements with many Findings, this process can take several minutes to complete.
+
+There is no need to build custom scripts to delete objects in dependency order. A single `DELETE` request on an Engagement will cascade to all child objects automatically. Simply allow time for the background tasks to complete.
+
+## API Pagination Limits
+
+DefectDojo Pro enforces a maximum page size of **250** results per API request. Setting `limit` higher than 250 may result in HTTP 502 errors due to query timeouts.
+
+Open Source DefectDojo instances may also experience timeouts with very large page sizes depending on dataset size and server resources.
+
+For large result sets, use pagination with a page size of 50-250 and add short delays between paginated requests to avoid saturating the worker pool.
+
+## Large-Scale Import Best Practices
+
+When importing scan results at scale (e.g., SBOM pipelines with thousands of components), consider the following:
+
+- **Use `background_import=true`** for large payloads. Synchronous imports tie up a uwsgi worker for the duration of the import, which can degrade performance for all users.
+- **Target payload sizes under 1 MB per import** where possible. Split large SBOMs into smaller files per product or component group.
+- **Add delays between consecutive API calls** to avoid worker pool exhaustion, which causes HTTP 502 errors.
+- **Use Reimport** (`/api/v2/reimport-scan/`) for recurring scans to update existing findings rather than creating duplicates.
 
 ## Using the Scan Completion Date (API: `scan_date`) field
 

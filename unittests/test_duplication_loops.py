@@ -407,6 +407,43 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_a.refresh_from_db()
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
 
+    def test_delete_duplicate_order_same_date_tiebreak_by_id(self):
+        """When duplicate findings share the same date, excess deletes use id as tie-break (oldest id first)."""
+        system_settings = System_Settings.objects.get()
+        system_settings.delete_duplicates = True
+        system_settings.max_dupes = 1
+        system_settings.save()
+
+        same_date = "2024-06-01"
+        self.finding_b.date = same_date
+        self.finding_c.date = same_date
+        self.finding_b.save()
+        self.finding_c.save()
+
+        set_duplicate(self.finding_b, self.finding_a)
+        set_duplicate(self.finding_c, self.finding_a)
+
+        self.finding_b.refresh_from_db()
+        self.finding_c.refresh_from_db()
+        self.assertLess(
+            self.finding_b.id,
+            self.finding_c.id,
+            "Fixture setup should give finding_b a lower id than finding_c for this tie-break.",
+        )
+
+        _async_dupe_delete_impl()
+
+        self.assertFalse(
+            Finding.objects.filter(id=self.finding_b.id).exists(),
+            "The duplicate with lower id should be deleted when dates are identical.",
+        )
+        self.assertTrue(
+            Finding.objects.filter(id=self.finding_c.id).exists(),
+            "The duplicate with higher id should remain when dates are identical.",
+        )
+        self.finding_a.refresh_from_db()
+        self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
+
     def test_delete_all_engagements(self):
         # make sure there is no exception when deleting all engagements
         for engagement in Engagement.objects.all().order_by("id"):

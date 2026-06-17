@@ -31,7 +31,8 @@ We currently support Connectors for the following tools, with more on the way:
 * **AWS Security Hub**
 * **BurpSuite**
 * **Checkmarx ONE**
-* **Dependency\-Track**
+* **Dependency-Track**
+* **IriusRisk**
 * **JFrog Xray**
 * **Probely**
 * **Semgrep**

@@ -1,23 +1,4 @@
-.btn,
-input,
-textarea,
-.progress,
-.tag-label,
-.label,
-.badge,
-.pagination-sm > li:first-child > a,
-.pagination-sm > li:first-child > span,
-.pagination-sm > li:last-child > a,
-.pagination-sm > li:last-child > span,
-.panel,
-.panel-heading,
-.panel-comments,
-.nav-pills > li > a,
-.breadcrumb,
-.panel > table:last-child,
-.panel > .table:first-child  {
-    border-radius: 0!important;
-}
+/* Legacy border-radius:0 removed — modern design uses rounded corners */
 
 .table-condensed > tbody > tr > td,
 .table-condensed > tbody > tr > th,
@@ -48,42 +29,33 @@ textarea,
 }
 
 a {
-  color: #546474;
+  color: var(--color-dd-primary-500);
 }
 
+/* Panel-default btn-primary: use brand blue (not transparent ghost) */
 .panel-default .btn-primary {
-    background-color: transparent!important;
-    border-style: none!important;
-    color: #fff!important;
-    border: 1px solid #fff!important;
+    background-color: var(--color-dd-primary-500, #1779C5);
+    color: #fff;
+    border: 1px solid var(--color-dd-primary-500, #1779C5);
 }
 
 .panel-default .btn-primary:hover {
-    background-color: transparent!important;
-    color: #fff!important;
-    border: 1px solid #fff!important;
+    background-color: var(--color-dd-primary-700, #204D87);
+    color: #fff;
+    border: 1px solid var(--color-dd-primary-700, #204D87);
 }
 
 .btn-primary {
     color: #fff;
-    background-color: #546474;
+    background-color: var(--color-dd-primary-500);
 	  /*border-style: none!important;*/
 }
 
 .btn-primary:hover {
-    background-color: #38434d!important;
+    background-color: var(--color-dd-primary-700);
 }
 
-.btn-secondary {
-    color: #fff;
-    background-color: #546474;
-	border-style: none!important;
-}
-
-.btn-secondary:hover {
-    color: #fff;
-    background-color: #38434d!important;
-}
+/* btn-secondary handled in Tailwind components layer */
 
 .panel-heading .dropdown-toggle:focus {
     outline: 5px auto -webkit-focus-ring-color;
@@ -99,20 +71,10 @@ a {
     text-decoration: none;
 }
 
-/*
-.btn-primary.active.focus, .btn-primary.active:focus, .btn-primary.active:hover, .btn-primary:active.focus, .btn-primary:active:focus, .btn-primary:active:hover, .open > .dropdown-toggle.btn-primary.focus, .open > .dropdown-toggle.btn-primary:focus, .open > .dropdown-toggle.btn-primary:hover {
-    background-color: transparent!important;
-    border-style: none!important;
-}
-
-.btn-primary.focus, .btn-primary:focus {
-    background-color: transparent!important;
-    border-style: none!important;
-}
-*/
+/* Removed: commented-out btn-primary state overrides (dead code) */
 
 .secondary-color {
-  background-color: #546474!important;
+  background-color: var(--color-dd-primary-600);
   color: white;
 }
 
@@ -132,57 +94,23 @@ h3 {
   line-height: 18px;
 }
 
-a {
-  text-decoration: none;
-}
+/* Removed: a text-decoration reset — handled by Tailwind base */
 
-a:hover {
-  text-decoration: none;
-}
+/* .nav.nav-second-level.nav-up — removed, old sidebar flyout */
 
-.nav.nav-second-level.nav-up {
-    transform: translateY(-100%);
-    margin-top: 41px;
-}
-
-.nav-tabs {
-    border-bottom: 1px solid rgb(148, 168, 187);
-}
-
-
-.nav-tabs > li.active > a,
-.nav-tabs > li.active > a:focus,
-.nav-tabs > li.active > a:hover {
-    color: #fff;
-    background-color: #73879c;
-    border: 1px solid #73879c;
-
-}
-.nav-tabs > li > a {
-    margin-right: 2px;
-    line-height: 1.42857143;
-    border: 1px solid transparent;
-    border-radius: 0;
-}
+/* Removed: .nav-tabs rules — now in tailwind.css with indigo theme */
 
 .nav-tabs .dropdown .badge{
     color: #fff;
-    background-color: #546474;
+    background-color: var(--color-dd-primary-500);
 }
 
 .nav-tabs .active-color .badge{
-    color: #72879b;
+    color: var(--color-dd-primary-500);
     background-color: #ffffff;
 }
 
-.navbar-brand {
-    padding: 5px 5px;
-    margin-left: 0px;
-}
-
-.navbar-brand > img {
-    display: inline-block;
-}
+/* .navbar-brand — removed, old topbar brand styling */
 
 .row {
     margin-top: 5px;
@@ -211,13 +139,9 @@ input[type="file"] {
     width: auto;
 }
 
-.form-control {
-    width: 70% !important;
-}
+/* Removed: .form-control width — handled by Tailwind component */
 
-.bs-searchbox .form-control {
-    width: 100% !important;
-}
+/* Removed: .bs-searchbox — bootstrap-select removed */
 
 .dojo-input-group {
     width: 73%;
@@ -225,29 +149,10 @@ input[type="file"] {
 }
 
 .home-icon a {
-    padding: 0 !important;
+    padding: 0;
 }
 
-.hilite,
-.hilite1 {
-    background: #FF0;
-}
-
-.hilite2 {
-    background: #A9DBA9;
-}
-
-.hilite3 {
-    background: #F89406;
-}
-
-.hilite4 {
-    background: #F8B9B7;
-}
-
-.hilite5 {
-    background: #BCE8F1;
-}
+/* Removed: .hilite* classes — jquery-highlight plugin removed */
 
 #swagger-ui-container h2 {
     font-size: 20px;
@@ -262,7 +167,7 @@ input[type="file"] {
 }
 
 #swagger-ui-container .footer {
-    display: none !important;
+    display: none;
 }
 
 div#header {
@@ -270,13 +175,14 @@ div#header {
 }
 
 .zero {
-    border: 0 !important;
-    padding: 0 !important;
-    width: 0 !important;
+    border: 0;
+    padding: 0;
+    width: 0;
 }
 
 body #header form#api_selector .input input#input_apiKey {
-    width: 500px;
+    width: 100%;
+    max-width: 500px;
 }
 
 .prod_name {
@@ -286,7 +192,7 @@ body #header form#api_selector .input input#input_apiKey {
 }
 
 .breadcrumb a.active {
-    color: #777 !important;
+    color: #777;
 }
 
 .badge.badge-count {
@@ -297,10 +203,7 @@ body #header form#api_selector .input input#input_apiKey {
     background-color: #5cb85c;
 }
 
-.dropdown-toggle-h {
-    display: none;
-    visibility: hidden;
-}
+/* Removed: .dropdown-toggle-h — not referenced in any template */
 
 a.eng_link {
     margin-bottom: 10px;
@@ -340,27 +243,14 @@ form.metric_form p label {
 }
 
 .filters .panel-heading {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--color-border);
 }
 
 .filters .panel-heading:first-child {
-    border-top: 0px solid #ddd;
+    border-top: 0px solid var(--color-border);
 }
 
-.panel-blue .panel-heading,
-.panel-blue {
-    color: #f5f5f5;
-    background-color: #546474!important;
-    border-color: #546474!important;
-}
-
-.panel-blue a {
-    color: #546474;
-}
-
-.panel-blue a:hover {
-    color: #38434d;
-}
+/* panel-blue, panel-red, panel-green, panel-yellow removed — stat cards now use .stat-card */
 
 .nowrap {
     white-space: nowrap;
@@ -372,7 +262,8 @@ form.metric_form p label {
 
 .metrics-half-chart {
     height: 300px;
-    width: 460px;
+    width: 100%;
+    max-width: 460px;
     display: inline-block;
     margin-bottom: 40px;
 }
@@ -393,6 +284,24 @@ form.metric_form p label {
     display: inline-block;
     vertical-align: top;
     width: 38%;
+}
+
+/* Metrics responsive: stack charts + tables on mobile/tablet */
+@media (max-width: 768px) {
+    .metric-half {
+        display: block;
+        width: 100%;
+    }
+    .metrics-half-chart {
+        max-width: 100%;
+        display: block;
+    }
+    .metrics-chart {
+        height: 200px;
+    }
+    .table-400, .table-600 {
+        width: 100%;
+    }
 }
 
 .field-help-text {
@@ -585,6 +494,7 @@ form ul#id_accepted_findings input {
 
 .severity {
     font-size: 80%;
+    color: #fff;
 }
 
 .severity-Info {
@@ -624,25 +534,17 @@ form ul#id_accepted_findings input {
 }
 
 .dojo-search {
-    clear: right !important;
-    display: inline-block !important;
-    float: right !important;
-    margin: 0 !important;
+    clear: right;
+    display: inline-block;
+    float: right;
+    margin: 0;
 }
 
-.pagination {
-    margin: 10px;
-}
-
-.pagination>.active>a, .pagination>.active>a:focus, .pagination>.active>a:hover, .pagination>.active>span, .pagination>.active>span:focus, .pagination>.active>span:hover
-{
-  background-color: #546474;
-  border-color: #546474;
-}
+/* Removed: .pagination base rules — now in tailwind.css */
 
 .pagination-in-panel {
-    margin-left: 10px!important;
-    margin-right: 10px!important;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 #risk_acceptance table form {
@@ -660,7 +562,8 @@ div.eng_info {
     margin-top: 10px;
     min-height: 135px;
     padding: 7px;
-    width: 280px;
+    width: 100%;
+    max-width: 280px;
 }
 
 div.prod_info {
@@ -678,26 +581,24 @@ br {
 }
 
 .filters h3 {
-    font-size: 122% !important;
+    font-size: 122%;
     line-height: 20px;
-    margin: 0px 0 5px 0 !important;
+    margin: 0px 0 5px 0;
 }
 
 .filters .helptext {
     display: none;
 }
 
-.table-bordered th {
-    background-color: #DCEDFB !important;
-}
+/* Removed: .table-bordered th blue bg — now uses Tailwind surface colors */
 
 span.report_note {
     display: inline-block;
-    font-size: 11px !important;
+    font-size: 11px;
 }
 
 span.report_note * {
-    font-size: 11px !important;
+    font-size: 11px;
 }
 
 div.pagination li form {
@@ -716,7 +617,7 @@ div.page_select {
 }
 
 input#simple_search {
-    width: 100%!important;
+    width: 100%;
 }
 
 .support-page-wrapper {
@@ -748,36 +649,59 @@ input#simple_search {
 }
 
 .community {
-    color: #546474!important;
-    background-color: #e7e7e7!important;
+    color: var(--color-text);
+    background-color: var(--color-surface-3);
+}
+
+.community h2,
+.community p {
+    color: inherit;
 }
 
 .commercial {
-    color: #e7e7e7!important;
-    background-color: #1d4565!important;
+    color: #e7e7e7;
+    background-color: #1d4565;
+}
+
+/* Override Tailwind's explicit h2/p color inside dark commercial box */
+.commercial h2,
+.commercial p,
+.commercial i {
+    color: inherit;
 }
 
 .support-box.hover:hover {
     transform: translateY(-10px);
 }
 
+/* Support page responsive: stack boxes on mobile/tablet */
+@media (max-width: 768px) {
+    .support-container {
+        flex-direction: column;
+        width: 100%;
+    }
+    .support-box.shape {
+        margin: 0 0 1rem 0;
+    }
+}
+
 .btn-primary.support {
     font-size: 16px;
     font-weight: 500;
-    padding: 10px!important;
-    border-radius: 6px!important;
-    margin: 20px 10px 0px 10px!important;
-    border: none!important;
+    padding: 10px;
+    border-radius: 6px;
+    margin: 20px 10px 0px 10px;
+    border: none;
 }
 
 .btn-primary.support.dark:hover {
-    color: #546474!important;
-    background-color: #f7f7f7!important;
+    color: var(--color-text-muted);
+    background-color: var(--color-surface-2);
 }
 
 .btn-primary.support.light:hover {
-    color: #e7e7e7!important;
-    background-color: #235175!important;
+    color: #e7e7e7;
+    background-color: #235175;
 }
 
 .divider {
@@ -786,11 +710,11 @@ input#simple_search {
 }
 
 .divider.dark {
-    border-color: #546474!important
+    border-color: var(--color-text-muted);
 }
 
 .divider.light {
-    border-color: #e7e7e7!important
+    border-color: #e7e7e7;
 }
 
 .dojo-modals-wrapper {
@@ -827,10 +751,7 @@ input#simple_search {
     margin-bottom: 40px;
 }
 
-.navbar a.brand {
-    margin: 0;
-    padding: 0;
-}
+/* Removed: .navbar a.brand — old topbar */
 
 .metric-data .well {
     padding: 7px;
@@ -842,28 +763,15 @@ input#simple_search {
     font-weight: bold;
 }
 
-body {
-    padding-top: 50px;
-}
-
 body.popup {
     padding-top: 0;
 }
-
-html,
-body,
-.container {
-    height: 100%;
-}
-
-body > .container {
-    height: auto;
-    min-height: 100%;
-}
+/* Removed: body { padding-top: 50px } — old Bootstrap fixed navbar offset */
+/* Removed: html/body/.container height: 100% — old Bootstrap layout */
 
 body #header form#api_selector .input a#explore:hover,
 body #header form#api_selector .input a#explore {
-    background-color: #09d !important;
+    background-color: #09d;
 }
 
 .controls ul {
@@ -871,14 +779,9 @@ body #header form#api_selector .input a#explore {
     margin: 0
 }
 
-div.dataTables_wrapper
-div.dataTables_filter {
-    margin: 10px!important;
-}
+/* dataTables_filter override removed — now in datatables-dd.css */
 
-.navbar li.search-form {
-    width: 170px
-}
+/* .navbar li.search-form — removed, old topbar search */
 
 label,
 input,
@@ -930,7 +833,7 @@ table.centered td {
 }
 
 .text-low {
-    color: #546474
+    color: var(--color-severity-low)
 }
 
 input[type="checkbox"] {
@@ -943,12 +846,7 @@ input[type="checkbox"] {
     box-shadow: none
 }
 
-.navbar-top-links .dropdown-messages,
-.navbar-top-links .dropdown-tasks,
-.navbar-top-links .dropdown-alerts {
-    width: 500px;
-    min-width: 0;
-}
+/* Removed: .navbar-top-links dropdown widths — old topbar */
 
 .footer {
     font-size: x-small
@@ -1025,33 +923,12 @@ span.endpoint_product {
     vertical-align: middle;
 }
 
+/* Removed: .dropdown-menu hard overrides — now in tailwind.css */
 .dropdown-menu > li > a.text-danger {
-    color: #a94442!important;;
+    color: #a94442!important;
 }
 
-.dropdown-menu  {
-	background-color: #fff;
-}
-
-.dropdown-menu a {
-	text-decoration: none!important;
-	letter-spacing: 0.04em;
-  color: #000000!important;;
-}
-
-th .fa-sort-asc {
-    vertical-align: -3px
-}
-
-th .fa-sort-desc {
-    vertical-align: 3px
-}
-
-th a {
-    color: #333;
-    width: 100%;
-    display: inline-block;
-}
+/* Removed: th sort icon/link styling — now handled by tailwind.css tablesorter */
 
 @font-face {
     font-family: 'icomoon';
@@ -1106,158 +983,52 @@ th a {
     content: "\e975";
 }
 
-#side-menu ul a {
-    /*border-top: 1px solid #ddd;*/
-    border-radius: 4px;
-}
-
-li#minimize-menu-li {
-    display: none;
-    visibility: hidden;
-}
-
-div.custom-search-form {
-    height: 21px;
-    width: 265px;
-}
+/* Removed: #side-menu, li#minimize-menu-li — old sidebar rules */
 
 .announcement-banner {
     margin: 0px -15px;
     border-radius: 0px 0px 4px 4px;
+    color: #000;
 }
 
-@media (min-width: 795px) {
-    div.custom-search-form {
-        height: 21px;
-        width: 350px;
-    }
+.announcement-banner a {
+    color: #0645ad;
+    text-decoration: underline;
 }
 
-@media (min-width: 945px) {
-    div.custom-search-form {
-        height: 21px;
-        width: 500px;
-    }
+.announcement-banner strong,
+.announcement-banner b {
+    color: #222;
 }
 
-@media (min-width: 320px) {
-    #page-wrapper {
-        margin: 75px 0 0 0;
-    }
-
-    #footer-wrapper {
-        margin: 75px 0 0 0;
-    }
+.banner-toggle {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin-left: 6px;
+    color: inherit;
+    cursor: pointer;
+    line-height: 1;
 }
 
-@media (min-width: 359px) {
-    #page-wrapper {
-        margin: 100px 0 0 0;
-    }
-
-    #footer-wrapper {
-        margin: 100px 0 0 0;
-    }
+.banner-toggle:focus,
+.banner-toggle:active {
+    outline: none;
+    box-shadow: none;
 }
 
-@media (min-width: 600px) {
-    #page-wrapper {
-        margin: 50px 0 0 0;
-    }
-
-    #footer-wrapper {
-        margin: 50px 0 0 0;
-    }
+.banner-toggle:not(.collapsed) .fa-caret-down {
+    transform: rotate(180deg);
 }
 
-@media (min-width: 768px) {
-    .sidebar {
-        width: 175px
-    }
-
-    #page-wrapper {
-        margin: 0 0 0 175px;
-    }
-
-    #footer-wrapper {
-        margin: 0 0 0 175px;
-        border-left: 1px solid #e7e7e7;
-    }
-
-    li#minimize-menu-li {
-        display: inline-block;
-        visibility: visible;
-    }
-
-    div.custom-search-form {
-        height: 21px;
-        width: 305px;
-    }
-
-    #side-menu li a span.arrow {
-        display: none
-    }
-
-    #side-menu li {
-        position: relative;
-        border-radius: 4px;
-    }
-
-    #side-menu > li ul {
-        position: absolute;
-        left: 100%;
-        top: 0;
-        min-width: 200px;
-        height: auto !important;
-	display: none;
-        z-index: 10000;
-        background-color: #fff;
-        background-clip: padding-box;
-        border: 1px solid rgba(0, 0, 0, .15);
-        border-left-width: 0;
-        border-radius: 4px;
-        box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
-    }
-
-    /* #side-menu > li.mm-active ul, */
-    #side-menu > li:hover ul {
-        display: block !important;
-    }
-
-    body.min #page-wrapper {
-        margin: 0 0 0 50px;
-        border-left: 1px solid #e7e7e7;
-    }
-
-    body.min #footer-wrapper {
-        margin: 0 0 0 50px;
-    }
-
-    body.min div.navbar-default.sidebar {
-        width: 50px;
-    }
-
-    body.min div.navbar-default.sidebar li a span {
-        display: none;
-    }
-
-    body.min div.navbar-default.sidebar li a i {
-        font-size: 18px;
-    }
-
-    body.min #min-menu i:before {
-        content: "\f0a9" !important;
-    }
-
-    body.max #min-menu i:before {
-        content: "\f0a8" !important;
-    }
-    
-    .announcement-banner {
-        margin: 0px -30px;
-    }
-
+.banner-expanded {
+    margin-top: 8px;
 }
+
+/* Removed: custom-search-form media queries — old topbar search sizing */
+
+/* Removed: Old sidebar/layout media queries for #page-wrapper, #footer-wrapper,
+   .sidebar, #side-menu, body.min/max, li#minimize-menu-li — replaced by Alpine.js sidebar */
 
 #toTop {
     position: fixed;
@@ -1269,75 +1040,241 @@ div.custom-search-form {
     height: 30px;
 }
 
-.dojo-filter-set * {
-    font-size: 11px;
+/* ---- Filter panel styling ---- */
+
+/* Filter panel container — clean, professional look */
+#the-filters,
+#the-filters-open,
+#the-filters-paused,
+#the-filters-closed,
+[id^="the-filters"] {
+    background-color: #f8f9fb;
+    padding: 1.25rem 1.25rem 0.5rem;
+    border-top: 2px solid var(--color-dd-primary-100, #C6DDF2);
 }
 
+/* Grid layout for filter fields */
+.dojo-filter-set.form-inline .filter-form-group {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0.75rem 1rem;
+    margin-bottom: 0;
+}
+
+/* Inline form-group fallback */
 .dojo-filter-set.form-inline .form-group {
     display: inline-block;
-    margin-bottom: 10px;
+    margin-bottom: 0.75rem;
     vertical-align: middle;
-    margin-right: 25px;
+    margin-right: 1rem;
 }
 
-.dojo-filter-set.form-inline .filter-form-group {
+/* Filter grid children: map col-* to grid-column spans */
+.filter-form-group > [class*="col-"] {
+    width: auto !important;
+    grid-column: span 12;
+}
+@media (min-width: 768px) {
+    .filter-form-group > .col-sm-6 { grid-column: span 6; }
+}
+@media (min-width: 992px) {
+    .filter-form-group > .col-md-4 { grid-column: span 4; }
+}
+@media (min-width: 1200px) {
+    .filter-form-group > .col-lg-3 { grid-column: span 3; }
+}
+
+/* Filter category grouping (details/summary) */
+.filter-category {
+    border-bottom: 1px solid var(--color-border, #DCDCDC);
+}
+
+.filter-category:last-of-type {
+    border-bottom: none;
+}
+
+.filter-category-header {
     display: flex;
-    flex-wrap: wrap;
-    flex-basis: auto;
-    flex-grow: 4;
-    align-content: stretch;
-    margin-bottom: 10px;
-    vertical-align: middle;
-    margin-right: 25px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.25rem;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
 }
 
+.filter-category-header::-webkit-details-marker {
+    display: none;
+}
+
+.filter-category-title {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: var(--color-dd-primary-700, #204D87);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.filter-category-chevron {
+    font-size: 0.625rem;
+    color: var(--color-text-muted, #666);
+    transition: transform 0.2s ease;
+}
+
+.filter-category[open] > .filter-category-header .filter-category-chevron {
+    transform: rotate(180deg);
+}
+
+.filter-category-body {
+    padding-bottom: 0.75rem;
+}
+
+/* Filter labels — compact, readable */
+.dojo-filter-set .form-label,
+.dojo-filter-set label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-text, #191919);
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+}
+
+/* Filter inputs — clean, consistent heights */
+.dojo-filter-set .filter-form-control,
+.dojo-filter-set .form-control {
+    width: 100%;
+    height: 2.125rem;
+    min-height: 2.125rem;
+    font-size: 0.8125rem;
+    color: var(--color-text, #191919);
+    background-color: #fff;
+    border: 1px solid var(--color-border, #DCDCDC);
+    border-radius: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dojo-filter-set .filter-form-control:focus,
+.dojo-filter-set .form-control:focus {
+    border-color: var(--color-dd-primary-300, #5094CC);
+    box-shadow: 0 0 0 3px rgba(23, 121, 197, 0.1);
+    outline: none;
+}
+
+.dojo-filter-set .filter-form-control::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+/* Filter input wrappers */
 .dojo-filter-set.form-inline .filter-form-input {
-    margin-right: 25px;
-    margin-bottom: 10px;
+    margin-right: 0;
+    margin-bottom: 0;
+    min-width: 0;
 }
 
-.dojo-filter-set.form-inline .filter-form-control {
-    width: 100%!important;
-    vertical-align: middle;
+/* Multi-select — compact, styled options */
+.dojo-filter-set select[multiple],
+.dojo-filter-set select[multiple=multiple] {
+    width: 100%;
+    min-height: 2.125rem;
+    max-height: 5rem;
+    font-size: 0.8125rem;
+    border: 1px solid var(--color-border, #DCDCDC);
+    border-radius: 0.375rem;
+    padding: 0.125rem;
+    background-color: #fff;
 }
 
-.dojo-filter-set.form-inline .form-control {
-    height: auto!important;
+.dojo-filter-set select[multiple] option {
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.25rem;
 }
 
+.dojo-filter-set select[multiple] option:checked {
+    background-color: var(--color-dd-primary-50, #e8f3fb);
+    color: var(--color-dd-primary-700, #204D87);
+}
+
+/* Select2 in filters — match design system */
+.dojo-filter-set .select2-container {
+    width: 100% !important;
+    min-width: 0;
+}
+
+.dojo-filter-set .select2-container--default .select2-selection--single,
+.dojo-filter-set .select2-container--default .select2-selection--multiple {
+    border: 1px solid var(--color-border, #DCDCDC);
+    border-radius: 0.375rem;
+    min-height: 2.125rem;
+    background-color: #fff;
+    font-size: 0.8125rem;
+}
+
+.dojo-filter-set .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 2rem;
+    padding-left: 0.5rem;
+    color: var(--color-text, #191919);
+}
+
+.dojo-filter-set .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 2rem;
+}
+
+.dojo-filter-set .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--color-dd-primary-50, #e8f3fb);
+    border: 1px solid var(--color-dd-primary-200, #82B0D9);
+    border-radius: 0.25rem;
+    color: var(--color-dd-primary-700, #204D87);
+    font-size: 0.75rem;
+    padding: 0.0625rem 0.375rem;
+    margin: 0.125rem 0.25rem 0.125rem 0;
+}
+
+.dojo-filter-set .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: var(--color-dd-primary-500, #1779C5);
+    margin-right: 0.25rem;
+}
+
+.dojo-filter-set .select2-container--default.select2-container--focus .select2-selection--single,
+.dojo-filter-set .select2-container--default.select2-container--focus .select2-selection--multiple,
+.dojo-filter-set .select2-container--default.select2-container--open .select2-selection--single,
+.dojo-filter-set .select2-container--default.select2-container--open .select2-selection--multiple {
+    border-color: var(--color-dd-primary-300, #5094CC);
+    box-shadow: 0 0 0 3px rgba(23, 121, 197, 0.1);
+}
+
+/* Filter help icons */
+.dojo-filter-set .has-popover,
+.dojo-filter-set .fa-circle-question {
+    font-size: 0.625rem;
+    color: #999;
+    margin-left: 0.125rem;
+    cursor: help;
+}
+
+/* Filter action buttons area */
+.dojo-filter-set .d-flex.justify-content-end {
+    padding-top: 0.25rem;
+    padding-bottom: 0.5rem;
+}
+
+/* Report filter set */
 .report-filter-set {
-    padding-left: 10px;
+    padding-left: 0.75rem;
 }
 
 .report-filter-set .form-group {
     display: inline-block;
-    margin-bottom: 10px;
+    margin-bottom: 0.75rem;
     vertical-align: middle;
-    margin-right: 25px;
+    margin-right: 1rem;
 }
 
+/* Finding list density */
 .finding-list .panel-body, .finding-list table {
-    font-size: .95em !important;
-}
-
-.dojo-filter-set.form-inline select[multiple=multiple] {
-    width: 200px;
-}
-
-#the-filters {
-    background-color: #f9f9f9;
-}
-
-#the-filters-open {
-    background-color: #f9f9f9;
-}
-
-#the-filters-paused {
-    background-color: #f9f9f9;
-}
-
-#the-filters-closed {
-    background-color: #f9f9f9;
+    font-size: .95em;
 }
 
 .panel-default {
@@ -1353,49 +1290,50 @@ div.custom-search-form {
 }
 
 .panel-heading .btn {
-	padding-top: 0;
-	padding-bottom: 0;
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
 }
 
 .panel-default > .panel-comments {
     color: black;
     font-size: 12px;
     padding: 10px 10px;
-    background-color: #ECECEC;
-    border-color: #A1C0D7;
-    border: 1px solid #dddedf;
+    background-color: var(--color-surface-3);
+    border-color: var(--color-border);
+    border: 1px solid var(--color-border);
 }
 
 .panel-default > .panel-heading {
-    color: white;
-    font-size: 16px;
-    background-color: rgba(32, 166, 216, 0.75);
-    border-color: #A1C0D7;
+    color: var(--color-text);
+    font-size: 14px;
+    background-color: var(--color-surface-2);
+    border-color: var(--color-border);
 }
 
-.panel-default > .panel-heading a,
+.panel-default > .panel-heading a:not(.btn),
 .panel-default > .panel-heading small{
-	color: #fff;
+	color: var(--color-dd-primary-500);
 }
 
-.panel-default > .panel-heading a{
+.panel-default > .panel-heading a:not(.btn) {
+	text-decoration: none;
+}
+
+.panel-default > .panel-heading a:not(.btn):hover{
+	color: var(--color-dd-primary-700);
 	text-decoration: underline;
 }
 
-.panel-default > .panel-heading a:hover{
-	color: #546474;
-}
-
 .panel-default-secondary{
-	border: 1px solid #dddedf;
+	border: 1px solid var(--color-border);
 	border-top-style: none;
 }
 
 .panel-default-secondary > .panel-heading {
-  color: white;
-  background-color: #546474;
+  color: var(--color-text);
+  background-color: var(--color-surface-3);
 	border-style: solid;
-	border-color: #536473;
+	border-color: var(--color-border);
 }
 
 .panel-heading .text-muted {
@@ -1425,32 +1363,26 @@ div.custom-search-form {
 }
 
 .panel-footer {
-    background-color: #dddedf;
-    border-top: 1px solid #ddd;
+    background-color: var(--color-surface-2);
+    border-top: 1px solid var(--color-border);
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
 }
 
 .panel-footer small{
-	color: #246c91;
+	color: var(--color-dd-primary-500);
 }
 
-div.dt-buttons {
-    margin: 10px!important;
-}
-
-div.dt-search {
-    display: inline-block!important;
-}
+/* dt-buttons / dt-search overrides removed — now in datatables-dd.css */
 
 table#product_types .btn-success{
-	background-color: #546474;
-	border-color: #546474;
+	background-color: var(--color-dd-primary-500);
+	border-color: var(--color-dd-primary-500);
 }
 
 table#product_types .btn-success:hover{
-	background-color: #3d4a58;
-	border-color: #3d4a58;
+	background-color: var(--color-dd-primary-700);
+	border-color: var(--color-dd-primary-700);
 }
 
 table#product_types .btn-warning{
@@ -1463,9 +1395,7 @@ table#product_types .btn-warning:hover{
 	border-color: #11876e;
 }
 
-span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.glyphicon-chevron-down {
-    color: #546474;
-}
+/* Removed: glyphicon-chevron-* — using Font Awesome now */
 
 .finding-description {
     max-height: 500px;
@@ -1491,9 +1421,7 @@ span.pull-right.clickable i.glyphicon-chevron-up, span.pull-right.clickable i.gl
     border-radius: 8px;
 }
 
-.highlight {
-    background-color: rgb(255, 255, 123);
-}
+/* Removed: .highlight — jquery-highlight plugin removed */
 
 
 .benchmark_pass {
@@ -1512,11 +1440,11 @@ form#quick-add-form {
 }
 
 .dojo-filter-heading {
-    background-color: #EBF4FB;
+    background-color: var(--color-surface-2);
     margin: 0px;
     padding: 5px 10px;
     border-radius: 0px;
-    border: 1px solid #A1C0D7;
+    border: 1px solid var(--color-border);
     margin-left: -16px;
     margin-right: -16px;
     margin-top: -16px;
@@ -1528,9 +1456,9 @@ form#quick-add-form {
     margin-top: 15px;
     margin-left: -16px;
     margin-right: -16px;
-    background-color: #EBF4FB;
+    background-color: var(--color-surface-2);
     border-radius: 0px;
-    border: 1px solid #A1C0D7;
+    border: 1px solid var(--color-border);
     font-size: 15px;
     padding: 5px 10px;
     margin-bottom: 15px;
@@ -1550,8 +1478,8 @@ a.template-popover:hover {
 }
 
 #template_findings div.popover {
-    width: 50% !important;
-    max-width: 50% !important;
+    width: 50%;
+    max-width: 50%;
 }
 
 #template_findings div.popover .popover-content {
@@ -1632,7 +1560,7 @@ ul#sortable1 li div.panel-heading:hover, ul#sortable2 li div.panel-heading:hover
 }
 
 .editor * {
-    font-size: 1em !important;
+    font-size: 1em;
 }
 
 .editor ul {
@@ -1711,12 +1639,12 @@ div.tags .label {
 
 .tag-color {
     background: #556270;
-    border: 1px solid #fff!important;
+    border: 1px solid #fff;
 }
 
 .tag-version {
-    background: rgba(32, 166, 216, 0.7);
-    border: 1px solid #fff!important;
+    background: var(--color-dd-primary-500);
+    border: 1px solid #fff;
 }
 
 .happy-green-color {
@@ -1814,6 +1742,17 @@ mark{
   font-size:18px;
   font-weight: 700;
 }
+.vuln-count small,
+.vuln-count .small {
+  /* Tailwind's base layer makes <small> use --color-text-muted (gray);
+     inside the severity counter boxes the label sits on a colored bg
+     and must stay white to match the count number above it. */
+  color: #fff;
+}
+.metrics-severity-counts {
+  table-layout: fixed;
+  width: 100%;
+}
 small {
   font-size:12px;
   font-weight:400;
@@ -1851,20 +1790,77 @@ small {
     font-style: normal;
 }
 
+/* ---- Select2 global styling ---- */
 .select2-container {
-    min-width:200px;
+    min-width: min(200px, 100%);
 }
 
+.select2-dropdown {
+    border: 1px solid var(--color-border, #DCDCDC);
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.select2-results__option {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.5rem;
+}
+
+.select2-results__option--highlighted[aria-selected] {
+    background-color: var(--color-dd-primary-50, #e8f3fb) !important;
+    color: var(--color-dd-primary-700, #204D87) !important;
+}
+
+.select2-results__option[aria-selected="true"] {
+    background-color: var(--color-dd-primary-100, #C6DDF2);
+    color: var(--color-dd-primary-800, #0F3C6E);
+}
+
+.select2-search--dropdown .select2-search__field {
+    border: 1px solid var(--color-border, #DCDCDC);
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+    outline: none;
+}
+
+.select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--color-dd-primary-300, #5094CC);
+    box-shadow: 0 0 0 2px rgba(23, 121, 197, 0.1);
+}
+
+/* Show Password toggle — inline, not absolutely positioned */
 #toggleBox {
-    background-color: transparent!important;
-    border: none!important;
-    font-weight: bold!important;
-    position: absolute!important;
-    left: 0!important;
+    background-color: transparent !important;
+    border: none !important;
+    font-weight: 500 !important;
+    padding: 0 !important;
+    font-size: 0.8125rem;
+    color: var(--color-dd-primary-500, #1779C5);
+    cursor: pointer;
+}
+#toggleBox:hover {
+    color: var(--color-dd-primary-700, #204D87);
+    text-decoration: underline;
 }
 
 .EasyMDEContainer .table {
     width: unset!important;
+}
+
+/* Form widget widths — keep EasyMDE markdown editor, Select2 (incl. tag inputs)
+   and the legacy Chosen widget the same width as plain .form-control inputs
+   inside .form-group cells (col-sm-10). !important on .select2-container is
+   needed because Tagulous sets style="width:70%" inline. */
+.form-group .EasyMDEContainer,
+.form-group .CodeMirror,
+.form-group .editor-toolbar,
+.form-group .editor-statusbar,
+.form-group .editor-preview-side,
+.form-group .chosen-container,
+.form-group .select2-container {
+    width: 100% !important;
 }
 
 /* remove spinners (up & down arrow) for integer / number fields
@@ -1882,22 +1878,9 @@ input[type=number]::-webkit-outer-spin-button {
     margin: 0;
 }
 
-.table th, .table td {
-    border-right: 1px solid #ddd;
-}
-.table th:last-child, .table td:last-child {
-    border-right: none; 
-}
+/* Removed: .table cell border-right — Tailwind uses bottom borders only */
 
-/* Keep the color of the legend in forced color mode */
-.legend td {
-    forced-color-adjust: none;
-}
-    
-.legend .legendLabel {
-    padding-left: 4px;   
-    forced-color-adjust: auto;
-}
+/* Removed: .legend / .legendLabel — Flot chart library removed */
     
 .fa-caret-down,
 .caret {

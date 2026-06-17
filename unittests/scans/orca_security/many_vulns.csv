@@ -1,0 +1,6 @@
+OrcaScore,Title,Category,Inventory,Inventory.Name,CloudAccount,CloudAccount.Name,Source,Status,CreatedAt,LastSeen,Labels
+2.0,Low severity test finding,Best practices,1,ResourceA,1,account-dev,ResourceA,open,2025-01-01T08:00:00+00:00,2025-02-01T08:00:00+00:00,"[""CSPM""]"
+5.1,Unused role with policy found,IAM misconfigurations,1,TestRole_abc123,1,account-test,TestRole_abc123,open,2025-01-15T10:30:00+00:00,2025-02-01T12:00:00+00:00,"[""CSPM"",""source: Orca Scan""]"
+7.5,Public S3 bucket detected,Data at risk,1,my-public-bucket,1,account-prod,my-public-bucket,open,2025-02-01T14:00:00+00:00,2025-02-03T09:00:00+00:00,"[""CSPM"",""mitre: initial access""]"
+9.5,Critical IAM root access key active,IAM misconfigurations,1,root,1,account-prod,root,open,2025-02-02T16:00:00+00:00,2025-02-03T16:00:00+00:00,"[""CSPM"",""critical""]"
+0,Informational security note,Best practices,1,InfoResource,1,account-dev,InfoResource,closed,2024-12-01T00:00:00+00:00,2025-01-01T00:00:00+00:00,"[]"

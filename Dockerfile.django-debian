@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.12-slim-trixie@sha256:f50f56f1471fc430b394ee75fc826be2d212e35d85ed1171ac79abbba485dce9 AS base
+FROM python:3.14.5-slim-trixie@sha256:c845af9399020c7e562969a13689e929074a10fd057acd1b1fad06a2fb068e97 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -67,7 +67,8 @@ RUN \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt
+  -r ./requirements.txt && \
+  apt-get -y purge --auto-remove git
 
 COPY \
   docker/entrypoint-celery-beat.sh \
@@ -80,7 +81,7 @@ COPY \
   docker/reach_broker.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py ./
+COPY manage.py ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer

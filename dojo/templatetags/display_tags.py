@@ -16,6 +16,7 @@ from django import template
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.staticfiles import finders
 from django.db.models import Case, IntegerField, Sum, Value, When
 from django.template.defaultfilters import stringfilter
 from django.urls import reverse
@@ -24,9 +25,9 @@ from django.utils.html import conditional_escape, escape
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
-import dojo.jira_link.helper as jira_helper
 import dojo.utils
 from dojo import __docs__, __version__
+from dojo.jira import services as jira_services
 from dojo.models import Benchmark_Product, Check_List, Dojo_User, FileAccessToken, Finding, Product, System_Settings
 from dojo.utils import calculate_grade, get_file_images, get_full_url, get_system_setting, prepare_for_view
 
@@ -141,6 +142,23 @@ def dojo_version():
     if settings.FOOTER_VERSION:
         version = settings.FOOTER_VERSION
     return f"v. {version}"
+
+
+@register.simple_tag
+def static_v(static_path):
+    """
+    Cache-busting query value for a static asset.
+
+    Returns the integer mtime of the file under STATIC_ROOT (or
+    STATICFILES_DIRS) so any local edit forces a fresh fetch. Falls
+    back to the dojo version string when the file isn't found, which
+    is enough granularity for release deploys.
+    """
+    with contextlib.suppress(Exception):
+        path = finders.find(static_path)
+        if path:
+            return str(int(Path(path).stat().st_mtime))
+    return __version__.replace(".", "")
 
 
 @register.simple_tag
@@ -854,7 +872,7 @@ def vulnerability_url(vulnerability_id):
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.replace("SSA:", "SSA-"))
             if key == "SSA-" and not re.findall(r"SSA-\d{4}-", vulnerability_id):
                 return "https://cert-portal.siemens.com/productcert/html/" + str(vulnerability_id.lower()) + ".html"
-            if key in {"AVD", "KHV", "C-", "ELA-"}:
+            if key in {"AVD", "KHV", "C-", "ELA-", "MFSA"}:
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower())
             if key == "SUSE-SU-":
                 return settings.VULNERABILITY_URLS[key] + str(vulnerability_id.lower().removeprefix("suse-su-")[:4]) + "/" + vulnerability_id.replace(":", "")
@@ -909,52 +927,52 @@ def jiraencode_component(value):
 
 @register.filter
 def jira_project(obj, *, use_inheritance=True):
-    return jira_helper.get_jira_project(obj, use_inheritance=use_inheritance)
+    return jira_services.get_project(obj, use_inheritance=use_inheritance)
 
 
 @register.filter
 def jira_issue_url(obj):
-    return jira_helper.get_jira_url(obj)
+    return jira_services.get_url(obj)
 
 
 @register.filter
 def jira_project_url(obj):
-    return jira_helper.get_jira_project_url(obj)
+    return jira_services.get_project_url(obj)
 
 
 @register.filter
 def jira_key(obj):
-    return jira_helper.get_jira_key(obj)
+    return jira_services.get_key(obj)
 
 
 @register.filter
 def jira_creation(obj):
-    return jira_helper.get_jira_creation(obj)
+    return jira_services.get_creation(obj)
 
 
 @register.filter
 def jira_change(obj):
-    return jira_helper.get_jira_change(obj)
+    return jira_services.get_change(obj)
 
 
 @register.filter
 def jira_qualified_findings(finding_group):
-    return jira_helper.get_qualified_findings(finding_group)
+    return jira_services.get_qualified_findings(finding_group)
 
 
 @register.filter
 def jira_non_qualified_findings(finding_group):
-    return jira_helper.get_non_qualified_findings(finding_group)
+    return jira_services.get_non_qualified_findings(finding_group)
 
 
 @register.filter
 def jira_sla_deadline(obj):
-    return jira_helper.get_sla_deadline(obj)
+    return jira_services.get_sla_deadline(obj)
 
 
 @register.filter
 def jira_severity(findings):
-    return jira_helper.get_severity(findings)
+    return jira_services.get_severity(findings)
 
 
 @register.filter
@@ -1012,7 +1030,7 @@ def jira_project_tag(product_or_engagement, *, autoescape=True):
         def esc(x):
             return x
 
-    jira_project = jira_helper.get_jira_project(product_or_engagement)
+    jira_project = jira_services.get_project(product_or_engagement)
 
     if not jira_project:
         return ""
@@ -1028,7 +1046,7 @@ def jira_project_tag(product_or_engagement, *, autoescape=True):
         <b>Push Notes:</b> %s">
     </i>
     """
-    jira_project_no_inheritance = jira_helper.get_jira_project(product_or_engagement, use_inheritance=False)
+    jira_project_no_inheritance = jira_services.get_project(product_or_engagement, use_inheritance=False)
     inherited = bool(not jira_project_no_inheritance)
 
     icon = "fa-bug"
@@ -1083,6 +1101,13 @@ def import_settings_tag(test_import, *, autoescape=True):
             <b>Push to jira:</b> %s<br/>
             <b>Tags:</b> %s<br/>
             <b>Endpoints:</b> %s<br/>
+            <b>Service:</b> %s<br/>
+            <b>Close Old Findings (Product Scope):</b> %s<br/>
+            <b>Do Not Reactivate:</b> %s<br/>
+            <b>Apply Tags to Findings:</b> %s<br/>
+            <b>Apply Tags to Endpoints:</b> %s<br/>
+            <b>Group By:</b> %s<br/>
+            <b>Create Finding Groups for All Findings:</b> %s<br/>
         "
     </i>
     """
@@ -1090,26 +1115,31 @@ def import_settings_tag(test_import, *, autoescape=True):
     icon = "fa-info-circle"
     color = ""
 
+    s = test_import.import_settings
+    common_fields = (
+        esc(test_import.id),
+        esc(s.get("active", None)),
+        esc(s.get("verified", None)),
+        esc(s.get("minimum_severity", None)),
+        esc(s.get("close_old_findings", None)),
+        esc(s.get("push_to_jira", None)),
+        esc(s.get("tags", None)),
+    )
+    extra_fields = (
+        esc(s.get("service", None)),
+        esc(s.get("close_old_findings_product_scope", None)),
+        esc(s.get("do_not_reactivate", None)),
+        esc(s.get("apply_tags_to_findings", None)),
+        esc(s.get("apply_tags_to_endpoints", None)),
+        esc(s.get("group_by", None)),
+        esc(s.get("create_finding_groups_for_all_findings", None)),
+    )
+
     if not settings.V3_FEATURE_LOCATIONS:
         # TODO: Delete this after the move to Locations
-        return mark_safe(html % (icon, color, icon,
-                                    esc(test_import.id),
-                                    esc(test_import.import_settings.get("active", None)),
-                                    esc(test_import.import_settings.get("verified", None)),
-                                    esc(test_import.import_settings.get("minimum_severity", None)),
-                                    esc(test_import.import_settings.get("close_old_findings", None)),
-                                    esc(test_import.import_settings.get("push_to_jira", None)),
-                                    esc(test_import.import_settings.get("tags", None)),
-                                    esc(test_import.import_settings.get("endpoints", test_import.import_settings.get("endpoint", None)))))
-    return mark_safe(html % (icon, color, icon,
-                             esc(test_import.id),
-                             esc(test_import.import_settings.get("active", None)),
-                             esc(test_import.import_settings.get("verified", None)),
-                             esc(test_import.import_settings.get("minimum_severity", None)),
-                             esc(test_import.import_settings.get("close_old_findings", None)),
-                             esc(test_import.import_settings.get("push_to_jira", None)),
-                             esc(test_import.import_settings.get("tags", None)),
-                             esc(test_import.import_settings.get("locations", None))))
+        endpoints = esc(s.get("endpoints", s.get("endpoint", None)))
+        return mark_safe(html % (icon, color, icon, *common_fields, endpoints, *extra_fields))
+    return mark_safe(html % (icon, color, icon, *common_fields, esc(s.get("locations", None)), *extra_fields))
 
 
 @register.filter(needs_autoescape=True)

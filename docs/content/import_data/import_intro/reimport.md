@@ -41,10 +41,14 @@ If any incoming Findings match Findings that already exist, the incoming Finding
 
 If there are any Findings that already exist in the Test but which are not present in the incoming report, you can choose to automatically set those Findings to Inactive and Mitigated (on the assumption that those vulnerabilities have been resolved since the previous import). The Test page will show these Findings as **Closed**.
 
-If you don’t want any Findings to be closed, you can disable this behavior on Reimport:
+If you **don’t** want any old Findings to be closed, you can disable this behavior on Reimport:
 
 * Uncheck the **Close Old Findings** checkbox if using the UI
-* Set **close\_old\_findings** to **False** if using the API
+* Set `close_old_findings` to `False` if using the API (on this endpoint, `close_old_findings` is `True` by default)
+
+**Scope note:** Unlike with Import, Reimport can never look at other Tests in the Engagement when considering Findings to close. The scope of Finding closure is always limited to the target Test.
+
+The `close_old_findings` feature will also respect the `service` field: only Findings with an identical `service` value (or no `service` value, if none was specified) will be considered for closure.
 
 ### Reopen Findings
 
@@ -54,6 +58,22 @@ If you’re using a triage\-less scanner, or you don’t otherwise want Closed F
 
 * Set **do\_not\_reactivate** to **True** if using the API
 * Check the **Do Not Reactivate** checkbox if using the UI
+
+### Force Active and Force Verified behavior
+
+Setting `active=true` (UI: **Force Active**) or `verified=true` (UI: **Force Verified**) on a Reimport will set the corresponding status on every matched Finding, **including findings that would otherwise be Inactive because they were Mitigated**. This is the same reactivation behavior described above, just made explicit on every incoming Finding.
+
+Force Active and Force Verified do **not** override statuses that represent an explicit user or system decision about why a Finding should not be Active:
+
+| Status | Does Force Active reactivate it? | Why |
+|---|---|---|
+| Mitigated / Closed | Yes | Same as the default reactivation behavior |
+| Risk Accepted | No | The Finding is Inactive because a user explicitly accepted the risk; reimport must not silently revoke that decision |
+| Duplicate | No | The Finding is Inactive because deduplication marked it as a duplicate of another Finding; the original Finding (not the duplicate) is what should be active |
+| False Positive | No | Same reasoning as Risk Accepted — an explicit triage decision |
+| Out of Scope | No | Same reasoning as Risk Accepted — an explicit triage decision |
+
+If you want a Risk Accepted or Duplicate Finding to become Active again, you need to remove the Risk Acceptance or the Duplicate marker first. Force Active alone will not do it.
 
 ## Opening the Reimport form
 

@@ -17,8 +17,8 @@ from rest_framework.test import APIClient, APITestCase
 from vcr_unittest import VCRTestCase
 
 from dojo.importers.location_manager import LocationManager
-from dojo.jira_link import helper as jira_helper
-from dojo.jira_link.views import get_custom_field
+from dojo.jira import helper as jira_helper
+from dojo.jira.views import get_custom_field
 from dojo.location.models import Location, LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.middleware import DojoSytemSettingsMiddleware
@@ -346,7 +346,7 @@ class DojoTestUtilsMixin:
         }
 
     def get_expected_redirect_product(self, product):
-        return f"/product/{product.id}"
+        return f"/asset/{product.id}"
 
     def add_product_jira(self, data, expect_redirect_to=None, *, expect_200=False):
         response = self.client.get(reverse("new_product"))
@@ -355,7 +355,7 @@ class DojoTestUtilsMixin:
         # self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
-            expect_redirect_to = "/product/%i"
+            expect_redirect_to = "/asset/%i"
 
         response = self.client.post(reverse("new_product"), urlencode(data), content_type="application/x-www-form-urlencoded")
 
@@ -540,17 +540,22 @@ class DojoTestUtilsMixin:
         return model.objects.order_by("id").last()
 
     def get_unsaved_locations(self, finding):
-        if settings.V3_FEATURE_LOCATIONS:
-            return LocationManager.make_abstract_locations(finding.unsaved_locations)
-        # TODO: Delete this after the move to Locations
-        return finding.unsaved_endpoints
+        if not hasattr(finding, "_cached_unsaved_locations"):
+            if settings.V3_FEATURE_LOCATIONS:
+                locations = LocationManager.make_abstract_locations(finding.unsaved_locations)
+            else:
+                # TODO: Delete this after the move to Locations
+                locations = finding.unsaved_endpoints
+            for loc in locations:
+                loc.clean()
+            finding._cached_unsaved_locations = locations
+        return finding._cached_unsaved_locations
 
     def validate_locations(self, findings):
         for finding in findings:
-            # AND SEVERITY HAHAHAHA
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            for location in self.get_unsaved_locations(finding):
-                location.clean()
+            # get_unsaved_locations handles conversion + cleaning + caching
+            self.get_unsaved_locations(finding)
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):

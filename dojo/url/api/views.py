@@ -3,8 +3,8 @@ from django.db.models.functions import Coalesce
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import DjangoModelPermissions
 
-from dojo.api_v2.permissions import IsSuperUser
 from dojo.api_v2.views import PrefetchDojoModelViewSet
+from dojo.authorization.api_permissions import IsSuperUser
 from dojo.location.models import LocationFindingReference
 from dojo.location.status import FindingLocationStatus
 from dojo.query_utils import build_count_subquery
@@ -36,3 +36,6 @@ class URLViewSet(PrefetchDojoModelViewSet):
         return URL.objects.annotate(
             active_findings=Coalesce(active_finding_subquery, Value(0)),
         )
+
+    def perform_destroy(self, instance):
+        instance.location.delete()

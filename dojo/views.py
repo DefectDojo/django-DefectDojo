@@ -2,38 +2,24 @@ import logging
 from contextlib import suppress
 from pathlib import Path
 
-from auditlog.models import LogEntry
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from dojo.auditlog import process_events_for_display
-from dojo.authorization.authorization import (
-    user_has_configuration_permission_or_403,
-    user_has_global_permission,
-    user_has_permission,
-    user_has_permission_or_403,
-)
-from dojo.authorization.roles_permissions import Permissions
-from dojo.filters import LogEntryFilter, PgHistoryFilter
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.forms import ManageFileFormSet
-from dojo.location.models import Location
 from dojo.models import (
-    Endpoint,
     Engagement,
     FileUpload,
     Finding,
-    Product,
     Test,
 )
-from dojo.pghistory_models import DojoEvents
 from dojo.product_announcements import ErrorPageProductAnnouncement
-from dojo.utils import Product_Tab, generate_file_response, get_page_items
+from dojo.utils import generate_file_response
 
 logger = logging.getLogger(__name__)
 
@@ -53,146 +39,18 @@ def custom_bad_request_view(request, exception=None):
     return render(request, "400.html", {}, status=400)
 
 
-def action_history(request, cid, oid):
-    try:
-        ct = ContentType.objects.get_for_id(cid)
-        obj = ct.get_object_for_this_type(pk=oid)
-    except (KeyError, ObjectDoesNotExist):
-        raise Http404
-
-    product_id = None
-    active_tab = None
-    finding = None
-    test = False
-    object_value = None
-
-    if ct.model == "product":
-        user_has_permission_or_403(request.user, obj, Permissions.Product_View)
-        product_id = obj.id
-        active_tab = "overview"
-        object_value = Product.objects.get(id=obj.id)
-    elif ct.model == "engagement":
-        user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        object_value = Engagement.objects.get(id=obj.id)
-        product_id = object_value.product.id
-        active_tab = "engagements"
-    elif ct.model == "test":
-        user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-        object_value = Test.objects.get(id=obj.id)
-        product_id = object_value.engagement.product.id
-        active_tab = "engagements"
-        test = True
-    elif ct.model == "finding":
-        user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
-        object_value = Finding.objects.get(id=obj.id)
-        product_id = object_value.test.engagement.product.id
-        active_tab = "findings"
-        finding = object_value
-    elif ct.model == "location":
-        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
-        object_value = Location.objects.get(id=obj.id)
-        active_tab = "endpoints"
-    # TODO: Delete this after the move to Locations
-    elif ct.model == "endpoint":
-        user_has_permission_or_403(request.user, obj, Permissions.Location_View)
-        object_value = Endpoint.objects.get(id=obj.id)
-        product_id = object_value.product.id
-        active_tab = "endpoints"
-    elif ct.model == "risk_acceptance":
-        engagements = Engagement.objects.filter(risk_acceptance=obj)
-        authorized = False
-        fetched_engagements = list(engagements)
-        # Check the case that there are no engagements associated with the risk acceptance
-        if len(fetched_engagements) == 0:
-            # Determine if the user has risk acceptance view permission globally
-            authorized = user_has_global_permission(request.user, Permissions.Risk_Acceptance)
-        else:
-            # Iterate through engagements to see if the user has view permission on any of them
-            for engagement in fetched_engagements:
-                if user_has_permission(request.user, engagement, Permissions.Engagement_View):
-                    authorized = True
-                    break
-        if not authorized:
-            raise PermissionDenied
-    elif ct.model == "user":
-        user_has_configuration_permission_or_403(request.user, "auth.view_user")
-    elif not request.user.is_superuser:
-        raise PermissionDenied
-
-    product_tab = None
-    if product_id:
-        product_tab = Product_Tab(get_object_or_404(Product, id=product_id), title="History", tab=active_tab)
-        if active_tab == "engagements":
-            if str(ct) == "engagement":
-                product_tab.setEngagement(object_value)
-            else:
-                product_tab.setEngagement(object_value.engagement)
-
-    # Get audit history from pghistory (and legacy django-auditlog entries if available)
-    auditlog_history = []
-    pghistory_history = []
-
-    # Try to get django-auditlog entries
-    auditlog_queryset = LogEntry.objects.filter(
-        content_type=ct,
-        object_pk=obj.id,
-    ).order_by("-timestamp")
-    auditlog_history = auditlog_queryset
-
-    # Use custom DojoEvents proxy model - provides proper diff calculation and context fields
-    # Filter by the specific object using references() method
-    # references() returns events where any FK points to the object (including through models like tags/reviewers)
-    # Note: Events is a CTE that doesn't support select_related, but includes context data
-    pghistory_history = DojoEvents.objects.references(obj).order_by("-pgh_created_at")
-
-    # Apply filtering first, then process for display
-    pghistory_filter = PgHistoryFilter(request.GET, queryset=pghistory_history)
-    filtered_pghistory = pghistory_filter.qs
-
-    # Process events in batch to add object_str and object_url
-    processed_events = list(filtered_pghistory)
-    process_events_for_display(processed_events)
-
-    # Paginate the processed events
-    paged_pghistory_history = get_page_items(request, processed_events, 25)
-
-    # Create filter and pagination for auditlog entries
-    auditlog_filter = LogEntryFilter(request.GET, queryset=auditlog_history)
-    paged_auditlog_history = get_page_items(request, auditlog_filter.qs, 25)
-
-    if not settings.ENABLE_AUDITLOG:
-        messages.add_message(
-            request,
-            messages.WARNING,
-            "Audit logging is currently disabled in System Settings.",
-            extra_tags="alert-danger")
-
-    return render(request, "dojo/action_history.html",
-                  {"auditlog_history": paged_auditlog_history,
-                   "pghistory_history": paged_pghistory_history,
-                   "product_tab": product_tab,
-                   "filtered": auditlog_history,
-                   "log_entry_filter": auditlog_filter,
-                   "pghistory_filter": pghistory_filter,
-                   "obj": obj,
-                   "test": test,
-                   "object_value": object_value,
-                   "finding": finding,
-                   })
-
-
 def manage_files(request, oid, obj_type):
     if obj_type == "Engagement":
         obj = get_object_or_404(Engagement, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Engagement_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_engagement", "engagement_set")
     elif obj_type == "Test":
         obj = get_object_or_404(Test, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Test_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_test", "test_set")
     elif obj_type == "Finding":
         obj = get_object_or_404(Finding, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Finding_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_finding", "finding_set")
     else:
         raise Http404
@@ -260,12 +118,8 @@ def protected_serve(request, path, document_root=None, *, show_indexes=False):
         raise Http404
     # Should only one item (but not sure what type) in the list, so O(n=1)
     for obj in object_set:
-        if isinstance(obj, Engagement):
-            user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
-        elif isinstance(obj, Test):
-            user_has_permission_or_403(request.user, obj, Permissions.Test_View)
-        elif isinstance(obj, Finding):
-            user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
+        if isinstance(obj, (Engagement, Test, Finding)):
+            user_has_permission_or_403(request.user, obj, "view")
 
     return generate_file_response(file)
 
@@ -278,15 +132,15 @@ def access_file(request, fid, oid, obj_type, *, url=False):
     file = get_object_or_404(FileUpload, pk=fid)
     if obj_type == "Engagement":
         obj = get_object_or_404(Engagement, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Engagement_View)
+        user_has_permission_or_403(request.user, obj, "view")
         obj_manager = file.engagement_set
     elif obj_type == "Test":
         obj = get_object_or_404(Test, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Test_View)
+        user_has_permission_or_403(request.user, obj, "view")
         obj_manager = file.test_set
     elif obj_type == "Finding":
         obj = get_object_or_404(Finding, pk=oid)
-        user_has_permission_or_403(request.user, obj, Permissions.Finding_View)
+        user_has_permission_or_403(request.user, obj, "view")
         obj_manager = file.finding_set
     else:
         raise Http404

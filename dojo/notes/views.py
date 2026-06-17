@@ -12,39 +12,34 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.roles_permissions import Permissions
-from dojo.cred.queries import get_authorized_cred_mappings
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import get_authorized_findings
 
 # Local application/library imports
 from dojo.forms import DeleteNoteForm, NoteForm, TypedNoteForm
-from dojo.models import Cred_User, Engagement, Finding, Note_Type, NoteHistory, Notes, Test
+from dojo.models import Engagement, Finding, Note_Type, NoteHistory, Notes, Test
 from dojo.test.queries import get_authorized_tests
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_PAGES = Literal["engagement", "test", "finding", "cred"]
+SUPPORTED_PAGES = Literal["engagement", "test", "finding"]
 
 
-def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES | None, objid: int) -> tuple[Notes, Engagement | Test | Finding | Cred_User, int, str]:
+def _get_page_details(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES | None, objid: int) -> tuple[Notes, Engagement | Test | Finding, int, str]:
     note = get_object_or_404(Notes, id=note_id)
     # Quick check to make sure we have a valid page
     if page is None or page not in get_args(SUPPORTED_PAGES):
         raise PermissionDenied
     # Get the real object based on page type
     if page == "engagement":
-        obj = get_authorized_engagements(Permissions.Engagement_View).filter(id=objid).first()
+        obj = get_authorized_engagements("view").filter(id=objid).first()
         reverse_url = "view_engagement"
     elif page == "test":
-        obj = get_authorized_tests(Permissions.Test_View).filter(id=objid).first()
+        obj = get_authorized_tests("view").filter(id=objid).first()
         reverse_url = "view_test"
     elif page == "finding":
-        obj = get_authorized_findings(Permissions.Finding_View).filter(id=objid).first()
+        obj = get_authorized_findings("view").filter(id=objid).first()
         reverse_url = "view_finding"
-    elif page == "cred":
-        obj = get_authorized_cred_mappings(Permissions.Cred_View).filter(id=objid).first()
-        reverse_url = "view_cred_details"
     else:
         # If we get here, something is wrong, so let's just raise PermissionDenied
         raise PermissionDenied
@@ -63,7 +58,7 @@ def delete_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid
     form = DeleteNoteForm(request.POST, instance=note)
 
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, obj, Permissions.Note_Delete)
+        user_has_permission_or_403(request.user, obj, "delete")
 
     if form.is_valid():
         note.delete()
@@ -84,7 +79,7 @@ def edit_note(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, objid: 
     note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, obj, Permissions.Note_Edit)
+        user_has_permission_or_403(request.user, obj, "edit")
 
     note_type_activation = Note_Type.objects.filter(is_active=True).count()
     if note_type_activation:
@@ -143,7 +138,7 @@ def note_history(request: HttpRequest, note_id: int, page: SUPPORTED_PAGES, obji
     note, obj, object_id, reverse_url = _get_page_details(request, note_id, page, objid)
 
     if str(request.user) != note.author.username:
-        user_has_permission_or_403(request.user, obj, Permissions.Note_View_History)
+        user_has_permission_or_403(request.user, obj, "view")
 
     history = note.history.all()
 

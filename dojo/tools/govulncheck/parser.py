@@ -40,6 +40,22 @@ class GovulncheckParser:
     def get_version(data, node):
         return data["Requires"]["Modules"][str(node)]["Version"]
 
+    @staticmethod
+    def get_fix_info(affected_ranges):
+        for r in affected_ranges:
+            for event in r.get("events", []):
+                if "fixed" in event:
+                    return True, event["fixed"]
+        return False, ""
+
+    @staticmethod
+    def get_introduced_version(affected_ranges):
+        for r in affected_ranges:
+            for event in r.get("events", []):
+                if "introduced" in event:
+                    return event["introduced"]
+        return ""
+
     def get_finding_trace_info(self, data, osv_id):
         # Browse the findings to look for matching OSV-id. If the OSV-id is matching, extract traces.
         trace_info_strs = []
@@ -74,7 +90,23 @@ class GovulncheckParser:
     def get_findings(self, scan_file, test):
         findings = []
         try:
-            data = json.load(scan_file)
+            try:
+                data = json.load(scan_file)
+            except json.JSONDecodeError:
+                scan_file.seek(0)
+                data = []
+                buf = ""
+                for line in scan_file:
+                    if not line.strip():
+                        continue
+                    buf += line.decode("utf-8") if isinstance(line, bytes) else line
+                    try:
+                        data.append(json.loads(buf))
+                        buf = ""
+                    except json.JSONDecodeError:
+                        continue
+                if not data:
+                    raise ValueError
         except Exception:
             msg = "Invalid JSON format"
             raise ValueError(msg)
@@ -160,7 +192,7 @@ class GovulncheckParser:
                         range_info = "\n ".join(formatted_ranges)
 
                         vuln_functions = ", ".join(
-                            set(osv_data["affected"][0]["ecosystem_specific"]["imports"][0].get("symbols", [])),
+                            set(osv_data["affected"][0].get("ecosystem_specific", {}).get("imports", [{}])[0].get("symbols", [])),
                         )
 
                         description = (
@@ -172,7 +204,7 @@ class GovulncheckParser:
                             f"**Traces found :**\n{self.get_finding_trace_info(data, osv_data['id'])}"
                         )
 
-                        references = [f"{ref['type']}: {ref['url']}" for ref in osv_data["references"]]
+                        references = [f"{ref['type']}: {ref['url']}" for ref in osv_data.get("references", [])]
                         db_specific_url = osv_data["database_specific"].get("url", "Unknown")
                         if db_specific_url:
                             references.append(f"Database: {db_specific_url}")
@@ -186,8 +218,12 @@ class GovulncheckParser:
                         else:
                             title = f"{osv_data['id']} - {affected_package['name']}"
 
-                        affected_version = self.get_affected_version(data, osv_data["id"])
+                        fix_available, fix_version = self.get_fix_info(affected_ranges)
 
+                        affected_version = (
+                            self.get_affected_version(data, osv_data["id"])
+                            or self.get_introduced_version(affected_ranges)
+                        )
                         severity = elem["osv"].get("severity", SEVERITY)
 
                         d = {
@@ -199,6 +235,8 @@ class GovulncheckParser:
                             "description": description,
                             "impact": impact,
                             "references": references,
+                            "fix_available": fix_available,
+                            "fix_version": fix_version,
                             "file_path": path,
                             "url": db_specific_url,
                             "unique_id_from_tool": osv_id,

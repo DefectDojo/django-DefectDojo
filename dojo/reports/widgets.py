@@ -3,6 +3,7 @@ import json
 from collections import OrderedDict
 
 from django import forms
+from django.conf import settings
 from django.forms import Widget
 from django.forms.utils import flatatt
 from django.http import QueryDict
@@ -23,7 +24,6 @@ from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
-from dojo.settings import settings
 from dojo.url.filters import URLFilter
 from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 

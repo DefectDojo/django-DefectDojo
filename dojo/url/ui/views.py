@@ -8,14 +8,12 @@ from django.contrib.admin.utils import NestedObjects
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.core.management import call_command
 from django.db import DEFAULT_DB_ALIAS
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import Http404, HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_meta_import
 from dojo.forms import (
     DeleteEndpointForm,
@@ -45,12 +43,10 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def view_endpoint(request: HttpRequest, location_id: int):
     return process_endpoint_view(request, location_id, host_view=False)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def view_endpoint_host(request: HttpRequest, location_id: int):
     return process_endpoint_view(request, location_id, host_view=True)
 
@@ -100,6 +96,14 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
 
     """
     location = get_object_or_404(Location, id=location_id)
+    if location.location_type != URL.get_location_type():
+        messages.add_message(
+            request,
+            messages.ERROR,
+            "Viewing this object is only available in the Pro UI.",
+            extra_tags="alert-danger",
+        )
+        raise Http404
     host = location.url.host
     locations = None
     metadata = None
@@ -124,7 +128,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         # In host view, aggregate all locations (endpoints) sharing the same host.
         locations = annotate_host_contents(
             get_authorized_locations(
-                permission=Permissions.Location_View,
+                permission="view",
                 queryset=Location.objects.prefetch_related("tags", "url").filter(
                     location_type=URL.LOCATION_TYPE, url__host=host,
                 ),
@@ -176,7 +180,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         if len(product) == 1:
             # If a single product is selected, get the product and check permissions
             product = get_object_or_404(Product, id=product[0])
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, "view")
             # Create the product tab for the view
             product_tab = Product_Tab(product, "Host" if host_view else "Endpoint", tab="endpoints")
             # Get the status of the location for the selected product
@@ -227,7 +231,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     # Determine the view name and get authorized endpoints
     view_name = "Vulnerable" if vulnerable else "All"
     locations = get_authorized_locations(
-        permission=Permissions.Location_View,
+        permission="view",
         queryset=Location.objects.prefetch_related("tags", "url").filter(location_type=URL.LOCATION_TYPE),
         user=request.user,
     )
@@ -263,7 +267,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
         if len(products) == 1:
             # If a single product is selected, get the product and check permissions
             product = get_object_or_404(Product, id=products[0])
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, "view")
             # Create the product tab for the view
             product_tab = Product_Tab(product, view_name, tab="endpoints")
 
@@ -282,7 +286,6 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     )
 
 
-@user_is_authorized(Location, Permissions.Location_Edit, "location_id")
 def edit_endpoint(request, location_id):
     # Retrieve the Location object by ID and add breadcrumb for editing
     location = get_object_or_404(Location, id=location_id)
@@ -319,7 +322,6 @@ def edit_endpoint(request, location_id):
     )
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "product_id")
 def add_endpoint_to_product(request, product_id):
     # Retrieve the Product object by ID and initialize the URLForm for adding a new endpoint
     product = get_object_or_404(Product, id=product_id)
@@ -341,7 +343,6 @@ def add_endpoint_to_product(request, product_id):
     return render(request, "dojo/url/create.html", {"product_tab": product_tab, "form": form})
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "finding_id")
 def add_endpoint_to_finding(request, finding_id):
     # Retrieve the Finding object by ID and get its associated Product
     finding = get_object_or_404(Finding, id=finding_id)
@@ -363,7 +364,6 @@ def add_endpoint_to_finding(request, finding_id):
     return render(request, "dojo/url/create.html", {"product_tab": product_tab, "form": form})
 
 
-@user_is_authorized(Location, Permissions.Location_Delete, "location_id")
 def delete_endpoint(request, location_id):
     # Retrieve the Location object by primary key and initialize the delete form
     location = get_object_or_404(Location, pk=location_id)
@@ -397,7 +397,6 @@ def delete_endpoint(request, location_id):
     )
 
 
-@user_is_authorized(Location, Permissions.Location_Edit, "location_id")
 def manage_meta_data(request, location_id):
     # Retrieve the Location object by ID and filter its associated metadata
     location = Location.objects.get(id=location_id)
@@ -422,7 +421,6 @@ def manage_meta_data(request, location_id):
     )
 
 
-@user_is_authorized(Product, Permissions.Location_Edit, "product_id")
 def import_endpoint_meta(request, product_id):
     # Retrieve the Product object by ID and initialize the import form
     product = get_object_or_404(Product, id=product_id)
@@ -489,9 +487,9 @@ def endpoint_bulk_update_all(request, product_id=None):
             # If a product_id is provided, check user authorization for deletion on that product
             if product_id is not None:
                 product = get_object_or_404(Product, id=product_id)
-                user_has_permission_or_403(request.user, product, Permissions.Location_Delete)
+                user_has_permission_or_403(request.user, product, "delete")
             # Filter locations to only those the user is authorized to delete
-            locations = get_authorized_locations(Permissions.Location_Delete, locations, request.user)
+            locations = get_authorized_locations("delete", locations, request.user)
             skipped_location_count = total_location_count - locations.count()
             deleted_location_count = locations.count()
             # This will also delete related finding and product location references via cascade
@@ -513,9 +511,9 @@ def endpoint_bulk_update_all(request, product_id=None):
             # If a product_id is provided, check user authorization for mitigation on that product
             if product_id is not None:
                 product = get_object_or_404(Product, id=product_id)
-                user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+                user_has_permission_or_403(request.user, product, "edit")
             # Filter locations to only those the user is authorized to edit (mitigate)
-            locations = get_authorized_locations(Permissions.Location_Edit, locations, request.user)
+            locations = get_authorized_locations("edit", locations, request.user)
             skipped_location_count = total_location_count - locations.count()
             updated_location_count = locations.count()
             # Notify user if any locations were skipped due to lack of authorization
@@ -554,7 +552,6 @@ def endpoint_bulk_update_all(request, product_id=None):
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "finding_id")
 def finding_location_bulk_update(request, finding_id):
     if request.method == "POST":
         # Get the list of endpoint IDs to update and the statuses to enable
@@ -626,13 +623,11 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def endpoint_report(request, location_id):
     location = get_object_or_404(Location, id=location_id)
     return generate_report(request, location, host_view=False)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def endpoint_host_report(request, location_id):
     location = get_object_or_404(Location, id=location_id)
     return generate_report(request, location, host_view=True)

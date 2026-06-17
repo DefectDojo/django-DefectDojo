@@ -21,6 +21,11 @@ jobs:
     with:
       platform: ${{ matrix.platform }}
 
+  test-performance:
+    needs: build-docker-containers
+    uses: ./.github/workflows/performance-tests.yml
+    secrets: inherit
+
   test-rest-framework:
     strategy:
       matrix:
@@ -45,3 +50,4 @@ jobs:
     needs: build-docker-containers
     uses: ./.github/workflows/k8s-tests.yml
     secrets: inherit
+

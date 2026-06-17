@@ -6,15 +6,10 @@ from threading import local
 from urllib.parse import quote
 
 import pghistory.middleware
-import requests
 from django.conf import settings
-from django.contrib import messages
 from django.db import models
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
 from django.urls import reverse
-from social_core.exceptions import AuthCanceled, AuthFailed, AuthForbidden, AuthTokenError
-from social_django.middleware import SocialAuthExceptionMiddleware
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -77,31 +72,6 @@ class LoginRequiredMiddleware:
                 # this populates dd_user log var, so can appear in the uwsgi logs
                 uwsgi.set_logvar("dd_user", str(request.user))
         return response
-
-
-class CustomSocialAuthExceptionMiddleware(SocialAuthExceptionMiddleware):
-    def process_exception(self, request, exception):
-        if isinstance(exception, requests.exceptions.RequestException):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthCanceled):
-            messages.warning(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthFailed):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthForbidden):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, AuthTokenError):
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR)
-            return redirect("/login?force_login_form")
-        if isinstance(exception, TypeError) and "'NoneType' object is not iterable" in str(exception):
-            logger.warning("OIDC login error: NoneType is not iterable")
-            messages.error(request, settings.SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE)
-            return redirect("/login?force_login_form")
-        logger.error(f"Unhandled exception during social login: {exception}")
-        return super().process_exception(request, exception)
 
 
 class DojoSytemSettingsMiddleware:
@@ -273,68 +243,83 @@ class AsyncSearchContextMiddleware(SearchContextMiddleware):
     """
 
     def _close_search_context(self, request):
-        """Override watson's close behavior to trigger async updates when above threshold."""
+        """Override watson's close behavior to always dispatch index updates asynchronously."""
         if search_context_manager.is_active():
-            from django.conf import settings  # noqa: PLC0415 circular import
+            objects, _is_invalid = search_context_manager._stack[-1]
+            _drain_search_context_to_async(objects, source="AsyncSearchContextMiddleware")
 
-            # Extract tasks and check if we should trigger async update
-            captured_tasks = self._extract_tasks_for_async()
-
-            # Get total number of instances across all model types
-            total_instances = sum(len(pk_list) for pk_list in captured_tasks.values())
-            threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_THRESHOLD", 100)
-
-            # only needed when at least one model instance is updated
-            if total_instances > 0:
-                # If threshold is below 0, async updating is disabled
-                if threshold < 0:
-                    logger.debug(f"AsyncSearchContextMiddleware: Async updating disabled (threshold={threshold}), using synchronous update")
-                elif total_instances > threshold:
-                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances > {threshold} threshold, triggering async update")
-                    self._trigger_async_index_update(captured_tasks)
-                    # Invalidate to prevent synchronous index update by super()._close_search_context()
-                    search_context_manager.invalidate()
-                else:
-                    logger.debug(f"AsyncSearchContextMiddleware: {total_instances} instances <= {threshold} threshold, using synchronous update")
-                    # Let watson handle synchronous update for small numbers
-
+        # The set is now empty (or was already empty); watson's `end()` will
+        # bulk-save an empty iterator and short-circuit. No need to invalidate.
         super()._close_search_context(request)
 
-    def _extract_tasks_for_async(self):
-        """Extract tasks from the search context and group by model type for async processing."""
-        current_tasks, _is_invalid = search_context_manager._stack[-1]
 
-        # Group by model type for efficient batch processing
-        model_groups = {}
-        for _engine, obj in current_tasks:
-            model_key = f"{obj._meta.app_label}.{obj._meta.model_name}"
-            if model_key not in model_groups:
-                model_groups[model_key] = []
-            model_groups[model_key].append(obj.pk)
+def _drain_search_context_to_async(objects, source):
+    """
+    Group `objects` ({(engine, obj), ...}) by model, dispatch one
+    force_async celery task per WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE-sized
+    batch, and `set.discard()` the drained entries from `objects` in place.
 
-        # Log what we extracted per model type
-        for model_key, pk_list in model_groups.items():
-            logger.debug(f"AsyncSearchContextMiddleware: Extracted {len(pk_list)} {model_key} instances for async indexing")
+    `objects` is the `set` inside `search_context_manager._stack[-1][0]`.
+    Mutating it in place is safe because watson's `_stack` is `threading.local`
+    and callers (request close + the wrapped `add_to_context`) hold the
+    active reference.
+    """
+    if not objects:
+        return
 
-        return model_groups
+    from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
+    from dojo.tasks import update_watson_search_index_for_model  # noqa: PLC0415 circular import
 
-    def _trigger_async_index_update(self, model_groups):
-        """Trigger async tasks to update search indexes, chunking large lists into batches of settings.WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE."""
-        if not model_groups:
+    # Snapshot before grouping so we don't iterate while mutating.
+    snapshot = list(objects)
+    model_groups = {}
+    for _engine, obj in snapshot:
+        model_key = f"{obj._meta.app_label}.{obj._meta.model_name}"
+        model_groups.setdefault(model_key, []).append(obj.pk)
+
+    batch_size = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
+    for model_name, pk_list in model_groups.items():
+        batches = [pk_list[i:i + batch_size] for i in range(0, len(pk_list), batch_size)]
+        # force_async=True keeps indexing off the request path even for users
+        # with block_execution=True — index updates are slow and never need
+        # to be synchronous from the user's perspective.
+        for i, batch in enumerate(batches, 1):
+            logger.debug(f"{source}: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
+            dojo_dispatch_task(update_watson_search_index_for_model, model_name, batch, force_async=True)
+
+    for entry in snapshot:
+        objects.discard(entry)
+
+
+def install_intermediate_flush_hook():
+    """
+    Wrap `watson.search.search_context_manager.add_to_context` with a
+    size-based flush. Once the per-request set reaches
+    `WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE`, drain it into async tasks
+    and clear it in place. Bounds memory on long-running requests
+    (large imports) and starts celery batches earlier instead of
+    dispatching all at end-of-request.
+
+    Idempotent — safe to call multiple times.
+    Setting WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE to 0 or below disables
+    the hook at runtime.
+    """
+    cls = search_context_manager.__class__
+    if getattr(cls, "_dd_intermediate_flush_installed", False):
+        return
+
+    original_add = cls.add_to_context
+
+    def add_to_context_with_flush(self, engine, obj):
+        original_add(self, engine, obj)
+        threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
+        if threshold <= 0 or not self._stack:
             return
+        objects, is_invalid = self._stack[-1]
+        if is_invalid or len(objects) < threshold:
+            return
+        _drain_search_context_to_async(objects, source="AsyncSearchContextMiddleware[intermediate]")
 
-        # Import here to avoid circular import
-        from django.conf import settings  # noqa: PLC0415 circular import
-
-        from dojo.tasks import update_watson_search_index_for_model  # noqa: PLC0415 circular import
-
-        # Create tasks per model type, chunking large lists into configurable batches
-        for model_name, pk_list in model_groups.items():
-            # Chunk into batches using configurable batch size (compatible with Python 3.11)
-            batch_size = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
-            batches = [pk_list[i:i + batch_size] for i in range(0, len(pk_list), batch_size)]
-
-            # Create tasks for each batch and log each one
-            for i, batch in enumerate(batches, 1):
-                logger.debug(f"AsyncSearchContextMiddleware: Triggering batch {i}/{len(batches)} for {model_name}: {len(batch)} instances")
-                update_watson_search_index_for_model(model_name, batch)
+    cls.add_to_context = add_to_context_with_flush
+    cls._dd_intermediate_flush_installed = True
+    logger.debug("AsyncSearchContextMiddleware: intermediate flush hook installed on %s", cls.__name__)
