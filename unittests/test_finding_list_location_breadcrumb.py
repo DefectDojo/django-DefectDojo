@@ -24,7 +24,7 @@ Active LocationFindingReference, which reproduces the reported scenario.
 from django.urls import reverse
 
 from dojo.models import Dojo_User
-from unittests.dojo_test_case import DojoTestCase, skip_unless_v3, versioned_fixtures
+from unittests.dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3, versioned_fixtures
 
 
 @skip_unless_v3
@@ -71,4 +71,59 @@ class TestFindingListLocationBreadcrumb(DojoTestCase):
         no_access = Dojo_User.objects.create_user(username="loc_breadcrumb_no_access")
         self.client.force_login(no_access)
         response = self.client.get(reverse("all_findings") + "?endpoints=6")
+        self.assertEqual(response.status_code, 404)
+
+
+@skip_unless_v2
+class TestFindingListEndpointBreadcrumbLegacy(DojoTestCase):
+
+    """
+    Legacy (``V3_FEATURE_LOCATIONS=False``) counterpart of the regression above.
+
+    The findings ``endpoints`` filter is V3-gated (dojo/filters.py): with locations
+    disabled it resolves against the legacy ``Endpoint`` model, and the legacy
+    Endpoints page (dojo/templates/dojo/endpoints.html) still links to
+    ``open_findings``/``verified_findings`` with ``?endpoints=<endpoint_id>``.
+    ``add_breadcrumbs`` must therefore resolve the id against ``Endpoint`` in this
+    mode — resolving it against ``Location`` (empty/unrelated in legacy mode) would
+    404 every valid endpoint id. This guards that supported-rollback path.
+    """
+
+    # Plain (non-versioned) fixture: legacy mode is backed by the Endpoint model,
+    # which dojo_testdata.json populates (endpoint pk=2 -> product 2 with an
+    # Endpoint_Status; endpoint pk=5 -> product 1).
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.client.force_login(self.get_test_admin())
+
+    def test_filter_findings_by_single_endpoint_returns_200(self):
+        # Endpoint pk=2 has an Endpoint_Status in the fixture.
+        url = reverse("all_findings") + "?endpoints=2"
+        response = self.client.get(url)
+        self.assertEqual(
+            response.status_code,
+            200,
+            "Filtering findings by a single legacy endpoint id must not 404 "
+            "(regression: breadcrumb would look up the empty Location model).",
+        )
+
+    def test_single_endpoint_filter_sets_vulnerable_endpoints_breadcrumb(self):
+        response = self.client.get(reverse("all_findings") + "?endpoints=2")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["filter_name"], "Vulnerable Endpoints")
+
+    def test_missing_endpoint_still_404s(self):
+        response = self.client.get(reverse("all_findings") + "?endpoints=999999")
+        self.assertEqual(response.status_code, 404)
+
+    def test_unauthorized_endpoint_404s(self):
+        # The breadcrumb lookup is scoped to get_authorized_endpoints("view"),
+        # so a user who cannot view the endpoint's product cannot confirm its
+        # existence/URL. Endpoint pk=5 is tied to product 1; this fresh user has
+        # no product membership, global role, or superuser status.
+        no_access = Dojo_User.objects.create_user(username="ep_breadcrumb_no_access")
+        self.client.force_login(no_access)
+        response = self.client.get(reverse("all_findings") + "?endpoints=5")
         self.assertEqual(response.status_code, 404)

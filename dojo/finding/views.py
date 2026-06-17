@@ -32,6 +32,7 @@ import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.filters import (
     AcceptedFindingFilter,
     AcceptedFindingFilterWithoutObjectLookups,
@@ -340,13 +341,18 @@ class ListFindings(View, BaseListFindings):
             endpoint_ids = request.GET.getlist("endpoints", [])
             if len(endpoint_ids) == 1 and endpoint_ids[0]:
                 endpoint_id = endpoint_ids[0]
-                # Scope to locations the user may view so the breadcrumb cannot
-                # disclose the existence/URL of a location they cannot access
-                # (404 for both missing and unauthorized ids).
-                endpoint = get_object_or_404(
-                    get_authorized_locations("view", user=request.user),
-                    id=endpoint_id,
-                )
+                # The findings `endpoints` filter is V3-gated (dojo/filters.py):
+                # under V3 it resolves against Location, otherwise against the
+                # legacy Endpoint model. Resolve the breadcrumb id against that
+                # same model so neither mode 404s a valid id. Scope to objects
+                # the user may view so the breadcrumb cannot disclose the
+                # existence/URL of one they cannot access (404 for both missing
+                # and unauthorized ids).
+                if settings.V3_FEATURE_LOCATIONS:
+                    authorized = get_authorized_locations("view", user=request.user)
+                else:
+                    authorized = get_authorized_endpoints("view", user=request.user)
+                endpoint = get_object_or_404(authorized, id=endpoint_id)
                 context["filter_name"] = "Vulnerable Endpoints"
                 context["custom_breadcrumb"] = OrderedDict(
                     [
