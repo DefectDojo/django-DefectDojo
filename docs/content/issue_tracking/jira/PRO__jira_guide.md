@@ -126,7 +126,7 @@ Here is an example of a **jira\_full** Issue:
 
 #### Component
 
-If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here.
+If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here. To assign more than one Component, enter a comma-separated list (for example, `Security, DevSecOps`); each value is sent to Jira as a separate component.
 
 #### Custom fields
 
