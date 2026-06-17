@@ -22,7 +22,7 @@ from dojo.forms import (
     Product_TypeForm,
 )
 from dojo.labels import get_labels
-from dojo.models import Dojo_User, Finding, Product, Product_Type
+from dojo.models import Dojo_User, Endpoint, Finding, Product, Product_Type
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import (
     get_authorized_product_types,
@@ -142,7 +142,8 @@ def delete_product_type(request, ptid):
                     message = labels.ORG_DELETE_SUCCESS_ASYNC_MESSAGE
                 else:
                     message = labels.ORG_DELETE_SUCCESS_MESSAGE
-                    product_type.delete()
+                    with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+                        product_type.delete()
                 messages.add_message(request,
                                      messages.SUCCESS,
                                      message,
@@ -152,9 +153,10 @@ def delete_product_type(request, ptid):
     rels = [_("Previewing the relationships has been disabled."), ""]
     display_preview = get_setting("DELETE_PREVIEW")
     if display_preview:
-        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([product_type])
-        rels = collector.nested()
+        with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([product_type])
+            rels = collector.nested()
 
     add_breadcrumb(title=str(labels.ORG_DELETE_LABEL), top_level=False, request=request)
     return render(request, "dojo/delete_product_type.html", {
