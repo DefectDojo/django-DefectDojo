@@ -31,6 +31,7 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
+    Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
@@ -77,6 +78,8 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
+        self.pending_vulnerability_ids: list[Vulnerability_Id] = []
+        self.pending_vuln_id_deletes: list[int] = []
 
     def check_child_implementation_exception(self):
         """
@@ -778,20 +781,30 @@ class BaseImporter(ImporterOptions):
         finding: Finding,
     ) -> Finding:
         """
-        Store vulnerability IDs for a finding.
-        Reads from finding.unsaved_vulnerability_ids and saves them overwriting existing ones.
-
-        Args:
-            finding: The finding to store vulnerability IDs for
-
-        Returns:
-            The finding object
-
+        Accumulate Vulnerability_Id objects for bulk insert at the batch boundary.
+        Call flush_vulnerability_ids() to persist.
         """
         self.sanitize_vulnerability_ids(finding)
-        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
-        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=False)
+        vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
+        vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
+        self.pending_vulnerability_ids.extend([
+            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            for vid in vulnerability_ids_to_process
+        ])
+        if vulnerability_ids_to_process:
+            finding.cve = vulnerability_ids_to_process[0]
+        else:
+            finding.cve = None
         return finding
+
+    def flush_vulnerability_ids(self) -> None:
+        """Delete stale and bulk-insert accumulated Vulnerability_Id objects, then clear buffers."""
+        if self.pending_vuln_id_deletes:
+            Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
+            self.pending_vuln_id_deletes.clear()
+        if self.pending_vulnerability_ids:
+            Vulnerability_Id.objects.bulk_create(self.pending_vulnerability_ids, batch_size=1000)
+            self.pending_vulnerability_ids.clear()
 
     def process_files(
         self,

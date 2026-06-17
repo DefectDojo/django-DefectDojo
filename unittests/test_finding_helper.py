@@ -220,8 +220,8 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
     @patch("dojo.finding.helper.Vulnerability_Id.objects.filter")
     @patch("django.db.models.query.QuerySet.delete")
-    @patch("dojo.finding.helper.Vulnerability_Id.save")
-    def test_save_vulnerability_ids(self, save_mock, delete_mock, filter_mock):
+    @patch("dojo.finding.helper.Vulnerability_Id.objects.bulk_create")
+    def test_save_vulnerability_ids(self, bulk_create_mock, delete_mock, filter_mock):
         finding = Finding()
         new_vulnerability_ids = ["REF-1", "REF-2", "REF-2"]
         filter_mock.return_value = Vulnerability_Id.objects.none()
@@ -230,7 +230,10 @@ class TestSaveVulnerabilityIds(DojoTestCase):
 
         filter_mock.assert_called_with(finding=finding)
         delete_mock.assert_called_once()
-        self.assertEqual(save_mock.call_count, 2)
+        bulk_create_mock.assert_called_once()
+        # Duplicates are removed: REF-1 and REF-2 only
+        created_objects = bulk_create_mock.call_args[0][0]
+        self.assertEqual(2, len(created_objects))
         self.assertEqual("REF-1", finding.cve)
 
     @patch("dojo.models.Finding_Template.save")
