@@ -49,7 +49,7 @@ from dojo.models import (
 )
 from dojo.tools.stackhawk.parser import StackHawkParser
 
-from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2
+from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -275,7 +275,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
 
 
 @tag("performance")
-@skip_unless_v2
+@override_settings(V3_FEATURE_LOCATIONS=False)
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     """Performance tests using small sample files (StackHawk, ~6 findings)."""
