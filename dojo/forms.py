@@ -189,6 +189,14 @@ from dojo.finding.ui.forms import (  # noqa: E402, F401 -- backward compat
     DeleteFindingGroupForm,
     EditFindingGroupForm,
     FindingBulkUpdateForm,
+    FindingForm,
+)
+from dojo.user.ui.forms import (  # noqa: E402, F401 -- backward compat re-export
+    AddDojoUserForm,
+    DeleteUserForm,
+    DojoUserForm,
+    EditDojoUserForm,
+    UserContactInfoForm,
 )
 
 

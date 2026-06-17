@@ -899,3 +899,46 @@ class SLAConfigurationViewset(
 
 
 # AnnouncementViewSet moved to dojo/announcement/api/views.py
+
+# Backward-compat re-exports for external consumers (e.g. dojo-pro) that still
+# import (or attribute-access) ViewSets from dojo.api_v2.views. The viewsets
+# moved into per-module api/views packages, and those modules import base
+# classes back from dojo.api_v2.views at import time. Eagerly importing them
+# here would create entry-order-dependent circular imports, so expose them
+# lazily via PEP 562 __getattr__ instead.
+import importlib  # noqa: E402
+
+_LAZY_VIEWSET_EXPORTS = {
+    "AnnouncementViewSet":                "dojo.announcement.api.views",
+    "EndPointViewSet":                    "dojo.endpoint.api.views",
+    "EndpointMetaImporterView":           "dojo.endpoint.api.views",
+    "EndpointStatusViewSet":              "dojo.endpoint.api.views",
+    "EngagementViewSet":                  "dojo.engagement.api.views",
+    "EngagementPresetsViewset":           "dojo.engagement.api.views",
+    "BurpRawRequestResponseViewSet":      "dojo.finding.api.views",
+    "FindingViewSet":                     "dojo.finding.api.views",
+    "FindingTemplatesViewSet":            "dojo.finding.api.views",
+    "ProductAPIScanConfigurationViewSet": "dojo.product.api.views",
+    "ProductTypeViewSet":                 "dojo.product_type.api.views",
+    "RiskAcceptanceViewSet":              "dojo.risk_acceptance.api.views",
+    "SystemSettingsViewSet":              "dojo.system_settings.api.views",
+    "TestsViewSet":                       "dojo.test.api.views",
+    "TestTypesViewSet":                   "dojo.test.api.views",
+    "TestImportViewSet":                  "dojo.test.api.views",
+    "ToolConfigurationsViewSet":          "dojo.tool_config.api.views",
+    "ToolProductSettingsViewSet":         "dojo.tool_product.api.views",
+    "ToolTypesViewSet":                   "dojo.tool_type.api.views",
+    "DevelopmentEnvironmentViewSet":      "dojo.development_environment.api.views",
+    "RegulationsViewSet":                 "dojo.regulations.api.views",
+    "UserContactInfoViewSet":             "dojo.user.api.views",
+    "UsersViewSet":                       "dojo.user.api.views",
+    "UserProfileView":                    "dojo.user.api.views",
+}
+
+
+def __getattr__(name):
+    module_path = _LAZY_VIEWSET_EXPORTS.get(name)
+    if module_path is None:
+        msg = f"module 'dojo.api_v2.views' has no attribute {name!r}"
+        raise AttributeError(msg)
+    return getattr(importlib.import_module(module_path), name)

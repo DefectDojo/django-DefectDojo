@@ -287,7 +287,10 @@ class MetaMainSerializer(serializers.Serializer):
 # EngagementSerializer is re-exported here because ReportGenerateSerializer and
 # RiskAcceptanceSerializer (below) still reference it. The other engagement
 # serializers are imported directly from dojo.engagement.api by their consumers.
-from dojo.engagement.api.serializer import EngagementSerializer  # noqa: E402 -- backward compat
+from dojo.engagement.api.serializer import (  # noqa: E402, F401 -- backward compat
+    EngagementCheckListSerializer,
+    EngagementSerializer,
+)
 from dojo.file_uploads.api.serializer import (  # noqa: E402, F401 -- re-export; prefetcher + lazy consumers in finding/test/engagement
     FileSerializer,
     RawFileSerializer,
@@ -365,7 +368,12 @@ from dojo.risk_acceptance.api.serializer import (  # noqa: E402 -- backward comp
     RiskAcceptanceSerializer,  # noqa: F401 -- lazy-imported by finding schema overrides + prefetcher
     RiskAcceptanceToNotesSerializer,  # noqa: F401
 )
-from dojo.test.api.serializer import TestSerializer  # noqa: E402 -- backward compat re-export
+from dojo.test.api.serializer import (  # noqa: E402, F401 -- backward compat re-export
+    TestCreateSerializer,
+    TestSerializer,
+    TestTypeCreateSerializer,
+    TestTypeSerializer,
+)
 
 
 class CommonImportScanSerializer(serializers.Serializer):

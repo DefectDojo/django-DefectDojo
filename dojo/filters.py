@@ -1373,4 +1373,44 @@ class NoteTypesFilter(DojoFilter):
 # QuestionnaireFilter, QuestionTypeFilter, QuestionFilter live in dojo/survey/ui/filters.py
 
 
+import importlib  # noqa: E402
+
+# Backward-compat re-exports for external consumers (e.g. dojo-pro) that still
+# import filters from dojo.filters. The filter classes themselves moved into the
+# per-module ui/api filter packages. Those modules import dojo.filters base
+# classes (DojoFilter, ...) at import time, so eagerly importing them back here
+# creates circular imports. Instead expose them lazily via PEP 562 __getattr__,
+# which only resolves the target module when the name is actually accessed.
+from django_filters import BooleanFilter  # noqa: E402, F401 -- backward compat re-export
+
 from dojo.auditlog.filters import LogEntryFilter, PgHistoryFilter  # noqa: E402, F401 -- backward compat
+from dojo.models import Product_API_Scan_Configuration  # noqa: E402, F401 -- backward compat re-export
+
+_LAZY_FILTER_EXPORTS = {
+    "ApiEndpointFilter":                        "dojo.endpoint.api.filters",
+    "EndpointFilter":                           "dojo.endpoint.ui.filters",
+    "EndpointFilterWithoutObjectLookups":       "dojo.endpoint.ui.filters",
+    "ApiEngagementFilter":                      "dojo.engagement.api.filters",
+    "EngagementDirectFilter":                   "dojo.engagement.ui.filters",
+    "EngagementTestFilter":                     "dojo.engagement.ui.filters",
+    "EngagementTestFilterWithoutObjectLookups": "dojo.engagement.ui.filters",
+    "ApiFindingFilter":                         "dojo.finding.api.filters",
+    "AcceptedFindingFilter":                    "dojo.finding.ui.filters",
+    "AcceptedFindingFilterWithoutObjectLookups": "dojo.finding.ui.filters",
+    "FindingFilter":                            "dojo.finding.ui.filters",
+    "FindingFilterWithoutObjectLookups":        "dojo.finding.ui.filters",
+    "ReportFindingFilter":                      "dojo.finding.ui.filters",
+    "ReportFindingFilterWithoutObjectLookups":  "dojo.finding.ui.filters",
+    "ApiProductFilter":                         "dojo.product.api.filters",
+    "ProductFilter":                            "dojo.product.ui.filters",
+    "ApiTestFilter":                            "dojo.test.api.filters",
+    "UserFilter":                               "dojo.user.ui.filters",
+}
+
+
+def __getattr__(name):
+    module_path = _LAZY_FILTER_EXPORTS.get(name)
+    if module_path is None:
+        msg = f"module 'dojo.filters' has no attribute {name!r}"
+        raise AttributeError(msg)
+    return getattr(importlib.import_module(module_path), name)
