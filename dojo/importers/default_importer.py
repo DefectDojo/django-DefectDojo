@@ -276,6 +276,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             if len(batch_finding_ids) >= batch_max_size or is_final_finding:
                 self.location_handler.persist()
                 self.flush_vulnerability_ids()
+                self.flush_burp_request_response()
                 # Apply parser-supplied tags for this batch before post-processing starts,
                 # so rules/deduplication tasks see the tags already on the findings.
                 bulk_apply_parser_tags(findings_with_parser_tags)
