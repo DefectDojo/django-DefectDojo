@@ -161,3 +161,34 @@ You can edit the Test_Type associated with your Universal Parser to change:
 * Whether it is "active" or not. If not, it will not appear as an option in the "Scan Type" drop-down on the "Add Findings" page
 * Whether its findings should be marked "static" or "dynamic"
 * You can tweak the same-tool and cross-tool deduplication hash codes, as well as the reimport hash codes, for your Universal Parser under "Enterprise Settings". By default, only same-tool deduplication and reimport hash codes are populated, with the required values Title, Severity, and Description.
+
+## Lifecycle: create, deactivate, reactivate
+
+A Universal Parser's lifecycle is **create-only**, with no in-UI edit or delete. Once a parser has been created, the field-mapping configuration cannot be modified, and the parser itself cannot be removed from the UI — this is by design, because Universal Parser configurations are tied to Test_Type records that may be referenced by existing Findings, Tests, and import history.
+
+What you **can** do from the UI:
+
+* **Deactivate** a parser to hide it from the "Scan Type" drop-down on import. Open **Import → Universal Parser** in the sidebar to see all of your Universal Parsers, and toggle "Active" off. (Alternatively, you can edit the underlying Test_Type and uncheck "active".) Deactivated parsers no longer appear as a Scan Type option on the **Add Findings** page, but existing Tests that were imported with this parser are unaffected and continue to work.
+* **Reactivate** a parser from the same screen by toggling "Active" back on.
+* **Edit the Test_Type fields** described in the section above (active/inactive, static/dynamic, deduplication hash codes).
+
+### Recommended workflow when a scanner's report format changes
+
+Because the field-mapping configuration is locked once a parser is created, the standard workflow for handling a format change in the underlying scanner is to **roll forward to a new parser** rather than try to edit the old one:
+
+1. **Create a new Universal Parser** using a sample of the new report format (see Step 1). Give it a distinct name — e.g. append `v2` or a date to the original name.
+2. **Switch new imports** in your CI/CD pipeline or UI workflow to use the new parser's scan type.
+3. **Deactivate the old parser** once you've confirmed the new one is producing the findings you expect. Tests already imported under the old parser remain in DefectDojo and can still be triaged; only new imports route to the new parser.
+
+If you need a parser configuration permanently removed (for example, because it contains sensitive field names), contact [DefectDojo Support](mailto:support@defectdojo.com).
+
+## A note about severity mapping
+
+The Universal Parser does **not** have a configurable severity-mapping field. Severity is mapped automatically with these rules:
+
+* Any case variation of a DefectDojo severity is accepted — `CRITICAL`, `Critical`, `cRiTiCaL`, `critical` all map to **Critical**. The same applies to `High`, `Medium`, `Low`, and `Info`.
+* Any value that does **not** match one of DefectDojo's five severities is mapped to **Info**.
+
+This behavior is the same for all parsers in DefectDojo (built-in parsers, Connectors, and Universal Parsers).
+
+If a scanner you're trying to ingest uses severity labels that don't line up with DefectDojo's (e.g. "warning", "note", or numeric CVSS scores), the Universal Parser will map all of those non-matching values to Info. If you need a different mapping, the best workaround today is to **transform the severity values upstream** — for example, in your CI pipeline before uploading — so the values DefectDojo receives are already one of the five DefectDojo severity names.

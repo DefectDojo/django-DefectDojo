@@ -48,7 +48,7 @@ def globalize_vars(request):
             profile_url = ""
         additional_banners.append({
             "source": "ui_toggle",
-            "message": "A redesigned UI is available as a beta opt-in. It will become the default on September 8th in the 2.62.0 release.",
+            "message": "A redesigned UI is available as a beta opt-in. It will become the default on September 8th in the 3.3.0 release.",
             "style": "info",
             "url": profile_url,
             "link_text": "Enable it in your profile.",

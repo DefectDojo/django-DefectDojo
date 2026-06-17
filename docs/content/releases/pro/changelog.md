@@ -23,13 +23,6 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 * **(API)** Removed the Stub Findings feature and its API endpoint. See [Removal: Stub Findings](/releases/os_upgrading/3.0/#removal-stub-findings).
 * **(Search)** Watson search index updates during import/reimport are now batched, tunable via `DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE`. See [Configuration change in Watson Search Indexing](/releases/os_upgrading/3.0/#configuration-change-in-watson-search-indexing).
 
-## June 2026: v2.59
-
-### June 1, 2026: v2.59.0
-
-* **(Authorization)** Pro deployments are **not impacted** by the OS legacy authorization rewrite. Pro retains full RBAC: the Members / Groups panels on Product and Product Type detail, the Groups panel + Global Role fieldset on the user view / profile / add user pages, the Group Members panel on the user view, the Groups link in the left-nav, and the System Settings default-group fields all continue to render unchanged, driven by Pro RBAC via template overrides at `pro/templates/dojo/`. The eight RBAC v2 API endpoints (`/api/v2/dojo_groups/`, `/api/v2/dojo_group_members/`, `/api/v2/global_roles/`, `/api/v2/product_groups/`, `/api/v2/product_members/`, `/api/v2/product_type_groups/`, `/api/v2/product_type_members/`, `/api/v2/roles/`) are re-registered by Pro's `add_*_urls` hooks. Pro's runtime authorization shadowing in `pro/apps.py:DojoProConfig.ready()` continues to govern object, global, and configuration permissions, so the OS-side `is_staff` bypass for configuration permissions does not affect Pro semantics.
-* **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, and remote-user header auth) are **Pro-only** as of 2.59. The implementation that previously shipped in open source (`dojo/sso/`) was consolidated into Pro at `pro/sso/`, and the social-auth and djangosaml2 dependencies moved to Pro's package. Pro deployments continue to expose the full SSO surface — login buttons, the tuner-driven runtime configuration, and the `remove_sso` management command — unchanged. Open source customers using SSO need to migrate to Pro to retain SSO sign-in.
-
 ## May 2026: v2.58
 
 ### May 26, 2026: v2.58.4
