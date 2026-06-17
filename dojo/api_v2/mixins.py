@@ -8,6 +8,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
 
 from dojo.api_v2 import serializers
+from dojo.models import Endpoint
 
 
 class DeletePreviewModelMixin:
@@ -21,9 +22,10 @@ class DeletePreviewModelMixin:
     def delete_preview(self, request, pk=None):
         obj = self.get_object()
 
-        collector = NestedObjects(using=DEFAULT_DB_ALIAS)
-        collector.collect([obj])
-        rels = collector.nested()
+        with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+            collector = NestedObjects(using=DEFAULT_DB_ALIAS)
+            collector.collect([obj])
+            rels = collector.nested()
 
         def flatten(elem):
             if isinstance(elem, list):
