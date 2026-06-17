@@ -78,8 +78,10 @@ class TestDeleteWithEndpointsV3(DojoTestCase):
         self.test_type = Test_Type.objects.get_or_create(name="Manual Test")[0]
 
     def _build_tree(self, suffix):
-        """Create Product_Type -> Product -> Engagement -> Test -> Finding, plus a legacy
-        Endpoint on the product and an Endpoint_Status linking it to the finding."""
+        """
+        Create Product_Type -> Product -> Engagement -> Test -> Finding, plus a legacy
+        Endpoint on the product and an Endpoint_Status linking it to the finding.
+        """
         product_type = Product_Type.objects.create(name=f"Org with endpoints {suffix}")
         product = Product.objects.create(
             name=f"Product with endpoints {suffix}",
@@ -132,9 +134,11 @@ class TestDeleteWithEndpointsV3(DojoTestCase):
     # ------------------------------------------------------------------ delete preview
 
     def test_ui_delete_pages_render_without_crashing(self):
-        """The UI delete page runs NestedObjects.collect for its preview; it must not crash
+        """
+        The UI delete page runs NestedObjects.collect for its preview; it must not crash
         for any object whose cascade can reach the deprecated Endpoint. (Finding deletion is
-        a POST-only view with no preview page, so it is covered by the API action below.)"""
+        a POST-only view with no preview page, so it is covered by the API action below.)
+        """
         tree = self._build_tree("ui-preview")
         cases = [
             ("delete_product_type", "ptid", tree.product_type.id),
@@ -151,8 +155,10 @@ class TestDeleteWithEndpointsV3(DojoTestCase):
                 )
 
     def test_api_delete_preview_without_crashing(self):
-        """The API delete_preview action (shared DeletePreviewModelMixin) runs the same
-        NestedObjects.collect and must not crash for any endpoint-related object."""
+        """
+        The API delete_preview action (shared DeletePreviewModelMixin) runs the same
+        NestedObjects.collect and must not crash for any endpoint-related object.
+        """
         tree = self._build_tree("api-preview")
         cases = [
             ("product_type", tree.product_type.id),
