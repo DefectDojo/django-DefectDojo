@@ -69,12 +69,12 @@ from dojo.forms import (
     TypedNoteForm,
 )
 from dojo.jira import services as jira_services
+from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
     Dojo_User,
-    Endpoint,
     Endpoint_Status,
     Engagement,
     FileAccessToken,
@@ -340,7 +340,7 @@ class ListFindings(View, BaseListFindings):
             endpoint_ids = request.GET.getlist("endpoints", [])
             if len(endpoint_ids) == 1 and endpoint_ids[0]:
                 endpoint_id = endpoint_ids[0]
-                endpoint = get_object_or_404(Endpoint, id=endpoint_id)
+                endpoint = get_object_or_404(Location, id=endpoint_id)
                 context["filter_name"] = "Vulnerable Endpoints"
                 context["custom_breadcrumb"] = OrderedDict(
                     [
