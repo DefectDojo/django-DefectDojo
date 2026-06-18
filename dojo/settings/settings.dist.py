@@ -1108,6 +1108,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Xygeni SCA Scan": ["vulnerability_ids", "component_name", "component_version"],
     "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
     "Alert Logic Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "PICUS Scan": ["vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1383,6 +1384,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Xygeni Secrets Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Alert Logic Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "PICUS Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
