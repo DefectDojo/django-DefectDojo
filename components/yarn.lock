@@ -843,25 +843,25 @@ pako@~1.0.2, pako@~1.0.5:
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-pdfkit@^0.18.0:
-  version "0.18.0"
-  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.18.0.tgz#573efa7f4c78a8ab1362232a05a589b97b292216"
-  integrity sha512-NvUwSDZ0eYEzqAiWwVQkRkjYUkZ48kcsHuCO31ykqPPIVkwoSDjDGiwIgHHNtsiwls3z3P/zy4q00hl2chg2Ug==
+pdfkit@^0.19.0:
+  version "0.19.0"
+  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.19.0.tgz#985e04f8f13d33f070e4bb528a2210af8957a011"
+  integrity sha512-fCffpuHBwbEUDVpBexE3tE6OwvqOXHbLeR2ONWZEw0pCGlbZSkWLuXUw2k1MIkHNpwAgQ300ETXy/owe+ZK2bQ==
   dependencies:
     "@noble/ciphers" "^1.0.0"
     "@noble/hashes" "^1.6.0"
     fontkit "^2.0.4"
     js-md5 "^0.8.3"
     linebreak "^1.1.0"
-    png-js "^1.0.0"
+    png-js "^1.1.0"
 
-pdfmake@^0.3.8:
-  version "0.3.8"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.8.tgz#cebff884636fddda02af04599530355aa855131f"
-  integrity sha512-ywj3MESfqOW7sOjXZiBKaWk7XLncZ9caMflM3WSbc0Do8Wpwn9DBV8ceKZqkz1M/avl8i+ccS2f8THZRyFaCGQ==
+pdfmake@^0.3.10:
+  version "0.3.10"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.10.tgz#908bb4c1502fb2cf05434465a9feddebe6d51891"
+  integrity sha512-2dKalR/02xdIb8XFcT3UXHTBpMJjKGjY7l8fl0RRFGu93r15AsI8vEJPkPYcP+IhfJVTuMQiQFq08hNcIC7ohQ==
   dependencies:
     linebreak "^1.1.0"
-    pdfkit "^0.18.0"
+    pdfkit "^0.19.0"
     xmldoc "^2.0.3"
 
 picocolors@^1.1.1:
@@ -874,7 +874,7 @@ picomatch@^4.0.3:
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-4.0.4.tgz#fd6f5e00a143086e074dffe4c924b8fb293b0589"
   integrity sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==
 
-png-js@^1.0.0:
+png-js@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/png-js/-/png-js-1.1.0.tgz#60a135216601f807b88a6d61ac93bd42a32c5ee1"
   integrity sha512-PM/uYGzGdNSzqeOgly68+6wKQDL1SY0a/N+OEa/+br6LnHWOAJB0Npiamnodfq3jd2LS/i2fMeOKSAILjA+m5Q==
