@@ -745,18 +745,6 @@ class EngagementSerializer(serializers.ModelSerializer):
             if data.get("target_start") > data.get("target_end"):
                 msg = "Your target start date exceeds your target end date"
                 raise serializers.ValidationError(msg)
-        if (
-            self.instance is not None
-            and "product" in data
-            and data.get("product") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product"),
-                "edit",
-            )
-        ):
-            msg = "You are not permitted to edit engagements in the destination product"
-            raise PermissionDenied(msg)
         return data
 
     def build_relational_field(self, field_name, relation_info):
