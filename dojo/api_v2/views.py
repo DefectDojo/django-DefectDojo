@@ -219,8 +219,6 @@ class SonarqubeIssueTransitionViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-# Authorization: object-based
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
 class DojoMetaViewSet(
