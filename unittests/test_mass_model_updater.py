@@ -14,13 +14,14 @@ from dojo.finding.deduplication import hashcode_values_writer
 from dojo.models import Finding
 from dojo.utils import mass_model_updater
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, versioned_fixtures
 
 
 def _updates(captured):
     return [q["sql"] for q in captured if q["sql"].lstrip().upper().startswith("UPDATE")]
 
 
+@versioned_fixtures
 class TestMassModelUpdater(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
