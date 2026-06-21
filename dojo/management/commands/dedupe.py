@@ -127,7 +127,8 @@ class Command(BaseCommand):
         if not dedupe_only:
             logger.info("######## Start Updating Hashcodes (foreground) ########")
 
-            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ", writer=hashcode_values_writer)
+            hash_code_writer = hashcode_values_writer if settings.MASS_HASH_CODE_USE_SQL_WRITER else None
+            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ", writer=hash_code_writer)
 
             logger.info("######## Done Updating Hashcodes########")
 

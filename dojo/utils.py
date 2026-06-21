@@ -1577,14 +1577,18 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def _flush_mass_update(model_type, batch, fields, writer):
-    """Persist a batch via the supplied writer, else Django's bulk_update."""
+def default_mass_model_writer(model_type, batch, fields):
+    """Default mass_model_updater ``writer``: persist a batch via Django's bulk_update."""
     if not batch:
         return
-    if writer is not None:
-        writer(model_type, batch, fields)
-    else:
-        model_type.objects.bulk_update(batch, fields)
+    model_type.objects.bulk_update(batch, fields)
+
+
+def _flush_mass_update(model_type, batch, fields, writer):
+    """Persist a batch via the supplied writer, else the default writer."""
+    if not batch:
+        return
+    (writer or default_mass_model_writer)(model_type, batch, fields)
 
 
 def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix="", *, skip_unchanged=True, writer=None):
