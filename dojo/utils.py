@@ -975,8 +975,20 @@ from dojo.notifications.helper import process_tag_notifications  # noqa: E402, F
 # Retained for backward-compatible decryption of values already stored in the
 # database. New values are written with the "AES.2" (AES-256-GCM) scheme below
 # via dojo_crypto_encrypt(); existing "AES.1" values upgrade lazily the next
-# time they are saved. Do NOT remove this path until all stored secrets have
-# been re-encrypted.
+# time they are saved.
+#
+# REMOVAL TRACKING (legacy OFB path):
+# Migration 0270_reencrypt_tool_config_credentials_aes_gcm eagerly re-encrypts
+# every stored Tool_Configuration credential to "AES.2", so after it has run in
+# every environment there should be no "AES.1" values left in the database.
+# Once that migration is squashed/baked into the release floor (i.e. no upgrade
+# path can skip it) and any external integrations have been confirmed not to
+# persist their own "AES.1" values, the entire legacy path can be deleted:
+#   - encrypt() / decrypt() / _pad_string() / _unpad_string() below
+#   - the OFB import at the top of this module
+#   - the "AES.1" else-branch in prepare_for_view()
+#   - prepare_for_save() (only ever produced the "AES.1" format)
+# Do NOT remove any of the above until all stored secrets have been re-encrypted.
 # ---------------------------------------------------------------------------
 def encrypt(key, iv, plaintext):
     text = ""
@@ -1066,6 +1078,10 @@ def prepare_for_view(encrypted_value):
                 if scheme == "AES.2":
                     decrypted_value = AESGCM(key).decrypt(iv, binascii.a2b_hex(value), None).decode("utf-8")
                 else:
+                    # Legacy "AES.1" (AES-256-OFB) read path. Removable once
+                    # migration 0270 is guaranteed to have run everywhere and no
+                    # "AES.1" values remain -- see the REMOVAL TRACKING note on
+                    # the encrypt()/decrypt() block above.
                     decrypted_value = decrypt(key, iv, value).decode("utf-8")
             except (UnicodeDecodeError, InvalidTag, ValueError, IndexError):
                 decrypted_value = ""
