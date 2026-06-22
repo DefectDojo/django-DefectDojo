@@ -44,6 +44,11 @@ def _build_finding(secret, test):
         mitigation=f"Rotate this {secret_type} secret immediately and remove it from version-control history.",
         static_finding=True,
         dynamic_finding=False,
-        unique_id_from_tool=secret.get("uniqueHash"),
-        vuln_id_from_tool=secret.get("issueId"),
+        # The same secret value can appear several times in one file. Xygeni assigns every
+        # occurrence the same ``uniqueHash`` (it hashes the secret value, not the location)
+        # but a distinct ``issueId`` (which encodes filepath + line). Dedup is keyed on
+        # ``unique_id_from_tool``, so use the per-occurrence ``issueId`` to keep each
+        # occurrence as its own Finding; ``uniqueHash`` groups them as the vuln id.
+        unique_id_from_tool=secret.get("issueId") or secret.get("uniqueHash"),
+        vuln_id_from_tool=secret.get("uniqueHash"),
     )

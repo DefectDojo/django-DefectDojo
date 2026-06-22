@@ -35,8 +35,13 @@ def _build_finding(vuln, test):
         cwe=parse_cwe(cwes=vuln.get("cwes"), cwe=vuln.get("cwe"), tags=vuln.get("tags")),
         static_finding=True,
         dynamic_finding=False,
-        unique_id_from_tool=vuln.get("uniqueHash"),
-        vuln_id_from_tool=vuln.get("issueId"),
+        # One detector can flag the same code pattern at several locations. Xygeni reuses a
+        # single ``uniqueHash`` across those occurrences but gives each a distinct ``issueId``
+        # (which encodes filepath + line). Dedup is keyed on ``unique_id_from_tool``, so use
+        # the per-occurrence ``issueId`` to keep each occurrence as its own Finding;
+        # ``uniqueHash`` groups them as the vuln id.
+        unique_id_from_tool=vuln.get("issueId") or vuln.get("uniqueHash"),
+        vuln_id_from_tool=vuln.get("uniqueHash"),
     )
 
     _apply_code_flow_fields(finding, vuln.get("codeFlows") or [])
