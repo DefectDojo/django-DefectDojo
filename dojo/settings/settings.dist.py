@@ -1108,6 +1108,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Xygeni SCA Scan": ["vulnerability_ids", "component_name", "component_version"],
     "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
     "Alert Logic Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "PICUS Scan": ["vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1292,6 +1293,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "GitLab Container Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Secret Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Checkov Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1383,6 +1385,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Xygeni Secrets Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Alert Logic Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "PICUS Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

@@ -2748,6 +2748,13 @@ class Finding(BaseModel):
             user = get_current_user()
         # Title Casing
         self.title = titlecase(self.title[:511])
+        # Normalize blank component fields to NULL so that findings without a component
+        # group together. An empty string is treated as a distinct value from NULL by the
+        # database, which would otherwise produce a separate "None" component group (SC-13073).
+        if self.component_name is not None and not self.component_name.strip():
+            self.component_name = None
+        if self.component_version is not None and not self.component_version.strip():
+            self.component_version = None
         # Set the date of the finding if nothing is supplied
         if self.date is None:
             self.date = timezone.now()

@@ -853,6 +853,22 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         model = Endpoint_Status
         fields = "__all__"
 
+    def validate(self, data):
+        if self.instance is not None:
+            # Reject changes to Endpoint/Finding on existing objects
+            if "endpoint" in data and data["endpoint"] != self.instance.endpoint:
+                msg = "endpoint cannot be changed after creation"
+                raise serializers.ValidationError(msg)
+            if "finding" in data and data["finding"] != self.instance.finding:
+                msg = "finding cannot be changed after creation"
+                raise serializers.ValidationError(msg)
+            return data
+
+        if data["endpoint"].product_id != data["finding"].test.engagement.product_id:
+            msg = "endpoint and finding must belong to the same product"
+            raise serializers.ValidationError(msg)
+        return data
+
     def run_validators(self, initial_data):
         try:
             return super().run_validators(initial_data)
