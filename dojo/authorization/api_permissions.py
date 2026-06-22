@@ -340,8 +340,10 @@ class UserHasEndpointPermission(permissions.BasePermission):
 # TODO: Delete this after the move to Locations
 class UserHasEndpointStatusPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(
-            request, Endpoint, "endpoint", "edit",
+        # Check the user can edit both the Endpoint and Finding that the Endpoint_Status will link to
+        return (
+            check_post_permission(request, Endpoint, "endpoint", "edit")
+            and check_post_permission(request, Finding, "finding", "edit")
         )
 
     def has_object_permission(self, request, view, obj):
@@ -349,6 +351,13 @@ class UserHasEndpointStatusPermission(permissions.BasePermission):
             check_object_permission(
                 request,
                 obj.endpoint,
+                "view",
+                "edit",
+                "edit",
+            )
+            and check_object_permission(
+                request,
+                obj.finding,
                 "view",
                 "edit",
                 "edit",
