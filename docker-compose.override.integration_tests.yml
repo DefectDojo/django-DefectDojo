@@ -72,6 +72,8 @@ services:
         published: 1025
         protocol: tcp
         mode: host
+  "webhook.endpoint":
+    image: mccutchen/go-httpbin:2.18.3@sha256:3992f3763e9ce5a4307eae0a869a78b4df3931dc8feba74ab823dd2444af6a6b
 volumes:
   defectdojo_postgres_integration_tests: {}
   defectdojo_media_integration_tests: {}
