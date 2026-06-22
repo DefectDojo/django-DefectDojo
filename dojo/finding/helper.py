@@ -532,6 +532,12 @@ def post_process_findings_batch(
 @receiver(pre_delete, sender=Finding)
 def finding_pre_delete(sender, instance, **kwargs):
     logger.debug("finding pre_delete: %d", instance.id)
+    if (
+        instance.has_jira_issue
+        and not getattr(instance, "_skip_jira_close_on_delete", False)
+        and jira_services.is_delete_sync_allowed(instance)
+    ):
+        jira_services.close_issue_for_deleted_finding(instance)
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
     instance.found_by.clear()
@@ -562,7 +568,8 @@ def finding_delete(instance, **kwargs):
         if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
             duplicate_cluster.order_by("-id").delete()
         else:
-            reconfigure_duplicate_cluster(instance, duplicate_cluster)
+            new_original = reconfigure_duplicate_cluster(instance, duplicate_cluster)
+            _reassign_jira_issue_to_new_original(instance, new_original)
     else:
         logger.debug("no duplicate cluster found for finding: %d, so no need to reconfigure", instance.id)
 
@@ -579,6 +586,28 @@ def finding_post_delete(sender, instance, **kwargs):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
 
 
+def _reassign_jira_issue_to_new_original(deleted_finding, new_original):
+    if not new_original or new_original.has_jira_issue or not jira_services.is_delete_sync_allowed(deleted_finding):
+        return False
+
+    jira_issue = jira_services.get_issue(deleted_finding)
+    if not jira_issue:
+        return False
+
+    jira_instance = jira_services.get_instance(deleted_finding)
+    jira_services.add_simple_comment(
+        jira_instance,
+        jira_issue,
+        (
+            f"DefectDojo finding {deleted_finding.id} was deleted. "
+            f"This Jira issue was reassigned to finding {new_original.id}."
+        ),
+    )
+    jira_services.reassign_issue_to_finding(jira_issue, new_original)
+    deleted_finding._skip_jira_close_on_delete = True
+    return True
+
+
 # can't use model to id here due to the queryset
 # @dojo_async_task
 # @app.task
@@ -586,12 +615,12 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
     # only look for a new original if there is one outside this test
     if original is None or cluster_outside is None or len(cluster_outside) == 0:
-        return
+        return None
 
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
         # Don't delete here — the caller (async_delete_crawl_task or finding_delete)
         # handles deletion of outside-scope duplicates efficiently via bulk_delete_findings.
-        return
+        return None
     logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
     # set new original to first finding in cluster (ordered by id)
     new_original = cluster_outside.order_by("id").first()
@@ -610,6 +639,8 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
         # Re-point remaining duplicates to the new original in a single query
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
+        return new_original
+    return None
 
 
 def prepare_duplicates_for_delete(obj, *, preview_only=False):
