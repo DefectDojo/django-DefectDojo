@@ -137,6 +137,24 @@ def push_status(obj, jira_instance, jira, issue, *, save=False):
     return _get_helper().push_status_to_jira(obj, jira_instance, jira, issue, save=save)
 
 
+def close_issue_for_deleted_finding(finding):
+    """
+    Close the linked Jira issue before a finding is deleted.
+
+    Wraps: jira_helper.close_jira_issue_for_deleted_finding
+    """
+    return _get_helper().close_jira_issue_for_deleted_finding(finding)
+
+
+def reassign_issue_to_finding(jira_issue, finding):
+    """
+    Reassign a local Jira issue record to another finding.
+
+    Wraps: jira_helper.reassign_jira_issue_to_finding
+    """
+    return _get_helper().reassign_jira_issue_to_finding(jira_issue, finding)
+
+
 def update_issue(obj, *args, **kwargs):
     """
     Update a Jira issue.
@@ -337,6 +355,15 @@ def is_keep_in_sync(obj, prefetched_jira_instance=None):
     Wraps: jira_helper.is_keep_in_sync_with_jira
     """
     return _get_helper().is_keep_in_sync_with_jira(obj, prefetched_jira_instance=prefetched_jira_instance)
+
+
+def is_delete_sync_allowed(finding):
+    """
+    Check if deleting a finding should update its linked Jira issue.
+
+    Wraps: jira_helper.is_delete_sync_allowed
+    """
+    return _get_helper().is_delete_sync_allowed(finding)
 
 
 def is_push(instance, push_to_jira_parameter=None):

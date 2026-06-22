@@ -159,6 +159,10 @@ def is_keep_in_sync_with_jira(obj: Finding | Finding_Group, prefetched_jira_inst
     return False
 
 
+def is_delete_sync_allowed(finding):
+    return bool(is_keep_in_sync_with_jira(finding) or is_push_all_issues(finding))
+
+
 # checks if a finding can be pushed to JIRA
 # optionally provides a form with the new data for the finding
 # any finding that already has a JIRA issue can be pushed again to JIRA
@@ -1271,6 +1275,81 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
         obj.jira_issue.jira_change = timezone.now()
         obj.jira_issue.save()
     return updated
+
+
+def close_jira_issue_for_deleted_finding(finding) -> tuple[bool | None, str]:
+    logger.debug("closing linked Jira issue before deleting finding %d", finding.id)
+
+    if not is_jira_enabled():
+        return False, "JIRA integration is not enabled."
+
+    if not finding.has_jira_issue:
+        return False, f"Finding {finding.id} has no linked JIRA issue."
+
+    if not is_delete_sync_allowed(finding):
+        return False, f"Finding {finding.id} is not configured to sync deleted findings to JIRA."
+
+    if not is_jira_configured_and_enabled(finding):
+        message = (
+            f"Finding {finding.id} cannot close its linked JIRA issue "
+            "because JIRA is not configured or enabled."
+        )
+        logger.debug(message)
+        return False, message
+
+    jira_instance = get_jira_instance(finding)
+    if not jira_instance:
+        message = (
+            f"Finding {finding.id} cannot close its linked JIRA issue "
+            "because the JIRA instance is not available."
+        )
+        logger.warning(message)
+        return False, message
+
+    jira_issue = get_jira_issue(finding)
+    if not jira_issue:
+        return False, f"Finding {finding.id} has no local JIRA issue record."
+
+    try:
+        JIRAError.log_to_tempfile = False
+        jira = get_jira_connection(jira_instance)
+        if not jira:
+            message = (
+                f"Finding {finding.id} cannot close its linked JIRA issue "
+                "because the JIRA connection could not be established."
+            )
+            logger.warning(message)
+            return False, message
+        issue = jira.issue(jira_issue.jira_id)
+    except Exception as e:
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
+        logger.exception(message)
+        log_jira_alert(message, finding)
+        return False, message
+
+    if not issue_from_jira_is_active(issue):
+        logger.debug("Jira issue %s is already resolved", jira_issue.jira_key)
+        return False, f"Jira issue {jira_issue.jira_key} is already resolved."
+
+    updated = jira_transition(jira, issue, jira_instance.close_status_key)
+    if updated:
+        add_simple_jira_comment(
+            jira_instance,
+            jira_issue,
+            f"DefectDojo finding {finding.id} was deleted. This Jira issue was closed automatically.",
+        )
+        jira_issue.jira_change = timezone.now()
+        jira_issue.save(update_fields=["jira_change"])
+        return True, f"Jira issue {jira_issue.jira_key} closed successfully."
+
+    return updated, f"Jira issue {jira_issue.jira_key} was not closed."
+
+
+def reassign_jira_issue_to_finding(jira_issue, finding):
+    jira_issue.finding = finding
+    jira_issue.finding_group = None
+    jira_issue.engagement = None
+    jira_issue.save(update_fields=["finding", "finding_group", "engagement"])
 
 
 # gets the metadata for the provided issue type in the provided jira project
