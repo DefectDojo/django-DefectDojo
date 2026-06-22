@@ -32,7 +32,6 @@ Sample scan data for testing purposes can be found [here](https://github.com/Def
 The "Garak Scan" scan type uses the `hash_code` [deduplication algorithm](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/) with the following fields:
 
 - title (the garak probe and its goal)
-- severity
 - component_name (the scanned model / generator)
 
-`description` is intentionally **excluded** from the hashcode: it holds the specific prompt and model output for the hit, which garak samples non-deterministically on each run. Including it would stop the same weakness from deduplicating across repeated scans of the same model.
+`description` and `severity` are intentionally **excluded** from the hashcode. `description` holds the specific prompt and model output for the hit, which garak samples non-deterministically on each run. `severity` is an aggregate value — the most severe rung seen across a probe's occurrences — so it shifts as the occurrence set changes between scans. Including either would stop the same weakness from deduplicating across repeated scans of the same model.

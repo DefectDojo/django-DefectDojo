@@ -1038,8 +1038,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Snyk Scan": ["vuln_id_from_tool", "file_path", "component_name", "component_version"],
     "GitLab Dependency Scanning Report": ["title", "vulnerability_ids", "file_path", "component_name", "component_version"],
     # garak findings have no file_path/line; description holds the (per-run, randomly sampled) prompt/output and is
-    # therefore unstable across runs, so dedupe on the stable identity: probe-derived title + severity + target model.
-    "Garak Scan": ["title", "severity", "component_name"],
+    # therefore unstable across runs. severity is also excluded: it's an aggregate (the most severe rung seen across a
+    # probe's occurrences) and shifts as the occurrence set changes, so dedupe on the stable identity: probe-derived
+    # title + target model.
+    "Garak Scan": ["title", "component_name"],
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
