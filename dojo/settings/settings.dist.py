@@ -1293,6 +1293,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "GitLab Container Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Secret Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Checkov Scan": DEDUPE_ALGO_HASH_CODE,
