@@ -31,6 +31,7 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
+    Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
@@ -77,6 +78,9 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
+        self.pending_vulnerability_ids: list[Vulnerability_Id] = []
+        self.pending_vuln_id_deletes: list[int] = []
+        self.pending_burp_rr: list[BurpRawRequestResponse] = []
 
     def check_child_implementation_exception(self):
         """
@@ -716,24 +720,26 @@ class BaseImporter(ImporterOptions):
         Create BurpRawRequestResponse objects linked to the finding without
         returning the finding afterward
         """
-        if len(unsaved_req_resp := getattr(finding, "unsaved_req_resp", [])) > 0:
-            for req_resp in unsaved_req_resp:
-                burp_rr = BurpRawRequestResponse(
-                    finding=finding,
-                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
-                burp_rr.clean()
-                burp_rr.save()
+        for req_resp in getattr(finding, "unsaved_req_resp", []):
+            self.pending_burp_rr.append(BurpRawRequestResponse(
+                finding=finding,
+                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
+            ))
 
         unsaved_request = getattr(finding, "unsaved_request", None)
         unsaved_response = getattr(finding, "unsaved_response", None)
         if unsaved_request is not None and unsaved_response is not None:
-            burp_rr = BurpRawRequestResponse(
+            self.pending_burp_rr.append(BurpRawRequestResponse(
                 finding=finding,
                 burpRequestBase64=base64.b64encode(unsaved_request.encode()),
-                burpResponseBase64=base64.b64encode(unsaved_response.encode()))
-            burp_rr.clean()
-            burp_rr.save()
+                burpResponseBase64=base64.b64encode(unsaved_response.encode()),
+            ))
+
+    def flush_burp_request_response(self) -> None:
+        if self.pending_burp_rr:
+            BurpRawRequestResponse.objects.bulk_create(self.pending_burp_rr, batch_size=1000)
+            self.pending_burp_rr.clear()
 
     def process_locations(
         self,
@@ -778,20 +784,30 @@ class BaseImporter(ImporterOptions):
         finding: Finding,
     ) -> Finding:
         """
-        Store vulnerability IDs for a finding.
-        Reads from finding.unsaved_vulnerability_ids and saves them overwriting existing ones.
-
-        Args:
-            finding: The finding to store vulnerability IDs for
-
-        Returns:
-            The finding object
-
+        Accumulate Vulnerability_Id objects for bulk insert at the batch boundary.
+        Call flush_vulnerability_ids() to persist.
         """
         self.sanitize_vulnerability_ids(finding)
-        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
-        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=False)
+        vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
+        vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
+        self.pending_vulnerability_ids.extend([
+            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            for vid in vulnerability_ids_to_process
+        ])
+        if vulnerability_ids_to_process:
+            finding.cve = vulnerability_ids_to_process[0]
+        else:
+            finding.cve = None
         return finding
+
+    def flush_vulnerability_ids(self) -> None:
+        """Delete stale and bulk-insert accumulated Vulnerability_Id objects, then clear buffers."""
+        if self.pending_vuln_id_deletes:
+            Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
+            self.pending_vuln_id_deletes.clear()
+        if self.pending_vulnerability_ids:
+            Vulnerability_Id.objects.bulk_create(self.pending_vulnerability_ids, batch_size=1000)
+            self.pending_vulnerability_ids.clear()
 
     def process_files(
         self,
