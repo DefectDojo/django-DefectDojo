@@ -429,8 +429,12 @@ def _get_authorized_users_for_product_type(users, product_type, permission):
         return users
     if product_type is None:
         return users.none()
-    # OS: users authorized on this product type via authorized_users.
-    return users.filter(id__in=product_type.authorized_users.values("id"))
+    # OS: users authorized on this product type via authorized_users, plus
+    # superusers (2.58.4 always surfaced is_superuser users as candidates).
+    return users.filter(
+        Q(id__in=product_type.authorized_users.values("id"))
+        | Q(is_superuser=True),
+    )
 
 
 register_auth_filter("user.get_authorized_users_for_product_type", _get_authorized_users_for_product_type)
@@ -446,11 +450,13 @@ def _get_authorized_users_for_product_and_product_type(users, product, permissio
         return users
     if product is None:
         return users.none()
-    # OS: users authorized on this product via authorized_users, either
-    # directly on the product or via its product type.
+    # OS: users authorized on this product via authorized_users (directly on
+    # the product or via its product type), plus superusers (2.58.4 always
+    # surfaced is_superuser users as candidates).
     return users.filter(
         Q(id__in=product.authorized_users.values("id"))
-        | Q(id__in=product.prod_type.authorized_users.values("id")),
+        | Q(id__in=product.prod_type.authorized_users.values("id"))
+        | Q(is_superuser=True),
     )
 
 

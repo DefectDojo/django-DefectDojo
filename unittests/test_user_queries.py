@@ -363,6 +363,8 @@ class TestGetAuthorizedUsersViaAuthorizedUsers(DojoTestCase):
         cls.product_member = Dojo_User.objects.create(username="au_product_member", is_active=True)
         cls.product_type_member = Dojo_User.objects.create(username="au_pt_member", is_active=True)
         cls.unrelated = Dojo_User.objects.create(username="au_unrelated", is_active=True)
+        # Superuser not in any authorized_users — must still surface (2.58.4 parity).
+        cls.superuser = Dojo_User.objects.create(username="au_superuser", is_active=True, is_superuser=True)
 
         # The "authorized users" sections the reporter used in the UI.
         cls.product.authorized_users.add(cls.product_member)
@@ -372,13 +374,15 @@ class TestGetAuthorizedUsersViaAuthorizedUsers(DojoTestCase):
     def test_product_and_product_type_returns_authorized_users(self, mock_get_current_user):
         # #15062: a non-staff user authorized on the product (via authorized_users)
         # must get a non-empty list so they can pick a Testing Lead. The list
-        # contains users authorized directly on the product and via its type.
+        # contains users authorized directly on the product and via its type,
+        # plus superusers (2.58.4 parity).
         mock_get_current_user.return_value = self.product_member
         users = get_authorized_users_for_product_and_product_type(
             None, self.product, Permissions.Product_View,
         )
         self.assertIn(self.product_member, users)
         self.assertIn(self.product_type_member, users)
+        self.assertIn(self.superuser, users)
         self.assertNotIn(self.unrelated, users)
 
     @patch("dojo.authorization.query_registrations.get_current_user")
@@ -388,5 +392,6 @@ class TestGetAuthorizedUsersViaAuthorizedUsers(DojoTestCase):
             None, self.product_type, Permissions.Product_Type_View,
         )
         self.assertIn(self.product_type_member, users)
+        self.assertIn(self.superuser, users)
         self.assertNotIn(self.product_member, users)
         self.assertNotIn(self.unrelated, users)
