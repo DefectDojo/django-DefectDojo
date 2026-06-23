@@ -344,3 +344,49 @@ class TestGetAuthorizedUsersForProductAndProductType(DojoTestCase):
         )
         for user in users:
             self.assertTrue(user.is_active)
+
+
+class TestGetAuthorizedUsersViaAuthorizedUsers(DojoTestCase):
+
+    """
+    OS authorized_users-based resolution for the product / product-type user
+    queries (regression test for issue #15062 — empty Testing Lead selector).
+    """
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.product_type = Product_Type.objects.create(name="AU Test PT")
+        cls.product = Product.objects.create(
+            name="AU Test Product", description="t", prod_type=cls.product_type,
+        )
+
+        cls.product_member = Dojo_User.objects.create(username="au_product_member", is_active=True)
+        cls.product_type_member = Dojo_User.objects.create(username="au_pt_member", is_active=True)
+        cls.unrelated = Dojo_User.objects.create(username="au_unrelated", is_active=True)
+
+        # The "authorized users" sections the reporter used in the UI.
+        cls.product.authorized_users.add(cls.product_member)
+        cls.product_type.authorized_users.add(cls.product_type_member)
+
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_product_and_product_type_returns_authorized_users(self, mock_get_current_user):
+        # #15062: a non-staff user authorized on the product (via authorized_users)
+        # must get a non-empty list so they can pick a Testing Lead. The list
+        # contains users authorized directly on the product and via its type.
+        mock_get_current_user.return_value = self.product_member
+        users = get_authorized_users_for_product_and_product_type(
+            None, self.product, Permissions.Product_View,
+        )
+        self.assertIn(self.product_member, users)
+        self.assertIn(self.product_type_member, users)
+        self.assertNotIn(self.unrelated, users)
+
+    @patch("dojo.authorization.query_registrations.get_current_user")
+    def test_product_type_returns_authorized_users(self, mock_get_current_user):
+        mock_get_current_user.return_value = self.product_type_member
+        users = get_authorized_users_for_product_type(
+            None, self.product_type, Permissions.Product_Type_View,
+        )
+        self.assertIn(self.product_type_member, users)
+        self.assertNotIn(self.product_member, users)
+        self.assertNotIn(self.unrelated, users)
