@@ -8,15 +8,58 @@ from urllib.parse import quote
 import pghistory.middleware
 from django.conf import settings
 from django.db import models
+from django.dispatch import receiver
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
+from dojo.caching import (
+    cache_dict_to_model,
+    dojo_settings_cache,
+    invalidate_dojo_settings_cache,
+    model_to_cache_dict,
+    reset_l1_cache,
+)
 from dojo.models import Dojo_User
 from dojo.product_announcements import LongRunningRequestProductAnnouncement
 
 logger = logging.getLogger(__name__)
+
+# Two-tier (in-process L1 + django.core.cache L2) read-through cache for the
+# System_Settings singleton, via the shared dojo_settings_cache decorator. Stored
+# as a plain dict (no pickled model graph) and rebuilt into a read-only instance
+# per call. Write paths use ``objects.get(no_cache=True)`` and are unaffected.
+SYSTEM_SETTINGS_CACHE_KEY = "dojo.system_settings.singleton"
+
+
+@dojo_settings_cache(key=SYSTEM_SETTINGS_CACHE_KEY)
+def _cached_system_settings_dict():
+    from dojo.models import System_Settings  # noqa: PLC0415 circular import
+    settings_obj = System_Settings.objects.get_from_db()
+    # ``get_from_db`` returns an unsaved defaults instance (pk None) when the row
+    # can't be read; returning None keeps that out of the cache so the next call
+    # retries the DB instead of serving stale defaults.
+    if settings_obj.pk is None:
+        return None
+    return model_to_cache_dict(settings_obj)
+
+
+def get_cached_system_settings():
+    from dojo.models import System_Settings  # noqa: PLC0415 circular import
+    data = _cached_system_settings_dict()
+    if not isinstance(data, dict):
+        return System_Settings()
+    return cache_dict_to_model(System_Settings, data)
+
+
+@receiver(models.signals.post_save, sender="dojo.System_Settings")
+def _invalidate_system_settings_cache(*args, **kwargs):
+    # Connected at import time (string sender avoids the circular import) so the
+    # bust fires in requests, Celery, commands and tests -- not only when a
+    # middleware instance is constructed.
+    invalidate_dojo_settings_cache(SYSTEM_SETTINGS_CACHE_KEY)
+
 
 EXEMPT_URLS = [re.compile(settings.LOGIN_URL.lstrip("/"))]
 if hasattr(settings, "LOGIN_EXEMPT_URLS"):
@@ -84,6 +127,10 @@ class DojoSytemSettingsMiddleware:
         models.signals.post_save.connect(DojoSytemSettingsMiddleware.cleanup, sender=System_Settings)
 
     def __call__(self, request):
+        # uwsgi/gunicorn reuse threads across requests, so the in-process L1 cache
+        # (threading.local) would otherwise persist between requests. Reset it at
+        # the start of each request so cached singletons are request-scoped.
+        reset_l1_cache()
         self.load()
         try:
             # Store error in request for context processor to display
@@ -117,8 +164,9 @@ class DojoSytemSettingsMiddleware:
     def load(cls):
         # cleanup any existing settings first to ensure fresh state
         cls.cleanup()
-        from dojo.models import System_Settings  # noqa: PLC0415 circular import
-        system_settings = System_Settings.objects.get(no_cache=True)
+        # Read through the shared L1/L2 cache so requests don't each hit the DB
+        # for the singleton. Freshness is bounded by the L1 TTL and busted on save.
+        system_settings = get_cached_system_settings()
         cls._thread_local.system_settings = system_settings
         return system_settings
 
@@ -151,8 +199,9 @@ class System_Settings_Manager(models.Manager):
         from_cache = DojoSytemSettingsMiddleware.get_system_settings()
 
         if not from_cache:
-            # logger.debug('no cached value found, loading system settings from db')
-            return self.get_from_db(*args, **kwargs)
+            # No per-request thread-local (e.g. outside a request / in Celery):
+            # fall back to the shared L1/L2 cache.
+            return get_cached_system_settings()
 
         return from_cache
 

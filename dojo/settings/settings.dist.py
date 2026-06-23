@@ -266,6 +266,11 @@ env = environ.FileAwareEnv(
     DD_V3_FEATURE_LOCATIONS=(bool, True),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
+    # Two-tier read-through cache for global singleton getters (see dojo/caching.py).
+    # Per-thread in-process L1 freshness budget in seconds; -1 disables L1.
+    DD_SETTINGS_CACHE_L1_TTL=(int, 30),
+    # L2 (django.core.cache) timeout in seconds; -1 disables L2.
+    DD_SETTINGS_CACHE_L2_TTL=(int, 300),
     # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
     **NOTIFICATIONS_ENV_DEFAULTS,
 )
@@ -313,6 +318,10 @@ ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
+
+# Two-tier singleton cache (dojo/caching.py)
+SETTINGS_CACHE_L1_TTL = env("DD_SETTINGS_CACHE_L1_TTL")
+SETTINGS_CACHE_L2_TTL = env("DD_SETTINGS_CACHE_L2_TTL")
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
