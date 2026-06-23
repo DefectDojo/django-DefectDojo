@@ -6,7 +6,8 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.timezone import now
 
-from dojo.middleware import DojoSytemSettingsMiddleware
+from dojo.caching import invalidate_dojo_settings_cache
+from dojo.middleware import SYSTEM_SETTINGS_CACHE_KEY, DojoSytemSettingsMiddleware
 from dojo.models import (
     Engagement,
     Finding,
@@ -225,8 +226,9 @@ class TestSystemSettingsMiddlewareIntegration(DojoTestCase):
 
     def test_multiple_get_calls_use_cache(self):
         """Test that multiple calls to System_Settings.objects.get() use cache instead of multiple DB queries."""
-        # Ensure cache is empty
+        # Ensure both the per-request thread-local and the shared L1/L2 cache are empty
         DojoSytemSettingsMiddleware.cleanup()
+        invalidate_dojo_settings_cache(SYSTEM_SETTINGS_CACHE_KEY)
 
         # First call should hit DB (cache is empty)
         with self.assertNumQueries(1):
@@ -265,6 +267,9 @@ class TestSystemSettingsMiddlewareIntegration(DojoTestCase):
         # Process request - should only hit DB once (when loading cache)
         # Then all subsequent get() calls should use cache
         request = self.factory.get("/test/")
+        # Start cold so the request's load is a real DB read (the shared L1/L2 cache
+        # otherwise persists across tests and would serve it with 0 queries).
+        invalidate_dojo_settings_cache(SYSTEM_SETTINGS_CACHE_KEY)
         with self.assertNumQueries(1):  # Only one query to load settings into cache
             middleware(request)
 

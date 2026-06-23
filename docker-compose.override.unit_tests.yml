@@ -22,6 +22,10 @@ services:
       DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
       DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
       DD_CELERY_BROKER_URL: 'sqla+sqlite:///dojo.celerydb.sqlite'
+      # Disable the singleton settings cache (dojo/caching.py) during tests so
+      # assertNumQueries counts stay deterministic. Covered by unittests/test_caching.py.
+      DD_SETTINGS_CACHE_L1_TTL: '-1'
+      DD_SETTINGS_CACHE_L2_TTL: '-1'
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
   celerybeat: !reset
   celeryworker: !reset
