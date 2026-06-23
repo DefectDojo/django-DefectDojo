@@ -413,7 +413,14 @@ def _get_authorized_users(permission, user=None):
         return Dojo_User.objects.none()
     if _is_unrestricted(user, permission_to_action(permission)) or user.is_staff:
         return Dojo_User.objects.all().order_by("first_name", "last_name")
-    return Dojo_User.objects.filter(pk=user.pk)
+    # OS: collaborators — users sharing the caller's authorized products /
+    # product types (via authorized_users), plus superusers. Mirrors 2.58.4,
+    # which returned co-members of the caller's authorized products/types.
+    return Dojo_User.objects.filter(
+        Q(authorized_products__id__in=_authorized_product_ids(user))
+        | Q(authorized_product_types__id__in=_authorized_product_type_ids(user))
+        | Q(is_superuser=True),
+    ).distinct().order_by("first_name", "last_name")
 
 
 register_auth_filter("user.get_authorized_users", _get_authorized_users)
