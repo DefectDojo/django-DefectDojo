@@ -101,11 +101,13 @@ class TestXygeniParser(DojoTestCase):
                 f for f in findings
                 if f.component_name == "cookie"
                 and f.component_version == "0.5.0"
-                and f.vuln_id_from_tool == "SCA.CVE-2024-47764"
+                and f.vuln_id_from_tool == "CVE-2024-47764"
             ),
             None,
         )
         self.assertIsNotNone(match, "expected the cookie@0.5.0 / CVE-2024-47764 SCA finding")
+        # uniqueHash is the dedup identity; userId is the user-friendly vuln id grouping label
+        self.assertEqual("CVE-2024-47764#:cookie:0.5.0:javascript", match.unique_id_from_tool)
         self.assertEqual("CVE-2024-47764", match.title)
         self.assertEqual("CVE-2024-47764", match.cve)
         self.assertIn("CVE-2024-47764", match.unsaved_vulnerability_ids)
