@@ -1,3 +1,4 @@
+{% load filter_tags %}
 {% load humanize %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -27,7 +28,7 @@
                 </div>
               </h4>
         </div>
-        <div id="the-filters-{{status}}" class="is-filters panel-body collapse {% if filter.form.has_changed %}in{% endif %}">
+        <div id="the-filters-{{status}}" class="is-filters panel-body collapse {% if filter.form|has_active_filters %}in{% endif %}">
             {% include "dojo/filter_snippet.html" with form=filter.form %}
         </div>
 
