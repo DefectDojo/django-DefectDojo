@@ -275,7 +275,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
 
 
 @tag("performance")
-@override_settings(V3_FEATURE_LOCATIONS=False)
+@override_settings(V3_FEATURE_LOCATIONS=False, SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     """Performance tests using small sample files (StackHawk, ~6 findings)."""
@@ -553,7 +553,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
 
 @tag("performance")
-@override_settings(V3_FEATURE_LOCATIONS=True)
+@override_settings(V3_FEATURE_LOCATIONS=True, SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase):
 
     r"""
