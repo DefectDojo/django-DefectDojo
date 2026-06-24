@@ -4,6 +4,8 @@ from unittest.mock import Mock, patch
 
 import dojo.finding.helper as finding_helper
 import dojo.jira.helper as jira_helper
+from dojo.api_v2 import views as api_views
+from dojo.finding import views as finding_views
 
 logger = logging.getLogger(__name__)
 
