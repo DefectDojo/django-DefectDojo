@@ -16,12 +16,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 from vcr_unittest import VCRTestCase
 
+from dojo.caching import invalidate_dojo_settings_cache
 from dojo.importers.location_manager import LocationManager
 from dojo.jira import helper as jira_helper
 from dojo.jira.views import get_custom_field
 from dojo.location.models import Location, LocationFindingReference
 from dojo.location.status import FindingLocationStatus
-from dojo.middleware import DojoSytemSettingsMiddleware
+from dojo.middleware import SYSTEM_SETTINGS_CACHE_KEY, get_cached_system_settings
 from dojo.models import (
     SEVERITIES,
     DojoMeta,
@@ -44,6 +45,17 @@ from dojo.models import (
 logger = logging.getLogger(__name__)
 
 
+def refresh_system_settings_cache():
+    """
+    Make the next ``System_Settings.objects.get()`` reflect DB changes made in a
+    test. Tests mutate settings via ``.update()`` (which fires no post_save) so
+    the L1/L2 cache isn't auto-busted; drop it and re-warm so a subsequent cached
+    read is served in-process. Replaces the old middleware ``load()``.
+    """
+    invalidate_dojo_settings_cache(SYSTEM_SETTINGS_CACHE_KEY)
+    get_cached_system_settings()
+
+
 def get_unit_tests_path():
     return Path(__file__).parent
 
@@ -61,14 +73,14 @@ def toggle_system_setting_boolean(flag_name, value):
             # Set the flag to the specified value
             System_Settings.objects.update(**{flag_name: value})
             # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-            DojoSytemSettingsMiddleware.load()
+            refresh_system_settings_cache()
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{flag_name: not value})
                 # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-                DojoSytemSettingsMiddleware.load()
+                refresh_system_settings_cache()
         return wrapper
 
     return decorator
@@ -84,14 +96,14 @@ def with_system_setting(field, value):
             # Set the flag to the specified value
             System_Settings.objects.update(**{field: value})
             # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-            DojoSytemSettingsMiddleware.load()
+            refresh_system_settings_cache()
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{field: old_value})
                 # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-                DojoSytemSettingsMiddleware.load()
+                refresh_system_settings_cache()
 
         return wrapper
 
@@ -131,7 +143,7 @@ class DojoTestUtilsMixin:
             setattr(ss, key, value)
         ss.save()
         # Refresh the cache with the new settings
-        DojoSytemSettingsMiddleware.load()
+        refresh_system_settings_cache()
 
     def create_product_type(self, name, *args, description="dummy description", **kwargs):
         product_type = Product_Type(name=name, description=description)
@@ -566,7 +578,7 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
     def setUp(self):
         super().setUp()
         # Initialize middleware with fresh settings from db
-        DojoSytemSettingsMiddleware.load()
+        refresh_system_settings_cache()
 
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)

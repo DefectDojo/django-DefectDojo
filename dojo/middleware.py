@@ -117,58 +117,31 @@ class LoginRequiredMiddleware:
         return response
 
 
-class DojoSytemSettingsMiddleware:
+class DojoSettingsManagerMiddleware:
+    # Caching of the System_Settings singleton lives in dojo.caching (L1+L2). This
+    # middleware only (a) resets the request-scoped L1 tier and (b) surfaces a
+    # System_Settings DB-read error as a banner. The thread-local carries just that
+    # error message (set by System_Settings_Manager.get_from_db).
     _thread_local = local()
 
     def __init__(self, get_response):
         self.get_response = get_response
-        from dojo.models import System_Settings  # noqa: PLC0415 circular import
-        # Use classmethod directly to avoid keeping reference to middleware instance
-        models.signals.post_save.connect(DojoSytemSettingsMiddleware.cleanup, sender=System_Settings)
 
     def __call__(self, request):
         # uwsgi/gunicorn reuse threads across requests, so the in-process L1 cache
         # (threading.local) would otherwise persist between requests. Reset it at
         # the start of each request so cached singletons are request-scoped.
         reset_l1_cache()
-        self.load()
-        try:
-            # Store error in request for context processor to display
-            # (We can't use messages here because MessageMiddleware runs after this middleware)
-            if hasattr(self._thread_local, "system_settings_error"):
-                request.system_settings_error = self._thread_local.system_settings_error
-                # Clear from thread-local after copying to request
-                delattr(self._thread_local, "system_settings_error")
-            return self.get_response(request)
-        finally:
-            # ensure cleanup happens even if an exception occurs
-            self.cleanup()
-
-    def process_exception(self, request, exception):
-        self.cleanup()
-
-    @classmethod
-    def get_system_settings(cls):
-        if hasattr(cls._thread_local, "system_settings"):
-            return cls._thread_local.system_settings
-        return None
-
-    @classmethod
-    def cleanup(cls, *args, **kwargs):  # noqa: ARG003
-        if hasattr(cls._thread_local, "system_settings"):
-            del cls._thread_local.system_settings
-        if hasattr(cls._thread_local, "system_settings_error"):
-            delattr(cls._thread_local, "system_settings_error")
-
-    @classmethod
-    def load(cls):
-        # cleanup any existing settings first to ensure fresh state
-        cls.cleanup()
-        # Read through the shared L1/L2 cache so requests don't each hit the DB
-        # for the singleton. Freshness is bounded by the L1 TTL and busted on save.
-        system_settings = get_cached_system_settings()
-        cls._thread_local.system_settings = system_settings
-        return system_settings
+        # Drop any error left on this reused thread by a previous request.
+        if hasattr(self._thread_local, "system_settings_error"):
+            delattr(self._thread_local, "system_settings_error")
+        # Warm the cache once; this also captures any DB-read error (via
+        # get_from_db) so the context processor can display it as a banner.
+        # (We can't use messages here because MessageMiddleware runs after this.)
+        get_cached_system_settings()
+        if hasattr(self._thread_local, "system_settings_error"):
+            request.system_settings_error = self._thread_local.system_settings_error
+        return self.get_response(request)
 
 
 class System_Settings_Manager(models.Manager):
@@ -181,11 +154,11 @@ class System_Settings_Manager(models.Manager):
         except Exception as e:
             # Store error message in thread-local for middleware to display
             error_msg = str(e)
-            if hasattr(DojoSytemSettingsMiddleware._thread_local, "system_settings_error"):
+            if hasattr(DojoSettingsManagerMiddleware._thread_local, "system_settings_error"):
                 # Only store the first error to avoid duplicates
                 pass
             else:
-                DojoSytemSettingsMiddleware._thread_local.system_settings_error = error_msg
+                DojoSettingsManagerMiddleware._thread_local.system_settings_error = error_msg
             # Return defaults so app can still start - error will be displayed as warning message
             # logger.debug('unable to get system_settings from database, returning defaults. Exception was:', exc_info=True)
             return System_Settings()
@@ -193,17 +166,12 @@ class System_Settings_Manager(models.Manager):
 
     def get(self, no_cache=False, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
         if no_cache:
-            # logger.debug('no_cache specified or cached value found, loading system settings from db')
+            # logger.debug('no_cache specified, loading system settings from db')
             return self.get_from_db(*args, **kwargs)
-
-        from_cache = DojoSytemSettingsMiddleware.get_system_settings()
-
-        if not from_cache:
-            # No per-request thread-local (e.g. outside a request / in Celery):
-            # fall back to the shared L1/L2 cache.
-            return get_cached_system_settings()
-
-        return from_cache
+        # Read through the shared L1/L2 cache (dojo.caching). L1 is request/task
+        # scoped (reset by the middleware and the Celery task base), so repeated
+        # reads within a request are served in-process.
+        return get_cached_system_settings()
 
 
 class APITrailingSlashMiddleware:
