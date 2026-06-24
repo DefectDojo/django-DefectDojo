@@ -882,10 +882,10 @@ pako@~1.0.2, pako@~1.0.5:
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.11.tgz#6c9599d340d54dfd3946380252a35705a6b992bf"
   integrity sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==
 
-pdfkit@^0.19.0:
-  version "0.19.0"
-  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.19.0.tgz#985e04f8f13d33f070e4bb528a2210af8957a011"
-  integrity sha512-fCffpuHBwbEUDVpBexE3tE6OwvqOXHbLeR2ONWZEw0pCGlbZSkWLuXUw2k1MIkHNpwAgQ300ETXy/owe+ZK2bQ==
+pdfkit@^0.19.1:
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/pdfkit/-/pdfkit-0.19.1.tgz#633d5f031ce6f1ba6ce141325c6cf87fa6acb0a2"
+  integrity sha512-6Gzk+wDwTs4VSxsR5rCMTnIl5nlmkye1oWB0l2hDB1EX6ZNSIBroKQEv+2+fPPn+stVjyqzmsqRJVDfB9fo5DA==
   dependencies:
     "@noble/ciphers" "^1.0.0"
     "@noble/hashes" "^1.6.0"
@@ -894,13 +894,13 @@ pdfkit@^0.19.0:
     linebreak "^1.1.0"
     png-js "^1.1.0"
 
-pdfmake@^0.3.10:
-  version "0.3.10"
-  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.10.tgz#908bb4c1502fb2cf05434465a9feddebe6d51891"
-  integrity sha512-2dKalR/02xdIb8XFcT3UXHTBpMJjKGjY7l8fl0RRFGu93r15AsI8vEJPkPYcP+IhfJVTuMQiQFq08hNcIC7ohQ==
+pdfmake@^0.3.11:
+  version "0.3.11"
+  resolved "https://registry.yarnpkg.com/pdfmake/-/pdfmake-0.3.11.tgz#b4504d19b8f31fa5063dc1b847b060faa4f7c5bb"
+  integrity sha512-Uc49J9hUMyuqJk+U+PxlpBpPr96A4HOOfesGx609EPr2ue82+5/Smq/KTAkEqh0/jUGSi1fumvqZ5yAWijJTJg==
   dependencies:
     linebreak "^1.1.0"
-    pdfkit "^0.19.0"
+    pdfkit "^0.19.1"
     xmldoc "^2.0.3"
 
 picocolors@^1.1.1:
