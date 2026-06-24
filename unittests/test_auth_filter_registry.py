@@ -13,7 +13,6 @@ from pathlib import Path
 import dojo
 import dojo.authorization.query_registrations  # noqa: F401 -- ensure OS registrations run
 from dojo.authorization.query_filters import get_auth_filter
-from dojo.authorization.query_registrations import CRITICAL_AUTH_FILTERS
 
 from .dojo_test_case import DojoTestCase
 
@@ -35,13 +34,4 @@ class TestAuthFilterRegistryComplete(DojoTestCase):
         self.assertEqual(
             missing, [],
             msg=f"auth-filter keys looked up but never registered (silent fallback): {missing}",
-        )
-
-    def test_critical_list_matches_looked_up_keys(self):
-        # The startup system check (_check_auth_filters_wired) guards this curated
-        # list at runtime; this test ensures it cannot drift from the keys the OS
-        # actually looks up (a new lookup must be added to CRITICAL_AUTH_FILTERS).
-        self.assertEqual(
-            sorted(CRITICAL_AUTH_FILTERS), sorted(_looked_up_keys()),
-            msg="CRITICAL_AUTH_FILTERS is out of sync with get_auth_filter() lookups",
         )

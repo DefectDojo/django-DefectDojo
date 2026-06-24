@@ -13,10 +13,9 @@ the API filter classes that look them up via ``get_auth_filter()`` keep
 working without code changes.
 """
 from crum import get_current_user
-from django.core.checks import Error, Tags, register
 from django.db.models import Q
 
-from dojo.authorization.query_filters import get_auth_filter, register_auth_filter
+from dojo.authorization.query_filters import register_auth_filter
 from dojo.authorization.roles_permissions import permission_to_action
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import (
@@ -462,61 +461,3 @@ def _get_authorized_users_for_product_and_product_type(users, product, permissio
 
 
 register_auth_filter("user.get_authorized_users_for_product_and_product_type", _get_authorized_users_for_product_and_product_type)
-
-
-# ---------------------------------------------------------------------------
-# Startup guard
-# ---------------------------------------------------------------------------
-# Every auth-filter key the OS looks up via ``get_auth_filter()`` must be
-# registered above. An unregistered key makes the per-app wrapper fall back to
-# its default (passthrough / None), silently bypassing membership scoping. This
-# Django system check fails loud during ``manage.py check`` / runserver / CI.
-# The exhaustive "looked-up keys == this list" invariant is enforced by
-# unittests/test_auth_filter_registry.py so this list cannot silently drift.
-
-CRITICAL_AUTH_FILTERS = (
-    "endpoint.get_authorized_endpoints",
-    "endpoint.get_authorized_endpoints_for_queryset",
-    "endpoint.get_authorized_endpoint_status",
-    "endpoint.get_authorized_endpoint_status_for_queryset",
-    "engagement.get_authorized_engagements",
-    "finding.get_authorized_findings",
-    "finding.get_authorized_findings_for_queryset",
-    "finding.get_authorized_vulnerability_ids",
-    "finding.get_authorized_vulnerability_ids_for_queryset",
-    "finding_group.get_authorized_finding_groups",
-    "finding_group.get_authorized_finding_groups_for_queryset",
-    "jira_link.get_authorized_jira_issues",
-    "jira_link.get_authorized_jira_projects",
-    "location.get_authorized_location_finding_reference",
-    "location.get_authorized_location_product_reference",
-    "location.get_authorized_locations",
-    "product.get_authorized_app_analysis",
-    "product.get_authorized_dojo_meta",
-    "product.get_authorized_engagement_presets",
-    "product.get_authorized_languages",
-    "product.get_authorized_product_api_scan_configurations",
-    "product.get_authorized_products",
-    "product_type.get_authorized_product_types",
-    "risk_acceptance.get_authorized_risk_acceptances",
-    "test.get_authorized_test_imports",
-    "test.get_authorized_tests",
-    "tool_product.get_authorized_tool_product_settings",
-    "user.get_authorized_users",
-    "user.get_authorized_users_for_product_and_product_type",
-    "user.get_authorized_users_for_product_type",
-)
-
-
-@register(Tags.security)
-def _check_auth_filters_wired(app_configs, **kwargs):
-    return [
-        Error(
-            f"OS auth-filter {key!r} is not registered; the wrapper falls back to "
-            "its default (passthrough / allow-all), bypassing authorization scoping.",
-            hint="Register it in dojo/authorization/query_registrations.py.",
-            id="dojo.E001",
-        )
-        for key in CRITICAL_AUTH_FILTERS
-        if get_auth_filter(key) is None
-    ]
