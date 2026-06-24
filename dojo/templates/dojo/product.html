@@ -343,9 +343,12 @@
                   },
                   colReorder: true,
 				  autoWidth: false,
+                  // Columns whose headers render server-side sort links (dojo_sort -> ?o=) must NOT
+                  // also be client-sortable by DataTables, or a header click triggers an instant client
+                  // re-sort that "flashes" right before the server reload redraws. (upstream issue #1811)
                   "columns": [
                       { "data": "action", "searchable": false },
-                      { "data": "product" },
+                      { "data": "product", "orderable": false },
                       { "data": "tags" },
                       { "data": "criticality" , render: function (data, type, row) {
                         const criticals = {
@@ -381,10 +384,10 @@
                               return type === 'export' ? getDojoExportValueFromTag(data, 'i', 'data-content') :  data;
                       }},
                       {% endif %}
-                      { "data": "findings" },
+                      { "data": "findings", "orderable": false },
                       { "data": "locations" },
                       { "data": "contacts" },
-                      { "data": "product_type" },
+                      { "data": "product_type", "orderable": false },
                   ],
                   order: [],
                   columnDefs: [
