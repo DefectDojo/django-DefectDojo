@@ -24,6 +24,7 @@ from dojo.utils import async_delete, get_setting
 
 
 # Authorization: object-based
+@extend_schema_view(**schema_with_prefetch())
 class ProductAPIScanConfigurationViewSet(
     PrefetchDojoModelViewSet,
 ):

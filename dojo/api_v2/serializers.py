@@ -303,10 +303,11 @@ from dojo.notes.api.serializer import (  # noqa: E402, F401 -- re-export; prefet
 
 # Product serializers live in dojo/product/api/serializer.py. ProductSerializer is
 # re-exported because ReportGenerateSerializer (below) still references it;
-# ProductMetaSerializer because dojo/asset/api/serializers.py imports it.
-# ProductAPIScanConfigurationSerializer is imported directly from
-# dojo.product.api.serializer by its only consumer (the viewset).
+# ProductMetaSerializer because dojo/asset/api/serializers.py imports it;
+# ProductAPIScanConfigurationSerializer so the prefetcher can discover it via this
+# module (enables prefetching Product_API_Scan_Configuration on the /tests/ endpoint).
 from dojo.product.api.serializer import (  # noqa: E402 -- backward compat
+    ProductAPIScanConfigurationSerializer,  # noqa: F401 -- prefetcher discovery
     ProductMetaSerializer,  # noqa: F401 -- backward compat
     ProductSerializer,
 )
