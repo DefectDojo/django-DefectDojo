@@ -22,13 +22,11 @@ services:
       DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
       DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
       DD_CELERY_BROKER_URL: 'sqla+sqlite:///dojo.celerydb.sqlite'
-      # No shared cache backend in unit tests (no Redis/valkey here) -> LocMemCache.
+      # No Redis/valkey in unit tests -> default django cache is LocMemCache.
       DD_CACHE_URL: ''
-      # L1 (in-process, request/test-scoped) stays ON for deterministic
-      # assertNumQueries counts; reset per request (middleware) and per test
-      # (dojo_test_case setUp). L2 is OFF (no shared backend; would persist).
+      # In-process singleton cache (dojo/caching.py) stays ON for deterministic
+      # assertNumQueries counts; reset per request (middleware) and per test.
       DD_SETTINGS_CACHE_L1_TTL: '30'
-      DD_SETTINGS_CACHE_L2_TTL: '-1'
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
   celerybeat: !reset
   celeryworker: !reset

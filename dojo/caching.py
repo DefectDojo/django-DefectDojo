@@ -1,24 +1,29 @@
 """
-Two-tier read-through cache for global, low-cardinality singleton config.
+In-process read-through cache for global, low-cardinality singleton config.
 
-One in-process **L1** tier sits on top of the shared **L2** tier
-(``django.core.cache``, Redis in deployments). A getter is resolved L1 → L2 → DB:
-the first tier with a value wins; a ``None`` anywhere means "not cached, compute
-it" and is never stored. This is deliberately simple — it is only for global,
-user-INDEPENDENT, signal-invalidated singletons (feature flags, system settings,
-and the like), never per-user or per-object data.
+A single per-thread **L1** tier resolves a getter L1 → DB: a hit wins; a ``None``
+result means "not cached, compute it" and is never stored. This is deliberately
+simple — it is only for global, user-INDEPENDENT, signal-invalidated singletons
+(feature flags, system settings, and the like), never per-user or per-object data.
+
+There is intentionally **no shared/cross-process (L2) tier**: freshness is provided
+by resetting L1 at every request and task boundary (middleware + the Celery task
+base), so each request/task reads the singleton from the DB at most once and never
+serves a value cached during a prior request/task (e.g. a since-changed
+``System_Settings``). This keeps the design free of a Redis dependency, pickled
+model graphs, and cross-process invalidation — at the cost of one DB read per
+singleton per request/task. (The default ``django.core.cache`` backend may still be
+Redis for other uses; this module no longer reads or writes it.)
 
 Values are stored as plain dicts/scalars (see ``model_to_cache_dict`` /
 ``cache_dict_to_model``), never pickled model instances.
 
-Two independent tiers, each turned off by setting its TTL to ``-1`` (both off makes
-the decorator a pass-through). Configuration (Django settings, wired from env in
-``settings.dist.py``):
+Configuration (Django setting, wired from env in ``settings.dist.py``):
 
 * ``SETTINGS_CACHE_L1_TTL`` — per-thread in-process freshness budget in seconds
-  (``-1`` disables L1). Keep it short — it bounds cross-process staleness. L1 is
-  reset at each request/task boundary, so it is effectively request/task scoped.
-* ``SETTINGS_CACHE_L2_TTL`` — L2 timeout in seconds (``-1`` disables L2).
+  (``-1`` disables the cache, making the decorator a pass-through). Keep it short.
+  L1 is reset at each request/task boundary, so it is effectively request/task
+  scoped.
 """
 
 import threading
@@ -26,7 +31,6 @@ import time
 from functools import wraps
 
 from django.conf import settings
-from django.core.cache import cache
 
 
 class _L1Store:
@@ -88,34 +92,23 @@ _L1_STORE = _L1Store()
 
 def dojo_settings_cache(*, key: str):
     """
-    Read-through L1+L2 cache for a fixed-key singleton getter.
+    Read-through in-process (L1) cache for a fixed-key singleton getter.
 
-    Resolves L1 → L2 → wrapped function. A ``None`` result is treated as "no
-    value" and is not cached (so the next call retries). Becomes a pass-through
-    when both tiers are disabled (``SETTINGS_CACHE_L1_TTL=-1`` and
-    ``SETTINGS_CACHE_L2_TTL=-1``).
+    Resolves L1 → wrapped function. A ``None`` result is treated as "no value" and
+    is not cached (so the next call retries). Becomes a pass-through when L1 is
+    disabled (``SETTINGS_CACHE_L1_TTL=-1``). Freshness across processes comes from
+    resetting L1 each request/task (see ``reset_l1_cache``), not a shared tier.
     """
 
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
-            l2_ttl = getattr(settings, "SETTINGS_CACHE_L2_TTL", 300)
-            l2_on = l2_ttl >= 0                      # SETTINGS_CACHE_L2_TTL == -1 disables L2
-
             value = _L1_STORE.get(key)              # ---- L1 ----
             if value is not None:
                 return value
 
-            if l2_on:                               # ---- L2 ----
-                value = cache.get(key)
-                if value is not None:
-                    _L1_STORE.set(key, value)
-                    return value
-
             value = fn(*args, **kwargs)             # ---- miss: compute ----
             if value is not None:
-                if l2_on:
-                    cache.set(key, value, timeout=l2_ttl)
                 _L1_STORE.set(key, value)
             return value
 
@@ -125,12 +118,12 @@ def dojo_settings_cache(*, key: str):
 
 
 def invalidate_dojo_settings_cache(key: str) -> None:
-    """Drop a cached singleton from L2 (all processes) and L1 (this process)."""
-    # Only touch L2 when it is enabled; when SETTINGS_CACHE_L2_TTL == -1 the L2
-    # tier is off and the backend (``cache``) may not even be reachable (e.g.
-    # unit tests run with no Redis configured), so skip the delete entirely.
-    if getattr(settings, "SETTINGS_CACHE_L2_TTL", 300) >= 0:
-        cache.delete(key)
+    """
+    Drop a cached singleton from L1 (this thread).
+
+    With no shared tier, other threads/processes self-heal at their next
+    request/task boundary (L1 reset), so there is nothing cross-process to drop.
+    """
     _L1_STORE.invalidate(key)
 
 
