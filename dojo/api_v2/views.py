@@ -26,8 +26,6 @@ from rest_framework.response import Response
 
 from dojo.api_v2 import (
     mixins as dojo_mixins,
-)
-from dojo.api_v2 import (
     prefetch,
     serializers,
 )
@@ -86,6 +84,15 @@ logger = logging.getLogger(__name__)
 
 
 labels = get_labels()
+
+
+def get_request_boolean(request, name):
+    value = request.query_params.get(name) if name in request.query_params else request.data.get(name)
+
+    if value is None:
+        return None
+
+    return drf_serializers.BooleanField(required=False).run_validation(value)
 
 
 def schema_with_prefetch() -> dict:

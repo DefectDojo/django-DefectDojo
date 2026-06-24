@@ -608,6 +608,16 @@ def _reassign_jira_issue_to_new_original(deleted_finding, new_original):
     return True
 
 
+def get_push_to_jira_on_delete(finding):
+    push_to_jira = getattr(finding, "_push_to_jira_on_delete", None)
+    return push_to_jira if isinstance(push_to_jira, bool) else None
+
+
+def set_push_to_jira_on_delete(finding, push_to_jira):
+    if push_to_jira is not None:
+        finding._push_to_jira_on_delete = push_to_jira
+
+
 # can't use model to id here due to the queryset
 # @dojo_async_task
 # @app.task
