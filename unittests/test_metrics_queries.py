@@ -90,7 +90,7 @@ class FindingQueriesTest(DojoTestCase):
 
         # Queries over Finding (legacy auth: fewer auth-layer queries
         # than RBAC since per-action role-permission lookups are gone).
-        with self.assertNumQueries(27):
+        with self.assertNumQueries(25):
             product_types = []
             finding_queries = utils.finding_queries(
                 product_types,
@@ -302,7 +302,7 @@ class EndpointQueriesTest(DojoTestCase):
 
         # Queries over Finding and Endpoint_Status (legacy auth: fewer
         # auth-layer queries than RBAC).
-        with self.assertNumQueries(41):
+        with self.assertNumQueries(40):
             product_types = Product_Type.objects.all()
             endpoint_queries = utils.endpoint_queries(
                 product_types,
