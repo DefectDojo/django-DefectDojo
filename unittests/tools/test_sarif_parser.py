@@ -595,8 +595,10 @@ add_core(ptr, offset, val);
         )
 
     def test_blackduck_nested_fingerprints(self):
-        """BlackDuck wraps fingerprint values as {"value": "<hash>"} instead of a plain string.
-        Verify unique_id_from_tool is extracted as a string, not left as a dict."""
+        """
+        BlackDuck wraps fingerprint values as {"value": "<hash>"} instead of a plain string.
+        Verify unique_id_from_tool is extracted as a string, not left as a dict.
+        """
         with (get_unit_tests_scans_path("sarif") / "blackduck_nested_fingerprints.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()
             findings = parser.get_findings(testfile, Test())
