@@ -93,15 +93,15 @@ class CloseFindingViewInstanceTest(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
 
-@override_settings(SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
+@override_settings(SETTINGS_CACHE_L1_TTL=30)
 class TestSystemSettingsMiddlewareIntegration(DojoTestCase):
 
     """
     Integration tests for DojoSettingsManagerMiddleware + System_Settings_Manager.
 
-    Caching lives in dojo.caching (decorator); the middleware only resets the
-    request-scoped L1 tier and surfaces a load error. These tests pin L1 on / L2
-    off via override_settings so they don't depend on the compose env.
+    Caching lives in dojo.caching (in-process L1 decorator); the middleware resets
+    the request-scoped L1 tier and surfaces a load error. These tests pin L1 on via
+    override_settings so they don't depend on the compose env.
     """
 
     def setUp(self):
