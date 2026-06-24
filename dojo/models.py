@@ -2715,6 +2715,16 @@ class Finding(BaseModel):
             models.Index(fields=["known_exploited"]),
             models.Index(fields=["ransomware_used"]),
             models.Index(fields=["kev_date"]),
+            models.Index(
+                fields=["severity", "-numerical_severity"],
+                name="idx_finding_sev_active",
+                condition=Q(active=True),
+            ),
+            models.Index(
+                fields=["-date"],
+                name="idx_finding_riskaccepted_date",
+                condition=Q(risk_accepted=True),
+            ),
         ]
 
     def __init__(self, *args, **kwargs):
