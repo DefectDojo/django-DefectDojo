@@ -22,6 +22,8 @@ services:
       DD_DATABASE_USER: ${DD_DATABASE_USER:-defectdojo}
       DD_DATABASE_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
       DD_CELERY_BROKER_URL: 'sqla+sqlite:///dojo.celerydb.sqlite'
+      # No shared cache backend in unit tests (no Redis/valkey here) -> LocMemCache.
+      DD_CACHE_URL: ''
       # Disable the singleton settings cache (dojo/caching.py) during tests so
       # assertNumQueries counts stay deterministic. Covered by unittests/test_caching.py.
       DD_SETTINGS_CACHE_L1_TTL: '-1'

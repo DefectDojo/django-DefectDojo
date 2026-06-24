@@ -126,7 +126,11 @@ def dojo_settings_cache(*, key: str):
 
 def invalidate_dojo_settings_cache(key: str) -> None:
     """Drop a cached singleton from L2 (all processes) and L1 (this process)."""
-    cache.delete(key)
+    # Only touch L2 when it is enabled; when SETTINGS_CACHE_L2_TTL == -1 the L2
+    # tier is off and the backend (``cache``) may not even be reachable (e.g.
+    # unit tests run with no Redis configured), so skip the delete entirely.
+    if getattr(settings, "SETTINGS_CACHE_L2_TTL", 300) >= 0:
+        cache.delete(key)
     _L1_STORE.invalidate(key)
 
 
