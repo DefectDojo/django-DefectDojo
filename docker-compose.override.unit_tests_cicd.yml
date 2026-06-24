@@ -23,6 +23,8 @@ services:
       DD_CELERY_BROKER_URL: 'sqla+sqlite:///dojo.celerydb.sqlite'
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
       DD_V3_FEATURE_LOCATIONS: ${DD_V3_FEATURE_LOCATIONS:-False}
+      # No shared cache backend in unit tests (no Redis/valkey here) -> LocMemCache.
+      DD_CACHE_URL: ''
       # Disable the singleton settings cache (dojo/caching.py) during tests so
       # assertNumQueries counts stay deterministic (it dedupes System_Settings reads
       # across requests/tests). The cache is covered by unittests/test_caching.py.

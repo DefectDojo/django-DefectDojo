@@ -23,6 +23,7 @@ class _FakeCache:
         self.store = {}
         self.gets = 0
         self.sets = 0
+        self.deletes = 0
 
     def get(self, key, default=None):
         self.gets += 1
@@ -33,6 +34,7 @@ class _FakeCache:
         self.store[key] = value
 
     def delete(self, key):
+        self.deletes += 1
         self.store.pop(key, None)
 
 
@@ -115,6 +117,13 @@ class DojoSettingsCacheTest(TestCase):
         invalidate_dojo_settings_cache("k")
         getter()
         self.assertEqual(calls["n"], 2)        # recomputed after invalidation
+
+    @override_settings(SETTINGS_CACHE_L2_TTL=-1)
+    def test_invalidate_skips_l2_when_disabled(self):
+        # With L2 off the backend may be unreachable (no Redis in unit tests);
+        # invalidation must not call cache.delete.
+        invalidate_dojo_settings_cache("k")
+        self.assertEqual(self.fake.deletes, 0)
 
 
 class ModelDictRoundTripTest(DojoTestCase):
