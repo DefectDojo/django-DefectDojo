@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from crum import impersonate
 from django.conf import settings
+from django.test import override_settings
 
 from dojo.finding.deduplication import do_false_positive_history_batch
 from dojo.finding.ui.views import EditFinding
@@ -126,6 +127,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @versioned_fixtures
+@override_settings(SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestFalsePositiveHistoryLogic(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 

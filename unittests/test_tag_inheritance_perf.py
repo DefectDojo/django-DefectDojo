@@ -99,6 +99,8 @@ def _make_locations(product: Product, n: int) -> None:
 @override_settings(
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 class TagInheritancePerfBaselines(DojoTestCase):
 
@@ -433,6 +435,8 @@ class TagInheritancePerfBaselines(DojoTestCase):
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
     SECURE_SSL_REDIRECT=False,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 @versioned_fixtures
 class TagInheritanceImportPerfBaselines(DojoAPITestCase):
