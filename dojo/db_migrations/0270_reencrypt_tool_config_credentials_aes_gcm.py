@@ -1,6 +1,6 @@
 import logging
 
-from django.db import migrations
+from django.db import migrations, models
 
 logger = logging.getLogger(__name__)
 
@@ -89,5 +89,25 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        # Widen the encrypted credential columns first. AES-256-GCM appends a
+        # 12-byte nonce and a 16-byte authentication tag (rendered as hex in the
+        # "AES.2:<nonce>:<ct>" payload), so a value stored at the old max length
+        # under AES.1 would overflow the column when re-encrypted below. Each
+        # field is grown by 50% of its previous max_length to leave ample room.
+        migrations.AlterField(
+            model_name="tool_configuration",
+            name="password",
+            field=models.CharField(blank=True, max_length=900, null=True),
+        ),
+        migrations.AlterField(
+            model_name="tool_configuration",
+            name="ssh",
+            field=models.CharField(blank=True, max_length=9000, null=True),
+        ),
+        migrations.AlterField(
+            model_name="tool_configuration",
+            name="api_key",
+            field=models.CharField(blank=True, max_length=900, null=True, verbose_name="API Key"),
+        ),
         migrations.RunPython(reencrypt_tool_config_credentials, noop_reverse),
     ]
