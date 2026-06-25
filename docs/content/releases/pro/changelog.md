@@ -12,6 +12,34 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## June 2026: v3.0
 
+### June 22, 2026: v3.0.100
+
+* **(Pro UI)** Added native Excel (`.xlsx`) export for Findings, Engagements, and Users.
+* **(Pro UI)** Bulk "Add to Existing Finding Group" no longer fails with an "Invalid pk 'None'" error.
+* **(Classic UI)** Fixed the disclaimer border rendering in the new UI.
+* **(Findings)** Blank component values are now normalized to NULL for consistent matching and filtering.
+* **(Reports)** Added DefectDojo Pro Report Builder guides (UI, API, and LLM).
+* **(Tools)** Added a PICUS Breach and Attack Simulation CSV parser.
+* **(Tools)** Added a Govulncheck Scanner V2 parser.
+* **(Tools)** cargo-audit parser now parses CVSS vectors and derives severity from them.
+
+### June 18, 2026: v3.0.2
+
+* **(SSO)** SAML now keeps the Pro group-mapping backend as the active authentication backend.
+* **(API)** Restored `members` and `authorization_groups` fields on the Asset and Organization serializers.
+* **(API)** Registered the `asset_*` / `organization_*` RBAC alias routes.
+* **(API)** Restored RBAC fields on `/api/v2/user_profile/`.
+
+### June 17, 2026: v3.0.1
+
+* **(Pro UI)** Calendar sidebar now honors the "Enable Calendar" system setting.
+* **(Pro UI)** Keyword search no longer blanks the Components table.
+* **(Reports)** Added a Finding quick report via the reporting engine.
+* **(SSO)** Azure AD configuration now requires and defaults the Application ID URI.
+* **(Locations)** Single-location filter now resolves correctly against the Location model.
+* **(API)** Fixed a 500 error when deleting an Organization/Asset that still has deprecated endpoints; the new-UI banner now points at 3.3.0.
+* **(API)** Refactored and enhanced API permissions.
+
 ### June 15, 2026: v3.0.0
 
 * **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).

@@ -66,7 +66,7 @@ Alternatively, Engagements within an Asset can be accessed in the window at the 
 
 Engagements sit below Assets and above Tests in the object hierarchy. As such, access to an Asset automatically grants access to all Engagements within that Asset. Engagements do not have independent access control lists.
 
-## Engagement Lifecycle 
+## Working with Engagements
 
 ### Create Engagements 
 
