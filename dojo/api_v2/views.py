@@ -19,6 +19,7 @@ from drf_spectacular.utils import (
 )
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework import mixins, status, viewsets
+from rest_framework import serializers as drf_serializers
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -26,6 +27,8 @@ from rest_framework.response import Response
 
 from dojo.api_v2 import (
     mixins as dojo_mixins,
+)
+from dojo.api_v2 import (
     prefetch,
     serializers,
 )

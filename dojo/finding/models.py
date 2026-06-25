@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+DELETE_JIRA_SYNC_UNSET = object()
 
 
 class Finding(BaseModel):
@@ -648,10 +649,10 @@ class Finding(BaseModel):
 
         return copy
 
-    def delete(self, *args, product_grading_option=True, **kwargs):
+    def delete(self, *args, product_grading_option=True, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
-        finding_helper.finding_delete(self)
+        finding_helper.finding_delete(self, push_to_jira=push_to_jira)
         super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
