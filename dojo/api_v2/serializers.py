@@ -613,6 +613,12 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit superusers."
             raise ValidationError(msg)
 
+        instance_is_staff = self.instance.is_staff if self.instance is not None else False
+        data_is_staff = data.get("is_staff", instance_is_staff)
+        if not self.context["request"].user.is_superuser and data_is_staff != instance_is_staff:
+            msg = "Only superusers are allowed to add or edit staff users."
+            raise ValidationError(msg)
+
         if self.context["request"].method in {"PATCH", "PUT"} and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
@@ -739,18 +745,6 @@ class EngagementSerializer(serializers.ModelSerializer):
             if data.get("target_start") > data.get("target_end"):
                 msg = "Your target start date exceeds your target end date"
                 raise serializers.ValidationError(msg)
-        if (
-            self.instance is not None
-            and "product" in data
-            and data.get("product") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product"),
-                "edit",
-            )
-        ):
-            msg = "You are not permitted to edit engagements in the destination product"
-            raise PermissionDenied(msg)
         return data
 
     def build_relational_field(self, field_name, relation_info):
@@ -858,6 +852,22 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Endpoint_Status
         fields = "__all__"
+
+    def validate(self, data):
+        if self.instance is not None:
+            # Reject changes to Endpoint/Finding on existing objects
+            if "endpoint" in data and data["endpoint"] != self.instance.endpoint:
+                msg = "endpoint cannot be changed after creation"
+                raise serializers.ValidationError(msg)
+            if "finding" in data and data["finding"] != self.instance.finding:
+                msg = "finding cannot be changed after creation"
+                raise serializers.ValidationError(msg)
+            return data
+
+        if data["endpoint"].product_id != data["finding"].test.engagement.product_id:
+            msg = "endpoint and finding must belong to the same product"
+            raise serializers.ValidationError(msg)
+        return data
 
     def run_validators(self, initial_data):
         try:

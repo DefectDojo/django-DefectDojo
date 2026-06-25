@@ -27,8 +27,8 @@ jobs:
       - name: Validate proper bugfix branch release_number format is being used
         if: ${{ inputs.from_branch == 'bugfix' }}
         run: |
-          # Expect the last octet in release_number to not be 0
-          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.[1-9]$"
+          # Expect a valid x.y.z release_number with a 1-3 digit last octet
+          echo "${{ inputs.release_number }}" | grep "^[0-9]*\.[0-9]*\.[0-9]\{1,3\}$"
 
       - name: Validate proper dev branch release_number format is being used
         if: ${{ inputs.from_branch == 'dev' }}
@@ -40,7 +40,7 @@ jobs:
         run: echo "GITHUB_ORG=${GITHUB_REPOSITORY%%/*}" >> $GITHUB_ENV
 
       - name: Checkout from_branch branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.from_branch }}
 
@@ -58,7 +58,7 @@ jobs:
         run: git push origin HEAD:${NEW_BRANCH}
 
       - name: Checkout release branch
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ env.NEW_BRANCH }}
 
