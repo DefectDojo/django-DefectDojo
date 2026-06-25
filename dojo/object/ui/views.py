@@ -9,6 +9,7 @@ from django.urls import reverse
 from dojo.labels import get_labels
 from dojo.object.models import Objects_Product
 from dojo.object.ui.forms import DeleteObjectsSettingsForm, ObjectSettingsForm
+from dojo.product.models import Product
 from dojo.utils import Product_Tab
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,6 @@ labels = get_labels()
 
 def new_object(request, pid):
     page_name = labels.ASSET_TRACKED_FILES_ADD_LABEL
-    from dojo.models import Product  # noqa: PLC0415 -- lazy import, avoids circular dependency
     prod = get_object_or_404(Product, id=pid)
     if request.method == "POST":
         tform = ObjectSettingsForm(request.POST)
@@ -45,7 +45,6 @@ def new_object(request, pid):
 
 
 def view_objects(request, pid):
-    from dojo.models import Product  # noqa: PLC0415 -- lazy import, avoids circular dependency
     product = get_object_or_404(Product, id=pid)
     object_queryset = Objects_Product.objects.filter(product=pid).order_by("path", "folder", "artifact")
 
@@ -61,7 +60,6 @@ def view_objects(request, pid):
 
 def edit_object(request, pid, ttid):
     object_prod = get_object_or_404(Objects_Product, pk=ttid)
-    from dojo.models import Product  # noqa: PLC0415 -- lazy import, avoids circular dependency
     product = get_object_or_404(Product, id=pid)
     if object_prod.product != product:
         raise PermissionDenied
@@ -90,7 +88,6 @@ def edit_object(request, pid, ttid):
 
 def delete_object(request, pid, ttid):
     object_prod = get_object_or_404(Objects_Product, pk=ttid)
-    from dojo.models import Product  # noqa: PLC0415 -- lazy import, avoids circular dependency
     product = get_object_or_404(Product, id=pid)
     if object_prod.product != product:
         raise PermissionDenied
