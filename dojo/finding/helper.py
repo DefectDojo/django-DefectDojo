@@ -456,13 +456,7 @@ def post_process_finding_save_internal(finding, dedupe_option=True, rules_option
             jira_services.push(finding.finding_group)
 
 
-# ignore_result=False so the 'async_wait' import execution mode can join on the
-# dispatched batch via AsyncResult.get() even when CELERY_TASK_IGNORE_RESULT=True.
-# NOTE: this override may not be strictly necessary — in the past .get()/await
-# appears to have worked with the global CELERY_TASK_IGNORE_RESULT=True and a
-# Redis broker. Needs verification against a real broker/worker setup; if join
-# works without it, this override can be removed to avoid storing extra results.
-@app.task(ignore_result=False)
+@app.task
 def post_process_findings_batch(
     finding_ids,
     *args,
