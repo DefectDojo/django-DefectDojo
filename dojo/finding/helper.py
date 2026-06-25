@@ -68,6 +68,7 @@ NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 UNDER_REVIEW_QUERY = Q(under_review=True)
+DELETE_JIRA_SYNC_UNSET = object()
 
 
 # this signal is triggered just before a finding is getting saved
@@ -532,12 +533,6 @@ def post_process_findings_batch(
 @receiver(pre_delete, sender=Finding)
 def finding_pre_delete(sender, instance, **kwargs):
     logger.debug("finding pre_delete: %d", instance.id)
-    if (
-        instance.has_jira_issue
-        and not getattr(instance, "_skip_jira_close_on_delete", False)
-        and jira_services.is_delete_sync_allowed(instance)
-    ):
-        jira_services.close_issue_for_deleted_finding(instance)
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
     instance.found_by.clear()
@@ -545,7 +540,7 @@ def finding_pre_delete(sender, instance, **kwargs):
     delete_related_files(instance)
 
 
-def finding_delete(instance, **kwargs):
+def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     logger.debug("finding delete, instance: %s", instance.id)
 
     # the idea is that the engagement/test pre delete already prepared all the duplicates inside
@@ -563,15 +558,30 @@ def finding_delete(instance, **kwargs):
         # but django still calls delete() in this case
         return
 
+    jira_sync_requested = push_to_jira is None or isinstance(push_to_jira, bool)
+    jira_issue_reassigned = False
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
         if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
             duplicate_cluster.order_by("-id").delete()
         else:
             new_original = reconfigure_duplicate_cluster(instance, duplicate_cluster)
-            _reassign_jira_issue_to_new_original(instance, new_original)
+            if jira_sync_requested:
+                jira_issue_reassigned = _reassign_jira_issue_to_new_original(
+                    instance,
+                    new_original,
+                    push_to_jira=push_to_jira,
+                )
     else:
         logger.debug("no duplicate cluster found for finding: %d, so no need to reconfigure", instance.id)
+
+    if (
+        jira_sync_requested
+        and not jira_issue_reassigned
+        and instance.has_jira_issue
+        and jira_services.is_delete_sync_allowed(instance, push_to_jira=push_to_jira)
+    ):
+        jira_services.close_issue_for_deleted_finding(instance, push_to_jira=push_to_jira)
 
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
@@ -586,8 +596,12 @@ def finding_post_delete(sender, instance, **kwargs):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
 
 
-def _reassign_jira_issue_to_new_original(deleted_finding, new_original):
-    if not new_original or new_original.has_jira_issue or not jira_services.is_delete_sync_allowed(deleted_finding):
+def _reassign_jira_issue_to_new_original(deleted_finding, new_original, *, push_to_jira=None):
+    if (
+        not new_original
+        or new_original.has_jira_issue
+        or not jira_services.is_delete_sync_allowed(deleted_finding, push_to_jira=push_to_jira)
+    ):
         return False
 
     jira_issue = jira_services.get_issue(deleted_finding)
@@ -595,27 +609,22 @@ def _reassign_jira_issue_to_new_original(deleted_finding, new_original):
         return False
 
     jira_instance = jira_services.get_instance(deleted_finding)
-    jira_services.add_simple_comment(
-        jira_instance,
-        jira_issue,
-        (
-            f"DefectDojo finding {deleted_finding.id} was deleted. "
-            f"This Jira issue was reassigned to finding {new_original.id}."
-        ),
+    if not jira_instance:
+        return False
+
+    jira_id = jira_issue.jira_id
+    jira_instance_id = jira_instance.id
+    comment = (
+        f"DefectDojo finding {deleted_finding.id} was deleted. "
+        f"This Jira issue was reassigned to finding {new_original.id}."
     )
     jira_services.reassign_issue_to_finding(jira_issue, new_original)
-    deleted_finding._skip_jira_close_on_delete = True
+    jira_services.add_simple_comment_async(
+        jira_id,
+        jira_instance_id,
+        comment,
+    )
     return True
-
-
-def get_push_to_jira_on_delete(finding):
-    push_to_jira = getattr(finding, "_push_to_jira_on_delete", None)
-    return push_to_jira if isinstance(push_to_jira, bool) else None
-
-
-def set_push_to_jira_on_delete(finding, push_to_jira):
-    if push_to_jira is not None:
-        finding._push_to_jira_on_delete = push_to_jira
 
 
 # can't use model to id here due to the queryset

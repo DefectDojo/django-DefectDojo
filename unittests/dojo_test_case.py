@@ -772,8 +772,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
-    def delete_finding_api(self, finding_id):
-        response = self.client.delete(reverse("finding-list") + f"{finding_id}/")
+    def delete_finding_api(self, finding_id, push_to_jira=None):
+        url = reverse("finding-list") + f"{finding_id}/"
+        if push_to_jira is not None:
+            url = f"{url}?push_to_jira={str(push_to_jira).lower()}"
+        response = self.client.delete(url)
         self.assertEqual(204, response.status_code, response.content[:1000])
         return response.data
 
