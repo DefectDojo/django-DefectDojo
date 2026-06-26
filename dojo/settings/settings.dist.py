@@ -331,6 +331,16 @@ SITE_ID = env("DD_SITE_ID")
 # to load the internationalization machinery.
 USE_I18N = env("DD_USE_I18N")
 
+# Languages offered in the UI. Only languages with an audited catalog are listed;
+# es/ja/de/fr are added once their translations land (their .po files are generated
+# for translators). Stored DB values and serialized API values always remain English
+# regardless of the selected language; only displayed text changes.
+LANGUAGES = [
+    ("en", "English"),
+    ("pt-br", "Português (Brasil)"),
+    ("ru", "Русский"),
+]
+
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = env("DD_USE_TZ")
 
@@ -380,6 +390,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 # ------------------------------------------------------------------------------
 
 DOJO_ROOT = env("DD_ROOT")
+
+# Where Django looks for translation catalogs: dojo/locale/<lang>/LC_MESSAGES/.
+LOCALE_PATHS = [Path(DOJO_ROOT) / "locale"]
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
@@ -795,10 +808,12 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.APITrailingSlashMiddleware",
     "dojo.middleware.DojoSytemSettingsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "dojo.middleware.LanguagePreferenceMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

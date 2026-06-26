@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db import models
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils import translation
 from watson.middleware import SearchContextMiddleware
 from watson.search import search_context_manager
 
@@ -192,6 +193,64 @@ class AdditionalHeaderMiddleware:
     def __call__(self, request):
         request.META.update(settings.ADDITIONAL_HEADERS)
         return self.get_response(request)
+
+
+def set_language_cookie(response, language):
+    """Persist (or clear) the UI-language cookie that Django's LocaleMiddleware reads."""
+    if language:
+        response.set_cookie(
+            settings.LANGUAGE_COOKIE_NAME,
+            language,
+            max_age=settings.LANGUAGE_COOKIE_AGE,
+            path=settings.LANGUAGE_COOKIE_PATH,
+            domain=settings.LANGUAGE_COOKIE_DOMAIN,
+            secure=settings.LANGUAGE_COOKIE_SECURE,
+            httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+            samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+        )
+    else:
+        response.delete_cookie(
+            settings.LANGUAGE_COOKIE_NAME,
+            path=settings.LANGUAGE_COOKIE_PATH,
+            domain=settings.LANGUAGE_COOKIE_DOMAIN,
+        )
+    return response
+
+
+class LanguagePreferenceMiddleware:
+
+    """
+    Seed the language cookie from the user's stored preference when it is missing.
+
+    UserContactInfo.language is the durable, cross-device source of truth. The DB
+    is read only when the django_language cookie is absent (roughly once per
+    browser session); thereafter Django's LocaleMiddleware serves the cookie with
+    no per-request DB access. API requests are skipped: they localize via
+    Accept-Language and their clients typically do not keep cookies, so seeding
+    from the DB there would add a query to every API call.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        seed = ""
+        user = getattr(request, "user", None)
+        if (
+            user is not None
+            and getattr(user, "is_authenticated", False)
+            and settings.LANGUAGE_COOKIE_NAME not in request.COOKIES
+            and not request.path.startswith("/api/")
+        ):
+            contact = getattr(user, "usercontactinfo", None)
+            seed = getattr(contact, "language", "") if contact is not None else ""
+            if seed:
+                translation.activate(seed)
+                request.LANGUAGE_CODE = seed
+        response = self.get_response(request)
+        if seed:
+            set_language_cookie(response, seed)
+        return response
 
 
 class PgHistoryMiddleware(pghistory.middleware.HistoryMiddleware):
