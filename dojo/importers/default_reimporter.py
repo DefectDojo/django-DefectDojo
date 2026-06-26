@@ -471,6 +471,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
                             jira_instance_id=getattr(self.jira_instance, "id", None),
+                            # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                            # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                            **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
                             **self.post_processing_dispatch_kwargs(**kwargs),
                         )
                         if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
