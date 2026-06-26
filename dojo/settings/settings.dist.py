@@ -127,7 +127,8 @@ env = environ.FileAwareEnv(
     # Falls back to a plain queryset on any error (logged).
     DD_WATSON_INDEX_PREFETCH_ENABLED=(bool, True),
     DD_FOOTER_VERSION=(str, ""),
-    # models should be passed to celery by ID, default is False (for now)
+    # Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+    DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE=(bool, True),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -625,6 +626,9 @@ TEAM_NAME = env("DD_TEAM_NAME")
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
 
+# Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+SHOW_A11Y_REQUIRED_FIELDS_NOTICE = env("DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE")
+
 # V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
 
@@ -1037,6 +1041,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "TFSec Scan": ["severity", "vuln_id_from_tool", "file_path", "line"],
     "Snyk Scan": ["vuln_id_from_tool", "file_path", "component_name", "component_version"],
     "GitLab Dependency Scanning Report": ["title", "vulnerability_ids", "file_path", "component_name", "component_version"],
+    # garak findings have no file_path/line; description holds the (per-run, randomly sampled) prompt/output and is
+    # therefore unstable across runs. severity is also excluded: it's an aggregate (the most severe rung seen across a
+    # probe's occurrences) and shifts as the occurrence set changes, so dedupe on the stable identity: probe-derived
+    # title + target model.
+    "Garak Scan": ["title", "component_name"],
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
@@ -1291,6 +1300,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "HackerOne Cases": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Snyk Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
+    "Garak Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,

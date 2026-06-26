@@ -23,6 +23,7 @@ from dojo.models import (
     Notes,
     Test,
     Test_Import,
+    Vulnerability_Id,
 )
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tags.inheritance import apply_inherited_tags_for_findings
@@ -438,6 +439,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # They don't need to be aligned since they optimize different operations.
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
                         self.location_handler.persist()
+                        self.flush_vulnerability_ids()
+                        self.flush_burp_request_response()
                         # Apply parser-supplied tags for this batch before post-processing starts,
                         # so rules/deduplication tasks see the tags already on the findings.
                         bulk_apply_parser_tags(findings_with_parser_tags)
@@ -561,6 +564,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 mitigated_findings.append(finding)
         # Persist any accumulated location/endpoint status changes
         self.location_handler.persist()
+        self.flush_vulnerability_ids()
+        self.flush_burp_request_response()
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
@@ -955,24 +960,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     ) -> Finding:
         """
         Reconcile vulnerability IDs for an existing finding.
-        Checks if IDs have changed before updating to avoid unnecessary database operations.
-        Uses prefetched data if available, otherwise fetches efficiently.
-
-        Args:
-            finding: The existing finding to reconcile vulnerability IDs for.
-                Must have unsaved_vulnerability_ids set.
-
-        Returns:
-            The finding object
-
+        Accumulates changes into pending_vuln_id_deletes / pending_vulnerability_ids
+        for batch flush at the batch boundary via flush_vulnerability_ids().
         """
-        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
+        vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
+        vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
         # Use prefetched data directly without triggering queries
         existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
         new_vuln_ids = set(vulnerability_ids_to_process)
 
-        # Early exit if unchanged
+        # Early exit if unchanged — no DB work needed
         if existing_vuln_ids == new_vuln_ids:
             logger.debug(
                 f"Skipping vulnerability_ids update for finding {finding.id} - "
@@ -980,8 +978,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             return finding
 
-        # Update if changed
-        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=True)
+        # Accumulate delete + insert for batch flush
+        self.pending_vuln_id_deletes.append(finding.id)
+        self.pending_vulnerability_ids.extend([
+            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            for vid in vulnerability_ids_to_process
+        ])
+        if vulnerability_ids_to_process:
+            finding.cve = vulnerability_ids_to_process[0]
+        else:
+            finding.cve = None
         return finding
 
     def finding_post_processing(

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import dateutil.parser
 
 from dojo.models import Finding
+from dojo.tools.checkmarx.parser import CheckmarxParser
 
 logger = logging.getLogger(__name__)
 
@@ -52,10 +53,15 @@ class CheckmarxCXFlowSastParser:
         return "Detailed Report. Import all vulnerabilities from checkmarx without aggregation"
 
     def get_findings(self, file, test):
-        if file.name.strip().lower().endswith(".json"):
+        file_name = file.name.strip().lower()
+        if file_name.endswith(".json"):
             return self._get_findings_json(file, test)
-        # TODO: support CxXML format
-        logger.warning("Not supported file format $%s", file)
+        if file_name.endswith(".xml"):
+            parser = CheckmarxParser()
+            parser.set_mode("detailed")
+            return parser.get_findings(file, test)
+
+        logger.warning("Not supported file format %s", file)
         return []
 
     def _get_findings_json(self, file, test):
