@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -5,6 +6,7 @@ import time
 import unittest
 from pathlib import Path
 
+import requests
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest
 from selenium.common.exceptions import TimeoutException
@@ -509,92 +511,186 @@ class DedupeTest(BaseTestCase):
         # Since we imported the same report twice but with different service names, we should have no duplicates
         self.check_nb_duplicates(0)
 
-# --------------------------------------------------------------------------------------------------------
-# 'async_wait' deduplication execution mode
-#   Unlike the tests above (which poll with retries while the background dedupe
-#   task catches up), 'async_wait' makes the import request block until dedupe
-#   has finished, so duplicates must be visible immediately. This exercises the
-#   real cross-process worker->request join that the eager unit tests cannot.
-# --------------------------------------------------------------------------------------------------------
-    def check_nb_duplicates_no_wait(self, expected_number_of_duplicates):
-        # Deliberately NO sleep/retry (contrast with check_nb_duplicates): in
-        # 'async_wait' mode the import only returns once dedupe has completed, so
-        # the duplicates must already be marked on the first findings-list load.
-        logger.debug("checking duplicates without waiting...")
-        driver = self.driver
-        self.goto_all_findings_list(driver)
-        dupe_count = 0
-        trs = driver.find_elements(By.XPATH, '//*[@id="open_findings"]/tbody/tr')
-        for row in trs:
-            concatRow = " ".join([td.text for td in row.find_elements(By.XPATH, ".//td")])
-            if "(DUPE)" and "Duplicate" in concatRow:
-                dupe_count += 1
-        if dupe_count != expected_number_of_duplicates:
-            logger.debug(driver.find_element(By.ID, "open_findings").get_attribute("innerHTML"))
+
+class ImportAsyncWaitApiTest(unittest.TestCase):
+
+    """
+    Deterministic API test for the import 'async_wait' deduplication mode.
+
+    The Selenium async_wait test above is only a UI smoke test: with 2 findings
+    and several page navigations between the import and the duplicate check, the
+    background dedupe finishes regardless of whether the import actually blocked,
+    so it cannot fail when the cross-process join is broken. The eager unit tests
+    (CELERY_TASK_ALWAYS_EAGER) and the mocked perf test can't catch it either.
+
+    This test runs against the real docker-compose stack: a separate celeryworker
+    process + broker, with the global CELERY_TASK_IGNORE_RESULT in effect. It is
+    the only coverage that can fail when the join is a no-op.
+
+    How it stays deterministic without timing hacks or production test hooks:
+      - It imports a *large* report (LARGE_N findings) twice into a dedup-on-
+        engagement engagement, so the second import's findings deduplicate against
+        the first.
+      - Background deduplication of LARGE_N findings takes ~1s of real worker time,
+        far longer than the single API round-trip used to observe the result.
+      - 'async_wait' must block until that work finishes, so duplicates are ALL
+        marked by the time the import response returns -> observed count == LARGE_N.
+      - plain 'async' does not block, so at response time essentially none are
+        marked yet -> observed count < LARGE_N (and deduplication_complete False).
+    A broken/no-op join makes 'async_wait' behave exactly like 'async' (count <
+    LARGE_N), which fails this test.
+    """
+
+    # Large enough that real background dedup cannot finish within the single
+    # observation round-trip, but small enough to keep the test fast (~seconds).
+    LARGE_N = 400
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = os.environ["DD_BASE_URL"].rstrip("/")
+        cls.api = cls.base_url + "/api/v2"
+        resp = requests.post(
+            cls.api + "/api-token-auth/",
+            data={
+                "username": os.environ["DD_ADMIN_USER"],
+                "password": os.environ["DD_ADMIN_PASSWORD"],
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        cls.headers = {"Authorization": "Token " + resp.json()["token"]}
+        # Deduplication must be enabled globally for the mode to do anything.
+        cls._patch("/system_settings/1/", {"enable_deduplication": True})
+
+    # --- thin API helpers -------------------------------------------------
+    @classmethod
+    def _get(cls, path, **params):
+        r = requests.get(cls.api + path, headers=cls.headers, params=params, timeout=60)
+        r.raise_for_status()
+        return r.json()
+
+    @classmethod
+    def _post(cls, path, payload):
+        r = requests.post(cls.api + path, headers=cls.headers, json=payload, timeout=60)
+        r.raise_for_status()
+        return r.json()
+
+    @classmethod
+    def _patch(cls, path, payload):
+        r = requests.patch(cls.api + path, headers=cls.headers, json=payload, timeout=60)
+        r.raise_for_status()
+        return r.json()
+
+    # --- fixtures ---------------------------------------------------------
+    def _make_engagement(self, name):
+        """Create a product + dedup-on-engagement engagement, return its id."""
+        suffix = f"{os.getpid()}-{name}"
+        prod_types = self._get("/product_types/", limit=1)["results"]
+        prod_type_id = (
+            prod_types[0]["id"] if prod_types
+            else self._post("/product_types/", {"name": f"async_wait pt {suffix}"})["id"]
+        )
+        product = self._post("/products/", {
+            "name": f"async_wait prod {suffix}",
+            "description": "async_wait integration test",
+            "prod_type": prod_type_id,
+        })
+        engagement = self._post("/engagements/", {
+            "name": f"async_wait eng {suffix}",
+            "product": product["id"],
+            "target_start": "2020-01-01",
+            "target_end": "2030-01-01",
+            "deduplication_on_engagement": True,
+            "engagement_type": "CI/CD",
+        })
+        return engagement["id"]
+
+    def _generic_report(self):
+        """
+        A Generic Findings Import report of LARGE_N unique findings.
+
+        Re-importing the identical content into a second test of the same
+        dedup-on-engagement engagement marks all LARGE_N as duplicates.
+        """
+        findings = [
+            {
+                "title": f"async_wait finding {i}",
+                "severity": "High",
+                "description": f"async_wait dedup finding number {i}",
+            }
+            for i in range(self.LARGE_N)
+        ]
+        return json.dumps({"findings": findings})
+
+    def _import(self, engagement_id, mode):
+        """POST /import-scan and return (response_json, test_id)."""
+        report = self._generic_report()
+        resp = requests.post(
+            self.api + "/import-scan/",
+            headers=self.headers,
+            data={
+                "scan_type": "Generic Findings Import",
+                "engagement": engagement_id,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": False,
+                "deduplication_execution_mode": mode,
+            },
+            files={"file": ("report.json", report, "application/json")},
+            timeout=120,
+        )
+        self.assertEqual(resp.status_code, 201, resp.text)
+        body = resp.json()
+        return body, body["test"]
+
+    def _duplicates_marked(self, test_id):
+        """Count findings flagged duplicate in a test, WITHOUT any wait/retry."""
+        return self._get("/findings/", test=test_id, duplicate=True, limit=1)["count"]
+
+    # --- tests ------------------------------------------------------------
+    def test_async_wait_blocks_until_dedupe_complete(self):
+        """async_wait: response reports completion AND all dupes already marked."""
+        engagement_id = self._make_engagement("wait")
+        # First import populates the engagement.
+        self._import(engagement_id, "async_wait")
+        # Second identical import deduplicates against the first.
+        body, test_id = self._import(engagement_id, "async_wait")
+
+        self.assertTrue(
+            body.get("deduplication_complete"),
+            f"async_wait did not report deduplication_complete: {body}",
+        )
+        # No sleep/retry: async_wait must have blocked until dedupe finished, so
+        # every finding in the second import is already marked duplicate.
+        marked = self._duplicates_marked(test_id)
         self.assertEqual(
-            dupe_count, expected_number_of_duplicates,
-            "duplicates were not visible immediately after an async_wait import "
-            "(the request did not block until deduplication finished)",
+            marked, self.LARGE_N,
+            f"async_wait returned with only {marked}/{self.LARGE_N} duplicates marked "
+            "-> the cross-process join did not block until deduplication finished",
         )
 
-    @on_exception_html_source_logger
-    def test_set_async_wait_mode(self):
-        self.set_deduplication_execution_mode("async_wait")
+    def test_async_does_not_block(self):
+        """
+        Control: plain async returns before dedupe -> incomplete + few marked.
 
-    @on_exception_html_source_logger
-    def test_reset_dedup_mode(self):
-        # Restore the default so later tests/suites are unaffected.
-        self.set_deduplication_execution_mode("async")
+        Proves the assertion above is meaningful: with a non-blocking dispatch the
+        duplicates are NOT all marked at response time. A broken async_wait would
+        look exactly like this and so fail the test above.
+        """
+        engagement_id = self._make_engagement("async")
+        self._import(engagement_id, "async")
+        body, test_id = self._import(engagement_id, "async")
 
-    @on_exception_html_source_logger
-    def test_add_async_wait_test_suite(self):
-        logger.debug("async_wait dedupe - creating engagement + two Checkmarx tests...")
-        driver = self.driver
-        self.goto_product_overview(driver)
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.pull-left").click()
-        driver.find_element(By.LINK_TEXT, "Add New Engagement").click()
-        driver.find_element(By.ID, "id_name").send_keys("Dedupe Async Wait")
-        driver.find_element(By.XPATH, '//*[@id="id_deduplication_on_engagement"]').click()
-        driver.find_element(By.NAME, "_Add Tests").click()
-        self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
-        # Test 1
-        driver.find_element(By.ID, "id_title").send_keys("Async Wait Test 1")
-        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Checkmarx Scan")
-        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.NAME, "_Add Another Test").click()
-        self.assertTrue(self.is_success_message_present(text="Test added successfully"))
-        # Test 2
-        driver.find_element(By.ID, "id_title").send_keys("Async Wait Test 2")
-        Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Checkmarx Scan")
-        Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
-        self.assertTrue(self.is_success_message_present(text="Test added successfully"))
-
-    @on_exception_html_source_logger
-    def test_import_async_wait_tests(self):
-        logger.debug("importing the same Checkmarx report into both tests under async_wait...")
-        driver = self.driver
-        # Test 1 - same report imported into both tests; the second import's
-        # findings deduplicate against the first.
-        self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Async Wait").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Async Wait Test 1").click()
-        driver.find_element(By.ID, "dropdownMenu1").click()
-        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "multiple_findings.xml"))
-        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
-        self.assertTrue(self.is_success_message_present(text="a total of 2 findings"))
-        # Test 2 - second import of the same findings -> 2 duplicates.
-        self.goto_active_engagements_overview(driver)
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Dedupe Async Wait").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Async Wait Test 2").click()
-        driver.find_element(By.ID, "dropdownMenu1").click()
-        driver.find_element(By.LINK_TEXT, "Re-Upload Scan").click()
-        driver.find_element(By.ID, "id_file").send_keys(str(self.relative_path / "dedupe_scans" / "multiple_findings.xml"))
-        driver.find_elements(By.CSS_SELECTOR, "button.btn.btn-primary")[1].click()
-        self.assertTrue(self.is_success_message_present(text="a total of 2 findings"))
-        # No sleep/retry: async_wait must have blocked until dedupe finished.
-        self.check_nb_duplicates_no_wait(2)
+        self.assertFalse(
+            body.get("deduplication_complete"),
+            f"async unexpectedly reported deduplication_complete: {body}",
+        )
+        marked = self._duplicates_marked(test_id)
+        self.assertLess(
+            marked, self.LARGE_N,
+            f"async marked all {self.LARGE_N} duplicates at response time "
+            "-> it unexpectedly blocked (background dedupe should not have finished)",
+        )
 
 
 def add_dedupe_tests_to_suite(suite, *, jira=False, github=False, block_execution=False):
@@ -648,13 +744,6 @@ def add_dedupe_tests_to_suite(suite, *, jira=False, github=False, block_executio
     suite.addTest(DedupeTest("test_delete_findings"))
     suite.addTest(DedupeTest("test_import_service"))
     suite.addTest(DedupeTest("test_check_service"))
-    # 'async_wait' execution mode: the import request blocks until dedupe
-    # completes, so duplicates are visible immediately (no polling needed).
-    suite.addTest(DedupeTest("test_set_async_wait_mode"))
-    suite.addTest(DedupeTest("test_delete_findings"))
-    suite.addTest(DedupeTest("test_add_async_wait_test_suite"))
-    suite.addTest(DedupeTest("test_import_async_wait_tests"))
-    suite.addTest(DedupeTest("test_reset_dedup_mode"))
     # Clean up
     suite.addTest(ProductTest("test_delete_product"))
     return suite
@@ -664,6 +753,10 @@ def suite():
     suite = unittest.TestSuite()
     add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False)
     add_dedupe_tests_to_suite(suite, jira=True, github=True, block_execution=True)
+    # Deterministic real-worker guard for 'async_wait' (independent of jira/github,
+    # so added once rather than per add_dedupe_tests_to_suite run).
+    suite.addTest(ImportAsyncWaitApiTest("test_async_wait_blocks_until_dedupe_complete"))
+    suite.addTest(ImportAsyncWaitApiTest("test_async_does_not_block"))
     return suite
 
 
