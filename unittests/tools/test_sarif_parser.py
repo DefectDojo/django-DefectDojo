@@ -580,6 +580,46 @@ add_core(ptr, offset, val);
             get_fingerprints_hashes(data2["fingerprints"]),
         )
 
+        # some tools (e.g. BlackDuck) wrap the hash as {"value": "<hash>"} instead of a plain string
+        data3 = {"fingerprints": {"csvRowSha256": {"value": "abc123"}}}
+        self.assertEqual(
+            {"csvRowSha256": {"version": 0, "value": "abc123"}},
+            get_fingerprints_hashes(data3["fingerprints"]),
+        )
+
+        # nested dict with no "value" key falls back to empty string rather than raising KeyError
+        data4 = {"fingerprints": {"csvRowSha256": {"other": "data"}}}
+        self.assertEqual(
+            {"csvRowSha256": {"version": 0, "value": ""}},
+            get_fingerprints_hashes(data4["fingerprints"]),
+        )
+
+    def test_blackduck_nested_fingerprints(self):
+        """
+        BlackDuck wraps fingerprint values as {"value": "<hash>"} instead of a plain string.
+        Verify unique_id_from_tool is extracted as a string, not left as a dict.
+        """
+        with (get_unit_tests_scans_path("sarif") / "blackduck_nested_fingerprints.sarif").open(encoding="utf-8") as testfile:
+            parser = SarifParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(5, len(findings))
+            for finding in findings:
+                self.common_checks(finding)
+                self.assertIsInstance(finding.unique_id_from_tool, str)
+                self.assertFalse(finding.unique_id_from_tool.startswith("{"))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", finding.unique_id_from_tool)
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", finding.unique_id_from_tool)
+            with self.subTest(i=3):
+                finding = findings[3]
+                self.assertEqual("Info", finding.severity)
+                self.assertEqual("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", finding.unique_id_from_tool)
+
     def test_tags_from_result_properties(self):
         with (get_unit_tests_scans_path("sarif") / "taint-python-report.sarif").open(encoding="utf-8") as testfile:
             parser = SarifParser()

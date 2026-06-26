@@ -10,12 +10,46 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
-## June 2026: v2.59
+## June 2026: v3.0
 
-### June 1, 2026: v2.59.0
+### June 22, 2026: v3.0.100
 
-* **(Authorization)** Pro deployments are **not impacted** by the OS legacy authorization rewrite. Pro retains full RBAC: the Members / Groups panels on Product and Product Type detail, the Groups panel + Global Role fieldset on the user view / profile / add user pages, the Group Members panel on the user view, the Groups link in the left-nav, and the System Settings default-group fields all continue to render unchanged, driven by Pro RBAC via template overrides at `pro/templates/dojo/`. The eight RBAC v2 API endpoints (`/api/v2/dojo_groups/`, `/api/v2/dojo_group_members/`, `/api/v2/global_roles/`, `/api/v2/product_groups/`, `/api/v2/product_members/`, `/api/v2/product_type_groups/`, `/api/v2/product_type_members/`, `/api/v2/roles/`) are re-registered by Pro's `add_*_urls` hooks. Pro's runtime authorization shadowing in `pro/apps.py:DojoProConfig.ready()` continues to govern object, global, and configuration permissions, so the OS-side `is_staff` bypass for configuration permissions does not affect Pro semantics.
-* **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, and remote-user header auth) are **Pro-only** as of 2.59. The implementation that previously shipped in open source (`dojo/sso/`) was consolidated into Pro at `pro/sso/`, and the social-auth and djangosaml2 dependencies moved to Pro's package. Pro deployments continue to expose the full SSO surface — login buttons, the tuner-driven runtime configuration, and the `remove_sso` management command — unchanged. Open source customers using SSO need to migrate to Pro to retain SSO sign-in.
+* **(Pro UI)** Added native Excel (`.xlsx`) export for Findings, Engagements, and Users.
+* **(Pro UI)** Bulk "Add to Existing Finding Group" no longer fails with an "Invalid pk 'None'" error.
+* **(Classic UI)** Fixed the disclaimer border rendering in the new UI.
+* **(Findings)** Blank component values are now normalized to NULL for consistent matching and filtering.
+* **(Reports)** Added DefectDojo Pro Report Builder guides (UI, API, and LLM).
+* **(Tools)** Added a PICUS Breach and Attack Simulation CSV parser.
+* **(Tools)** Added a Govulncheck Scanner V2 parser.
+* **(Tools)** cargo-audit parser now parses CVSS vectors and derives severity from them.
+
+### June 18, 2026: v3.0.2
+
+* **(SSO)** SAML now keeps the Pro group-mapping backend as the active authentication backend.
+* **(API)** Restored `members` and `authorization_groups` fields on the Asset and Organization serializers.
+* **(API)** Registered the `asset_*` / `organization_*` RBAC alias routes.
+* **(API)** Restored RBAC fields on `/api/v2/user_profile/`.
+
+### June 17, 2026: v3.0.1
+
+* **(Pro UI)** Calendar sidebar now honors the "Enable Calendar" system setting.
+* **(Pro UI)** Keyword search no longer blanks the Components table.
+* **(Reports)** Added a Finding quick report via the reporting engine.
+* **(SSO)** Azure AD configuration now requires and defaults the Application ID URI.
+* **(Locations)** Single-location filter now resolves correctly against the Location model.
+* **(API)** Fixed a 500 error when deleting an Organization/Asset that still has deprecated endpoints; the new-UI banner now points at 3.3.0.
+* **(API)** Refactored and enhanced API permissions.
+
+### June 15, 2026: v3.0.0
+
+* **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
+* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic — API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
+* **(Authorization)** Open Source restores the **Authorized Users** panel on Product/Product Type detail under the legacy authorization model; Pro deployments retain full RBAC and are not impacted. See [Authorized Users panel replaces Members/Groups under legacy authorization](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
+* **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
+* **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
+* **(API)** Removed the Credential Manager feature and its API endpoints. See [Removal: Credential Manager](/releases/os_upgrading/3.0/#removal-credential-manager).
+* **(API)** Removed the Stub Findings feature and its API endpoint. See [Removal: Stub Findings](/releases/os_upgrading/3.0/#removal-stub-findings).
+* **(Search)** Watson search index updates during import/reimport are now batched, tunable via `DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE`. See [Configuration change in Watson Search Indexing](/releases/os_upgrading/3.0/#configuration-change-in-watson-search-indexing).
 
 ## May 2026: v2.58
 

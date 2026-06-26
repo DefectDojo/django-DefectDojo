@@ -1738,7 +1738,8 @@ class ProductViewSet(
             async_del = async_delete()
             async_del.delete(instance)
         else:
-            instance.delete()
+            with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+                instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     # def list(self, request):
@@ -1823,7 +1824,8 @@ class ProductTypeViewSet(
             async_del = async_delete()
             async_del.delete(instance)
         else:
-            instance.delete()
+            with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+                instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @extend_schema(

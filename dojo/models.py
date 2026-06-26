@@ -2715,6 +2715,16 @@ class Finding(BaseModel):
             models.Index(fields=["known_exploited"]),
             models.Index(fields=["ransomware_used"]),
             models.Index(fields=["kev_date"]),
+            models.Index(
+                fields=["severity", "-numerical_severity"],
+                name="idx_finding_sev_active",
+                condition=Q(active=True),
+            ),
+            models.Index(
+                fields=["-date"],
+                name="idx_finding_riskaccepted_date",
+                condition=Q(risk_accepted=True),
+            ),
         ]
 
     def __init__(self, *args, **kwargs):
@@ -2748,6 +2758,13 @@ class Finding(BaseModel):
             user = get_current_user()
         # Title Casing
         self.title = titlecase(self.title[:511])
+        # Normalize blank component fields to NULL so that findings without a component
+        # group together. An empty string is treated as a distinct value from NULL by the
+        # database, which would otherwise produce a separate "None" component group (SC-13073).
+        if self.component_name is not None and not self.component_name.strip():
+            self.component_name = None
+        if self.component_version is not None and not self.component_version.strip():
+            self.component_version = None
         # Set the date of the finding if nothing is supplied
         if self.date is None:
             self.date = timezone.now()

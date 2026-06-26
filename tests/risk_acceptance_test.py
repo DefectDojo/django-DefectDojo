@@ -26,7 +26,7 @@ class RiskAcceptanceTest(BaseTestCase):
         driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
 
         self.assertTrue(
-            self.is_success_message_present(text="Product updated successfully")
+            self.is_success_message_present(text="Asset updated successfully")
             or self.is_text_present_on_page(text="QA Test"),
         )
 

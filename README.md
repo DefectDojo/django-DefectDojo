@@ -34,7 +34,7 @@ Pro Edition: [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 
 OWASP Community Edition: [demo.defectdojo.org](https://demo.defectdojo.org)
 
-Either demo enviornment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
+Either demo environment can be logged into with username `admin` and password `1Defectdojo@demo#appsec`. Please note that the demos are publicly accessible
 and reset every day. Do not put sensitive data in the demo. An easy way to test DefectDojo is to upload some [sample scan reports](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans).
 
 ## Quick Start for Docker Compose

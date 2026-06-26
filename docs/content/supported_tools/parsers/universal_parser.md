@@ -164,11 +164,25 @@ You can edit the Test_Type associated with your Universal Parser to change:
 
 ### Current limitations: editing and deleting a Universal Parser
 
-The field-mapping configuration of an existing Universal Parser cannot be modified after it is created — only the associated Test_Type (above) is editable. There is also no in-UI option to delete a Universal Parser.
+A Universal Parser's lifecycle is **create-only**. The field-mapping configuration of an existing Universal Parser cannot be modified after it is created — only the associated Test_Type (above) is editable. There is also no in-UI option to delete a Universal Parser. This is by design: Universal Parser configurations are tied to Test_Type records that may already be referenced by Findings, Tests, and import history.
+
+What you **can** do from the UI:
+
+* **Deactivate** a parser to hide it from the "Scan Type" drop-down on import. Open **Import → Universal Parser** in the sidebar to see all of your Universal Parsers, and toggle "Active" off (or edit the underlying Test_Type and uncheck "active"). Existing Tests already imported under this parser are unaffected.
+* **Reactivate** a deactivated parser from the same screen.
 
 The current workaround for both cases is:
 
-* **To change a parser's field mappings:** create a new Universal Parser with the desired mappings (using a representative sample file as in Step 1), and switch new imports to use the new parser. Existing Tests already imported under the old parser are unaffected.
-* **To "retire" a parser you no longer want to use:** mark its associated Test_Type as inactive (uncheck "active" on the Test_Type). It will stop appearing in the "Scan Type" drop-down on the Add Findings page. The parser configuration itself will remain in the database.
+* **To change a parser's field mappings:** create a new Universal Parser with the desired mappings (using a representative sample file as in Step 1), and switch new imports to use the new parser. Existing Tests already imported under the old parser are unaffected. Then deactivate the old parser so it stops appearing in the Scan Type drop-down.
+* **To "retire" a parser you no longer want to use:** deactivate it as described above. The parser configuration itself will remain in the database for the benefit of historical Tests.
 
 If you need a parser configuration permanently removed (for example, because it contains sensitive field names), contact [DefectDojo Support](mailto:support@defectdojo.com).
+
+### A note about severity mapping
+
+The Universal Parser does not have a configurable severity-mapping field. Severity values from your scan file are mapped automatically:
+
+* Any case variation of a DefectDojo severity is accepted — `CRITICAL`, `Critical`, `cRiTiCaL`, `critical` all map to **Critical**. The same applies to `High`, `Medium`, `Low`, and `Info`.
+* Any value that does not match one of DefectDojo's five severities is mapped to **Info**.
+
+This is the same behavior as the rest of DefectDojo's parsers. If your scanner emits severity labels that don't line up with DefectDojo's (e.g. "warning", "note", numeric CVSS scores), the recommended workaround is to **transform the severity values upstream** — in your CI pipeline before uploading — so the values DefectDojo receives are already one of the five DefectDojo severity names.
