@@ -9,6 +9,10 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
+# Key under UserContactInfo.user_state_details holding the hash of the most
+# recently dismissed open-source promo banner.
+OS_MESSAGE_DISMISSED_KEY = "os_message_dismissed_hash"
+
 BUCKET_URL = "https://storage.googleapis.com/defectdojo-os-messages-prod/open_source_message.md"
 CACHE_SECONDS = 3600
 HTTP_TIMEOUT_SECONDS = 2

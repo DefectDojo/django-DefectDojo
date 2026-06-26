@@ -10,6 +10,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
+from dojo.announcement.os_message import OS_MESSAGE_DISMISSED_KEY
 from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
 from dojo.models import Announcement, UserAnnouncement, UserContactInfo
 from dojo.utils import add_breadcrumb
@@ -97,9 +98,11 @@ def dismiss_os_message(request):
     token = request.POST.get("token", "").strip()
     if token and re.fullmatch(r"[0-9a-f]{1,64}", token):
         contact = UserContactInfo.objects.get_or_create(user=request.user)[0]
-        if contact.os_message_dismissed_hash != token:
-            contact.os_message_dismissed_hash = token
-            contact.save(update_fields=["os_message_dismissed_hash"])
+        state = contact.user_state_details or {}
+        if state.get(OS_MESSAGE_DISMISSED_KEY) != token:
+            state[OS_MESSAGE_DISMISSED_KEY] = token
+            contact.user_state_details = state
+            contact.save(update_fields=["user_state_details"])
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return HttpResponse(status=204)
     referer = request.META.get("HTTP_REFERER")

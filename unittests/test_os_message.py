@@ -276,7 +276,7 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
         request.user = SimpleNamespace(
             is_authenticated=True,
             usercontactinfo=SimpleNamespace(
-                os_message_dismissed_hash=dismissed_hash,
+                user_state_details={os_message.OS_MESSAGE_DISMISSED_KEY: dismissed_hash},
                 ui_use_tailwind=ui_use_tailwind,
             ),
         )
@@ -331,7 +331,7 @@ class TestDismissOsMessageView(DojoTestCase):
         response = self.client.post(self.url, {"token": "abc123def456"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
         self.assertEqual(response.status_code, 204)
         contact = UserContactInfo.objects.get(user=self.user)
-        self.assertEqual(contact.os_message_dismissed_hash, "abc123def456")
+        self.assertEqual(contact.user_state_details.get(os_message.OS_MESSAGE_DISMISSED_KEY), "abc123def456")
 
     def test_get_not_allowed(self):
         self.assertEqual(self.client.get(self.url).status_code, 405)
@@ -340,7 +340,8 @@ class TestDismissOsMessageView(DojoTestCase):
         response = self.client.post(self.url, {"token": "NOT-HEX!"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
         self.assertEqual(response.status_code, 204)
         contact = UserContactInfo.objects.filter(user=self.user).first()
-        self.assertIn(getattr(contact, "os_message_dismissed_hash", ""), ("", None))
+        state = getattr(contact, "user_state_details", {}) or {}
+        self.assertNotIn(os_message.OS_MESSAGE_DISMISSED_KEY, state)
 
     def test_requires_authentication(self):
         self.client.logout()

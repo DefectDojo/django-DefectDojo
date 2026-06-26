@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.urls import NoReverseMatch, reverse
 
-from dojo.announcement.os_message import get_os_banner
+from dojo.announcement.os_message import OS_MESSAGE_DISMISSED_KEY, get_os_banner
 from dojo.labels import get_labels
 from dojo.models import System_Settings, UserAnnouncement
 
@@ -80,7 +80,9 @@ def _should_show_ui_toggle_banner(request):
 
 def _os_message_dismissed(user, token):
     contact = getattr(user, "usercontactinfo", None)
-    return contact is not None and contact.os_message_dismissed_hash == token
+    if contact is None:
+        return False
+    return (contact.user_state_details or {}).get(OS_MESSAGE_DISMISSED_KEY) == token
 
 
 def bind_system_settings(request):
