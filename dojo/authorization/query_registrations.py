@@ -362,6 +362,13 @@ def _get_authorized_endpoints(permission, user=None):
 register_auth_filter("endpoint.get_authorized_endpoints", _get_authorized_endpoints)
 
 
+def _get_authorized_endpoints_for_queryset(permission, queryset, user=None):
+    return _filter_by_authorized_products(queryset, "product", permission, user=user)
+
+
+register_auth_filter("endpoint.get_authorized_endpoints_for_queryset", _get_authorized_endpoints_for_queryset)
+
+
 def _get_authorized_endpoint_status(permission, user=None):
     return _filter_by_authorized_products(
         Endpoint_Status.objects.all(), "endpoint__product", permission, user=user,
@@ -369,6 +376,13 @@ def _get_authorized_endpoint_status(permission, user=None):
 
 
 register_auth_filter("endpoint.get_authorized_endpoint_status", _get_authorized_endpoint_status)
+
+
+def _get_authorized_endpoint_status_for_queryset(permission, queryset, user=None):
+    return _filter_by_authorized_products(queryset, "endpoint__product", permission, user=user)
+
+
+register_auth_filter("endpoint.get_authorized_endpoint_status_for_queryset", _get_authorized_endpoint_status_for_queryset)
 
 
 # ---------------------------------------------------------------------------
@@ -387,6 +401,7 @@ def _get_authorized_findings(permission, queryset=None, user=None):
 
 
 register_auth_filter("finding.get_authorized_findings", _get_authorized_findings)
+register_auth_filter("finding.get_authorized_findings_for_queryset", _get_authorized_findings)
 
 
 def _get_authorized_vulnerability_ids(permission, queryset=None, user=None):
@@ -400,6 +415,7 @@ def _get_authorized_vulnerability_ids(permission, queryset=None, user=None):
 
 
 register_auth_filter("finding.get_authorized_vulnerability_ids", _get_authorized_vulnerability_ids)
+register_auth_filter("finding.get_authorized_vulnerability_ids_for_queryset", _get_authorized_vulnerability_ids)
 
 
 # ---------------------------------------------------------------------------
