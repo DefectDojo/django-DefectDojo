@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
             model_name="finding",
             index=models.Index(
                 fields=["severity"],
-                name="idx_finding_open_active_by_severity",
+                name="idx_finding_open_active_sev",
                 condition=models.Q(active=True, is_mitigated=False),
             ),
         ),
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
             model_name="finding",
             index=models.Index(
                 fields=["severity", "-numerical_severity"],
-                name="idx_finding_sev_numsev_open_unverified",
+                name="idx_finding_sev_open_unver",
                 condition=models.Q(active=True, verified=False),
             ),
         ),
