@@ -3,6 +3,8 @@ title: "Risk Acceptances"
 description: "Leveraging Risk Acceptances in DefectDojo Pro"
 audience: pro
 weight: 2
+aliases:
+    - /en/working_with_findings/findings_workflows/risk_acceptances/
 ---
 
 **Risk Acceptances** are a special status that can be applied to Findings using either **Full Risk Acceptance** objects or the **Simple Risk Acceptance** workflow.  Risk Acceptances are used to formally document and operationalize the decision to acknowledge a vulnerable Finding without immediately remediating it.

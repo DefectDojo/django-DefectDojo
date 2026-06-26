@@ -1,7 +1,10 @@
 import json
 from datetime import datetime, timedelta
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class XeolParser:
@@ -92,6 +95,13 @@ class XeolParser:
                 cwe=672,
                 references=cycle.get("ProductPermalink", "") + "\n[www.xeol.io/explorer](https://www.xeol.io/explorer)",
             )
+
+            artifact_purl = artifact.get("purl")
+            if settings.V3_FEATURE_LOCATIONS and artifact_purl:
+                license_expression = " OR ".join(artifact.get("licenses", []))
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl=artifact_purl, license_expression=license_expression),
+                )
 
             findings.append(finding)
 

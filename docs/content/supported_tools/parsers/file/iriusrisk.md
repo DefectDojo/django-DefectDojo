@@ -1,0 +1,142 @@
+---
+title: "IriusRisk Threats Scan"
+toc_hide: true
+---
+
+The [IriusRisk](https://www.iriusrisk.com/) parser for DefectDojo supports imports from CSV format. This document details the parsing of IriusRisk threat model CSV exports into DefectDojo field mappings, unmapped fields, and transformation notes for easier troubleshooting and analysis.
+
+## Supported File Types
+
+The IriusRisk parser accepts CSV file format. To generate this file from IriusRisk:
+
+1. Log into your IriusRisk console
+2. Navigate to the project containing your threat model
+3. Export the threats as CSV
+4. Save the file with a `.csv` extension
+5. Upload to DefectDojo using the "IriusRisk Threats Scan" scan type
+
+## Default Deduplication Hashcode Fields
+
+DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- component_name
+
+### Sample Scan Data
+
+Sample IriusRisk scans can be found in the [sample scan data folder](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/iriusrisk).
+
+## Link To Tool
+
+- [IriusRisk](https://www.iriusrisk.com/)
+- [IriusRisk Documentation](https://support.iriusrisk.com/)
+
+## CSV Format (Threat Model Export)
+
+### Total Fields in CSV
+
+- Total data fields: 14
+- Total data fields parsed: 14
+- Total data fields NOT parsed: 0
+
+### CSV Format Field Mapping Details
+
+<details>
+<summary>Click to expand Field Mapping Table</summary>
+
+| Source Field             | DefectDojo Field     | Notes                                                                 |
+| ------------------------ | -------------------- | --------------------------------------------------------------------- |
+| Threat                   | title                | Truncated to 500 characters with "..." suffix if longer               |
+| Current Risk             | severity             | Mapped from IriusRisk risk levels to DefectDojo severity levels       |
+| Component                | component_name       | The affected asset or component from the threat model                 |
+| Threat                   | description          | Full threat text included as first line of structured description     |
+| Component                | description          | Included in structured description block                              |
+| Use case                 | description          | Threat category included in structured description                    |
+| Source                   | description          | Origin of the threat included in structured description               |
+| Inherent Risk            | description          | Pre-control risk level included in structured description             |
+| Current Risk             | description          | Current risk level included in structured description                 |
+| Projected Risk           | description          | Post-mitigation risk level included in structured description         |
+| Countermeasure progress  | description          | Percentage complete included in structured description                |
+| Weakness tests           | description          | Test status included in structured description                        |
+| Countermeasure tests     | description          | Test status included in structured description                        |
+| Owner                    | description          | Conditionally appended to description only when present               |
+| STRIDE-LM               | description          | Conditionally appended to description only when present               |
+| Risk Response            | mitigation           | Mitigation status percentages from IriusRisk                          |
+| MITRE reference          | cwe                  | When value matches CWE-NNN pattern, integer is extracted to cwe field |
+| MITRE reference          | references           | When value does not match CWE pattern, stored as references           |
+
+</details>
+
+### Additional Finding Field Settings (CSV Format)
+
+<details>
+<summary>Click to expand Additional Settings Table</summary>
+
+| Finding Field    | Default Value                    | Notes                                                       |
+| ---------------- | -------------------------------- | ----------------------------------------------------------- |
+| static_finding   | False                            | Threat model data is neither static nor dynamic analysis    |
+| dynamic_finding  | False                            | Threat model data is neither static nor dynamic analysis    |
+| active           | True (False when "Very low")     | Set to False when Current Risk is "Very low" (fully mitigated) |
+
+</details>
+
+## Special Processing Notes
+
+### Status Conversion
+
+IriusRisk uses a five-level risk scale that is mapped to DefectDojo severity levels:
+
+- `Critical` → Critical
+- `High` → High
+- `Medium` → Medium
+- `Low` → Low
+- `Very low` → Info
+
+Any unrecognized risk value defaults to Info. The mapping uses the "Current Risk" column, which reflects the risk level accounting for existing controls and represents the most accurate current exposure.
+
+### Title Format
+
+Finding titles are derived from the "Threat" column. Threat descriptions longer than 500 characters are truncated to 497 characters with a "..." suffix appended. Shorter threat texts are used as-is without modification.
+
+### Description Construction
+
+The parser constructs a structured markdown description containing all relevant CSV fields:
+
+1. Full threat text (untruncated, regardless of title truncation)
+2. Component name
+3. Use case (threat category, e.g., "Elevation of Privilege", "Networking")
+4. Source (e.g., "Created by Rules Engine")
+5. Inherent Risk (pre-control risk level)
+6. Current Risk (risk with existing controls)
+7. Projected Risk (risk after planned mitigations)
+8. Countermeasure Progress (percentage complete)
+9. Weakness Tests (test status)
+10. Countermeasure Tests (test status)
+11. Owner (conditionally included only when the field contains a value)
+12. STRIDE-LM (conditionally included only when the field contains a value)
+
+Each field is formatted as a bold markdown label followed by the value, with fields separated by newlines.
+
+### MITRE Reference / CWE Extraction
+
+The parser reads the "MITRE reference" column and applies conditional mapping:
+
+- If the value matches the pattern `CWE-NNN` (e.g., "CWE-284"), the integer portion is extracted and set on the finding's `cwe` field.
+- If the value is present but does not match the CWE pattern (e.g., "T1059" for a MITRE ATT&CK technique), the full value is stored in the finding's `references` field.
+- If the column is empty, neither field is set.
+
+### Mitigation Construction
+
+The mitigation field is populated directly from the "Risk Response" column, which contains the IriusRisk mitigation status in the format: "Planned mitigation: X%. Mitigated: Y%. Unmitigated: Z%." This preserves the original IriusRisk mitigation tracking percentages.
+
+### Active/Inactive Logic
+
+Findings are set to active by default. When the "Current Risk" value is "Very low", the finding is set to inactive, as this indicates the threat has been fully mitigated through implemented countermeasures.
+
+### Deduplication
+
+Deduplication uses DefectDojo's hashcode algorithm with the title and component_name fields to identify duplicate findings. These stable fields ensure that reimports correctly match existing findings even when risk levels or countermeasure progress change between scans.
+
+### Duplicate Rows in Source Data
+
+IriusRisk CSV exports can contain multiple rows with the same Component and Threat but different Risk Response values. These represent distinct countermeasure paths for the same threat. Each row is imported as a separate finding, distinguished by its description content which incorporates all CSV fields.

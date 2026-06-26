@@ -1,8 +1,13 @@
 ---
 title: "Action permission charts"
-description: "All user permissions in detail"
+description: "All DefectDojo Pro user permissions in detail"
 weight: 4
+audience: pro
+aliases:
+  - /en/customize_dojo/user_management/user_permission_chart
 ---
+
+> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
 
 ## Role Permission Chart
 
@@ -62,10 +67,12 @@ The majority of Configuration Permissions give users access to certain pages in 
 | Login Banner | n/a | n/a | Edit the login banner, located under **⚙️Configuration \> Login Banner** | n/a |
 | Announcements | n/a | n/a | Configure Announcements, located under  **⚙️Configuration \> Announcements** | n/a |
 | Note Types | Access the ⚙️Configuration \> Note Types page | Add a Note Type | Edit a Note Type | Delete a Note Type |
+| Prioritization Engines | Access the Prioritization Engine configuration page | Add a new Prioritization Engine | Edit an existing Prioritization Engine | Delete a Prioritization Engine |
 | Product Types | n/a | Add a new Product Type (under Products \> Product Type) | n/a | n/a |
 | Questionnaires | Access the **Questionnaires \> All Questionnaires** page | Add a new Questionnaire | Edit an existing Questionnaire | Delete a Questionnaire |
 | Questions | Access the **Questionnaires \> Questions** page | Add a new Question | Edit an existing Question | n/a |
 | Regulations | n/a | Add a Regulation to the **⚙️Configuration \> Regulations** page | Edit an existing Regulation | Delete a Regulation |
+| Scheduling Service Schedule | Access the **Scheduling** page | Superuser only | Edit an existing Schedule (change trigger, enable/disable) | Delete a Schedule |
 | SLA Configuration | Access the **⚙️Configuration \> SLA Configuration** page | Add a new SLA Configuration | Edit an existing SLA Configuration | Delete an SLA Configuration |
 | Test Types | n/a | Add a new Test Type (under **Engagements \> Test Types**) | Edit an existing Test Type | n/a |
 | Tool Configuration | Access the **⚙️Configuration \> Tool Configuration** page | Add a new Tool Configuration | Edit an existing Tool Configuration | Delete a Tool Configuration |

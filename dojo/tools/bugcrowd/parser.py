@@ -6,7 +6,7 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class BugCrowdParser:
@@ -258,4 +258,4 @@ class BugCrowdParser:
         # TODO: Delete this after the move to Locations
         if not settings.V3_FEATURE_LOCATIONS:
             return Endpoint.from_uri(stripped_url) if "://" in stripped_url else Endpoint.from_uri("//" + stripped_url)
-        return URL.from_value(stripped_url) if "://" in stripped_url else URL.from_value("//" + stripped_url)
+        return LocationData.url(url=stripped_url) if "://" in stripped_url else LocationData.url(url="//" + stripped_url)

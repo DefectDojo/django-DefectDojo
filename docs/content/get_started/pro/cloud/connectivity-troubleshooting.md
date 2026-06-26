@@ -3,8 +3,9 @@ title: "Connectivity Troubleshooting"
 description: "Reconnect to your DefectDojo Instance"
 weight: 2
 audience: pro
+aliases:
+  - /en/cloud_management/connectivity-troubleshooting
 ---
-
 If you have difficulty accessing your DefectDojo instance, here are some steps you can follow to get reconnected:
 
 ## I can access the site, but I can't log in

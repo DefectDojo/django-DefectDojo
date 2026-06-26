@@ -18,10 +18,11 @@ class _SupportsApplyAsync(Protocol):
 
 def _inject_async_user(kwargs: Mapping[str, Any] | None) -> dict[str, Any]:
     result: dict[str, Any] = dict(kwargs or {})
-    if "async_user" not in result:
+    if "async_user_id" not in result:
         from dojo.utils import get_current_user  # noqa: PLC0415 circular import
 
-        result["async_user"] = get_current_user()
+        user = get_current_user()
+        result["async_user_id"] = user.id if user else None
     return result
 
 
@@ -58,9 +59,12 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     """
     Dispatch a task/signature using DefectDojo semantics.
 
-    - Inject `async_user` if missing.
+    - Inject `async_user_id` if missing.
     - Capture and inject pghistory context if available.
-    - Respect `sync=True` (foreground execution) and user `block_execution`.
+    - Respect `force_sync=True` (foreground execution) and user `block_execution`.
+    - Respect `force_async=True` (background execution even when the caller
+      would otherwise run synchronously, e.g. user has `block_execution`).
+      `force_async` wins over `force_sync` and `block_execution`.
     - Support `countdown=<seconds>` for async dispatch.
 
     Returns:
@@ -84,8 +88,6 @@ def dojo_dispatch_task(task_or_sig: _SupportsSi | _SupportsApplyAsync | Signatur
     # Track foreground execution as a "created task" as well (matches historical dojo_async_task behavior)
     dojo_async_task_counter.incr(str(sig.task), args=sig.args, kwargs=sig_kwargs)
 
-    sig_kwargs.pop("sync", None)
-    sig = sig.clone(kwargs=sig_kwargs)
     eager = sig.apply()
     try:
         return eager.get(propagate=True)

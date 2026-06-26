@@ -15,8 +15,9 @@ seo:
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
 pro-feature: true
+aliases:
+  - /en/connecting_your_tools/connectors/about_connectors
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
 DefectDojo allows users to build sophisticated API integrations, and gives users full control over how their vulnerability data is organized. 
@@ -25,11 +26,14 @@ But everyone needs a starting point, and that's where Connectors come in. Connec
 
 We currently support Connectors for the following tools, with more on the way:
 
+* **Akamai API Security**
 * **Anchore**
 * **AWS Security Hub**
 * **BurpSuite**
 * **Checkmarx ONE**
-* **Dependency\-Track**
+* **Dependency-Track**
+* **IriusRisk**
+* **JFrog Xray**
 * **Probely**
 * **Semgrep**
 * **SonarQube**

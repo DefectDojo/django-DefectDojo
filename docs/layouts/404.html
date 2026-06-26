@@ -1,8 +1,17 @@
 {{ define "main"}}
-    <main id="main">
-      <div>
-       <h1 id="title">Not found</h1>
-       <p>Oops! This page doesn't exist. Try going back to our <a href="{{ "/" | relURL }}">home page</a>.</p>
+<main id="main">
+  <div class="container py-5">
+    <div class="row justify-content-center text-center">
+      <div class="col-lg-6">
+        <div class="error-code">404</div>
+        <h1 id="title">Page not found</h1>
+        <p class="lead text-muted">Oops! This page doesn't exist. Try going back to our <a href="{{ "/" | relURL }}">home page</a>.</p>
+        <div class="mt-4">
+          <a class="btn btn-primary rounded-pill me-2" href="{{ "/" | relURL }}">Go home</a>
+          <a class="btn btn-outline-primary rounded-pill" href="/get_started/about/about_defectdojo/">Browse docs</a>
+        </div>
       </div>
-    </main>
+    </div>
+  </div>
+</main>
 {{ end }}

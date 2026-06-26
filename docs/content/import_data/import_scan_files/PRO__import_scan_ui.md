@@ -3,8 +3,9 @@ title: "Add Findings form"
 description: ""
 weight: 1
 audience: pro
+aliases:
+  - /en/connecting_your_tools/import_scan_files/import_scan_ui
 ---
-
 If you have a brand new DefectDojo instance, the Import Scan Form is a logical first step to learn the software and set up your environment. From this form, you upload a scan file from a supported tool, which will create Findings to represent those vulnerabilities. While filling out the form, you can decide whether to:
 
 * Store these Findings under an existing Product Type / Product / Engagement **or**
@@ -60,6 +61,25 @@ To open Optional Fields, click the button labelled **"Optional Fields +"** above
 * **Version, Branch Tag, Commit Hash, Build ID, Service** can all be specified if you want to include these details in the Test.
 * **Source Code Management URI** can also be specified. This form option must be a valid URI.
 * **Group By:** if you want to create Finding Groups out of this File, you can specify the grouping method here.
+
+### Close Old Findings
+
+When importing a scan, you can automatically close Findings from previous scans that are no longer present in the new report. Enable this by checking the **Close Old Findings** checkbox in the UI or setting `close_old_findings: true` in the API.
+
+#### Scope: Engagement vs. Product
+
+By default, `close_old_findings` closes Findings of the same scan type within the **same Engagement**. DefectDojo Pro adds a second option — **Close Old Findings Within This Product** — which widens the scope to all Findings of the same scan type across the **entire Product**, regardless of which Engagement they belong to.
+
+| Option | UI checkbox | API parameter | Scope |
+|---|---|---|---|
+| Close old findings (engagement scope) | **Close Old Findings** | `close_old_findings: true` | Same Engagement |
+| Close old findings (product scope) | **Close Old Findings Within This Product** | `close_old_findings_product_scope: true` | Entire Product |
+
+`close_old_findings_product_scope` requires `close_old_findings` to also be enabled. Setting `close_old_findings_product_scope` without `close_old_findings` has no effect.
+
+> **Note:** `close_old_findings_product_scope` only applies to the Import (`/import-scan`) endpoint. It has no effect on the Reimport (`/reimport-scan`) endpoint, where the scope is always limited to the current Test.
+
+The `service` field is also respected: only Findings with an identical `service` value (or no `service` value, if none was specified at import time) will be considered for closure.
 
 ### Triage-less scanners: Do Not Reactivate field
 

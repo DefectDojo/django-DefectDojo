@@ -1,15 +1,10 @@
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from dojo.api_v2.serializers import ProductMetaSerializer, TagListSerializerField
-from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions
 from dojo.models import (
     Dojo_User,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
 )
 from dojo.organization.api.serializers import RelatedOrganizationField
 from dojo.product.queries import get_authorized_products
@@ -17,7 +12,7 @@ from dojo.product.queries import get_authorized_products
 
 class RelatedAssetField(serializers.PrimaryKeyRelatedField):
     def get_queryset(self):
-        return get_authorized_products(Permissions.Product_View)
+        return get_authorized_products("view")
 
 
 class AssetAPIScanConfigurationSerializer(serializers.ModelSerializer):
@@ -78,89 +73,3 @@ class AssetSerializer(serializers.ModelSerializer):
     # TODO: maybe extend_schema_field is needed here?
     def get_findings_list(self, obj) -> list[int]:
         return obj.open_findings_list()
-
-
-class AssetMemberSerializer(serializers.ModelSerializer):
-    asset = RelatedAssetField(source="product")
-
-    class Meta:
-        model = Product_Member
-        exclude = ("product",)
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("asset") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("asset"),
-                Permissions.Product_Manage_Members,
-            )
-        ):
-            msg = "You are not permitted to add a member to this Asset"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("asset") != self.instance.product
-            or data.get("user") != self.instance.user
-        ):
-            members = Product_Member.objects.filter(
-                product=data.get("asset"), user=data.get("user"),
-            )
-            if members.count() > 0:
-                msg = "Asset Member already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("asset"),
-            Permissions.Product_Member_Add_Owner,
-        ):
-            msg = "You are not permitted to add a member as Owner to this Asset"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class AssetGroupSerializer(serializers.ModelSerializer):
-    asset = RelatedAssetField(source="product")
-
-    class Meta:
-        model = Product_Group
-        exclude = ("product",)
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("asset") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("asset"),
-                Permissions.Product_Group_Add,
-            )
-        ):
-            msg = "You are not permitted to add a group to this Asset"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("asset") != self.instance.product
-            or data.get("group") != self.instance.group
-        ):
-            members = Product_Group.objects.filter(
-                product=data.get("asset"), group=data.get("group"),
-            )
-            if members.count() > 0:
-                msg = "Asset Group already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("asset"),
-            Permissions.Product_Group_Add_Owner,
-        ):
-            msg = "You are not permitted to add a group as Owner to this Asset"
-            raise PermissionDenied(msg)
-
-        return data

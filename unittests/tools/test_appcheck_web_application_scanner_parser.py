@@ -1,5 +1,7 @@
 import string
 
+from django.conf import settings
+
 from dojo.models import Finding, Test
 from dojo.tools.appcheck_web_application_scanner.engines.appcheck import AppCheckScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.engines.base import (
@@ -10,6 +12,7 @@ from dojo.tools.appcheck_web_application_scanner.engines.base import (
 )
 from dojo.tools.appcheck_web_application_scanner.engines.nmap import NmapScanningEngineParser
 from dojo.tools.appcheck_web_application_scanner.parser import AppCheckWebApplicationScannerParser
+from dojo.url.models import URL
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -380,7 +383,7 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             ({"url": "", "host": "foobar"}, "foobar"),
             ({"host": "hostname.resolver.com.com"}, "hostname.resolver.com.com"),
         ]:
-            self.assertEqual(expected, engine.get_host(item))
+            self.assertEqual(expected, engine.get_url(item) or engine.get_host(item))
 
         # Test port extraction
         for port, expected in [
@@ -402,12 +405,12 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
         for item, (expected_host, expected_port, expected_path) in [
             ({"host": "foobar.baz", "ipv4_address": "10.0.1.1", "port": 80}, ("foobar.baz", 80, "")),
             (
-                {"url": "http://foobar.baz.qux/http/local", "ipv4_address": "10.0.1.1", "port": 443},
+                {"url": "https://foobar.baz.qux/http/local", "ipv4_address": "10.0.1.1", "port": 443},
                 ("foobar.baz.qux", 443, "http/local"),
             ),
             ({"ipv4_address": "10.0.1.1", "port": 227}, ("10.0.1.1", 227, "")),
             ({"url": "http://examplecom.com/bar", "port": 0}, ("examplecom.com", 80, "bar")),
-            ({"url": "http://examplecom.com/bar", "port": 8080}, ("examplecom.com", 8080, "bar")),
+            ({"url": "http://examplecom.com:8080/bar"}, ("examplecom.com", 8080, "bar")),
             ({"ipv4_address": "10.0.1.1", "port": ""}, ("10.0.1.1", None, "")),
         ]:
             locations = self.parse_locations(engine, item)
@@ -432,7 +435,11 @@ class TestAppCheckWebApplicationScannerParser(DojoTestCase):
             self.assertEqual(0, len(locations))
 
     def parse_locations(self, engine, item):
-        return engine.parse_locations(item)
+        # TODO: Delete this after the move to Locations
+        if not settings.V3_FEATURE_LOCATIONS:
+            return engine.parse_endpoints(item)
+        location_data = engine.parse_locations(item)
+        return [URL.from_location_data(data) for data in location_data]
 
     def test_appcheck_web_application_scanner_parser_nmap_engine_parser(self):
         engine = NmapScanningEngineParser()

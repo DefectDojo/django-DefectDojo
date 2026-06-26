@@ -1,13 +1,11 @@
 import logging
 
 from django.contrib import messages
-from django.core.exceptions import BadRequest
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.forms import DeleteObjectsSettingsForm, ObjectSettingsForm
 from dojo.labels import get_labels
 from dojo.models import Objects_Product, Product
@@ -18,7 +16,6 @@ logger = logging.getLogger(__name__)
 labels = get_labels()
 
 
-@user_is_authorized(Product, Permissions.Product_Tracking_Files_Add, "pid")
 def new_object(request, pid):
     page_name = labels.ASSET_TRACKED_FILES_ADD_LABEL
     prod = get_object_or_404(Product, id=pid)
@@ -46,7 +43,6 @@ def new_object(request, pid):
                    "pid": prod.id})
 
 
-@user_is_authorized(Product, Permissions.Product_Tracking_Files_View, "pid")
 def view_objects(request, pid):
     product = get_object_or_404(Product, id=pid)
     object_queryset = Objects_Product.objects.filter(product=pid).order_by("path", "folder", "artifact")
@@ -61,14 +57,11 @@ def view_objects(request, pid):
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_Tracking_Files_Edit, "pid")
 def edit_object(request, pid, ttid):
-    object_prod = Objects_Product.objects.get(pk=ttid)
+    object_prod = get_object_or_404(Objects_Product, pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object_prod.product != product:
-        msg = labels.ASSET_TRACKED_FILES_ID_MISMATCH_ERROR_MESSAGE % {"asset_id": pid,
-                                                                      "object_asset_id": object_prod.product.id}
-        raise BadRequest(msg)
+        raise PermissionDenied
 
     if request.method == "POST":
         tform = ObjectSettingsForm(request.POST, instance=object_prod)
@@ -92,14 +85,11 @@ def edit_object(request, pid, ttid):
                   })
 
 
-@user_is_authorized(Product, Permissions.Product_Tracking_Files_Delete, "pid")
 def delete_object(request, pid, ttid):
-    object_prod = Objects_Product.objects.get(pk=ttid)
+    object_prod = get_object_or_404(Objects_Product, pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if object_prod.product != product:
-        msg = labels.ASSET_TRACKED_FILES_ID_MISMATCH_ERROR_MESSAGE % {"asset_id": pid,
-                                                                      "object_asset_id": object_prod.product.id}
-        raise BadRequest(msg)
+        raise PermissionDenied
 
     if request.method == "POST":
         tform = ObjectSettingsForm(request.POST, instance=object_prod)

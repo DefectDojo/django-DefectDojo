@@ -1,8 +1,9 @@
 ---
 title: "Set Personal Notifications"
 description: "Configure notifications for a personal account"
+aliases:
+  - /en/customize_dojo/notifications/configure_personal_notifs
 ---
-
 ## Configure Personal notifications
 
 Personal Notifications are sent in addition to System\-Wide Notifications, and will apply to any Product, Product Type or other data type that you have access to. Personal Notification preferences only apply to a single user, and can only be set on the account which is configuring them.

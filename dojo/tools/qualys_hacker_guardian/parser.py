@@ -6,7 +6,7 @@ from dateutil import parser as date_parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class QualysHackerGuardianParser:
@@ -112,7 +112,7 @@ class QualysHackerGuardianParser:
                 nb_occurences=1,
             )
             if settings.V3_FEATURE_LOCATIONS:
-                location = URL.from_value(self.get_endpoint(row))
+                location = LocationData.url(url=self.get_endpoint(row))
                 finding.unsaved_locations = [location]
             else:
                 # TODO: Delete this after the move to Locations

@@ -1,7 +1,11 @@
 import hashlib
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+from dojo.utils import parse_cvss_data
 
 
 class CargoAuditParser:
@@ -14,11 +18,15 @@ class CargoAuditParser:
 
         Fields:
         - title: Set to the title from Cargo Audit Scanner
-        - severity: Set to "High" regardless of context.
+        - severity: Derived from the advisory CVSS vector when available, otherwise "High".
         - tags: Set to the tags from Cargo Audit Scanner if they are provided.
         - description: Set to the description from Cargo Audit Scanner and joined with URL provided.
         - component_name: Set to name of package provided by the Cargo Audit Scanner.
         - component_version: Set to version of package provided by the Cargo Audit Scanner.
+        - cvssv3: Set to the CVSS v3.x vector from the advisory if one is provided.
+        - cvssv3_score: Set to the CVSS v3.x score computed from the vector if one is provided.
+        - cvssv4: Set to the CVSS v4.0 vector from the advisory if one is provided.
+        - cvssv4_score: Set to the CVSS v4.0 score computed from the vector if one is provided.
         - vuln_id_from_tool: Set to id provided by the Cargo Audit Scanner.
         - publish_date: Set to date provided by the Cargo Audit Scanner.
         - nb_occurences: Set to 1 by the parser.
@@ -33,6 +41,10 @@ class CargoAuditParser:
             "description",
             "component_name",
             "component_version",
+            "cvssv3",
+            "cvssv3_score",
+            "cvssv4",
+            "cvssv4_score",
             "vuln_id_from_tool",
             "publish_date",
             "nb_occurences",
@@ -77,24 +89,13 @@ class CargoAuditParser:
                 vuln_id = advisory.get("id")
                 vulnerability_ids = [advisory.get("id")]
                 categories = f"**Categories:** {', '.join(advisory['categories'])}" if "categories" in advisory else ""
-                description = (
-                    categories
-                    + f"\n**Description:** `{advisory.get('description')}`"
-                )
+                description = categories + f"\n**Description:** `{advisory.get('description')}`"
 
-                if (
-                    item["affected"] is not None
-                    and "functions" in item["affected"]
-                ):
+                if item["affected"] is not None and "functions" in item["affected"]:
                     affected_func = [
-                        f'{func}: {", ".join(versions)}'
-                        for func, versions in item["affected"][
-                            "functions"
-                        ].items()
+                        f"{func}: {', '.join(versions)}" for func, versions in item["affected"]["functions"].items()
                     ]
-                    description += (
-                        f"\n**Affected functions**: {', '.join(affected_func)}"
-                    )
+                    description += f"\n**Affected functions**: {', '.join(affected_func)}"
 
                 references = f"{advisory.get('url')}\n" + "\n".join(
                     advisory["references"],
@@ -107,7 +108,16 @@ class CargoAuditParser:
                 package_name = item.get("package").get("name")
                 package_version = item.get("package").get("version")
                 title = f"[{package_name} {package_version}] {advisory.get('title')}"
-                severity = "High"
+                # The advisory may carry a CVSS vector (v3.x or v4.0). When present, use it
+                # to populate the CVSS fields and derive severity; otherwise fall back to "High".
+                cvss_data = {}
+                cvss_vector = advisory.get("cvss")
+                if cvss_vector:
+                    try:
+                        cvss_data = parse_cvss_data(cvss_vector)
+                    except Exception:
+                        cvss_data = {}
+                severity = cvss_data.get("severity") or "High"
                 tags = advisory.get("keywords") if "keywords" in advisory else []
                 try:
                     mitigation = f"**Update {package_name} to** {', '.join(item['versions']['patched'])}"
@@ -127,16 +137,24 @@ class CargoAuditParser:
                         title=title,
                         test=test,
                         severity=severity,
-                        tags=tags,
                         description=description,
                         component_name=package_name,
                         component_version=package_version,
+                        cvssv3=cvss_data.get("cvssv3"),
+                        cvssv3_score=cvss_data.get("cvssv3_score"),
+                        cvssv4=cvss_data.get("cvssv4"),
+                        cvssv4_score=cvss_data.get("cvssv4_score"),
                         vuln_id_from_tool=vuln_id,
                         publish_date=date,
                         nb_occurences=1,
                         references=references,
                         mitigation=mitigation,
                     )
+                    finding.unsaved_tags = tags
                     finding.unsaved_vulnerability_ids = vulnerability_ids
+                    if settings.V3_FEATURE_LOCATIONS and package_name:
+                        finding.unsaved_locations.append(
+                            LocationData.dependency(purl_type="cargo", name=package_name, version=package_version),
+                        )
                     dupes[dupe_key] = finding
         return list(dupes.values())

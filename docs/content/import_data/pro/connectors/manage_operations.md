@@ -1,8 +1,9 @@
 ---
 title: "Managing Operations"
 description: "Check the status of your Connector's Discover & Sync Operations"
+aliases:
+  - /en/connecting_your_tools/connectors/manage_operations
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
 Once an API connector is set up, it will run two Operations on a recurring basis:
@@ -66,7 +67,7 @@ Whenever Sync runs, it will compare the latest scan data against the existing li
 * If there are new Findings detected, they will be added to the Test as new Findings.
 * If there are any Findings which aren’t detected in the latest scan, they will be marked as Inactive in the Test.
 
-To learn more about Products, Engagements, Tests and Findings, see our [Product Hierarchy Overview](/asset_modelling/hierarchy/product_hierarchy/).
+To learn more about Products, Engagements, Tests and Findings, see our [Product Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/).
 
 ### Running Sync Manually
 

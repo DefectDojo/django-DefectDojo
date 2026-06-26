@@ -31,10 +31,7 @@ class TrivyComplianceHandler:
                     check_severity = check.get("severity", "")
                     check_target = check.get("target", "")
                     check_title = check.get("title", "")
-                    if not check_severity:
-                        severity = TRIVY_SEVERITIES[check_severity]
-                    else:
-                        severity = TRIVY_SEVERITIES[result_severity]
+                    severity = TRIVY_SEVERITIES[check_severity] if check_severity else TRIVY_SEVERITIES[result_severity]
                     description += "**result description:** " + result_description + "\n"
                     description += "**result id:** " + result_id + "\n"
                     description += "**result name:** " + result_name + "\n"

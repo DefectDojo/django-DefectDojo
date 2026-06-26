@@ -2,8 +2,9 @@
 title: "Introduction to Findings"
 description: "The main workflow and vulnerability tracking system of DefectDojo"
 weight: 1
+aliases:
+  - /en/working_with_findings/intro_to_findings
 ---
-
 Findings are the main way that DefectDojo standardizes and guides the reporting and remediation process of your security tools. Regardless of whether a vulnerability was reported in SonarQube, Acunetix, or your team’s custom tool, Findings give you the ability to manage each vulnerability in the same way.
 
 ## What are Findings?
@@ -74,7 +75,7 @@ If you’re in charge of security reporting for many different contexts, softwar
 * Each Product in DefectDojo can have a different SLA configuration, so that you can instantly flag Findings that are discovered in Production or other highly sensitive environments.
 * You can create a report directly from a **Product Type, Product, Engagement or Test** to ‘zoom in and out’ of your security context. **Tests** contain results from a single tool, **Engagements** can combine multiple Tests, **Products** can contain multiple Engagements, **Product Types** can contain multiple Products.
 
-For more information on creating a Report, see our guides to **[Custom Reporting](/metrics_reports/reports/using_the_report_builder)**.
+For more information on creating a Report, see our guides to **[Custom Reporting](/metrics_reports/reports/)**.
 
 ### Triage Vulnerabilities using Finding Status
 

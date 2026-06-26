@@ -1,54 +1,55 @@
 ---
 title: "Enabling Deduplication"
-description: "How to enable Deduplication at the Product level"
+description: "How to enable Deduplication at the Product or Engagement level"
 weight: 2
 audience: pro
+aliases:
+  - /en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
-
-Deduplication can be implemented at either a Product level or at a more narrow Engagement level.
+Deduplication can be applied at a Product\-wide level, or scoped more narrowly to a single Engagement.
 
 ## Deduplication for Products
 
-1. Start by navigating to the System Settings page. This is nested under **Settings \> Pro Settings \> ⚙️ System Settings** on the sidebar.
+1. Navigate to the System Settings page: **Settings \> Pro Settings \> ⚙️ System Settings** on the sidebar.
 
 ![image](images/enabling_product-level_deduplication.png)
 
-2. **Deduplication and Finding Settings** are at the top of the **System Settings** menu.  
-​
+2. The **Deduplication and Finding Settings** card is at the top of the **System Settings** page.
+
 ![image](images/enabling_product-level_deduplication_2.png)
 
 ### Enable Finding Deduplication
 
-**Enable Finding Deduplication** will turn on the Deduplication Algorithm for all Findings. Deduplication will be triggered on all subsequent imports \- when this happens, DefectDojo will look at any Findings contained in the destination Product, and deduplicate as per your settings. 
+**Enable Finding Deduplication** turns on the Deduplication Algorithm for all Findings. Once enabled, Deduplication runs on every subsequent import — DefectDojo compares imported Findings against existing Findings in the destination Product and marks duplicates according to your configuration.
 
-### Delete Deduplicate Findings
+### Delete Duplicate Findings
 
-**Delete Deduplicate Findings**, combined with the **Maximum Duplicates** field allows DefectDojo to limit the amount of Duplicate Findings stored. When this field is enabled, DefectDojo will only keep a certain number of Duplicate Findings.
-
-Applying **Delete Deduplicate Findings** will begin a deletion process immediately. DefectDojo will look at each Finding with Duplicates recorded, and will delete old duplicate Findings until the Maximum Duplicate number has been reached.
+**Delete Duplicate Findings**, combined with the **Maximum Duplicates** field, limits how many duplicate Findings DefectDojo retains. When enabled, a background job periodically prunes excess duplicates so that each original Finding keeps no more than the configured **Maximum Duplicates** count. Oldest duplicates are removed first.
 
 ## Deduplication for Engagements
 
-Rather than Deduplicating across an entire Product, you can set a deduplication scope to be within a single Engagement exclusively.
+Rather than Deduplicating across an entire Product, you can scope Deduplication to a single Engagement.
 
-### Edit Engagement page
+### Open the Engagement form
 
-* To enable Deduplication within a New Engagement, start with the **\+ New Engagement** option from the sidebar, which you can find by opening the **📥Engagements** sub\-menu.  
-​
+* **For a new Engagement:** open the **📥 Engagements** sub‑menu on the sidebar and click **\+ New Engagement**.
+
 ![image](images/enabling_deduplication_within_an_engagement.png)
 
-* To enable Deduplication within an existing Engagement: from the **All Engagements** page, select the **Edit Engagement** option from the **⋮** menu.   
-​
+* **For an existing Engagement (from the All Engagements page):** open the **⋮** menu for the Engagement and select **Edit Engagement**.
+
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
-* You can also open this menu from a specific **Engagement Page** by clicking the ⚙️Gear icon in the top\-right hand corner.  
-​
+* **For an existing Engagement (from the Engagement page):** open the **⚙️ Gear** menu in the top‑right corner of the page and select **Edit Engagement**.
+
 ![image](images/enabling_deduplication_within_an_engagement_3.png)
 
-### Completing the Edit Engagement form
+### Completing the Engagement form
 
-1. Start by opening the **Optional Fields \+** menu at the bottom of the **Edit Engagement** form.
-2. Click the ☐ **Deduplication Within This Engagement** box.
+1. On the Engagement form, locate the ☐ **Isolate Deduplication from Other Engagements** checkbox. It appears above the **Optional Fields \+** panel.
+2. Check the box to scope Deduplication to this Engagement.
 3. Submit the form.
+
+When this option is enabled, Findings in this Engagement will only be deduplicated against other Findings within the same Engagement. Findings in other Engagements on the same Product are ignored by the Deduplication Algorithm.
 
 ![image](images/enabling_deduplication_within_an_engagement_4.png)

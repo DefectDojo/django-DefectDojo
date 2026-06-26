@@ -1,10 +1,12 @@
 ---
-title: "MCP Server (Pro)"
+title: "MCP Server"
 description: "DefectDojo's MCP Server allows you to use LLMs with DefectDojo Pro"
 draft: false
-weight: 2
+audience: pro
+weight: 23
+aliases:
+  - /en/ai/mcp_server_pro
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: AI features are a DefectDojo Pro-only feature.</span>
 
 The DefectDojo Model Context Protocol (MCP) Server enables Large Language Models (LLMs) to intelligently interact with DefectDojo's vulnerability management data. Unlike traditional API integrations that simply transfer data, the MCP server provides structured context and semantic meaning that enables AI assistants to perform sophisticated security analysis and generate actionable insights.

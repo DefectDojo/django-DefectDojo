@@ -1,3 +1,4 @@
+import argparse
 import logging
 
 import pghistory
@@ -53,7 +54,7 @@ class Command(BaseCommand):
         parser.add_argument("--dedupe_sync", action="store_true", help="Run dedupe in the foreground, default false")
         parser.add_argument(
             "--dedupe_batch_mode",
-            action="store_true",
+            action=argparse.BooleanOptionalAction,
             default=True,
             help="Deduplicate in batches (similar to import), works with both sync and async modes (default: True)",
         )
@@ -130,12 +131,13 @@ class Command(BaseCommand):
                 elif dedupe_sync:
                     mass_model_updater(Finding, findings, do_dedupe_finding_task_internal, fields=None, order="desc", page_size=100, log_prefix="deduplicating ")
                 else:
-                    # async tasks only need the id
+                    # async tasks only need the id; clear select/prefetch_related to avoid
+                    # FieldError when combining only("id") with select_related traversal
                     from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
                     mass_model_updater(
                         Finding,
-                        findings.only("id"),
+                        findings.select_related(None).prefetch_related(None).only("id"),
                         lambda f: dojo_dispatch_task(do_dedupe_finding_task, f.id),
                         fields=None,
                         order="desc",
@@ -169,7 +171,11 @@ class Command(BaseCommand):
         logger.info(f"Processing {total_findings} findings in batches of max {batch_max_size} per test ({mode_str})")
 
         # Group findings by test_id to process them in batches per test
-        test_ids = findings_queryset.values_list("test_id", flat=True).distinct()
+        # Use order_by("test_id") to override the Finding model's default ordering
+        # (numerical_severity, date, title, ...). Without this, Django includes those
+        # ordering columns in the SELECT for DISTINCT, making test_ids non-unique and
+        # causing the same test to be processed multiple times.
+        test_ids = findings_queryset.order_by("test_id").values_list("test_id", flat=True).distinct()
         total_tests = len(test_ids)
         total_processed = 0
 

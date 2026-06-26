@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.dateparse import parse_datetime
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class StackHawkScanMetadata:
@@ -79,7 +79,7 @@ class StackHawkParser:
                 + "\n"
             )
             if settings.V3_FEATURE_LOCATIONS:
-                location = URL.from_value(host + path["path"])
+                location = LocationData.url(url=host + path["path"])
             else:
                 # TODO: Delete this after the move to Locations
                 location = Endpoint.from_uri(host + path["path"])

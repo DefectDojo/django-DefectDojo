@@ -1,8 +1,9 @@
 ---
 title: "About Notifications & 🔔 Alerts"
 description: "Learn about notifications, in-app alerts"
+aliases:
+  - /en/customize_dojo/notifications/about_notifications
 ---
-
 DefectDojo keeps you up to date in a variety of ways. Notifications can be sent for upcoming Engagements, user Mentions, SLA expiry, and other events in the software.
 
 This article contains an overview of notifications at both System\-wide and Personal levels.
@@ -74,4 +75,4 @@ For more information about this behavior see the [related pull request #9699](ht
 
 ### Webhooks (experimental)
 
-DefectDojo also supports webhooks that follow the same events as other notifications (you can be notified in the same situations). Details about setup are described in [related page](/open_source/notification_webhooks/how_to).
+DefectDojo also supports webhooks that follow the same events as other notifications (you can be notified in the same situations). Details about setup are described in [the related page](/automation/api/notification_webhooks/).

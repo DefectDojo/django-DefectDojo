@@ -1,8 +1,9 @@
 ---
 title: "Tool-Specific Connector Setup"
 description: "Our list of supported Connector tools, and how to set them up with DefectDojo"
+aliases:
+  - /en/connecting_your_tools/connectors/connectors_tool_reference
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
 When setting up a Connector for a supported tool, you'll need to give DefectDojo specific information related to the tool's API. At a base level, you'll need:
@@ -19,6 +20,21 @@ Each tool has a different API configuration, and this guide is intended to help 
 Whenever possible, we recommend creating a new 'DefectDojo Bot' account within your Security Tool which will only be used by the Connector. This will help you better differentiate between actions manually taken by your team, and automated actions taken by the Connector.
 
 # **Supported Connectors**
+
+## **Akamai API Security**
+
+The Akamai API Security connector uses an API key to pull security findings from the Akamai API. DefectDojo will discover your Akamai environment and create separate Records for each **Application** and **Host** configured in your account.
+
+#### Prerequisites
+
+You will need an API key with access to the Akamai API. We recommend creating a dedicated service account for DefectDojo to clearly distinguish automated activity from manual team actions.
+
+#### Connector Mappings
+
+1. Enter your Akamai API base URL in the **Location** field. This URL is specific to your Akamai instance: for example
+2. Enter a valid **API Key** in the **Secret** field.
+
+DefectDojo will map **Applications** and **Hosts** as separate Records. Each Application will appear as `{name} (application)` and each Host as `{name} (host)` in your Records list.
 
 ## **Anchore**
 
@@ -131,6 +147,54 @@ To generate a Dependency\-Track API key:
 5. Click "**Select**" to confirm and save these permissions.
 
 For more information, see **[Dependency\-Track Documentation](https://docs.dependencytrack.org/integrations/rest-api/)**.
+
+## **IriusRisk**
+
+The IriusRisk connector uses an API token to pull threat modeling data from your IriusRisk instance.
+
+#### Prerequisites
+
+You will need an API token from your IriusRisk account. We recommend creating a dedicated service account for DefectDojo to clearly distinguish automated activity from manual team actions.
+
+To generate an API token in IriusRisk:
+
+1. Log in to your IriusRisk instance.
+2. Navigate to your **User Profile** in the top-right menu.
+3. Select **API Token** and generate a new token.
+
+See the [IriusRisk API documentation](https://support.iriusrisk.com/hc/en-us/categories/360001148511) for more information.
+
+#### Connector Mappings
+
+1. Enter your IriusRisk instance URL in the **Location URL** field. For cloud-hosted instances this is typically `https://{your-subdomain}.iriusrisk.com`. For on-premise installations, use your instance's base URL.
+2. Enter your **API Token** in the **Secret** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity will not be imported.
+
+## **JFrog Xray**
+
+The JFrog Xray connector uses the JFrog Xray REST API to fetch vulnerability data from your Artifactory repositories. DefectDojo will discover all repositories in your JFrog instance and generate vulnerability reports via Xray, importing findings on a scheduled basis.
+
+#### Prerequisites
+
+You will need an API token with access to both Artifactory and Xray APIs. We recommend creating a dedicated service account for DefectDojo. The account requires:
+
+* Read access to Artifactory repositories
+* Permission to generate and view Xray vulnerability reports (`Apply on Watches` permission in Xray, or equivalent)
+
+#### Connector Mappings
+
+1. Enter your JFrog instance base URL in the **Location** field. This should be the root URL of your JFrog instance, for example `https://your-instance.jfrog.io`. Do not include a trailing path — DefectDojo will construct the appropriate API paths automatically.
+2. Enter a valid **Reference Token** in the **Secret** field. Tokens can be generated under **User Management \> Access Tokens** in the JFrog Platform UI.
+You'll need to generate a **Reference Token** and use that value.
+
+Required token scopes for JFrog Xray:
+
+- **All Services**, as DefectDojo needs access to both access to both XRay and Artifactory services
+- **Manage Reports + Manage Resources** at a minimum.
+
+DefectDojo maps each Artifactory **repository** as a separate Record. On first Sync, DefectDojo generates a full historical vulnerability report; subsequent Syncs generate incremental (delta) reports covering new findings since the last Sync.
+
+See the [JFrog Xray REST API documentation](https://jfrog.com/help/r/jfrog-rest-apis/xray-rest-apis) for more information.
 
 ## Probely
 

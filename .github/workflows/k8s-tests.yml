@@ -16,18 +16,18 @@ jobs:
           # databases, broker and k8s are independent, so we don't need to test each combination
           # lastest k8s version (https://kubernetes.io/releases/) and the oldest officially supported version
           # are tested (https://kubernetes.io/releases/)
-          - k8s: 'v1.35.0' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
+          - k8s: 'v1.35.4' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
             os: debian
-          - k8s: '1.32.11' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
+          - k8s: '1.33.13' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
             os: debian
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Setup Minikube
-        uses: manusa/actions-setup-minikube@b589f2d61bf96695c546929c72b38563e856059d # v2.14.0
+        uses: manusa/actions-setup-minikube@b65276017fdec6f1e6498129fb740e34e260dc55 # v2.18.0
         with:
-          minikube version: 'v1.38.0' # renovate: datasource=github-releases depName=kubernetes/minikube
+          minikube version: 'v1.38.1' # renovate: datasource=github-releases depName=kubernetes/minikube
           kubernetes version: ${{ matrix.k8s }}
           driver: docker
           start args: '--addons=ingress --cni calico'
@@ -38,7 +38,7 @@ jobs:
           minikube status
 
       - name: Load images from artifacts
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           path: built-docker-image
           pattern: built-docker-image-*

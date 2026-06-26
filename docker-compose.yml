@@ -120,15 +120,16 @@ services:
           source: ./docker/extra_settings
           target: /app/docker/extra_settings
   postgres:
-    image: postgres:18.1-alpine@sha256:4eb15de8e7b692c02427a2df278d18eb89422a534e428efb6d43c968250334d4
+    image: postgres:18.4-alpine@sha256:1b1689b20d16a014a3d195653381cf2caa75a41a92d93b255a9d6ea29fd353aa
     environment:
+      PGDATA: /var/lib/postgresql/data
       POSTGRES_DB: ${DD_DATABASE_NAME:-defectdojo}
       POSTGRES_USER: ${DD_DATABASE_USER:-defectdojo}
       POSTGRES_PASSWORD: ${DD_DATABASE_PASSWORD:-defectdojo}
     volumes:
       - defectdojo_postgres:/var/lib/postgresql/data
   valkey:
-    image: valkey/valkey:7.2.11-alpine@sha256:9e483e0fe4c98b631b166b41d530c7ff1b8009a44f261bff28e9d1e2e27db58d
+    image: valkey/valkey:9.1.0-alpine@sha256:a35428eba9043cc0b79dbe54100f0c92784f2de00ad09b01182bfb1c5c83d1bd
     volumes:
       # we keep using the redis volume as renaming is not possible and copying data over
       # would require steps during downtime or complex commands in the intializer

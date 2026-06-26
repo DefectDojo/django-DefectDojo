@@ -1,6 +1,8 @@
 ---
 title: "OpenReports"
 toc_hide: true
+aliases:
+ - /en/connecting_your_tools/parsers/file/openreports
 ---
 Import JSON reports from [OpenReports](https://github.com/openreports/reports-api).
 

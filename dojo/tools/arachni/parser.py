@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.encoding import force_str
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class ArachniParser:
@@ -117,7 +117,7 @@ class ArachniParser:
             vuln_id_from_tool=item_node.get("digest"),
         )
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations = [URL.from_value(url)]
+            finding.unsaved_locations = [LocationData.url(url=url)]
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints = [Endpoint.from_uri(url)]

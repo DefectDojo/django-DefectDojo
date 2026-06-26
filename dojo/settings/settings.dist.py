@@ -15,11 +15,22 @@ from email.utils import getaddresses
 from pathlib import Path
 
 import environ
-import pghistory
 from celery.schedules import crontab
-from netaddr import IPNetwork, IPSet
 
 from dojo import __version__
+from dojo.auditlog.settings import (  # noqa: F401 -- re-exported as Django settings
+    AUDITLOG_DISABLE_ON_RAW_SAVE,
+    PGHISTORY_CONTEXT_FIELD,
+    PGHISTORY_FOREIGN_KEY_FIELD,
+    PGHISTORY_OBJ_FIELD,
+)
+from dojo.auditlog.settings import ENV_SCHEMA as AUDITLOG_ENV_SCHEMA
+from dojo.notifications.settings import (
+    NOTIFICATIONS_ENV_DEFAULTS,
+)
+from dojo.notifications.settings import (
+    populate_settings as _populate_notifications_settings,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,13 +45,13 @@ env = environ.FileAwareEnv(
     # django-jsonfield-backport raises a warning that can be ignored,
     # see https://github.com/laymonage/django-jsonfield-backport
     # debug_toolbar.E001 is raised when running tests in dev mode via run-unittests.sh
-    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001"]),
+    DD_SILENCED_SYSTEM_CHECKS=(list, ["debug_toolbar.E001", "django_jsonfield_backport.W001", "polymorphic.W001", "polymorphic.W002"]),
     DD_TEMPLATE_DEBUG=(bool, False),
     DD_LOG_LEVEL=(str, ""),
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, "/"),
     DD_LOGIN_URL=(str, "/login"),
-    DD_DJANGO_ADMIN_ENABLED=(bool, True),
+    DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
@@ -88,16 +99,36 @@ env = environ.FileAwareEnv(
     DD_CELERY_RESULT_BACKEND=(str, "django-db"),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
-    DD_CELERY_TASK_SERIALIZER=(str, "pickle"),
+    DD_CELERY_TASK_SERIALIZER=(str, "json"),
     DD_CELERY_LOG_LEVEL=(str, "INFO"),
+    # Hard ceiling on task runtime. When reached, the worker process is sent SIGKILL — no cleanup
+    # code runs. Always set higher than DD_CELERY_TASK_SOFT_TIME_LIMIT. (0 = disabled, no limit)
+    DD_CELERY_TASK_TIME_LIMIT=(int, 43200),        # default: 12 hours
+    # Raises SoftTimeLimitExceeded inside the task, giving it a chance to clean up before the hard
+    # kill. Set a few seconds below DD_CELERY_TASK_TIME_LIMIT so cleanup has time to finish.
+    # (0 = disabled, no limit)
+    DD_CELERY_TASK_SOFT_TIME_LIMIT=(int, 0),
+    # If a task sits in the broker queue for longer than this without being picked up by a worker,
+    # Celery silently discards it — it is never executed and no exception is raised. Does not
+    # affect tasks that are already running. (0 = disabled, no limit)
+    DD_CELERY_TASK_DEFAULT_EXPIRES=(int, 43200),   # default: 12 hours
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
-    # Minimum number of model updated instances before search index updates as performaed asynchronously. Set to -1 to disable async updates.
-    DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD=(int, 10),
+    # Batch size for async watson search-index update tasks. Also doubles as
+    # the per-request intermediate-flush threshold: once the in-memory watson
+    # context reaches this many pending objects mid-request,
+    # AsyncSearchContextMiddleware flushes them to async celery tasks instead
+    # of waiting for end-of-request. Set to 0 (or negative) to disable the
+    # intermediate flush.
     DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=(int, 1000),
+    # When True, the async watson indexer auto-derives select_related/prefetch_related
+    # paths from each adapter's `fields`/`store` to avoid N+1 queries during indexing.
+    # Falls back to a plain queryset on any error (logged).
+    DD_WATSON_INDEX_PREFETCH_ENABLED=(bool, True),
     DD_FOOTER_VERSION=(str, ""),
-    # models should be passed to celery by ID, default is False (for now)
+    # Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+    DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE=(bool, True),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -109,120 +140,13 @@ env = environ.FileAwareEnv(
     DD_SECRET_KEY=(str, ""),
     DD_CREDENTIAL_AES_256_KEY=(str, "."),
     DD_DATA_UPLOAD_MAX_MEMORY_SIZE=(int, 8388608),  # Max post size set to 8mb
+    DD_MAX_ZIP_MEMBERS=(int, 1000),
+    DD_MAX_ZIP_MEMBER_SIZE=(int, 512 * 1024 * 1024),  # 512 MB per member (uncompressed)
+    DD_MAX_ZIP_TOTAL_SIZE=(int, 1 * 1024 * 1024 * 1024),  # 1 GB total (uncompressed)
+    DD_MAX_ZIP_RATIO=(int, 100),  # max compression ratio (uncompressed / compressed)
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
-    DD_SOCIAL_AUTH_SHOW_LOGIN_FORM=(bool, True),  # do we show user/pass input
-    DD_SOCIAL_AUTH_CREATE_USER=(bool, True),  # if True creates user at first login
-    DD_SOCIAL_AUTH_CREATE_USER_MAPPING=(str, "username"),  # could also be email or fullname
-    DD_SOCIAL_LOGIN_AUTO_REDIRECT=(bool, False),  # auto-redirect if there is only one social login method
-    DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS=(bool, False),  # If true, the redirect after login will use the HTTPS protocol
-    DD_SOCIAL_AUTH_TRAILING_SLASH=(bool, True),
-    DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_ID_KEY=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_KEY=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_USERNAME_KEY=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS=(list, []),
-    DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS=(list, ["RS256", "HS256"]),
-    DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_USERINFO_URL=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_JWKS_URI=(str, ""),
-    DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT=(str, "Login with OIDC"),
-    DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_AUTH0_KEY=(str, ""),
-    DD_SOCIAL_AUTH_AUTH0_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_AUTH0_DOMAIN=(str, ""),
-    DD_SOCIAL_AUTH_AUTH0_SCOPE=(list, ["openid", "profile", "email"]),
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=(str, ""),
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS=(list, [""]),
-    DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS=(list, [""]),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY=(str, ""),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL=(str, "https://{your-org-url}/oauth2"),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY=(str, ""),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID=(str, ""),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE=(str, "https://graph.microsoft.com/"),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS=(bool, False),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER=(str, ""),
-    DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS=(bool, True),
-    DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT=(bool, False),
-    DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS=(bool, False),
-    DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_URL=(bool, False),
-    DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL=(int, 20),
-    DD_SOCIAL_AUTH_GITLAB_KEY=(str, ""),
-    DD_SOCIAL_AUTH_GITLAB_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_GITLAB_API_URL=(str, "https://gitlab.com"),
-    DD_SOCIAL_AUTH_GITLAB_SCOPE=(list, ["read_user", "openid", "read_api", "read_repository"]),
-    DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_KEYCLOAK_KEY=(str, ""),
-    DD_SOCIAL_AUTH_KEYCLOAK_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY=(str, ""),
-    DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL=(str, ""),
-    DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL=(str, ""),
-    DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT=(str, "Login with Keycloak"),
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED=(bool, False),
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL=(str, ""),
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL=(str, ""),
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY=(str, ""),
-    DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET=(str, ""),
-    DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL=(bool, True),
-    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION=(str, "Please use the standard login below."),
-    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED=(str, "Social login was canceled. Please try again or use the standard login."),
-    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED=(str, "Social login failed. Please try again or use the standard login."),
-    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN=(str, "You are not authorized to log in via this method. Please contact support or use the standard login."),
-    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE=(str, "An unexpected error occurred during social login. Please use the standard login."),
-    DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR=(str, "Social login failed due to an invalid or expired token. Please try again or use the standard login."),
-    DD_SAML2_ENABLED=(bool, False),
-    # Allows to override default SAML authentication backend. Check https://djangosaml2.readthedocs.io/contents/setup.html#custom-user-attributes-processing
-    DD_SAML2_AUTHENTICATION_BACKENDS=(str, "djangosaml2.backends.Saml2Backend"),
-    # Force Authentication to make SSO possible with SAML2
-    DD_SAML2_FORCE_AUTH=(bool, True),
-    DD_SAML2_LOGIN_BUTTON_TEXT=(str, "Login with SAML"),
-    # Optional: display the idp SAML Logout URL in DefectDojo
-    DD_SAML2_LOGOUT_URL=(str, ""),
-    # Metadata is required for SAML, choose either remote url or local file path
-    DD_SAML2_METADATA_AUTO_CONF_URL=(str, ""),
-    DD_SAML2_METADATA_LOCAL_FILE_PATH=(str, ""),  # ex. '/public/share/idp_metadata.xml'
-    # Optional, default is SITE_URL + /saml2/metadata/
-    DD_SAML2_ENTITY_ID=(str, ""),
-    # Allow to create user that are not already in the Django database
-    DD_SAML2_CREATE_USER=(bool, False),
-    DD_SAML2_ATTRIBUTES_MAP=(dict, {
-        # Change Email/UserName/FirstName/LastName to corresponding SAML2 userprofile attributes.
-        # format: SAML attrib:django_user_model
-        "Email": "email",
-        "UserName": "username",
-        "Firstname": "first_name",
-        "Lastname": "last_name",
-    }),
-    DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE=(bool, False),
-    # Authentication via HTTP Proxy which put username to HTTP Header REMOTE_USER
-    DD_AUTH_REMOTEUSER_ENABLED=(bool, False),
-    # Names of headers which will be used for processing user data.
-    # WARNING: Possible spoofing of headers. Read Warning in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
-    DD_AUTH_REMOTEUSER_USERNAME_HEADER=(str, "REMOTE_USER"),
-    DD_AUTH_REMOTEUSER_EMAIL_HEADER=(str, ""),
-    DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER=(str, ""),
-    DD_AUTH_REMOTEUSER_LASTNAME_HEADER=(str, ""),
-    DD_AUTH_REMOTEUSER_GROUPS_HEADER=(str, ""),
-    DD_AUTH_REMOTEUSER_GROUPS_CLEANUP=(bool, True),
-    # Comma separated list of IP ranges with trusted proxies
-    DD_AUTH_REMOTEUSER_TRUSTED_PROXY=(list, ["127.0.0.1/32"]),
-    # REMOTE_USER will be processed only on login page. Check https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#using-remote-user-on-login-pages-only
-    DD_AUTH_REMOTEUSER_LOGIN_ONLY=(bool, False),
-    # `RemoteUser` is usually used behind AuthN proxy and users should not know about this mechanism from Swagger because it is not usable by users.
-    # It should be hidden by default.
-    DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER=(bool, False),
     # Some security policies require allowing users to have only one active session
     DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -233,13 +157,7 @@ env = environ.FileAwareEnv(
     # SLA Notifications via alerts and JIRA comments
     # enable either DD_SLA_NOTIFY_ACTIVE or DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY to enable the feature.
     # If desired you can enable to only notify for Findings that are linked to JIRA issues.
-    # All three flags are moved to system_settings, will be removed from settings file
-    DD_SLA_NOTIFY_ACTIVE=(bool, False),
-    DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY=(bool, False),
-    DD_SLA_NOTIFY_WITH_JIRA_ONLY=(bool, False),
-    # finetuning settings for when enabled
-    DD_SLA_NOTIFY_PRE_BREACH=(int, 3),
-    DD_SLA_NOTIFY_POST_BREACH=(int, 7),
+    # SLA + alert + notification env-var schema lives in dojo/notifications/settings.py.
     # maximum number of result in search as search can be an expensive operation
     DD_SEARCH_MAX_RESULTS=(int, 100),
     DD_SIMILAR_FINDINGS_MAX_RESULTS=(int, 25),
@@ -267,10 +185,6 @@ env = environ.FileAwareEnv(
     DD_LOGGING_HANDLER=(str, "console"),
     # If true, drf-spectacular will load CSS & JS from default CDN, otherwise from static resources
     DD_DEFAULT_SWAGGER_UI=(bool, False),
-    DD_ALERT_REFRESH=(bool, True),
-    DD_DISABLE_ALERT_COUNTER=(bool, False),
-    # to disable deleting alerts per user set value to -1
-    DD_MAX_ALERTS_PER_USER=(int, 999),
     DD_TAG_PREFETCHING=(bool, True),
     DD_QUALYS_WAS_WEAKNESS_IS_VULN=(bool, False),
     # regular expression to exclude one or more parsers
@@ -288,21 +202,19 @@ env = environ.FileAwareEnv(
     DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE=(int, 1000),
     # Batch size for import/reimport deduplication processing
     DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=(int, 1000),
-    # Delete Auditlogs older than x month; -1 to keep all logs
-    DD_AUDITLOG_FLUSH_RETENTION_PERIOD=(int, -1),
-    # Batch size for flushing audit logs per task run
-    DD_AUDITLOG_FLUSH_BATCH_SIZE=(int, 1000),
-    # Maximum number of batches to process per task run
-    DD_AUDITLOG_FLUSH_MAX_BATCHES=(int, 100),
+    # Batch size for Redis pipeline when purging the Celery queue by task name
+    DD_CELERY_QUEUE_PURGE_BATCH_SIZE=(int, 1000),
+    # Maximum number of tasks to purge in a single per-task purge action
+    DD_CELERY_QUEUE_PURGE_MAX_TASKS=(int, 10000),
+    # Audit-log env-var schema (DD_ENABLE_AUDITLOG, DD_AUDITLOG_FLUSH_*) sourced
+    # from dojo/auditlog/settings.py.
+    **AUDITLOG_ENV_SCHEMA,
     # Allow grouping of findings in the same test, for example to group findings per dependency
     # DD_FEATURE_FINDING_GROUPS feature is moved to system_settings, will be removed from settings file
     DD_FEATURE_FINDING_GROUPS=(bool, True),
     DD_JIRA_TEMPLATE_ROOT=(str, "dojo/templates/issue-trackers"),
     DD_TEMPLATE_DIR_PREFIX=(str, "dojo/templates/"),
-    # Initial behaviour in Defect Dojo was to delete all duplicates when an original was deleted
-    # New behaviour is to leave the duplicates in place, but set the oldest of duplicates as new original
-    # Set to True to revert to the old behaviour where all duplicates are deleted
-    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(str, False),
+    DD_DUPLICATE_CLUSTER_CASCADE_DELETE=(bool, False),
     # Enable Rate Limiting for the login page
     DD_RATE_LIMITER_ENABLED=(bool, False),
     # Examples include 5/m 100/h and more https://django-ratelimit.readthedocs.io/en/stable/rates.html#simple-rates
@@ -333,7 +245,6 @@ env = environ.FileAwareEnv(
     # possible to create new and it will not be possible to use exising.
     DD_API_TOKENS_ENABLED=(bool, True),
     # Enable endpoint which allow user to get API token when user+pass is provided
-    # It is useful to disable when non-local authentication (like SAML, Azure, ...) is in place
     DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
@@ -341,27 +252,22 @@ env = environ.FileAwareEnv(
     DD_HASHCODE_FIELDS_PER_SCANNER=(str, ""),
     # Set deduplication algorithms per parser, via en env variable that contains a JSON string
     DD_DEDUPLICATION_ALGORITHM_PER_PARSER=(str, ""),
-    # Dictates whether cloud banner is created or not
-    DD_CREATE_CLOUD_BANNER=(bool, True),
-    # With this setting turned on, Dojo maintains an audit log of changes made to entities (Findings, Tests, Engagements, Products, ...)
-    # If you run big import you may want to disable this because there's a performance hit during (re-)imports.
-    DD_ENABLE_AUDITLOG=(bool, True),
     # Specifies whether the "first seen" date of a given report should be used over the "last seen" date
     DD_USE_FIRST_SEEN=(bool, False),
     # When set to True, use the older version of the qualys parser that is a more heavy handed in setting severity
     # with the use of CVSS scores to potentially override the severity found in the report produced by the tool
     DD_QUALYS_LEGACY_SEVERITY_PARSING=(bool, True),
-    # Use System notification settings to override user's notification settings
-    DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP=(list, ["user_mentioned", "review_requested"]),
     # When enabled, force the password field to be required for creating/updating users
     DD_REQUIRE_PASSWORD_ON_USER=(bool, True),
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
-    # Dictates if v3 functionality will be enabled
-    DD_V3_FEATURE_LOCATIONS=(bool, False),
-    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
-    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
+    # Dictates if v3 functionality will be enabled (on by default as of 3.0.0; set to False to revert to the legacy Endpoint model)
+    DD_V3_FEATURE_LOCATIONS=(bool, True),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
+    # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
+    **NOTIFICATIONS_ENV_DEFAULTS,
 )
 
 
@@ -429,12 +335,10 @@ USE_TZ = env("DD_USE_TZ")
 
 TEST_RUNNER = env("DD_TEST_RUNNER")
 
-ALERT_REFRESH = env("DD_ALERT_REFRESH")
-DISABLE_ALERT_COUNTER = env("DD_DISABLE_ALERT_COUNTER")
-MAX_ALERTS_PER_USER = env("DD_MAX_ALERTS_PER_USER")
+_populate_notifications_settings(env, globals())
 
 TAG_PREFETCHING = env("DD_TAG_PREFETCHING")
-# Tag bulk add batch size (used by dojo.tag_utils.bulk_add_tag_to_instances)
+# Tag bulk add batch size (used by dojo.tags.utils.bulk_add_tag_to_instances)
 TAG_BULK_ADD_BATCH_SIZE = env("DD_TAG_BULK_ADD_BATCH_SIZE")
 
 
@@ -519,6 +423,10 @@ FILE_UPLOAD_HANDLERS = (
 )
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = env("DD_DATA_UPLOAD_MAX_MEMORY_SIZE")
+MAX_ZIP_MEMBERS = env("DD_MAX_ZIP_MEMBERS")
+MAX_ZIP_MEMBER_SIZE = env("DD_MAX_ZIP_MEMBER_SIZE")
+MAX_ZIP_TOTAL_SIZE = env("DD_MAX_ZIP_TOTAL_SIZE")
+MAX_ZIP_RATIO = env("DD_MAX_ZIP_RATIO")
 
 # ------------------------------------------------------------------------------
 # URLS
@@ -544,18 +452,7 @@ URL_PREFIX = env("DD_URL_PREFIX")
 LOGIN_REDIRECT_URL = env("DD_LOGIN_REDIRECT_URL")
 LOGIN_URL = env("DD_LOGIN_URL")
 
-# These are the individidual modules supported by social-auth
 AUTHENTICATION_BACKENDS = (
-    "social_core.backends.open_id_connect.OpenIdConnectAuth",
-    "social_core.backends.auth0.Auth0OAuth2",
-    "social_core.backends.google.GoogleOAuth2",
-    "social_core.backends.okta.OktaOAuth2",
-    "social_core.backends.azuread_tenant.AzureADTenantOAuth2",
-    "social_core.backends.gitlab.GitLabOAuth2",
-    "social_core.backends.keycloak.KeycloakOAuth2",
-    "social_core.backends.github_enterprise.GithubEnterpriseOAuth2",
-    "dojo.remote_user.RemoteUserBackend",
-    "django.contrib.auth.backends.RemoteUserBackend",
     "django.contrib.auth.backends.ModelBackend",
 )
 
@@ -572,131 +469,11 @@ PASSWORD_HASHERS = [
     "django.contrib.auth.hashers.MD5PasswordHasher",
 ]
 
-SOCIAL_AUTH_PIPELINE = (
-    "social_core.pipeline.social_auth.social_details",
-    "dojo.pipeline.social_uid",
-    "social_core.pipeline.social_auth.auth_allowed",
-    "social_core.pipeline.social_auth.social_user",
-    "social_core.pipeline.user.get_username",
-    "social_core.pipeline.social_auth.associate_by_email",
-    "dojo.pipeline.create_user",
-    "dojo.pipeline.modify_permissions",
-    "social_core.pipeline.social_auth.associate_user",
-    "social_core.pipeline.social_auth.load_extra_data",
-    "social_core.pipeline.user.user_details",
-    "dojo.pipeline.update_azure_groups",
-    "dojo.pipeline.update_product_access",
-)
-
 CLASSIC_AUTH_ENABLED = True
 FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
 REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
-# Showing login form (form is not needed for external auth: OKTA, Google Auth, etc.)
-SHOW_LOGIN_FORM = env("DD_SOCIAL_AUTH_SHOW_LOGIN_FORM")
-SOCIAL_LOGIN_AUTO_REDIRECT = env("DD_SOCIAL_LOGIN_AUTO_REDIRECT")
-SOCIAL_AUTH_REDIRECT_IS_HTTPS = env("DD_SOCIAL_AUTH_REDIRECT_IS_HTTPS")
-SOCIAL_AUTH_CREATE_USER = env("DD_SOCIAL_AUTH_CREATE_USER")
-SOCIAL_AUTH_CREATE_USER_MAPPING = env("DD_SOCIAL_AUTH_CREATE_USER_MAPPING")
-
-SOCIAL_AUTH_STRATEGY = "social_django.strategy.DjangoStrategy"
-SOCIAL_AUTH_STORAGE = "social_django.models.DjangoStorage"
-SOCIAL_AUTH_ADMIN_USER_SEARCH_FIELDS = ["username", "first_name", "last_name", "email"]
-SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL = env("DD_SOCIAL_AUTH_USERNAME_IS_FULL_EMAIL")
-
-GOOGLE_OAUTH_ENABLED = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_ENABLED")
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_KEY")
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = env("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET")
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS = tuple(env.list("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_DOMAINS", default=[""]))
-SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS = tuple(env.list("DD_SOCIAL_AUTH_GOOGLE_OAUTH2_WHITELISTED_EMAILS", default=[""]))
-SOCIAL_AUTH_LOGIN_ERROR_URL = "/login"
-SOCIAL_AUTH_BACKEND_ERROR_URL = "/login"
-
-OKTA_OAUTH_ENABLED = env("DD_SOCIAL_AUTH_OKTA_OAUTH2_ENABLED")
-SOCIAL_AUTH_OKTA_OAUTH2_KEY = env("DD_SOCIAL_AUTH_OKTA_OAUTH2_KEY")
-SOCIAL_AUTH_OKTA_OAUTH2_SECRET = env("DD_SOCIAL_AUTH_OKTA_OAUTH2_SECRET")
-SOCIAL_AUTH_OKTA_OAUTH2_API_URL = env("DD_SOCIAL_AUTH_OKTA_OAUTH2_API_URL")
-
-AZUREAD_TENANT_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_ENABLED")
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_KEY")
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_SECRET")
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_TENANT_ID")
-SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_RESOURCE")
-AZUREAD_TENANT_OAUTH2_GET_GROUPS = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GET_GROUPS")
-AZUREAD_TENANT_OAUTH2_GROUPS_FILTER = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_GROUPS_FILTER")
-AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS = env("DD_SOCIAL_AUTH_AZUREAD_TENANT_OAUTH2_CLEANUP_GROUPS")
-
-GITLAB_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_GITLAB_OAUTH2_ENABLED")
-GITLAB_PROJECT_AUTO_IMPORT = env("DD_SOCIAL_AUTH_GITLAB_PROJECT_AUTO_IMPORT")
-GITLAB_PROJECT_IMPORT_TAGS = env("DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_TAGS")
-GITLAB_PROJECT_IMPORT_URL = env("DD_SOCIAL_AUTH_GITLAB_PROJECT_IMPORT_URL")
-GITLAB_PROJECT_MIN_ACCESS_LEVEL = env("DD_SOCIAL_AUTH_GITLAB_PROJECT_MIN_ACCESS_LEVEL")
-SOCIAL_AUTH_GITLAB_KEY = env("DD_SOCIAL_AUTH_GITLAB_KEY")
-SOCIAL_AUTH_GITLAB_SECRET = env("DD_SOCIAL_AUTH_GITLAB_SECRET")
-SOCIAL_AUTH_GITLAB_API_URL = env("DD_SOCIAL_AUTH_GITLAB_API_URL")
-SOCIAL_AUTH_GITLAB_SCOPE = env("DD_SOCIAL_AUTH_GITLAB_SCOPE")
-
-# Add required scope if auto import is enabled
-if GITLAB_PROJECT_AUTO_IMPORT:
-    SOCIAL_AUTH_GITLAB_SCOPE += ["read_repository"]
-
-# Mandatory settings
-OIDC_AUTH_ENABLED = env("DD_SOCIAL_AUTH_OIDC_AUTH_ENABLED")
-SOCIAL_AUTH_OIDC_OIDC_ENDPOINT = env("DD_SOCIAL_AUTH_OIDC_OIDC_ENDPOINT")
-SOCIAL_AUTH_OIDC_KEY = env("DD_SOCIAL_AUTH_OIDC_KEY")
-SOCIAL_AUTH_OIDC_SECRET = env("DD_SOCIAL_AUTH_OIDC_SECRET")
-# Optional settings
-if value := env("DD_LOGIN_REDIRECT_URL"):
-    SOCIAL_AUTH_LOGIN_REDIRECT_URL = value
-if value := env("DD_SOCIAL_AUTH_OIDC_ID_KEY"):
-    SOCIAL_AUTH_OIDC_ID_KEY = value
-if value := env("DD_SOCIAL_AUTH_OIDC_USERNAME_KEY"):
-    SOCIAL_AUTH_OIDC_USERNAME_KEY = value
-if value := env("DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS"):
-    SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS = env("DD_SOCIAL_AUTH_OIDC_WHITELISTED_DOMAINS")
-if value := env("DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS"):
-    SOCIAL_AUTH_OIDC_JWT_ALGORITHMS = env("DD_SOCIAL_AUTH_OIDC_JWT_ALGORITHMS")
-if value := env("DD_SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER"):
-    SOCIAL_AUTH_OIDC_ID_TOKEN_ISSUER = value
-if value := env("DD_SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL"):
-    SOCIAL_AUTH_OIDC_ACCESS_TOKEN_URL = value
-if value := env("DD_SOCIAL_AUTH_OIDC_AUTHORIZATION_URL"):
-    SOCIAL_AUTH_OIDC_AUTHORIZATION_URL = value
-if value := env("DD_SOCIAL_AUTH_OIDC_USERINFO_URL"):
-    SOCIAL_AUTH_OIDC_USERINFO_URL = value
-if value := env("DD_SOCIAL_AUTH_OIDC_JWKS_URI"):
-    SOCIAL_AUTH_OIDC_JWKS_URI = value
-if value := env("DD_SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT"):
-    SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT = value
-
-SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_REQUEST_EXCEPTION")
-SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_CANCELED")
-SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FAILED")
-SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_FORBIDDEN")
-SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_NONE_TYPE")
-SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR = env("DD_SOCIAL_AUTH_EXCEPTION_MESSAGE_AUTH_TOKEN_ERROR")
-
-AUTH0_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED")
-SOCIAL_AUTH_AUTH0_KEY = env("DD_SOCIAL_AUTH_AUTH0_KEY")
-SOCIAL_AUTH_AUTH0_SECRET = env("DD_SOCIAL_AUTH_AUTH0_SECRET")
-SOCIAL_AUTH_AUTH0_DOMAIN = env("DD_SOCIAL_AUTH_AUTH0_DOMAIN")
-SOCIAL_AUTH_AUTH0_SCOPE = env("DD_SOCIAL_AUTH_AUTH0_SCOPE")
-SOCIAL_AUTH_TRAILING_SLASH = env("DD_SOCIAL_AUTH_TRAILING_SLASH")
-
-KEYCLOAK_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_KEYCLOAK_OAUTH2_ENABLED")
-SOCIAL_AUTH_KEYCLOAK_KEY = env("DD_SOCIAL_AUTH_KEYCLOAK_KEY")
-SOCIAL_AUTH_KEYCLOAK_SECRET = env("DD_SOCIAL_AUTH_KEYCLOAK_SECRET")
-SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY = env("DD_SOCIAL_AUTH_KEYCLOAK_PUBLIC_KEY")
-SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL = env("DD_SOCIAL_AUTH_KEYCLOAK_AUTHORIZATION_URL")
-SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL = env("DD_SOCIAL_AUTH_KEYCLOAK_ACCESS_TOKEN_URL")
-SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT = env("DD_SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT")
-
-GITHUB_ENTERPRISE_OAUTH2_ENABLED = env("DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_OAUTH2_ENABLED")
-SOCIAL_AUTH_GITHUB_ENTERPRISE_URL = env("DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_URL")
-SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL = env("DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_API_URL")
-SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY = env("DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_KEY")
-SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET = env("DD_SOCIAL_AUTH_GITHUB_ENTERPRISE_SECRET")
 
 DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 
@@ -704,12 +481,7 @@ DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 # If you import thousands of Active findings through your pipeline everyday,
 # and make the choice of enabling SLA notifications for non-verified findings,
 # be mindful of performance.
-# 'SLA_NOTIFY_ACTIVE', 'SLA_NOTIFY_ACTIVE_VERIFIED_ONLY' and 'SLA_NOTIFY_WITH_JIRA_ONLY' are moved to system settings, will be removed here
-SLA_NOTIFY_ACTIVE = env("DD_SLA_NOTIFY_ACTIVE")  # this will include 'verified' findings as well as non-verified.
-SLA_NOTIFY_ACTIVE_VERIFIED_ONLY = env("DD_SLA_NOTIFY_ACTIVE_VERIFIED_ONLY")
-SLA_NOTIFY_WITH_JIRA_ONLY = env("DD_SLA_NOTIFY_WITH_JIRA_ONLY")  # Based on the 2 above, but only with a JIRA link
-SLA_NOTIFY_PRE_BREACH = env("DD_SLA_NOTIFY_PRE_BREACH")  # in days, notify between dayofbreach minus this number until dayofbreach
-SLA_NOTIFY_POST_BREACH = env("DD_SLA_NOTIFY_POST_BREACH")  # in days, skip notifications for findings that go past dayofbreach plus this number
+# SLA_NOTIFY_* are populated by dojo.notifications.settings.populate_settings (see ALERT_REFRESH section above).
 
 
 SEARCH_MAX_RESULTS = env("DD_SEARCH_MAX_RESULTS")
@@ -854,6 +626,9 @@ TEAM_NAME = env("DD_TEAM_NAME")
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
 
+# Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+SHOW_A11Y_REQUIRED_FIELDS_NOTICE = env("DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE")
+
 # V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
 
@@ -922,24 +697,54 @@ if not env("DD_DEFAULT_SWAGGER_UI"):
 # TEMPLATES
 # ------------------------------------------------------------------------------
 
+# Two parallel template trees coexist on this branch: the new Tailwind v4 UI at
+# dojo/templates/ (the default Django app dir) and the classic Bootstrap 3 / SB
+# Admin 2 UI at dojo/templates_classic/. Per-user resolution is handled by
+# UIPreferenceLoader; see dojo/template_loaders.py.
+_DOJO_TAILWIND_TEMPLATES_DIR = root("dojo/templates")
+_DOJO_CLASSIC_TEMPLATES_DIR = root("dojo/templates_classic")
+# Sub-package template dirs (dojo/notifications, dojo/github, ...) share a
+# single list that the FilesystemLoader below reads by reference, so any
+# late-binding settings can append a template dir at startup and have it
+# picked up at render time.
+_DOJO_EXTRA_TEMPLATE_DIRS = [
+    root("dojo/auditlog/templates"),
+    root("dojo/notifications/templates"),
+    root("dojo/github/templates"),
+]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "APP_DIRS": True,
+        # DIRS shares the _DOJO_EXTRA_TEMPLATE_DIRS list reference with the
+        # FilesystemLoader entry below; later append()s land in both places.
+        "DIRS": _DOJO_EXTRA_TEMPLATE_DIRS,
+        # APP_DIRS is False because dojo's templates are loaded explicitly via
+        # UIPreferenceLoader; the FilesystemLoader entry below picks up
+        # template dirs from the dojo/auditlog, dojo/notifications and
+        # dojo/github consolidations; other apps' templates are loaded via the
+        # app_directories.Loader entry.
+        "APP_DIRS": False,
         "OPTIONS": {
             "debug": env("DD_DEBUG"),
+            "loaders": [
+                ("dojo.template_loaders.UIPreferenceLoader",
+                 _DOJO_TAILWIND_TEMPLATES_DIR,
+                 _DOJO_CLASSIC_TEMPLATES_DIR),
+                ("django.template.loaders.filesystem.Loader",
+                 _DOJO_EXTRA_TEMPLATE_DIRS),
+                "django.template.loaders.app_directories.Loader",
+            ],
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "social_django.context_processors.backends",
-                "social_django.context_processors.login_redirect",
                 "dojo.context_processors.globalize_vars",
                 "dojo.context_processors.bind_system_settings",
-                "dojo.context_processors.bind_alert_count",
+                "dojo.notifications.context_processors.bind_alert_count",
                 "dojo.context_processors.bind_announcement",
-                "dojo.context_processors.session_expiry_notification",
+                "dojo.notifications.context_processors.session_expiry_notification",
                 "dojo.context_processors.labels",
             ],
         },
@@ -968,7 +773,6 @@ INSTALLED_APPS = (
     "rest_framework.authtoken",
     "dbbackup",
     "django_celery_results",
-    "social_django",
     "drf_spectacular",
     "drf_spectacular_sidecar",  # required for Django collectstatic discovery
     "tagulous",
@@ -978,6 +782,7 @@ INSTALLED_APPS = (
     "pgtrigger",
     "pghistory",
     "single_session",
+    "django_htmx",
 )
 
 # ------------------------------------------------------------------------------
@@ -993,11 +798,12 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dojo.middleware.LoginRequiredMiddleware",
     "dojo.middleware.AdditionalHeaderMiddleware",
-    "dojo.middleware.CustomSocialAuthExceptionMiddleware",
     "crum.CurrentRequestUserMiddleware",
+    "dojo.authorization.middleware.AuthorizationMiddleware",
     "dojo.middleware.AsyncSearchContextMiddleware",
     "dojo.request_cache.middleware.RequestCacheMiddleware",
     "dojo.middleware.LongRunningRequestAlertMiddleware",
@@ -1030,194 +836,6 @@ EMAIL_CONFIG = env.email_url(
 vars().update(EMAIL_CONFIG)
 
 # ------------------------------------------------------------------------------
-# SAML
-# ------------------------------------------------------------------------------
-# For more configuration and customization options, see djangosaml2 documentation
-# https://djangosaml2.readthedocs.io/contents/setup.html#configuration
-# To override not configurable settings, you can use local_settings.py
-# function that helps convert env var into the djangosaml2 attribute mapping format
-# https://djangosaml2.readthedocs.io/contents/setup.html#users-attributes-and-account-linking
-
-
-def saml2_attrib_map_format(din):
-    dout = {}
-    for i in din:
-        dout[i] = (din[i],)
-    return dout
-
-
-SAML2_ENABLED = env("DD_SAML2_ENABLED")
-SAML2_LOGIN_BUTTON_TEXT = env("DD_SAML2_LOGIN_BUTTON_TEXT")
-SAML2_LOGOUT_URL = env("DD_SAML2_LOGOUT_URL")
-if SAML2_ENABLED:
-    import saml2
-    import saml2.saml
-    # SSO_URL = env('DD_SSO_URL')
-    SAML_METADATA = {}
-    if len(env("DD_SAML2_METADATA_AUTO_CONF_URL")) > 0:
-        SAML_METADATA["remote"] = [{"url": env("DD_SAML2_METADATA_AUTO_CONF_URL")}]
-    if len(env("DD_SAML2_METADATA_LOCAL_FILE_PATH")) > 0:
-        SAML_METADATA["local"] = [env("DD_SAML2_METADATA_LOCAL_FILE_PATH")]
-    INSTALLED_APPS += ("djangosaml2",)
-    MIDDLEWARE.append("djangosaml2.middleware.SamlSessionMiddleware")
-    AUTHENTICATION_BACKENDS += (env("DD_SAML2_AUTHENTICATION_BACKENDS"),)
-    LOGIN_EXEMPT_URLS += (rf"^{URL_PREFIX}saml2/",)
-    SAML_LOGOUT_REQUEST_PREFERRED_BINDING = saml2.BINDING_HTTP_POST
-    SAML_IGNORE_LOGOUT_ERRORS = True
-    SAML_DJANGO_USER_MAIN_ATTRIBUTE = "username"
-#    SAML_DJANGO_USER_MAIN_ATTRIBUTE_LOOKUP = '__iexact'
-    SAML_USE_NAME_ID_AS_USERNAME = True
-    SAML_CREATE_UNKNOWN_USER = env("DD_SAML2_CREATE_USER")
-    SAML_ATTRIBUTE_MAPPING = saml2_attrib_map_format(env("DD_SAML2_ATTRIBUTES_MAP"))
-    SAML_FORCE_AUTH = env("DD_SAML2_FORCE_AUTH")
-    SAML_ALLOW_UNKNOWN_ATTRIBUTES = env("DD_SAML2_ALLOW_UNKNOWN_ATTRIBUTE")
-    BASEDIR = Path(__file__).parent.absolute()
-    if len(env("DD_SAML2_ENTITY_ID")) == 0:
-        SAML2_ENTITY_ID = f"{SITE_URL}/saml2/metadata/"
-    else:
-        SAML2_ENTITY_ID = env("DD_SAML2_ENTITY_ID")
-
-    SAML_CONFIG = {
-        # full path to the xmlsec1 binary programm
-        "xmlsec_binary": "/usr/bin/xmlsec1",
-
-        # your entity id, usually your subdomain plus the url to the metadata view
-        "entityid": str(SAML2_ENTITY_ID),
-
-        # directory with attribute mapping
-        "attribute_map_dir": str(Path(BASEDIR) / "attribute-maps"),
-        # do now discard attributes not specified in attribute-maps
-        "allow_unknown_attributes": SAML_ALLOW_UNKNOWN_ATTRIBUTES,
-        # this block states what services we provide
-        "service": {
-            # we are just a lonely SP
-            "sp": {
-                "name": "Defect_Dojo",
-                "name_id_format": saml2.saml.NAMEID_FORMAT_TRANSIENT,
-                "want_response_signed": False,
-                "want_assertions_signed": True,
-                "force_authn": SAML_FORCE_AUTH,
-                "allow_unsolicited": True,
-
-                # For Okta add signed logout requets. Enable this:
-                # "logout_requests_signed": True,
-
-                "endpoints": {
-                    # url and binding to the assetion consumer service view
-                    # do not change the binding or service name
-                    "assertion_consumer_service": [
-                        (f"{SITE_URL}/saml2/acs/",
-                        saml2.BINDING_HTTP_POST),
-                    ],
-                    # url and binding to the single logout service view
-                    # do not change the binding or service name
-                    "single_logout_service": [
-                        # Disable next two lines for HTTP_REDIRECT for IDP's that only support HTTP_POST. Ex. Okta:
-                        (f"{SITE_URL}/saml2/ls/",
-                        saml2.BINDING_HTTP_REDIRECT),
-                        (f"{SITE_URL}/saml2/ls/post",
-                        saml2.BINDING_HTTP_POST),
-                    ],
-                },
-
-                # attributes that this project need to identify a user
-                "required_attributes": ["Email", "UserName"],
-
-                # attributes that may be useful to have but not required
-                "optional_attributes": ["Firstname", "Lastname"],
-
-                # in this section the list of IdPs we talk to are defined
-                # This is not mandatory! All the IdP available in the metadata will be considered.
-                # 'idp': {
-                #     # we do not need a WAYF service since there is
-                #     # only an IdP defined here. This IdP should be
-                #     # present in our metadata
-
-                #     # the keys of this dictionary are entity ids
-                #     'https://localhost/simplesaml/saml2/idp/metadata.php': {
-                #         'single_sign_on_service': {
-                #             saml2.BINDING_HTTP_REDIRECT: 'https://localhost/simplesaml/saml2/idp/SSOService.php',
-                #         },
-                #         'single_logout_service': {
-                #             saml2.BINDING_HTTP_REDIRECT: 'https://localhost/simplesaml/saml2/idp/SingleLogoutService.php',
-                #         },
-                #     },
-                # },
-            },
-        },
-
-        # where the remote metadata is stored, local, remote or mdq server.
-        # One metadatastore or many ...
-        "metadata": SAML_METADATA,
-
-        # set to 1 to output debugging information
-        "debug": 0,
-
-        # Signing
-        # 'key_file': path.join(BASEDIR, 'private.key'),  # private part
-        # 'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
-
-        # Encryption
-        # 'encryption_keypairs': [{
-        #     'key_file': path.join(BASEDIR, 'private.key'),  # private part
-        #     'cert_file': path.join(BASEDIR, 'public.pem'),  # public part
-        # }],
-
-        # own metadata settings
-        "contact_person": [
-            {"given_name": "Lorenzo",
-            "sur_name": "Gil",
-            "company": "Yaco Sistemas",
-            "email_address": "lgs@yaco.es",
-            "contact_type": "technical"},
-            {"given_name": "Angel",
-            "sur_name": "Fernandez",
-            "company": "Yaco Sistemas",
-            "email_address": "angel@yaco.es",
-            "contact_type": "administrative"},
-        ],
-        # you can set multilanguage information here
-        "organization": {
-            "name": [("Yaco Sistemas", "es"), ("Yaco Systems", "en")],
-            "display_name": [("Yaco", "es"), ("Yaco", "en")],
-            "url": [("http://www.yaco.es", "es"), ("http://www.yaco.com", "en")],
-        },
-        "valid_for": 24,  # how long is our metadata valid
-    }
-
-# ------------------------------------------------------------------------------
-# REMOTE_USER
-# ------------------------------------------------------------------------------
-
-AUTH_REMOTEUSER_ENABLED = env("DD_AUTH_REMOTEUSER_ENABLED")
-AUTH_REMOTEUSER_USERNAME_HEADER = env("DD_AUTH_REMOTEUSER_USERNAME_HEADER")
-AUTH_REMOTEUSER_EMAIL_HEADER = env("DD_AUTH_REMOTEUSER_EMAIL_HEADER")
-AUTH_REMOTEUSER_FIRSTNAME_HEADER = env("DD_AUTH_REMOTEUSER_FIRSTNAME_HEADER")
-AUTH_REMOTEUSER_LASTNAME_HEADER = env("DD_AUTH_REMOTEUSER_LASTNAME_HEADER")
-AUTH_REMOTEUSER_GROUPS_HEADER = env("DD_AUTH_REMOTEUSER_GROUPS_HEADER")
-AUTH_REMOTEUSER_GROUPS_CLEANUP = env("DD_AUTH_REMOTEUSER_GROUPS_CLEANUP")
-AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER = env("DD_AUTH_REMOTEUSER_VISIBLE_IN_SWAGGER")
-
-AUTH_REMOTEUSER_TRUSTED_PROXY = IPSet()
-for ip_range in env("DD_AUTH_REMOTEUSER_TRUSTED_PROXY"):
-    AUTH_REMOTEUSER_TRUSTED_PROXY.add(IPNetwork(ip_range))
-
-if env("DD_AUTH_REMOTEUSER_LOGIN_ONLY"):
-    RemoteUserMiddleware = "dojo.remote_user.PersistentRemoteUserMiddleware"
-else:
-    RemoteUserMiddleware = "dojo.remote_user.RemoteUserMiddleware"
-# we need to add middleware just behindAuthenticationMiddleware as described in https://docs.djangoproject.com/en/3.2/howto/auth-remote-user/#configuration
-for i in range(len(MIDDLEWARE)):
-    if MIDDLEWARE[i] == "django.contrib.auth.middleware.AuthenticationMiddleware":
-        MIDDLEWARE.insert(i + 1, RemoteUserMiddleware)
-        break
-
-if AUTH_REMOTEUSER_ENABLED:
-    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] = \
-        ("dojo.remote_user.RemoteUserAuthentication",) + \
-        REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]
-
-# ------------------------------------------------------------------------------
 # SINGLE_USER_SESSION
 # ------------------------------------------------------------------------------
 
@@ -1245,9 +863,17 @@ CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = env("DD_CELERY_RESULT_EXPIRES")
 CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
-CELERY_ACCEPT_CONTENT = ["pickle", "json", "msgpack", "yaml"]
+CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = env("DD_CELERY_TASK_SERIALIZER")
+CELERY_RESULT_SERIALIZER = "json"
 CELERY_LOG_LEVEL = env("DD_CELERY_LOG_LEVEL")
+
+if env("DD_CELERY_TASK_TIME_LIMIT") > 0:
+    CELERY_TASK_TIME_LIMIT = env("DD_CELERY_TASK_TIME_LIMIT")
+if env("DD_CELERY_TASK_SOFT_TIME_LIMIT") > 0:
+    CELERY_TASK_SOFT_TIME_LIMIT = env("DD_CELERY_TASK_SOFT_TIME_LIMIT")
+if env("DD_CELERY_TASK_DEFAULT_EXPIRES") > 0:
+    CELERY_TASK_DEFAULT_EXPIRES = env("DD_CELERY_TASK_DEFAULT_EXPIRES")
 
 if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
     CELERY_BROKER_TRANSPORT_OPTIONS = json.loads(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS"))
@@ -1255,21 +881,20 @@ if len(env("DD_CELERY_BROKER_TRANSPORT_OPTIONS")) > 0:
 CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 
 # Watson async index update settings
-WATSON_ASYNC_INDEX_UPDATE_THRESHOLD = env("DD_WATSON_ASYNC_INDEX_UPDATE_THRESHOLD")
 WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
+WATSON_INDEX_PREFETCH_ENABLED = env("DD_WATSON_INDEX_PREFETCH_ENABLED")
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
     "add-alerts": {
-        "task": "dojo.tasks.add_alerts",
+        "task": "dojo.notifications.tasks.add_alerts",
         "schedule": timedelta(hours=1),
-        "args": [timedelta(hours=1)],
         "options": {
             "expires": int(60 * 60 * 1 * 1.2),  # If a task is not executed within 72 minutes, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
         },
     },
     "cleanup-alerts": {
-        "task": "dojo.tasks.cleanup_alerts",
+        "task": "dojo.notifications.tasks.cleanup_alerts",
         "schedule": timedelta(hours=8),
         "options": {
             "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
@@ -1297,7 +922,7 @@ CELERY_BEAT_SCHEDULE = {
         },
     },
     "compute-sla-age-and-notify": {
-        "task": "dojo.tasks.async_sla_compute_and_notify_task",
+        "task": "dojo.notifications.tasks.async_sla_compute_and_notify_task",
         "schedule": crontab(hour=7, minute=30),
         "options": {
             "expires": int(60 * 60 * 24 * 1.2),  # If a task is not executed within 28.8 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
@@ -1311,17 +936,10 @@ CELERY_BEAT_SCHEDULE = {
         },
     },
     "notification_webhook_status_cleanup": {
-        "task": "dojo.notifications.helper.webhook_status_cleanup",
+        "task": "dojo.notifications.tasks.webhook_status_cleanup",
         "schedule": timedelta(minutes=1),
         "options": {
             "expires": int(60 * 1 * 1.2),  # If a task is not executed within 72 seconds, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
-        },
-    },
-    "trigger_evaluate_pro_proposition": {
-        "task": "dojo.tasks.evaluate_pro_proposition",
-        "schedule": timedelta(hours=8),
-        "options": {
-            "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
         },
     },
     "clear_sessions": {
@@ -1423,9 +1041,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "TFSec Scan": ["severity", "vuln_id_from_tool", "file_path", "line"],
     "Snyk Scan": ["vuln_id_from_tool", "file_path", "component_name", "component_version"],
     "GitLab Dependency Scanning Report": ["title", "vulnerability_ids", "file_path", "component_name", "component_version"],
+    # garak findings have no file_path/line; description holds the (per-run, randomly sampled) prompt/output and is
+    # therefore unstable across runs. severity is also excluded: it's an aggregate (the most severe rung seen across a
+    # probe's occurrences) and shifts as the occurrence set changes, so dedupe on the stable identity: probe-derived
+    # title + target model.
+    "Garak Scan": ["title", "component_name"],
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
+    "JFrog Xray API Summary Artifact Scan": ["title", "description", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
@@ -1488,6 +1112,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Snyk Issue API Scan": ["vuln_id_from_tool", "file_path"],
     "OpenReports": ["vulnerability_ids", "component_name", "component_version", "severity"],
     "n0s1 Scanner": ["description"],
+    "IriusRisk Threats Scan": ["title", "component_name"],
+    "Orca Security Alerts": ["title", "component_name"],
+    "Xygeni SCA Scan": ["vulnerability_ids", "component_name", "component_version"],
+    "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
+    "Alert Logic Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "PICUS Scan": ["vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1517,6 +1147,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AnchoreCTL Policies Report": True,
     "Anchore Enterprise Policy Check": True,
     "Anchore Grype": True,
+    "Anchore Grype detailed": True,
     "AWS Prowler Scan": True,
     "AWS Prowler V3": True,
     "Checkmarx Scan": False,
@@ -1561,6 +1192,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
     "OpenReports": True,
+    "Xygeni SCA Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1614,6 +1246,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
     "Anchore Enterprise Policy Check": DEDUPE_ALGO_HASH_CODE,
     "Anchore Grype": DEDUPE_ALGO_HASH_CODE,
+    "Anchore Grype detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Aqua Scan": DEDUPE_ALGO_HASH_CODE,
     "AuditJS Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Prowler Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1634,7 +1267,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Coverity Scan JSON Report": DEDUPE_ALGO_HASH_CODE,
     "Cobalt.io API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Crunch42 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
-    "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_HASH_CODE,
+    "Dependency Track Finding Packaging Format (FPF) Export": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Horusec Scan": DEDUPE_ALGO_HASH_CODE,
     "Mobsfscan Scan": DEDUPE_ALGO_HASH_CODE,
     "SonarQube Scan detailed": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
@@ -1667,18 +1300,21 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "HackerOne Cases": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Snyk Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
+    "Garak Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "GitLab Container Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Secret Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Checkov Scan": DEDUPE_ALGO_HASH_CODE,
     "SpotBugs Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray Unified Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray On Demand Binary Scan": DEDUPE_ALGO_HASH_CODE,
+    "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_HASH_CODE,
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
-    "Github SAST Scan": DEDUPE_ALGO_HASH_CODE,
+    "Github SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Github Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1752,6 +1388,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "OpenVAS Parser v2": DEDUPE_ALGO_HASH_CODE,
     "Snyk Issue API Scan": DEDUPE_ALGO_HASH_CODE,
     "OpenReports": DEDUPE_ALGO_HASH_CODE,
+    "IriusRisk Threats Scan": DEDUPE_ALGO_HASH_CODE,
+    "Orca Security Alerts": DEDUPE_ALGO_HASH_CODE,
+    "Xygeni SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Xygeni SCA Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Xygeni Secrets Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Alert Logic Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "PICUS Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
@@ -1775,6 +1419,8 @@ DISABLE_FINDING_MERGE = env("DD_DISABLE_FINDING_MERGE")
 TRACK_IMPORT_HISTORY = env("DD_TRACK_IMPORT_HISTORY")
 IMPORT_REIMPORT_MATCH_BATCH_SIZE = env("DD_IMPORT_REIMPORT_MATCH_BATCH_SIZE")
 IMPORT_REIMPORT_DEDUPE_BATCH_SIZE = env("DD_IMPORT_REIMPORT_DEDUPE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_BATCH_SIZE = env("DD_CELERY_QUEUE_PURGE_BATCH_SIZE")
+CELERY_QUEUE_PURGE_MAX_TASKS = env("DD_CELERY_QUEUE_PURGE_MAX_TASKS")
 
 # ------------------------------------------------------------------------------
 # JIRA
@@ -1880,11 +1526,6 @@ LOGGING = {
             "level": str(LOG_LEVEL),
             "propagate": False,
         },
-        "saml2": {
-            "handlers": [rf"{LOGGING_HANDLER}"],
-            "level": str(LOG_LEVEL),
-            "propagate": False,
-        },
         "MARKDOWN": {
             # The markdown library is too verbose in it's logging, reducing the verbosity in our logs.
             "handlers": [rf"{LOGGING_HANDLER}"],
@@ -1980,6 +1621,7 @@ VULNERABILITY_URLS = {
     "CERTFR-": "https://www.cert.ssi.gouv.fr/alerte/",  # e.g. https://www.cert.ssi.gouv.fr/alerte/CERTFR-2025-ALE-012"
     "CGA-": "https://images.chainguard.dev/security/",  # e.g. https://images.chainguard.dev/security/CGA-24pq-h5fw-43v3
     "CISCO-SA-": "https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/",  # e.g. https://sec.cloudapps.cisco.com/security/center/content/CiscoSecurityAdvisory/cisco-sa-umbrella-tunnel-gJw5thgE
+    "CNNVD-": "https://vulners.com/cnnvd/",  # e.g. https://vulners.com/cnnvd/CNNVD-202601-2391
     "CONFSERVER-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/CONFSERVER-93361
     "CVE-": "https://nvd.nist.gov/vuln/detail/",  # e.g. https://nvd.nist.gov/vuln/detail/cve-2022-22965
     "CWE": "https://cwe.mitre.org/data/definitions/&&.html",  # e.g. https://cwe.mitre.org/data/definitions/79.html
@@ -2001,8 +1643,10 @@ VULNERABILITY_URLS = {
     "JVNDB-": "https://jvndb.jvn.jp/en/contents/",  # e.g. https://jvndb.jvn.jp/en/contents/2025/JVNDB-2025-004079.html
     "KB": "https://support.hcl-software.com/csm?id=kb_article&sysparm_article=",  # e.g. https://support.hcl-software.com/csm?id=kb_article&sysparm_article=KB0108401
     "KHV": "https://avd.aquasec.com/misconfig/kubernetes/",  # e.g. https://avd.aquasec.com/misconfig/kubernetes/khv045
+    "KSA-": "https://www.krones.com/media/downloads/KRONES-Security-Advisory-&&.pdf",  # e.g. https://www.krones.com/media/downloads/KRONES-Security-Advisory-KSA-2025-2.pdf
     "LEN-": "https://support.lenovo.com/cl/de/product_security/",  # e.g. https://support.lenovo.com/cl/de/product_security/LEN-94953
     "MAL-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/mal-2025-49305
+    "MFSA": "https://www.mozilla.org/en-US/security/advisories/",  # e.g. https://www.mozilla.org/en-US/security/advisories/mfsa2025-01/
     "MGAA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGAA-2013-0054.html
     "MGASA-": "https://advisories.mageia.org/&&.html",  # e.g. https://advisories.mageia.org/MGASA-2025-0023.html
     "MSRC_": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/msrc_cve-2025-59200
@@ -2038,6 +1682,7 @@ VULNERABILITY_URLS = {
     "VA-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/va-25-282-01
     "VAR-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/var-201801-0152
     "VNS": "https://vulners.com/",
+    "WGSA-": "https://www.watchguard.com/wgrd-psirt/advisory/",  # e.g. https://www.watchguard.com/wgrd-psirt/advisory/wgsa-2026-00008
     "WID-SEC-W-": "https://cvepremium.circl.lu/vuln/",  # e.g. https://cvepremium.circl.lu/vuln/wid-sec-w-2025-1468
 }
 # List of acceptable file types that can be uploaded to a given object via arbitrary file upload
@@ -2045,13 +1690,9 @@ FILE_UPLOAD_TYPES = env("DD_FILE_UPLOAD_TYPES")
 # List of acceptable file types that can be (re)imported
 FILE_IMPORT_TYPES = env("DD_FILE_IMPORT_TYPES")
 # Fixes error
-# AttributeError: Problem installing fixture '/app/dojo/fixtures/defect_dojo_sample_data.json': 'Settings' object has no attribute 'AUDITLOG_DISABLE_ON_RAW_SAVE'
-AUDITLOG_DISABLE_ON_RAW_SAVE = False
+# AUDITLOG_DISABLE_ON_RAW_SAVE is imported from dojo.auditlog.settings at the top of this file.
 #  You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
 ADDITIONAL_HEADERS = env("DD_ADDITIONAL_HEADERS")
-# Dictates whether cloud banner is created or not
-CREATE_CLOUD_BANNER = env("DD_CREATE_CLOUD_BANNER")
-
 # ------------------------------------------------------------------------------
 # Auditlog
 # ------------------------------------------------------------------------------
@@ -2065,7 +1706,7 @@ USE_QUALYS_LEGACY_SEVERITY_PARSING = env("DD_QUALYS_LEGACY_SEVERITY_PARSING")
 # ------------------------------------------------------------------------------
 # Notifications
 # ------------------------------------------------------------------------------
-NOTIFICATIONS_SYSTEM_LEVEL_TRUMP = env("DD_NOTIFICATIONS_SYSTEM_LEVEL_TRUMP")
+# NOTIFICATIONS_SYSTEM_LEVEL_TRUMP is populated by dojo.notifications.settings.populate_settings.
 
 # ------------------------------------------------------------------------------
 # Timeouts
@@ -2116,14 +1757,7 @@ if DJANGO_DEBUG_TOOLBAR_ENABLED:
 
     MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware", *MIDDLEWARE]
 
-# Linear migrations for development
-# Helps avoid merge migration conflicts by tracking the latest migration
 if DEBUG:
-    INSTALLED_APPS = (
-        "django_linear_migrations",  # Must be before dojo to override makemigrations
-        *INSTALLED_APPS,
-    )
-
     def show_toolbar(request):
         return True
 
@@ -2155,9 +1789,8 @@ if DEBUG:
 # Auditlog configuration                                                                                #
 #########################################################################################################
 
-PGHISTORY_FOREIGN_KEY_FIELD = pghistory.ForeignKey(db_index=False)
-PGHISTORY_CONTEXT_FIELD = pghistory.ContextForeignKey(db_index=True)
-PGHISTORY_OBJ_FIELD = pghistory.ObjForeignKey(db_index=True)
+# PGHISTORY_FOREIGN_KEY_FIELD, PGHISTORY_CONTEXT_FIELD, and PGHISTORY_OBJ_FIELD
+# are imported from dojo.auditlog.settings at the top of this file.
 
 #########################################################################################################
 # End of Auditlog configuration                                                                          #

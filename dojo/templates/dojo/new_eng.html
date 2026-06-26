@@ -6,19 +6,10 @@
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
-{% block add_styles %}
-    {{ block.super }}
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-    .chosen-container.chosen-container-multi {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <h3> {{ title }} </h3>
-    <form class="form-horizontal" method="post">{% csrf_token %}
+    <form class="" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
 
         {%  if jira_project_form %}
@@ -32,7 +23,7 @@
                 <hr>
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this engagement product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                        <i class="fa-solid fa-circle-question has-popover" data-content="JIRA URL connected to this engagement product or engagement">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">

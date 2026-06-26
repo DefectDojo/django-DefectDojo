@@ -6,8 +6,9 @@ weight: 4
 chapter: true
 exclude_search: true
 audience: pro
+aliases:
+  - /en/about_defectdojo/pro_features
 ---
-
 Here is a list of DefectDojo Pro’s many additional features, along with links to documentation to see them in action:
 
 ## Improved UX
@@ -15,20 +16,20 @@ Here is a list of DefectDojo Pro’s many additional features, along with links 
 ### Pro UI
 
 DefectDojo's UI has been reworked in DefectDojo Pro to be faster, more functional, fully customizable, and better at navigating through enterprise-level data volume.  It also includes a dark mode.  
-See our [Pro UI Guide](../ui_pro_vs_os) for more information.
+See our [Pro UI Guide](/get_started/about/ui_pro_vs_os/) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
 ### Assets/Organizations
 
-DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/hierarchy/pro__assets_organizations/) for details.
+DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/assets_organizations/) for details.
 
 ![image](images/asset_hierarchy_diagram.png)
 
 ### Finding Priority
 
 DefectDojo Pro can pre-triage your Findings by Priority and Risk, allowing your team to identify and fix your most critical issues first.
-See our [Finding Priority Guide](/asset_modelling/hierarchy/pro__priority_sla/) for more details.
+See our [Finding Priority Guide](/asset_modelling/pro_hierarchy/priority_sla/) for more details.
 
 ### Rules Engine
 
@@ -40,7 +41,7 @@ See our [Rules Engine Guide](/automation/rules_engine/about) for more info.
 
 ### Pro Dashboards and Reporting
 
-Generate [instant reports and metrics](../ui_pro_vs_os/#new-dashboards) to share the security posture of your apps and repos, evaluate your security tools and analyze your team's performance in addressing security issues.
+Generate [instant reports and metrics](/get_started/about/ui_pro_vs_os/#new-dashboards) to share the security posture of your apps and repos, evaluate your security tools and analyze your team's performance in addressing security issues.
 
 The graphics on the landing page can be exported as SVG files, and the data used to create the graphics can also be exported as a table. 
 

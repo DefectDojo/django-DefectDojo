@@ -12,7 +12,7 @@
         {{ note_type.name}}<br>
       {% endfor %}
     {% endif %}
-    <form class="form-horizontal" action="{% url 'close_finding' finding.id %}" method="post">
+    <form class="" action="{% url 'close_finding' finding.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         <div class="form-group">

@@ -1,5 +1,5 @@
 from dojo.models import Test
-from dojo.tools.govulncheck.parser import GovulncheckParser
+from dojo.tools.govulncheck.parser import GovulncheckParser, GovulncheckParserV2
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -127,3 +127,58 @@ class TestGovulncheckParser(DojoTestCase):
                 self.assertIsNotNone(finding.impact)
                 self.assertIsNotNone(finding.description)
                 self.assertIsNotNone(finding.references)
+                self.assertTrue(finding.fix_available)
+                self.assertEqual("0.3.8", finding.fix_version)
+
+    def test_parse_issue_14642(self):
+        with (get_unit_tests_scans_path("govulncheck") / "issue_14642.json").open(encoding="utf-8") as testfile:
+            parser = GovulncheckParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(201, len(findings))
+
+
+class TestGovulncheckParserV2(DojoTestCase):
+
+    def test_parse_empty(self):
+        with self.assertRaises(ValueError) as exp, \
+          (get_unit_tests_scans_path("govulncheck") / "empty.json").open(encoding="utf-8") as testfile:
+            GovulncheckParserV2().get_findings(testfile, Test())
+        self.assertIn("Invalid JSON format", str(exp.exception))
+
+    def test_parse_no_findings(self):
+        # The old dict format is ignored by v2 (it only handles the streaming list format).
+        with (get_unit_tests_scans_path("govulncheck") / "no_vulns.json").open(encoding="utf-8") as testfile:
+            findings = GovulncheckParserV2().get_findings(testfile, Test())
+            self.assertEqual(0, len(findings))
+
+    def test_parse_issue_15033(self):
+        with (get_unit_tests_scans_path("govulncheck") / "issue_15033.json").open(encoding="utf-8") as testfile:
+            findings = GovulncheckParserV2().get_findings(testfile, Test())
+
+            # One finding per (osv, module); advisories that do not apply to the
+            # scanned code are not imported (the old parser produced 234).
+            self.assertEqual(72, len(findings))
+
+            severities = [f.severity for f in findings]
+            # Reachability-based severity, separate per tier: symbol=High, package=Low, module=Info.
+            self.assertEqual(29, severities.count("High"))
+            self.assertEqual(17, severities.count("Low"))
+            self.assertEqual(26, severities.count("Info"))
+
+            # Every finding maps to a vulnerable component.
+            self.assertTrue(all(f.component_name for f in findings))
+
+            # unique_id_from_tool encodes (osv, module) so multi-module advisories split.
+            self.assertEqual(len({f.unique_id_from_tool for f in findings}), len(findings))
+
+            first = findings[0]
+            self.assertEqual("GO-2024-3333 - golang.org/x/net", first.title)
+            # Highest reachability level seen for this (osv, module) wins: package -> Low.
+            self.assertEqual("Low", first.severity)
+            self.assertEqual("CVE-2024-45338", first.cve)
+            self.assertEqual("golang.org/x/net", first.component_name)
+            self.assertEqual("v0.25.0", first.component_version)
+            self.assertEqual("GO-2024-3333:golang.org/x/net", first.unique_id_from_tool)
+            self.assertTrue(first.fix_available)
+            self.assertEqual("v0.33.0", first.fix_version)
+            self.assertEqual("https://pkg.go.dev/vuln/GO-2024-3333", first.url)

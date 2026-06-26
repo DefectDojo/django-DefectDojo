@@ -5,7 +5,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 __author__ = "dr3dd589"
 
@@ -90,7 +90,7 @@ class SslscanParser:
 
                         if host:
                             if settings.V3_FEATURE_LOCATIONS:
-                                location = URL.from_value(host) if "://" in host else URL(host=host, port=port)
+                                location = LocationData.url(url=host) if "://" in host else LocationData.url(host=host, port=port)
                                 finding.unsaved_locations.append(location)
                             else:
                                 # TODO: Delete this after the move to Locations

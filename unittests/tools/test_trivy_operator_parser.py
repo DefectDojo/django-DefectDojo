@@ -1,3 +1,4 @@
+from datetime import date
 
 from dojo.models import Test
 from dojo.tools.trivy_operator.parser import TrivyOperatorParser
@@ -130,6 +131,9 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual(5.9, finding.cvssv3_score)
             self.assertEqual("ubuntu:20.04 (ubuntu 20.04)", finding.file_path)
             self.assertEqual(["lbc", "ubuntu", "os-pkgs"], finding.unsaved_tags)
+            self.assertEqual(date(2024, 1, 16), finding.publish_date)
+            # Second vuln has publishedDate "" -> None
+            self.assertIsNone(findings[1].publish_date)
 
     def test_cis_benchmark(self):
         with sample_path("cis_benchmark.json").open(encoding="utf-8") as test_file:
@@ -138,7 +142,7 @@ class TestTrivyOperatorParser(DojoTestCase):
             self.assertEqual(len(findings), 795)
             finding = findings[0]
             self.assertEqual("5.1.2 AVD-KSV-0041 /clusterrole-admin", finding.title)
-            self.assertEqual("High", finding.severity)
+            self.assertEqual("Critical", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
             self.assertEqual("AVD-KSV-0041", finding.unsaved_vulnerability_ids[0])
             finding = findings[40]
@@ -169,3 +173,43 @@ class TestTrivyOperatorParser(DojoTestCase):
             parser = TrivyOperatorParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 2)
+
+    def test_compliance_severity_logic(self):
+        with sample_path("compliance_severity.json").open(encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 2)
+            # First check has severity MEDIUM, result has severity HIGH -> uses check's MEDIUM
+            self.assertEqual("Medium", findings[0].severity)
+            # Second check has empty severity, result has severity HIGH -> falls back to HIGH
+            self.assertEqual("High", findings[1].severity)
+
+    def test_configauditreport_missing_checkid(self):
+        with sample_path("configauditreport_missing_checkid.json").open(encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 1)
+            finding = findings[0]
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("0 - Missing checkID test", finding.title)
+            # When checkID is "0", references should be empty (not a bogus URL)
+            self.assertEqual("", finding.references)
+
+    def test_configauditreport_with_remediation(self):
+        with sample_path("configauditreport_with_remediation.json").open(encoding="utf-8") as test_file:
+            parser = TrivyOperatorParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 2)
+            # First check: has both remediation and messages
+            finding = findings[0]
+            self.assertEqual("Low", finding.severity)
+            self.assertIn("Set 'securityContext.readOnlyRootFilesystem' to true.", finding.mitigation)
+            self.assertIn("Container 'nginx' of Deployment 'nginx-app'", finding.mitigation)
+            self.assertEqual(["production", "Kubernetes Security Check"], finding.unsaved_tags)
+            # Second check: messages only, no remediation or category
+            finding = findings[1]
+            self.assertEqual(
+                "Container 'nginx' of Deployment 'nginx-app' should add 'ALL' to 'securityContext.capabilities.drop'",
+                finding.mitigation,
+            )
+            self.assertEqual(["production"], finding.unsaved_tags)

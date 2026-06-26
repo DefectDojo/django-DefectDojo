@@ -31,6 +31,7 @@ Generic Findings Import can be used to import any report in CSV or JSON format.
 - known_exploited: Indicator if the finding is listed in Known Exploited List. Must be TRUE, or FALSE
 - ransomware_used: Indicator if the finding is used in Ransomware. Must be TRUE, or FALSE
 - fix_available: Indicator if fix available for the finding. Must be TRUE, or FALSE
+- fix_version: Version where fix is available. String value.
 - kev_date: Date the finding was added to Known Exploited Vulnerabilities list in mm/dd/yyyy format or ISO format.
 
 The CSV expects a header row with the names of the attributes.
@@ -94,6 +95,7 @@ The list of supported fields in JSON format:
 - known_exploited: Bool
 - ransomware_used: Bool
 - fix_available: Bool
+- fix_version: String
 
 ### Example JSON
 
@@ -114,6 +116,7 @@ The list of supported fields in JSON format:
             "known_exploited": true,
             "ransomware_used": true,
             "fix_available": true,
+            "fix_version": "0.0.00",
             "kev_date": "2024-05-01",
             "file_path": "src/first.cpp",
             "line": 13,

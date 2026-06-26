@@ -2,8 +2,9 @@
 title: "Editing Findings"
 description: "Change a Finding’s Status, or add more metadata as you resolve an issue"
 weight: 2
+aliases:
+  - /en/working_with_findings/findings_workflows/editing_findings
 ---
-
 If you want to add notes or update the language on a Finding to be more relevant to the current situation, you can do so through the Edit Finding form.
 
 ## Open the Edit Finding Form

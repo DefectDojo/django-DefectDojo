@@ -22,7 +22,7 @@ class TestCargoAuditParser(DojoTestCase):
                 self.assertEqual("[arc-swap 0.4.7] Dangling reference in `access::Map` with Constant", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertIsNotNone(finding.description)
-                self.assertEqual(["dangling reference"], finding.tags)
+                self.assertEqual(["dangling reference"], finding.unsaved_tags)
                 self.assertEqual("arc-swap", finding.component_name)
                 self.assertEqual("0.4.7", finding.component_version)
                 self.assertEqual("RUSTSEC-2020-0091", finding.vuln_id_from_tool)
@@ -37,7 +37,7 @@ class TestCargoAuditParser(DojoTestCase):
                 self.assertEqual("[hyper 0.13.9] Multiple Transfer-Encoding headers misinterprets request payload", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertIsNotNone(finding.description)
-                self.assertEqual(["http", "request-smuggling"], finding.tags)
+                self.assertEqual(["http", "request-smuggling"], finding.unsaved_tags)
                 self.assertEqual("hyper", finding.component_name)
                 self.assertEqual("0.13.9", finding.component_version)
                 self.assertEqual("RUSTSEC-2021-0020", finding.vuln_id_from_tool)
@@ -52,7 +52,7 @@ class TestCargoAuditParser(DojoTestCase):
                 self.assertEqual("[smallvec 0.6.13] Buffer overflow in SmallVec::insert_many", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertIsNotNone(finding.description)
-                self.assertEqual(["buffer-overflow", "heap-overflow", "unsound"], finding.tags)
+                self.assertEqual(["buffer-overflow", "heap-overflow", "unsound"], finding.unsaved_tags)
                 self.assertEqual("smallvec", finding.component_name)
                 self.assertEqual("0.6.13", finding.component_version)
                 self.assertEqual("RUSTSEC-2021-0003", finding.vuln_id_from_tool)
@@ -67,7 +67,7 @@ class TestCargoAuditParser(DojoTestCase):
                 self.assertEqual("[smallvec 1.5.0] Buffer overflow in SmallVec::insert_many", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertIsNotNone(finding.description)
-                self.assertEqual(["buffer-overflow", "heap-overflow", "unsound"], finding.tags)
+                self.assertEqual(["buffer-overflow", "heap-overflow", "unsound"], finding.unsaved_tags)
                 self.assertEqual("smallvec", finding.component_name)
                 self.assertEqual("1.5.0", finding.component_version)
                 self.assertEqual("RUSTSEC-2021-0003", finding.vuln_id_from_tool)
@@ -76,3 +76,40 @@ class TestCargoAuditParser(DojoTestCase):
                 self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
                 self.assertEqual("RUSTSEC-2021-0003", finding.unsaved_vulnerability_ids[0])
                 self.assertEqual("CVE-2021-25900", finding.unsaved_vulnerability_ids[1])
+
+    def test_parse_cvss_findings(self):
+        with (get_unit_tests_scans_path("cargo_audit") / "many_findings_cvss.json").open(encoding="utf-8") as testfile:
+            parser = CargoAuditParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(10, len(findings))
+            findings_by_id = {finding.vuln_id_from_tool: finding for finding in findings}
+
+            with self.subTest("CVSS v3.1 vector, severity derived as High"):
+                finding = findings_by_id["RUSTSEC-2026-0047"]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
+                self.assertEqual(7.5, finding.cvssv3_score)
+                self.assertIsNone(finding.cvssv4)
+                self.assertIsNone(finding.cvssv4_score)
+
+            with self.subTest("CVSS v3.1 vector, severity derived as Medium"):
+                finding = findings_by_id["RUSTSEC-2026-0045"]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:H/A:N", finding.cvssv3)
+                self.assertEqual(5.9, finding.cvssv3_score)
+
+            with self.subTest("CVSS v4.0 vector, severity derived as Critical"):
+                finding = findings_by_id["RUSTSEC-2026-0141"]
+                self.assertEqual("Critical", finding.severity)
+                self.assertEqual("CVSS:4.0/AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:N/SC:L/SI:L/SA:N", finding.cvssv4)
+                self.assertEqual(9.1, finding.cvssv4_score)
+                self.assertIsNone(finding.cvssv3)
+                self.assertIsNone(finding.cvssv3_score)
+
+            with self.subTest("No CVSS vector, severity falls back to High"):
+                finding = findings_by_id["RUSTSEC-2026-0044"]
+                self.assertEqual("High", finding.severity)
+                self.assertIsNone(finding.cvssv3)
+                self.assertIsNone(finding.cvssv3_score)
+                self.assertIsNone(finding.cvssv4)
+                self.assertIsNone(finding.cvssv4_score)

@@ -9,6 +9,7 @@ from dojo.tools.openvas.parser_v2.common import (
     OpenVASFindingAuxData,
     cleanup_openvas_text,
     deduplicate,
+    finalize_location,
     get_location,
     is_valid_severity,
     postprocess_finding,
@@ -38,6 +39,7 @@ def get_findings_from_xml(file, test) -> list[Finding]:
         for element in result:
             parser.process_element(element, finding, aux_info)
 
+        finalize_location(finding)
         postprocess_finding(finding, aux_info)
         deduplicate(dupes, finding)
 

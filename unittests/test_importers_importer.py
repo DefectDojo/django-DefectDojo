@@ -461,7 +461,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_import_by_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -474,7 +474,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
         mock.assert_not_called()
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_import_by_product_type_name_not_exists_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=1, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -666,7 +666,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_reimport_by_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -679,7 +679,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
         mock.assert_not_called()
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_reimport_by_product_type_not_exists_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=1, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -803,14 +803,15 @@ class TestImporterUtils(DojoAPITestCase):
         }
 
     def test_handle_vulnerability_ids_references_and_cve(self):
-        # Why doesn't this test use the test db and query for one?
         vulnerability_ids = ["CVE", "REF-1", "REF-2"]
         finding = Finding()
         finding.unsaved_vulnerability_ids = vulnerability_ids
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
@@ -827,7 +828,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
 
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
@@ -841,7 +844,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.reporter = self.testuser
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("REF-1", finding.vulnerability_ids[0])
         self.assertEqual("REF-1", finding.cve)
@@ -854,7 +859,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
         self.assertEqual(finding.cve, None)
         self.assertEqual(finding.unsaved_vulnerability_ids, None)
         self.assertEqual(finding.vulnerability_ids, [])
@@ -880,7 +887,9 @@ class TestImporterUtils(DojoAPITestCase):
 
         # Process with empty list - should clear all IDs
         finding.unsaved_vulnerability_ids = []
-        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+        reimporter.reconcile_vulnerability_ids(finding)
+        reimporter.flush_vulnerability_ids()
         # Save the finding to persist the cve=None change
         finding.save()
 
@@ -917,7 +926,9 @@ class TestImporterUtils(DojoAPITestCase):
         # Process with different IDs - should replace old IDs
         new_vulnerability_ids = ["CVE-2021-9999", "GHSA-xxxx-yyyy"]
         finding.unsaved_vulnerability_ids = new_vulnerability_ids
-        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+        reimporter.reconcile_vulnerability_ids(finding)
+        reimporter.flush_vulnerability_ids()
         # Save the finding to persist the cve change
         finding.save()
 
@@ -933,3 +944,202 @@ class TestImporterUtils(DojoAPITestCase):
         vuln_ids = list(Vulnerability_Id.objects.filter(finding=finding).values_list("vulnerability_id", flat=True))
         self.assertEqual(set(new_vulnerability_ids), set(vuln_ids))
         finding.delete()
+
+    def test_reconcile_vulnerability_ids_cross_finding_batch(self):
+        """Multiple findings accumulated before flush — one delete+insert pair per changed finding."""
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+
+        # finding_a: IDs change (CVE-A → CVE-B)
+        finding_a = Finding(test=self.test, reporter=self.testuser)
+        finding_a.save()
+        Vulnerability_Id.objects.create(finding=finding_a, vulnerability_id="CVE-A-OLD")
+        finding_a.cve = "CVE-A-OLD"
+        finding_a.save()
+
+        # finding_b: IDs change (CVE-B1, CVE-B2 → CVE-B-NEW)
+        finding_b = Finding(test=self.test, reporter=self.testuser)
+        finding_b.save()
+        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B1")
+        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B2")
+        finding_b.cve = "CVE-B1"
+        finding_b.save()
+
+        # finding_c: IDs unchanged — should not appear in delete/insert buffers
+        finding_c = Finding(test=self.test, reporter=self.testuser)
+        finding_c.save()
+        Vulnerability_Id.objects.create(finding=finding_c, vulnerability_id="CVE-C-SAME")
+        finding_c.cve = "CVE-C-SAME"
+        finding_c.save()
+
+        finding_a.unsaved_vulnerability_ids = ["CVE-A-NEW"]
+        finding_b.unsaved_vulnerability_ids = ["CVE-B-NEW"]
+        finding_c.unsaved_vulnerability_ids = ["CVE-C-SAME"]
+
+        # Accumulate all three before any flush
+        reimporter.reconcile_vulnerability_ids(finding_a)
+        reimporter.reconcile_vulnerability_ids(finding_b)
+        reimporter.reconcile_vulnerability_ids(finding_c)
+
+        # pending_vuln_id_deletes only contains changed findings, not finding_c
+        self.assertIn(finding_a.id, reimporter.pending_vuln_id_deletes)
+        self.assertIn(finding_b.id, reimporter.pending_vuln_id_deletes)
+        self.assertNotIn(finding_c.id, reimporter.pending_vuln_id_deletes)
+        self.assertEqual(2, len(reimporter.pending_vulnerability_ids))
+
+        # Old IDs still in DB (not yet deleted)
+        self.assertEqual(1, Vulnerability_Id.objects.filter(finding=finding_a).count())
+        self.assertEqual(2, Vulnerability_Id.objects.filter(finding=finding_b).count())
+
+        reimporter.flush_vulnerability_ids()
+
+        # Buffers cleared
+        self.assertEqual([], reimporter.pending_vuln_id_deletes)
+        self.assertEqual([], reimporter.pending_vulnerability_ids)
+
+        # finding_a: old deleted, new inserted
+        vuln_ids_a = list(Vulnerability_Id.objects.filter(finding=finding_a).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-A-NEW"], vuln_ids_a)
+        self.assertEqual("CVE-A-NEW", finding_a.cve)
+
+        # finding_b: both old deleted, new inserted
+        vuln_ids_b = list(Vulnerability_Id.objects.filter(finding=finding_b).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-B-NEW"], vuln_ids_b)
+        self.assertEqual("CVE-B-NEW", finding_b.cve)
+
+        # finding_c: unchanged — IDs untouched
+        vuln_ids_c = list(Vulnerability_Id.objects.filter(finding=finding_c).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-C-SAME"], vuln_ids_c)
+
+        finding_a.delete()
+        finding_b.delete()
+        finding_c.delete()
+
+    def test_reconcile_vulnerability_ids_unchanged_no_db_write(self):
+        """Early-exit path: unchanged IDs never touch pending buffers."""
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+
+        finding = Finding(test=self.test, reporter=self.testuser)
+        finding.save()
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
+        finding.cve = "CVE-2020-1234"
+        finding.save()
+
+        finding.unsaved_vulnerability_ids = ["CVE-2020-1234"]
+        reimporter.reconcile_vulnerability_ids(finding)
+
+        self.assertEqual([], reimporter.pending_vuln_id_deletes)
+        self.assertEqual([], reimporter.pending_vulnerability_ids)
+
+        finding.delete()
+
+
+class ReimportDuplicateReactivationTest(DojoTestCase):
+
+    """
+    Regression test for https://github.com/DefectDojo/django-DefectDojo/issues/14910
+
+    Reimport reactivation of a mitigated finding must not produce an invalid
+    active/verified duplicate finding state.
+    """
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="admin", is_superuser=True)
+        Development_Environment.objects.get_or_create(name="Development")
+        self.product_type, _ = Product_Type.objects.get_or_create(name="dup_reactivation_pt")
+        self.product, _ = Product.objects.get_or_create(
+            name="DupReactivationProduct",
+            description="test product",
+            prod_type=self.product_type,
+        )
+        self.engagement = Engagement.objects.create(
+            name="Dup Reactivation Engagement",
+            product=self.product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        self.test = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title="dup reactivation test")
+
+    def _make_finding(self, title, **kwargs):
+        return Finding.objects.create(
+            title=title,
+            test=self.test,
+            severity="High",
+            reporter=self.user,
+            **kwargs,
+        )
+
+    def test_reactivation_keeps_duplicate_inactive_and_unverified(self):
+        # Original active finding
+        original = self._make_finding("original finding", active=True, verified=True)
+        # Mitigated finding that is marked as a duplicate of the original
+        existing_duplicate = self._make_finding(
+            "duplicate finding",
+            active=False,
+            verified=False,
+            duplicate=True,
+            duplicate_finding=original,
+            is_mitigated=True,
+            mitigated=timezone.now(),
+            mitigated_by=self.user,
+        )
+        # The reimported (unsaved) finding that re-matches the duplicate, and is active/not mitigated
+        unsaved_finding = self._make_finding("duplicate finding incoming", active=True, verified=True)
+
+        reimporter = DefaultReImporter(
+            test=self.test,
+            user=self.user,
+            scan_type=NPM_AUDIT_SCAN_TYPE,
+            active=True,
+            verified=True,
+            do_not_reactivate=False,
+        )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
+
+        result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing_duplicate)
+
+        result_finding.refresh_from_db()
+        # The mitigation is cleared (the finding reappeared in the scan)...
+        self.assertFalse(result_finding.is_mitigated)
+        self.assertIsNone(result_finding.mitigated)
+        # ...but a duplicate must never become active or verified (issue #14910)
+        self.assertTrue(result_finding.duplicate)
+        self.assertFalse(result_finding.active)
+        self.assertFalse(result_finding.verified)
+
+    def test_reactivation_of_non_duplicate_still_activates(self):
+        # A regular mitigated finding (not a duplicate) must still reactivate as before
+        existing = self._make_finding(
+            "regular finding",
+            active=False,
+            verified=False,
+            is_mitigated=True,
+            mitigated=timezone.now(),
+            mitigated_by=self.user,
+        )
+        unsaved_finding = self._make_finding("regular finding incoming", active=True, verified=True)
+
+        reimporter = DefaultReImporter(
+            test=self.test,
+            user=self.user,
+            scan_type=NPM_AUDIT_SCAN_TYPE,
+            active=True,
+            verified=True,
+            do_not_reactivate=False,
+        )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
+
+        result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing)
+
+        result_finding.refresh_from_db()
+        self.assertFalse(result_finding.is_mitigated)
+        self.assertIsNone(result_finding.mitigated)
+        self.assertTrue(result_finding.active)
+        self.assertTrue(result_finding.verified)

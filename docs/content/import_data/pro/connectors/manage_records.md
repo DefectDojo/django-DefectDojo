@@ -1,8 +1,9 @@
 ---
 title: "Managing Records"
 description: "Direct the flow of data from your tool into DefectDojo"
+aliases:
+  - /en/connecting_your_tools/connectors/manage_records
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
 Once you have run your first Discover operation, you should see a list of Mapped or Unmapped records on the **Manage Records and Operations** page.
@@ -57,7 +58,7 @@ Once a Record is Mapped, DefectDojo will be ready to import your tool’s scans 
 
 This makes it possible to send scan data from multiple Connectors to the same Product. All of the data will be stored in the same Engagement, but each Connector will store data in a separate Test.
 
-To learn more about Products, Engagements and Tests, see our [Product Hierarchy Overview](/asset_modelling/hierarchy/product_hierarchy/).
+To learn more about Products, Engagements and Tests, see our [Product Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/).
 
 ## Record States - Glossary
 

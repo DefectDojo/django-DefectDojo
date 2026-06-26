@@ -2,14 +2,12 @@
 import logging
 
 from django.contrib import messages
-from django.core.exceptions import BadRequest
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.forms import DeleteToolProductSettingsForm, ToolProductSettingsForm
 from dojo.models import Product, Tool_Product_Settings
 from dojo.utils import Product_Tab
@@ -17,7 +15,6 @@ from dojo.utils import Product_Tab
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def new_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     if request.method == "POST":
@@ -45,7 +42,6 @@ def new_tool_product(request, pid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def all_tool_product(request, pid):
     prod = get_object_or_404(Product, id=pid)
     tools = Tool_Product_Settings.objects.filter(product=prod).order_by("name")
@@ -57,13 +53,11 @@ def all_tool_product(request, pid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def edit_tool_product(request, pid, ttid):
     product = get_object_or_404(Product, id=pid)
-    tool_product = Tool_Product_Settings.objects.get(pk=ttid)
+    tool_product = get_object_or_404(Tool_Product_Settings, pk=ttid)
     if tool_product.product != product:
-        msg = f"Product {pid} does not fit to product of Tool_Product {tool_product.product.id}"
-        raise BadRequest(msg)
+        raise PermissionDenied
 
     if request.method == "POST":
         tform = ToolProductSettingsForm(request.POST, instance=tool_product)
@@ -85,13 +79,11 @@ def edit_tool_product(request, pid, ttid):
     })
 
 
-@user_is_authorized(Product, Permissions.Product_Edit, "pid")
 def delete_tool_product(request, pid, ttid):
-    tool_product = Tool_Product_Settings.objects.get(pk=ttid)
+    tool_product = get_object_or_404(Tool_Product_Settings, pk=ttid)
     product = get_object_or_404(Product, id=pid)
     if tool_product.product != product:
-        msg = f"Product {pid} does not fit to product of Tool_Product {tool_product.product.id}"
-        raise BadRequest(msg)
+        raise PermissionDenied
 
     if request.method == "POST":
         DeleteToolProductSettingsForm(request.POST, instance=tool_product)

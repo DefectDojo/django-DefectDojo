@@ -1,106 +1,142 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% load get_banner %}
-{% block content %}
+{% load static %}
+
+{% block add_styles %}
     {{ block.super }}
-    <h3>{% trans "Login" %}</h3>
-    <form class="form-horizontal" method="POST" autocomplete="off"> {% csrf_token %}
-        <fieldset class="col-md-offset-3 col-md-6">
+    .login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        background: linear-gradient(135deg, var(--color-dd-primary-50) 0%, var(--color-surface-2) 50%, var(--color-surface) 100%);
+    }
+    .login-card {
+        width: 100%;
+        max-width: 26rem;
+        background: var(--color-surface);
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 10px 15px -3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.03);
+        padding: 2.5rem 2rem;
+    }
+    .login-card .login-logo {
+        text-align: center;
+        margin-bottom: 1.75rem;
+    }
+    .login-card .login-logo img {
+        height: 2.75rem;
+        width: auto;
+    }
+    .login-card .login-title {
+        text-align: center;
+        font-size: 1.375rem;
+        font-weight: 600;
+        color: var(--color-text);
+        margin-bottom: 0.25rem;
+        letter-spacing: -0.01em;
+    }
+    .login-card .login-subtitle {
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--color-text-muted);
+        margin-bottom: 1.75rem;
+    }
+    .login-card .form-group {
+        margin-bottom: 1rem;
+    }
+    .login-card .control-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #333333;
+        margin-bottom: 0.375rem;
+    }
+    .login-card .form-control {
+        height: 2.75rem;
+        font-size: 0.9375rem;
+        border-color: var(--color-border);
+        border-radius: 0.5rem;
+        transition: border-color 150ms, box-shadow 150ms;
+    }
+    .login-card .form-control:focus {
+        border-color: var(--color-dd-primary-500);
+        box-shadow: 0 0 0 3px rgba(23, 121, 197, 0.12);
+    }
+    .login-btn {
+        width: 100%;
+        height: 2.75rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        background: var(--color-dd-primary-500);
+        color: white;
+        border: none;
+        transition: background-color 150ms, transform 100ms, box-shadow 150ms;
+    }
+    .login-btn:hover {
+        background: var(--color-dd-primary-700);
+        box-shadow: 0 2px 8px rgba(0, 56, 100, 0.2);
+    }
+    .login-btn:active {
+        transform: translateY(1px);
+    }
+    .login-links {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 1.25rem;
+        font-size: 0.8125rem;
+    }
+    .login-links a {
+        color: var(--color-dd-primary-500);
+        font-weight: 500;
+    }
+    .login-links a:hover {
+        color: var(--color-dd-primary-700);
+        text-decoration: underline;
+    }
+{% endblock %}
+
+{% block content %}
+    <div class="login-wrapper">
+        <div class="login-card">
+            <div class="login-logo">
+                <img src="{% static "dojo/img/logo.png" %}" alt="DefectDojo">
+            </div>
+            <div class="login-title">{% trans "Welcome back" %}</div>
+            <div class="login-subtitle">{% trans "Sign in to your account" %}</div>
+
             {% if "banner_enable"|get_banner_conf %}
-                <div class="well">
+                <div class="alert alert-info mb-4">
                     {{ "banner_message"|get_banner_conf }}
                 </div>
             {% endif %}
 
-            {% if SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
-               {% include "dojo/form_fields.html" with form=form %}
-            {% endif %}
+            <form method="POST" autocomplete="off"> {% csrf_token %}
+                {% include "dojo/form_fields.html" with form=form %}
 
-            <!-- Button -->
-            <div class="form-group">
-
-                {% if SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <button class="btn" id="toggleBox" onclick="togglePassVisibility()" type="button">
-                            <i class="fa-solid fa-eye"></i>
-                            {% trans "Show Password" %}
+                {% if CLASSIC_AUTH_ENABLED %}
+                    <div class="form-group" style="margin-top: 0.25rem; margin-bottom: 0.75rem;">
+                        <button class="btn" id="toggleBox" onclick="togglePassVisibility()" type="button" style="font-size: 0.8125rem; padding: 0.25rem 0;">
+                            <i class="fa-solid fa-eye"></i> {% trans "Show Password" %}
                         </button>
                     </div>
-                {% endif %}
 
-                {% if CLASSIC_AUTH_ENABLED and SHOW_LOGIN_FORM or 'force_login_form' in request.GET %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <button class="btn btn-success">{% trans "Login" %}</button>
-                    </div>
+                    <button class="btn btn-primary login-btn" type="submit">{% trans "Login" %}</button>
+
                     {% if FORGOT_PASSWORD or FORGOT_USERNAME %}
-                        <div class="col-sm-4">
-                            <ul style="list-style-type: none">
-                                {% if FORGOT_PASSWORD %}
-                                    <li><a id="reset-password" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
-                                {% endif %}
-                                {% if FORGOT_USERNAME %}
-                                    <li><a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
-                                {% endif %}
-                            </ul>
+                        <div class="login-links">
+                            {% if FORGOT_PASSWORD %}
+                                <a id="reset-password" href="{% url 'password_reset' %}">{% trans "Forgot password?" %}</a>
+                            {% endif %}
+                            {% if FORGOT_USERNAME %}
+                                <a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "Forgot username?" %}</a>
+                            {% endif %}
                         </div>
                     {% endif %}
                 {% endif %}
-            </div>
-            <div class="form-group">
-                {% if OIDC_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'oidc' %}?next={{ request.GET.next }}" style="color: rgb(255, 255, 255)" class="btn btn-success" type="button">{{ SOCIAL_AUTH_OIDC_LOGIN_BUTTON_TEXT }}</a>
-                    </div>
-                {% endif %}
-
-                {% if GOOGLE_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'google-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Google" %}</a>
-                    </div>
-                {% endif %}
-
-                {% if OKTA_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'okta-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with OKTA" %}</a>
-                    </div>
-                {% endif %}
-
-                {% if AZUREAD_TENANT_OAUTH2_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'azuread-tenant-oauth2' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Azure AD" %}</a>
-                    </div>
-                {% endif %}
-
-                {% if GITLAB_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'gitlab' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Gitlab" %}</a>
-                    </div>
-                {% endif %}
-
-                {% if AUTH0_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'auth0' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with Auth0" %}</a>
-                    </div>
-                {% endif %}
-
-                {% if KEYCLOAK_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'keycloak' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{{ SOCIAL_AUTH_KEYCLOAK_LOGIN_BUTTON_TEXT }}</a>
-                    </div>
-                {% endif %}
-
-                {% if GITHUB_ENTERPRISE_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a href="{% url 'social:begin' 'github-enterprise' %}?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{% trans "Login with GitHub Enterprise" %}</a>
-                    </div>
-                {% endif %}
-
-                {% if SAML2_ENABLED is True %}
-                    <div class="col-sm-offset-1 col-sm-2">
-                        <a id="oauth-login-saml" rel="nofollow" data-method="post" href="/saml2/login?next={{ request.GET.next }}" style="color: rgb(255,255,255)" class="btn btn-success" type="button">{{ SAML2_LOGIN_BUTTON_TEXT }}</a>
-                    </div>
-                {% endif %}
-            </div>
-        </fieldset>
-    </form>
+            </form>
+        </div>
+    </div>
 {% endblock %}

@@ -5,8 +5,8 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 
 from dojo.models import Endpoint, FileUpload, Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
-from dojo.url.models import URL
 
 
 class GenericJSONParser:
@@ -110,6 +110,7 @@ class GenericJSONParser:
                 "known_exploited",
                 "ransomware_used",
                 "fix_available",
+                "fix_version",
             }.union(required)
             not_allowed = sorted(set(item).difference(allowed))
             if not_allowed:
@@ -123,11 +124,11 @@ class GenericJSONParser:
                     for location_item in unsaved_locations:
                         if isinstance(location_item, str):
                             if "://" in location_item:  # is the host full uri?
-                                location = URL.from_value(location_item)
+                                location = LocationData.url(url=location_item)
                             else:
-                                location = URL.from_value("//" + location_item)
+                                location = LocationData.url(url="//" + location_item)
                         else:
-                            location = URL(**location_item)
+                            location = LocationData.url(**location_item)
                         finding.unsaved_locations.append(location)
                 else:
                     # TODO: Delete this after the move to Locations
@@ -143,6 +144,18 @@ class GenericJSONParser:
                         else:
                             endpoint = Endpoint(**endpoint_item)
                         finding.unsaved_endpoints.append(endpoint)
+            if settings.V3_FEATURE_LOCATIONS:
+                component_name = item.get("component_name")
+                component_version = item.get("component_version")
+                file_path = item.get("file_path")
+                if component_name or component_version or file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.dependency(
+                            name=component_name,
+                            version=component_version,
+                            file_path=file_path,
+                        ),
+                    )
             if unsaved_files:
                 for unsaved_file in unsaved_files:
                     data = base64.b64decode(unsaved_file.get("data"))

@@ -2,7 +2,10 @@
 title: "Pro Integrations"
 weight: 1
 audience: pro
+aliases:
+  - /en/share_your_findings/integrations
 ---
+**Availability:** Integrations is currently in **Beta** and is only available for **Cloud-hosted** DefectDojo Pro instances. On-premise deployments do not yet have the required infrastructure to support Integrations. If you are an on-premise customer interested in this feature, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for updates on availability.
 
 DefectDojo Pro's Integrations let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 

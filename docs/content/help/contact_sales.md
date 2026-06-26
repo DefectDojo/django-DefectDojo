@@ -4,8 +4,9 @@ description: "How to request and work with a trial of DefectDojo Cloud"
 draft: "false"
 weight: 6
 pro-feature: true
+aliases:
+  - /en/about_defectdojo/request_a_trial
 ---
-
 If your team requires an on-premise DefectDojo installation, please connect with our Sales team by emailing → [hello@defectdojo.com](mailto:hello@defectdojo.com) . This trial setup process only applies to DefectDojo Cloud users.
 
 All DefectDojo plans include a free 2-week trial, which you can use to evaluate our software. DefectDojo Trial instances are fully-featured and can be immediately converted into paid instances by our team; no need to set everything up again, or reupload any data when your trial period ends.

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from rest_framework.relations import PrimaryKeyRelatedField
 from rest_framework.serializers import CharField
 
 from dojo.api_helpers.serializers import BaseModelSerializer
@@ -13,6 +14,7 @@ from dojo.location.models import (
 
 
 class AbstractedLocationSerializer(BaseModelSerializer):
+    id = PrimaryKeyRelatedField(source="location.id", read_only=True)
     string = CharField(source="location.location_value", read_only=True)
     type = CharField(source="location.location_type", read_only=True)
     tags = TagListSerializerField(source="location.tags", required=False)

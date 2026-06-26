@@ -1,8 +1,9 @@
 ---
 title: "Import from API"
 description: ""
+aliases:
+  - /en/connecting_your_tools/import_scan_files/api_pipeline_modelling
 ---
-
 DefectDojo’s API allows for robust pipeline solutions, which automatically ingest new scans to your instance. Automation like this can take a few different forms:
 
 * A daily import which scans your environment on a daily basis, and then imports the results of the scan to DefectDojo (similar to our **Connectors** feature)

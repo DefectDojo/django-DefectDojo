@@ -3,6 +3,8 @@ title: "Set Permissions in Pro"
 description: "Overhaul, pro feature"
 weight: 3
 audience: pro
+aliases:
+ - /en/customize_dojo/user_management/pro_permissions_overhaul
 ---
 
 ## Introduction to Permission Types

@@ -1,8 +1,9 @@
 ---
 title: "Set up Email, Slack or Teams notifications"
 description: "Set up Microsoft Teams to receive notifications"
+aliases:
+  - /en/customize_dojo/notifications/email_slack_teams
 ---
-
 **You will need Superuser access to use the System Settings page, which is required to complete this process.**
 
 Notifications can be pushed to Slack or Teams when certain events trigger in DefectDojo.

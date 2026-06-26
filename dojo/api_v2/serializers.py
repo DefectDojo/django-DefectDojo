@@ -9,9 +9,10 @@ from datetime import datetime
 import six
 import tagulous
 from django.conf import settings
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.utils import IntegrityError
 from django.urls import reverse
 from django.utils import timezone
@@ -20,13 +21,12 @@ from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
-from rest_framework.fields import DictField, MultipleChoiceField
+from rest_framework.fields import DictField
 
 import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.authorization.authorization import user_has_permission
-from dojo.authorization.roles_permissions import Permissions
+from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.utils import endpoint_filter, endpoint_meta_import
 from dojo.finding.helper import (
     save_endpoints_template,
@@ -34,32 +34,22 @@ from dojo.finding.helper import (
     save_vulnerability_ids_template,
 )
 from dojo.finding.queries import get_authorized_findings
-from dojo.group.utils import get_auth_group_name
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
+from dojo.jira import services as jira_services
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
-    DEFAULT_NOTIFICATION,
     IMPORT_ACTIONS,
-    NOTIFICATION_CHOICES,
     SEVERITIES,
     SEVERITY_CHOICES,
     STATS_FIELDS,
     Announcement,
-    Answer,
-    Answered_Survey,
     App_Analysis,
     BurpRawRequestResponse,
     Check_List,
-    ChoiceAnswer,
-    ChoiceQuestion,
-    Cred_Mapping,
-    Cred_User,
     Development_Environment,
-    Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     DojoMeta,
     Endpoint,
@@ -67,46 +57,29 @@ from dojo.models import (
     Endpoint_Status,
     Engagement,
     Engagement_Presets,
-    Engagement_Survey,
     FileUpload,
     Finding,
     Finding_Group,
     Finding_Template,
-    General_Survey,
-    Global_Role,
-    JIRA_Instance,
-    JIRA_Issue,
-    JIRA_Project,
     Language_Type,
     Languages,
     Network_Locations,
     Note_Type,
     NoteHistory,
     Notes,
-    Notification_Webhooks,
-    Notifications,
     Product,
     Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
     Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
-    Question,
     Regulation,
     Risk_Acceptance,
-    Role,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    TextAnswer,
-    TextQuestion,
     Tool_Configuration,
     Tool_Product_Settings,
     Tool_Type,
@@ -115,7 +88,7 @@ from dojo.models import (
     Vulnerability_Id,
     get_current_date,
 )
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import async_create_notification
 from dojo.product_announcements import (
     LargeScanSizeProductAnnouncement,
     ScanTypeProductAnnouncement,
@@ -536,6 +509,7 @@ class UserSerializer(serializers.ModelSerializer):
             "date_joined",
             "last_login",
             "is_active",
+            "is_staff",
             "is_superuser",
             "token_last_reset",
             "password_last_reset",
@@ -639,6 +613,12 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit superusers."
             raise ValidationError(msg)
 
+        instance_is_staff = self.instance.is_staff if self.instance is not None else False
+        data_is_staff = data.get("is_staff", instance_is_staff)
+        if not self.context["request"].user.is_superuser and data_is_staff != instance_is_staff:
+            msg = "Only superusers are allowed to add or edit staff users."
+            raise ValidationError(msg)
+
         if self.context["request"].method in {"PATCH", "PUT"} and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
@@ -667,187 +647,6 @@ class UserStubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Dojo_User
         fields = ("id", "username", "first_name", "last_name")
-
-
-class RoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Role
-        fields = "__all__"
-
-
-class DojoGroupSerializer(serializers.ModelSerializer):
-    configuration_permissions = serializers.PrimaryKeyRelatedField(
-        allow_null=True,
-        queryset=Permission.objects.filter(
-            codename__in=get_configuration_permissions_codenames(),
-        ),
-        many=True,
-        required=False,
-        source="auth_group.permissions",
-    )
-
-    class Meta:
-        model = Dojo_Group
-        exclude = ("auth_group",)
-
-    def to_representation(self, instance):
-        if not instance.auth_group:
-            auth_group = Group(name=get_auth_group_name(instance))
-            auth_group.save()
-            instance.auth_group = auth_group
-            members = instance.users.all()
-            for member in members:
-                auth_group.user_set.add(member)
-            instance.save()
-        ret = super().to_representation(instance)
-        # This will show only "configuration_permissions" even if user has also
-        # other permissions
-        all_permissions = set(ret["configuration_permissions"])
-        allowed_configuration_permissions = set(
-            self.fields[
-                "configuration_permissions"
-            ].child_relation.queryset.values_list("id", flat=True),
-        )
-        ret["configuration_permissions"] = list(
-            all_permissions.intersection(allowed_configuration_permissions),
-        )
-
-        return ret
-
-    def create(self, validated_data):
-        new_configuration_permissions = None
-        if (
-            "auth_group" in validated_data
-            and "permissions" in validated_data["auth_group"]
-        ):  # This field was renamed from "configuration_permissions" in the meantime
-            new_configuration_permissions = set(
-                validated_data.pop("auth_group")["permissions"],
-            )
-
-        instance = super().create(validated_data)
-
-        # This will update only Permissions from category
-        # "configuration_permissions". There are no other Permissions.
-        if new_configuration_permissions:
-            instance.auth_group.permissions.set(new_configuration_permissions)
-
-        return instance
-
-    def update(self, instance, validated_data):
-        permissions_in_payload = None
-        new_configuration_permissions = None
-        if (
-            "auth_group" in validated_data
-            and "permissions" in validated_data["auth_group"]
-        ):  # This field was renamed from "configuration_permissions" in the meantime
-            permissions_in_payload = validated_data.pop("auth_group")["permissions"]
-            new_configuration_permissions = set(permissions_in_payload)
-
-        instance = super().update(instance, validated_data)
-
-        # This will update only Permissions from category
-        # "configuration_permissions". Others will be untouched
-        if new_configuration_permissions:
-            allowed_configuration_permissions = set(
-                self.fields[
-                    "configuration_permissions"
-                ].child_relation.queryset.all(),
-            )
-            non_configuration_permissions = (
-                set(instance.auth_group.permissions.all())
-                - allowed_configuration_permissions
-            )
-            new_permissions = non_configuration_permissions.union(
-                new_configuration_permissions,
-            )
-            instance.auth_group.permissions.set(new_permissions)
-
-        # Clear all configuration permissions if an empty list is provided
-        if isinstance(permissions_in_payload, list) and len(permissions_in_payload) == 0:
-            instance.auth_group.permissions.clear()
-
-        return instance
-
-
-class DojoGroupMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Dojo_Group_Member
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("group") != self.instance.group
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("group"),
-                Permissions.Group_Manage_Members,
-            )
-        ):
-            msg = "You are not permitted to add a user to this group"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("group") != self.instance.group
-            or data.get("user") != self.instance.user
-        ):
-            members = Dojo_Group_Member.objects.filter(
-                group=data.get("group"), user=data.get("user"),
-            )
-            if members.count() > 0:
-                msg = "Dojo_Group_Member already exists"
-                raise ValidationError(msg)
-
-        if self.instance is not None and not data.get("role").is_owner:
-            owners = (
-                Dojo_Group_Member.objects.filter(
-                    group=data.get("group"), role__is_owner=True,
-                )
-                .exclude(id=self.instance.id)
-                .count()
-            )
-            if owners < 1:
-                msg = "There must be at least one owner"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("group"),
-            Permissions.Group_Add_Owner,
-        ):
-            msg = "You are not permitted to add a user as Owner to this group"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class GlobalRoleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Global_Role
-        fields = "__all__"
-
-    def validate(self, data):
-        user = None
-        group = None
-
-        if self.instance is not None:
-            user = self.instance.user
-            group = self.instance.group
-
-        if "user" in data:
-            user = data.get("user")
-        if "group" in data:
-            group = data.get("group")
-
-        if user is None and group is None:
-            msg = "Global_Role must have either user or group"
-            raise ValidationError(msg)
-        if user is not None and group is not None:
-            msg = "Global_Role cannot have both user and group"
-            raise ValidationError(msg)
-
-        return data
 
 
 class AddUserSerializer(serializers.ModelSerializer):
@@ -928,182 +727,6 @@ class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
         fields = ["path"]
 
 
-class ProductMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Member
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product"),
-                Permissions.Product_Manage_Members,
-            )
-        ):
-            msg = "You are not permitted to add a member to this product"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product") != self.instance.product
-            or data.get("user") != self.instance.user
-        ):
-            members = Product_Member.objects.filter(
-                product=data.get("product"), user=data.get("user"),
-            )
-            if members.count() > 0:
-                msg = "Product_Member already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product"),
-            Permissions.Product_Member_Add_Owner,
-        ):
-            msg = "You are not permitted to add a member as Owner to this product"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class ProductGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Group
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product") != self.instance.product
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product"),
-                Permissions.Product_Group_Add,
-            )
-        ):
-            msg = "You are not permitted to add a group to this product"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product") != self.instance.product
-            or data.get("group") != self.instance.group
-        ):
-            members = Product_Group.objects.filter(
-                product=data.get("product"), group=data.get("group"),
-            )
-            if members.count() > 0:
-                msg = "Product_Group already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product"),
-            Permissions.Product_Group_Add_Owner,
-        ):
-            msg = "You are not permitted to add a group as Owner to this product"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class ProductTypeMemberSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Type_Member
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product_type") != self.instance.product_type
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product_type"),
-                Permissions.Product_Type_Manage_Members,
-            )
-        ):
-            msg = "You are not permitted to add a member to this product type"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product_type") != self.instance.product_type
-            or data.get("user") != self.instance.user
-        ):
-            members = Product_Type_Member.objects.filter(
-                product_type=data.get("product_type"), user=data.get("user"),
-            )
-            if members.count() > 0:
-                msg = "Product_Type_Member already exists"
-                raise ValidationError(msg)
-
-        if self.instance is not None and not data.get("role").is_owner:
-            owners = (
-                Product_Type_Member.objects.filter(
-                    product_type=data.get("product_type"), role__is_owner=True,
-                )
-                .exclude(id=self.instance.id)
-                .count()
-            )
-            if owners < 1:
-                msg = "There must be at least one owner"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product_type"),
-            Permissions.Product_Type_Member_Add_Owner,
-        ):
-            msg = "You are not permitted to add a member as Owner to this product type"
-            raise PermissionDenied(msg)
-
-        return data
-
-
-class ProductTypeGroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product_Type_Group
-        fields = "__all__"
-
-    def validate(self, data):
-        if (
-            self.instance is not None
-            and data.get("product_type") != self.instance.product_type
-            and not user_has_permission(
-                self.context["request"].user,
-                data.get("product_type"),
-                Permissions.Product_Type_Group_Add,
-            )
-        ):
-            msg = "You are not permitted to add a group to this product type"
-            raise PermissionDenied(msg)
-
-        if (
-            self.instance is None
-            or data.get("product_type") != self.instance.product_type
-            or data.get("group") != self.instance.group
-        ):
-            members = Product_Type_Group.objects.filter(
-                product_type=data.get("product_type"), group=data.get("group"),
-            )
-            if members.count() > 0:
-                msg = "Product_Type_Group already exists"
-                raise ValidationError(msg)
-
-        if data.get("role").is_owner and not user_has_permission(
-            self.context["request"].user,
-            data.get("product_type"),
-            Permissions.Product_Type_Group_Add_Owner,
-        ):
-            msg = "You are not permitted to add a group as Owner to this product type"
-            raise PermissionDenied(msg)
-
-        return data
-
-
 class ProductTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Type
@@ -1135,6 +758,13 @@ class EngagementSerializer(serializers.ModelSerializer):
 class EngagementToNotesSerializer(serializers.Serializer):
     engagement_id = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(), many=False, allow_null=True,
+    )
+    notes = NoteSerializer(many=True)
+
+
+class RiskAcceptanceToNotesSerializer(serializers.Serializer):
+    risk_acceptance_id = serializers.PrimaryKeyRelatedField(
+        queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,
     )
     notes = NoteSerializer(many=True)
 
@@ -1223,6 +853,22 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
         model = Endpoint_Status
         fields = "__all__"
 
+    def validate(self, data):
+        if self.instance is not None:
+            # Reject changes to Endpoint/Finding on existing objects
+            if "endpoint" in data and data["endpoint"] != self.instance.endpoint:
+                msg = "endpoint cannot be changed after creation"
+                raise serializers.ValidationError(msg)
+            if "finding" in data and data["finding"] != self.instance.finding:
+                msg = "finding cannot be changed after creation"
+                raise serializers.ValidationError(msg)
+            return data
+
+        if data["endpoint"].product_id != data["finding"].test.engagement.product_id:
+            msg = "endpoint and finding must belong to the same product"
+            raise serializers.ValidationError(msg)
+        return data
+
     def run_validators(self, initial_data):
         try:
             return super().run_validators(initial_data)
@@ -1264,6 +910,7 @@ class EndpointStatusSerializer(serializers.ModelSerializer):
 
 class EndpointSerializer(serializers.ModelSerializer):
     tags = TagListSerializerField(required=False)
+    active_finding_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Endpoint
@@ -1355,73 +1002,11 @@ class EndpointParamsSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class JIRAIssueSerializer(serializers.ModelSerializer):
-    url = serializers.SerializerMethodField(read_only=True)
-
-    class Meta:
-        model = JIRA_Issue
-        fields = "__all__"
-
-    def get_url(self, obj) -> str:
-        return jira_helper.get_jira_issue_url(obj)
-
-    def validate(self, data):
-        if self.context["request"].method == "PATCH":
-            engagement = data.get("engagement", self.instance.engagement)
-            finding = data.get("finding", self.instance.finding)
-            finding_group = data.get(
-                "finding_group", self.instance.finding_group,
-            )
-        else:
-            engagement = data.get("engagement", None)
-            finding = data.get("finding", None)
-            finding_group = data.get("finding_group", None)
-
-        if (
-            (engagement and not finding and not finding_group)
-            or (finding and not engagement and not finding_group)
-            or (finding_group and not engagement and not finding)
-        ):
-            pass
-        else:
-            msg = "Either engagement or finding or finding_group has to be set."
-            raise serializers.ValidationError(msg)
-
-        if finding:
-            if (linked_finding := jira_helper.jira_already_linked(finding, data.get("jira_key"), data.get("jira_id"))) is not None:
-                msg = "JIRA issue " + data.get("jira_key") + " already linked to " + reverse("view_finding", args=(linked_finding.id,))
-                raise serializers.ValidationError(msg)
-
-        return data
-
-
-class JIRAInstanceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JIRA_Instance
-        fields = "__all__"
-        extra_kwargs = {
-            "password": {"write_only": True},
-        }
-
-
-class JIRAProjectSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JIRA_Project
-        fields = "__all__"
-
-    def validate(self, data):
-        if self.context["request"].method == "PATCH":
-            engagement = data.get("engagement", self.instance.engagement)
-            product = data.get("product", self.instance.product)
-        else:
-            engagement = data.get("engagement", None)
-            product = data.get("product", None)
-
-        if (engagement and product) or (not engagement and not product):
-            msg = "Either engagement or product has to be set."
-            raise serializers.ValidationError(msg)
-
-        return data
+from dojo.jira.api.serializers import (  # noqa: E402, F401 backward compat
+    JIRAInstanceSerializer,
+    JIRAIssueSerializer,
+    JIRAProjectSerializer,
+)
 
 
 class SonarqubeIssueSerializer(serializers.ModelSerializer):
@@ -1624,7 +1209,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings = data.get("accepted_findings", [])
         findings_ids = [x.id for x in findings]
         finding_objects = Finding.objects.filter(id__in=findings_ids)
-        authed_findings = get_authorized_findings(Permissions.Risk_Acceptance).filter(id__in=findings_ids)
+        authed_findings = get_authorized_findings("edit").filter(id__in=findings_ids)
         if len(findings) != len(authed_findings):
             msg = "You are not permitted to add one or more selected findings to this risk acceptance"
             raise PermissionDenied(msg)
@@ -1743,7 +1328,7 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
 
     @extend_schema_field(JIRAIssueSerializer)
     def get_jira(self, obj):
-        issue = jira_helper.get_jira_issue(obj)
+        issue = jira_services.get_issue(obj)
         if issue is None:
             return None
         return JIRAIssueSerializer(read_only=True).to_representation(issue)
@@ -1760,9 +1345,7 @@ class FindingSerializer(serializers.ModelSerializer):
     mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
     tags = TagListSerializerField(required=False)
     request_response = serializers.SerializerMethodField()
-    accepted_risks = RiskAcceptanceSerializer(
-        many=True, read_only=True, source="risk_acceptance_set",
-    )
+    accepted_risks = serializers.SerializerMethodField()
     push_to_jira = serializers.BooleanField(default=False)
     found_by = serializers.PrimaryKeyRelatedField(
         queryset=Test_Type.objects.all(), many=True,
@@ -1806,13 +1389,24 @@ class FindingSerializer(serializers.ModelSerializer):
                 many=True, required=False, queryset=Endpoint.objects.all(),
             )
 
+    @extend_schema_field(RiskAcceptanceSerializer(many=True))
+    def get_accepted_risks(self, obj):
+        request = self.context.get("request")
+        if request is None:
+            return []
+        if not user_has_permission(request.user, obj, "edit"):
+            return []
+        return RiskAcceptanceSerializer(
+            obj.risk_acceptance_set.all(), many=True,
+        ).data
+
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_creation(self, obj):
-        return jira_helper.get_jira_creation(obj)
+        return jira_services.get_creation(obj)
 
     @extend_schema_field(serializers.DateTimeField())
     def get_jira_change(self, obj):
-        return jira_helper.get_jira_change(obj)
+        return jira_services.get_change(obj)
 
     @extend_schema_field(FindingRelatedFieldsSerializer)
     def get_related_fields(self, obj):
@@ -1888,9 +1482,11 @@ class FindingSerializer(serializers.ModelSerializer):
             for location_ref in locations:
                 location_ref.location.associate_with_finding(instance)
 
-        if push_to_jira or finding_helper.is_keep_in_sync_with_jira(instance):
+        if push_to_jira or jira_services.is_keep_in_sync(instance):
             # Push synchronously so that we can see jira errors in real time
-            jira_helper.push_to_jira(instance, sync=True)
+            success, message = jira_services.push(instance, force_sync=True)
+            if not success:
+                raise serializers.ValidationError(message)
 
         return instance
 
@@ -2045,13 +1641,14 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
 
         if push_to_jira:
-            jira_helper.push_to_jira(new_finding)
+            jira_services.push(new_finding)
 
         # Create a notification
-        create_notification(
+        dojo_dispatch_task(
+            async_create_notification,
             event="finding_added",
             title=_("Addition of %s") % new_finding.title,
-            finding=new_finding,
+            finding_id=new_finding.id,
             description=_('Finding "%s" was added by %s') % (new_finding.title, new_finding.reporter),
             url=reverse("view_finding", args=(new_finding.id,)),
             icon="exclamation-triangle",
@@ -2187,47 +1784,6 @@ class FindingTemplateSerializer(serializers.ModelSerializer):
             save_endpoints_template(instance, endpoint_urls)
 
         return super().update(instance, validated_data)
-
-
-class CredentialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_User
-        exclude = ("password",)
-
-
-class CredentialMappingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cred_Mapping
-        fields = "__all__"
-
-
-class StubFindingSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
-
-
-class StubFindingCreateSerializer(serializers.ModelSerializer):
-    test = serializers.PrimaryKeyRelatedField(queryset=Test.objects.all())
-
-    class Meta:
-        model = Stub_Finding
-        fields = "__all__"
-        extra_kwargs = {
-            "reporter": {"default": serializers.CurrentUserDefault()},
-        }
-
-    def validate_severity(self, value: str) -> str:
-        if value not in SEVERITIES:
-            msg = f"Severity must be one of the following: {SEVERITIES}"
-            raise serializers.ValidationError(msg)
-        return value
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -2709,8 +2265,11 @@ class ReImportScanSerializer(CommonImportScanSerializer):
                 # Attempt to create an engagement
                 logger.debug("reimport for non-existing test, using import to create new test")
                 context["engagement"] = auto_create_manager.get_or_create_engagement(**context)
+                # Do not close old findings when creating a brand new test: there are no
+                # existing findings to compare against, and close_old_findings would
+                # incorrectly close findings from other tests in the same scope.
                 context["test"], _, _, _, _, _, _ = self.get_importer(
-                    **context,
+                    **{**context, "close_old_findings": False},
                 ).process_scan(
                     context.pop("scan", None),
                 )
@@ -2852,32 +2411,51 @@ class ImportLanguagesSerializer(serializers.Serializer):
                 deserialized = json.loads(data)
         except Exception:
             msg = "Invalid format"
-            raise Exception(msg)
+            raise serializers.ValidationError(msg)
 
-        Languages.objects.filter(product=product).delete()
-
-        for name in deserialized:
-            if name not in {"header", "SUM"}:
-                element = deserialized[name]
-
-                try:
-                    (
-                        language_type,
-                        _created,
-                    ) = Language_Type.objects.get_or_create(language=name)
-                except Language_Type.MultipleObjectsReturned:
-                    language_type = Language_Type.objects.filter(
-                        language=name,
-                    ).first()
-
-                language = Languages()
-                language.product = product
-                language.language = language_type
-                language.files = element.get("nFiles", 0)
-                language.blank = element.get("blank", 0)
-                language.comment = element.get("comment", 0)
-                language.code = element.get("code", 0)
-                language.save()
+        # Filter out ignored keys and deduplicate
+        language_names = list(dict.fromkeys(
+            name for name in deserialized if name not in {"header", "SUM"}
+        ))
+        # Ensure any new Language_Type records exist (ignore conflicts from
+        # concurrent requests or already-existing types)
+        Language_Type.objects.bulk_create(
+            [Language_Type(language=name) for name in language_names],
+            ignore_conflicts=True,
+        )
+        # Single query to fetch all Language_Type objects we need (indexed lookup)
+        language_types = {
+            lt.language: lt
+            for lt in Language_Type.objects.filter(language__in=language_names)
+        }
+        # Prepare Languages objects for upsert
+        languages_to_upsert = [
+            Languages(
+                product=product,
+                language=language_types[name],
+                files=deserialized[name].get("nFiles", 0),
+                blank=deserialized[name].get("blank", 0),
+                comment=deserialized[name].get("comment", 0),
+                code=deserialized[name].get("code", 0),
+            )
+            for name in language_names
+        ]
+        # Upsert Languages and remove stale ones atomically
+        try:
+            with transaction.atomic():
+                Languages.objects.bulk_create(
+                    languages_to_upsert,
+                    update_conflicts=True,
+                    unique_fields=["language", "product"],
+                    update_fields=["files", "blank", "comment", "code"],
+                )
+                # Remove languages no longer present in the file
+                Languages.objects.filter(product=product).exclude(
+                    language__in=language_types.values(),
+                ).delete()
+        except IntegrityError as e:
+            msg = f"Failed to import languages due to a data integrity issue: {e}"
+            raise serializers.ValidationError(msg)
 
     def validate(self, data):
         if is_scan_file_too_large(data["file"]):
@@ -2963,7 +2541,7 @@ class FindingCloseSerializer(serializers.ModelSerializer):
                 })
 
             # Ensure selected user is authorized (Finding_Edit)
-            authorized_users = get_authorized_users(Permissions.Finding_Edit, user=request_user)
+            authorized_users = get_authorized_users("edit", user=request_user)
             if not authorized_users.filter(id=mitigated_by_user.id).exists():
                 raise serializers.ValidationError({
                     "mitigated_by": [
@@ -2972,6 +2550,11 @@ class FindingCloseSerializer(serializers.ModelSerializer):
                 })
 
         return data
+
+
+class FindingVerifySerializer(serializers.Serializer):
+    note = serializers.CharField(required=False, allow_blank=True)
+    note_type = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=Note_Type.objects.all())
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
@@ -3016,9 +2599,9 @@ class ReportGenerateSerializer(serializers.Serializer):
     )
 
 
-class EngagementUpdateJiraEpicSerializer(serializers.Serializer):
-    epic_name = serializers.CharField(required=False, max_length=200)
-    epic_priority = serializers.CharField(required=False, allow_null=True)
+from dojo.jira.api.serializers import (  # noqa: E402, F401 backward compat
+    EngagementUpdateJiraEpicSerializer,
+)
 
 
 class TagSerializer(serializers.Serializer):
@@ -3030,133 +2613,32 @@ class SystemSettingsSerializer(serializers.ModelSerializer):
         model = System_Settings
         fields = "__all__"
 
-    def validate(self, data):
-        if self.instance is not None:
-            default_group = self.instance.default_group
-            default_group_role = self.instance.default_group_role
 
-        if "default_group" in data:
-            default_group = data["default_group"]
-        if "default_group_role" in data:
-            default_group_role = data["default_group_role"]
+class CeleryStatusSerializer(serializers.Serializer):
+    worker_status = serializers.BooleanField(read_only=True)
+    broker_status = serializers.BooleanField(read_only=True)
+    queue_length = serializers.IntegerField(allow_null=True, read_only=True)
+    task_time_limit = serializers.IntegerField(allow_null=True, read_only=True)
+    task_soft_time_limit = serializers.IntegerField(allow_null=True, read_only=True)
+    task_default_expires = serializers.IntegerField(allow_null=True, read_only=True)
 
-        if (default_group is None and default_group_role is not None) or (
-            default_group is not None and default_group_role is None
-        ):
-            msg = "default_group and default_group_role must either both be set or both be empty."
-            raise ValidationError(msg)
 
-        return data
+class CeleryQueueTaskDetailSerializer(serializers.Serializer):
+    task_name = serializers.CharField(read_only=True)
+    count = serializers.IntegerField(read_only=True)
+    oldest_position = serializers.IntegerField(read_only=True)
+    newest_position = serializers.IntegerField(read_only=True)
+    oldest_eta = serializers.CharField(allow_null=True, read_only=True)
+    newest_eta = serializers.CharField(allow_null=True, read_only=True)
+    earliest_expires = serializers.CharField(allow_null=True, read_only=True)
+    latest_expires = serializers.CharField(allow_null=True, read_only=True)
 
 
 class FindingNoteSerializer(serializers.Serializer):
     note_id = serializers.IntegerField()
 
 
-class NotificationsSerializer(serializers.ModelSerializer):
-    product = serializers.PrimaryKeyRelatedField(
-        queryset=Product.objects.all(),
-        required=False,
-        default=None,
-        allow_null=True,
-    )
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=Dojo_User.objects.all(),
-        required=False,
-        default=None,
-        allow_null=True,
-    )
-    product_type_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    product_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    engagement_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    test_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    scan_added = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    jira_update = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    upcoming_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    stale_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    auto_close_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    close_engagement = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    user_mentioned = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    code_review = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    review_requested = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    other = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    sla_breach = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    sla_breach_combined = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    risk_acceptance_expiration = MultipleChoiceField(
-        choices=NOTIFICATION_CHOICES, default=DEFAULT_NOTIFICATION,
-    )
-    template = serializers.BooleanField(default=False)
-
-    class Meta:
-        model = Notifications
-        fields = "__all__"
-
-    def validate(self, data):
-        user = None
-        product = None
-        template = False
-
-        if self.instance is not None:
-            user = self.instance.user
-            product = self.instance.product
-
-        if "user" in data:
-            user = data.get("user")
-        if "product" in data:
-            product = data.get("product")
-        if "template" in data:
-            template = data.get("template")
-
-        if (
-            template
-            and Notifications.objects.filter(template=True).count() > 0
-        ):
-            msg = "Notification template already exists"
-            raise ValidationError(msg)
-        if (
-            self.instance is None
-            or user != self.instance.user
-            or product != self.instance.product
-        ):
-            notifications = Notifications.objects.filter(
-                user=user, product=product, template=template,
-            ).count()
-            if notifications > 0:
-                msg = "Notification for user and product already exists"
-                raise ValidationError(msg)
-        return data
+from dojo.notifications.api.serializer import NotificationsSerializer  # noqa: E402, F401  -- backward compat
 
 
 class EngagementPresetsSerializer(serializers.ModelSerializer):
@@ -3193,10 +2675,6 @@ class SLAConfigurationSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.Serializer):
     user = UserSerializer(many=False)
     user_contact_info = UserContactInfoSerializer(many=False, required=False)
-    global_role = GlobalRoleSerializer(many=False, required=False)
-    dojo_group_member = DojoGroupMemberSerializer(many=True)
-    product_type_member = ProductTypeMemberSerializer(many=True)
-    product_member = ProductMemberSerializer(many=True)
 
 
 class DeletePreviewSerializer(serializers.Serializer):
@@ -3209,111 +2687,6 @@ class ConfigurationPermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
         exclude = ("content_type",)
-
-
-class QuestionnaireQuestionSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        if isinstance(instance, TextQuestion):
-            return TextQuestionSerializer(instance=instance).data
-        if isinstance(instance, ChoiceQuestion):
-            return ChoiceQuestionSerializer(instance=instance).data
-        return QuestionSerializer(instance=instance).data
-
-    class Meta:
-        model = Question
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        exclude = ("polymorphic_ctype",)
-
-
-class TextQuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TextQuestion
-        exclude = ("polymorphic_ctype",)
-
-
-class ChoiceQuestionSerializer(serializers.ModelSerializer):
-    choices = serializers.StringRelatedField(many=True)
-
-    class Meta:
-        model = ChoiceQuestion
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionnaireAnsweredSurveySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Answered_Survey
-        fields = "__all__"
-
-
-class QuestionnaireAnswerSerializer(serializers.ModelSerializer):
-    def to_representation(self, instance):
-        if isinstance(instance, TextAnswer):
-            return TextAnswerSerializer(instance=instance).data
-        if isinstance(instance, ChoiceAnswer):
-            return ChoiceAnswerSerializer(instance=instance).data
-        return AnswerSerializer(instance=instance).data
-
-    class Meta:
-        model = Answer
-        exclude = ("polymorphic_ctype",)
-
-
-class AnswerSerializer(serializers.ModelSerializer):
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = Answer
-        exclude = ("polymorphic_ctype",)
-
-
-class TextAnswerSerializer(serializers.ModelSerializer):
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = TextAnswer
-        exclude = ("polymorphic_ctype",)
-
-
-class ChoiceAnswerSerializer(serializers.ModelSerializer):
-    answer = serializers.StringRelatedField(many=True)
-    question = serializers.StringRelatedField()
-    answered_survey = QuestionnaireAnsweredSurveySerializer()
-
-    class Meta:
-        model = ChoiceAnswer
-        exclude = ("polymorphic_ctype",)
-
-
-class QuestionnaireEngagementSurveySerializer(serializers.ModelSerializer):
-    questions = serializers.SerializerMethodField()
-
-    @extend_schema_field(serializers.ListField(child=serializers.CharField()))
-    def get_questions(self, obj):
-        questions = obj.questions.all()
-        formated_questions = []
-        for question in questions:
-            formated_question = f"Order #{question.order} - {question.text}{' (Optional)' if question.optional else ''}"
-            formated_questions.append(formated_question)
-        return formated_questions
-
-    class Meta:
-        model = Engagement_Survey
-        fields = "__all__"
-
-
-class QuestionnaireGeneralSurveySerializer(serializers.ModelSerializer):
-    survey = QuestionnaireEngagementSurveySerializer()
-
-    class Meta:
-        model = General_Survey
-        fields = "__all__"
 
 
 class AnnouncementSerializer(serializers.ModelSerializer):
@@ -3333,7 +2706,4 @@ class AnnouncementSerializer(serializers.ModelSerializer):
             raise
 
 
-class NotificationWebhooksSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Notification_Webhooks
-        fields = "__all__"
+from dojo.notifications.api.serializer import NotificationWebhooksSerializer  # noqa: E402, F401  -- backward compat

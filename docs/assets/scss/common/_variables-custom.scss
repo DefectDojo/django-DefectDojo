@@ -1,3 +1,27 @@
+// DefectDojo Brand Colors
+$dd-fuji-blue:    #1779C5;
+$dd-fuji-hue-01:  #C6DDF2;
+$dd-fuji-hue-02:  #82B0D9;
+$dd-fuji-hue-03:  #204D87;
+$dd-fuji-hue-04:  #003864;
+
+$dd-torii-orange:   #F2561D;
+$dd-torii-hue-01:   #F2D49B;
+$dd-torii-hue-02:   #F2762E;
+$dd-torii-hue-03:   #C1230D;
+$dd-torii-hue-04:   #890000;
+
+$dd-dojo-black:   #191919;
+$dd-dojo-hue-01:  #DCDCDC;
+$dd-dojo-hue-02:  #B3B3B3;
+$dd-dojo-hue-03:  #666666;
+$dd-dojo-hue-04:  #333333;
+
+// Bootstrap variable overrides
+$primary:   $dd-fuji-blue;
+$secondary: $dd-fuji-hue-04;
+
+// Typography
 $font-family-sans-serif:
     "Worksans",
     system-ui,
@@ -13,3 +37,19 @@ $font-family-sans-serif:
     "Segoe UI Emoji",
     "Segoe UI Symbol",
     "Noto Color Emoji";
+
+$font-weight-light:    300;
+$font-weight-normal:   400;
+$font-weight-medium:   500;
+$font-weight-semibold: 600;
+
+// Body
+$body-color: $dd-dojo-black;
+
+// Links
+$link-color:       $dd-fuji-blue;
+$link-hover-color: $dd-fuji-hue-03;
+
+// Headings
+$headings-font-weight: 600;
+$headings-color:       $dd-dojo-black;

@@ -1,8 +1,9 @@
 ---
 title: "Add or Edit a Connector"
 description: "Connect to a supported security tool"
+aliases:
+  - /en/connecting_your_tools/connectors/add_edit_connectors
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
 
 The process for adding and configuring a connector is similar, regardless of the tool you’re trying to connect. However, certain tools may require you to create API keys or complete additional steps.

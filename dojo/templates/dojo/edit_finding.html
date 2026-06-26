@@ -6,20 +6,11 @@
     {{ block.super }}
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
-{% block add_styles %}
-    {{ block.super }}
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <h3> Edit a Finding </h3>
     {% if temp %}
-        <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
+        <form id="add_finding" class="" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
             {% include "dojo/form_fields.html" with form=form %}
             {% if jform %}
@@ -40,7 +31,7 @@
             </div>
         </form>
     {% else %}
-        <form id="add_finding" class="form-horizontal" action="{% url 'edit_finding' finding.id %}" method="post">
+        <form id="add_finding" class="" action="{% url 'edit_finding' finding.id %}" method="post">
             {% csrf_token %}
             {% if return_url %}
                 <input type="hidden" name="return_url" value="{{ return_url }}" />
@@ -82,7 +73,7 @@
                 <hr>
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="id_jira_issue">JIRA URL
-                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="JIRA URL connected to this findings product or engagement" data-placement="right" data-container="body" data-original-title="" title="">
+                        <i class="fa-solid fa-circle-question has-popover" data-content="JIRA URL connected to this findings product or engagement">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">
@@ -105,7 +96,7 @@
                 <hr>
                 <div class="form-group">
                     <label class="col-sm-2 control-label" for="id_github_issue">GitHub issue
-                        <i class="fa-solid fa-circle-question has-popover" data-trigger="hover" data-content="Github issue connected to this finding" data-placement="right" data-container="body" data-original-title="" title="">
+                        <i class="fa-solid fa-circle-question has-popover" data-content="Github issue connected to this finding">
                         </i>
                     </label>
                     <div class="col-sm-10 form-control-static">

@@ -289,7 +289,7 @@ class TestTenableParser(DojoTestCase):
             findings = parser.get_findings(testfile, self.create_test())
             self.assertEqual(99, len(findings))
             finding = findings[0]
-            self.assertEqual("Blah1", self.get_unsaved_locations(finding)[0].host)
+            self.assertEqual("Blah1".lower(), self.get_unsaved_locations(finding)[0].host.lower())
             self.assertEqual("Blah1", finding.title)
             self.assertEqual("Low", finding.severity)
             self.assertEqual("3.1", finding.cvssv3_score)

@@ -2,9 +2,9 @@
 title: "Filter Index"
 description: "Reference for all filters in DefectDojo"
 weight: 5
-
+aliases:
+  - /en/working_with_findings/organizing_engagements_tests/filter_index
 ---
-
 **Note: Currently this article only covers Finding Filters available in the DefectDojo Pro UI, but this article will be expanded in the future to govern more object types, along with Open-Source filters.** 
 
 Here is a list of filters that can be applied in the DefectDojo Pro UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, creating custom [Dashboard Tiles](/metrics_reports/dashboards/about_custom_dashboard_tiles/), or creating automation via [Rules Engine](/automation/rules_engine/about).

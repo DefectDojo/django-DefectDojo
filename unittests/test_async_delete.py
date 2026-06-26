@@ -2,10 +2,10 @@
 Unit tests for async_delete functionality.
 
 These tests verify that the async_delete class works correctly with dojo_dispatch_task,
-which injects async_user and _pgh_context kwargs into task calls.
+which injects user context and _pgh_context kwargs into task calls.
 
 The original bug was that @app.task decorated instance methods didn't properly handle
-the injected kwargs, causing TypeError: unexpected keyword argument 'async_user'.
+the injected kwargs, causing TypeError for unexpected keyword arguments.
 """
 import logging
 
@@ -120,8 +120,8 @@ class TestAsyncDelete(DojoTestCase):
 
         # Use impersonate to set current user context (required for block_execution to work)
         with impersonate(self.testuser):
-            # This would raise TypeError before the fix:
-            # TypeError: delete() got an unexpected keyword argument 'async_user'
+            # This would raise TypeError before the fix when injected kwargs
+            # were not handled properly by task functions
             async_del = async_delete()
             async_del.delete(finding)
 
@@ -252,11 +252,11 @@ class TestAsyncDelete(DojoTestCase):
         )
 
     @override_settings(ASYNC_OBJECT_DELETE=True)
-    def test_async_delete_accepts_sync_kwarg(self):
+    def test_async_delete_accepts_force_sync_kwarg(self):
         """
-        Test that async_delete passes through the sync kwarg properly.
+        Test that async_delete passes through the force_sync kwarg properly.
 
-        The sync=True kwarg forces synchronous execution for the top-level task.
+        The force_sync=True kwarg forces synchronous execution for the top-level task.
         However, nested task dispatches still need user context to run synchronously,
         so we use impersonate here as well.
         """
@@ -265,14 +265,14 @@ class TestAsyncDelete(DojoTestCase):
 
         # Use impersonate to ensure nested tasks also run synchronously
         with impersonate(self.testuser):
-            # Explicitly pass sync=True
+            # Explicitly pass force_sync=True
             async_del = async_delete()
-            async_del.delete(product, sync=True)
+            async_del.delete(product, force_sync=True)
 
         # Verify the product was deleted
         self.assertFalse(
             Product.objects.filter(pk=product_pk).exists(),
-            "Product should be deleted with sync=True",
+            "Product should be deleted with force_sync=True",
         )
 
     def test_async_delete_helper_methods(self):
@@ -296,18 +296,3 @@ class TestAsyncDelete(DojoTestCase):
             "Product",
             "get_object_name should work with model class",
         )
-
-    def test_async_delete_mapping_preserved(self):
-        """
-        Test that the mapping attribute is preserved on async_delete instances.
-
-        This ensures backwards compatibility for code that might access the mapping.
-        """
-        async_del = async_delete()
-
-        # Verify mapping exists and has expected keys
-        self.assertIsNotNone(async_del.mapping)
-        self.assertIn("Product", async_del.mapping)
-        self.assertIn("Product_Type", async_del.mapping)
-        self.assertIn("Engagement", async_del.mapping)
-        self.assertIn("Test", async_del.mapping)

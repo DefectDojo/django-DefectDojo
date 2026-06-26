@@ -16,8 +16,6 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.endpoint.queries import get_authorized_endpoints_for_queryset
 from dojo.endpoint.utils import clean_hosts_run, endpoint_meta_import
@@ -59,8 +57,14 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     else:
         endpoints = Endpoint.objects.all()
 
-    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").distinct()
-    endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_View, endpoints, request.user)
+    active_finding_subquery = build_count_subquery(
+        Finding.objects.filter(endpoints=OuterRef("pk"), active=True),
+        group_field="endpoints",
+    )
+    endpoints = endpoints.prefetch_related("product", "product__tags", "tags").annotate(
+        active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+    ).distinct()
+    endpoints = get_authorized_endpoints_for_queryset("view", endpoints, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = EndpointFilterWithoutObjectLookups if filter_string_matching else EndpointFilter
     if host_view:
@@ -85,7 +89,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
         p = request.GET.getlist("product", [])
         if len(p) == 1:
             product = get_object_or_404(Product, id=p[0])
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, "view")
             product_tab = Product_Tab(product, view_name, tab="endpoints")
 
     return render(
@@ -175,17 +179,14 @@ def process_endpoint_view(request, eid, *, host_view=False):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint(request, eid):
     return process_endpoint_view(request, eid, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def view_endpoint_host(request, eid):
     return process_endpoint_view(request, eid, host_view=True)
 
 
-@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def edit_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
 
@@ -213,7 +214,6 @@ def edit_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_Delete, "eid")
 def delete_endpoint(request, eid):
     endpoint = get_object_or_404(Endpoint, pk=eid)
     product = endpoint.product
@@ -248,7 +248,6 @@ def delete_endpoint(request, eid):
                    })
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "pid")
 def add_endpoint(request, pid):
     product = get_object_or_404(Product, id=pid)
     template = "dojo/add_endpoint.html"
@@ -281,7 +280,7 @@ def add_product_endpoint(request):
     if request.method == "POST":
         form = AddEndpointForm(request.POST)
         if form.is_valid():
-            user_has_permission_or_403(request.user, form.product, Permissions.Location_Add)
+            user_has_permission_or_403(request.user, form.product, "add")
             endpoints = form.save()
             tags = request.POST.get("tags")
             for e in endpoints:
@@ -300,7 +299,6 @@ def add_product_endpoint(request):
                    })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_Edit, "eid")
 def manage_meta_data(request, eid):
     endpoint = Endpoint.objects.get(id=eid)
     meta_data_query = DojoMeta.objects.filter(endpoint=endpoint)
@@ -336,9 +334,9 @@ def endpoint_bulk_update_all(request, pid=None):
 
             if pid is not None:
                 product = get_object_or_404(Product, id=pid)
-                user_has_permission_or_403(request.user, product, Permissions.Location_Delete)
+                user_has_permission_or_403(request.user, product, "delete")
 
-            endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_Delete, endpoints, request.user)
+            endpoints = get_authorized_endpoints_for_queryset("delete", endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             deleted_endpoint_count = endpoints.count()
@@ -360,9 +358,9 @@ def endpoint_bulk_update_all(request, pid=None):
 
             if pid is not None:
                 product = get_object_or_404(Product, id=pid)
-                user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+                user_has_permission_or_403(request.user, product, "edit")
 
-            endpoints = get_authorized_endpoints_for_queryset(Permissions.Location_Edit, endpoints, request.user)
+            endpoints = get_authorized_endpoints_for_queryset("edit", endpoints, request.user)
 
             skipped_endpoint_count = total_endpoint_count - endpoints.count()
             updated_endpoint_count = endpoints.count()
@@ -390,7 +388,6 @@ def endpoint_bulk_update_all(request, pid=None):
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "fid")
 def endpoint_status_bulk_update(request, fid):
     if request.method == "POST":
         post = request.POST
@@ -398,7 +395,15 @@ def endpoint_status_bulk_update(request, fid):
         status_list = ["active", "false_positive", "mitigated", "out_of_scope", "risk_accepted"]
         enable = [item for item in status_list if item in list(post.keys())]
 
-        if endpoints_to_update and len(enable) > 0:
+        if request.POST.get("remove_from_finding") and endpoints_to_update:
+            Endpoint_Status.objects.filter(finding_id=fid, endpoint_id__in=endpoints_to_update).delete()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Selected endpoints have been removed from this finding.",
+                extra_tags="alert-success",
+            )
+        elif endpoints_to_update and len(enable) > 0:
             endpoints = Endpoint.objects.filter(id__in=endpoints_to_update).order_by("endpoint_meta__product__id")
             for endpoint in endpoints:
                 endpoint_status = Endpoint_Status.objects.get(
@@ -457,7 +462,6 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Product, Permissions.Location_Edit, "pid")
 def import_endpoint_meta(request, pid):
     product = get_object_or_404(Product, id=pid)
     form = ImportEndpointMetaForm()
@@ -492,13 +496,11 @@ def import_endpoint_meta(request, pid):
     })
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def endpoint_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, host_view=False)
 
 
-@user_is_authorized(Endpoint, Permissions.Location_View, "eid")
 def endpoint_host_report(request, eid):
     endpoint = get_object_or_404(Endpoint, id=eid)
     return generate_report(request, endpoint, host_view=True)

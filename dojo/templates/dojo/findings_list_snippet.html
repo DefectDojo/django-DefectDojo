@@ -55,11 +55,11 @@
             </div>
             {% if findings %}
                 <div class="clearfix">{% include "dojo/paging_snippet.html" with page=findings page_size=True %}</div>
-                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                     <div class="dropdown hidden" style="padding-bottom: 5px;" id="bulk_edit_menu">
                         {{ bulk_edit_form.media.css }}
                         {{ bulk_edit_form.media.js }}
-                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                             <button class="btn btn-info btn-sm btn-primary dropdown-toggle"
                                     type="button"
                                     id="dropdownMenu2"
@@ -77,18 +77,18 @@
                                         aria-label="Merge selected findings"
                                         class="btn btn-sm  btn-primary"
                                         data-toggle="tooltip"
-                                        data-placement="bottom"
+                                       
                                         title="Merge Findings">
                                     <a class="white-color merge" href="#" alt="Merge Findings">
                                         <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
                                     </a>
                                 </button>
                             {% endif %}
-                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Delete" %}
+                            {% if not product_tab or product_tab and product_tab.product|has_object_permission:"delete" %}
                                 <button type="button"
                                         class="btn btn-sm  btn-primary"
                                         data-toggle="tooltip"
-                                        data-placement="bottom"
+                                       
                                         title="Delete Findings"
                                         aria-label="Delete selected findings">
                                     <a class="white-color delete-bulk" href="#" alt="Delete Findings">
@@ -248,7 +248,7 @@
                                         <label style="display: block">{% trans "Tags" %}</label>
                                         {{ bulk_edit_form.tags }}
                                         {% if bulk_edit_form.disclaimer %}
-                                            <div style="background-color:#DADCE2; border:1px #003333; padding:.3em; margin:.1em; ">
+                                            <div style="background-color:#DADCE2; border:1px solid #003333; padding:.3em; margin:.1em; ">
                                                 <div style="color:#ff0000;">Disclaimer</div>
                                                 <div>{{ bulk_edit_form.disclaimer }}</div>
                                             </div>
@@ -264,7 +264,7 @@
                         <thead>
                             <tr>
                                 {% block header %}
-                                    {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                                    {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                                         <th class="centered" title="Select all visible findings." scope="col" aria-label="Select all visible findings">
                                             <div class="dropdown">
                                                 <button class="btn btn-primary dropdown-toggle"
@@ -393,6 +393,9 @@
                                     <th scope="col">
                                         {% dojo_sort request 'Planned Remediation' 'planned_remediation_date' %}
                                     </th>
+                                    <th scope="col">
+                                        {% dojo_sort request 'Planned remediation version' 'planned_remediation_version' %}
+                                    </th>
                                     {% if filter_name != 'Closed' %}
                                         <th scope="col">
                                             {% trans "Reviewers" %}
@@ -405,7 +408,7 @@
                             {% for finding in findings %}
                                 <tr class="{% if finding.active %}active_finding{% else %}inactive_finding{% endif %}">
                                     {% block body %}
-                                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                                        {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                                             <td class="centered">
                                                 <form action="#">
                                                     <input type="checkbox" name="select_{{ finding.id }}" id="{{ finding.id }}" class="select_one {{ finding.severity }}" aria-label="select-finding"/>
@@ -422,7 +425,7 @@
                                                                 <i class="fa-solid fa-circle-right"></i> {% trans "View" %}
                                                             </a>
                                                         </li>
-                                                        {% if finding|has_object_permission:"Finding_Edit" %}
+                                                        {% if finding|has_object_permission:"edit" %}
                                                             <li role="presentation">
                                                                 <a class="" href="{% url 'edit_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}" role="menuitem">
                                                                     <i class="fa-solid fa-pen-to-square"></i> {% trans "Edit" %}
@@ -435,9 +438,9 @@
                                                             </li>
                                                             <li class="divider" role="separator"></li>
                                                         {% endif %}
-                                                        {% if finding|has_object_permission:"Finding_View" %}
+                                                        {% if finding|has_object_permission:"view" %}
                                                             {% user_can_clear_peer_review finding request.user as clear_peer_review %}
-                                                            {% if finding|has_object_permission:"Finding_Edit" and clear_peer_review %}
+                                                            {% if finding|has_object_permission:"edit" and clear_peer_review %}
                                                                 <li role="presentation">
                                                                     <a href="{% url 'clear_finding_review' finding.id %}" role="menuitem">
                                                                         <i class="icon-user-check"></i> {% trans "Clear Review" %}
@@ -451,28 +454,28 @@
                                                                 </li>
                                                             {% endif %}
                                                         {% endif %}
-                                                        {% if finding|has_object_permission:"Finding_Edit" %}
+                                                        {% if finding|has_object_permission:"edit" %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}" role="menuitem">
                                                                     <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
-                                                        {% if finding|has_object_permission:"Finding_Add" %}
+                                                        {% if finding|has_object_permission:"add" %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'mktemplate' finding.id %}" role="menuitem">
                                                                     <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
-                                                        {% if finding|has_object_permission:"Finding_Edit" %}
+                                                        {% if finding|has_object_permission:"edit" %}
                                                             <li role="presentation">
                                                                 <a href="{% url 'find_template_to_apply' finding.id %}" role="menuitem">
                                                                     <i class="fa-solid fa-copy"></i> {% trans "Apply Template to Finding" %}
                                                                 </a>
                                                             </li>
                                                         {% endif %}
-                                                        {% if finding|has_object_permission:"Finding_Edit" %}
+                                                        {% if finding|has_object_permission:"edit" %}
                                                             {% if finding.active %}
                                                                 <li role="presentation">
                                                                     <a href="{% url 'close_finding' finding.id %}" role="menuitem">
@@ -488,7 +491,7 @@
                                                             {% endif %}
                                                         {% endif %}
                                                         <li class="divider" role="separator"></li>
-                                                        {% if finding|has_object_permission:"Risk_Acceptance" %}
+                                                        {% if finding|has_object_permission:"edit" %}
                                                             {% if finding.risk_accepted %}
                                                                 <li role="presentation">
                                                                     <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}" role="menuitem">
@@ -519,7 +522,7 @@
                                                                 <i class="fa-solid fa-clock-rotate-left"></i> {% trans "View History" %}
                                                             </a>
                                                         </li>
-                                                        {% if finding|has_object_permission:"Finding_Delete" %}
+                                                        {% if finding|has_object_permission:"delete" %}
                                                             <li class="divider" role="separator"> </li>
                                                             <li role="presentation">
                                                                 <form method="post" action="{% url 'delete_finding' finding.id %}" style="display: inline" class="form-inline form" id="delete-finding-menu-{{ finding.id }}-form">
@@ -543,22 +546,17 @@
                                         </td>
                                         <td>
                                             {% if finding.title %}
-                                                <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars_html:60 }}</a>
+                                                <a title="{{ finding.title }}" href="{% url 'view_finding' finding.id %}">{{ finding.title|truncatechars:60 }}</a>
                                             {% else %}
                                                 <a title="{{ finding.id }}" href="{% url 'view_finding' finding.id %}">{{ finding.id }}</a>
                                             {% endif %}
                                             {% if finding.file_path %}
                                                 <i class="fa-solid fa-folder has-popover dojo-sup"
-                                                data-trigger="hover"
-                                                data-content="{{ finding.file_path }}{% if finding.line %}:{{finding.line}}{% endif %}"
-                                                data-placement="right"
-                                                data-container="body"
-                                                data-original-title="Files"
-                                                title=""></i>
+                                                data-content="{{ finding.file_path }}{% if finding.line %}:{{finding.line}}{% endif %}"></i>
                                             {% endif %}
                                             {% if V3_FEATURE_LOCATIONS %}
                                                 {% if finding.locations.exists %}
-                                                    <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                                    <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-content="
                                                     {% for ref in finding.locations.all %}
                                                         {% if ref.status == "Mitigated" %} &#10003; {{ ref.location }}
                                                             <br/>
@@ -567,12 +565,12 @@
                                                                 <br/>
                                                         {% endif %}
                                                     {% endfor %}
-                                                    " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                                    "></i>
                                                 {% endif %}
                                             {% else %}
                                                 {% comment %} TODO: Delete this after the move to Locations {% endcomment %}
                                                 {% if finding.endpoints.exists %}
-                                                    <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-trigger="hover" data-content="
+                                                    <i class="fa-solid fa-sitemap has-popover dojo-sup" data-html="true" data-content="
                                                     {% for endpoint_status in finding.status_finding.all %}
                                                         {% if endpoint_status.mitigated %} &#10003; {{ endpoint_status.endpoint }}
                                                             <br/>
@@ -581,26 +579,16 @@
                                                                 <br/>
                                                         {% endif %}
                                                     {% endfor %}
-                                                    " data-placement="right" data-container="body" data-original-title="Endpoints ({{ finding.active_endpoint_count }} Active, {{ finding.mitigated_endpoint_count }} Mitigated)" title=""></i>
+                                                    "></i>
                                                 {% endif %}
                                             {% endif %}
                                             {% if finding.component_name %}
                                                 <i class="fa-solid fa-file has-popover dojo-sup"
-                                                data-trigger="hover"
-                                                data-placement="right"
-                                                data-content="{{ finding.component_name }} - {{ finding.component_version }}"
-                                                data-container="body"
-                                                data-original-title="Component"
-                                                title=""></i>
+                                                data-content="{{ finding.component_name }} - {{ finding.component_version }}"></i>
                                             {% endif %}
                                             {% if finding.notes.all %}
-                                                <i class="glyphicon glyphicon-comment has-popover dojo-sup"
-                                                data-trigger="hover"
-                                                data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"
-                                                data-placement="left"
-                                                data-container="body"
-                                                data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
-                                                title=""></i>
+                                                <i class="fa-solid fa-comment has-popover dojo-sup"
+                                                data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"></i>
                                                 <a href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                     class="dojo-sup"
                                                     alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
@@ -671,12 +659,12 @@
                                             {% if finding.found_by %}
                                                 <a target="#"
                                                 data-toggle="tooltip"
-                                                data-placement="bottom"
+                                               
                                                 title="Test: {{ finding.test }}">{{ finding.found_by.all|join:", " }}</a>
                                             {% else %}
                                                 <a target="#"
                                                 data-toggle="tooltip"
-                                                data-placement="bottom"
+                                               
                                                 title="Test: {{ finding.test }}">{{ finding.test.test_type }}</a>
                                             {% endif %}
                                         </td>
@@ -691,14 +679,14 @@
                                                         target="_blank"
                                                         alt="Jira Bug - {{ finding.finding_group | jira_key }} (group)"
                                                         data-toggle="tooltip"
-                                                        data-placement="bottom"
+                                                       
                                                         title="{{ finding.finding_group | jira_key }} (group)">{{ finding.finding_group | jira_key }}</a>
                                                     {% elif finding.has_jira_issue %}
                                                         <a href="{{ finding | jira_issue_url }}"
                                                         target="_blank"
                                                         alt="Jira Bug - {{ finding | jira_key }}"
                                                         data-toggle="tooltip"
-                                                        data-placement="bottom"
+                                                       
                                                         title="{{ finding | jira_key }}">{{ finding | jira_key }}</a>
                                                     {% endif %}
                                                 </td>
@@ -782,7 +770,7 @@
                 return data;
             }
             var datatables_columns = [
-                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"Finding_Edit" %}
+                {% if not product_tab or product_tab and product_tab.product|has_object_permission:"edit" %}
                     { "data": "checkbox" },
                 {% endif %}
                     { "data": "action" },
@@ -1220,5 +1208,4 @@
 
     </script>
     {% include "dojo/filter_js_snippet.html" %}
-    {% include "dojo/snippets/selectpicker_in_dropdown.html" %}
 {% endblock %}

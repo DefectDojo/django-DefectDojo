@@ -4,8 +4,9 @@ description: "Import files to DefectDojo from the command line"
 draft: false
 weight: 2
 audience: pro
+aliases:
+  - /en/connecting_your_tools/external_tools
 ---
-
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The following external tools are DefectDojo Pro-only features. These binaries will not work unless they are connected to an instance with a DefectDojo Pro license.</span>
 
 ## About External Tools
