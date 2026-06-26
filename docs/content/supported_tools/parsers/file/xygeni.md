@@ -64,24 +64,28 @@ Sample Xygeni JSON reports can be found
 
 ### Deduplication
 
-Every finding carries both `unique_id_from_tool` and `vuln_id_from_tool`, and
-the deduplication algorithm is configured per scan type:
+Every finding carries both `unique_id_from_tool` and `vuln_id_from_tool`. All
+scan types deduplicate on `unique_id_from_tool`, keyed on Xygeni's `uniqueHash`:
 
-| Scan type            | Algorithm                          | `unique_id_from_tool` | `vuln_id_from_tool` | Hash-code fields (fallback)                               |
-| -------------------- | ---------------------------------- | --------------------- | ------------------- | --------------------------------------------------------- |
-| Xygeni SAST Scan     | `unique_id_from_tool`              | `issueId`             | `uniqueHash`        | n/a                                                       |
-| Xygeni SCA Scan      | `unique_id_from_tool_or_hash_code` | `uniqueHash`          | `issueId`           | `vulnerability_ids`, `component_name`, `component_version` |
-| Xygeni Secrets Scan  | `unique_id_from_tool`              | `issueId`             | `uniqueHash`        | n/a                                                       |
+| Scan type            | Algorithm             | `unique_id_from_tool` | `vuln_id_from_tool`        |
+| -------------------- | --------------------- | --------------------- | ------------------------- |
+| Xygeni SAST Scan     | `unique_id_from_tool` | `uniqueHash`          | `detector`                |
+| Xygeni SCA Scan      | `unique_id_from_tool` | `uniqueHash`          | `userId` (CVE / GHSA / OSV) |
+| Xygeni Secrets Scan  | `unique_id_from_tool` | `uniqueHash`          | `detector`                |
 
-For SAST and Secrets the dedup key is the per-occurrence `issueId` (which
-encodes the file path and line). The same secret value or code pattern can
-appear several times in one file; Xygeni reuses a single `uniqueHash` across
-those occurrences, so keying dedup on `uniqueHash` would collapse them into one
-Finding and underreport the occurrences. Keying on `issueId` keeps each
-occurrence as its own Finding, while `uniqueHash` is retained as the
-`vuln_id_from_tool` that groups occurrences of the same value.
+`uniqueHash` is Xygeni's location-independent identity for a finding. For SAST
+it hashes the detector and the normalized code with the line deliberately
+excluded, so two findings on the same line with different code stay distinct,
+while the same code that shifts lines keeps its identity across scans. For SCA
+it encodes CVE + package + version, and for Secrets it hashes the secret value,
+type, detector, file and key.
 
-For SCA the dedup key stays `uniqueHash` (it encodes CVE + package + version,
-unique per finding) and the hash-code fallback enables cross-tool
-deduplication: the same CVE on the same package@version reported by Xygeni and
-another SCA scanner (Snyk, Trivy, etc.) collapse into a single Finding.
+`vuln_id_from_tool` is a non-unique grouping label only — never a dedup key. It
+is the `detector` (the rule that fired or the kind of secret) for SAST and
+Secrets, and the user-friendly vulnerability id (`userId`: CVE / GHSA / OSV) for
+SCA.
+
+The same secret value can be leaked on several lines of one file. Because
+`uniqueHash` excludes the line, those occurrences share one identity, so the
+Secrets parser aggregates them into a single Finding and lists every line where
+the secret appears in the description.

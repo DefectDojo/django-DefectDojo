@@ -44,13 +44,13 @@ class TestXygeniParser(DojoTestCase):
         match = next(
             (
                 f for f in findings
-                if f.unique_id_from_tool == "SAS.injection.python.code_injection_deserialization.dockerized_labs/insec_des_lab/main.py.36"
+                if f.unique_id_from_tool == "nsXRi+PTLom/sG8m6weOXw"
             ),
             None,
         )
-        self.assertIsNotNone(match, "expected the deserialization SAST finding by issueId")
-        # uniqueHash is kept as the vuln id; the per-occurrence issueId drives dedup
-        self.assertEqual("nsXRi+PTLom/sG8m6weOXw", match.vuln_id_from_tool)
+        self.assertIsNotNone(match, "expected the deserialization SAST finding by uniqueHash")
+        # uniqueHash is the dedup identity; the detector is the non-unique grouping id
+        self.assertEqual("python.code_injection_deserialization", match.vuln_id_from_tool)
         self.assertEqual("python.code_injection_deserialization", match.title)
         self.assertEqual("Critical", match.severity)
         self.assertEqual(502, match.cwe)
@@ -62,19 +62,28 @@ class TestXygeniParser(DojoTestCase):
         self.assertEqual("serialized_data", match.sast_source_object)
         self.assertIn("Data flow", match.description)
 
-    def test_sast_repeated_detector_in_same_file_stays_distinct(self):
-        # One detector flagging the same pattern at several lines shares a uniqueHash but
-        # carries a distinct issueId per line. Each occurrence must remain its own Finding.
+    def test_sast_same_code_repeated_in_same_file_shares_unique_id(self):
+        # The same detector flagging identical code on several lines shares one uniqueHash (the
+        # line is excluded from the hash), so every occurrence carries the same unique_id_from_tool
+        # and DefectDojo folds them into a single finding on import. The detector is the grouping id.
         with self._load("sast_many_findings.json") as testfile:
             findings = XygeniParser().get_findings(testfile, Test())
 
         occurrences = [
             f for f in findings
-            if f.vuln_id_from_tool == "VsqoC9U6q8EYG0QZ5UqxXw"  # forms_without_csrf_protection, 4 lines
+            if f.unique_id_from_tool == "VsqoC9U6q8EYG0QZ5UqxXw"  # html.forms_without_csrf_protection, 4 lines
         ]
-        self.assertEqual(4, len(occurrences), "all occurrences of the repeated detector must be kept")
-        unique_ids = {f.unique_id_from_tool for f in occurrences}
-        self.assertEqual(4, len(unique_ids), "each occurrence needs a distinct unique_id_from_tool")
+        self.assertEqual(4, len(occurrences), "the parser still emits one finding per report entry")
+        self.assertEqual(
+            {"VsqoC9U6q8EYG0QZ5UqxXw"},
+            {f.unique_id_from_tool for f in occurrences},
+            "identical code shares one unique_id so dedup folds the occurrences into one finding",
+        )
+        self.assertEqual(
+            {"html.forms_without_csrf_protection"},
+            {f.vuln_id_from_tool for f in occurrences},
+            "the detector is the shared, non-unique grouping id",
+        )
 
     def test_sca_many_findings(self):
         with self._load("sca_many_findings.json") as testfile:
@@ -92,11 +101,13 @@ class TestXygeniParser(DojoTestCase):
                 f for f in findings
                 if f.component_name == "cookie"
                 and f.component_version == "0.5.0"
-                and f.vuln_id_from_tool == "SCA.CVE-2024-47764"
+                and f.vuln_id_from_tool == "CVE-2024-47764"
             ),
             None,
         )
         self.assertIsNotNone(match, "expected the cookie@0.5.0 / CVE-2024-47764 SCA finding")
+        # uniqueHash is the dedup identity; userId is the user-friendly vuln id grouping label
+        self.assertEqual("CVE-2024-47764#:cookie:0.5.0:javascript", match.unique_id_from_tool)
         self.assertEqual("CVE-2024-47764", match.title)
         self.assertEqual("CVE-2024-47764", match.cve)
         self.assertIn("CVE-2024-47764", match.unsaved_vulnerability_ids)
@@ -116,33 +127,34 @@ class TestXygeniParser(DojoTestCase):
             self.assertIsNotNone(finding.cwe)
 
         match = next(
-            (f for f in findings if f.unique_id_from_tool == "SEC.private_key.private_key..ssh/id_rsa.1"),
+            (f for f in findings if f.unique_id_from_tool == "LVAjuA4Z40VxktixjtztXg"),
             None,
         )
-        self.assertIsNotNone(match, "expected the .ssh/id_rsa private-key secret finding")
-        # uniqueHash is kept as the vuln id; the per-occurrence issueId drives dedup
-        self.assertEqual("LVAjuA4Z40VxktixjtztXg", match.vuln_id_from_tool)
+        self.assertIsNotNone(match, "expected the .ssh/id_rsa private-key secret finding by uniqueHash")
+        # uniqueHash is the dedup identity; the detector is the non-unique grouping id
+        self.assertEqual("private_key", match.vuln_id_from_tool)
         self.assertEqual("Critical", match.severity)
         self.assertEqual(".ssh/id_rsa", match.file_path)
         self.assertEqual(1, match.line)
         self.assertIn("private_key", match.title)
         self.assertIn("Rotate", match.mitigation)
 
-    def test_secrets_repeated_in_same_file_stay_distinct(self):
-        # A secret value repeated in one file shares a uniqueHash across occurrences but
-        # carries a distinct issueId per line. The parser must surface each occurrence as
-        # its own Finding (distinct unique_id_from_tool) so dedup does not collapse them.
+    def test_secrets_repeated_in_same_file_aggregate_into_one_finding(self):
+        # A secret value repeated in one file shares a single uniqueHash across occurrences (the
+        # line is excluded from the hash). The parser aggregates them into one Finding with a
+        # stable identity and lists every line where the secret appears in the description.
         with self._load("secrets_many_findings.json") as testfile:
             findings = XygeniParser().get_findings(testfile, Test())
 
         occurrences = [
             f for f in findings
-            if f.vuln_id_from_tool == "1yvAV2ndtW4yYG+TJQhhXg"  # .docker/.dockercfg, lines 9 and 29
+            if f.unique_id_from_tool == "1yvAV2ndtW4yYG+TJQhhXg"  # .docker/.dockercfg, lines 9 and 29
         ]
-        self.assertEqual(2, len(occurrences), "both occurrences of the repeated secret must be kept")
-        unique_ids = {f.unique_id_from_tool for f in occurrences}
-        self.assertEqual(2, len(unique_ids), "each occurrence needs a distinct unique_id_from_tool")
-        self.assertEqual({9, 29}, {f.line for f in occurrences})
+        self.assertEqual(1, len(occurrences), "the repeated secret must collapse into a single finding")
+        finding = occurrences[0]
+        self.assertEqual("dockercfg", finding.vuln_id_from_tool)
+        self.assertEqual(9, finding.line, "the finding's line is the first occurrence")
+        self.assertIn("lines: 9, 29", finding.description, "every leaked line must be listed in the description")
 
     # ----- dispatch + error cases -----
 
@@ -164,8 +176,8 @@ class TestXygeniParser(DojoTestCase):
         }
         findings = XygeniParser().get_findings(io.StringIO(json.dumps(report)), Test())
         self.assertEqual(1, len(findings))
-        self.assertEqual("SECRETS.aws-access-key.config.ini:12", findings[0].unique_id_from_tool)
-        self.assertEqual("abc123", findings[0].vuln_id_from_tool)
+        self.assertEqual("abc123", findings[0].unique_id_from_tool)
+        self.assertEqual("aws-access-key", findings[0].vuln_id_from_tool)
         self.assertEqual(798, findings[0].cwe)
 
     def test_raises_on_missing_scan_type(self):
