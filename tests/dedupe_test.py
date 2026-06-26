@@ -517,33 +517,32 @@ class ImportAsyncWaitApiTest(unittest.TestCase):
     """
     Deterministic API test for the import 'async_wait' deduplication mode.
 
-    The Selenium async_wait test above is only a UI smoke test: with 2 findings
-    and several page navigations between the import and the duplicate check, the
-    background dedupe finishes regardless of whether the import actually blocked,
-    so it cannot fail when the cross-process join is broken. The eager unit tests
-    (CELERY_TASK_ALWAYS_EAGER) and the mocked perf test can't catch it either.
+    The Selenium async_wait test (removed) was only a UI smoke test: with few
+    findings and several page navigations between the import and the duplicate
+    check, the background dedupe finished regardless of whether the import
+    actually blocked, so it could not fail when the cross-process join is broken.
+    The eager unit tests (CELERY_TASK_ALWAYS_EAGER) and the mocked perf test can't
+    catch it either.
 
     This test runs against the real docker-compose stack: a separate celeryworker
     process + broker, with the global CELERY_TASK_IGNORE_RESULT in effect. It is
     the only coverage that can fail when the join is a no-op.
 
-    How it stays deterministic without timing hacks or production test hooks:
-      - It imports a *large* report (LARGE_N findings) twice into a dedup-on-
-        engagement engagement, so the second import's findings deduplicate against
-        the first.
-      - Background deduplication of LARGE_N findings takes ~1s of real worker time,
-        far longer than the single API round-trip used to observe the result.
-      - 'async_wait' must block until that work finishes, so duplicates are ALL
-        marked by the time the import response returns -> observed count == LARGE_N.
-      - plain 'async' does not block, so at response time essentially none are
-        marked yet -> observed count < LARGE_N (and deduplication_complete False).
-    A broken/no-op join makes 'async_wait' behave exactly like 'async' (count <
-    LARGE_N), which fails this test.
+    Determinism comes from DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY, set on the
+    integration-test celeryworker (see docker-compose.override.integration_tests.yml):
+    each deduplication batch sleeps a few seconds before doing any work. So:
+      - 'async_wait' blocks on the worker round-trip, so by the time the import
+        response returns every duplicate is already marked -> count == NUM_FINDINGS.
+      - plain 'async' returns immediately while the dedup task is still sleeping,
+        so at response time NONE are marked yet -> count == 0.
+    A broken/no-op join makes 'async_wait' behave exactly like 'async' (count 0),
+    which fails this test. The injected delay makes that distinction independent of
+    worker speed (a plain large-report race would not, since dedup overlaps the
+    import and can finish before the response on a fast worker).
     """
 
-    # Large enough that real background dedup cannot finish within the single
-    # observation round-trip, but small enough to keep the test fast (~seconds).
-    LARGE_N = 400
+    # Small: determinism comes from the worker-side dedup delay, not report size.
+    NUM_FINDINGS = 25
 
     @classmethod
     def setUpClass(cls):
@@ -607,10 +606,10 @@ class ImportAsyncWaitApiTest(unittest.TestCase):
 
     def _generic_report(self):
         """
-        A Generic Findings Import report of LARGE_N unique findings.
+        A Generic Findings Import report of NUM_FINDINGS unique findings.
 
         Re-importing the identical content into a second test of the same
-        dedup-on-engagement engagement marks all LARGE_N as duplicates.
+        dedup-on-engagement engagement marks all NUM_FINDINGS as duplicates.
         """
         findings = [
             {
@@ -618,7 +617,7 @@ class ImportAsyncWaitApiTest(unittest.TestCase):
                 "severity": "High",
                 "description": f"async_wait dedup finding number {i}",
             }
-            for i in range(self.LARGE_N)
+            for i in range(self.NUM_FINDINGS)
         ]
         return json.dumps({"findings": findings})
 
@@ -660,22 +659,23 @@ class ImportAsyncWaitApiTest(unittest.TestCase):
             body.get("deduplication_complete"),
             f"async_wait did not report deduplication_complete: {body}",
         )
-        # No sleep/retry: async_wait must have blocked until dedupe finished, so
-        # every finding in the second import is already marked duplicate.
+        # No sleep/retry: async_wait must have blocked past the worker-side dedup
+        # delay until dedupe finished, so every finding is already marked duplicate.
         marked = self._duplicates_marked(test_id)
         self.assertEqual(
-            marked, self.LARGE_N,
-            f"async_wait returned with only {marked}/{self.LARGE_N} duplicates marked "
+            marked, self.NUM_FINDINGS,
+            f"async_wait returned with only {marked}/{self.NUM_FINDINGS} duplicates marked "
             "-> the cross-process join did not block until deduplication finished",
         )
 
     def test_async_does_not_block(self):
         """
-        Control: plain async returns before dedupe -> incomplete + few marked.
+        Control: plain async returns while dedupe is still running -> none marked.
 
         Proves the assertion above is meaningful: with a non-blocking dispatch the
-        duplicates are NOT all marked at response time. A broken async_wait would
-        look exactly like this and so fail the test above.
+        duplicates are NOT marked at response time (the dedup task is still in its
+        worker-side delay). A broken async_wait would look exactly like this and so
+        fail the test above.
         """
         engagement_id = self._make_engagement("async")
         self._import(engagement_id, "async")
@@ -685,11 +685,13 @@ class ImportAsyncWaitApiTest(unittest.TestCase):
             body.get("deduplication_complete"),
             f"async unexpectedly reported deduplication_complete: {body}",
         )
+        # The worker-side delay guarantees the dedup task has not finished yet, so
+        # nothing is marked at response time regardless of worker speed.
         marked = self._duplicates_marked(test_id)
-        self.assertLess(
-            marked, self.LARGE_N,
-            f"async marked all {self.LARGE_N} duplicates at response time "
-            "-> it unexpectedly blocked (background dedupe should not have finished)",
+        self.assertEqual(
+            marked, 0,
+            f"async marked {marked} duplicates at response time "
+            "-> it unexpectedly blocked (background dedupe should still be delayed)",
         )
 
 

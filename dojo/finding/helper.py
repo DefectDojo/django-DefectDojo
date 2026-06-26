@@ -2,7 +2,7 @@ import logging
 from contextlib import suppress
 from datetime import datetime
 from itertools import batched
-from time import strftime
+from time import sleep, strftime
 
 from django.conf import settings
 from django.db import transaction
@@ -470,6 +470,12 @@ def post_process_findings_batch(
     force_sync=False,
     **kwargs,
 ):
+    # Test-only hook: when DEDUPLICATION_BATCH_PROCESS_TEST_DELAY > 0 (set only in
+    # the integration-test stack) block this batch so integration tests can
+    # deterministically distinguish 'async_wait' (which joins on this task) from
+    # 'async' (which does not). Default 0 -> no effect in production.
+    if (test_delay := settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY) > 0:
+        sleep(test_delay)
 
     logger.debug(
         f"post_process_findings_batch called: finding_ids_count={len(finding_ids) if finding_ids else 0}, "
