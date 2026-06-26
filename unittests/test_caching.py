@@ -1,0 +1,85 @@
+from django.test import TestCase, override_settings
+
+from dojo.caching import (
+    _L1_STORE,  # noqa: PLC2701 test needs the in-process store
+    cache_dict_to_model,
+    dojo_settings_cache,
+    invalidate_dojo_settings_cache,
+    model_to_cache_dict,
+)
+from dojo.models import System_Settings
+
+from .dojo_test_case import DojoTestCase
+
+
+@override_settings(SETTINGS_CACHE_L1_TTL=30)
+class DojoSettingsCacheTest(TestCase):
+
+    """
+    Unit tests for the in-process (L1) read-through decorator (dojo/caching.py).
+
+    There is no shared/L2 tier: the decorator only memoizes in-process and relies
+    on L1 reset at request/task boundaries for cross-process freshness.
+    """
+
+    def setUp(self):
+        _L1_STORE.clear()
+
+    def tearDown(self):
+        _L1_STORE.clear()
+
+    def _build_getter(self, *, key="k", returns=1):
+        calls = {"n": 0}
+
+        @dojo_settings_cache(key=key)
+        def getter():
+            calls["n"] += 1
+            return returns
+
+        return getter, calls
+
+    def test_l1_memoizes_in_process(self):
+        getter, calls = self._build_getter()
+        getter()
+        getter()
+        getter()
+        self.assertEqual(calls["n"], 1)        # computed once, then served from L1
+
+    @override_settings(SETTINGS_CACHE_L1_TTL=-1)
+    def test_l1_disabled_is_passthrough(self):
+        getter, calls = self._build_getter()
+        getter()
+        getter()
+        self.assertEqual(calls["n"], 2)        # recomputed every call when L1 off
+
+    def test_reset_recomputes(self):
+        getter, calls = self._build_getter()
+        getter()
+        _L1_STORE.reset()
+        getter()
+        self.assertEqual(calls["n"], 2)        # reset drops L1, so it recomputes
+
+    def test_none_result_is_not_cached(self):
+        getter, calls = self._build_getter(returns=None)
+        self.assertIsNone(getter())
+        self.assertIsNone(getter())
+        self.assertEqual(calls["n"], 2)        # None recomputed each call (never stored)
+
+    def test_invalidate_recomputes(self):
+        getter, calls = self._build_getter(returns=7)
+        self.assertEqual(getter(), 7)
+        invalidate_dojo_settings_cache("k")
+        getter()
+        self.assertEqual(calls["n"], 2)        # recomputed after invalidation
+
+
+class ModelDictRoundTripTest(DojoTestCase):
+
+    def test_round_trip_preserves_field_values(self):
+        settings_obj = System_Settings.objects.get(no_cache=True)
+        data = model_to_cache_dict(settings_obj)
+        self.assertIsInstance(data, dict)
+        self.assertEqual(data["id"], settings_obj.pk)
+        rebuilt = cache_dict_to_model(System_Settings, data)
+        self.assertEqual(rebuilt.pk, settings_obj.pk)
+        self.assertEqual(rebuilt.enable_deduplication, settings_obj.enable_deduplication)

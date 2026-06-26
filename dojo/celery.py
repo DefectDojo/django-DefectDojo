@@ -28,6 +28,12 @@ class DojoAsyncTask(Task):
         """
         Restore user context in the celery worker via crum.impersonate.
 
+        Also resets the request/task-scoped L1 settings cache at the start of every
+        task (including eager): a prefork worker reuses its thread across tasks, so an
+        L1 value cached during a prior task (e.g. System_Settings) would otherwise be
+        served stale even after another process changed and saved it. The shared L2
+        tier is left intact, so a reset task re-reads each singleton once from L2.
+
         The apply_async method injects ``async_user_id`` into kwargs when a task
         is dispatched. Here we pop it, resolve to a user instance, and set it
         as the current user in thread-local storage so that all downstream
@@ -39,6 +45,9 @@ class DojoAsyncTask(Task):
         intact so that callers who already set a user (e.g. via
         crum.impersonate in tests or request middleware) are not disrupted.
         """
+        from dojo.caching import reset_l1_cache  # noqa: PLC0415
+        reset_l1_cache()
+
         if "async_user_id" not in kwargs:
             return super().__call__(*args, **kwargs)
 

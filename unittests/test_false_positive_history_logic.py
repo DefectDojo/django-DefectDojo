@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from crum import impersonate
 from django.conf import settings
+from django.test import override_settings
 
 from dojo.finding.deduplication import do_false_positive_history_batch
 from dojo.finding.views import EditFinding
@@ -126,6 +127,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 
 
 @versioned_fixtures
+@override_settings(SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestFalsePositiveHistoryLogic(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1684,7 +1686,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
             #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
             #   1 candidates SELECT (with .only())
             #   1 bulk UPDATE
-            with self.assertNumQueries(7):
+            with self.assertNumQueries(6):
                 do_false_positive_history_batch(batch)
             # One candidate-fetch call for the whole batch — not one per finding.
             self.assertEqual(mock_fetch.call_count, 1, "Expected exactly one call to _fetch_fp_candidates_for_batch")
@@ -1713,7 +1715,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
         #   1 candidates SELECT (with .only())
         #   1 bulk UPDATE
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(6):
             do_false_positive_history_batch(batch)
 
         # The pre-existing active finding must now be retroactively marked FP.
@@ -1721,9 +1723,9 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def test_fp_history_batch_query_count_does_not_grow_with_affected_findings(self):
         """
-        Query count must stay flat (7) no matter how many findings are retroactively marked.
+        Query count must stay flat (6) no matter how many findings are retroactively marked.
 
-        With the old per-finding approach this would have been 7 + N queries where N is the
+        With the old per-finding approach this would have been 6 + N queries where N is the
         number of pre-existing findings that get marked as FP. With the batch approach it is
         always 7: System_Settings, 4 lazy-load chain, candidates SELECT, one bulk UPDATE.
         """
@@ -1748,7 +1750,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
         #   1 candidates SELECT (with .only())
         #   1 bulk UPDATE covering all retroactively marked findings
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(6):
             do_false_positive_history_batch(batch)
 
         # All pre-existing findings must now be marked as FP.

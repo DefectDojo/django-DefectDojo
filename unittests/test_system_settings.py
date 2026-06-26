@@ -1,12 +1,12 @@
-from unittest.mock import Mock
+from unittest import mock
 
-from django.db import models
 from django.http import HttpResponse
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from django.utils.timezone import now
 
-from dojo.middleware import DojoSytemSettingsMiddleware
+from dojo.caching import invalidate_dojo_settings_cache, reset_l1_cache
+from dojo.middleware import SYSTEM_SETTINGS_CACHE_KEY, DojoSettingsManagerMiddleware, get_cached_system_settings
 from dojo.models import (
     Engagement,
     Finding,
@@ -93,185 +93,72 @@ class CloseFindingViewInstanceTest(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
 
+@override_settings(SETTINGS_CACHE_L1_TTL=30)
 class TestSystemSettingsMiddlewareIntegration(DojoTestCase):
 
-    """Integration tests for DojoSytemSettingsMiddleware using RequestFactory."""
+    """
+    Integration tests for DojoSettingsManagerMiddleware + System_Settings_Manager.
+
+    Caching lives in dojo.caching (in-process L1 decorator); the middleware resets
+    the request-scoped L1 tier and surfaces a load error. These tests pin L1 on via
+    override_settings so they don't depend on the compose env.
+    """
 
     def setUp(self):
-        """Set up test environment."""
         super().setUp()
         self.factory = RequestFactory()
-        # Ensure signal is connected
-        models.signals.post_save.disconnect(DojoSytemSettingsMiddleware.cleanup, sender=System_Settings)
-        models.signals.post_save.connect(DojoSytemSettingsMiddleware.cleanup, sender=System_Settings)
 
-    def test_middleware_loads_cache_on_request(self):
-        """Test that middleware loads settings into cache when processing a request."""
-        # Ensure cache is empty
-        DojoSytemSettingsMiddleware.cleanup()
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
+    def test_no_cache_always_hits_db(self):
+        # no_cache bypasses both tiers: every read is a fresh query.
+        with self.assertNumQueries(2):
+            System_Settings.objects.get(no_cache=True)
+            System_Settings.objects.get(no_cache=True)
 
-        # Create middleware with mock get_response
-        mock_response = HttpResponse("OK")
-        mock_get_response = Mock(return_value=mock_response)
-        middleware = DojoSytemSettingsMiddleware(mock_get_response)
-
-        # Create a request
-        request = self.factory.get("/test/")
-
-        # Process request through middleware
-        response = middleware(request)
-
-        # Verify response is returned
-        self.assertEqual(response, mock_response)
-        mock_get_response.assert_called_once_with(request)
-
-        # Verify cache was populated during request processing
-        # Note: cache should be cleaned up after request, but we can check during processing
-        # Since cleanup happens in finally block, cache should be empty after __call__ returns
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-    def test_middleware_cleans_up_cache_after_request(self):
-        """Test that middleware cleans up cache after request processing."""
-        # Manually load cache first
-        DojoSytemSettingsMiddleware.load()
-        self.assertIsNotNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-        # Create middleware
-        middleware = DojoSytemSettingsMiddleware(lambda _r: HttpResponse("OK"))
-
-        # Process request
-        request = self.factory.get("/test/")
-        middleware(request)
-
-        # Verify cache is cleaned up after request
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-    def test_middleware_cleans_up_cache_on_exception(self):
-        """Test that middleware cleans up cache even when exception occurs."""
-        # Load cache first
-        DojoSytemSettingsMiddleware.load()
-        self.assertIsNotNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-        # Create middleware that raises an exception
-        def failing_get_response(request):
-            msg = "Test exception"
-            raise ValueError(msg)
-
-        middleware = DojoSytemSettingsMiddleware(failing_get_response)
-
-        # Process request - should raise exception
-        request = self.factory.get("/test/")
-        with self.assertRaises(ValueError):
-            middleware(request)
-
-        # Verify cache is cleaned up even after exception
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-    def test_middleware_process_exception_cleans_up_cache(self):
-        """Test that process_exception method cleans up cache."""
-        # Load cache first
-        DojoSytemSettingsMiddleware.load()
-        self.assertIsNotNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-        # Create middleware
-        middleware = DojoSytemSettingsMiddleware(lambda _r: HttpResponse("OK"))
-
-        # Call process_exception directly
-        request = self.factory.get("/test/")
-        exception = ValueError("Test exception")
-        middleware.process_exception(request, exception)
-
-        # Verify cache is cleaned up
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-    def test_middleware_cache_isolation_between_requests(self):
-        """Test that cache is isolated between requests (thread-local)."""
-        # Create middleware
-        middleware = DojoSytemSettingsMiddleware(lambda _r: HttpResponse("OK"))
-
-        # First request
-        request1 = self.factory.get("/test1/")
-        middleware(request1)
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-        # Second request - cache should be empty at start
-        request2 = self.factory.get("/test2/")
-        middleware(request2)
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-    def test_middleware_cache_during_request_processing(self):
-        """Test that cache is available during request processing."""
-        # Track if cache was available during request
-        cache_available_during_request = []
-
-        def get_response_with_cache_check(request):
-            # Check if cache is available during request processing
-            cached = DojoSytemSettingsMiddleware.get_system_settings()
-            cache_available_during_request.append(cached is not None)
-            return HttpResponse("OK")
-
-        middleware = DojoSytemSettingsMiddleware(get_response_with_cache_check)
-
-        # Process request
-        request = self.factory.get("/test/")
-        middleware(request)
-
-        # Verify cache was available during request processing
-        self.assertTrue(cache_available_during_request[0], "Cache should be available during request processing")
-
-        # But cleaned up after request
-        self.assertIsNone(DojoSytemSettingsMiddleware.get_system_settings())
-
-    def test_multiple_get_calls_use_cache(self):
-        """Test that multiple calls to System_Settings.objects.get() use cache instead of multiple DB queries."""
-        # Ensure cache is empty
-        DojoSytemSettingsMiddleware.cleanup()
-
-        # First call should hit DB (cache is empty)
+    def test_repeated_cached_get_served_from_l1(self):
+        # Cold start, warm once (1 query), then repeated cached reads do no queries.
+        reset_l1_cache()
+        invalidate_dojo_settings_cache(SYSTEM_SETTINGS_CACHE_KEY)
         with self.assertNumQueries(1):
-            settings1 = System_Settings.objects.get()
-
-        # Load into cache via middleware
-        DojoSytemSettingsMiddleware.load()
-
-        # Now multiple calls should use cache (no additional DB queries)
+            get_cached_system_settings()
         with self.assertNumQueries(0):
-            settings2 = System_Settings.objects.get()
-            settings3 = System_Settings.objects.get()
-            settings4 = System_Settings.objects.get()
+            s2 = System_Settings.objects.get()
+            s3 = System_Settings.objects.get()
+        # Rebuilt per call from the cached dict: equal data, not the same instance.
+        self.assertEqual(s2.pk, s3.pk)
 
-        # All calls should return the same cached object instance
-        self.assertEqual(settings1.id, settings2.id)
-        self.assertEqual(settings2.id, settings3.id)
-        self.assertEqual(settings3.id, settings4.id)
-        # Verify they're the same object instance (same memory address)
-        self.assertIs(settings2, settings3)
-        self.assertIs(settings3, settings4)
+    def test_middleware_resets_l1_each_request(self):
+        # Warm L1, change the row underneath via update() (no post_save signal, so
+        # L1 is not auto-busted), then a request must still see the new value
+        # because the middleware resets L1 at request start.
+        get_cached_system_settings()
+        System_Settings.objects.update(enable_deduplication=True)
+        seen = []
 
-    def test_multiple_get_calls_within_request_use_cache(self):
-        """Test that multiple get() calls within a single request use cache."""
-        retrieved_settings = []
-
-        def get_response_with_multiple_gets(request):
-            # Make multiple calls to get() during request processing
-            retrieved_settings.append(System_Settings.objects.get())
-            retrieved_settings.append(System_Settings.objects.get())
-            retrieved_settings.append(System_Settings.objects.get())
+        def view(_request):
+            seen.append(System_Settings.objects.get().enable_deduplication)
             return HttpResponse("OK")
 
-        middleware = DojoSytemSettingsMiddleware(get_response_with_multiple_gets)
+        middleware = DojoSettingsManagerMiddleware(view)
+        middleware(self.factory.get("/test/"))
+        self.assertEqual(seen, [True])
 
-        # Process request - should only hit DB once (when loading cache)
-        # Then all subsequent get() calls should use cache
-        request = self.factory.get("/test/")
-        with self.assertNumQueries(1):  # Only one query to load settings into cache
-            middleware(request)
+    def test_middleware_surfaces_load_error(self):
+        # When the DB read fails, get_from_db stashes an error on the thread-local
+        # and returns defaults; the middleware copies the error onto the request
+        # for the banner context processor.
+        invalidate_dojo_settings_cache(SYSTEM_SETTINGS_CACHE_KEY)
+        reset_l1_cache()
+        captured = {}
 
-        # Verify we got 3 settings objects
-        self.assertEqual(len(retrieved_settings), 3)
+        def view(request):
+            captured["err"] = getattr(request, "system_settings_error", None)
+            return HttpResponse("OK")
 
-        # All should be the same cached instance
-        self.assertIs(retrieved_settings[0], retrieved_settings[1])
-        self.assertIs(retrieved_settings[1], retrieved_settings[2])
-        self.assertEqual(retrieved_settings[0].id, retrieved_settings[1].id)
+        def failing_get_from_db(*args, **kwargs):
+            DojoSettingsManagerMiddleware._thread_local.system_settings_error = "boom"
+            return System_Settings()  # defaults (pk None) -> not cached
+
+        middleware = DojoSettingsManagerMiddleware(view)
+        with mock.patch.object(System_Settings.objects, "get_from_db", side_effect=failing_get_from_db):
+            middleware(self.factory.get("/test/"))
+        self.assertEqual(captured["err"], "boom")
