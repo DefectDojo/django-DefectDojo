@@ -8,6 +8,7 @@ from datetime import datetime
 
 import six
 import tagulous
+from defusedxml import ElementTree as ET
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.contrib.auth.password_validation import validate_password
@@ -1984,6 +1985,8 @@ class CommonImportScanSerializer(serializers.Serializer):
             duration = time.perf_counter() - start_time
             LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
             ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
+        except ET.ParseError as e:
+            raise serializers.ValidationError({"file": f"Malformed XML: {e}"})
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -2292,6 +2295,8 @@ class ReImportScanSerializer(CommonImportScanSerializer):
             duration = time.perf_counter() - start_time
             LargeScanSizeProductAnnouncement(response_data=data, duration=duration)
             ScanTypeProductAnnouncement(response_data=data, scan_type=context.get("scan_type"))
+        except ET.ParseError as e:
+            raise serializers.ValidationError({"file": f"Malformed XML: {e}"})
         # convert to exception otherwise django rest framework will swallow them as 400 error
         # exceptions are already logged in the importer
         except SyntaxError as se:
@@ -2374,6 +2379,8 @@ class EndpointMetaImporterSerializer(serializers.Serializer):
                     create_dojo_meta,
                     origin="API",
                 )
+        except ET.ParseError as e:
+            raise serializers.ValidationError({"file": f"Malformed XML: {e}"})
         except SyntaxError as se:
             raise Exception(se)
         except ValueError as ve:
