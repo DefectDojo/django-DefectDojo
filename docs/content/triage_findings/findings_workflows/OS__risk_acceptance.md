@@ -94,7 +94,39 @@ Once a Finding has been Simple Risk Accepted, it will still appear in the Test's
 
 If you Simple Risk Accept a Finding and later wish to add it to a Full Risk Acceptance, the Risk must be unaccepted prior to adding it to a Full Risk Acceptance. 
 
-### Risk Acceptance Best Practices 
+## When a Risk Acceptance Expiration Date is Changed
+
+A Full Risk Acceptance's expiration date can be edited at any time after creation.  How DefectDojo responds depends on whether the Risk Acceptance is currently active or has already expired.
+
+### Editing the date on an active Risk Acceptance
+
+If a Risk Acceptance has not yet expired — its expiration date is in the future, or has just passed but the periodic expiration job has not yet processed it — editing the date is straightforward:
+
+- The new date is saved as-is.
+- Linked Findings stay Risk Accepted.
+- The Risk Acceptance object stays active.
+
+### Pushing the date forward on an already-expired Risk Acceptance
+
+If the Risk Acceptance has **already expired** — meaning the periodic expiration job has processed its expiration and the linked Findings have been set back to Active — editing the expiration date to a future value triggers a **reinstate** workflow:
+
+- The Risk Acceptance is reinstated and is no longer in the expired state.
+- Every Finding linked to the Risk Acceptance that is currently Active is re-accepted (set back to Risk Accepted / Inactive).
+- A comment is posted to any linked Jira issues recording the reinstate.
+
+> **Important — your chosen date may be overridden.** When a previously-expired Risk Acceptance is reinstated, the expiration date that actually gets saved is **today + N days**, where `N` is the system setting **Risk Acceptance Form Default Days** (default: 90).  This means the date you typed into the edit form will be replaced during the reinstate.  If you need a specific future expiration date on a reinstated Risk Acceptance, edit the Risk Acceptance a second time after the reinstate completes.
+
+### Moving the date backwards or to a date still in the past
+
+Moving the expiration date to an earlier-but-still-future date has no special behavior — the Risk Acceptance stays active and the new date is saved.
+
+Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior.
+
+### What the API exposes
+
+API consumers can observe expiration state on the Risk Acceptance object via the `expiration_date`, `expiration_date_handled`, and `expiration_date_warned` fields.  A Risk Acceptance is "expired" precisely when `expiration_date_handled` is non-null.  When a reinstate happens, both `expiration_date_handled` and `expiration_date_warned` are cleared back to `null`, and `expiration_date` is updated to the reinstate target.
+
+## Risk Acceptance Best Practices 
 
 As a standard practice, it is generally preferable to use either Full Risk Acceptances or Simple Risk Acceptances exclusively, rather than leveraging both.
 
