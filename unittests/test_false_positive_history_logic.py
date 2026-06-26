@@ -6,7 +6,7 @@ from crum import impersonate
 from django.conf import settings
 
 from dojo.finding.deduplication import do_false_positive_history_batch
-from dojo.finding.views import EditFinding
+from dojo.finding.ui.views import EditFinding
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import (
     Endpoint,
