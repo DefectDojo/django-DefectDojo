@@ -1,8 +1,10 @@
+import hashlib
 import logging
 
 import bleach
 import markdown
 import requests
+from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
@@ -109,11 +111,17 @@ def parse_os_message(text):
 
 
 def get_os_banner():
+    if not settings.OS_MESSAGE_ENABLED:
+        return None
     try:
         text = fetch_os_message()
         if not text:
             return None
-        return parse_os_message(text)
+        banner = parse_os_message(text)
     except Exception:
         logger.debug("os_message: get_os_banner failed", exc_info=True)
         return None
+    else:
+        if banner:
+            banner["dismiss_token"] = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+        return banner

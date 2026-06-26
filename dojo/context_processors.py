@@ -28,14 +28,20 @@ def globalize_vars(request):
     additional_banners = []
 
     if (os_banner := get_os_banner()) is not None:
-        additional_banners.append({
-            "source": "os",
-            "message": os_banner["message"],
-            "style": "info",
-            "url": "",
-            "link_text": "",
-            "expanded_html": os_banner["expanded_html"],
-        })
+        token = os_banner.get("dismiss_token", "")
+        user = getattr(request, "user", None)
+        dismissible = bool(token and getattr(user, "is_authenticated", False))
+        if not (dismissible and _os_message_dismissed(user, token)):
+            additional_banners.append({
+                "source": "os",
+                "message": os_banner["message"],
+                "style": "info",
+                "url": "",
+                "link_text": "",
+                "expanded_html": os_banner["expanded_html"],
+                "dismissible": dismissible,
+                "dismiss_token": token,
+            })
 
     if hasattr(request, "session"):
         for banner in request.session.pop("_product_banners", []):
@@ -70,6 +76,11 @@ def _should_show_ui_toggle_banner(request):
     # Tailwind UI — that includes users without a contact info row at all
     # (those users get the classic UI by default in UIPreferenceLoader).
     return not (contact is not None and getattr(contact, "ui_use_tailwind", False))
+
+
+def _os_message_dismissed(user, token):
+    contact = getattr(user, "usercontactinfo", None)
+    return contact is not None and contact.os_message_dismissed_hash == token
 
 
 def bind_system_settings(request):

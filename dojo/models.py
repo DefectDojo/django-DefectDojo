@@ -260,6 +260,7 @@ class UserContactInfo(models.Model):
     ui_use_tailwind = models.BooleanField(default=False, verbose_name=_("Use new UI (beta)"), help_text=_("Opt in to the new Tailwind-based UI. Leave off for the classic UI."))
     token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
     password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
+    os_message_dismissed_hash = models.CharField(max_length=64, blank=True, default="", editable=False, help_text=_("Hash of the most recently dismissed open-source promo banner; the banner reappears when the message changes."))
 
 
 class System_Settings(models.Model):

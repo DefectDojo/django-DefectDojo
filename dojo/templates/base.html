@@ -503,6 +503,15 @@
                 {% for banner in additional_banners %}
                     <div role="alert" class="announcement-banner alert alert-{{ banner.style }} show"
                          data-source="{{ banner.source }}">
+                        {% if banner.dismissible %}
+                            <form method="post" action="{% url 'dismiss_os_message' %}" class="os-message-dismiss-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="token" value="{{ banner.dismiss_token }}">
+                                <button type="submit" class="close" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </form>
+                        {% endif %}
                         {{ banner.message|safe }}{% if banner.url %} <a href="{{ banner.url }}">{{ banner.link_text }}</a>{% endif %}
                         {% if banner.expanded_html %}
                             <button type="button" class="banner-toggle collapsed"
