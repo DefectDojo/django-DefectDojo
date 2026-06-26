@@ -657,9 +657,7 @@
                             <form method="post" action="{% url 'dismiss_os_message' %}" class="os-message-dismiss-form">
                                 {% csrf_token %}
                                 <input type="hidden" name="token" value="{{ banner.dismiss_token }}">
-                                <button type="submit" class="close" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
+                                <button type="submit" class="os-message-dismiss" aria-label="Dismiss" title="Dismiss this message">&times;</button>
                             </form>
                         {% endif %}
                         {{ banner.message|safe }}{% if banner.url %} <a href="{{ banner.url }}">{{ banner.link_text }}</a>{% endif %}
