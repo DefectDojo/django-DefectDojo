@@ -246,6 +246,8 @@ env = environ.FileAwareEnv(
     DD_API_TOKENS_ENABLED=(bool, True),
     # Enable endpoint which allow user to get API token when user+pass is provided
     DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
+    # Default token lifetime in days. 0 = no expiry (tokens last forever).
+    DD_API_TOKEN_DEFAULT_EXPIRY_DAYS=(int, 0),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
@@ -651,6 +653,7 @@ DJANGO_ADMIN_ENABLED = env("DD_DJANGO_ADMIN_ENABLED")
 API_TOKENS_ENABLED = env("DD_API_TOKENS_ENABLED")
 
 API_TOKEN_AUTH_ENDPOINT_ENABLED = env("DD_API_TOKEN_AUTH_ENDPOINT_ENABLED")
+API_TOKEN_DEFAULT_EXPIRY_DAYS = env("DD_API_TOKEN_DEFAULT_EXPIRY_DAYS")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -670,7 +673,7 @@ REST_FRAMEWORK = {
 }
 
 if API_TOKENS_ENABLED:
-    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("rest_framework.authentication.TokenAuthentication",)
+    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("dojo.user.authentication.ExpiringTokenAuthentication",)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "DefectDojo API v2",

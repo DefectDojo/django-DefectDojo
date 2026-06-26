@@ -481,6 +481,7 @@ class UserSerializer(serializers.ModelSerializer):
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)
     email = serializers.EmailField(required=True)
     token_last_reset = serializers.SerializerMethodField()
+    token_expiry = serializers.SerializerMethodField()
     password_last_reset = serializers.SerializerMethodField()
     password = serializers.CharField(
         write_only=True,
@@ -512,6 +513,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_staff",
             "is_superuser",
             "token_last_reset",
+            "token_expiry",
             "password_last_reset",
             "password",
             "configuration_permissions",
@@ -521,6 +523,11 @@ class UserSerializer(serializers.ModelSerializer):
     def get_token_last_reset(self, instance):
         uci = getattr(instance, "usercontactinfo", None)
         return getattr(uci, "token_last_reset", None)
+
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_token_expiry(self, instance):
+        uci = getattr(instance, "usercontactinfo", None)
+        return getattr(uci, "token_expiry", None)
 
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_password_last_reset(self, instance):

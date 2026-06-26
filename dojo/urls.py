@@ -41,6 +41,7 @@ from dojo.api_v2.views import (
     ProductViewSet,
     RegulationsViewSet,
     ReImportScanView,
+    RevokeApiTokenView,
     RiskAcceptanceViewSet,
     SLAConfigurationViewset,
     SonarqubeIssueTransitionViewSet,
@@ -214,6 +215,7 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/api-tokens/revoke/".format(get_system_setting("url_prefix")), RevokeApiTokenView.as_view(), name="api-token-revoke"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):

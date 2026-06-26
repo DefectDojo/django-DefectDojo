@@ -30,7 +30,9 @@ from drf_spectacular.utils import (
 )
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework import mixins, status, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -2288,6 +2290,44 @@ class UserContactInfoViewSet(
 
     def get_queryset(self):
         return UserContactInfo.objects.all().order_by("id")
+
+
+# Authorization: superuser/global-owner only
+class RevokeApiTokenView(GenericAPIView):
+
+    """
+    Revoke an API token by its key value.
+
+    Accepts {"key": "<token>"} and immediately invalidates the matching token.
+    Intended for incident response when a token is discovered to be leaked
+    and the owning user may not be known.
+
+    Only superusers and Global Owners may call this endpoint.
+    """
+
+    permission_classes = (permissions.IsSuperUserOrGlobalOwner,)
+    pagination_class = None
+
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"key": {"type": "string"}}, "required": ["key"]}},
+        responses={204: None},
+        summary="Revoke an API token by its key value",
+    )
+    def post(self, request, *args, **kwargs):
+        key = request.data.get("key")
+        if not key:
+            return Response({"detail": "key is required."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            token = Token.objects.select_related("user", "user__usercontactinfo").get(key=key)
+        except Token.DoesNotExist:
+            msg = "No token matching the provided key."
+            raise NotFound(msg)
+        uci = getattr(token.user, "usercontactinfo", None)
+        if uci:
+            uci.token_expiry = None
+            uci.save(update_fields=["token_expiry"])
+        token.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # Authorization: authenticated users

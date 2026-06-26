@@ -47,6 +47,54 @@ If you use [an alternative authentication method](/admin/sso/) for users, you ma
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
+### Token management
+
+DefectDojo provides API endpoints to revoke and set expiry on API tokens programmatically.
+
+#### Revoking a token by key
+
+When a token value is compromised, a superuser or Global Owner can revoke it directly by its key, without needing to know which user it belongs to:
+
+```
+POST /api/v2/api-tokens/revoke/
+Authorization: Token <api_key>
+Content-Type: application/json
+
+{"key": "<token_to_revoke>"}
+```
+
+Returns 204 on success. The token is immediately revoked and the expiry date is cleared. The owner will need to generate a new token via the UI (`/api/key-v2`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
+
+Returns 404 if no token matches the supplied key, 400 if `key` is missing, and 403 for non-superusers.
+
+#### Token expiry
+
+An optional expiry datetime can be set per user via the `user_contact_infos` endpoint (superuser only):
+
+```
+PATCH /api/v2/user_contact_infos/{id}/
+Authorization: Token <api_key>
+Content-Type: application/json
+
+{"token_expiry": "2026-12-31T23:59:59Z"}
+```
+
+Once set, any request using that user's token after the expiry datetime will receive a `403 Forbidden` response with `{"detail": "API token has expired."}`. The user must generate a new token to regain access.
+
+To remove an expiry and make a token permanent again, set `token_expiry` to `null`.
+
+#### Default token lifetime
+
+To enforce a maximum token lifetime across all users, set the environment variable:
+
+```
+DD_API_TOKEN_DEFAULT_EXPIRY_DAYS=90
+```
+
+When set to a value greater than `0`, every token rotation (via `POST /api/v2/users/{id}/reset_api_token/` or the UI) will automatically set `token_expiry` to the current time plus the configured number of days. The default is `0`, meaning tokens do not expire unless explicitly set.
+
+Note: resetting a token always snaps the expiry back to the instance default. Per-user expiry overrides set via `user_contact_infos` do not persist across token resets.
+
 ## Sample Code
 
 Here are some simple python examples and their results produced against

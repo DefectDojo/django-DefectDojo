@@ -103,6 +103,7 @@ def api_v2_key(request):
             api_key = Token.objects.get(user=request.user)
         except Token.DoesNotExist:
             api_key = Token.objects.create(user=request.user)
+    uci = getattr(request.user, "usercontactinfo", None)
     add_breadcrumb(title=_("API Key"), top_level=True, request=request)
 
     return render(request, "dojo/api_v2_key.html",
@@ -110,6 +111,7 @@ def api_v2_key(request):
                    "metric": False,
                    "user": request.user,
                    "key": api_key,
+                   "token_expiry": getattr(uci, "token_expiry", None),
                    "form": form,
                    })
 
