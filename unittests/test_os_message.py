@@ -11,7 +11,7 @@ from django.urls import reverse
 from dojo import context_processors
 from dojo.announcement import os_message
 from dojo.models import User, UserContactInfo
-from unittests.dojo_test_case import DojoTestCase
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
 class _Resp:
@@ -318,6 +318,7 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
         self.assertFalse(entries[0]["dismissible"])
 
 
+@versioned_fixtures
 class TestDismissOsMessageView(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
