@@ -1,14 +1,17 @@
 import logging
+import re
 
 from django.contrib import messages
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 
 from dojo.forms import AnnouncementCreateForm, AnnouncementRemoveForm
-from dojo.models import Announcement, UserAnnouncement
+from dojo.models import Announcement, UserAnnouncement, UserContactInfo
 from dojo.utils import add_breadcrumb
 
 logger = logging.getLogger(__name__)
@@ -85,3 +88,23 @@ def dismiss_announcement(request):
         )
         return render(request, "dojo/dismiss_announcement.html")
     return render(request, "dojo/dismiss_announcement.html")
+
+
+@require_POST
+def dismiss_os_message(request):
+    if not request.user.is_authenticated:
+        return HttpResponseForbidden()
+    token = request.POST.get("token", "").strip()
+    if token and re.fullmatch(r"[0-9a-f]{1,64}", token):
+        contact = UserContactInfo.objects.get_or_create(user=request.user)[0]
+        if contact.os_message_dismissed_hash != token:
+            contact.os_message_dismissed_hash = token
+            contact.save(update_fields=["os_message_dismissed_hash"])
+    if request.headers.get("x-requested-with") == "XMLHttpRequest":
+        return HttpResponse(status=204)
+    referer = request.META.get("HTTP_REFERER")
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure(),
+    ):
+        return HttpResponseRedirect(referer)
+    return HttpResponseRedirect("/")

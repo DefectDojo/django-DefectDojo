@@ -3537,14 +3537,18 @@ msgstr "Vulnerabilidades de alta gravidade"
 msgid ""
 "\n"
 "                                        %(name)s is affected by critical vulnerabilities."
-msgstr "%(name)s é afetado por vulnerabilidades críticas."
+msgstr ""
+"\n"
+"%(name)s é afetado por vulnerabilidades críticas."
 
 #: dojo/templates/dojo/metrics.html
 #, python-format
 msgid ""
 "\n"
 "                                        %(name)s is affected by high severity vulnerabilities."
-msgstr "%(name)s é afetado por vulnerabilidades de alta gravidade."
+msgstr ""
+"\n"
+"%(name)s é afetado por vulnerabilidades de alta gravidade."
 
 #: dojo/templates/dojo/metrics.html
 msgid "Full Metrics"
@@ -3789,7 +3793,9 @@ msgid ""
 "\n"
 "    Showing entries %(start_index)s to %(end_index)s of %(count)s\n"
 "    "
-msgstr "Mostrando entradas %(start_index)s a %(end_index)s de %(count)s"
+msgstr ""
+"\n"
+"Mostrando entradas %(start_index)s a %(end_index)s de %(count)s"
 
 #: dojo/templates/dojo/paging_snippet.html
 msgid "Page Size"

@@ -95,6 +95,17 @@ RUN \
   mkdir -p dojo/migrations && \
   chmod g=u dojo/migrations && \
   true
+
+# Compile translation catalogs (.mo) into the image (the .mo files are gitignored
+# and generated at build). msgfmt is run directly so no Django settings/env are
+# needed; gettext is only required at build time, so install and purge it here.
+RUN \
+  apt-get -y update && \
+  apt-get -y install --no-install-recommends gettext && \
+  find dojo/locale -name 'django.po' -execdir msgfmt django.po -o django.mo \; && \
+  apt-get -y purge --auto-remove gettext && \
+  apt-get clean && \
+  rm -rf /var/lib/apt/lists
 USER root
 RUN \
     addgroup --gid ${gid} ${appuser} && \
