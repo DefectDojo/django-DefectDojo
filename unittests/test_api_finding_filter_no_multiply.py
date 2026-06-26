@@ -33,7 +33,7 @@ class TestApiFindingFilterNoMultiply(DojoTestCase):
         cls.reviewer1 = Dojo_User.objects.create(username="nm_reviewer1")
         cls.reviewer2 = Dojo_User.objects.create(username="nm_reviewer2")
         cls.prod_type = Product_Type.objects.create(name="NM Product Type")
-        cls.product = Product.objects.create(name="NM Product", prod_type=cls.prod_type)
+        cls.product = Product.objects.create(name="NM Product", prod_type=cls.prod_type, description="NM Product")
         cls.engagement = Engagement.objects.create(
             name="NM Engagement", product=cls.product, target_start=now(), target_end=now(),
         )
