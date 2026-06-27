@@ -20,11 +20,13 @@ from dojo.endpoint.queries import get_authorized_endpoint_status_for_queryset
 from dojo.filters import (
     MetricsEndpointFilter,
     MetricsEndpointFilterWithoutObjectLookups,
-    MetricsFindingFilter,
-    MetricsFindingFilterWithoutObjectLookups,
 )
 from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, OPEN_FINDINGS_QUERY
 from dojo.finding.queries import get_authorized_findings
+from dojo.finding.ui.filters import (
+    MetricsFindingFilter,
+    MetricsFindingFilterWithoutObjectLookups,
+)
 from dojo.models import Endpoint_Status, Finding, Product_Type
 from dojo.utils import (
     get_system_setting,

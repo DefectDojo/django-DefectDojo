@@ -49,7 +49,7 @@ from dojo.models import (
 )
 from dojo.tools.stackhawk.parser import StackHawkParser
 
-from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2
+from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -275,7 +275,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
 
 
 @tag("performance")
-@skip_unless_v2
+@override_settings(V3_FEATURE_LOCATIONS=False)
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     """Performance tests using small sample files (StackHawk, ~6 findings)."""
@@ -343,9 +343,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=170,
+            expected_num_queries1=156,
             expected_num_async_tasks1=2,
-            expected_num_queries2=123,
+            expected_num_queries2=121,
             expected_num_async_tasks2=1,
             expected_num_queries3=28,
             expected_num_async_tasks3=1,
@@ -367,9 +367,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=184,
+            expected_num_queries1=170,
             expected_num_async_tasks1=2,
-            expected_num_queries2=131,
+            expected_num_queries2=129,
             expected_num_async_tasks2=1,
             expected_num_queries3=36,
             expected_num_async_tasks3=1,
@@ -392,9 +392,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=194,
+            expected_num_queries1=180,
             expected_num_async_tasks1=4,
-            expected_num_queries2=141,
+            expected_num_queries2=139,
             expected_num_async_tasks2=3,
             expected_num_queries3=43,
             expected_num_async_tasks3=3,
@@ -524,9 +524,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=109,
+            expected_num_queries1=92,
             expected_num_async_tasks1=2,
-            expected_num_queries2=89,
+            expected_num_queries2=72,
             expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -545,9 +545,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=123,
+            expected_num_queries1=106,
             expected_num_async_tasks1=2,
-            expected_num_queries2=104,
+            expected_num_queries2=87,
             expected_num_async_tasks2=2,
         )
 
@@ -633,9 +633,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=177,
+            expected_num_queries1=163,
             expected_num_async_tasks1=2,
-            expected_num_queries2=132,
+            expected_num_queries2=130,
             expected_num_async_tasks2=1,
             expected_num_queries3=36,
             expected_num_async_tasks3=1,
@@ -657,9 +657,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=193,
+            expected_num_queries1=179,
             expected_num_async_tasks1=2,
-            expected_num_queries2=142,
+            expected_num_queries2=140,
             expected_num_async_tasks2=1,
             expected_num_queries3=46,
             expected_num_async_tasks3=1,
@@ -682,9 +682,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=206,
+            expected_num_queries1=192,
             expected_num_async_tasks1=4,
-            expected_num_queries2=155,
+            expected_num_queries2=153,
             expected_num_async_tasks2=3,
             expected_num_queries3=53,
             expected_num_async_tasks3=3,
@@ -789,9 +789,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=116,
+            expected_num_queries1=99,
             expected_num_async_tasks1=2,
-            expected_num_queries2=92,
+            expected_num_queries2=75,
             expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -809,8 +809,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=132,
+            expected_num_queries1=115,
             expected_num_async_tasks1=2,
-            expected_num_queries2=215,
+            expected_num_queries2=198,
             expected_num_async_tasks2=2,
         )

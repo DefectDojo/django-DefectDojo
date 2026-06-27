@@ -476,9 +476,9 @@ class TestNotificationTriggersApi(APITestCase):
     def test_auditlog_on(self, mock):
         prod_type = Product_Type.objects.create(name="notif prod type API")
         self.client.delete(reverse("product_type-detail", args=(prod_type.pk,)), format="json")
-        self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The product type "notif prod type API" was deleted by admin')
+        self.assertEqual(mock.call_args_list[-1].kwargs["description"], 'The Organization "notif prod type API" was deleted by admin')
 
-    @patch("dojo.api_v2.serializers.dojo_dispatch_task")
+    @patch("dojo.finding.api.serializer.dojo_dispatch_task")
     def test_create_calls_notification_with_auto_assigned_reporter(self, mock_dispatch):
         """Dispatch of async_create_notification when creating a finding without explicit reporter."""
         payload = self._minimal_create_payload("Finding with auto-assigned reporter notification")
@@ -504,7 +504,7 @@ class TestNotificationTriggersApi(APITestCase):
         created_finding = Finding.objects.get(id=created_id)
         self.assertEqual(created_finding.reporter, self.admin)
 
-    @patch("dojo.api_v2.serializers.dojo_dispatch_task")
+    @patch("dojo.finding.api.serializer.dojo_dispatch_task")
     def test_create_calls_notification_with_explicit_reporter(self, mock_dispatch):
         """Dispatch of async_create_notification when creating a finding with explicit reporter."""
         explicit_reporter = User.objects.create(username="explicit_reporter", email="reporter@test.com")
@@ -533,7 +533,7 @@ class TestNotificationTriggersApi(APITestCase):
         created_finding = Finding.objects.get(id=created_id)
         self.assertEqual(created_finding.reporter, explicit_reporter)
 
-    @patch("dojo.api_v2.serializers.dojo_dispatch_task")
+    @patch("dojo.finding.api.serializer.dojo_dispatch_task")
     def test_notification_parameters_are_correct(self, mock_dispatch):
         """All dispatch parameters for finding_added are properly formatted and passed."""
         payload = self._minimal_create_payload("Test Finding for Parameter Validation")

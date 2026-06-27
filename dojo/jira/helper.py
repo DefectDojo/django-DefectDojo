@@ -867,7 +867,12 @@ def prepare_jira_issue_fields(
     }
 
     if component_name:
-        fields["components"] = [{"name": component_name}]
+        # The component field holds a comma-separated list of component names, so split it
+        # into the list of components Jira expects ([{"name": "A"}, {"name": "B"}]). A single
+        # value without commas yields a single component. (SC-13173)
+        components = [{"name": name.strip()} for name in component_name.split(",") if name.strip()]
+        if components:
+            fields["components"] = components
 
     if custom_fields:
         fields.update(custom_fields)

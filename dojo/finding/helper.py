@@ -603,6 +603,7 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
             duplicate=False,
             duplicate_finding=None,
             active=original.active,
+            verified=original.verified,
             is_mitigated=original.is_mitigated,
         )
         new_original.found_by.set(original.found_by.all())
@@ -986,14 +987,15 @@ def add_locations(finding, form, *, replace=False):
     return set(locations_to_associate)
 
 
-def sanitize_vulnerability_ids(vulnerability_ids) -> None:
+def sanitize_vulnerability_ids(vulnerability_ids):
     """Remove undisired vulnerability id values"""
-    vulnerability_ids = [x for x in vulnerability_ids if x.strip()]
+    return [x for x in vulnerability_ids if x.strip()]
 
 
 def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool = True):
-    # Remove duplicates
+    # Remove duplicates and empty/whitespace IDs
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+    vulnerability_ids = sanitize_vulnerability_ids(vulnerability_ids)
 
     # Remove old vulnerability ids if requested
     # Callers can set delete_existing=False when they know there are no existing IDs
@@ -1001,12 +1003,10 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
     if delete_existing:
         Vulnerability_Id.objects.filter(finding=finding).delete()
 
-    # Remove undisired vulnerability ids
-    sanitize_vulnerability_ids(vulnerability_ids)
-    # Save new vulnerability ids
-    # Using bulk create throws Django 50 warnings about unsaved models...
-    for vulnerability_id in vulnerability_ids:
-        Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
+    Vulnerability_Id.objects.bulk_create([
+        Vulnerability_Id(finding=finding, vulnerability_id=vid)
+        for vid in vulnerability_ids
+    ])
 
     # Set CVE
     if vulnerability_ids:

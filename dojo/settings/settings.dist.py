@@ -51,7 +51,7 @@ env = environ.FileAwareEnv(
     DD_DJANGO_METRICS_ENABLED=(bool, False),
     DD_LOGIN_REDIRECT_URL=(str, "/"),
     DD_LOGIN_URL=(str, "/login"),
-    DD_DJANGO_ADMIN_ENABLED=(bool, True),
+    DD_DJANGO_ADMIN_ENABLED=(bool, False),
     DD_SESSION_COOKIE_HTTPONLY=(bool, True),
     DD_CSRF_COOKIE_HTTPONLY=(bool, True),
     DD_SECURE_SSL_REDIRECT=(bool, False),
@@ -127,7 +127,8 @@ env = environ.FileAwareEnv(
     # Falls back to a plain queryset on any error (logged).
     DD_WATSON_INDEX_PREFETCH_ENABLED=(bool, True),
     DD_FOOTER_VERSION=(str, ""),
-    # models should be passed to celery by ID, default is False (for now)
+    # Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+    DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE=(bool, True),
     DD_DATABASE_ENGINE=(str, "django.db.backends.postgresql"),
     DD_DATABASE_HOST=(str, "postgres"),
     DD_DATABASE_NAME=(str, "defectdojo"),
@@ -261,10 +262,10 @@ env = environ.FileAwareEnv(
     # For HTTP requests, how long connection is open before timeout
     # This settings apply only on requests performed by "requests" lib used in Dojo code (if some included lib is using "requests" as well, this does not apply there)
     DD_REQUESTS_TIMEOUT=(int, 30),
-    # Dictates if v3 functionality will be enabled
-    DD_V3_FEATURE_LOCATIONS=(bool, False),
-    # Dictates if v3 org/asset relabeling (+url routing) will be enabled
-    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, False),
+    # Dictates if v3 functionality will be enabled (on by default as of 3.0.0; set to False to revert to the legacy Endpoint model)
+    DD_V3_FEATURE_LOCATIONS=(bool, True),
+    # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
+    DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
     # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
     **NOTIFICATIONS_ENV_DEFAULTS,
 )
@@ -624,6 +625,9 @@ TEAM_NAME = env("DD_TEAM_NAME")
 
 # Used to configure a custom version in the footer of the base.html template.
 FOOTER_VERSION = env("DD_FOOTER_VERSION")
+
+# Toggle for the highly accessible notice at the top of forms ("Required fields are marked with an asterisk*")
+SHOW_A11Y_REQUIRED_FIELDS_NOTICE = env("DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE")
 
 # V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
@@ -1037,6 +1041,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "TFSec Scan": ["severity", "vuln_id_from_tool", "file_path", "line"],
     "Snyk Scan": ["vuln_id_from_tool", "file_path", "component_name", "component_version"],
     "GitLab Dependency Scanning Report": ["title", "vulnerability_ids", "file_path", "component_name", "component_version"],
+    # garak findings have no file_path/line; description holds the (per-run, randomly sampled) prompt/output and is
+    # therefore unstable across runs. severity is also excluded: it's an aggregate (the most severe rung seen across a
+    # probe's occurrences) and shifts as the occurrence set changes, so dedupe on the stable identity: probe-derived
+    # title + target model.
+    "Garak Scan": ["title", "component_name"],
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
@@ -1108,6 +1117,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Xygeni SCA Scan": ["vulnerability_ids", "component_name", "component_version"],
     "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
     "Alert Logic Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "PICUS Scan": ["vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1290,8 +1300,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "HackerOne Cases": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Snyk Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
+    "Garak Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "GitLab Container Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Secret Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Checkov Scan": DEDUPE_ALGO_HASH_CODE,
@@ -1383,6 +1395,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Xygeni Secrets Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Alert Logic Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "PICUS Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

@@ -22,6 +22,7 @@ def globalize_vars(request):
         "SHOW_PLG_LINK": True,
         # V3 Feature Flags
         "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
+        "SHOW_A11Y_REQUIRED_FIELDS_NOTICE": settings.SHOW_A11Y_REQUIRED_FIELDS_NOTICE,
     }
 
     additional_banners = []
@@ -47,7 +48,7 @@ def globalize_vars(request):
             profile_url = ""
         additional_banners.append({
             "source": "ui_toggle",
-            "message": "A redesigned UI is available as a beta opt-in. It will become the default on September 8th in the 2.62.0 release.",
+            "message": "A redesigned UI is available as a beta opt-in. It will become the default on September 8th in the 3.3.0 release.",
             "style": "info",
             "url": profile_url,
             "link_text": "Enable it in your profile.",

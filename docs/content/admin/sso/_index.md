@@ -29,9 +29,9 @@ aliases:
   - /admin/sso/os__remote_user/
 ---
 
-Single Sign-On is a **DefectDojo Pro** feature. As of DefectDojo 2.59, the SSO surface — SAML, OIDC, and the bundled OAuth providers — is available only in DefectDojo Pro. Open-source DefectDojo uses local username/password login and the password-reset flow.
+Single Sign-On is a **DefectDojo Pro** feature. As of DefectDojo 3.0, the SSO surface — SAML, OIDC, and the bundled OAuth providers — is available only in DefectDojo Pro. Open-source DefectDojo uses local username/password login and the password-reset flow.
 
-If you're running open-source DefectDojo and want SSO, you'll need to switch to [DefectDojo Pro](https://defectdojo.com); the migration is covered in the [2.59 upgrade notes](/releases/os_upgrading/2.59/#sso-providers-are-available-in-defectdojo-pro-only). Existing user accounts and group memberships are preserved on upgrade. For access control on open-source DefectDojo, see the [Authorized Users](/admin/user_management/os__authorized_users/) page.
+If you're running open-source DefectDojo and want SSO, you'll need to switch to [DefectDojo Pro](https://defectdojo.com); the migration is covered in the [3.0 upgrade notes](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only). Existing user accounts and group memberships are preserved on upgrade. For access control on open-source DefectDojo, see the [Authorized Users](/admin/user_management/os__authorized_users/) page.
 
 ## Supported SSO providers (DefectDojo Pro)
 

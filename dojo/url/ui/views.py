@@ -24,7 +24,7 @@ from dojo.location.models import Location, LocationFindingReference, LocationPro
 from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
-from dojo.reports.views import generate_report
+from dojo.reports.ui.views import generate_report
 from dojo.url.filters import URLFilter
 from dojo.url.models import URL
 from dojo.url.queries import annotate_host_contents

@@ -33,20 +33,13 @@ from rest_framework.mixins import (
 )
 from rest_framework.test import APIClient
 
+from dojo.announcement.api.views import AnnouncementViewSet
 from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from dojo.api_v2.prefetch.utils import get_prefetchable_fields
 from dojo.api_v2.views import (
-    AnnouncementViewSet,
     AppAnalysisViewSet,
-    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
-    DevelopmentEnvironmentViewSet,
-    EndpointStatusViewSet,
-    EndPointViewSet,
-    EngagementViewSet,
-    FindingTemplatesViewSet,
-    FindingViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -56,24 +49,21 @@ from dojo.api_v2.views import (
     LanguageViewSet,
     NotesViewSet,
     NoteTypeViewSet,
-    ProductAPIScanConfigurationViewSet,
-    ProductTypeViewSet,
-    ProductViewSet,
-    RiskAcceptanceViewSet,
     SonarqubeIssueViewSet,
-    TestsViewSet,
-    TestTypesViewSet,
-    ToolConfigurationsViewSet,
-    ToolProductSettingsViewSet,
-    ToolTypesViewSet,
-    UserContactInfoViewSet,
-    UsersViewSet,
 )
 from dojo.asset.api.views import (
     AssetAPIScanConfigurationViewSet,
     AssetViewSet,
 )
 from dojo.authorization.roles_permissions import Permissions, permission_to_action
+from dojo.development_environment.api.views import DevelopmentEnvironmentViewSet
+from dojo.endpoint.api.views import EndpointStatusViewSet, EndPointViewSet
+from dojo.engagement.api.views import EngagementViewSet
+from dojo.finding.api.views import (
+    BurpRawRequestResponseViewSet,
+    FindingTemplatesViewSet,
+    FindingViewSet,
+)
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.views import LocationFindingReferenceViewSet, LocationProductReferenceViewSet, LocationViewSet
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -116,8 +106,16 @@ from dojo.notifications.api.views import NotificationsViewSet, NotificationWebho
 from dojo.organization.api.views import (
     OrganizationViewSet,
 )
+from dojo.product.api.views import ProductAPIScanConfigurationViewSet, ProductViewSet
+from dojo.product_type.api.views import ProductTypeViewSet
+from dojo.risk_acceptance.api.views import RiskAcceptanceViewSet
+from dojo.test.api.views import TestsViewSet, TestTypesViewSet
+from dojo.tool_config.api.views import ToolConfigurationsViewSet
+from dojo.tool_product.api.views import ToolProductSettingsViewSet
+from dojo.tool_type.api.views import ToolTypesViewSet
 from dojo.url.api.views import URLViewSet
 from dojo.url.models import URL
+from dojo.user.api.views import UserContactInfoViewSet, UsersViewSet
 
 from .dojo_test_case import (
     DojoAPITestCase,
@@ -1224,6 +1222,75 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
         logger.debug(response.data)
         self.assertEqual(400, response.status_code, response.content[:1000])
         self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
+
+    def test_update(self):
+        # Override the base-class PATCH+PUT cycle: PUT must preserve the row's
+        # endpoint/finding because the serializer freezes them after creation.
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        relative_url = self.url + "{}/".format(first["id"])
+
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.check_schema_response("patch", "200", response, detail=True)
+
+        put_payload = self.payload.copy()
+        put_payload["endpoint"] = first["endpoint"]
+        put_payload["finding"] = first["finding"]
+        response = self.client.put(relative_url, put_payload)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.check_schema_response("put", "200", response, detail=True)
+
+    def test_patch_endpoint_change_rejected(self):
+        # Pick the first existing row, find a different endpoint in the same
+        # product, and confirm PATCH refuses to re-point the row.
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        row = Endpoint_Status.objects.get(pk=first["id"])
+        other_endpoint = Endpoint.objects.filter(
+            product_id=row.endpoint.product_id,
+        ).exclude(pk=row.endpoint_id).first()
+        self.assertIsNotNone(other_endpoint, "fixture needs >1 endpoint per product")
+
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {"endpoint": other_endpoint.id},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("endpoint cannot be changed after creation", response.content.decode("utf-8"))
+
+    def test_patch_finding_change_rejected(self):
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        row = Endpoint_Status.objects.get(pk=first["id"])
+        other_finding = Finding.objects.filter(
+            test__engagement__product_id=row.endpoint.product_id,
+        ).exclude(pk=row.finding_id).first()
+        self.assertIsNotNone(other_finding, "fixture needs >1 finding per product")
+
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {"finding": other_finding.id},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("finding cannot be changed after creation", response.content.decode("utf-8"))
+
+    def test_patch_same_endpoint_and_finding_succeeds(self):
+        # PATCH that re-sends the existing FK values (no change) must still pass.
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {
+                "endpoint": first["endpoint"],
+                "finding": first["finding"],
+                "false_positive": not first.get("false_positive", False),
+            },
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:1000])
 
     def test_create_minimal(self):
         # This call should not fail even if there is not date defined

@@ -501,6 +501,57 @@ class TestFindingModelWithEndpoints(DojoTestCase, TestFindingModelMixin):
         self.assertFalse(is_naive(status.mitigated_time))
 
 
+class TestFindingComponentNormalization(DojoTestCase):
+
+    """
+    SC-13073: empty component_name/component_version must be stored as NULL, not an
+    empty string. Otherwise the "All Components" view (which groups by component_name)
+    shows two separate "None" rows: one for NULL findings and one for "" findings.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="comp-tester", password="pass")  # noqa: S106
+        product_type = Product_Type.objects.create(name="PT comp")
+        product = Product.objects.create(name="P comp", description="d", prod_type=product_type)
+        engagement = Engagement.objects.create(
+            name="E comp", product=product, target_start=now(), target_end=now(),
+        )
+        test_type = Test_Type.objects.create(name="TT comp")
+        self.test = Test.objects.create(
+            engagement=engagement, test_type=test_type,
+            target_start=now(), target_end=now(),
+        )
+
+    def _save_finding(self, **kwargs):
+        finding = Finding.objects.create(title="Comp", severity="High", test=self.test, reporter=self.user, **kwargs)
+        finding.refresh_from_db()
+        return finding
+
+    def test_empty_component_name_normalized_to_none(self):
+        finding = self._save_finding(component_name="", component_version="")
+        self.assertIsNone(finding.component_name)
+        self.assertIsNone(finding.component_version)
+
+    def test_whitespace_component_name_normalized_to_none(self):
+        finding = self._save_finding(component_name="   ", component_version="\t")
+        self.assertIsNone(finding.component_name)
+        self.assertIsNone(finding.component_version)
+
+    def test_real_component_value_preserved(self):
+        finding = self._save_finding(component_name="django", component_version="4.2")
+        self.assertEqual(finding.component_name, "django")
+        self.assertEqual(finding.component_version, "4.2")
+
+    def test_empty_and_null_findings_group_together(self):
+        self._save_finding(component_name="", component_version="")
+        self._save_finding(component_name=None, component_version=None)
+        # Both should now share a single NULL component_name grouping
+        distinct_names = set(
+            Finding.objects.filter(test=self.test).values_list("component_name", flat=True),
+        )
+        self.assertEqual(distinct_names, {None})
+
+
 @versioned_fixtures
 class TestFindingSLAExpiration(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
