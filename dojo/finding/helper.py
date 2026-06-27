@@ -479,6 +479,10 @@ def post_process_findings_batch(
     if (test_delay := settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY) > 0:
         delay_filter = settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER
         if not delay_filter or Finding.objects.filter(id__in=finding_ids, title__istartswith=delay_filter).exists():
+            logger.warning(
+                "post_process_findings_batch: TEST-ONLY delay of %ss for %d finding(s) (filter=%r)",
+                test_delay, len(finding_ids) if finding_ids else 0, delay_filter,
+            )
             sleep(test_delay)
 
     logger.debug(
