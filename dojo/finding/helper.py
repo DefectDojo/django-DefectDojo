@@ -471,11 +471,15 @@ def post_process_findings_batch(
     **kwargs,
 ):
     # Test-only hook: when DEDUPLICATION_BATCH_PROCESS_TEST_DELAY > 0 (set only in
-    # the integration-test stack) block this batch so integration tests can
-    # deterministically distinguish 'async_wait' (which joins on this task) from
-    # 'async' (which does not). Default 0 -> no effect in production.
+    # the integration-test stack) block this batch so the async_wait integration
+    # test can deterministically distinguish 'async_wait' (which joins on this
+    # task) from 'async' (which does not). Default 0 -> no effect in production.
+    # DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER (a finding-title prefix) scopes
+    # the delay to that one test's findings so unrelated dedupe tests are not slowed.
     if (test_delay := settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY) > 0:
-        sleep(test_delay)
+        delay_filter = settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER
+        if not delay_filter or Finding.objects.filter(id__in=finding_ids, title__istartswith=delay_filter).exists():
+            sleep(test_delay)
 
     logger.debug(
         f"post_process_findings_batch called: finding_ids_count={len(finding_ids) if finding_ids else 0}, "

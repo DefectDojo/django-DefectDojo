@@ -102,8 +102,10 @@ env = environ.FileAwareEnv(
     # Test-only: artificial delay (seconds) injected at the start of
     # post_process_findings_batch so integration tests can deterministically
     # observe that 'async_wait' blocks on deduplication while 'async' does not.
-    # Must stay 0 in production.
+    # Must stay 0 in production. The _FILTER (a finding-title prefix) scopes the
+    # delay to a single test's findings so unrelated dedupe tests are not slowed.
     DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY=(int, 0),
+    DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER=(str, ""),
     DD_CELERY_RESULT_BACKEND=(str, "django-db"),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
@@ -874,6 +876,7 @@ CELERY_BROKER_URL = env("DD_CELERY_BROKER_URL") \
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
 DEDUPLICATION_ASYNC_WAIT_TIMEOUT = env("DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT")
 DEDUPLICATION_BATCH_PROCESS_TEST_DELAY = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY")
+DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = env("DD_CELERY_RESULT_EXPIRES")
