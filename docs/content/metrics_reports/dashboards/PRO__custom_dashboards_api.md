@@ -3,10 +3,10 @@ title: "Automating Dashboards with the API"
 description: "Discover the widget catalog, create and update dashboard layouts, and render widget data via the DefectDojo Pro REST API"
 draft: false
 audience: pro
-weight: 21
+weight: 11
 slug: custom-dashboards-api
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Customizable Dashboards REST API (layouts, widget catalog, and widget data) is a DefectDojo Pro feature, currently in beta behind the `dashboard_v2` feature flag.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Customizable Dashboards REST API (layouts, widget catalog, and widget data) is a DefectDojo Pro feature, currently in beta. Beta features are available to DefectDojo Pro Cloud subscriptions — contact DefectDojo support or your customer success advocate to enable it for your instance.</span>
 
 The Customizable Dashboards REST API lets you build the same dashboards you assemble by hand in the [Dashboards UI](../custom-dashboards/) — entirely from code. You can discover the widget catalog, create and update layouts, set your default, share layouts with your team, and even render a widget's data on demand without re-implementing DefectDojo's filtering. The layouts surface was designed as the primary entry point for AI agents building dashboards, so the request shapes are deliberately introspectable.
 
@@ -45,7 +45,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 Important:** The entire Dashboards API is gated behind the `dashboard_v2` feature flag. Until the beta is enabled for your instance, every endpoint returns `403 Dashboard V2 is not enabled.` — see [Enabling the beta](../custom-dashboards/#enabling-the-beta).
+> **🔑 Important:** The entire Dashboards API is part of the beta. Until it is enabled for your instance, every endpoint returns `403 Dashboard V2 is not enabled.` — see [Enabling the beta](../custom-dashboards/#enabling-the-beta).
 
 > **⚠️ Security Notice:** Your API token grants full access to your DefectDojo data. Never paste it into a chat, screenshot, ticket, or committed file. Read it from an environment variable, rotate it if it is ever exposed, and scope tokens to service accounts where possible.
 
