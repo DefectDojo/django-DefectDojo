@@ -145,6 +145,7 @@ class BaseImporter(ImporterOptions):
             return
         timeout = getattr(settings, "DEDUPLICATION_ASYNC_WAIT_TIMEOUT", 60)
         logger.debug("async_wait: waiting for %d post-processing task(s) (timeout=%ss)", len(results), timeout)
+        start = time.monotonic()
         success = True
         for result in results:
             if result is None or not hasattr(result, "get"):
@@ -152,8 +153,13 @@ class BaseImporter(ImporterOptions):
             try:
                 result.get(timeout=timeout, propagate=False)
             except Exception as e:
-                logger.warning("async_wait: error/timeout while waiting for post-processing task: %s", e)
+                logger.warning(
+                    "async_wait: error/timeout after %.2fs waiting for post-processing task: %s",
+                    time.monotonic() - start, e,
+                )
                 success = False
+        elapsed = time.monotonic() - start
+        logger.debug("async_wait: waited %.2fs for %d post-processing task(s) (success=%s)", elapsed, len(results), success)
         self.deduplication_complete = success
         self.post_processing_results = []
 
