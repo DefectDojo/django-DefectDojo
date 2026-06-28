@@ -13,6 +13,8 @@ aliases:
 
 DefectDojo Pro Customizable Dashboards let each user assemble their own home page out of **widgets** — counts, charts, leaderboards, feeds, and notes — arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, publish them to your whole team, set one as your default landing page, and clone any layout (yours or a shared template) as a starting point.
 
+![A DefectDojo Pro customizable dashboard — the Default Dashboard layout.](images/pro_dashboard_v2_default.png)
+
 ## How it compares to open source
 
 Open source DefectDojo has a single, built-in [Main Dashboard](../introduction_dashboard/) with a fixed set of summary cards and charts that a superuser can show or hide. It is the same for every user.
@@ -70,7 +72,7 @@ Widgets are placed on a **12-column grid**. In edit mode you drag widgets to mov
 
 The toolbar across the top of the home page is where you switch layouts and manage them. It includes a **layout picker** (with badges that mark your default layout and any shared layouts/templates), and buttons to create a **New Layout**, open **Manage Layouts**, **Refresh** all widgets, and toggle **Edit** mode.
 
-![The Customizable Dashboard with its toolbar](images/pro_dashboard_v2_home.png)
+![The dashboard toolbar (highlighted): the layout picker, plus New Layout, Manage Layouts, Refresh, and Edit](images/pro_dashboard_v2_home.png)
 
 ### Step 1: Enter edit mode
 
