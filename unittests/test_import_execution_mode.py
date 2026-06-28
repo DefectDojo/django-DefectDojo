@@ -150,6 +150,13 @@ class ImportExecutionModeAPITest(DojoAPITestCase):
         }
 
     def test_import_async_wait_returns_statistics(self):
+        # NOTE: this assertion is not actually meaningful under CELERY_TASK_ALWAYS_EAGER:
+        # eager .get() returns an inline EagerResult, so deduplication_complete is True
+        # whether or not the real cross-process join works. It cannot fail when the join
+        # is broken. The genuine guarantee (async_wait blocks until dedupe finishes) is
+        # covered by the real-worker integration test, ImportAsyncWaitApiTest in
+        # tests/dedupe_test.py. Kept here only for endpoint/field plumbing coverage and
+        # future reference if this ever runs against a non-eager worker.
         with (get_unit_tests_path() / "scans/zap/0_zap_sample.xml").open(encoding="utf-8") as testfile:
             payload = self._payload(DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT)
             payload["file"] = testfile
