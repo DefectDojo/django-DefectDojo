@@ -23,18 +23,8 @@ import cvss
 import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
-from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
-from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-
-# OFB powers the legacy "AES.1" decryption path only. It has been moved to the
-# "decrepit" module and is being removed from primitives.ciphers.modes; import
-# it from its new home when available, falling back for older cryptography.
-try:
-    from cryptography.hazmat.decrepit.ciphers.modes import OFB
-except ImportError:  # cryptography that predates the decrepit modes module
-    from cryptography.hazmat.primitives.ciphers.modes import OFB
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cvss import CVSS2, CVSS3, CVSS4
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
@@ -970,31 +960,11 @@ def reopen_external_issue(finding_id, note, external_issue_provider, **kwargs):
 from dojo.notifications.helper import process_tag_notifications  # noqa: E402, F401  -- backward compat
 
 
-# ---------------------------------------------------------------------------
-# Legacy "AES.1" credential encryption: AES-256-OFB with null-byte padding.
-# Retained for backward-compatible decryption of values already stored in the
-# database. New values are written with the "AES.2" (AES-256-GCM) scheme below
-# via dojo_crypto_encrypt(); existing "AES.1" values upgrade lazily the next
-# time they are saved.
-#
-# REMOVAL TRACKING (legacy OFB path):
-# Migration 0270_reencrypt_tool_config_credentials_aes_gcm eagerly re-encrypts
-# every stored Tool_Configuration credential to "AES.2", so after it has run in
-# every environment there should be no "AES.1" values left in the database.
-# Once that migration is squashed/baked into the release floor (i.e. no upgrade
-# path can skip it) and any external integrations have been confirmed not to
-# persist their own "AES.1" values, the entire legacy path can be deleted:
-#   - encrypt() / decrypt() / _pad_string() / _unpad_string() below
-#   - the OFB import at the top of this module
-#   - the "AES.1" else-branch in prepare_for_view()
-#   - prepare_for_save() (only ever produced the "AES.1" format)
-# Do NOT remove any of the above until all stored secrets have been re-encrypted.
-# ---------------------------------------------------------------------------
 def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
@@ -1004,7 +974,7 @@ def encrypt(key, iv, plaintext):
 
 def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
+    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
@@ -1024,18 +994,14 @@ def _unpad_string(value):
 
 
 def dojo_crypto_encrypt(plaintext):
-    # New values are encrypted with the modern "AES.2" (AES-256-GCM) scheme.
-    # AESGCM provides authenticated encryption (no separate padding needed) and
-    # uses the same key derived by get_db_key(), so it stays interoperable with
-    # the legacy "AES.1" decryption path. See prepare_for_view() for reads.
     data = None
     if plaintext:
+        key = None
         key = get_db_key()
-        # GCM standard nonce length is 96 bits (12 bytes); never reuse a nonce
-        # with the same key, hence a fresh random nonce per encryption.
-        nonce = os.urandom(12)
-        ciphertext = AESGCM(key).encrypt(nonce, plaintext.encode("utf-8"), None)
-        data = "AES.2:" + binascii.b2a_hex(nonce).decode("utf-8") + ":" + binascii.b2a_hex(ciphertext).decode("utf-8")
+
+        iv = os.urandom(16)
+        data = prepare_for_save(
+            iv, encrypt(key, iv, plaintext.encode("utf-8")))
 
     return data
 
@@ -1060,10 +1026,7 @@ def get_db_key():
 
 
 def prepare_for_view(encrypted_value):
-    # Reads both the modern "AES.2" (AES-256-GCM) format written by
-    # dojo_crypto_encrypt() and the legacy "AES.1" (AES-256-OFB) format. Any
-    # unrecognized prefix falls through to the legacy path so that values
-    # already stored in the database continue to decrypt unchanged.
+
     key = None
     decrypted_value = ""
     if encrypted_value is not NotImplementedError and encrypted_value is not None:
@@ -1071,19 +1034,13 @@ def prepare_for_view(encrypted_value):
         encrypted_values = encrypted_value.split(":")
 
         if len(encrypted_values) > 1:
-            scheme = encrypted_values[0]
+            iv = binascii.a2b_hex(encrypted_values[1])
+            value = encrypted_values[2]
+
             try:
-                iv = binascii.a2b_hex(encrypted_values[1])
-                value = encrypted_values[2]
-                if scheme == "AES.2":
-                    decrypted_value = AESGCM(key).decrypt(iv, binascii.a2b_hex(value), None).decode("utf-8")
-                else:
-                    # Legacy "AES.1" (AES-256-OFB) read path. Removable once
-                    # migration 0270 is guaranteed to have run everywhere and no
-                    # "AES.1" values remain -- see the REMOVAL TRACKING note on
-                    # the encrypt()/decrypt() block above.
-                    decrypted_value = decrypt(key, iv, value).decode("utf-8")
-            except (UnicodeDecodeError, InvalidTag, ValueError, IndexError):
+                decrypted_value = decrypt(key, iv, value)
+                decrypted_value = decrypted_value.decode("utf-8")
+            except UnicodeDecodeError:
                 decrypted_value = ""
 
     return decrypted_value
