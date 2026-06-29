@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load i18n %}
 {% load display_tags %}
 {% load authorization_tags %}
@@ -73,7 +74,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if prod_filter.form|has_active_filters %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=prod_filter.form %}
                 </div>
                 {% if products %}

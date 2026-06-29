@@ -253,7 +253,7 @@ See the [Snyk API documentation](https://docs.snyk.io/snyk-api) for more info.
 
 ## Tenable
 
-The Tenable connector uses the **Tenable.io** REST API to fetch data.  Currently, only vulnerability scans are imported - Web App Scans cannot be imported with the Connector.
+The Tenable connector uses the **Tenable.io** REST API to fetch data.  Scans are pulled from the Tenable VM `/scans` endpoint.
 
 On\-premise Tenable Connectors are not available at this time.
 

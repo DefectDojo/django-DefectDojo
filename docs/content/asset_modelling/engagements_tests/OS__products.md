@@ -91,7 +91,7 @@ Product views contain a variety of tables and charts to interpret a Product’s 
 - **Notifications**
     - Toggles notifications on and off depending on specific events (e.g., an Engagement has been added or closed) 
 
-## Product Lifecycle 
+## Working with Products
 
 ### Create Products 
 

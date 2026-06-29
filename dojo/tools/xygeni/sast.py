@@ -35,8 +35,13 @@ def _build_finding(vuln, test):
         cwe=parse_cwe(cwes=vuln.get("cwes"), cwe=vuln.get("cwe"), tags=vuln.get("tags")),
         static_finding=True,
         dynamic_finding=False,
+        # ``uniqueHash`` is Xygeni's identity for a finding across scans. For SAST it is
+        # MD5(kind + detector + filepath + normalized code), with the line deliberately excluded:
+        # two findings on the same line with different code get different hashes (kept distinct),
+        # while the same code that shifts lines keeps its identity (no churn). ``detector`` is the
+        # rule that fired, used as the non-unique grouping id.
         unique_id_from_tool=vuln.get("uniqueHash"),
-        vuln_id_from_tool=vuln.get("issueId"),
+        vuln_id_from_tool=vuln.get("detector"),
     )
 
     _apply_code_flow_fields(finding, vuln.get("codeFlows") or [])
