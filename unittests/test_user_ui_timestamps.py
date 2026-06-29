@@ -49,7 +49,7 @@ class TestUserUITimestamps(TestCase):
         user.save()
 
         self.client.force_login(user)
-        with patch("dojo.user.views.now", return_value=fixed):
+        with patch("dojo.user.ui.views.now", return_value=fixed):
             resp = self.client.post(
                 reverse("change_password"),
                 data={
@@ -74,7 +74,7 @@ class TestUserUITimestamps(TestCase):
         token = default_token_generator.make_token(user)
         url = reverse("password_reset_confirm", kwargs={"uidb64": uidb64, "token": token})
 
-        with patch("dojo.user.views.now", return_value=fixed):
+        with patch("dojo.user.ui.views.now", return_value=fixed):
             # Django's PasswordResetConfirmView typically requires a GET to the tokenized URL,
             # which sets a session token and redirects to the "set-password" URL.
             resp_get = self.client.get(url)

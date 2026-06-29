@@ -18,7 +18,7 @@ from datetime import date, datetime
 from django.test import RequestFactory
 
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, User
-from dojo.product.views import finding_queries
+from dojo.product.ui.views import finding_queries
 
 from .dojo_test_case import DojoTestCase
 

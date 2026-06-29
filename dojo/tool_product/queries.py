@@ -3,8 +3,8 @@ try:
 except ImportError:
     def get_auth_filter(key): return None
 
-from dojo.models import Tool_Product_Settings
 from dojo.request_cache import cache_for_request
+from dojo.tool_product.models import Tool_Product_Settings
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering

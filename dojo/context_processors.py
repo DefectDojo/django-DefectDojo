@@ -22,6 +22,7 @@ def globalize_vars(request):
         "SHOW_PLG_LINK": True,
         # V3 Feature Flags
         "V3_FEATURE_LOCATIONS": settings.V3_FEATURE_LOCATIONS,
+        "SHOW_A11Y_REQUIRED_FIELDS_NOTICE": settings.SHOW_A11Y_REQUIRED_FIELDS_NOTICE,
     }
 
     additional_banners = []
