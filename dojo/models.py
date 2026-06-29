@@ -2725,6 +2725,31 @@ class Finding(BaseModel):
                 name="idx_finding_riskaccepted_date",
                 condition=Q(risk_accepted=True),
             ),
+            models.Index(
+                fields=["test", "date"],
+                name="idx_finding_testid_date",
+            ),
+            models.Index(
+                fields=["sla_expiration_date", "test"],
+                name="idx_finding_sla_open_cov",
+                condition=Q(is_mitigated=False),
+            ),
+            models.Index(
+                fields=["severity"],
+                name="idx_finding_open_active_sev",
+                condition=Q(active=True, is_mitigated=False),
+            ),
+            models.Index(
+                fields=["severity", "-numerical_severity"],
+                name="idx_finding_sev_open_unver",
+                condition=Q(active=True, verified=False),
+            ),
+            models.Index(
+                fields=["test", "sla_expiration_date", "date"],
+                name="idx_finding_sla_breach_cov",
+                include=["id"],
+                condition=Q(is_mitigated=False),
+            ),
         ]
 
     def __init__(self, *args, **kwargs):
