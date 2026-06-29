@@ -17,11 +17,11 @@ class Tool_Configuration(models.Model):
     extras = models.CharField(max_length=255, null=True, blank=True, help_text=_("Additional definitions that will be "
                                                                              "consumed by scanner"))
     username = models.CharField(max_length=200, null=True, blank=True)
-    password = models.CharField(max_length=600, null=True, blank=True)
+    password = models.CharField(max_length=900, null=True, blank=True)
     auth_title = models.CharField(max_length=200, null=True, blank=True,
                                   verbose_name=_("Title for SSH/API Key"))
-    ssh = models.CharField(max_length=6000, null=True, blank=True)
-    api_key = models.CharField(max_length=600, null=True, blank=True,
+    ssh = models.CharField(max_length=9000, null=True, blank=True)
+    api_key = models.CharField(max_length=900, null=True, blank=True,
                                verbose_name=_("API Key"))
 
     class Meta:
