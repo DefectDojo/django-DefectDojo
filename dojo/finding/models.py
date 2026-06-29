@@ -803,10 +803,11 @@ class Finding(BaseModel):
 
         def _get_saved_vulnerability_ids(finding) -> str:
             if finding.id is not None:
-                vulnerability_ids = Vulnerability_Id.objects.filter(finding=finding)
-                deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
-                # convert list of vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
+                # Use the reverse relation (vulnerability_id_set) rather than a fresh
+                # Vulnerability_Id.objects.filter(...) so prefetch_related("vulnerability_id_set")
+                # is honored — avoids an N+1 (COUNT + SELECT per finding) during dedupe/hashcode.
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.vulnerability_id_set.all()]
+                deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(len(vulnerability_id_str_list)))
                 # sort vulnerability_ids strings
                 return "".join(sorted(vulnerability_id_str_list))
             return ""

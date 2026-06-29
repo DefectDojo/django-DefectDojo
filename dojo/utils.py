@@ -1577,7 +1577,21 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
+def default_mass_model_writer(model_type, batch, fields):
+    """Default mass_model_updater ``writer``: persist a batch via Django's bulk_update."""
+    if not batch:
+        return
+    model_type.objects.bulk_update(batch, fields)
+
+
+def _flush_mass_update(model_type, batch, fields, writer):
+    """Persist a batch via the supplied writer, else the default writer."""
+    if not batch:
+        return
+    (writer or default_mass_model_writer)(model_type, batch, fields)
+
+
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix="", *, skip_unchanged=True, writer=None):
     """
     Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
@@ -1586,6 +1600,14 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     was processed and continue from there on the next page. This is fast because
     it results in an index seek instead of executing the whole query again and skipping
     the first X items.
+
+    When ``fields`` is given:
+      - skip_unchanged (default True): rows whose tracked ``fields`` were not changed by
+        ``function`` are not written (compared against the values loaded from the page
+        query; deferred fields are read from ``__dict__`` so no extra query is issued).
+      - writer (optional): a callable ``writer(model_type, batch, fields)`` used to persist
+        each batch instead of Django's ``bulk_update`` (e.g. a backend-specific fast path).
+        Defaults to ``bulk_update``.
     """
     # force ordering by id to make our paging work
     last_id = 0
@@ -1608,6 +1630,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     logger.debug("%s found %d models for mass update:", log_prefix, total_count)
 
     i = 0
+    written = 0
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.debug("pages to process: %d", total_pages)
@@ -1623,22 +1646,40 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
             i += 1
             last_id = model.id
 
+            # snapshot tracked fields before mutation (read from __dict__ to avoid
+            # triggering a deferred-field load); used to skip no-op writes
+            before = None
+            if fields and skip_unchanged:
+                before = [model.__dict__.get(f) for f in fields]
+
             function(model)
 
-            batch.append(model)
+            if fields and skip_unchanged and before is not None and all(
+                model.__dict__.get(f) == old for f, old in zip(fields, before, strict=True)
+            ):
+                # nothing changed for this row -> no write needed
+                pass
+            else:
+                batch.append(model)
 
-            if (i > 0 and i % page_size == 0):
-                if fields:
-                    model_type.objects.bulk_update(batch, fields)
+            if fields and len(batch) >= page_size:
+                _flush_mass_update(model_type, batch, fields, writer)
+                written += len(batch)
                 batch = []
+            elif not fields and len(batch) >= page_size:
+                # function has side effects only; keep memory bounded
+                batch = []
+
+            if i > 0 and i % page_size == 0:
                 logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
         logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
-    if fields:
-        model_type.objects.bulk_update(batch, fields)
+    if fields and batch:
+        _flush_mass_update(model_type, batch, fields, writer)
+        written += len(batch)
     batch = []
-    logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
+    logger.info("%s%s out of %s models processed (%s written) ...", log_prefix, i, total_count, written)
 
 
 def to_str_typed(obj):
