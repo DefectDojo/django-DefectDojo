@@ -104,7 +104,7 @@ The following settings are available within each Test view:
 - **View History**
     - Opens a history of edits made to the Test for tracking, reporting, and auditing purposes.
 
-## Test Lifecycle
+## Working with Tests
 
 ### Create Tests 
 

@@ -64,6 +64,8 @@ To enable Cross Tool Deduplication:
 
 Cross Tool Deduplication supports the Hash Code algorithm, which is suitable for most workflows, as different tools rarely share compatible unique identifiers. For SCA tools reporting the same dependencies, [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) is also available as a cross-tool option (off by default).
 
+Note that Cross Tool Deduplication is also scoped to individual Assets only.
+
 ## Reimport Deduplication
 
 **⚠️ Reimport processes can completely discard Findings before they are recorded.  This can lead to data loss if set incorrectly, so Reimport Deduplication settings should be adjusted with caution.**
@@ -86,14 +88,29 @@ The following algorithm options are available for Reimport Deduplication:
 
 Reimport can completely discard Findings before they are recorded, so Reimport Deduplication settings should be adjusted with caution.
 
+## Running Deduplication Retroactively on Existing Data
+
+A common situation when first turning on Deduplication Tuning is having a large backlog of Findings that were imported *before* the dedup configuration changed.  In DefectDojo Pro, you do not need to run a separate command to dedupe this historical data — **changing the Deduplication Settings for a tool automatically triggers a background re-hash of all existing Findings associated with that test type**.
+
+What this means in practice:
+
+- When you change the **Deduplication Algorithm** or the **Hash Code Fields** for a tool, DefectDojo queues a background job to recompute hashes for every Finding from that tool already in the instance.
+- The job runs asynchronously.  On large instances (millions of Findings), this can take some time to complete and you will not see immediate changes in the Findings table.
+- Newly-computed hashes apply to subsequent dedup decisions across the whole backlog.
+
+If you make several configuration changes in quick succession, each one queues its own re-hash job.  Allow the previous job to finish before evaluating results, especially when comparing Findings counts before and after the change.
+
+> **Note for self-hosted Pro:** The background job runs in the Celery worker pool.  If you have starved or backlogged workers, the re-hash can take longer than expected — check worker health if results don't appear within the timeframe you would expect for your instance size.
+
 ## Deduplication Best Practices
 
 For optimal results with Deduplication Tuning:
 
 - **Start with defaults**: The preconfigured deduplication settings work well for most scenarios
 - **Test changes carefully**: After adjusting deduplication settings, monitor a few imports to ensure proper behavior.
-- **Adjustments to deduplication will retroactively adjust the hash codes for findings already imported for the given test type that was changed**.  The recalculation is applied in the background to all findings in the database associated with the given test type that was changed. Please note that since the process is occurring in the background, immediate changes may not be observed.
+- **Plan retroactive re-hashes**: Changing dedup settings re-hashes every existing Finding from that tool in the background.  See [Running Deduplication Retroactively on Existing Data](#running-deduplication-retroactively-on-existing-data) above.
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
+- **Keep cross-tool sources in the same Asset**: Cross-Tool Deduplication is Asset-scoped.  Findings split across separate Assets will not dedupe even with matching hash fields.  See [Cross-Tool Deduplication is Scoped to a Single Asset](#cross-tool-deduplication-is-scoped-to-a-single-asset) above.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
 
 By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.

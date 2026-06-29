@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django_filters import (
     BooleanFilter,
     CharFilter,
@@ -16,10 +16,11 @@ from dojo.filters import (
     CharFieldInFilter,
     DateRangeFilter,
     DojoFilter,
+    ExistsRiskAcceptanceFilter,
     FindingSLAFilter,
+    MultivaluedOrderingFilter,
     NumberInFilter,
     PercentageRangeFilter,
-    ReportRiskAcceptanceFilter,
     custom_filter,
     custom_vulnerability_id_filter,
     labels,
@@ -81,7 +82,7 @@ class ApiFindingFilter(DojoFilter):
     # NumberInFilter
     cwe = NumberInFilter(field_name="cwe", lookup_expr="in")
     defect_review_requested_by = NumberInFilter(field_name="defect_review_requested_by", lookup_expr="in")
-    endpoints = NumberInFilter(field_name="endpoints", lookup_expr="in")
+    endpoints = NumberInFilter(method="filter_endpoints")
     epss_score = PercentageRangeFilter(
         field_name="epss_score",
         label="EPSS score range",
@@ -99,7 +100,7 @@ class ApiFindingFilter(DojoFilter):
             "is an upper bound. Leaving one empty will skip that bound (e.g., leaving the min bound "
             'input empty will filter only on the max bound -- filtering on "less than or equal"). Leading 0 required.'
         ))
-    found_by = NumberInFilter(field_name="found_by", lookup_expr="in")
+    found_by = NumberInFilter(method="filter_found_by")
     id = NumberInFilter(field_name="id", lookup_expr="in")
     last_reviewed_by = NumberInFilter(field_name="last_reviewed_by", lookup_expr="in")
     mitigated_by = NumberInFilter(field_name="mitigated_by", lookup_expr="in")
@@ -107,17 +108,17 @@ class ApiFindingFilter(DojoFilter):
     reporter = NumberInFilter(field_name="reporter", lookup_expr="in")
     scanner_confidence = NumberInFilter(field_name="scanner_confidence", lookup_expr="in")
     review_requested_by = NumberInFilter(field_name="review_requested_by", lookup_expr="in")
-    reviewers = NumberInFilter(field_name="reviewers", lookup_expr="in")
+    reviewers = NumberInFilter(method="filter_reviewers")
     sast_source_line = NumberInFilter(field_name="sast_source_line", lookup_expr="in")
     sonarqube_issue = NumberInFilter(field_name="sonarqube_issue", lookup_expr="in")
     test__test_type = NumberInFilter(field_name="test__test_type", lookup_expr="in", label="Test Type")
     test__engagement = NumberInFilter(field_name="test__engagement", lookup_expr="in")
     test__engagement__product = NumberInFilter(field_name="test__engagement__product", lookup_expr="in")
     test__engagement__product__prod_type = NumberInFilter(field_name="test__engagement__product__prod_type", lookup_expr="in")
-    finding_group = NumberInFilter(field_name="finding_group", lookup_expr="in")
+    finding_group = NumberInFilter(method="filter_finding_group")
 
-    # ReportRiskAcceptanceFilter
-    risk_acceptance = extend_schema_field(OpenApiTypes.NUMBER)(ReportRiskAcceptanceFilter())
+    # ExistsRiskAcceptanceFilter
+    risk_acceptance = extend_schema_field(OpenApiTypes.NUMBER)(ExistsRiskAcceptanceFilter())
 
     tag = CharFilter(field_name="tags__name", lookup_expr="icontains", help_text="Tag name contains")
     tags = CharFieldInFilter(
@@ -163,7 +164,9 @@ class ApiFindingFilter(DojoFilter):
     has_tags = BooleanFilter(field_name="tags", lookup_expr="isnull", exclude=True, label="Has tags")
     outside_of_sla = extend_schema_field(OpenApiTypes.NUMBER)(FindingSLAFilter())
 
-    o = OrderingFilter(
+    # found_by / reviewers are to-many; aggregate them on sort so ordering does not re-multiply rows
+    # now that the blanket .distinct() is gone (see MultivaluedOrderingFilter / get_queryset).
+    o = MultivaluedOrderingFilter(
         # tuple-mapping retains order
         fields=(
             ("active", "active"),
@@ -193,6 +196,7 @@ class ApiFindingFilter(DojoFilter):
             ("under_review", "under_review"),
             ("verified", "verified"),
         ),
+        multivalued_fields={"found_by", "reviewers"},
     )
 
     class Meta:
@@ -218,6 +222,28 @@ class ApiFindingFilter(DojoFilter):
         if value:
             return queryset.exclude(mitigation__isnull=True).exclude(mitigation__exact="")
         return queryset.filter(Q(mitigation__isnull=True) | Q(mitigation__exact=""))
+
+    @staticmethod
+    def _has(**lookup):
+        # endpoints / found_by / reviewers / finding_group are to-many relations: a plain JOIN-based
+        # lookup__in filter emits one row per related match and multiplies the finding row. Exists()
+        # keeps the outer row count correct, so FindingViewSet.get_queryset() can drop its blanket
+        # .distinct() without these filters producing duplicates.
+        return Exists(Finding.objects.filter(pk=OuterRef("pk"), **lookup))
+
+    def filter_endpoints(self, queryset, _name, value):
+        return queryset.filter(self._has(endpoints__id__in=value)) if value else queryset
+
+    def filter_found_by(self, queryset, _name, value):
+        return queryset.filter(self._has(found_by__in=value)) if value else queryset
+
+    def filter_reviewers(self, queryset, _name, value):
+        return queryset.filter(self._has(reviewers__in=value)) if value else queryset
+
+    def filter_finding_group(self, queryset, _name, value):
+        # finding_group is the reverse side of Finding_Group.findings (M2M, no related_name), so the
+        # reverse query name is finding_group; dedupe via Exists() like the other to-many filters.
+        return queryset.filter(self._has(finding_group__id__in=value)) if value else queryset
 
 
 class ApiTemplateFindingFilter(DojoFilter):
