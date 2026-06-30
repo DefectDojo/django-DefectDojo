@@ -172,6 +172,14 @@
         };
 
         $(document).ready(function() {
+            // Disable DataTables' client-side ordering on columns that sort server-side via dojo_sort
+            // (?o=), so a header click does ONE sort (server reload) instead of an instant client
+            // re-sort that "flashes" before the reload. (upstream issue #1811)
+            var serverSortDataKeys = new Set(['name', 'findings_count', 'creator', 'sla_deadline']);
+            var serverSortTargets = [];
+            for (var i = 0; i < datatables_columns.length; i++) {
+                if (serverSortDataKeys.has(datatables_columns[i]["data"])) { serverSortTargets.push(i); }
+            }
             $('#open_finding_groups').DataTable({
                 drawCallback: function(){
                     $('#open_finding_groups .has-popover').hover(
@@ -183,6 +191,10 @@
                 columns: datatables_columns,
                 order: [],
                 columnDefs: [
+                    {
+                        orderable: false,
+                        targets: serverSortTargets
+                    },
                     {
                         targets: 'severity-sort',
                         orderDataType: 'severity-asc'

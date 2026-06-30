@@ -7,7 +7,7 @@ import six
 import tagulous
 from django.apps import apps
 from django.conf import settings
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, Min, OuterRef, Q
 from django.utils.timezone import now, tzinfo
 from django.utils.translation import gettext_lazy as _
 from django_filters import (
@@ -882,6 +882,72 @@ class ReportRiskAcceptanceFilter(ChoiceFilter):
         except (ValueError, TypeError):
             value = None
         return self.options[value][1](self, qs, self.field_name)
+
+
+class ExistsRiskAcceptanceFilter(ReportRiskAcceptanceFilter):
+
+    """
+    ReportRiskAcceptanceFilter whose "Expired" (WAS_ACCEPTED) branch uses Exists() instead of a
+    row-multiplying join over the risk_acceptance m2m, so a finding queryset filtered by it does not
+    need a query-wide DISTINCT. The Yes/No branches already filter the scalar ``risk_accepted`` field
+    via ACCEPTED/NOT_ACCEPTED queries and never multiply, so they are left to the parent.
+    """
+
+    def was_accepted(self, qs, name):
+        return qs.filter(
+            Exists(Finding.objects.filter(WAS_ACCEPTED_FINDINGS_QUERY, pk=OuterRef("pk"))),
+        )
+
+    def filter(self, qs, value):
+        # ReportRiskAcceptanceFilter.options captured the *parent's* was_accepted function object at
+        # class-definition time, so overriding the method alone is bypassed -- options[3] still points
+        # at the parent's row-multiplying join. Dispatch the "Expired" (3) choice to our Exists()
+        # override explicitly; the other choices (Either/Yes/No) are non-multiplying, so defer to super.
+        try:
+            choice = int(value)
+        except (ValueError, TypeError):
+            choice = None
+        if choice == 3:
+            return self.was_accepted(qs, self.field_name)
+        return super().filter(qs, value)
+
+
+class MultivaluedOrderingFilter(OrderingFilter):
+
+    """
+    OrderingFilter that orders by an aggregate for to-many fields.
+
+    Ordering by a reverse-FK / M2M field (e.g. ``found_by``, ``reviewers``) joins the relation and
+    emits one row per related object, duplicating the base row. ``ApiFindingFilter`` no longer applies
+    a blanket ``.distinct()`` (the multiplying value filters were rewritten as Exists()), so to keep
+    ordering by those fields from re-introducing duplicates we order by ``Min(field)`` instead, which
+    collapses to a single representative value per base row (adds a GROUP BY on the pk). Only paid for
+    when the user actually sorts by one of ``multivalued_fields``.
+    """
+
+    def __init__(self, *args, **kwargs):
+        self.multivalued_fields = set(kwargs.pop("multivalued_fields", ()))
+        super().__init__(*args, **kwargs)
+
+    def filter(self, qs, value):
+        if not value:
+            return qs
+
+        ordering = []
+        for param in value:
+            ordering_param = self.get_ordering_value(param).strip()
+            raw_field = ordering_param.lstrip("-")
+            descending = ordering_param.startswith("-")
+
+            order_field = raw_field
+            if raw_field in self.multivalued_fields:
+                order_field = f"_ord_{raw_field.replace('__', '_')}"
+                if order_field not in qs.query.annotations:
+                    qs = qs.annotate(**{order_field: Min(raw_field)})
+
+            ordering.append(f"-{order_field}" if descending else order_field)
+
+        return qs.order_by(*ordering)
 
 
 class MetricsDateRangeFilter(ChoiceFilter):

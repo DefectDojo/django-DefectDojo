@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load display_tags %}
 {% block content %}
     {{ block.super }}
@@ -14,7 +15,7 @@
                             </div>
                         </h4>
                     </div>
-                    <div id="pghistory-filters" class="is-filters panel-body collapse {% if pghistory_filter.form.has_changed %}in{% endif %}">
+                    <div id="pghistory-filters" class="is-filters panel-body collapse {% if pghistory_filter.form|has_active_filters %}in{% endif %}">
                         {% include "dojo/filter_snippet.html" with form=pghistory_filter.form %}
                     </div>
                     <div class="clearfix">
@@ -135,7 +136,7 @@
                             </div>
                         </h4>
                     </div>
-                    <div id="the-filters" class="is-filters panel-body collapse {% if log_entry_filter.form.has_changed %}in{% endif %}">
+                    <div id="the-filters" class="is-filters panel-body collapse {% if log_entry_filter.form|has_active_filters %}in{% endif %}">
                         {% include "dojo/filter_snippet.html" with form=log_entry_filter.form %}
                     </div>
                     <div class="clearfix">

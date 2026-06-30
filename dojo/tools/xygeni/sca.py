@@ -52,8 +52,11 @@ def _build_finding(dep, vuln, test):
         component_version=component_version,
         static_finding=True,
         dynamic_finding=False,
+        # ``uniqueHash`` (``CVE#component:version``) is Xygeni's identity for the finding across
+        # scans. ``userId`` is the user-friendly vulnerability id (CVE / GHSA / OSV), used as the
+        # non-unique grouping id.
         unique_id_from_tool=vuln.get("uniqueHash"),
-        vuln_id_from_tool=vuln.get("issueId"),
+        vuln_id_from_tool=vuln.get("userId"),
     )
 
     if vuln.get("cve"):

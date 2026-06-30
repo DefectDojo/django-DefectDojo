@@ -8,6 +8,14 @@ aliases:
 
 Here are some common issues with the Jira integration, and ways to address them.
 
+## DefectDojo cannot reach Jira (or other outbound services) at all
+
+If DefectDojo's Jira integration fails with connection errors that look like "connection refused", "no route to host", or generic TLS handshake failures — and the credentials themselves are valid — your DefectDojo instance may be behind a firewall that requires outbound traffic to go through a forward HTTPS proxy.
+
+For on-prem Pro deployments, set the `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` environment variables on the deployment.  `dojo-compose-cli` propagates these to the `uwsgi`, `celeryworker`, and Connector containers automatically.  See [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/) for the full configuration walkthrough.
+
+> Note: setting `HTTPS_PROXY` configures **outbound** traffic from DefectDojo only.  It does not affect Jira's ability to deliver **inbound** webhooks to DefectDojo — see [Changes made to Jira issues are not updating Findings in DefectDojo](#changes-made-to-jira-issues-are-not-updating-findings-in-defectdojo) below for that case.
+
 ## Unable to setup Jira configuration in DefectDojo due to 404, 401 or 403 errors
 Jira Cloud:
 - Consult the Jira Cloud REST API documentation on authentication: https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/
