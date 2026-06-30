@@ -126,7 +126,7 @@ Here is an example of a **jira\_full** Issue:
 
 #### Component
 
-If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here.
+If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here. To assign more than one Component, enter a comma-separated list (for example, `Security, DevSecOps`); each value is sent to Jira as a separate component.
 
 #### Custom fields
 
@@ -358,6 +358,23 @@ The Jira Instance configuration has entries for two Jira Transitions which will 
 ![image](images/Creating_Issues_in_Jira_3.png)
 
 * When the **'Reopen' Transition** is performed on the Jira Issue, the associated Finding will be set as **Active** on DefectDojo, and will lose its **Mitigated** status.
+
+## Mapping Jira Resolutions to Risk Acceptance / False Positive
+
+The Jira Instance configuration includes two optional fields that let you map a Jira **Resolution** to a DefectDojo Finding status:
+
+* **Risk Accepted Finding Mapping Resolution** — when a Jira issue is closed with this Resolution, the linked Finding becomes Risk Accepted in DefectDojo.
+* **False Positive Finding Mapping Resolution** — when a Jira issue is closed with this Resolution, the linked Finding becomes False Positive in DefectDojo.
+
+### Status vs Resolution: A Common Point of Confusion
+
+These fields map the Jira **Resolution**, not the Jira **Status**.  Status and Resolution are two independent Jira concepts: Status describes where the issue is in the workflow (Open, In Progress, Done), while Resolution describes how it was resolved (Fixed, Won't Do, Duplicate, False Positive, etc.).
+
+### Prerequisite: A "Set issue resolution" post-function on the Jira workflow transition
+
+Jira's workflow engine does not populate the Resolution field automatically.  Each transition that should close an issue with a specific Resolution needs a **Set issue resolution** post-function configured on the transition itself.  Without that post-function, the issue moves to the new Status but the Resolution stays blank, and DefectDojo's mapping has nothing to match against.
+
+A Jira admin can add this post-function from **Project Settings → Workflows → (edit workflow) → (select the closing transition) → Post Functions → Add post function → Set issue resolution**.
 
 # Custom Fields in Jira
 

@@ -1,6 +1,6 @@
 from django.utils.timezone import now
 
-from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
+from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.models import (
     Dojo_User,
     Engagement,

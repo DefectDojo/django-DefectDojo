@@ -13,8 +13,8 @@ from dojo.authorization.models import (
     Product_Member,
     Role,
 )
-from dojo.finding import views
 from dojo.finding.helper import save_endpoints_template, save_vulnerability_ids_template
+from dojo.finding.ui import views
 from dojo.models import (
     Dojo_User,
     Engagement,
@@ -28,7 +28,7 @@ from dojo.models import (
     Test_Type,
     Vulnerability_Id,
 )
-from dojo.test import views as test_views
+from dojo.test.ui import views as test_views
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 

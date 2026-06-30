@@ -632,6 +632,9 @@ def get_fingerprints_hashes(values):
             key_method = key
             key_method_version = 0
         value = values[key]
+        # some tools (e.g. BlackDuck) wrap the hash as {"value": "<hash>"} instead of a plain string
+        if isinstance(value, dict):
+            value = value.get("value", "")
         if fingerprints.get(key_method):
             if fingerprints[key_method]["version"] < key_method_version:
                 fingerprints[key_method] = {

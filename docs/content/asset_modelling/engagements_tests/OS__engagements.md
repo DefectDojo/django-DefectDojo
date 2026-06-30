@@ -66,7 +66,7 @@ Alternatively, Engagements within a particular Product can be accessed from the 
 
 Engagements sit below Products and above Tests in the object hierarchy. As such, access to a Product automatically grants access to all Engagements within that Product. Engagements do not have independent access control lists.
 
-## Engagement Lifecycle 
+## Working with Engagements
 
 ### Create Engagements 
 

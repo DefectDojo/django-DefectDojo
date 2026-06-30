@@ -23,8 +23,18 @@ import cvss
 import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+# OFB powers the legacy "AES.1" decryption path only. It has been moved to the
+# "decrepit" module and is being removed from primitives.ciphers.modes; import
+# it from its new home when available, falling back for older cryptography.
+try:
+    from cryptography.hazmat.decrepit.ciphers.modes import OFB
+except ImportError:  # cryptography that predates the decrepit modes module
+    from cryptography.hazmat.primitives.ciphers.modes import OFB
 from cvss import CVSS2, CVSS3, CVSS4
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
@@ -960,11 +970,31 @@ def reopen_external_issue(finding_id, note, external_issue_provider, **kwargs):
 from dojo.notifications.helper import process_tag_notifications  # noqa: E402, F401  -- backward compat
 
 
+# ---------------------------------------------------------------------------
+# Legacy "AES.1" credential encryption: AES-256-OFB with null-byte padding.
+# Retained for backward-compatible decryption of values already stored in the
+# database. New values are written with the "AES.2" (AES-256-GCM) scheme below
+# via dojo_crypto_encrypt(); existing "AES.1" values upgrade lazily the next
+# time they are saved.
+#
+# REMOVAL TRACKING (legacy OFB path):
+# Migration 0272_reencrypt_tool_config_credentials_aes_gcm eagerly re-encrypts
+# every stored Tool_Configuration credential to "AES.2", so after it has run in
+# every environment there should be no "AES.1" values left in the database.
+# Once that migration is squashed/baked into the release floor (i.e. no upgrade
+# path can skip it) and any external integrations have been confirmed not to
+# persist their own "AES.1" values, the entire legacy path can be deleted:
+#   - encrypt() / decrypt() / _pad_string() / _unpad_string() below
+#   - the OFB import at the top of this module
+#   - the "AES.1" else-branch in prepare_for_view()
+#   - prepare_for_save() (only ever produced the "AES.1" format)
+# Do NOT remove any of the above until all stored secrets have been re-encrypted.
+# ---------------------------------------------------------------------------
 def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
@@ -974,7 +1004,7 @@ def encrypt(key, iv, plaintext):
 
 def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
+    cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
@@ -994,14 +1024,18 @@ def _unpad_string(value):
 
 
 def dojo_crypto_encrypt(plaintext):
+    # New values are encrypted with the modern "AES.2" (AES-256-GCM) scheme.
+    # AESGCM provides authenticated encryption (no separate padding needed) and
+    # uses the same key derived by get_db_key(), so it stays interoperable with
+    # the legacy "AES.1" decryption path. See prepare_for_view() for reads.
     data = None
     if plaintext:
-        key = None
         key = get_db_key()
-
-        iv = os.urandom(16)
-        data = prepare_for_save(
-            iv, encrypt(key, iv, plaintext.encode("utf-8")))
+        # GCM standard nonce length is 96 bits (12 bytes); never reuse a nonce
+        # with the same key, hence a fresh random nonce per encryption.
+        nonce = os.urandom(12)
+        ciphertext = AESGCM(key).encrypt(nonce, plaintext.encode("utf-8"), None)
+        data = "AES.2:" + binascii.b2a_hex(nonce).decode("utf-8") + ":" + binascii.b2a_hex(ciphertext).decode("utf-8")
 
     return data
 
@@ -1026,7 +1060,10 @@ def get_db_key():
 
 
 def prepare_for_view(encrypted_value):
-
+    # Reads both the modern "AES.2" (AES-256-GCM) format written by
+    # dojo_crypto_encrypt() and the legacy "AES.1" (AES-256-OFB) format. Any
+    # unrecognized prefix falls through to the legacy path so that values
+    # already stored in the database continue to decrypt unchanged.
     key = None
     decrypted_value = ""
     if encrypted_value is not NotImplementedError and encrypted_value is not None:
@@ -1034,13 +1071,19 @@ def prepare_for_view(encrypted_value):
         encrypted_values = encrypted_value.split(":")
 
         if len(encrypted_values) > 1:
-            iv = binascii.a2b_hex(encrypted_values[1])
-            value = encrypted_values[2]
-
+            scheme = encrypted_values[0]
             try:
-                decrypted_value = decrypt(key, iv, value)
-                decrypted_value = decrypted_value.decode("utf-8")
-            except UnicodeDecodeError:
+                iv = binascii.a2b_hex(encrypted_values[1])
+                value = encrypted_values[2]
+                if scheme == "AES.2":
+                    decrypted_value = AESGCM(key).decrypt(iv, binascii.a2b_hex(value), None).decode("utf-8")
+                else:
+                    # Legacy "AES.1" (AES-256-OFB) read path. Removable once
+                    # migration 0272 is guaranteed to have run everywhere and no
+                    # "AES.1" values remain -- see the REMOVAL TRACKING note on
+                    # the encrypt()/decrypt() block above.
+                    decrypted_value = decrypt(key, iv, value).decode("utf-8")
+            except (UnicodeDecodeError, InvalidTag, ValueError, IndexError):
                 decrypted_value = ""
 
     return decrypted_value
@@ -1577,7 +1620,21 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
+def default_mass_model_writer(model_type, batch, fields):
+    """Default mass_model_updater ``writer``: persist a batch via Django's bulk_update."""
+    if not batch:
+        return
+    model_type.objects.bulk_update(batch, fields)
+
+
+def _flush_mass_update(model_type, batch, fields, writer):
+    """Persist a batch via the supplied writer, else the default writer."""
+    if not batch:
+        return
+    (writer or default_mass_model_writer)(model_type, batch, fields)
+
+
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix="", *, skip_unchanged=True, writer=None):
     """
     Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
@@ -1586,6 +1643,14 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     was processed and continue from there on the next page. This is fast because
     it results in an index seek instead of executing the whole query again and skipping
     the first X items.
+
+    When ``fields`` is given:
+      - skip_unchanged (default True): rows whose tracked ``fields`` were not changed by
+        ``function`` are not written (compared against the values loaded from the page
+        query; deferred fields are read from ``__dict__`` so no extra query is issued).
+      - writer (optional): a callable ``writer(model_type, batch, fields)`` used to persist
+        each batch instead of Django's ``bulk_update`` (e.g. a backend-specific fast path).
+        Defaults to ``bulk_update``.
     """
     # force ordering by id to make our paging work
     last_id = 0
@@ -1608,6 +1673,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     logger.debug("%s found %d models for mass update:", log_prefix, total_count)
 
     i = 0
+    written = 0
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.debug("pages to process: %d", total_pages)
@@ -1623,22 +1689,40 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
             i += 1
             last_id = model.id
 
+            # snapshot tracked fields before mutation (read from __dict__ to avoid
+            # triggering a deferred-field load); used to skip no-op writes
+            before = None
+            if fields and skip_unchanged:
+                before = [model.__dict__.get(f) for f in fields]
+
             function(model)
 
-            batch.append(model)
+            if fields and skip_unchanged and before is not None and all(
+                model.__dict__.get(f) == old for f, old in zip(fields, before, strict=True)
+            ):
+                # nothing changed for this row -> no write needed
+                pass
+            else:
+                batch.append(model)
 
-            if (i > 0 and i % page_size == 0):
-                if fields:
-                    model_type.objects.bulk_update(batch, fields)
+            if fields and len(batch) >= page_size:
+                _flush_mass_update(model_type, batch, fields, writer)
+                written += len(batch)
                 batch = []
+            elif not fields and len(batch) >= page_size:
+                # function has side effects only; keep memory bounded
+                batch = []
+
+            if i > 0 and i % page_size == 0:
                 logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
         logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
-    if fields:
-        model_type.objects.bulk_update(batch, fields)
+    if fields and batch:
+        _flush_mass_update(model_type, batch, fields, writer)
+        written += len(batch)
     batch = []
-    logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
+    logger.info("%s%s out of %s models processed (%s written) ...", log_prefix, i, total_count, written)
 
 
 def to_str_typed(obj):

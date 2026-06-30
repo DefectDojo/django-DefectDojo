@@ -1,0 +1,292 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "Example-Application",
+          "rules": [
+            {
+              "id": "BDSA-2020-1001 (CVE-2020-11022)",
+              "name": "BDSA-2020-1001 (CVE-2020-11022)",
+              "shortDescription": {
+                "text": "BDSA-2020-1001 (CVE-2020-11022)"
+              },
+              "fullDescription": {
+                "text": "jQuery is vulnerable to XSS via the HTML passed to certain jQuery methods."
+              },
+              "helpUri": "https://nvd.nist.gov/vuln/detail/CVE-2020-11022",
+              "properties": {
+                "tags": ["BDSA", "CWE-79", "SBOM"],
+                "cwe": ["CWE-79"]
+              }
+            },
+            {
+              "id": "BDSA-2021-1002 (CVE-2021-23337)",
+              "name": "BDSA-2021-1002 (CVE-2021-23337)",
+              "shortDescription": {
+                "text": "BDSA-2021-1002 (CVE-2021-23337)"
+              },
+              "fullDescription": {
+                "text": "Lodash is vulnerable to command injection via the template function."
+              },
+              "helpUri": "https://nvd.nist.gov/vuln/detail/CVE-2021-23337",
+              "properties": {
+                "tags": ["BDSA", "CWE-78", "SBOM"],
+                "cwe": ["CWE-78"]
+              }
+            },
+            {
+              "id": "BDSA-2019-1003 (CVE-2019-10744)",
+              "name": "BDSA-2019-1003 (CVE-2019-10744)",
+              "shortDescription": {
+                "text": "BDSA-2019-1003 (CVE-2019-10744)"
+              },
+              "fullDescription": {
+                "text": "Lodash is vulnerable to prototype pollution via the defaultsDeep function."
+              },
+              "helpUri": "https://nvd.nist.gov/vuln/detail/CVE-2019-10744",
+              "properties": {
+                "tags": ["BDSA", "CWE-1321", "SBOM"],
+                "cwe": ["CWE-1321"]
+              }
+            },
+            {
+              "id": "BDSA-2022-1004",
+              "name": "BDSA-2022-1004",
+              "shortDescription": {
+                "text": "BDSA-2022-1004"
+              },
+              "fullDescription": {
+                "text": "Example-lib is affected by a denial of service vulnerability."
+              },
+              "helpUri": "https://nvd.nist.gov/vuln/search",
+              "properties": {
+                "tags": ["BDSA", "CWE-400", "SBOM"],
+                "cwe": ["CWE-400"]
+              }
+            },
+            {
+              "id": "BDSA-2023-1005 (CVE-2023-26115)",
+              "name": "BDSA-2023-1005 (CVE-2023-26115)",
+              "shortDescription": {
+                "text": "BDSA-2023-1005 (CVE-2023-26115)"
+              },
+              "fullDescription": {
+                "text": "word-wrap is vulnerable to ReDoS via the wrap function."
+              },
+              "helpUri": "https://nvd.nist.gov/vuln/detail/CVE-2023-26115",
+              "properties": {
+                "tags": ["BDSA", "CWE-1333", "SBOM"],
+                "cwe": ["CWE-1333"]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "BDSA-2020-1001 (CVE-2020-11022)",
+          "level": "warning",
+          "message": {
+            "text": "BDSA-2020-1001 (CVE-2020-11022) in example-frontend-lib 1.0.0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "npm/example-frontend-lib@1.0.0"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "Upgrade/patch dependency: example-frontend-lib 1.0.0."
+              }
+            }
+          ],
+          "properties": {
+            "securityRisk": "MEDIUM",
+            "component": "example-frontend-lib",
+            "componentVersion": "1.0.0",
+            "componentOrigin": "npm",
+            "matchType": "exact",
+            "exploitAvailable": false,
+            "solutionAvailable": true,
+            "workaroundAvailable": false,
+            "remediationStatus": "New",
+            "reachable": "unknown"
+          },
+          "fingerprints": {
+            "csvRowSha256": {
+              "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+            }
+          }
+        },
+        {
+          "ruleId": "BDSA-2021-1002 (CVE-2021-23337)",
+          "level": "error",
+          "message": {
+            "text": "BDSA-2021-1002 (CVE-2021-23337) in example-util-lib 4.17.20"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "npm/example-util-lib@4.17.20"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "Upgrade/patch dependency: example-util-lib 4.17.20."
+              }
+            }
+          ],
+          "properties": {
+            "securityRisk": "HIGH",
+            "component": "example-util-lib",
+            "componentVersion": "4.17.20",
+            "componentOrigin": "npm",
+            "matchType": "exact",
+            "exploitAvailable": true,
+            "solutionAvailable": true,
+            "workaroundAvailable": false,
+            "remediationStatus": "New",
+            "reachable": "unknown"
+          },
+          "fingerprints": {
+            "csvRowSha256": {
+              "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+            }
+          }
+        },
+        {
+          "ruleId": "BDSA-2019-1003 (CVE-2019-10744)",
+          "level": "error",
+          "message": {
+            "text": "BDSA-2019-1003 (CVE-2019-10744) in example-util-lib 4.17.20"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "npm/example-util-lib@4.17.20"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "Upgrade/patch dependency: example-util-lib 4.17.20."
+              }
+            }
+          ],
+          "properties": {
+            "securityRisk": "HIGH",
+            "component": "example-util-lib",
+            "componentVersion": "4.17.20",
+            "componentOrigin": "npm",
+            "matchType": "exact",
+            "exploitAvailable": false,
+            "solutionAvailable": true,
+            "workaroundAvailable": false,
+            "remediationStatus": "New",
+            "reachable": "unknown"
+          },
+          "fingerprints": {
+            "csvRowSha256": {
+              "value": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+            }
+          }
+        },
+        {
+          "ruleId": "BDSA-2022-1004",
+          "level": "note",
+          "message": {
+            "text": "BDSA-2022-1004 in example-common-lib 2.3.1"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "maven/example-common-lib@2.3.1"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "Upgrade/patch dependency: example-common-lib 2.3.1."
+              }
+            }
+          ],
+          "properties": {
+            "securityRisk": "LOW",
+            "component": "example-common-lib",
+            "componentVersion": "2.3.1",
+            "componentOrigin": "maven",
+            "matchType": "exact",
+            "exploitAvailable": false,
+            "solutionAvailable": false,
+            "workaroundAvailable": true,
+            "remediationStatus": "Ignored",
+            "reachable": "unknown"
+          },
+          "fingerprints": {
+            "csvRowSha256": {
+              "value": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+            }
+          }
+        },
+        {
+          "ruleId": "BDSA-2023-1005 (CVE-2023-26115)",
+          "level": "error",
+          "message": {
+            "text": "BDSA-2023-1005 (CVE-2023-26115) in example-text-lib 1.2.5"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "npm/example-text-lib@1.2.5"
+                }
+              }
+            }
+          ],
+          "fixes": [
+            {
+              "description": {
+                "text": "Upgrade/patch dependency: example-text-lib 1.2.5."
+              }
+            }
+          ],
+          "properties": {
+            "securityRisk": "CRITICAL",
+            "component": "example-text-lib",
+            "componentVersion": "1.2.5",
+            "componentOrigin": "npm",
+            "matchType": "exact",
+            "exploitAvailable": true,
+            "solutionAvailable": true,
+            "workaroundAvailable": false,
+            "remediationStatus": "New",
+            "reachable": "unknown"
+          },
+          "fingerprints": {
+            "csvRowSha256": {
+              "value": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

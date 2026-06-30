@@ -13,12 +13,12 @@ from django.views import View
 from django.views.decorators.http import require_POST
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.filters import (
+from dojo.finding.queries import prefetch_for_findings
+from dojo.finding.ui.filters import (
     FindingFilter,
     FindingFilterWithoutObjectLookups,
     FindingGroupsFilter,
 )
-from dojo.finding.queries import prefetch_for_findings
 from dojo.forms import DeleteFindingGroupForm, EditFindingGroupForm, FindingBulkUpdateForm
 from dojo.jira import services as jira_services
 from dojo.models import Engagement, Finding, Finding_Group, GITHUB_PKey, Product
