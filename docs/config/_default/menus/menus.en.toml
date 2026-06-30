@@ -20,7 +20,7 @@
 
 [[main]]
   name = "Metrics & Reports"
-  url = "/metrics_reports/dashboards/"
+  url = "/metrics_reports/dashboards/introduction_dashboard/"
   weight = 14
 
 [[main]]
