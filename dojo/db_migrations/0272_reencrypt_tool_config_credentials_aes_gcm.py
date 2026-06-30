@@ -85,7 +85,7 @@ def noop_reverse(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("dojo", "0269_normalize_blank_finding_components"),
+        ("dojo", "0271_finding_perf_indexes"),
     ]
 
     operations = [

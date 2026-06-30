@@ -978,7 +978,7 @@ from dojo.notifications.helper import process_tag_notifications  # noqa: E402, F
 # time they are saved.
 #
 # REMOVAL TRACKING (legacy OFB path):
-# Migration 0270_reencrypt_tool_config_credentials_aes_gcm eagerly re-encrypts
+# Migration 0272_reencrypt_tool_config_credentials_aes_gcm eagerly re-encrypts
 # every stored Tool_Configuration credential to "AES.2", so after it has run in
 # every environment there should be no "AES.1" values left in the database.
 # Once that migration is squashed/baked into the release floor (i.e. no upgrade
@@ -1079,7 +1079,7 @@ def prepare_for_view(encrypted_value):
                     decrypted_value = AESGCM(key).decrypt(iv, binascii.a2b_hex(value), None).decode("utf-8")
                 else:
                     # Legacy "AES.1" (AES-256-OFB) read path. Removable once
-                    # migration 0270 is guaranteed to have run everywhere and no
+                    # migration 0272 is guaranteed to have run everywhere and no
                     # "AES.1" values remain -- see the REMOVAL TRACKING note on
                     # the encrypt()/decrypt() block above.
                     decrypted_value = decrypt(key, iv, value).decode("utf-8")
