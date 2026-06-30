@@ -559,8 +559,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         Deduplication performance in the 'async_wait' execution mode: post-processing is
         dispatched to a background worker, then the request joins on the result before
         responding. The dedup queries run in the worker (a separate connection), NOT in
-        the web request, so the only web-side cost over the plain async path is the single
-        post-dedup notification refresh SELECT (+1).
+        the web request, so the only web-side cost over the plain async path is +2: the
+        post-dedup notification refresh SELECT, plus one result-backend write from the
+        per-dispatch ignore_result=False that lets the request join via AsyncResult.get().
 
         We do not use CELERY_TASK_ALWAYS_EAGER here — that would run the dispatched task
         inline on the request's connection and wrongly count the worker's dedup queries.
@@ -579,9 +580,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         # returns instantly without executing dedup on the request's DB connection.
         with patch("celery.result.AsyncResult.get", return_value=None):
             self._deduplication_performance(
-                expected_num_queries1=93,
+                expected_num_queries1=94,
                 expected_num_async_tasks1=2,
-                expected_num_queries2=73,
+                expected_num_queries2=74,
                 expected_num_async_tasks2=2,
                 dedup_mode="async_wait",
                 check_duplicates=False,
