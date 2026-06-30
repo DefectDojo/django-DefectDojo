@@ -130,6 +130,48 @@ class TestMassModelUpdater(DojoTestCase):
             msg="skip_unchanged=False must still write unchanged rows",
         )
 
+    def test_writes_deferred_field_recomputed_to_none(self):
+        # Regression (dojo-pro risk-mode SLA recalc): when the tracked field is
+        # deferred (queryset used .only() and omitted it), the before-snapshot must
+        # not be read as None from __dict__ and mistaken for "unchanged". Recomputing
+        # a populated field to None must still persist.
+        ids = self._finding_ids()
+        # Seed a non-None value via a normally-loaded queryset.
+        mass_model_updater(
+            Finding, Finding.objects.filter(id__in=ids),
+            lambda f: setattr(f, "hash_code", f"seed-{f.id}"), fields=["hash_code"], order="asc",
+        )
+        # Reload deferring hash_code, then recompute it to None.
+        deferred_qs = Finding.objects.filter(id__in=ids).only("id")
+        with CaptureQueriesContext(connection) as ctx:
+            mass_model_updater(
+                Finding, deferred_qs,
+                lambda f: setattr(f, "hash_code", None), fields=["hash_code"], order="asc",
+            )
+        self.assertGreater(
+            len(_updates(ctx.captured_queries)), 0,
+            msg="deferred tracked field must not be treated as unchanged",
+        )
+        for fid in ids:
+            self.assertIsNone(
+                Finding.objects.get(id=fid).hash_code,
+                msg=f"finding {fid}: deferred field recomputed to None was not persisted",
+            )
+
+    def test_writes_deferred_field_recomputed_to_value(self):
+        # Same guard, non-None target: a deferred field updated to a value persists.
+        ids = self._finding_ids()
+        deferred_qs = Finding.objects.filter(id__in=ids).only("id")
+        mass_model_updater(
+            Finding, deferred_qs,
+            lambda f: setattr(f, "hash_code", f"deferred-{f.id}"), fields=["hash_code"], order="asc",
+        )
+        for fid in ids:
+            self.assertEqual(
+                Finding.objects.get(id=fid).hash_code, f"deferred-{fid}",
+                msg=f"finding {fid}: deferred field update not persisted",
+            )
+
     def test_hashcode_values_writer_uses_values_sql_on_postgres(self):
         if connection.vendor != "postgresql":
             self.skipTest("VALUES fast path is postgres-only")

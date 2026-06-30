@@ -1647,7 +1647,11 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     When ``fields`` is given:
       - skip_unchanged (default True): rows whose tracked ``fields`` were not changed by
         ``function`` are not written (compared against the values loaded from the page
-        query; deferred fields are read from ``__dict__`` so no extra query is issued).
+        query, read from ``__dict__`` so no extra query is issued). If any tracked field
+        is deferred (e.g. the queryset used ``.only()``/``.defer()`` and omitted it) the
+        no-op check is skipped for that row and it is always written, because ``__dict__``
+        has no loaded value to compare against and would otherwise read as ``None`` --
+        silently dropping a real change to ``None``.
       - writer (optional): a callable ``writer(model_type, batch, fields)`` used to persist
         each batch instead of Django's ``bulk_update`` (e.g. a backend-specific fast path).
         Defaults to ``bulk_update``.
@@ -1690,9 +1694,12 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
             last_id = model.id
 
             # snapshot tracked fields before mutation (read from __dict__ to avoid
-            # triggering a deferred-field load); used to skip no-op writes
+            # triggering a deferred-field load); used to skip no-op writes.
+            # If any tracked field is deferred it is absent from __dict__ and would
+            # read as None -- making a real change to None look unchanged and dropping
+            # the write -- so leave before=None to force a write for that row.
             before = None
-            if fields and skip_unchanged:
+            if fields and skip_unchanged and not model.get_deferred_fields().intersection(fields):
                 before = [model.__dict__.get(f) for f in fields]
 
             function(model)
