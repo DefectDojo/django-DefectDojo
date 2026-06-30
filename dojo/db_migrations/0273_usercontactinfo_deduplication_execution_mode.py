@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0269_normalize_blank_finding_components'),
+        ('dojo', '0272_reencrypt_tool_config_credentials_aes_gcm'),
     ]
 
     operations = [
