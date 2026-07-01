@@ -8,7 +8,7 @@ from tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.vulnerability_id import parse_cwes
+from dojo.finding.vulnerability_id import cwe_number, parse_cwes
 from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.utils import validate_locations_to_add
@@ -57,6 +57,14 @@ class CweFormMixin:
 
     Mirrors how the 'vulnerability_ids' textarea maps to cve + Vulnerability_Id rows.
     """
+
+    def clean_cwes(self):
+        value = self.cleaned_data.get("cwes", "")
+        invalid = [token for token in value.replace(",", "\n").split() if cwe_number(token) is None]
+        if invalid:
+            msg = f"Invalid CWE(s): {', '.join(invalid)}. Enter numbers like 89 or CWE-89, one per line."
+            raise forms.ValidationError(msg)
+        return value
 
     def save(self, commit=True):  # noqa: FBT002
         cwes = parse_cwes(self.cleaned_data.get("cwes"))
