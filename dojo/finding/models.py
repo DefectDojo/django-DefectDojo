@@ -684,6 +684,11 @@ class Finding(BaseModel):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
+        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util)
+        for vulnerability_id in self.vulnerability_id_set.all():
+            Vulnerability_Id.objects.create(finding=copy, vulnerability_id=vulnerability_id.vulnerability_id)
+        for finding_cwe in self.finding_cwe_set.all():
+            Finding_CWE.objects.create(finding=copy, cwe=finding_cwe.cwe)
 
         return copy
 
