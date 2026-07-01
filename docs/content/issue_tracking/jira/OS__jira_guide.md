@@ -333,6 +333,25 @@ The Jira Configuration on DefectDojo has entries for two Jira Transitions which 
 
 * When the **'Reopen' Transition** is performed on the Jira Issue, the associated Finding will be set as **Active** on DefectDojo, and will lose its **Mitigated** status.
 
+### Mapping Jira Resolutions to Risk Acceptance / False Positive
+
+In addition to Close / Reopen transitions, the Jira Configuration includes optional fields that let you map a Jira **Resolution** to a DefectDojo Finding status.  These are set during the **Add Jira Configuration (Express)** workflow (steps 6 and 7), and can be edited later on the Jira Configuration:
+
+* **Risk Accepted Finding Mapping Resolution** — when a Jira issue is closed with this Resolution, the linked Finding becomes Risk Accepted in DefectDojo.
+* **False Positive Finding Mapping Resolution** — when a Jira issue is closed with this Resolution, the linked Finding becomes False Positive in DefectDojo.
+
+#### Status vs Resolution: A Common Point of Confusion
+
+These fields map the Jira **Resolution**, not the Jira **Status**.  Status and Resolution are two independent Jira concepts: Status describes where the issue is in the workflow (Open, In Progress, Done), while Resolution describes how it was resolved (Fixed, Won't Do, Duplicate, False Positive, etc.).
+
+A common point of confusion is that a Jira workflow transition can change the Status to "Done" *without* setting any Resolution.  When that happens, DefectDojo's resolution mapping never fires — instead the Finding gets marked **Mitigated** by the standard **'Close' Transition** behavior described above, not Risk Accepted or False Positive.
+
+#### Prerequisite: A "Set issue resolution" post-function on the Jira workflow transition
+
+Jira's workflow engine does not populate the Resolution field automatically.  Each transition that should close an issue with a specific Resolution needs a **Set issue resolution** post-function configured on the transition itself.  Without that post-function, the issue moves to the new Status but the Resolution stays blank, and DefectDojo's mapping has nothing to match against.
+
+A Jira admin can add this post-function from **Project Settings → Workflows → (edit workflow) → (select the closing transition) → Post Functions → Add post function → Set issue resolution**.
+
 ## Push Finding Groups as Jira Issues
 
 If you have Finding Groups enabled, you can push a Group of Findings to Jira as a single Issue rather than separate Issues for each Finding.

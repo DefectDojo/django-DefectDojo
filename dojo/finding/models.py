@@ -476,6 +476,50 @@ class Finding(BaseModel):
             models.Index(fields=["known_exploited"]),
             models.Index(fields=["ransomware_used"]),
             models.Index(fields=["kev_date"]),
+            models.Index(
+                fields=["severity", "-numerical_severity"],
+                name="idx_finding_sev_active",
+                condition=models.Q(active=True),
+            ),
+            models.Index(
+                fields=["-date"],
+                name="idx_finding_riskaccepted_date",
+                condition=models.Q(risk_accepted=True),
+            ),
+            models.Index(
+                fields=["test", "date"],
+                name="idx_finding_testid_date",
+            ),
+            models.Index(
+                fields=["sla_expiration_date", "test"],
+                name="idx_finding_sla_open_cov",
+                condition=models.Q(is_mitigated=False),
+            ),
+            models.Index(
+                fields=["severity"],
+                name="idx_finding_open_active_sev",
+                condition=models.Q(active=True, is_mitigated=False),
+            ),
+            models.Index(
+                fields=["severity", "-numerical_severity"],
+                name="idx_finding_sev_open_unver",
+                condition=models.Q(active=True, verified=False),
+            ),
+            models.Index(
+                fields=["test", "sla_expiration_date", "date"],
+                name="idx_finding_sla_breach_cov",
+                include=["id"],
+                condition=models.Q(is_mitigated=False),
+            ),
+            # Full (non-partial) index so the global finding list ordered by
+            # sla_expiration_date can be served by an index walk + LIMIT instead
+            # of sorting the entire authorized finding set. The partial
+            # idx_finding_sla_open_cov can't serve it (query has no is_mitigated
+            # filter).
+            models.Index(
+                fields=["sla_expiration_date"],
+                name="idx_finding_sla_exp",
+            ),
         ]
 
     def __init__(self, *args, **kwargs):
@@ -768,10 +812,11 @@ class Finding(BaseModel):
 
         def _get_saved_vulnerability_ids(finding) -> str:
             if finding.id is not None:
-                vulnerability_ids = Vulnerability_Id.objects.filter(finding=finding)
-                deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(vulnerability_ids.count()))
-                # convert list of vulnerability_ids to the list of their canonical representation
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in vulnerability_ids.all()]
+                # Use the reverse relation (vulnerability_id_set) rather than a fresh
+                # Vulnerability_Id.objects.filter(...) so prefetch_related("vulnerability_id_set")
+                # is honored — avoids an N+1 (COUNT + SELECT per finding) during dedupe/hashcode.
+                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.vulnerability_id_set.all()]
+                deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(len(vulnerability_id_str_list)))
                 # sort vulnerability_ids strings
                 return "".join(sorted(vulnerability_id_str_list))
             return ""

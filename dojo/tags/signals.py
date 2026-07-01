@@ -3,6 +3,7 @@ import logging
 
 from django.db.models import signals
 from django.dispatch import receiver
+from tagulous.models.fields import SingleTagField, TagField
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -15,6 +16,31 @@ from dojo.tags.inheritance import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _flush_pending_tag_fields(instance):
+    """
+    Persist any tags assigned to ``instance`` *before* it was first saved.
+
+    Tagulous holds tags set on an unsaved instance (``finding.tags = [...]``
+    followed by ``finding.save()``) in an in-memory manager and only writes
+    them to the through table from its own ``post_save`` handler. That handler
+    is registered by ``tagulous``' AppConfig.ready(), which runs *after*
+    ``dojo``'s (``dojo`` precedes ``tagulous`` in ``INSTALLED_APPS``), so the
+    inheritance ``post_save`` handler below fires first. When it reads
+    ``instance.tags`` on the freshly-saved row it loads an empty, DB-backed
+    manager and the pending pre-save tags are lost — the user's tags silently
+    disappear on finding creation when product tag inheritance is enabled
+    (#15092).
+
+    Flushing here makes the inheritance path independent of signal-handler
+    ordering: the instance's own tags are committed first, then inheritance
+    merges the product tags on top.
+    """
+    for field in instance._meta.get_fields():
+        if isinstance(field, SingleTagField | TagField):
+            descriptor = getattr(type(instance), field.name)
+            descriptor.get_manager(instance).post_save_handler()
 
 
 def auto_inherit_product_tags(instance):
@@ -32,6 +58,9 @@ def auto_inherit_product_tags(instance):
     products = get_products_to_inherit_tags_from(instance)
     if not products:
         return
+    # Commit the instance's own (possibly pre-save assigned) tags before we
+    # read/merge them, so inheritance never clobbers them — see #15092.
+    _flush_pending_tag_fields(instance)
     incoming_inherited_tags = [tag.name for product in products for tag in product.tags.all()]
     _sync_inherited_tags(instance, incoming_inherited_tags)
 
