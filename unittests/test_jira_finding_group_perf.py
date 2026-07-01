@@ -12,8 +12,10 @@ from django.test import TestCase
 
 from dojo.jira.helper import push_finding_group_to_jira
 from dojo.models import Dojo_User, Finding, Finding_Group, Test
+from unittests.dojo_test_case import versioned_fixtures
 
 
+@versioned_fixtures
 class JiraFindingGroupPushQueryCountTest(TestCase):
     fixtures = ["dojo_testdata.json"]
 
