@@ -1,4 +1,5 @@
-"""Schema regression test for the case-insensitive product-name index.
+"""
+Schema regression test for the case-insensitive product-name index.
 
 Regression: DJANGO-D2M — filtering findings by product name issues
 ``WHERE UPPER(dojo_product.name) = UPPER(%s)``. The plain unique btree on
