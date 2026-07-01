@@ -467,7 +467,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             # Callers may defer grading to a single end-of-import pass
                             # (e.g. chunked connector reimport) to avoid one grade
                             # recalculation per dedupe batch; default keeps per-batch grading.
-                            product_grading_option=not getattr(self, "defer_product_grading", False),
+                            product_grading_option=not self.defer_product_grading,
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
                             jira_instance_id=getattr(self.jira_instance, "id", None),
@@ -491,7 +491,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         # Synchronous tasks were already executed during processing, just calculate grade.
         # Callers may defer grading to a single end-of-import pass (see defer_product_grading).
-        if not getattr(self, "defer_product_grading", False):
+        if not self.defer_product_grading:
             perform_product_grading(self.test.engagement.product)
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
@@ -581,7 +581,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
                     jira_services.push(finding_group)
         # Calculate grade once after all findings have been closed
-        if mitigated_findings and not getattr(self, "defer_product_grading", False):
+        if mitigated_findings and not self.defer_product_grading:
             perform_product_grading(self.test.engagement.product)
 
         return mitigated_findings
