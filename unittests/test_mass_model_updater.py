@@ -130,6 +130,54 @@ class TestMassModelUpdater(DojoTestCase):
             msg="skip_unchanged=False must still write unchanged rows",
         )
 
+    def test_writes_deferred_tracked_field_recomputed_to_none(self):
+        # Regression (dojo-pro risk-mode SLA recalc): the before-snapshot reads each
+        # tracked field with normal attribute access, so a deferred tracked field is
+        # loaded and its real persisted value is compared -- never mistaken for an
+        # absent/None value. Recomputing a populated field to None must still persist.
+        ids = self._finding_ids()
+        # Seed a non-None value via a normally-loaded queryset.
+        mass_model_updater(
+            Finding, Finding.objects.filter(id__in=ids),
+            lambda f: setattr(f, "hash_code", f"seed-{f.id}"), fields=["hash_code"], order="asc",
+        )
+        # Reload deferring hash_code (the tracked field), then recompute it to None.
+        deferred_qs = Finding.objects.filter(id__in=ids).only("id")
+        with CaptureQueriesContext(connection) as ctx:
+            mass_model_updater(
+                Finding, deferred_qs,
+                lambda f: setattr(f, "hash_code", None), fields=["hash_code"], order="asc",
+            )
+        self.assertGreater(
+            len(_updates(ctx.captured_queries)), 0,
+            msg="deferred tracked field recomputed to None must still issue an UPDATE",
+        )
+        for fid in ids:
+            self.assertIsNone(
+                Finding.objects.get(id=fid).hash_code,
+                msg=f"finding {fid}: deferred field recomputed to None was not persisted",
+            )
+
+    def test_skips_deferred_tracked_field_left_unchanged(self):
+        # The flip side: a deferred tracked field that function() does NOT change must
+        # still be recognised as unchanged (real value loaded and compared equal) and
+        # issue no UPDATE -- the skip-unchanged optimization keeps working with .only().
+        ids = self._finding_ids()
+        mass_model_updater(
+            Finding, Finding.objects.filter(id__in=ids),
+            lambda f: setattr(f, "hash_code", f"keep-{f.id}"), fields=["hash_code"], order="asc",
+        )
+        deferred_qs = Finding.objects.filter(id__in=ids).only("id")
+        with CaptureQueriesContext(connection) as ctx:
+            mass_model_updater(
+                Finding, deferred_qs,
+                lambda f: setattr(f, "hash_code", f"keep-{f.id}"), fields=["hash_code"], order="asc",
+            )
+        self.assertEqual(
+            len(_updates(ctx.captured_queries)), 0,
+            msg="deferred tracked field left unchanged must not issue an UPDATE",
+        )
+
     def test_hashcode_values_writer_uses_values_sql_on_postgres(self):
         if connection.vendor != "postgresql":
             self.skipTest("VALUES fast path is postgres-only")
