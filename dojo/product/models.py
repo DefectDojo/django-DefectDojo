@@ -2,6 +2,7 @@ from decimal import Decimal
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.functions import Upper
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -124,6 +125,12 @@ class Product(BaseModel):
 
     class Meta:
         ordering = ("name",)
+        indexes = [
+            # Serves the case-insensitive product-name lookup
+            # (WHERE UPPER(name) = UPPER(%s)) used when filtering findings by
+            # product name; the plain unique btree on name can't (Sentry DJANGO-D2M).
+            models.Index(Upper("name"), name="dojo_product_upper_name_idx"),
+        ]
 
     def __str__(self):
         return self.name
