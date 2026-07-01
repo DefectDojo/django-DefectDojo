@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from threading import local
 from urllib.parse import quote
 
@@ -291,6 +291,31 @@ def _drain_search_context_to_async(objects, source):
         objects.discard(entry)
 
 
+# Thread-local kill-switch for the intermediate-flush hook (below). Bulk operations that run
+# under watson.skip_index_update() set this so the hook no-ops on their thread -- see
+# suppress_intermediate_flush().
+_intermediate_flush_state = local()
+
+
+@contextmanager
+def suppress_intermediate_flush():
+    """
+    Disable the watson intermediate-flush hook on the current thread.
+
+    watson.skip_index_update() only marks its context invalid at __exit__, so while a skip block
+    is still accumulating, the intermediate-flush hook can't tell it's a skip context and would
+    drain it -- dispatching async index tasks for objects meant to be discarded, defeating the
+    skip. Wrap a skip_index_update() block in this so the hook returns early (no accumulate, no
+    drain) and the skip actually holds. Thread-local, so it only affects the wrapping thread.
+    """
+    previous = getattr(_intermediate_flush_state, "suppressed", False)
+    _intermediate_flush_state.suppressed = True
+    try:
+        yield
+    finally:
+        _intermediate_flush_state.suppressed = previous
+
+
 def install_intermediate_flush_hook():
     """
     Wrap `watson.search.search_context_manager.add_to_context` with a
@@ -311,6 +336,13 @@ def install_intermediate_flush_hook():
     original_add = cls.add_to_context
 
     def add_to_context_with_flush(self, engine, obj):
+        # Bulk ops under skip_index_update() (e.g. connector chunked reimport) set this to make the
+        # hook a full no-op on this thread. skip_index_update() only invalidates its context at
+        # __exit__, so mid-accumulation the hook would otherwise drain (index) objects meant to be
+        # discarded -- defeating the skip. Returning before original_add means nothing is even
+        # accumulated, so the skip holds and the caller's own end-of-op reindex does the indexing.
+        if getattr(_intermediate_flush_state, "suppressed", False):
+            return
         original_add(self, engine, obj)
         # The intermediate flush is a request-path optimization on the global singleton
         # context (AsyncSearchContextMiddleware). The async reindex task
