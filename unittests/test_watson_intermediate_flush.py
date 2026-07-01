@@ -10,11 +10,12 @@ from the in-memory set.
 from unittest.mock import patch
 
 from django.test import override_settings
-from watson.search import search_context_manager
+from watson.search import SearchContextManager, search_context_manager
 
 from dojo.middleware import (
     _drain_search_context_to_async,  # noqa: PLC2701 -- internal helper under test
     install_intermediate_flush_hook,
+    suppress_intermediate_flush,
 )
 from dojo.models import Product, Product_Type
 
@@ -119,3 +120,46 @@ class TestIntermediateFlushHook(DojoTestCase):
                 # hook should detect the invalid flag and bail out.
                 search_context_manager.add_to_context(engine_marker, p)
             drain.assert_not_called()
+
+    @override_settings(WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=2)
+    def test_ad_hoc_context_manager_does_not_drain(self):
+        """
+        The intermediate flush is a request-path optimization on the global singleton. An
+        ad-hoc SearchContextManager -- e.g. the one update_watson_search_index_for_model builds to
+        index its own batch -- must NOT drain, or it would dispatch a clone of itself and loop
+        forever (queue ~0, worker pegged, nothing indexed).
+        """
+        adhoc = SearchContextManager()
+        adhoc.start()
+        try:
+            with patch("dojo.middleware._drain_search_context_to_async") as drain:
+                for p in self.products[:3]:  # past the threshold of 2
+                    adhoc.add_to_context(object(), p)
+                drain.assert_not_called()
+        finally:
+            adhoc.invalidate()
+            adhoc.end()
+
+    @override_settings(WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=2)
+    def test_suppress_intermediate_flush_no_ops_hook_and_restores(self):
+        """
+        suppress_intermediate_flush() turns the hook into a no-op on this thread, so a
+        skip_index_update() block isn't defeated -- otherwise the hook would drain the still-valid
+        skip context mid-accumulation and index objects meant to be discarded. Nothing is
+        accumulated or drained while suppressed, and the hook is live again after the block.
+        """
+        self._open_context()
+        objects = search_context_manager._stack[-1][0]
+        engine_marker = object()
+
+        with patch("dojo.middleware._drain_search_context_to_async") as drain:
+            with suppress_intermediate_flush():
+                for p in self.products[:3]:  # past threshold, but suppressed
+                    search_context_manager.add_to_context(engine_marker, p)
+                drain.assert_not_called()
+                self.assertEqual(len(objects), 0, "suppressed hook must not even accumulate")
+
+            # Flag restored after the block: the hook drains normally again at threshold.
+            for p in self.products[:2]:
+                search_context_manager.add_to_context(engine_marker, p)
+            drain.assert_called_once()
