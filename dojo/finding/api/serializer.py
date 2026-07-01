@@ -22,6 +22,7 @@ from dojo.finding.helper import (
     save_vulnerability_ids_template,
 )
 from dojo.finding.models import BurpRawRequestResponse
+from dojo.finding.vulnerability_id import cwe_number
 from dojo.jira import services as jira_services
 from dojo.jira.api.serializers import JIRAIssueSerializer
 from dojo.location.models import LocationFindingReference
@@ -33,6 +34,7 @@ from dojo.models import (
     Endpoint,
     Engagement,
     Finding,
+    Finding_CWE,
     Finding_Group,
     Finding_Template,
     Note_Type,
@@ -299,6 +301,29 @@ class VulnerabilityIdSerializer(serializers.ModelSerializer):
         fields = ["vulnerability_id"]
 
 
+class CweField(serializers.Field):
+
+    """Serialize a CWE as the canonical ``CWE-<n>`` string; accept ``"CWE-79"`` or ``"79"`` on write."""
+
+    def to_representation(self, value):
+        return f"CWE-{value}"
+
+    def to_internal_value(self, data):
+        number = cwe_number(data)
+        if number is None:
+            msg = "Enter a CWE number, e.g. 89 or CWE-89."
+            raise serializers.ValidationError(msg)
+        return number
+
+
+class FindingCweSerializer(serializers.ModelSerializer):
+    cwe = CweField()
+
+    class Meta:
+        model = Finding_CWE
+        fields = ["cwe"]
+
+
 class FindingSerializer(serializers.ModelSerializer):
     mitigated = serializers.DateTimeField(required=False, allow_null=True)
     mitigated_by = serializers.PrimaryKeyRelatedField(required=False, allow_null=True, queryset=User.objects.all())
@@ -321,6 +346,9 @@ class FindingSerializer(serializers.ModelSerializer):
     )
     vulnerability_ids = VulnerabilityIdSerializer(
         source="vulnerability_id_set", many=True, required=False,
+    )
+    cwes = FindingCweSerializer(
+        source="finding_cwe_set", many=True, required=False,
     )
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all(),
@@ -418,6 +446,13 @@ class FindingSerializer(serializers.ModelSerializer):
             logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
 
+        # CWEs (mirror vulnerability_ids): the first entry is the primary Finding.cwe; the rest
+        # become Finding_CWE rows via save_cwes() below.
+        parsed_cwes = None
+        if (cwes := validated_data.pop("finding_cwe_set", None)) is not None:
+            parsed_cwes = [entry["cwe"] for entry in cwes]
+            validated_data["cwe"] = parsed_cwes[0] if parsed_cwes else 0
+
         # Save the reporter on the finding
         if reporter_id := validated_data.get("reporter"):
             instance.reporter = reporter_id
@@ -447,6 +482,8 @@ class FindingSerializer(serializers.ModelSerializer):
         )
 
         # Sync the CWE relation (separate from vulnerability ids) after the new cwe is applied.
+        if parsed_cwes is not None:
+            instance.unsaved_cwes = parsed_cwes[1:]
         save_cwes(instance)
 
         if settings.V3_FEATURE_LOCATIONS and locations is not None:
@@ -565,6 +602,9 @@ class FindingCreateSerializer(serializers.ModelSerializer):
     vulnerability_ids = VulnerabilityIdSerializer(
         source="vulnerability_id_set", many=True, required=False,
     )
+    cwes = FindingCweSerializer(
+        source="finding_cwe_set", many=True, required=False,
+    )
     reporter = serializers.PrimaryKeyRelatedField(
         required=False, queryset=User.objects.all(),
     )
@@ -605,6 +645,12 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             validated_data["cve"] = parsed_vulnerability_ids[0]
             # validated_data["unsaved_vulnerability_ids"] = parsed_vulnerability_ids
 
+        # CWEs (mirror vulnerability_ids): first entry is the primary cwe, the rest are extras.
+        parsed_cwes = None
+        if (cwes := validated_data.pop("finding_cwe_set", None)) is not None:
+            parsed_cwes = [entry["cwe"] for entry in cwes]
+            validated_data["cwe"] = parsed_cwes[0] if parsed_cwes else 0
+
         # super.create() doesn't accept unsaved_vulnerability_ids or dedupe_option=False, so call save directly.
         new_finding = Finding(**validated_data)
         new_finding.unsaved_vulnerability_ids = parsed_vulnerability_ids or []
@@ -621,6 +667,8 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
+        if parsed_cwes is not None:
+            new_finding.unsaved_cwes = parsed_cwes[1:]
         save_cwes(new_finding)
 
         if push_to_jira:

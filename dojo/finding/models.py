@@ -1340,12 +1340,12 @@ class Finding(BaseModel):
 
     @cached_property
     def cwes(self):
-        # All CWE numbers for this finding: the primary self.cwe plus any additional
-        # Finding_CWE rows (multiple CWEs per finding), primary first, deduplicated.
+        # All CWEs for this finding in canonical CWE-<n> form: the primary self.cwe plus any
+        # additional Finding_CWE rows (multiple CWEs per finding), primary first, deduplicated.
         cwe_numbers = [row.cwe for row in self.finding_cwe_set.all()]
         if self.cwe and self.cwe > 0:
             cwe_numbers.insert(0, self.cwe)
-        return list(dict.fromkeys(cwe_numbers))
+        return [f"CWE-{cwe_number}" for cwe_number in dict.fromkeys(cwe_numbers)]
 
     @property
     def violates_sla(self):

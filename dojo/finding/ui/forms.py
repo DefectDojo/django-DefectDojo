@@ -560,9 +560,9 @@ class FindingForm(CweFormMixin, forms.ModelForm):
 
         super().__init__(*args, **kwargs)
 
-        # Pre-fill all CWEs (primary first) on edit; mirrors the vulnerability_ids field.
+        # Pre-fill all CWEs (primary first, CWE-<n> form) on edit; mirrors the vulnerability_ids field.
         if self.instance and self.instance.pk:
-            self.fields["cwes"].initial = "\n".join(str(cwe) for cwe in self.instance.cwes)
+            self.fields["cwes"].initial = "\n".join(self.instance.cwes)
 
         if settings.V3_FEATURE_LOCATIONS:
             self.fields["endpoints"].queryset = Location.objects.filter(products__product=self.instance.test.engagement.product)
