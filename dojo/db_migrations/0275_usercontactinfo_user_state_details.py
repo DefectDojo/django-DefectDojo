@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0269_normalize_blank_finding_components"),
+        ("dojo", "0274_finding_sla_expiration_index"),
     ]
 
     operations = [

@@ -333,6 +333,17 @@ class TestDismissOsMessageView(DojoTestCase):
         contact = UserContactInfo.objects.get(user=self.user)
         self.assertEqual(contact.user_state_details.get(os_message.OS_MESSAGE_DISMISSED_KEY), "abc123def456")
 
+    def test_dismiss_preserves_other_state_keys(self):
+        """Dismissing must not clobber unrelated keys in the shared user_state_details blob."""
+        contact = UserContactInfo.objects.get_or_create(user=self.user)[0]
+        contact.user_state_details = {"other_flag": 1}
+        contact.save(update_fields=["user_state_details"])
+        response = self.client.post(self.url, {"token": "abc123def456"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 204)
+        contact.refresh_from_db()
+        self.assertEqual(contact.user_state_details.get("other_flag"), 1)
+        self.assertEqual(contact.user_state_details.get(os_message.OS_MESSAGE_DISMISSED_KEY), "abc123def456")
+
     def test_get_not_allowed(self):
         self.assertEqual(self.client.get(self.url).status_code, 405)
 

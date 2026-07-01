@@ -2,6 +2,7 @@ import logging
 import re
 
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseForbidden, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -98,12 +99,17 @@ def dismiss_os_message(request):
         return HttpResponseForbidden()
     token = request.POST.get("token", "").strip()
     if token and re.fullmatch(r"[0-9a-f]{1,64}", token):
-        contact = UserContactInfo.objects.get_or_create(user=request.user)[0]
-        state = contact.user_state_details or {}
-        if state.get(OS_MESSAGE_DISMISSED_KEY) != token:
-            state[OS_MESSAGE_DISMISSED_KEY] = token
-            contact.user_state_details = state
-            contact.save(update_fields=["user_state_details"])
+        # user_state_details is a shared JSON blob for many per-user flags, so
+        # read-modify-write it under a row lock to avoid clobbering a concurrent
+        # write to a different key (lost update).
+        with transaction.atomic():
+            contact, _ = UserContactInfo.objects.get_or_create(user=request.user)
+            contact = UserContactInfo.objects.select_for_update().get(pk=contact.pk)
+            state = contact.user_state_details or {}
+            if state.get(OS_MESSAGE_DISMISSED_KEY) != token:
+                state[OS_MESSAGE_DISMISSED_KEY] = token
+                contact.user_state_details = state
+                contact.save(update_fields=["user_state_details"])
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return HttpResponse(status=204)
     referer = request.META.get("HTTP_REFERER")
