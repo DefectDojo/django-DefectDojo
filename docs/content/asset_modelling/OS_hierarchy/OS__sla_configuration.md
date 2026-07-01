@@ -21,7 +21,7 @@ You can use SLAs as a way to represent your organizations remediation policies. 
 * You can sort or filter Finding tables by SLA days.
 * SLA violations can be configured to trigger [Notifications](/admin/notifications/about_notifications/) to DefectDojo users assigned to the related Product.
 * In **DefectDojo Pro**, SLA performance is also tracked on the [Executive Insights and Remediation](/metrics_reports/pro_metrics/pro__overview/) Metrics Dashboards.
-* SLA compliance can also be used to create custom [Dashboard Tiles](/metrics_reports/dashboards/about_custom_dashboard_tiles/#sla-violation-tile) in **DefectDojo Pro**.
+* SLA compliance can also be surfaced on a custom [dashboard](/metrics_reports/dashboards/custom-dashboards/) in **DefectDojo Pro** — for example with an SLA Burndown or a filtered Count widget.
 
 ### Mitigated Within SLA status
 
