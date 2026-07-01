@@ -1646,8 +1646,10 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
 
     When ``fields`` is given:
       - skip_unchanged (default True): rows whose tracked ``fields`` were not changed by
-        ``function`` are not written (compared against the values loaded from the page
-        query; deferred fields are read from ``__dict__`` so no extra query is issued).
+        ``function`` are not written. The pre-``function`` value of each tracked field is
+        read with normal attribute access, so callers must ensure the tracked ``fields``
+        are loaded by the queryset (i.e. not excluded via ``.only()``/``.defer()``);
+        otherwise accessing a deferred tracked field issues a per-row query.
       - writer (optional): a callable ``writer(model_type, batch, fields)`` used to persist
         each batch instead of Django's ``bulk_update`` (e.g. a backend-specific fast path).
         Defaults to ``bulk_update``.
@@ -1689,16 +1691,17 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
             i += 1
             last_id = model.id
 
-            # snapshot tracked fields before mutation (read from __dict__ to avoid
-            # triggering a deferred-field load); used to skip no-op writes
+            # snapshot tracked fields before mutation; used to skip no-op writes.
+            # Read via normal attribute access so the real persisted value is compared
+            # (callers must load the tracked fields; see docstring).
             before = None
             if fields and skip_unchanged:
-                before = [model.__dict__.get(f) for f in fields]
+                before = [getattr(model, f) for f in fields]
 
             function(model)
 
             if fields and skip_unchanged and before is not None and all(
-                model.__dict__.get(f) == old for f, old in zip(fields, before, strict=True)
+                getattr(model, f) == old for f, old in zip(fields, before, strict=True)
             ):
                 # nothing changed for this row -> no write needed
                 pass
