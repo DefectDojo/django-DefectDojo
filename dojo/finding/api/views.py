@@ -459,7 +459,7 @@ class FindingViewSet(
         responses={status.HTTP_201_CREATED: api_v2_serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasFindingFilePermission),
     )
     def files(self, request, pk=None):
         finding = self.get_object()
@@ -497,7 +497,7 @@ class FindingViewSet(
     @action(
         detail=True,
         methods=["get"],
-        url_path=r"files/download/(?P<file_id>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
+        url_path=r"files/download/(?P<file_id>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingFilePermission),
     )
     def download_file(self, request, file_id, pk=None):
         finding = self.get_object()
