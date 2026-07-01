@@ -16,6 +16,7 @@ import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.helper import (
+    save_cwes,
     save_endpoints_template,
     save_vulnerability_ids,
     save_vulnerability_ids_template,
@@ -445,6 +446,9 @@ class FindingSerializer(serializers.ModelSerializer):
             instance, validated_data,
         )
 
+        # Sync the CWE relation (separate from vulnerability ids) after the new cwe is applied.
+        save_cwes(instance)
+
         if settings.V3_FEATURE_LOCATIONS and locations is not None:
             for location_ref in instance.locations.all():
                 location_ref.location.disassociate_from_finding(instance)
@@ -617,6 +621,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             new_finding.reviewers.set(reviewers)
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
+        save_cwes(new_finding)
 
         if push_to_jira:
             jira_services.push(new_finding)
