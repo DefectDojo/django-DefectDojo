@@ -1660,11 +1660,13 @@ class DojoMetaViewSet(
         """Fetch parent objects and verify the user has the required permissions."""
         data = request.data
         parents = {}
-        for field, (model, permission) in permission_map.items():
-            obj = model.objects.filter(id=data.get(field)).first()
-            if obj:
-                user_has_permission_or_403(request.user, obj, permission)
-            parents[field] = obj
+        # TODO: Delete this after the move to Locations
+        with Endpoint.allow_endpoint_init():
+            for field, (model, permission) in permission_map.items():
+                obj = model.objects.filter(id=data.get(field)).first()
+                if obj:
+                    user_has_permission_or_403(request.user, obj, permission)
+                parents[field] = obj
         return parents
 
     def process_post(self, request):
@@ -2694,10 +2696,12 @@ def report_generate(request, obj, options):
                 Finding.objects.filter(test__engagement__product=product),
             ),
         )
-        ids = get_endpoint_ids(
-            Endpoint.objects.filter(product=product).distinct(),
-        )
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        # TODO: Delete this after the move to Locations
+        with Endpoint.allow_endpoint_init():
+            ids = get_endpoint_ids(
+                Endpoint.objects.filter(product=product).distinct(),
+            )
+            endpoints = list(Endpoint.objects.filter(id__in=ids))
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
@@ -2711,10 +2715,12 @@ def report_generate(request, obj, options):
         report_name = "Engagement Report: " + str(engagement)
 
         ids = set(finding.id for finding in findings.qs)  # noqa: C401
-        ids = get_endpoint_ids(
-            Endpoint.objects.filter(product=engagement.product).distinct(),
-        )
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        # TODO: Delete this after the move to Locations
+        with Endpoint.allow_endpoint_init():
+            ids = get_endpoint_ids(
+                Endpoint.objects.filter(product=engagement.product).distinct(),
+            )
+            endpoints = list(Endpoint.objects.filter(id__in=ids))
 
     elif type(obj).__name__ == "Test":
         test = obj

@@ -916,8 +916,10 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.name)
 
                 endpoint_value = ""
-                for endpoint in finding.endpoints.all():
-                    endpoint_value += f"{endpoint}; "
+                # TODO: Delete this after the move to Locations
+                with Endpoint.allow_endpoint_init():
+                    for endpoint in finding.endpoints.all():
+                        endpoint_value += f"{endpoint}; "
                 endpoint_value = endpoint_value.removesuffix("; ")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
@@ -1081,8 +1083,10 @@ class ExcelExportView(View):
                 col_num += 1
 
                 endpoint_value = ""
-                for endpoint in finding.endpoints.all():
-                    endpoint_value += f"{endpoint}; \n"
+                # TODO: Delete this after the move to Locations
+                with Endpoint.allow_endpoint_init():
+                    for endpoint in finding.endpoints.all():
+                        endpoint_value += f"{endpoint}; \n"
                 endpoint_value = endpoint_value.removesuffix("; \n")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."

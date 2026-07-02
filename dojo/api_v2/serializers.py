@@ -439,12 +439,6 @@ class MetaMainSerializer(serializers.Serializer):
         default=None,
         allow_null=True,
     )
-    endpoint = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(),
-        required=False,
-        default=None,
-        allow_null=True,
-    )
     finding = serializers.PrimaryKeyRelatedField(
         queryset=Finding.objects.all(),
         required=False,
@@ -452,6 +446,17 @@ class MetaMainSerializer(serializers.Serializer):
         allow_null=True,
     )
     metadata = MetadataSerializer(many=True)
+
+    # TODO: Delete this after the move to Locations
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.fields["endpoint"] = serializers.PrimaryKeyRelatedField(
+                queryset=Endpoint.objects.all(),
+                required=False,
+                default=None,
+                allow_null=True,
+            )
 
     def validate(self, data):
         product_id = data.get("product", None)

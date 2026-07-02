@@ -5,7 +5,7 @@ from django.template.loader import render_to_string
 from github import Auth, Github
 
 from dojo.github.models import GITHUB_Issue, GITHUB_PKey
-from dojo.models import Engagement, Product
+from dojo.models import Endpoint, Engagement, Product
 
 logger = logging.getLogger(__name__)
 
@@ -160,4 +160,6 @@ def github_body(find):
     template = "issue-trackers/jira_full/jira-description.tpl"
     kwargs = {}
     kwargs["finding"] = find
-    return render_to_string(template, kwargs)
+    # TODO: Delete this after the move to Locations
+    with Endpoint.allow_endpoint_init():
+        return render_to_string(template, kwargs)

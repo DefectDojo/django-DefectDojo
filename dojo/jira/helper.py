@@ -21,6 +21,7 @@ from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
 from dojo.models import (
+    Endpoint,
     Engagement,
     Finding,
     Finding_Group,
@@ -705,7 +706,9 @@ def jira_description(obj, **kwargs):
     elif isinstance(obj, Finding_Group):
         kwargs["finding_group"] = obj
 
-    description = render_to_string(template, kwargs)
+    # TODO: Delete this after the move to Locations
+    with Endpoint.allow_endpoint_init():
+        description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
     max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
     suffix = f"\n\nIssue Description Too Long: See [DefectDojo|{defect_dojo_obj_url}] for full description."
