@@ -74,6 +74,16 @@ class TestAWSInspector2Parser(DojoTestCase):
             self.assertEqual("1.24.4", dependency_locations[0].data["version"])
             self.assertEqual("extensions/collector", dependency_locations[0].data["file_path"])
 
+    def test_aws_inspector2_parser_multi_cwe_finding(self):
+        """A CODE_VULNERABILITY finding populates the primary cwe plus the full unsaved_cwes list."""
+        with (get_unit_tests_scans_path("aws_inspector2") / "aws_inspector2_package_vuln_metadata_multi_cwe_fabricated.json").open(encoding="utf-8") as testfile:
+            parser = AWSInspector2Parser()
+            findings = parser.get_findings(testfile, Test())
+        # The multi-CWE CODE_VULNERABILITY finding is the first entry in the file and therefore the first finding.
+        self.assertEqual("CWE-117,93 - Log injection", findings[0].title)
+        self.assertEqual("CWE-117", findings[0].cwe)
+        self.assertEqual(["CWE-117", "CWE-93"], findings[0].unsaved_cwes)
+
     def test_aws_inspector2_parser_empty_with_error(self):
         with self.assertRaises(TypeError) as context, \
           (get_unit_tests_scans_path("aws_inspector2") / "empty_with_error.json").open(encoding="utf-8") as testfile:

@@ -1,0 +1,53 @@
+{
+    "version": "3.0.0",
+    "vulnerabilities": [
+        {
+            "id": "38e1bf843be70b01cd6847ba877897acb4185d3445256f818871a4b66c0af712",
+            "name": "Servlet reflected cross site scripting vulnerability",
+            "description": "HTTP parameter written to Servlet output in servlets.module.lesson.XssLesson.doPost(HttpServletRequest, HttpServletResponse)",
+            "cve": "3e7ef723fe684a84eb7f9a94b27d1ea2:XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER:src/main/java/servlets/module/lesson/XssLesson.java:96",
+            "severity": "High",
+            "location": {
+                "file": "src/main/java/servlets/module/lesson/XssLesson.java",
+                "start_line": 96,
+                "end_line": 96,
+                "class": "servlets.module.lesson.XssLesson",
+                "method": "doPost"
+            },
+            "identifiers": [
+                {
+                    "type": "find_sec_bugs_type",
+                    "name": "Find Security Bugs-XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER",
+                    "value": "XSS_REQUEST_PARAMETER_TO_SERVLET_WRITER",
+                    "url": "https://spotbugs.readthedocs.io/en/latest/bugDescriptions.html#xss-servlet-reflected-cross-site-scripting-vulnerability-xss-request-parameter-to-servlet-writer"
+                },
+                {
+                    "type": "cwe",
+                    "name": "CWE-79",
+                    "value": "79",
+                    "url": "https://cwe.mitre.org/data/definitions/79.html"
+                },
+                {
+                    "type": "cwe",
+                    "name": "CWE-89",
+                    "value": 89,
+                    "url": "https://cwe.mitre.org/data/definitions/89.html"
+                }
+            ]
+        }
+    ],
+    "scan": {
+        "scanner": {
+            "id": "find_sec_bugs",
+            "name": "Find Security Bugs",
+            "version": "1.0.0",
+            "vendor": {
+                "name": "GitLab"
+            }
+        },
+        "type": "sast",
+        "start_time": "2022-01-01T00:00:00",
+        "end_time": "2022-01-01T00:00:01",
+        "status": "success"
+    }
+}

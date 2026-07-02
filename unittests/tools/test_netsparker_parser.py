@@ -140,6 +140,11 @@ class TestNetsparkerParser(DojoTestCase):
                 self.assertEqual(205, finding.cwe)
                 # Generated date is "2024-10-08 02:33 PM"
                 self.assertEqual("08/10/2024", finding.date.strftime("%d/%m/%Y"))
+            with self.subTest(i=1):
+                # "Out-of-date Version (Apache)" carries multiple CWEs: "1035, 937"
+                finding = findings[1]
+                self.assertEqual(1035, finding.cwe)
+                self.assertEqual(["1035", "937"], finding.unsaved_cwes)
 
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_issue_11020_first_seen(self):

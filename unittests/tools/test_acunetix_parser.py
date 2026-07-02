@@ -301,6 +301,7 @@ class TestAcunetixParser(DojoTestCase):
                 finding = findings[0]
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual(16, finding.cwe)
+                self.assertEqual([16, 200], finding.unsaved_cwes)
                 self.assertIsNotNone(finding.description)
                 self.assertGreater(len(finding.description), 0)
                 self.assertEqual("CVSS:3.0/AV:N/AC:L/PR:L/UI:R/S:U/C:H/I:N/A:N/E:H/RL:O/RC:C", finding.cvssv3)
