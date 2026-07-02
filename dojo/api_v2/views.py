@@ -19,6 +19,7 @@ from drf_spectacular.utils import (
 )
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework import mixins, status, viewsets
+from rest_framework import serializers as drf_serializers
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
@@ -86,6 +87,15 @@ logger = logging.getLogger(__name__)
 
 
 labels = get_labels()
+
+
+def get_request_boolean(request, name):
+    value = request.query_params.get(name) if name in request.query_params else request.data.get(name)
+
+    if value is None:
+        return None
+
+    return drf_serializers.BooleanField(required=False).run_validation(value)
 
 
 def schema_with_prefetch() -> dict:
