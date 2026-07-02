@@ -22,7 +22,7 @@ def unseed_deduplication_execution_mode(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0273_usercontactinfo_deduplication_execution_mode'),
+        ('dojo', '0276_usercontactinfo_deduplication_execution_mode'),
     ]
 
     operations = [
