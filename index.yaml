@@ -5,10 +5,12 @@ entries:
       artifacthub.io/changes: |
         - kind: changed
           description: chore(deps)_ update valkey _ tag from 0.20.2 to v0.22.1 (_/defect_/chart.yaml)
+        - kind: changed
+          description: Update gcr.io/cloudsql__/gce_proxy Docker tag from 1.38.0 to v1.38.1 (_/defect_/values.yaml)
       artifacthub.io/prerelease: "true"
     apiVersion: v2
     appVersion: 3.1.0-dev
-    created: "2026-07-01T06:33:12.107043601Z"
+    created: "2026-07-02T06:23:28.178127388Z"
     dependencies:
     - condition: postgresql.enabled
       name: postgresql
@@ -19,7 +21,7 @@ entries:
       repository: oci://registry-1.docker.io/cloudpirates
       version: 0.22.1
     description: A Helm chart for Kubernetes to install DefectDojo
-    digest: 069146be49432d82a81119c95d063a75cfba6845d8cfba247890fba93bc955bf
+    digest: ae99380a2477da395d7ac38e993384a1a37a6e3ab30954b83da6a22d4499c728
     icon: https://defectdojo.com/hubfs/DefectDojo_favicon.png
     maintainers:
     - email: defectdojo-project@owasp.org
@@ -8978,4 +8980,4 @@ entries:
     urls:
     - https://github.com/DefectDojo/django-DefectDojo/releases/download/1.15.0/defectdojo-1.6.1.tgz
     version: 1.6.1
-generated: "2026-07-01T06:33:12.091920044Z"
+generated: "2026-07-02T06:23:28.168331551Z"
