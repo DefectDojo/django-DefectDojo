@@ -1,5 +1,18 @@
 $(function () {
     $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa-solid fa-arrow-up fa-fw"></i></a>');
+
+    // ---- OS promo banner dismiss: persist per-user (form carries CSRF) + hide instantly ----
+    $(document).on('submit', '.os-message-dismiss-form', function (e) {
+        e.preventDefault();
+        var form = this;
+        $(form).closest('.announcement-banner').fadeOut(200, function () { $(this).remove(); });
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'same-origin',
+        });
+    });
     $(window).scroll(function () {
         if ($(this).scrollTop() > 300) {
             $('#toTop').fadeIn();

@@ -65,6 +65,28 @@
     });
 })();
 
+/* ---- OS promo banner dismiss ----
+   Persist the dismissal per-user (the form carries csrfmiddlewaretoken) and
+   hide the banner instantly. Degrades to a normal form POST when JS is off.
+*/
+document.addEventListener('submit', function (e) {
+    var form = e.target.closest('.os-message-dismiss-form');
+    if (!form) return;
+    e.preventDefault();
+    var banner = form.closest('.announcement-banner');
+    if (banner) {
+        banner.style.transition = 'opacity 0.2s';
+        banner.style.opacity = '0';
+        setTimeout(function () { banner.remove(); }, 200);
+    }
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+    });
+});
+
 /* ---- Collapse shim ----
    Handles [data-toggle="collapse"] by toggling .in on the target element.
    CSS in tailwind.css:  .collapse { display:none }  .collapse.in { display:block }

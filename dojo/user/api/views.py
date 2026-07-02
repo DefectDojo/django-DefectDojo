@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
 from dojo.models import UserContactInfo
-from dojo.user.api.filters import ApiUserFilter
+from dojo.user.api.filters import ApiUserContactInfoFilter, ApiUserFilter
 from dojo.user.api.serializer import (
     UserContactInfoSerializer,
     UserProfileSerializer,
@@ -71,7 +71,7 @@ class UserContactInfoViewSet(
     serializer_class = UserContactInfoSerializer
     queryset = UserContactInfo.objects.none()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
+    filterset_class = ApiUserContactInfoFilter
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
 
     def get_queryset(self):
