@@ -2742,7 +2742,6 @@ def report_generate(request, obj, options):
         )
         report_name = "Engagement Report: " + str(engagement)
 
-        ids = set(finding.id for finding in findings.qs)  # noqa: C401
         if settings.V3_FEATURE_LOCATIONS:
             endpoints = _report_url_location_refs(engagement.product)
         else:

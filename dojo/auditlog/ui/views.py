@@ -73,7 +73,6 @@ def action_history(request, cid, oid):
     # TODO: Delete this after the move to Locations
     elif ct.model == "endpoint":
         user_has_permission_or_403(request.user, obj, "view")
-        # TODO: Delete this after the move to Locations
         with Endpoint.allow_endpoint_init():
             object_value = Endpoint.objects.get(id=obj.id)
         product_id = object_value.product.id
