@@ -1129,8 +1129,9 @@ span.endpoint_product {
     .filter-form-group > .col-lg-3 { grid-column: span 3; }
 }
 
-/* Filter category grouping (details/summary) */
+/* Filter category grouping (Alpine-toggled accordion) */
 .filter-category {
+    flex: 0 0 100%;
     border-bottom: 1px solid var(--color-border, #DCDCDC);
 }
 
@@ -1142,14 +1143,15 @@ span.endpoint_product {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    width: 100%;
     padding: 0.5rem 0.25rem;
+    background: none;
+    border: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
     cursor: pointer;
     user-select: none;
-    list-style: none;
-}
-
-.filter-category-header::-webkit-details-marker {
-    display: none;
 }
 
 .filter-category-title {
@@ -1166,8 +1168,25 @@ span.endpoint_product {
     transition: transform 0.2s ease;
 }
 
-.filter-category[open] > .filter-category-header .filter-category-chevron {
+.filter-category-chevron.is-open {
     transform: rotate(180deg);
+}
+
+/* Slide the whole category open/closed via the grid-rows trick so the header
+   stack moves together smoothly instead of snapping. Works in all browsers. */
+.filter-category-content {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.2s ease;
+}
+
+.filter-category-content.is-open {
+    grid-template-rows: 1fr;
+}
+
+.filter-category-content > .filter-category-clip {
+    overflow: hidden;
+    min-height: 0;
 }
 
 .filter-category-body {

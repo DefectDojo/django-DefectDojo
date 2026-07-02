@@ -14,31 +14,35 @@
         {% endfor %}
         {% get_filter_groups form as filter_groups %}
         {% for group in filter_groups %}
-            <details class="filter-category" {% if group.open %}open{% endif %}>
-                <summary class="filter-category-header">
+            <div class="filter-category" x-data="{ open: {% if group.open %}true{% else %}false{% endif %} }">
+                <button type="button" class="filter-category-header" @click="open = !open" :aria-expanded="open">
                     <span class="filter-category-title">{{ group.name }}</span>
-                    <i class="fa-solid fa-chevron-down filter-category-chevron"></i>
-                </summary>
-                <div class="container-fluid filter-form-group filter-category-body">
-                    {% for field in group.fields %}
-                        <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-                            <div class="filter-form-input" style="min-width: 0;">
-                                <label for="{{ field.auto_id }}" class="form-label mb-1" style="display: block;">
-                                    {{ field.label }}
-                                    {% if field.help_text %}
-                                        <i class="fa-solid fa-circle-question has-popover"
-                                        data-content="{{ field.help_text }}">
-                                        </i>
-                                    {% endif %}
-                                </label>
-                                {% with placeholder="placeholder:"|add:field.label %}
-                                  {{ field|addcss:"class: form-control filter-form-control"|addcss:placeholder }}
-                                {% endwith %}
-                            </div>
+                    <i class="fa-solid fa-chevron-down filter-category-chevron{% if group.open %} is-open{% endif %}" :class="{ 'is-open': open }"></i>
+                </button>
+                <div class="filter-category-content{% if group.open %} is-open{% endif %}" :class="{ 'is-open': open }">
+                    <div class="filter-category-clip">
+                        <div class="container-fluid filter-form-group filter-category-body">
+                            {% for field in group.fields %}
+                                <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                                    <div class="filter-form-input" style="min-width: 0;">
+                                        <label for="{{ field.auto_id }}" class="form-label mb-1" style="display: block;">
+                                            {{ field.label }}
+                                            {% if field.help_text %}
+                                                <i class="fa-solid fa-circle-question has-popover"
+                                                data-content="{{ field.help_text }}">
+                                                </i>
+                                            {% endif %}
+                                        </label>
+                                        {% with placeholder="placeholder:"|add:field.label %}
+                                          {{ field|addcss:"class: form-control filter-form-control"|addcss:placeholder }}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
-            </details>
+            </div>
         {% endfor %}
         <div class="container-fluid">
             <div class="row mt-3">
