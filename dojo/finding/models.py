@@ -22,6 +22,7 @@ from tagulous.models import TagField
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
+from dojo.finding.vulnerability_id import cwe_label, resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and
@@ -534,6 +535,9 @@ class Finding(BaseModel):
         self.unsaved_tags = None
         self.unsaved_files = None
         self.unsaved_vulnerability_ids = None
+        # Extra CWE numbers a parser wants to attach in addition to the primary self.cwe.
+        # Persisted as Finding_CWE rows (multiple CWEs per finding). None = none supplied.
+        self.unsaved_cwes = None
 
     def __str__(self):
         return self.title
@@ -689,6 +693,11 @@ class Finding(BaseModel):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
+        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util)
+        for vulnerability_id in self.vulnerability_id_set.all():
+            Vulnerability_Id.objects.create(finding=copy, vulnerability_id=vulnerability_id.vulnerability_id)
+        for finding_cwe in self.finding_cwe_set.all():
+            Finding_CWE.objects.create(finding=copy, cwe=finding_cwe.cwe)
 
         return copy
 
@@ -1343,6 +1352,16 @@ class Finding(BaseModel):
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
 
+    @cached_property
+    def cwes(self):
+        # All CWEs for this finding in canonical CWE-<n> form: the additional Finding_CWE rows
+        # (already stored as CWE-<n> strings) with the primary self.cwe first, deduplicated.
+        labels = [row.cwe for row in self.finding_cwe_set.all()]
+        primary = cwe_label(self.cwe)
+        if primary is not None:
+            labels.insert(0, primary)
+        return list(dict.fromkeys(label for label in labels if label))
+
     @property
     def violates_sla(self):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
@@ -1366,9 +1385,50 @@ class Finding(BaseModel):
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    # Autodetected from the id prefix (CVE, GHSA, ...); NULL when there is no non-numeric
+    # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
+    vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
+        ]
+        indexes = [
+            # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
+            # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
+            models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
+        ]
 
     def __str__(self):
         return self.vulnerability_id
+
+    def save(self, *args, **kwargs):
+        # bulk_create paths set the type at construction; this covers save()/get_or_create.
+        self.vulnerability_id_type = resolve_vulnerability_id_type(self.vulnerability_id)
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("view_finding", args=[str(self.finding.id)])
+
+
+class Finding_CWE(models.Model):
+    # A CWE weakness associated with a finding. Separate from Vulnerability_Id because a CWE is a
+    # weakness class, not a vulnerability instance identifier — it must not participate in
+    # hash_code, vulnerability-id deduplication, or the cve field. Stored as the canonical
+    # ``CWE-<n>`` string (mirrors Vulnerability_Id.vulnerability_id). The primary CWE also stays on
+    # the legacy int Finding.cwe; this relation lets a finding carry multiple CWEs.
+    finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
+    # "CWE-<n>": 4 for the "CWE-" prefix + up to 7 digits (CWE-9999999) — far beyond the current
+    # max (~CWE-1428) yet tight. (Postgres varchar(n) is a length bound, not a storage cost.)
+    cwe = models.CharField(max_length=11, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "cwe"], name="unique_finding_cwe"),
+        ]
+
+    def __str__(self):
+        return self.cwe
 
     def get_absolute_url(self):
         return reverse("view_finding", args=[str(self.finding.id)])

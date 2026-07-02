@@ -139,6 +139,17 @@ class TestVeracodeScannerParser(DojoTestCase):
             self.assertEqual(4.3, finding.cvssv3_score)
             return findings[0]
 
+    def test_parse_file_with_multi_cwe_fabricated_copy(self):
+        # Fabricated copy: the CVE-2012-6153 SCA node carries multiple CWEs
+        # (cwe_id="CWE-20 CWE-295"); the primary CWE is the first (20).
+        with (get_unit_tests_scans_path("veracode") / "veracode_scan_multi_cwe_fabricated.xml").open(encoding="utf-8") as testfile:
+            parser = VeracodeParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[0]
+            self.assertEqual("CVE-2012-6153", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual(20, finding.cwe)
+            self.assertEqual([20, 295], finding.unsaved_cwes)
+
     @override_settings(USE_FIRST_SEEN=True)
     def test_parse_file_with_mitigated_finding_first_seen(self):
         self.parse_file_with_mitigated_finding()

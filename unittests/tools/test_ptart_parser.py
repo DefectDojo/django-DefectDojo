@@ -8,6 +8,7 @@ from dojo.tools.ptart.ptart_parser_tools import (
     parse_attachment_from_hit,
     parse_cwe_from_hit,
     parse_cwe_id_from_cwe,
+    parse_cwes_from_hit,
     parse_locations_from_hit,
     parse_ptart_fix_effort,
     parse_ptart_severity,
@@ -446,6 +447,59 @@ class TestPTARTParser(DojoTestCase):
         with self.subTest("No CWE in hit"):
             hit = {}
             self.assertEqual(None, parse_cwe_from_hit(hit))
+        with self.subTest("Multiple CWEs does not mutate hit"):
+            hit = {
+                "cwes": [{
+                    "cwe_id": 862,
+                    "title": "CWE-862 - Missing Authorization",
+                }, {
+                    "cwe_id": 863,
+                    "title": "CWE-863 - Improper Authorization",
+                }],
+            }
+            self.assertEqual(863, parse_cwe_from_hit(hit))
+            # The primary lookup must not consume/mutate the cwes list.
+            self.assertEqual(2, len(hit["cwes"]))
+
+    def test_ptart_parser_tools_parse_cwes_from_hit(self):
+        with self.subTest("Single CWE"):
+            hit = {
+                "cwes": [{
+                    "cwe_id": 862,
+                    "title": "CWE-862 - Missing Authorization",
+                }],
+            }
+            self.assertEqual([862], parse_cwes_from_hit(hit))
+        with self.subTest("Multiple CWEs preserves order"):
+            hit = {
+                "cwes": [{
+                    "cwe_id": 284,
+                    "title": "CWE-284 - Improper Access Control",
+                }, {
+                    "cwe_id": 862,
+                    "title": "CWE-862 - Missing Authorization",
+                }],
+            }
+            self.assertEqual([284, 862], parse_cwes_from_hit(hit))
+        with self.subTest("Partial CWE Definition (title only)"):
+            hit = {
+                "cwes": [{
+                    "title": "CWE-862 - Missing Authorization",
+                }],
+            }
+            self.assertEqual([862], parse_cwes_from_hit(hit))
+        with self.subTest("Drops unparseable CWEs"):
+            hit = {
+                "cwes": [{
+                    "cwe_id": 284,
+                    "title": "CWE-284 - Improper Access Control",
+                }, {}],
+            }
+            self.assertEqual([284], parse_cwes_from_hit(hit))
+        with self.subTest("Empty CWEs"):
+            self.assertEqual([], parse_cwes_from_hit({"cwes": []}))
+        with self.subTest("No CWE in hit"):
+            self.assertEqual([], parse_cwes_from_hit({}))
 
     def get_locations_from_hit(self, hit):
         if not settings.V3_FEATURE_LOCATIONS:
@@ -788,6 +842,17 @@ class TestPTARTParser(DojoTestCase):
                 self.assertEqual("Yet another Screenshot.png", screenshot["title"])
                 self.assertTrue(screenshot["data"].startswith("iVBORw0KGgoAAAAN"), "Invalid Screenshot Data")
 
+    def test_ptart_parser_with_multi_cwe_fabricated_copy(self):
+        # Fabricated copy: the retest's original_hit carries multiple CWEs
+        # ([284, 862]); the primary CWE remains the last element (862).
+        with (get_unit_tests_scans_path("ptart") / "ptart_vuln_plus_retest_multi_cwe_fabricated.json").open(encoding="utf-8") as testfile:
+            parser = PTARTParser()
+            findings = parser.get_findings(testfile, self.test)
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(862, finding.cwe)
+            self.assertEqual([284, 862], finding.unsaved_cwes)
+
     def test_ptart_parser_with_single_vuln_containing_multiple_cwes(self):
         with (get_unit_tests_scans_path("ptart") / "ptart_one_vul_multiple_cwe.json").open(encoding="utf-8") as testfile:
             parser = PTARTParser()
@@ -818,6 +883,7 @@ class TestPTARTParser(DojoTestCase):
             self.assertEqual("Test Assessment", finding.component_name)
             self.assertEqual("2024-09-06", finding.date.strftime("%Y-%m-%d"))
             self.assertEqual(862, finding.cwe)
+            self.assertEqual([284, 862], finding.unsaved_cwes)
             self.assertEqual(2, len(finding.unsaved_tags))
             self.assertEqual([
                 "A01:2021-Broken Access Control",

@@ -12,6 +12,7 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.finding.vulnerability_id import finding_cwe_labels, resolve_vulnerability_id_type
 from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
@@ -27,6 +28,7 @@ from dojo.models import (
     Endpoint,
     FileUpload,
     Finding,
+    Finding_CWE,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
@@ -80,6 +82,8 @@ class BaseImporter(ImporterOptions):
         ImporterOptions.__init__(self, *args, **kwargs)
         self.pending_vulnerability_ids: list[Vulnerability_Id] = []
         self.pending_vuln_id_deletes: list[int] = []
+        self.pending_cwes: list[Finding_CWE] = []
+        self.pending_cwe_deletes: list[int] = []
         self.pending_burp_rr: list[BurpRawRequestResponse] = []
 
     def check_child_implementation_exception(self):
@@ -791,23 +795,50 @@ class BaseImporter(ImporterOptions):
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
         self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
             for vid in vulnerability_ids_to_process
         ])
         if vulnerability_ids_to_process:
             finding.cve = vulnerability_ids_to_process[0]
         else:
             finding.cve = None
+        self.store_cwes(finding)
         return finding
 
+    def finding_cwe_values(self, finding: Finding) -> list[str]:
+        """Canonical CWE-<n> labels: the primary Finding.cwe plus any parser-supplied unsaved_cwes."""
+        return finding_cwe_labels(finding.cwe, getattr(finding, "unsaved_cwes", None))
+
+    def store_cwes(self, finding: Finding) -> None:
+        """Accumulate Finding_CWE rows for bulk insert at the batch boundary (via flush_vulnerability_ids)."""
+        self.pending_cwes.extend([
+            Finding_CWE(finding=finding, cwe=cwe) for cwe in self.finding_cwe_values(finding)
+        ])
+
+    def reconcile_cwes(self, finding: Finding) -> None:
+        """Accumulate a delete+insert of Finding_CWE rows for a reimported finding when its CWEs changed."""
+        new_cwes = set(self.finding_cwe_values(finding))
+        # finding_cwe_set is prefetched on reimport candidates (build_candidate_scope_queryset).
+        existing_cwes = {row.cwe for row in finding.finding_cwe_set.all()}
+        if existing_cwes == new_cwes:
+            return
+        self.pending_cwe_deletes.append(finding.id)
+        self.pending_cwes.extend([Finding_CWE(finding=finding, cwe=cwe) for cwe in new_cwes])
+
     def flush_vulnerability_ids(self) -> None:
-        """Delete stale and bulk-insert accumulated Vulnerability_Id objects, then clear buffers."""
+        """Delete stale and bulk-insert accumulated Vulnerability_Id / Finding_CWE objects, then clear buffers."""
         if self.pending_vuln_id_deletes:
             Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
             self.pending_vuln_id_deletes.clear()
         if self.pending_vulnerability_ids:
             Vulnerability_Id.objects.bulk_create(self.pending_vulnerability_ids, batch_size=1000)
             self.pending_vulnerability_ids.clear()
+        if self.pending_cwe_deletes:
+            Finding_CWE.objects.filter(finding_id__in=self.pending_cwe_deletes).delete()
+            self.pending_cwe_deletes.clear()
+        if self.pending_cwes:
+            Finding_CWE.objects.bulk_create(self.pending_cwes, batch_size=1000, ignore_conflicts=True)
+            self.pending_cwes.clear()
 
     def process_files(
         self,
