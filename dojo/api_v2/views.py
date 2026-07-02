@@ -81,6 +81,8 @@ from dojo.finding.views import (
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.jira import services as jira_services
 from dojo.labels import get_labels
+from dojo.location.models import LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     Announcement,
     App_Analysis,
@@ -141,6 +143,7 @@ from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
+from dojo.url.models import URL
 from dojo.user.authentication import reset_token_for_user
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
@@ -2626,6 +2629,29 @@ class NotesViewSet(
         return Notes.objects.all().order_by("id")
 
 
+def _report_url_location_refs(product):
+    """
+    URL LocationProductReferences for a product, shaped for V3EndpointCompatibleSerializer.
+
+    Mirrors V3EndpointCompatibleViewSet.get_queryset so the report's ``endpoints`` field matches
+    the V3 ``/endpoints`` route. Non-URL locations (e.g. dependencies) are excluded because the
+    compat serializer only understands URL-backed locations.
+    """
+    active_finding_subquery = build_count_subquery(
+        LocationFindingReference.objects.filter(
+            location=OuterRef("location"),
+            status=FindingLocationStatus.Active,
+        ),
+        group_field="location",
+    )
+    return LocationProductReference.objects.filter(
+        product=product,
+        location__location_type=URL.LOCATION_TYPE,
+    ).annotate(
+        active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+    ).distinct()
+
+
 def report_generate(request, obj, options):
     user = Dojo_User.objects.get(id=request.user.id)
     product_type = None
@@ -2696,12 +2722,14 @@ def report_generate(request, obj, options):
                 Finding.objects.filter(test__engagement__product=product),
             ),
         )
-        # TODO: Delete this after the move to Locations
-        with Endpoint.allow_endpoint_init():
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = _report_url_location_refs(product)
+        else:
+            # TODO: Delete this after the move to Locations
             ids = get_endpoint_ids(
                 Endpoint.objects.filter(product=product).distinct(),
             )
-            endpoints = list(Endpoint.objects.filter(id__in=ids))
+            endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
@@ -2715,12 +2743,14 @@ def report_generate(request, obj, options):
         report_name = "Engagement Report: " + str(engagement)
 
         ids = set(finding.id for finding in findings.qs)  # noqa: C401
-        # TODO: Delete this after the move to Locations
-        with Endpoint.allow_endpoint_init():
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = _report_url_location_refs(engagement.product)
+        else:
+            # TODO: Delete this after the move to Locations
             ids = get_endpoint_ids(
                 Endpoint.objects.filter(product=engagement.product).distinct(),
             )
-            endpoints = list(Endpoint.objects.filter(id__in=ids))
+            endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Test":
         test = obj

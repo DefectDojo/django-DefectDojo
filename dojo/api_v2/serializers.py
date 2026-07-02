@@ -2592,7 +2592,6 @@ class ReportGenerateSerializer(serializers.Serializer):
     report_info = serializers.CharField(max_length=200)
     test = TestSerializer(many=False, read_only=True)
     endpoint = EndpointSerializer(many=False, read_only=True)
-    endpoints = EndpointSerializer(many=True, read_only=True)
     findings = FindingSerializer(many=True, read_only=True)
     user = UserStubSerializer(many=False, read_only=True)
     team_name = serializers.CharField(max_length=200)
@@ -2602,6 +2601,22 @@ class ReportGenerateSerializer(serializers.Serializer):
     finding_notes = FindingToNotesSerializer(
         many=True, allow_null=True, required=False,
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Locations are the default under V3; V3EndpointCompatibleSerializer presents them with the
+        # same endpoint-compatible shape the V3 /endpoints route uses. Legacy Endpoints are the
+        # V2-only exception. The lazy import avoids a circular import: endpoint_compat imports this
+        # module (and its viewset references ReportGenerateSerializer in @extend_schema at
+        # class-definition time).
+        if settings.V3_FEATURE_LOCATIONS:
+            from dojo.location.api.endpoint_compat import (  # noqa: PLC0415
+                V3EndpointCompatibleSerializer,
+            )
+            self.fields["endpoints"] = V3EndpointCompatibleSerializer(many=True, read_only=True)
+        else:
+            # TODO: Delete this after the move to Locations
+            self.fields["endpoints"] = EndpointSerializer(many=True, read_only=True)
 
 
 from dojo.jira.api.serializers import (  # noqa: E402, F401 backward compat

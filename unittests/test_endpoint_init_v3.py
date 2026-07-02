@@ -32,8 +32,8 @@ from rest_framework.test import APIClient
 
 from dojo.github.services import github_body
 from dojo.jira.helper import jira_description
-from dojo.location.models import LocationFindingReference
-from dojo.location.status import FindingLocationStatus
+from dojo.location.models import LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
     Endpoint,
     Endpoint_Status,
@@ -127,6 +127,15 @@ class TestEndpointInitV3(DojoTestCase):
             location=saved[0].location, finding=tree.finding, status=status,
         )
 
+    def _add_product_location(self, product, host):
+        """Attach a V3 URL Location to the product via a LocationProductReference."""
+        url = URL(protocol="https", host=host)
+        url.clean()
+        saved = URL.bulk_get_or_create([url])
+        return LocationProductReference.objects.create(
+            location=saved[0].location, product=product, status=ProductLocationStatus.Active,
+        )
+
     # ------------------------------------------------------------------
     # JIRA / GitHub descriptions
     # ------------------------------------------------------------------
@@ -189,29 +198,36 @@ class TestEndpointInitV3(DojoTestCase):
     # ------------------------------------------------------------------
     # API report_generate (Product / Engagement)
     # ------------------------------------------------------------------
-    def test_api_product_report_generate_with_legacy_endpoints(self):
-        """POST /products/{id}/generate_report must not 500 when the product has legacy endpoints."""
+    def test_api_product_report_generate_renders_locations_under_v3(self):
+        """POST /products/{id}/generate_report returns URL locations (compat shape) under V3."""
         tree = self._make_tree("prod-rpt")
-        self._add_legacy_endpoint(tree, "legacy-prodrpt.example.com")
+        self._add_legacy_endpoint(tree, "legacy-prodrpt.example.com")  # must be ignored under V3
+        self._add_product_location(tree.product, "loc-prodrpt.example.com")
 
         response = self.api_client.post(
             reverse("product-generate-report", args=(tree.product.id,)),
             {}, format="json", HTTP_HOST="testserver",
         )
 
-        self.assertNotEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 200)
+        hosts = [ep.get("host") for ep in response.json()["endpoints"]]
+        self.assertIn("loc-prodrpt.example.com", hosts)
+        self.assertNotIn("legacy-prodrpt.example.com", hosts)
 
-    def test_api_engagement_report_generate_with_legacy_endpoints(self):
-        """POST /engagements/{id}/generate_report must not 500 when legacy endpoints exist."""
+    def test_api_engagement_report_generate_renders_locations_under_v3(self):
+        """POST /engagements/{id}/generate_report returns URL locations (compat shape) under V3."""
         tree = self._make_tree("eng-rpt")
-        self._add_legacy_endpoint(tree, "legacy-engrpt.example.com")
+        self._add_legacy_endpoint(tree, "legacy-engrpt.example.com")  # must be ignored under V3
+        self._add_product_location(tree.product, "loc-engrpt.example.com")
 
         response = self.api_client.post(
             reverse("engagement-generate-report", args=(tree.engagement.id,)),
             {}, format="json", HTTP_HOST="testserver",
         )
 
-        self.assertNotEqual(response.status_code, 500)
+        self.assertEqual(response.status_code, 200)
+        hosts = [ep.get("host") for ep in response.json()["endpoints"]]
+        self.assertIn("loc-engrpt.example.com", hosts)
 
     # ------------------------------------------------------------------
     # API metadata batch
