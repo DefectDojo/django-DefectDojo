@@ -297,7 +297,10 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     finding_ids_batch,
                     dedupe_option=True,
                     rules_option=True,
-                    product_grading_option=True,
+                    # Callers may defer grading to a single end-of-import pass
+                    # (e.g. a large chunked import) to avoid one grade
+                    # recalculation per dedupe batch; default keeps per-batch grading.
+                    product_grading_option=not self.defer_product_grading,
                     issue_updater_option=True,
                     push_to_jira=push_to_jira,
                     force_sync=kwargs.get("force_sync", False),
@@ -324,7 +327,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Note: All chord batching is now handled within the loop above
 
         # Always perform an initial grading, even though it might get overwritten later.
-        perform_product_grading(self.test.engagement.product)
+        # Callers may defer grading to a single end-of-import pass (see defer_product_grading).
+        if not self.defer_product_grading:
+            perform_product_grading(self.test.engagement.product)
 
         return new_findings
 
@@ -428,7 +433,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                     jira_services.push(finding_group)
 
         # Calculate grade once after all findings have been closed
-        if old_findings:
+        if old_findings and not self.defer_product_grading:
             perform_product_grading(self.test.engagement.product)
 
         return old_findings

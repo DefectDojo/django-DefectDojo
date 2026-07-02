@@ -353,6 +353,8 @@ class ImporterOptions:
     ) -> bool:
         # Defer per-batch/end/close-old product grade dispatches so callers (e.g. a large
         # chunked reimport) can grade once at the end instead of once per dedupe batch.
+        # Caveat: all-or-nothing -- when True the caller MUST run perform_product_grading()
+        # itself after the import; nothing re-grades automatically, so a stale grade goes unnoticed.
         return self.validate(
             "defer_product_grading",
             expected_types=[bool],

@@ -91,6 +91,91 @@ class TestDojoDefaultImporter(DojoTestCase):
             for finding in new_findings:
                 self.assertIn(finding.numerical_severity, ["S0", "S1", "S2", "S3", "S4"])
 
+    def _grading_import_options(self, scan_type, name_suffix, **overrides):
+        """Minimal DefaultImporter options for the product-grading-deferral tests."""
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name=f"grade-defer-pt-{name_suffix}")
+        product, _ = Product.objects.get_or_create(
+            name=f"grade-defer-prod-{name_suffix}",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name=f"grade-defer-eng-{name_suffix}",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        options = {
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": scan_type,
+            "engagement": engagement,
+        }
+        options.update(overrides)
+        return options
+
+    def _process_findings_capturing_grading(self, importer, parsed_findings):
+        """Run process_findings with dispatch + grading patched; return (per_batch_options, grade_mock)."""
+        per_batch_options = []
+
+        def _spy(_task, *args, **kwargs):
+            per_batch_options.append(kwargs.get("product_grading_option"))
+
+        with (
+            patch("dojo.importers.default_importer.dojo_dispatch_task", side_effect=_spy),
+            patch("dojo.importers.default_importer.perform_product_grading") as grade,
+        ):
+            importer.process_findings(parsed_findings)
+        return per_batch_options, grade
+
+    def test_defer_product_grading_skips_per_batch_and_end_grade(self):
+        """
+        defer_product_grading=True makes DefaultImporter dispatch each dedupe batch with
+        product_grading_option=False and skip the end-of-import perform_product_grading pass,
+        leaving the caller to grade once. Mirrors DefaultReImporter's deferral.
+        """
+        with ACUNETIX_AUDIT_ONE_VULN_FILENAME.open(encoding="utf-8") as scan:
+            scan_type = "Acunetix Scan"
+            importer = DefaultImporter(**self._grading_import_options(scan_type, "defer", defer_product_grading=True))
+            test = importer.create_test(scan_type)
+            parsed_findings = importer.get_parser().get_findings(scan, test)
+
+            per_batch_options, grade = self._process_findings_capturing_grading(importer, parsed_findings)
+
+            self.assertTrue(per_batch_options, "at least one post-process batch should be dispatched")
+            self.assertTrue(
+                all(opt is False for opt in per_batch_options),
+                f"deferred import must dispatch product_grading_option=False, got {per_batch_options}",
+            )
+            grade.assert_not_called()
+
+    def test_default_import_grades_per_batch_and_at_end(self):
+        """
+        Control for the deferral test: without defer_product_grading, DefaultImporter grades per
+        dedupe batch (product_grading_option=True) and once at the end, as it always has.
+        """
+        with ACUNETIX_AUDIT_ONE_VULN_FILENAME.open(encoding="utf-8") as scan:
+            scan_type = "Acunetix Scan"
+            importer = DefaultImporter(**self._grading_import_options(scan_type, "default"))
+            test = importer.create_test(scan_type)
+            parsed_findings = importer.get_parser().get_findings(scan, test)
+
+            per_batch_options, grade = self._process_findings_capturing_grading(importer, parsed_findings)
+
+            self.assertTrue(per_batch_options, "at least one post-process batch should be dispatched")
+            self.assertTrue(
+                all(opt is True for opt in per_batch_options),
+                f"default import must dispatch product_grading_option=True, got {per_batch_options}",
+            )
+            grade.assert_called_once()
+
     def test_import_scan(self):
         with (get_unit_tests_path() / "scans" / "sarif" / "spotbugs.sarif").open(encoding="utf-8") as scan:
             scan_type = SarifParser().get_scan_types()[0]  # SARIF format implement the new method
