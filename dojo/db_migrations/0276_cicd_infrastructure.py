@@ -54,7 +54,7 @@ def migrate_tool_configs_to_cicd_infrastructure(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0269_normalize_blank_finding_components"),
+        ("dojo", "0275_usercontactinfo_user_state_details"),
     ]
 
     operations = [
