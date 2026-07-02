@@ -219,7 +219,7 @@ class EngagementViewSet(
         responses={status.HTTP_201_CREATED: api_v2_serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission],
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=[IsAuthenticated, permissions.UserHasEngagementFilePermission],
     )
     def files(self, request, pk=None):
         engagement = self.get_object()

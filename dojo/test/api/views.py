@@ -194,7 +194,7 @@ class TestsViewSet(
         responses={status.HTTP_201_CREATED: api_v2_serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestFilePermission),
     )
     def files(self, request, pk=None):
         test = self.get_object()
@@ -233,7 +233,7 @@ class TestsViewSet(
         detail=True,
         methods=["get"],
         url_path=r"files/download/(?P<file_id>\d+)",
-        permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
+        permission_classes=(IsAuthenticated, permissions.UserHasTestFilePermission),
     )
     def download_file(self, request, file_id, pk=None):
         test = self.get_object()
