@@ -208,7 +208,13 @@ class FindingViewSet(
                 "test__engagement__product__prod_type",
             )
 
-        return findings.distinct()
+        # No blanket .distinct(): get_authorized_findings filters by a scalar product-id IN (no row
+        # multiplication), the prefetches above don't join, and ApiFindingFilter rewrites its to-many
+        # value filters (endpoints/found_by/reviewers/finding_group/risk_acceptance) as Exists() while
+        # ordering by to-many fields aggregates via MultivaluedOrderingFilter. Tag filters still apply
+        # DojoFilter.qs's tag-conditional distinct. A query-wide DISTINCT over the full wide-row finding
+        # result set forces an expensive sort/hash-aggregate on every list request, so it's dropped.
+        return findings
 
     def get_serializer_class(self):
         if self.request and self.request.method == "POST":

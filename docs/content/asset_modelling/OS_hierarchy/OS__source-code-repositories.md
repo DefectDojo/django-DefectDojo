@@ -33,15 +33,15 @@ For CI/CD Engagements, the commit hash, branch/tag and code line can vary, so yo
 
 In a CI/CD Engagement, you can specify a commit hash or branch/tag in the **Edit Engagement** form, which will be appended to any links rendered by DefectDojo.  If these are not set, the SCM URL will need to contain a complete link which includes the code branch. 
 
-SCM navigation URL is composed from Repo URL using SCM Type. A specific SCM type can be set in Product custom field "scm-type". If no "scm-type" is set and the URL contains "https://github.com", a "github" SCM type is assumed.
+SCM navigation URL is composed from Repo URL using SCM Type. A specific SCM type can be set in Asset custom field "scm-type". If no "scm-type" is set and the URL contains "https://github.com", a "github" SCM type is assumed.
 
-Product custom fields:
+Asset custom fields:
 
-![Product custom fields](images/product-custom-fields_1.png)
+![Asset custom fields](images/asset-custom-fields_1.png)
 
-Product SCM type add:
+Asset SCM type add:
 
-![Product scm type](images/product-scm-type_1.png)
+![Asset scm type](images/asset-scm-type_1.png)
 
 Possible SCM types could be 'github', 'gitlab', 'bitbucket', 'bitbucket-standalone', 'gitea', 'codeberg' or nothing (for default github).
 

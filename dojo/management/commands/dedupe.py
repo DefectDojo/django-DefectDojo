@@ -12,6 +12,7 @@ from dojo.finding.deduplication import (
     do_dedupe_finding_task,
     do_dedupe_finding_task_internal,
     get_finding_models_for_deduplication,
+    hashcode_values_writer,
 )
 from dojo.models import Finding, Product
 from dojo.utils import (
@@ -96,6 +97,10 @@ class Command(BaseCommand):
                 "test", "test__engagement", "test__engagement__product", "test__test_type",
             ).prefetch_related(
                 "locations",
+                # vulnerability_id_set feeds hash_code computation for parsers whose
+                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
+                # a per-finding query in get_vulnerability_ids().
+                "vulnerability_id_set",
                 Prefetch(
                     "original_finding",
                     queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
@@ -108,6 +113,10 @@ class Command(BaseCommand):
                 "test", "test__engagement", "test__engagement__product", "test__test_type",
             ).prefetch_related(
                 "endpoints",
+                # vulnerability_id_set feeds hash_code computation for parsers whose
+                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
+                # a per-finding query in get_vulnerability_ids().
+                "vulnerability_id_set",
                 Prefetch(
                     "original_finding",
                     queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
@@ -118,7 +127,8 @@ class Command(BaseCommand):
         if not dedupe_only:
             logger.info("######## Start Updating Hashcodes (foreground) ########")
 
-            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ")
+            hash_code_writer = hashcode_values_writer if settings.MASS_HASH_CODE_USE_SQL_WRITER else None
+            mass_model_updater(Finding, findings, generate_hash_code, fields=["hash_code"], order="asc", log_prefix="hash_code computation ", writer=hash_code_writer)
 
             logger.info("######## Done Updating Hashcodes########")
 

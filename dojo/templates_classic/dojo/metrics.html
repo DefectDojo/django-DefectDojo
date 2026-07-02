@@ -368,7 +368,7 @@
                         <!-- /.panel -->
                     </div>
                 {% endif %}
-                {% if not critical_prods %}
+                {% if not critical_prods and name != labels.ASSET_METRICS_CRITICAL_LABEL %}
                     <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
@@ -958,7 +958,7 @@
                 medium1.push([{{ week.epoch }}, {{ week.medium }}]);
                 low1.push([{{ week.epoch }}, {{ week.low }}]);
             {% endfor %}
-            {% if not critical_prods %}
+            {% if not critical_prods and name != labels.ASSET_METRICS_CRITICAL_LABEL %}
                 opened_per_week_2(critical, high, medium, low);
                 accepted_per_week_2(critical1, high1, medium1, low1);
             {% endif %}

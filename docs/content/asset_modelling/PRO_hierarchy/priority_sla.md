@@ -84,11 +84,19 @@ organization’s policies, so these fields do not necessarily need to be set per
 
 Findings within a Product can have additional metadata which can further adjust the Finding’s Priority and Risk level:
 
-* Whether or not the Finding has an EPSS score, this is automatically added to Findings and kept up to date for Pro users
+* Whether or not the Finding has an **EPSS Score**, this is automatically added to Findings and kept up to date for Pro users.  The **EPSS Score** is the field that contributes to the Priority Score — **EPSS Percentile** is tracked on the Finding for reference but does not directly feed the calculation.
 * How many Endpoints in the Product are affected by this Finding
 * Whether or not a Finding is Under Review
 * Whether the Finding is in the KEV (Known Exploited Vulnerabilities) database, which is checked by DefectDojo on a regular basis
 * The tool-reported Severity of a Finding (Info, Low, Medium, High, Critical)
+
+#### EPSS Score vs EPSS Percentile
+
+Two Findings that look identical on the visible factors (Severity, Business Criticality, Internet Accessible, Exploit Available) can still end up with different Priority Scores if their **EPSS Scores** differ.  This is expected: EPSS Score is a contextual input to the calculation.
+
+EPSS Percentile is shown on the Finding for context, but it is not consumed by the Priority Score calculation.  If you need to compare two Findings to understand a Priority Score gap, look at the EPSS Score values, not the Percentile values.
+
+The exact weight that EPSS Score (and the other factors) carries in the Priority Score calculation is intentionally not published.  If you need to influence how heavily EPSS Score affects scoring in your environment, adjust the **Exploitability** slider in your [Prioritization Engine](#prioritization-engines).
 
 
 ## Finding Risk Calculation
@@ -210,7 +218,7 @@ You can use SLAs as a way to represent your organizations remediation policies. 
 * You can sort or filter Finding tables by SLA days.
 * SLA violations can be configured to trigger [Notifications](/admin/notifications/about_notifications/) to DefectDojo users assigned to the related Product.
 * In **DefectDojo Pro**, SLA performance is also tracked on the [Executive Insights and Remediation](/metrics_reports/pro_metrics/pro__overview/) Metrics Dashboards.
-* SLA compliance can also be used to create custom [Dashboard Tiles](/metrics_reports/dashboards/about_custom_dashboard_tiles/#sla-violation-tile) in **DefectDojo Pro**.
+* SLA compliance can also be surfaced on a custom [dashboard](/metrics_reports/dashboards/custom-dashboards/) in **DefectDojo Pro** — for example with an SLA Burndown or a filtered Count widget.
 
 ### Mitigated Within SLA status
 
