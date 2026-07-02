@@ -19,12 +19,14 @@ These tests cover the sites that were guarded/repaired for that:
 * API ``metadata/batch`` -- the ``endpoint`` parent fetch.
 """
 import logging
+from io import BytesIO
 from types import SimpleNamespace
 
 from django.contrib.auth.models import User
 from django.test import Client, override_settings
 from django.urls import reverse
 from django.utils import timezone
+from openpyxl import load_workbook
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -154,24 +156,35 @@ class TestEndpointInitV3(DojoTestCase):
     # ------------------------------------------------------------------
     # CSV / Excel exports
     # ------------------------------------------------------------------
-    def test_csv_export_with_legacy_endpoints(self):
-        """Exporting a finding list containing a legacy-endpoint finding must not 500."""
+    def test_csv_export_renders_locations_under_v3(self):
+        """CSV export must render locations (not legacy endpoints) under V3 without crashing."""
         tree = self._make_tree("csv")
-        self._add_legacy_endpoint(tree, "legacy-csv.example.com")
+        self._add_legacy_endpoint(tree, "legacy-csv.example.com")  # must be ignored under V3
+        self._add_location(tree, "loc-csv.example.com")
 
         response = self.ui_client.get(reverse("csv_export") + f"?url=test/{tree.test.id}")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("legacy-csv.example.com", response.content.decode())
+        content = response.content.decode()
+        self.assertIn("loc-csv.example.com", content)
+        self.assertNotIn("legacy-csv.example.com", content)
 
-    def test_excel_export_with_legacy_endpoints(self):
-        """Same as CSV, for the xlsx export path."""
+    def test_excel_export_renders_locations_under_v3(self):
+        """Excel export must render locations (not legacy endpoints) under V3 without crashing."""
         tree = self._make_tree("xlsx")
-        self._add_legacy_endpoint(tree, "legacy-xlsx.example.com")
+        self._add_legacy_endpoint(tree, "legacy-xlsx.example.com")  # must be ignored under V3
+        self._add_location(tree, "loc-xlsx.example.com")
 
         response = self.ui_client.get(reverse("excel_export") + f"?url=test/{tree.test.id}")
 
         self.assertEqual(response.status_code, 200)
+        cells = [
+            str(cell.value)
+            for row in load_workbook(BytesIO(response.content)).active.iter_rows()
+            for cell in row
+        ]
+        self.assertTrue(any("loc-xlsx.example.com" in c for c in cells), cells)
+        self.assertFalse(any("legacy-xlsx.example.com" in c for c in cells), cells)
 
     # ------------------------------------------------------------------
     # API report_generate (Product / Engagement)

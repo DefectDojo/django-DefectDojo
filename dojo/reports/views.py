@@ -916,8 +916,11 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.name)
 
                 endpoint_value = ""
-                # TODO: Delete this after the move to Locations
-                with Endpoint.allow_endpoint_init():
+                if settings.V3_FEATURE_LOCATIONS:
+                    for location_ref in finding.locations.all():
+                        endpoint_value += f"{location_ref.location}; "
+                else:
+                    # TODO: Delete this after the move to Locations
                     for endpoint in finding.endpoints.all():
                         endpoint_value += f"{endpoint}; "
                 endpoint_value = endpoint_value.removesuffix("; ")
@@ -1083,8 +1086,11 @@ class ExcelExportView(View):
                 col_num += 1
 
                 endpoint_value = ""
-                # TODO: Delete this after the move to Locations
-                with Endpoint.allow_endpoint_init():
+                if settings.V3_FEATURE_LOCATIONS:
+                    for location_ref in finding.locations.all():
+                        endpoint_value += f"{location_ref.location}; \n"
+                else:
+                    # TODO: Delete this after the move to Locations
                     for endpoint in finding.endpoints.all():
                         endpoint_value += f"{endpoint}; \n"
                 endpoint_value = endpoint_value.removesuffix("; \n")
