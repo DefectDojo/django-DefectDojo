@@ -940,6 +940,7 @@ class EditFinding(View):
             self.process_burp_request_response(new_finding, context)
             # Save the vulnerability IDs
             finding_helper.save_vulnerability_ids(new_finding, context["form"].cleaned_data["vulnerability_ids"].split())
+            finding_helper.save_cwes(new_finding)
             # Add a success message
             messages.add_message(
                 request,

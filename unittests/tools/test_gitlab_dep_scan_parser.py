@@ -23,6 +23,15 @@ class TestGitlabDepScanParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(1, len(findings))
 
+    def test_parse_file_with_multiple_cwe_v15(self):
+        with (get_unit_tests_scans_path("gitlab_dep_scan") / "gl-dependency-scanning-report-multiple-cwe-fabricated_v15.json").open(encoding="utf-8") as testfile:
+            parser = GitlabDepScanParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual("776", finding.cwe)  # primary is the first CWE identifier
+            self.assertEqual(["776", "400"], finding.unsaved_cwes)  # both CWE identifiers are kept
+
     def test_parse_file_with_two_vuln_has_one_missing_component__v14(self):
         with (get_unit_tests_scans_path("gitlab_dep_scan") / "gl-dependency-scanning-report-2-vuln-missing-component_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabDepScanParser()

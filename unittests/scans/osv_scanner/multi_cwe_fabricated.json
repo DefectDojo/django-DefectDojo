@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "source": {
+        "path": "/tmp/components/yarn.lock",
+        "type": "lockfile"
+      },
+      "packages": [
+        {
+          "package": {
+            "name": "example-pkg",
+            "version": "1.0.0",
+            "ecosystem": "npm"
+          },
+          "vulnerabilities": [
+            {
+              "id": "GHSA-multi-cwe-0001",
+              "summary": "Example vulnerability with multiple CWEs",
+              "details": "Example details.",
+              "affected": [
+                {
+                  "package": {
+                    "ecosystem": "npm",
+                    "name": "example-pkg",
+                    "purl": "pkg:npm/example-pkg"
+                  },
+                  "database_specific": {
+                    "cwes": [
+                      {
+                        "cweId": "CWE-79",
+                        "name": "Cross-site Scripting"
+                      },
+                      {
+                        "cweId": "CWE-89",
+                        "name": "SQL Injection"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "references": [
+                {
+                  "type": "ADVISORY",
+                  "url": "https://github.com/advisories/GHSA-multi-cwe-0001"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -986,6 +986,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
+        # Reconcile CWEs independently of the vulnerability_ids early-exit below (CWEs may change
+        # while vulnerability_ids do not, and vice versa).
+        self.reconcile_cwes(finding)
+
         # Use prefetched data directly without triggering queries
         existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
         new_vuln_ids = set(vulnerability_ids_to_process)
