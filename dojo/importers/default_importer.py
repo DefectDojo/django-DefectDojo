@@ -326,8 +326,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
 
         # Note: All chord batching is now handled within the loop above
 
-        # Always perform an initial grading, even though it might get overwritten later.
-        # Callers may defer grading to a single end-of-import pass (see defer_product_grading).
+        # Perform an initial grading (it may be overwritten later) unless the caller defers
+        # grading to a single end-of-import pass (see defer_product_grading).
         if not self.defer_product_grading:
             perform_product_grading(self.test.engagement.product)
 
