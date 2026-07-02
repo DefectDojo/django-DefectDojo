@@ -351,8 +351,8 @@ class ImporterOptions:
         *args: list,
         **kwargs: dict,
     ) -> bool:
-        # Defer per-batch/end/close-old product grade dispatches so callers (e.g. the chunked
-        # connector reimport) can grade once at the end instead of once per dedupe batch.
+        # Defer per-batch/end/close-old product grade dispatches so callers (e.g. a large
+        # chunked reimport) can grade once at the end instead of once per dedupe batch.
         return self.validate(
             "defer_product_grading",
             expected_types=[bool],

@@ -336,7 +336,7 @@ def install_intermediate_flush_hook():
     original_add = cls.add_to_context
 
     def add_to_context_with_flush(self, engine, obj):
-        # Bulk ops under skip_index_update() (e.g. connector chunked reimport) set this to make the
+        # Bulk ops under skip_index_update() (e.g. a large chunked reimport) set this to make the
         # hook a full no-op on this thread. skip_index_update() only invalidates its context at
         # __exit__, so mid-accumulation the hook would otherwise drain (index) objects meant to be
         # discarded -- defeating the skip. Returning before original_add means nothing is even

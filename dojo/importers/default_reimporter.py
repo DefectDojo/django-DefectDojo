@@ -465,7 +465,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             dedupe_option=True,
                             rules_option=True,
                             # Callers may defer grading to a single end-of-import pass
-                            # (e.g. chunked connector reimport) to avoid one grade
+                            # (e.g. a large chunked reimport) to avoid one grade
                             # recalculation per dedupe batch; default keeps per-batch grading.
                             product_grading_option=not self.defer_product_grading,
                             issue_updater_option=True,
