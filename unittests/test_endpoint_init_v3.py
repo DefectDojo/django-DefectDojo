@@ -23,7 +23,7 @@ from io import BytesIO
 from types import SimpleNamespace
 
 from django.contrib.auth.models import User
-from django.test import Client, override_settings
+from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
 from openpyxl import load_workbook
@@ -47,12 +47,12 @@ from dojo.models import (
 )
 from dojo.url.models import URL
 
-from .dojo_test_case import DojoTestCase
+from .dojo_test_case import DojoTestCase, skip_unless_v3
 
 logger = logging.getLogger(__name__)
 
 
-@override_settings(V3_FEATURE_LOCATIONS=True)
+@skip_unless_v3
 class TestEndpointInitV3(DojoTestCase):
 
     """
