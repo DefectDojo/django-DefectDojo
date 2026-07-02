@@ -12,6 +12,7 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
@@ -791,7 +792,7 @@ class BaseImporter(ImporterOptions):
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
         self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
             for vid in vulnerability_ids_to_process
         ])
         if vulnerability_ids_to_process:
