@@ -616,8 +616,8 @@ class FindingTagFilter(DojoFilter):
         field_name="test__engagement__product__tags__name",
         to_field_name="name",
         queryset=Product.tags.tag_model.objects.all().order_by("name"),
-        help_text="Filter Findings by the selected Product tags (AND logic)",
-        label="Product Tags (AND)",
+        help_text=labels.ASSET_FILTERS_TAGS_ASSET_AND_HELP,
+        label=labels.ASSET_FILTERS_TAGS_ASSET_AND_LABEL,
         conjoined=True,
     )
 
