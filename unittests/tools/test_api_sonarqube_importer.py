@@ -58,6 +58,20 @@ def dummy_hotspot_rule_wo_risk_description(self, *args, **kwargs):
         return json.load(json_file)
 
 
+def dummy_sca_risks(self, *args, **kwargs):
+    with (get_unit_tests_scans_path("api_sonarqube") / "sca_risks.json").open(encoding="utf-8") as json_file:
+        risks = json.load(json_file)
+        # Wrap in paginated response structure
+        return {
+            "page": {
+                "pageIndex": 1,
+                "pageSize": 500,
+                "total": len(risks),
+            },
+            "issuesReleases": risks,
+        }
+
+
 def empty_list(self, *args, **kwargs):
     return []
 
@@ -136,6 +150,7 @@ class TestSonarqubeImporterOneSQConfigNoKey(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -162,6 +177,7 @@ class TestSonarqubeImporterOneSQConfigWithKey(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -213,6 +229,7 @@ class TestSonarqubeImporterSelectedSQConfigsNoKey(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -249,6 +266,7 @@ class TestSonarqubeImporterSelectedSQConfigsWithKey(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -284,6 +302,7 @@ class TestSonarqubeImporterExternalRule(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -292,7 +311,7 @@ class TestSonarqubeImporterExternalRule(DojoTestCase):
         self.assertEqual('Remove this useless assignment to local variable "currentValue".', finding.title)
         self.assertEqual(None, finding.cwe)
         self.assertEqual("", finding.description)
-        self.assertEqual("[Issue permalink](http://localhoproject/issues?issues=AWKWIl8pZpu0CyehMfc4&open=AWKWIl8pZpu0CyehMfc4&resolved=CONFIRMED&id=internal.dummy.project) \n", finding.references)
+        self.assertEqual("[Issue permalink](http://localhost/project/issues?issues=AWKWIl8pZpu0CyehMfc4&open=AWKWIl8pZpu0CyehMfc4&resolved=CONFIRMED&id=internal.dummy.project) \n", finding.references)
         self.assertEqual("Medium", finding.severity)
         self.assertEqual(242, finding.line)
         self.assertEqual("internal.dummy.project:src/main/javascript/TranslateDirective.ts", finding.file_path)
@@ -396,6 +415,7 @@ class TestSonarqubeImporterTwoIssuesNoHotspots(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -421,6 +441,7 @@ class TestSonarqubeImporterNoIssuesOneHotspot(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", dummy_one_hotspot)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -446,6 +467,7 @@ class TestSonarqubeImporterNoIssuesTwoHotspots(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", dummy_many_hotspots)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -471,6 +493,7 @@ class TestSonarqubeImporterTwoIssuesTwoHotspots(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", dummy_many_hotspots)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -496,6 +519,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", dummy_one_hotspot)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -516,7 +540,7 @@ class TestSonarqubeImporterValidateHotspotData(DojoTestCase):
         )
         self.assertEqual(str(findings[0].severity), "High")
         self.assertMultiLineEqual(
-            "[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) "
+            "[Hotspot permalink](http://localhost/security_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq)"
             "\n"
             "[CVE-2019-13466](http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-13466)"
             "\n"
@@ -567,6 +591,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule_wo_risk_description)
     @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", dummy_one_hotspot)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", empty_list)
     def test_parser(self):
         parser = SonarQubeApiImporter()
         findings = parser.get_findings(None, self.test)
@@ -586,7 +611,7 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
             findings[0].description,
         )
         self.assertEqual(str(findings[0].severity), "High")
-        self.assertEqual(findings[0].references, "[Hotspot permalink](http://localhosecurity_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) \n")
+        self.assertEqual(findings[0].references, "[Hotspot permalink](http://localhost/security_hotspots?id=internal.dummy.project&hotspots=AXgm6Z-ophPPY0C1qhRq) \n")
         self.assertEqual(str(findings[0].file_path), "internal.dummy.project:spec/support/user_fixture.rb")
         self.assertEqual(findings[0].line, 9)
         self.assertEqual(findings[0].active, True)
@@ -597,3 +622,78 @@ class TestSonarqubeImporterHotspotRule_WO_Risk_Description(DojoTestCase):
         self.assertEqual(findings[0].static_finding, True)
         self.assertEqual(findings[0].scanner_confidence, 1)
         self.assertEqual(str(findings[0].sonarqube_issue), "AXgm6Z-ophPPY0C1qhRq")
+
+
+class TestSonarqubeImporterSCASupport(DojoTestCase):
+    # Test SCA risk import
+    fixtures = [
+        "unit_sonarqube_toolType.json",
+        "unit_sonarqube_toolConfig1.json",
+        "unit_sonarqube_sqcWithKey.json",
+        "unit_sonarqube_product.json",
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name="product")
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", dummy_sca_risks)
+    def test_sca_import_count(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        # Only OPEN risks should be imported (33 out of 49 total risks)
+        self.assertEqual(33, len(findings))
+
+
+class TestSonarqubeImporterValidateSCAData(DojoTestCase):
+    # Test SCA data mapping
+    fixtures = [
+        "unit_sonarqube_toolType.json",
+        "unit_sonarqube_toolConfig1.json",
+        "unit_sonarqube_sqcWithKey.json",
+        "unit_sonarqube_product.json",
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name="product")
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_sca_risks", dummy_sca_risks)
+    def test_sca_data_mapping(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+        # Find the CVE-2020-35490 finding
+        cve_finding = next((f for f in findings if "CVE-2020-35490" in f.title), None)
+        self.assertIsNotNone(cve_finding)
+        self.assertEqual("CVE-2020-35490 - Deserialization of Untrusted Data", cve_finding.title)
+        self.assertEqual(502, cve_finding.cwe)
+        self.assertEqual("Medium", cve_finding.severity)
+        self.assertEqual(8.1, cve_finding.cvssv3_score)
+        self.assertEqual("com.fasterxml.jackson.core/jackson-databind", cve_finding.component_name)
+        self.assertEqual("2.9.10.7", cve_finding.component_version)
+        self.assertEqual(True, cve_finding.verified)
+        self.assertEqual(False, cve_finding.false_p)
+        self.assertEqual(False, cve_finding.duplicate)
+        self.assertEqual(False, cve_finding.out_of_scope)
+        self.assertEqual(True, cve_finding.static_finding)
+        # Verify description contains expected content
+        self.assertIn("CVE-2020-35490", cve_finding.description)
+        self.assertIn("pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7", cve_finding.description)
+        self.assertIn("8.1", cve_finding.description)
+        self.assertIn("CWE-502", cve_finding.description)
+        # Verify vulnerability_ids
+        self.assertEqual(["CVE-2020-35490"], cve_finding.unsaved_vulnerability_ids)
+        # Verify unique_id_from_tool
+        self.assertEqual("sca:CVE-2020-35490:pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.9.10.7", cve_finding.unique_id_from_tool)
