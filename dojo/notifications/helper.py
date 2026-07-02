@@ -894,7 +894,7 @@ def process_tag_notifications(request, note, parent_url, parent_title):
     usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
 
     users_to_notify = [
-        Dojo_User.objects.filter(username=username).get()
+        username
         for username in usernames_to_check
         if Dojo_User.objects.filter(is_active=True, username=username).exists()
     ]
