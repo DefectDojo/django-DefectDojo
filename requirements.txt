@@ -24,7 +24,7 @@ Django==5.2.14
 django-single-session==0.2.0
 djangorestframework==3.17.1
 html2text==2025.4.15
-humanize==4.15.0
+humanize==4.16.0
 jira==3.10.5
 PyGithub==2.9.1
 lxml==6.1.1
