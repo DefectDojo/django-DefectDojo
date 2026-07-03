@@ -224,6 +224,9 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
             unsaved_finding.reporter = self.user
             unsaved_finding.last_reviewed_by = self.user
             unsaved_finding.last_reviewed = self.now
+            # Imported findings start PENDING; post_process_findings_batch stamps
+            # the terminal state (PROCESSED/FAILED) when the pipeline completes.
+            unsaved_finding.processing_status = Finding.ProcessingStatus.PENDING
             logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
             # indicates an override. Otherwise, do not change the value of unsaved_finding.active
             if self.active is not None:

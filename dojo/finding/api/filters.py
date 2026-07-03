@@ -46,6 +46,8 @@ class ApiFindingFilter(DojoFilter):
     # CharFilter
     component_version = CharFilter(lookup_expr="icontains")
     component_name = CharFilter(lookup_expr="icontains")
+    processing_status = CharFilter(field_name="processing_status",
+                                   help_text="Post-import processing state: pending, processed or failed")
     vulnerability_id = CharFilter(method=custom_vulnerability_id_filter)
     description = CharFilter(lookup_expr="icontains")
     file_path = CharFilter(lookup_expr="icontains")
