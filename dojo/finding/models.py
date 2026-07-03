@@ -511,6 +511,15 @@ class Finding(BaseModel):
                 include=["id"],
                 condition=models.Q(is_mitigated=False),
             ),
+            # Full (non-partial) index so the global finding list ordered by
+            # sla_expiration_date can be served by an index walk + LIMIT instead
+            # of sorting the entire authorized finding set. The partial
+            # idx_finding_sla_open_cov can't serve it (query has no is_mitigated
+            # filter).
+            models.Index(
+                fields=["sla_expiration_date"],
+                name="idx_finding_sla_exp",
+            ),
         ]
 
     def __init__(self, *args, **kwargs):

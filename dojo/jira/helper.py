@@ -789,7 +789,11 @@ def push_finding_to_jira(finding_id, *args, **kwargs) -> tuple[str, bool]:
 
 @app.task
 def push_finding_group_to_jira(finding_group_id, *args, **kwargs) -> tuple[str, bool]:
-    finding_group = get_object_or_none(Finding_Group, id=finding_group_id)
+    # Prefetch the group's findings: the JIRA helpers below (jira_description,
+    # jira_priority, get_sla_deadline, get_labels, ...) each call
+    # finding_group.findings.all(), which would otherwise re-query per call and
+    # N+1 on dojo_finding_group_findings (Sentry DJANGO-42P8).
+    finding_group = get_object_or_none(Finding_Group.objects.prefetch_related("findings"), id=finding_group_id)
     if not finding_group:
         message = f"Finding_Group with id {finding_group_id} does not exist, skipping push_finding_group_to_jira"
         logger.warning(message)

@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django_filters import OrderingFilter
 from django_filters import rest_framework as filters
 
+from dojo.models import UserContactInfo
+
 User = get_user_model()
 
 
@@ -42,3 +44,12 @@ class ApiUserFilter(filters.FilterSet):
             ("last_login", "last_login"),
         ),
     )
+
+
+class ApiUserContactInfoFilter(filters.FilterSet):
+    class Meta:
+        model = UserContactInfo
+        # user_state_details is an internal JSONField for UI state; django-filter
+        # cannot auto-generate a filter for it, so exclude it (everything else
+        # keeps the previous "__all__" auto-filter behaviour).
+        exclude = ["user_state_details"]

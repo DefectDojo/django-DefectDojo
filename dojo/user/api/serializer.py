@@ -169,7 +169,9 @@ class UserContactInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserContactInfo
-        fields = "__all__"
+        # user_state_details is an internal JSON blob for UI state (dismissed
+        # banners, "don't show again" flags); keep it out of the public API.
+        exclude = ("user_state_details",)
 
     def validate(self, data):
         user = data.get("user", None) or self.instance.user
