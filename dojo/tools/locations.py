@@ -42,6 +42,36 @@ class LocationData:
         )
 
     @classmethod
+    def code(
+        cls,
+        *,
+        file_path: str = "",
+        line: int | None = None,
+        end_line: int | None = None,
+        snippet: str = "",
+        source_object: str = "",
+        sink_object: str = "",
+        source_file_path: str = "",
+        source_line: int | None = None,
+    ) -> LocationData:
+        """
+        A static-analysis code coordinate. Identity is file_path (+ line);
+        the remaining keys are volatile context expected to ride the finding
+        reference rather than the location identity, so unset ones are omitted.
+        """
+        data: dict[str, Any] = {"file_path": file_path, "line": line}
+        context = {
+            "end_line": end_line,
+            "snippet": snippet,
+            "source_object": source_object,
+            "sink_object": sink_object,
+            "source_file_path": source_file_path,
+            "source_line": source_line,
+        }
+        data.update({key: value for key, value in context.items() if value not in {"", None}})
+        return cls(type="code", data=data)
+
+    @classmethod
     def dependency(
         cls,
         *,

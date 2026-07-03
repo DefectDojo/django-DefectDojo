@@ -860,9 +860,18 @@ class Finding(BaseModel):
                 from dojo.importers.location_manager import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
                     LocationManager,
                 )
+                from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
                 unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
+                # Only URL locations feed the "endpoints" hash ingredient — the
+                # saved path below filters to URL references, and hashing other
+                # location types here would make a finding's hash change between
+                # pre-save and post-save computation.
+                locations = sorted({
+                    location.get_location_value()
+                    for location in unsaved_locations
+                    if location.get_location_type() == URL.get_location_type()
+                })
                 # deduplicate (usually done upon saving finding) and sort locations
-                locations = sorted({location.get_location_value() for location in unsaved_locations})
                 return "".join(locations)
             # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
             # In this case, before saving the finding, both static_finding and dynamic_finding are True
