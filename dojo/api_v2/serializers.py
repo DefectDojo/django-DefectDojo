@@ -998,10 +998,22 @@ class AddNewFileOptionSerializer(serializers.ModelSerializer):
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
+    REPORT_TYPE_CHOICES = (
+        ("JSON", "JSON"),
+        ("HTML", "HTML"),
+        ("CSV", "CSV"),
+        ("Excel", "Excel"),
+    )
+
     include_finding_notes = serializers.BooleanField(default=False)
     include_finding_images = serializers.BooleanField(default=False)
     include_executive_summary = serializers.BooleanField(default=False)
     include_table_of_contents = serializers.BooleanField(default=False)
+    report_type = serializers.ChoiceField(
+        choices=REPORT_TYPE_CHOICES,
+        default="JSON",
+        help_text="Format for the generated report.",
+    )
 
 
 class ExecutiveSummarySerializer(serializers.Serializer):

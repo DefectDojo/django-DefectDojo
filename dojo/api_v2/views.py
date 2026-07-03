@@ -8,6 +8,7 @@ from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models.query import QuerySet as DjangoQuerySet
+from django.shortcuts import render
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.renderers import OpenApiJsonRenderer2
@@ -34,10 +35,12 @@ from dojo.api_v2 import (
 from dojo.authorization import api_permissions as permissions
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.endpoint.ui.views import get_endpoint_ids
+from dojo.engagement.queries import get_authorized_engagements
 from dojo.filters import (
     ApiAppAnalysisFilter,
     ApiDojoMetaFilter,
 )
+from dojo.finding.queries import get_authorized_findings
 from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
@@ -68,6 +71,8 @@ from dojo.product.queries import (
     get_authorized_products,
 )
 from dojo.reports.ui.views import (
+    CSVExportView,
+    ExcelExportView,
     prefetch_related_findings_for_report,
     report_url_resolver,
 )
@@ -515,8 +520,8 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             pghistory.context(test_id=test_id_from_response)
 
 
-from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401 -- re-export; urls.py imports by name
-from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401 -- re-export; urls.py imports by name
+from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401
+from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401
 
 
 def report_generate(request, obj, options):
@@ -527,6 +532,9 @@ def report_generate(request, obj, options):
     test = None
     endpoint = None
     endpoints = None
+    report_context = {}
+    report_template = None
+    report_title = "Generate Report"
 
     include_finding_notes = False
     include_finding_images = False
@@ -550,6 +558,8 @@ def report_generate(request, obj, options):
 
     if type(obj).__name__ == "Product_Type":
         product_type = obj
+        report_template = "dojo/product_type_pdf_report.html"
+        report_title = labels.ORG_REPORT_LABEL
 
         report_name = labels.ORG_REPORT_WITH_NAME_TITLE % {"name": str(product_type)}
 
@@ -557,7 +567,7 @@ def report_generate(request, obj, options):
             request.GET,
             prod_type=product_type,
             queryset=prefetch_related_findings_for_report(
-                Finding.objects.filter(
+                get_authorized_findings("view").filter(
                     test__engagement__product__prod_type=product_type,
                 ),
             ),
@@ -576,9 +586,26 @@ def report_generate(request, obj, options):
         months_between = (r.years * 12) + r.months
         # include current month
         months_between += 1
+        report_context = {
+            "products": get_authorized_products("view").filter(
+                prod_type=product_type,
+                engagement__test__finding__in=findings.qs,
+            ).distinct(),
+            "engagements": get_authorized_engagements("view").filter(
+                product__prod_type=product_type,
+                test__finding__in=findings.qs,
+            ).distinct(),
+            "tests": get_authorized_tests("view").filter(
+                engagement__product__prod_type=product_type,
+                finding__in=findings.qs,
+            ).distinct(),
+            "months_between": months_between,
+        }
 
     elif type(obj).__name__ == "Product":
         product = obj
+        report_template = "dojo/product_pdf_report.html"
+        report_title = labels.ASSET_REPORT_LABEL
 
         report_name = labels.ASSET_REPORT_WITH_NAME_TITLE % {"name": str(product)}
 
@@ -596,6 +623,8 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
+        report_template = "dojo/engagement_pdf_report.html"
+        report_title = "Engagement Report"
         findings = report_finding_filter_class(
             request.GET,
             engagement=engagement,
@@ -613,6 +642,8 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Test":
         test = obj
+        report_template = "dojo/test_pdf_report.html"
+        report_title = "Test Report"
         findings = report_finding_filter_class(
             request.GET,
             engagement=test.engagement,
@@ -624,6 +655,8 @@ def report_generate(request, obj, options):
 
     elif type(obj).__name__ == "Endpoint":
         endpoint = obj
+        report_template = "dojo/endpoint_pdf_report.html"
+        report_title = "Endpoint Report"
         host = endpoint.host
         report_name = "Endpoint Report: " + host
         endpoints = Endpoint.objects.filter(
@@ -638,6 +671,8 @@ def report_generate(request, obj, options):
 
     elif isinstance(obj, DjangoQuerySet):
         # Support any Django QuerySet (including Tagulous CastTaggedQuerySet)
+        report_template = "dojo/finding_pdf_report.html"
+        report_title = "Finding Report"
         findings = report_finding_filter_class(
             request.GET,
             queryset=prefetch_related_findings_for_report(obj).distinct(),
@@ -660,12 +695,20 @@ def report_generate(request, obj, options):
         "endpoint": endpoint,
         "endpoints": endpoints,
         "findings": findings.qs.order_by("numerical_severity"),
+        "include_finding_notes": include_finding_notes,
+        "include_finding_images": include_finding_images,
+        "include_executive_summary": include_executive_summary,
         "include_table_of_contents": include_table_of_contents,
+        "include_disclaimer": get_system_setting("disclaimer_reports_forced", 0),
+        "disclaimer": get_system_setting("disclaimer_reports"),
         "user": user,
         "team_name": settings.TEAM_NAME,
-        "title": "Generate Report",
+        "title": report_title,
         "user_id": request.user.id,
         "host": report_url_resolver(request),
+        "host_view": False,
+        "context": report_context,
+        "report_template": report_template,
     }
 
     finding_notes = []
@@ -780,6 +823,27 @@ def report_generate(request, obj, options):
         result["executive_summary"] = executive_summary
 
     return result
+
+
+def report_generate_response(request, obj, options):
+    report_type = options.get("report_type", "JSON")
+    data = report_generate(request, obj, options)
+
+    if report_type == "JSON":
+        report = serializers.ReportGenerateSerializer(data)
+        return Response(report.data)
+
+    if report_type == "HTML":
+        return render(request, data["report_template"], data)
+
+    if report_type == "CSV":
+        return CSVExportView().build_response(data["findings"])
+
+    if report_type == "Excel":
+        return ExcelExportView().build_response(data["findings"])
+
+    msg = f"Unsupported report_type: {report_type}"
+    raise ValidationError(msg)
 
 
 class CeleryViewSet(viewsets.ViewSet):

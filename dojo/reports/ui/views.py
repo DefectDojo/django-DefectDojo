@@ -71,6 +71,8 @@ def report_url_resolver(request):
     try:
         url_resolver = request.META["HTTP_X_FORWARDED_PROTO"] + "://" + request.META["HTTP_X_FORWARDED_FOR"]
     except:
+        if "HTTP_HOST" not in request.META:
+            return request.build_absolute_uri("/").rstrip("/")
         hostname = request.META["HTTP_HOST"]
         port_index = hostname.find(":")
         if port_index != -1:
@@ -846,6 +848,9 @@ class CSVExportView(View):
         findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
+        return self.build_response(findings)
+
+    def build_response(self, findings):
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = "attachment; filename=findings.csv"
         writer = csv.writer(response)
@@ -983,6 +988,9 @@ class ExcelExportView(View):
         findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
+        return self.build_response(findings)
+
+    def build_response(self, findings):
         workbook = Workbook()
         workbook.iso_dates = True
         worksheet = workbook.active
