@@ -388,6 +388,46 @@
             "description": "create valkey secret in defectdojo chart, outside of valkey chart",
             "type": "boolean"
         },
+        "externalSecret": {
+            "description": "External Secrets Operator integration",
+            "type": "object",
+            "properties": {
+                "enabled": {
+                    "description": "Enable the ExternalSecret resource",
+                    "type": "boolean"
+                },
+                "labels": {
+                    "type": "object"
+                },
+                "annotations": {
+                    "type": "object"
+                },
+                "refreshInterval": {
+                    "description": "How often to refresh the secret from the external store",
+                    "type": "string"
+                },
+                "secretStoreRef": {
+                    "description": "Reference to a SecretStore or ClusterSecretStore",
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "kind": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "targetSecretName": {
+                    "description": "Name of the Kubernetes Secret created by ESO",
+                    "type": "string"
+                },
+                "data": {
+                    "description": "Data mappings from the external store",
+                    "type": "array"
+                }
+            }
+        },
         "dbMigrationChecker": {
             "type": "object",
             "properties": {
@@ -510,6 +550,33 @@
                 "extraVolumes": {
                     "description": "A list of extra volumes to mount.",
                     "type": "array"
+                },
+                "httpRoute": {
+                    "description": "Kubernetes Gateway API HTTPRoute configuration (alternative to Ingress)",
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "type": "boolean"
+                        },
+                        "labels": {
+                            "type": "object"
+                        },
+                        "annotations": {
+                            "type": "object"
+                        },
+                        "parentRefs": {
+                            "type": "array"
+                        },
+                        "hostnames": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "rules": {
+                            "type": "array"
+                        }
+                    }
                 },
                 "ingress": {
                     "type": "object",
