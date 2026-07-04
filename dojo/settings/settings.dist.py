@@ -106,6 +106,10 @@ env = environ.FileAwareEnv(
     # delay to a single test's findings so unrelated dedupe tests are not slowed.
     DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY=(int, 0),
     DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER=(str, ""),
+    # Finding lifecycle provenance events (created/closed/reopened/duplicate/pushed).
+    # Enabled acts as a kill switch; retention bounds table growth (purged nightly).
+    DD_FINDING_LIFECYCLE_EVENTS_ENABLED=(bool, True),
+    DD_FINDING_LIFECYCLE_EVENTS_RETENTION_DAYS=(int, 540),
     DD_CELERY_RESULT_BACKEND=(str, "django-db"),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
@@ -900,6 +904,8 @@ DEDUPLICATION_ASYNC_WAIT_TIMEOUT = env("DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT")
 DEDUPLICATION_BATCH_PROCESS_TEST_DELAY = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY")
 DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
+FINDING_LIFECYCLE_EVENTS_ENABLED = env("DD_FINDING_LIFECYCLE_EVENTS_ENABLED")
+FINDING_LIFECYCLE_EVENTS_RETENTION_DAYS = env("DD_FINDING_LIFECYCLE_EVENTS_RETENTION_DAYS")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = env("DD_CELERY_RESULT_EXPIRES")
 CELERY_BEAT_SCHEDULE_FILENAME = env("DD_CELERY_BEAT_SCHEDULE_FILENAME")
@@ -952,6 +958,13 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": timedelta(hours=8),
         "options": {
             "expires": int(60 * 60 * 8 * 1.2),  # If a task is not executed within 9.6 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
+        },
+    },
+    "purge-finding-lifecycle-events": {
+        "task": "dojo.finding.lifecycle.purge_finding_lifecycle_events",
+        "schedule": timedelta(hours=24),
+        "options": {
+            "expires": int(60 * 60 * 24 * 1.2),  # If a task is not executed within 28.8 hours, it should be dropped from the queue. Two more tasks should be scheduled in the meantime.
         },
     },
     "update-findings-from-source-issues": {

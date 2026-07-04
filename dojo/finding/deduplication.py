@@ -8,7 +8,8 @@ from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
-from dojo.models import Endpoint_Status, Finding, System_Settings
+from dojo.finding.lifecycle import record_lifecycle_event
+from dojo.models import Endpoint_Status, Finding, Finding_Lifecycle_Event, System_Settings
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -191,6 +192,16 @@ def set_duplicate(new_finding, existing_finding, *, save=True):
             super(Finding, f).save(skip_validation=True)
         logger.debug("saving existing finding: %d", existing_finding.id)
         super(Finding, existing_finding).save(skip_validation=True)
+
+    # Provenance: record the dedupe decision with enough context to answer
+    # "why is this a duplicate?" (transitively re-pointed findings record
+    # their own event through the recursive call above)
+    record_lifecycle_event(
+        new_finding.id,
+        Finding_Lifecycle_Event.Action.MARKED_DUPLICATE,
+        {"original_id": existing_finding.id, "hash_code": new_finding.hash_code},
+        actor_type=Finding_Lifecycle_Event.ActorType.DEDUPE,
+    )
 
     return all_modified
 

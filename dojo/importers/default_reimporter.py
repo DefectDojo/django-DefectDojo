@@ -13,6 +13,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
+from dojo.finding.lifecycle import lifecycle_event, record_lifecycle_event, record_lifecycle_events
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
@@ -21,6 +22,7 @@ from dojo.models import (
     DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
     Development_Environment,
     Finding,
+    Finding_Lifecycle_Event,
     Notes,
     Test,
     Test_Import,
@@ -462,6 +464,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         # their original creation; re-running it on no-change reimports
                         # would be ~8 wasted queries per batch.
                         apply_inherited_tags_for_findings(new_findings_in_batch)
+                        # Provenance: CREATED events only for findings this reimport actually
+                        # created — matched/unchanged findings intentionally produce no rows
+                        record_lifecycle_events([
+                            lifecycle_event(
+                                f.id,
+                                Finding_Lifecycle_Event.Action.CREATED,
+                                {"test_id": self.test.id, "scan_type": self.scan_type, "kind": "reimport"},
+                            )
+                            for f in new_findings_in_batch
+                        ])
                         new_findings_in_batch.clear()
                         batch_findings.clear()
                         # Partition the batch by each finding's own push_to_jira flag so one
@@ -859,6 +871,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.location_handler.record_reactivations_for_finding(existing_finding)
         existing_finding.notes.add(note)
         self.reactivated_items.append(existing_finding)
+        record_lifecycle_event(
+            existing_finding.id,
+            Finding_Lifecycle_Event.Action.REOPENED,
+            {"test_id": self.test.id, "scan_type": self.scan_type, "reason": note_entry},
+        )
         # The new finding is active while the existing on is mitigated. The existing finding needs to
         # be updated in some way
         # Return False here to make sure further processing happens
