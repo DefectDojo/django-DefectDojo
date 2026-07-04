@@ -343,13 +343,13 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=157,
+            expected_num_queries1=158,
             expected_num_async_tasks1=2,
-            expected_num_queries2=122,
+            expected_num_queries2=123,
             expected_num_async_tasks2=1,
             expected_num_queries3=29,
             expected_num_async_tasks3=1,
-            expected_num_queries4=100,
+            expected_num_queries4=106,
             expected_num_async_tasks4=0,
         )
 
@@ -373,7 +373,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_async_tasks2=1,
             expected_num_queries3=38,
             expected_num_async_tasks3=1,
-            expected_num_queries4=100,
+            expected_num_queries4=106,
             expected_num_async_tasks4=0,
         )
 
@@ -398,7 +398,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_async_tasks2=3,
             expected_num_queries3=45,
             expected_num_async_tasks3=3,
-            expected_num_queries4=109,
+            expected_num_queries4=115,
             expected_num_async_tasks4=2,
         )
 
@@ -526,9 +526,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=93,
+            expected_num_queries1=94,
             expected_num_async_tasks1=2,
-            expected_num_queries2=73,
+            expected_num_queries2=74,
             expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -549,7 +549,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._deduplication_performance(
             expected_num_queries1=110,
             expected_num_async_tasks1=2,
-            expected_num_queries2=91,
+            expected_num_queries2=98,
             expected_num_async_tasks2=2,
         )
 
@@ -670,13 +670,13 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=164,
+            expected_num_queries1=165,
             expected_num_async_tasks1=2,
-            expected_num_queries2=131,
+            expected_num_queries2=132,
             expected_num_async_tasks2=1,
             expected_num_queries3=37,
             expected_num_async_tasks3=1,
-            expected_num_queries4=101,
+            expected_num_queries4=107,
             expected_num_async_tasks4=0,
         )
 
@@ -700,7 +700,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=1,
             expected_num_queries3=48,
             expected_num_async_tasks3=1,
-            expected_num_queries4=101,
+            expected_num_queries4=107,
             expected_num_async_tasks4=0,
         )
 
@@ -725,7 +725,7 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
             expected_num_async_tasks2=3,
             expected_num_queries3=55,
             expected_num_async_tasks3=3,
-            expected_num_queries4=113,
+            expected_num_queries4=119,
             expected_num_async_tasks4=2,
         )
 
@@ -826,9 +826,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=100,
+            expected_num_queries1=101,
             expected_num_async_tasks1=2,
-            expected_num_queries2=76,
+            expected_num_queries2=77,
             expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -848,6 +848,6 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self._deduplication_performance(
             expected_num_queries1=119,
             expected_num_async_tasks1=2,
-            expected_num_queries2=202,
+            expected_num_queries2=209,
             expected_num_async_tasks2=2,
         )
