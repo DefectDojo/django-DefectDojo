@@ -1,0 +1,20 @@
+{
+  "key": "python:S112",
+  "repo": "python",
+  "name": "General exceptions should not be raised",
+  "createdAt": "2026-01-01T00:00:00Z",
+  "descriptionSections": [
+    {
+      "key": "root_cause",
+      "content": "<p>Raising generic exceptions reduces code readability.</p>"
+    },
+    {
+      "key": "how_to_fix",
+      "content": "<p>Raise specific built-in exceptions instead.</p>"
+    },
+    {
+      "key": "resources",
+      "content": "<p>See OWASP Top 10 or check CWE-95 for details.</p>"
+    }
+  ]
+}

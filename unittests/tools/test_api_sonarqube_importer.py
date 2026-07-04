@@ -62,6 +62,16 @@ def empty_list(self, *args, **kwargs):
     return []
 
 
+def dummy_rule_description_sections_only(self, *args, **kwargs):
+    with (get_unit_tests_scans_path("api_sonarqube") / "rule_description_sections_only.json").open(encoding="utf-8") as json_file:
+        return json.load(json_file)
+
+
+def dummy_issues_single(self, *args, **kwargs):
+    with (get_unit_tests_scans_path("api_sonarqube") / "issues_single.json").open(encoding="utf-8") as json_file:
+        return json.load(json_file)
+
+
 class TestSonarqubeImporterNoSQToolConfig(DojoTestCase):
     # Testing case no 1. https://github.com/DefectDojo/django-DefectDojo/pull/4676
     fixtures = [
@@ -375,6 +385,50 @@ class TestSonarqubeImporterRuleDetailsSanitization(DojoTestCase):
         self.assertNotIn("<style", rule_details)
         self.assertNotIn("display: none", rule_details)
         self.assertNotIn("javascript:", rule_details)
+
+
+class TestSonarqubeImporterDescriptionSections(DojoTestCase):
+
+    """
+    Verify that the modern descriptionSections API path (SonarQube 2025/2026+)
+    correctly populates Finding.description and Finding.mitigation.
+    """
+
+    fixtures = [
+        "unit_sonarqube_toolType.json",
+        "unit_sonarqube_toolConfig1.json",
+        "unit_sonarqube_toolConfig2.json",
+        "unit_sonarqube_product.json",
+        "unit_sonarqube_sqcWithKey.json",
+    ]
+
+    def setUp(self):
+        product = Product.objects.get(name="product")
+        engagement = Engagement(product=product)
+        self.test = Test(engagement=engagement)
+
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule_description_sections_only)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues_single)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    def test_description_sections_populate_finding_fields(self):
+        parser = SonarQubeApiImporter()
+        findings = parser.get_findings(None, self.test)
+
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+
+        # description should contain the root_cause prose but NOT the references section
+        # (clean_rule_description_html truncates at <h2>References</h2>)
+        self.assertIn("Raising generic exceptions reduces code readability", finding.description)
+        self.assertNotIn("OWASP Top 10", finding.description)
+
+        # mitigation should be populated from the how_to_fix descriptionSection
+        self.assertIn("Raise specific built-in exceptions instead", finding.mitigation)
+
+        # CWE-95 appears in the resources section and should be extracted
+        self.assertEqual(95, finding.cwe)
 
 
 class TestSonarqubeImporterTwoIssuesNoHotspots(DojoTestCase):

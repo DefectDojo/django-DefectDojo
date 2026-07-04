@@ -194,12 +194,22 @@ class SonarQubeApiImporter:
                     sonarqube_permalink = "No permalink \n"
 
                 rule_details = self.get_rule_details(rule)
+                mitigation = "No mitigation provided"  # Default fallback
+
                 if rule_details:
                     description = self.clean_rule_description_html(
                         rule_details,
                     )
                     cwe = self.clean_cwe(rule_details)
                     references = sonarqube_permalink + self.get_references(rule_details)
+
+                    # Dynamic extraction for modern descriptionSections payloads
+                    if "descriptionSections" in rule:
+                        for section in rule.get("descriptionSections", []):
+                            if isinstance(section, dict) and section.get("key") == "how_to_fix":
+                                content = section.get("content", "")
+                                if content:
+                                    mitigation = self.sanitize_rule_details(content)
                 else:
                     description = ""
                     cwe = None
@@ -234,7 +244,7 @@ class SonarQubeApiImporter:
                     duplicate=False,
                     out_of_scope=False,
                     mitigated=None,
-                    mitigation="No mitigation provided",
+                    mitigation=mitigation,  # Dynamic assignment
                     impact="No impact provided",
                     static_finding=True,
                     sonarqube_issue=sonarqube_issue,
@@ -400,15 +410,40 @@ class SonarQubeApiImporter:
 
     @staticmethod
     def get_rule_details(rule):
+        # Path 1: Legacy HTML Support
         if html_desc := rule.get("htmlDesc"):
             return SonarQubeApiImporter.sanitize_rule_details(html_desc)
-        if not (md_desc := rule.get("mdDesc")):
-            return ""
-        # SonarQube 2025.x can return markdown-only rule descriptions, including
-        # inline HTML that should still be treated as markdown content.
-        return SonarQubeApiImporter.sanitize_rule_details(
-            markdown.markdown(md_desc, extensions=["extra"]),
-        )
+
+        # Path 2: Legacy Markdown Support
+        if md_desc := rule.get("mdDesc"):
+            return SonarQubeApiImporter.sanitize_rule_details(
+                markdown.markdown(md_desc, extensions=["extra"]),
+            )
+
+        # Path 3: Modern/Conditional Structured Sections Support (SonarQube 2025/2026+)
+        if "descriptionSections" in rule:
+            sections = rule["descriptionSections"]
+            if isinstance(sections, list):
+                sections_map = {}
+                for section in sections:
+                    if isinstance(section, dict) and "key" in section and "content" in section:
+                        sections_map[section["key"]] = section["content"]
+
+                payload_elements = []
+                if root_cause := sections_map.get("root_cause"):
+                    payload_elements.append(f"<h3>Root Cause</h3>{root_cause}")
+                if how_to_fix := sections_map.get("how_to_fix"):
+                    # Folded into description text; main mitigation field remains default
+                    payload_elements.append(f"<h3>Mitigation</h3>{how_to_fix}")
+                if resources := sections_map.get("resources"):
+                    # Must use h2 to correctly trigger clean_rule_description_html() truncation
+                    payload_elements.append(f"<h2>References</h2>{resources}")
+
+                if payload_elements:
+                    combined_payload = "".join(payload_elements)
+                    return SonarQubeApiImporter.sanitize_rule_details(combined_payload)
+
+        return ""
 
     @staticmethod
     def sanitize_rule_details(description):

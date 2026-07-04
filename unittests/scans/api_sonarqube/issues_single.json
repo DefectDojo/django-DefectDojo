@@ -1,0 +1,29 @@
+[
+	{
+		"key": "AYrPQw9oZpu0CyehMfb1",
+		"rule": "python:S112",
+		"severity": "MAJOR",
+		"component": "internal.dummy.project:src/main/python/app.py",
+		"project": "internal.dummy.project",
+		"line": 42,
+		"hash": "abc123def456abc123def456abc123de",
+		"textRange": {
+			"startLine": 42,
+			"endLine": 42,
+			"startOffset": 4,
+			"endOffset": 28
+		},
+		"flows": [],
+		"status": "OPEN",
+		"message": "Replace this generic exception class with a more specific one.",
+		"effort": "5min",
+		"debt": "5min",
+		"author": "developer@example.com",
+		"tags": [],
+		"creationDate": "2026-01-01T00:00:00+0000",
+		"updateDate": "2026-01-01T00:00:00+0000",
+		"type": "BUG",
+		"organization": "default-organization",
+		"fromHotspot": false
+	}
+]
