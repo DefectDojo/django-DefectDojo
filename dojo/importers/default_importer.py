@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
+from dojo.finding.lifecycle import lifecycle_event, record_lifecycle_events
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
@@ -15,6 +16,7 @@ from dojo.models import (
     DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
     Engagement,
     Finding,
+    Finding_Lifecycle_Event,
     Test,
     Test_Import,
 )
@@ -292,6 +294,15 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 # their endpoints/locations) BEFORE post_process_findings_batch
                 # dispatches, so rules/dedup see inherited tags on .tags.
                 apply_inherited_tags_for_findings(batch_findings)
+                # Provenance: one CREATED lifecycle event per new finding, bulk-written per batch
+                record_lifecycle_events([
+                    lifecycle_event(
+                        f.id,
+                        Finding_Lifecycle_Event.Action.CREATED,
+                        {"test_id": self.test.id, "scan_type": self.scan_type, "kind": "import"},
+                    )
+                    for f in batch_findings
+                ])
                 batch_findings.clear()
                 finding_ids_batch = list(batch_finding_ids)
                 batch_finding_ids.clear()

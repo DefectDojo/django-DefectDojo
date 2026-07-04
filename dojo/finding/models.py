@@ -1555,6 +1555,77 @@ class CWE(models.Model):
     number = models.IntegerField()
 
 
+class Finding_Lifecycle_Event(models.Model):
+
+    """
+    Append-only provenance log of SEMANTIC finding transitions: created by
+    import X, closed because gone from a re-upload, marked duplicate of Y,
+    pushed to JIRA as KEY. Complements (does not duplicate) field-level
+    history and Test_Import_Finding_Action — this table records the WHY.
+
+    Deliberately skinny and delete-safe: the finding FK carries no database
+    constraint and on_delete=DO_NOTHING, so bulk finding deletion never
+    touches this table; orphans are swept by the retention purge task.
+    Writes are transition-only and batched (see dojo/finding/lifecycle.py).
+    """
+
+    class ActorType(models.TextChoices):
+        IMPORT = "import", _("Import pipeline")
+        DEDUPE = "dedupe", _("Deduplication")
+        JIRA = "jira", _("JIRA sync")
+        SYSTEM = "system", _("System")
+
+    class Action(models.TextChoices):
+        CREATED = "created", _("Created")
+        CLOSED = "closed", _("Closed")
+        REOPENED = "reopened", _("Reopened")
+        MARKED_DUPLICATE = "marked_duplicate", _("Marked duplicate")
+        PUSHED_JIRA = "pushed_jira", _("Pushed to JIRA")
+
+    finding = models.ForeignKey(
+        "dojo.Finding",
+        on_delete=models.DO_NOTHING,
+        db_constraint=False,
+        related_name="lifecycle_events",
+        editable=False,
+        verbose_name=_("Finding"),
+    )
+    actor_type = models.CharField(
+        max_length=20,
+        choices=ActorType.choices,
+        default=ActorType.SYSTEM,
+        editable=False,
+        verbose_name=_("Actor Type"),
+        help_text=_("Which part of the platform produced this event."),
+    )
+    action = models.CharField(
+        max_length=20,
+        choices=Action.choices,
+        editable=False,
+        verbose_name=_("Action"),
+        help_text=_("The lifecycle transition that happened to the finding."),
+    )
+    detail = models.JSONField(
+        default=dict,
+        blank=True,
+        editable=False,
+        verbose_name=_("Detail"),
+        help_text=_("Context for the transition: import/test ids, close reason, duplicate original, JIRA key."),
+    )
+    created = models.DateTimeField(default=timezone.now, editable=False, verbose_name=_("Created"))
+
+    class Meta:
+        indexes = [
+            # the only hot read: one finding's timeline, newest first
+            models.Index(fields=["finding", "created"], name="finding_lifecycle_f_created"),
+            # retention purge scans by age
+            models.Index(fields=["created"], name="finding_lifecycle_created"),
+        ]
+
+    def __str__(self):
+        return f"{self.action} finding {self.finding_id} ({self.actor_type})"
+
+
 class BurpRawRequestResponse(models.Model):
     finding = models.ForeignKey("dojo.Finding", blank=True, null=True, on_delete=models.CASCADE)
     burpRequestBase64 = models.BinaryField()

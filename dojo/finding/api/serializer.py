@@ -33,6 +33,7 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    Finding_Lifecycle_Event,
     Finding_Template,
     Note_Type,
     Product,
@@ -146,6 +147,12 @@ class RequestResponseSerializerField(serializers.ListSerializer):
                 ]
 
         return value
+
+
+class FindingLifecycleEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Finding_Lifecycle_Event
+        fields = ("id", "action", "actor_type", "detail", "created")
 
 
 class BurpRawRequestResponseSerializer(serializers.Serializer):

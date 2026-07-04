@@ -19,11 +19,13 @@ from requests.auth import HTTPBasicAuth
 
 from dojo.celery import app
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.finding.lifecycle import record_lifecycle_event
 from dojo.forms import JIRAEngagementForm, JIRAProjectForm
 from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    Finding_Lifecycle_Event,
     JIRA_Instance,
     JIRA_Issue,
     JIRA_Project,
@@ -1006,6 +1008,14 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         j_issue.save()
         jira.issue(new_issue.id)
         logger.info("Created the following jira issue for %d:%s", obj.id, to_str_typed(obj))
+        if isinstance(obj, Finding):
+            # Provenance: the finding's timeline shows when and as what it was ticketed
+            record_lifecycle_event(
+                obj.id,
+                Finding_Lifecycle_Event.Action.PUSHED_JIRA,
+                {"jira_key": new_issue.key},
+                actor_type=Finding_Lifecycle_Event.ActorType.JIRA,
+            )
     except Exception as e:
         message = f"Failed to create jira issue with the following payload: {fields} - {e}"
         return failure_to_add_message(message, e, obj)

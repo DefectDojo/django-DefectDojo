@@ -12,6 +12,7 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.finding.lifecycle import record_lifecycle_event
 from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
@@ -29,6 +30,7 @@ from dojo.models import (
     Endpoint,
     FileUpload,
     Finding,
+    Finding_Lifecycle_Event,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
@@ -941,6 +943,12 @@ class BaseImporter(ImporterOptions):
             finding.save(dedupe_option=False, product_grading_option=product_grading_option)
         else:
             finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
+        # Provenance: record WHY the finding closed (close_old_findings / re-upload)
+        record_lifecycle_event(
+            finding.id,
+            Finding_Lifecycle_Event.Action.CLOSED,
+            {"test_id": self.test.id, "scan_type": self.scan_type, "reason": note_message},
+        )
 
     def notify_scan_added(
         self,
