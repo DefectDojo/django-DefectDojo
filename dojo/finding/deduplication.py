@@ -1098,6 +1098,13 @@ def do_false_positive_history_batch(findings):
     # Fetch all candidate existing findings with one DB query
     candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg)
 
+    # Optional plugin hook: refine the per-finding candidate list after it is resolved by
+    # deduplication_algorithm. Lets a plugin (e.g. Pro) narrow candidates by fields that are
+    # excluded from the hash string but compared per pair (set-match tokens on
+    # vulnerability_ids / CWEs). Resolved once; a no-op when unset. See get_custom_method.
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+    fp_candidate_filter = get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD")
+
     to_mark_as_fp_ids: set = set()
 
     for finding in findings:
@@ -1120,6 +1127,9 @@ def do_false_positive_history_batch(findings):
             existing = candidates.get(key, []) if key else []
         else:
             existing = []
+
+        if fp_candidate_filter:
+            existing = fp_candidate_filter(finding, existing)
 
         existing_fps = [ef for ef in existing if ef.false_p]
 
