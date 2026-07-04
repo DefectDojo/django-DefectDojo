@@ -18,10 +18,15 @@ class TestSerializer(serializers.ModelSerializer):
     # HASHCODE_FIELDS_PER_SCANNER). Read-only: surfaced so users can see
     # which algorithm and fields deduplication and reimport matching use,
     # instead of having to ask support or read settings.dist.py.
-    deduplication_algorithm = serializers.ReadOnlyField(
+    # Typed fields (not ReadOnlyField) so drf-spectacular can emit an exact schema.
+    deduplication_algorithm = serializers.CharField(
+        read_only=True,
         help_text="Algorithm used to match findings for deduplication and reimport "
                   "(legacy, unique_id_from_tool, hash_code, or unique_id_from_tool_or_hash_code).")
-    hash_code_fields = serializers.ReadOnlyField(
+    hash_code_fields = serializers.ListField(
+        child=serializers.CharField(),
+        read_only=True,
+        allow_null=True,
         help_text="Finding fields hashed to compute hash_code for this test's scan type. "
                   "Null when the scan type has no per-scanner configuration and legacy "
                   "default fields are used.")
