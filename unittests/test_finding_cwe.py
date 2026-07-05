@@ -1,5 +1,5 @@
 """CWE-as-a-separate-relationship (Finding_CWE) and the API."""
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, override_settings
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -123,3 +123,53 @@ class TestFindingCwesAPI(DojoAPITestCase):
         # primary cwe (legacy int) set from the first entry; both stored as canonical Finding_CWE rows
         self.assertEqual(79, finding.cwe)
         self.assertEqual({"CWE-79", "CWE-89"}, set(finding.finding_cwe_set.values_list("cwe", flat=True)))
+
+
+@versioned_fixtures
+class TestFindingCweHashCode(DojoTestCase):
+
+    """get_cwes() and its use in compute_hash_code, incl. the unsaved_cwes import path."""
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.finding = Finding.objects.get(id=2)
+        Finding_CWE.objects.filter(finding=self.finding).delete()
+
+    def test_get_cwes_prefers_unsaved_cwes(self):
+        # Extra CWE rows are not written yet; get_cwes must still reflect them via unsaved_cwes.
+        self.finding.cwe = 79
+        self.finding.unsaved_cwes = [89, 22]
+        self.assertEqual(self.finding.get_cwes(), "".join(sorted(["CWE-79", "CWE-89", "CWE-22"])))
+
+    def test_get_cwes_stable_before_and_after_save(self):
+        # The pre-save (unsaved_cwes) and post-save (finding_cwe_set) hashes must agree.
+        self.finding.cwe = 79
+        self.finding.unsaved_cwes = [89, 22]
+        before = self.finding.get_cwes()
+        save_cwes(self.finding)
+        reloaded = Finding.objects.get(id=2)  # unsaved_cwes is None on a fresh load
+        self.assertEqual(before, reloaded.get_cwes())
+        self.assertEqual(reloaded.get_cwes(), "".join(sorted(["CWE-79", "CWE-89", "CWE-22"])))
+
+    def test_get_cwes_empty_when_no_cwe(self):
+        self.finding.cwe = 0
+        self.finding.unsaved_cwes = None
+        save_cwes(self.finding)
+        self.assertEqual(Finding.objects.get(id=2).get_cwes(), "")
+
+    def test_compute_hash_code_uses_cwe_set(self):
+        self.finding.cwe = 79
+        scanner = self.finding.test.test_type.name
+        # FINDING_COMPUTE_HASH_METHOD=None forces the OSS compute_hash_code path under test
+        # (a Pro deployment would otherwise delegate to its tuner-driven hash method).
+        with override_settings(
+            FINDING_COMPUTE_HASH_METHOD=None,
+            HASHCODE_FIELDS_PER_SCANNER={scanner: ["title", "cwes"]},
+        ):
+            self.finding.unsaved_cwes = [89]
+            hash_with_89 = self.finding.compute_hash_code()
+            self.finding.unsaved_cwes = [22]
+            hash_with_22 = self.finding.compute_hash_code()
+        # Different CWE set -> different hash, so cwes participates in the hash.
+        self.assertNotEqual(hash_with_89, hash_with_22)

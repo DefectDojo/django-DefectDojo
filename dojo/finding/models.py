@@ -22,7 +22,7 @@ from tagulous.models import TagField
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
-from dojo.finding.vulnerability_id import cwe_label, resolve_vulnerability_id_type
+from dojo.finding.vulnerability_id import cwe_label, finding_cwe_labels, resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and
@@ -787,6 +787,11 @@ class Finding(BaseModel):
                 my_vulnerability_ids = self.get_vulnerability_ids()
                 fields_to_hash += my_vulnerability_ids
                 deduplicationLogger.debug(hashcodeField + " : " + my_vulnerability_ids)
+            elif hashcodeField == "cwes":
+                # For the CWE set (primary cwe + additional CWEs), need to compute the field
+                my_cwes = self.get_cwes()
+                fields_to_hash += my_cwes
+                deduplicationLogger.debug(hashcodeField + " : " + my_cwes)
             else:
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
                 fields_to_hash += str(getattr(self, hashcodeField))
@@ -831,6 +836,22 @@ class Finding(BaseModel):
             return ""
 
         return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
+
+    # Get CWEs (canonical CWE-<n> labels) to use for hash_code computation
+    def get_cwes(self):
+        # The extra CWE rows (finding_cwe_set) are written *after* the finding is saved during
+        # import, but unsaved_cwes carries them at hash time. Unlike vulnerability_ids there is a
+        # primary scalar (self.cwe) that is always set, so self.cwes is non-empty even before the
+        # extra rows exist — a plain "saved or unsaved" fallback would miss the extras. Prefer
+        # unsaved_cwes whenever it is present so the pre-save and post-save hashes agree.
+        if self.unsaved_cwes:
+            labels = finding_cwe_labels(self.cwe, self.unsaved_cwes)
+        elif self.id is not None:
+            labels = self.cwes
+        else:
+            labels = finding_cwe_labels(self.cwe, None)
+        # sort for a deterministic hash regardless of row/label ordering
+        return "".join(sorted(labels))
 
     # Get locations/endpoints to use for hash_code computation
     def get_locations(self):
