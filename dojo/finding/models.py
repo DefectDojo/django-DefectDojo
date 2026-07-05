@@ -837,21 +837,27 @@ class Finding(BaseModel):
 
         return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
 
-    # Get CWEs (canonical CWE-<n> labels) to use for hash_code computation
+    # Get CWEs (canonical CWE-<n> labels) to use for hash_code computation.
+    # Mirrors get_vulnerability_ids: the saved path reads the reverse relation directly (never the
+    # cached `cwes` property, which could be stale if accessed before the rows were written), and
+    # falls back to the unsaved values before the finding is saved. save_cwes persists the primary
+    # self.cwe as a Finding_CWE row too, so finding_cwe_set already carries the full set.
     def get_cwes(self):
-        # The extra CWE rows (finding_cwe_set) are written *after* the finding is saved during
-        # import, but unsaved_cwes carries them at hash time. Unlike vulnerability_ids there is a
-        # primary scalar (self.cwe) that is always set, so self.cwes is non-empty even before the
-        # extra rows exist — a plain "saved or unsaved" fallback would miss the extras. Prefer
-        # unsaved_cwes whenever it is present so the pre-save and post-save hashes agree.
-        if self.unsaved_cwes:
-            labels = finding_cwe_labels(self.cwe, self.unsaved_cwes)
-        elif self.id is not None:
-            labels = self.cwes
-        else:
-            labels = finding_cwe_labels(self.cwe, None)
-        # sort for a deterministic hash regardless of row/label ordering
-        return "".join(sorted(labels))
+
+        def _get_unsaved_cwes(finding) -> str:
+            # primary self.cwe + any unsaved extra CWEs, canonical CWE-<n>, deduplicated
+            labels = finding_cwe_labels(finding.cwe, finding.unsaved_cwes)
+            return "".join(sorted(labels))
+
+        def _get_saved_cwes(finding) -> str:
+            if finding.id is not None:
+                # Use the reverse relation (finding_cwe_set) rather than the cached `cwes` property
+                # so prefetch is honored and a stale cached value can never corrupt the hash.
+                labels = [row.cwe for row in finding.finding_cwe_set.all()]
+                return "".join(sorted(labels))
+            return ""
+
+        return _get_saved_cwes(self) or _get_unsaved_cwes(self)
 
     # Get locations/endpoints to use for hash_code computation
     def get_locations(self):

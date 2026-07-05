@@ -158,6 +158,17 @@ class TestFindingCweHashCode(DojoTestCase):
         save_cwes(self.finding)
         self.assertEqual(Finding.objects.get(id=2).get_cwes(), "")
 
+    def test_get_cwes_ignores_stale_cwes_cached_property(self):
+        # Regression: get_cwes() must read finding_cwe_set directly, not the cwes @cached_property.
+        # If cwes was cached (e.g. accessed before the rows were written) get_cwes must still be
+        # correct, otherwise the hash_code is nondeterministic.
+        self.finding.cwe = 79
+        self.finding.unsaved_cwes = [89]
+        save_cwes(self.finding)
+        f = Finding.objects.get(id=2)
+        f.__dict__["cwes"] = []  # poison the cached_property with a stale/empty value
+        self.assertEqual(f.get_cwes(), "".join(sorted(["CWE-79", "CWE-89"])))
+
     def test_compute_hash_code_uses_cwe_set(self):
         self.finding.cwe = 79
         scanner = self.finding.test.test_type.name
