@@ -1388,6 +1388,9 @@ class Finding(BaseModel):
     def cwes(self):
         # All CWEs for this finding in canonical CWE-<n> form: the additional Finding_CWE rows
         # (already stored as CWE-<n> strings) with the primary self.cwe first, deduplicated.
+        # The single primary `cwe` field is merged in for backward compatibility, exactly as the
+        # `cve` field is merged into `vulnerability_ids`. We keep both fields to stay flexible
+        # until the single `cwe` field is not needed anymore and can be removed.
         labels = [row.cwe for row in self.finding_cwe_set.all()]
         primary = cwe_label(self.cwe)
         if primary is not None:
