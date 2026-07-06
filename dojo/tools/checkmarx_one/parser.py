@@ -41,15 +41,17 @@ class CheckmarxOneParser:
         data: dict,
     ) -> list[Finding]:
         findings = []
-        cwe_store = data.get("vulnerabilityDetails", [])
+        # Reports filtered to a subset of scanners may contain the other
+        # sections as explicit nulls, so fall back to empty containers
+        cwe_store = data.get("vulnerabilityDetails") or []
         # SAST
-        if (results := data.get("scanResults", {}).get("resultsList")) is not None:
+        if (results := (data.get("scanResults") or {}).get("resultsList")) is not None:
             findings += self.parse_sast_vulnerabilities(test, results, cwe_store)
         # IaC
-        if (results := data.get("iacScanResults", {}).get("technology")) is not None:
+        if (results := (data.get("iacScanResults") or {}).get("technology")) is not None:
             findings += self.parse_iac_vulnerabilities(test, results, cwe_store)
         # SCA
-        if (results := data.get("scaScanResults", {}).get("packages")) is not None:
+        if (results := (data.get("scaScanResults") or {}).get("packages")) is not None:
             findings += self.parse_sca_vulnerabilities(test, results, cwe_store)
         return findings
 
