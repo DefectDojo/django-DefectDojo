@@ -153,3 +153,5 @@ docs/.hugo_build.lock
 # claude etc
 MEMORY.md
 .claude/
+CLAUDE.md
+CLAUDE.local.md

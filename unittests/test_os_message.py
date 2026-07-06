@@ -1,12 +1,17 @@
+import hashlib
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import requests
 from django.core.cache import cache
 from django.template import Context, Template
 from django.test import RequestFactory, SimpleTestCase, override_settings
+from django.urls import reverse
 
 from dojo import context_processors
 from dojo.announcement import os_message
+from dojo.models import User, UserContactInfo
+from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
 class _Resp:
@@ -163,6 +168,30 @@ class TestGetOsBanner(SimpleTestCase):
              patch("dojo.announcement.os_message.parse_os_message", side_effect=RuntimeError("boom")):
             self.assertIsNone(os_message.get_os_banner())
 
+    @override_settings(OS_MESSAGE_ENABLED=False)
+    def test_disabled_returns_none_without_fetching(self):
+        with patch("dojo.announcement.os_message.fetch_os_message") as mock_fetch, \
+             patch("dojo.announcement.os_message.requests.get") as mock_get:
+            self.assertIsNone(os_message.get_os_banner())
+        mock_fetch.assert_not_called()
+        mock_get.assert_not_called()
+
+    @override_settings(OS_MESSAGE_ENABLED=True)
+    def test_enabled_returns_parsed_banner(self):
+        with patch("dojo.announcement.os_message.fetch_os_message", return_value="# Headline\n") as mock_fetch:
+            result = os_message.get_os_banner()
+        mock_fetch.assert_called_once()
+        self.assertEqual(result["message"], "Headline")
+        self.assertIsNone(result["expanded_html"])
+
+    @override_settings(OS_MESSAGE_ENABLED=True)
+    def test_enabled_includes_dismiss_token(self):
+        text = "# Headline\n"
+        with patch("dojo.announcement.os_message.fetch_os_message", return_value=text):
+            result = os_message.get_os_banner()
+        expected = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+        self.assertEqual(result["dismiss_token"], expected)
+
 
 @override_settings(CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}})
 class TestGlobalizeVarsOsBanner(SimpleTestCase):
@@ -241,3 +270,91 @@ class TestGlobalizeVarsOsBanner(SimpleTestCase):
         self.assertEqual(len(result["additional_banners"]), 2)
         self.assertEqual(result["additional_banners"][0]["source"], "os")
         self.assertEqual(result["additional_banners"][1]["source"], "product_announcement")
+
+    def _authed_request(self, *, dismissed_hash="", ui_use_tailwind=True):
+        request = RequestFactory().get("/")
+        request.user = SimpleNamespace(
+            is_authenticated=True,
+            usercontactinfo=SimpleNamespace(
+                user_state_details={os_message.OS_MESSAGE_DISMISSED_KEY: dismissed_hash},
+                ui_use_tailwind=ui_use_tailwind,
+            ),
+        )
+        return request
+
+    @staticmethod
+    def _os_entries(result):
+        return [b for b in result.get("additional_banners", []) if b["source"] == "os"]
+
+    def test_os_banner_dismissible_for_authenticated_user(self):
+        banner = {"message": "Hi", "expanded_html": None, "dismiss_token": "deadbeef"}
+        request = self._authed_request(dismissed_hash="")
+        with patch.object(context_processors, "get_os_banner", return_value=banner):
+            entries = self._os_entries(context_processors.globalize_vars(request))
+        self.assertEqual(len(entries), 1)
+        self.assertTrue(entries[0]["dismissible"])
+        self.assertEqual(entries[0]["dismiss_token"], "deadbeef")
+
+    def test_os_banner_hidden_when_dismissed_hash_matches(self):
+        banner = {"message": "Hi", "expanded_html": None, "dismiss_token": "deadbeef"}
+        request = self._authed_request(dismissed_hash="deadbeef")
+        with patch.object(context_processors, "get_os_banner", return_value=banner):
+            entries = self._os_entries(context_processors.globalize_vars(request))
+        self.assertEqual(entries, [])
+
+    def test_os_banner_shown_when_dismissed_hash_differs(self):
+        banner = {"message": "Hi", "expanded_html": None, "dismiss_token": "newhash"}
+        request = self._authed_request(dismissed_hash="oldhash")
+        with patch.object(context_processors, "get_os_banner", return_value=banner):
+            entries = self._os_entries(context_processors.globalize_vars(request))
+        self.assertEqual(len(entries), 1)
+        self.assertTrue(entries[0]["dismissible"])
+
+    def test_os_banner_not_dismissible_for_anonymous(self):
+        banner = {"message": "Hi", "expanded_html": None, "dismiss_token": "deadbeef"}
+        with patch.object(context_processors, "get_os_banner", return_value=banner):
+            entries = self._os_entries(context_processors.globalize_vars(self.request))
+        self.assertEqual(len(entries), 1)
+        self.assertFalse(entries[0]["dismissible"])
+
+
+@versioned_fixtures
+class TestDismissOsMessageView(DojoTestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        self.user = User.objects.get(username="admin")
+        self.client.force_login(self.user)
+        self.url = reverse("dismiss_os_message")
+
+    def test_post_persists_hash_on_usercontactinfo(self):
+        response = self.client.post(self.url, {"token": "abc123def456"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 204)
+        contact = UserContactInfo.objects.get(user=self.user)
+        self.assertEqual(contact.user_state_details.get(os_message.OS_MESSAGE_DISMISSED_KEY), "abc123def456")
+
+    def test_dismiss_preserves_other_state_keys(self):
+        """Dismissing must not clobber unrelated keys in the shared user_state_details blob."""
+        contact = UserContactInfo.objects.get_or_create(user=self.user)[0]
+        contact.user_state_details = {"other_flag": 1}
+        contact.save(update_fields=["user_state_details"])
+        response = self.client.post(self.url, {"token": "abc123def456"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 204)
+        contact.refresh_from_db()
+        self.assertEqual(contact.user_state_details.get("other_flag"), 1)
+        self.assertEqual(contact.user_state_details.get(os_message.OS_MESSAGE_DISMISSED_KEY), "abc123def456")
+
+    def test_get_not_allowed(self):
+        self.assertEqual(self.client.get(self.url).status_code, 405)
+
+    def test_invalid_token_is_ignored(self):
+        response = self.client.post(self.url, {"token": "NOT-HEX!"}, HTTP_X_REQUESTED_WITH="XMLHttpRequest")
+        self.assertEqual(response.status_code, 204)
+        contact = UserContactInfo.objects.filter(user=self.user).first()
+        state = getattr(contact, "user_state_details", {}) or {}
+        self.assertNotIn(os_message.OS_MESSAGE_DISMISSED_KEY, state)
+
+    def test_requires_authentication(self):
+        self.client.logout()
+        response = self.client.post(self.url, {"token": "abc123"})
+        self.assertIn(response.status_code, (302, 403))

@@ -9,7 +9,7 @@ class PrefetchListMixin(ListModelMixin):
         prefetch_params = request.GET.get("prefetch", "")
         prefetch_params = prefetch_params.split(",") if "," in prefetch_params else request.GET.getlist("prefetch")
 
-        prefetcher = _Prefetcher()
+        prefetcher = _Prefetcher(request=request)
 
         # Apply the same operations as the standard list method defined in the
         # django rest framework
@@ -35,7 +35,7 @@ class PrefetchRetrieveMixin(RetrieveModelMixin):
         prefetch_params = request.GET.get("prefetch", "")
         prefetch_params = prefetch_params.split(",") if "," in prefetch_params else request.GET.getlist("prefetch")
 
-        prefetcher = _Prefetcher()
+        prefetcher = _Prefetcher(request=request)
 
         entry = self.get_object()
         serializer = self.get_serializer()

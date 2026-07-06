@@ -27,6 +27,14 @@ original parser:
 
 The original **Govulncheck Scanner** parser is unchanged and remains available.
 
+### SARIF format
+
+The Govulncheck Scanner parsers only accept govulncheck's native JSON output
+(`govulncheck -format json`). To import govulncheck's SARIF output
+(`govulncheck -format sarif`), use the generic **SARIF** scan type instead — not
+the Govulncheck Scanner scan type. Uploading a SARIF report to a Govulncheck
+Scanner parser fails with an error pointing you to the SARIF scan type.
+
 ### Sample Scan Data
 Sample Govulncheck scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/govulncheck).
 

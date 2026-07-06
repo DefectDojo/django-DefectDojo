@@ -72,7 +72,7 @@ services:
         protocol: tcp
         mode: host
   "webhook.endpoint":
-    image: mccutchen/go-httpbin:2.22.1@sha256:33aa5d2d563881a55f319cce4530de48ae518386ad742159f4390281a8277915
+    image: mccutchen/go-httpbin:2.23.1@sha256:90ac1702685468aa592938e65b2ba1b4757e0c006934a962ef7271a8717aaa3b
   integration-tests:
     platform: "linux/amd64"
     profiles:

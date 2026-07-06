@@ -135,6 +135,11 @@ class JIRAProjectForm(forms.ModelForm):
         self.engagement = kwargs.pop("engagement", None)
         super().__init__(*args, **kwargs)
 
+        self.fields["component"].help_text = (
+            "Comma-separate multiple components to assign more than one to the JIRA issue, "
+            "e.g. 'Security, DevSecOps'."
+        )
+
         logger.debug("self.target: %s, self.product: %s, self.instance: %s", self.target, self.product, self.instance)
         logger.debug("data: %s", self.data)
         if self.target == "engagement":

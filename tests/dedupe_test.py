@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -5,6 +6,7 @@ import time
 import unittest
 from pathlib import Path
 
+import requests
 from base_test_class import BaseTestCase, on_exception_html_source_logger, set_suite_settings
 from product_test import ProductTest
 from selenium.common.exceptions import TimeoutException
@@ -510,6 +512,187 @@ class DedupeTest(BaseTestCase):
         self.check_nb_duplicates(0)
 
 
+class ImportAsyncWaitApiTest(unittest.TestCase):
+
+    """
+    Deterministic API test for the import 'async_wait' deduplication mode.
+
+    The Selenium async_wait test (removed) was only a UI smoke test: with few
+    findings and several page navigations between the import and the duplicate
+    check, the background dedupe finished regardless of whether the import
+    actually blocked, so it could not fail when the cross-process join is broken.
+    The eager unit tests (CELERY_TASK_ALWAYS_EAGER) and the mocked perf test can't
+    catch it either.
+
+    This test runs against the real docker-compose stack: a separate celeryworker
+    process + broker, with the global CELERY_TASK_IGNORE_RESULT in effect. It is
+    the only coverage that can fail when the join is a no-op.
+
+    Determinism comes from DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY, set on the
+    integration-test celeryworker (see docker-compose.override.integration_tests.yml):
+    each deduplication batch for this test's findings sleeps a few seconds before
+    doing any work. 'async_wait' blocks on the worker round-trip, so by the time
+    the import response returns the delayed batch has finished and every duplicate
+    is already marked -> count == NUM_FINDINGS. A broken/no-op join would not block,
+    so the count would still be 0 at response time -> the test fails. The injected
+    delay makes that distinction independent of worker speed (a plain large-report
+    race would not, since dedup overlaps the import and can finish before the
+    response on a fast worker).
+
+    The 'async' counterpart only asserts deduplication_complete is False: its
+    worker task races the import's own DB commit, so the marked count at response
+    time is not deterministic -- the count guarantee is asserted on async_wait.
+    """
+
+    # Small: determinism comes from the worker-side dedup delay, not report size.
+    NUM_FINDINGS = 25
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = os.environ["DD_BASE_URL"].rstrip("/")
+        cls.api = cls.base_url + "/api/v2"
+        resp = requests.post(
+            cls.api + "/api-token-auth/",
+            data={
+                "username": os.environ["DD_ADMIN_USER"],
+                "password": os.environ["DD_ADMIN_PASSWORD"],
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        cls.headers = {"Authorization": "Token " + resp.json()["token"]}
+        # Deduplication must be enabled globally for the mode to do anything.
+        cls._patch("/system_settings/1/", {"enable_deduplication": True})
+
+    # --- thin API helpers -------------------------------------------------
+    @classmethod
+    def _get(cls, path, **params):
+        r = requests.get(cls.api + path, headers=cls.headers, params=params, timeout=60)
+        r.raise_for_status()
+        return r.json()
+
+    @classmethod
+    def _post(cls, path, payload):
+        r = requests.post(cls.api + path, headers=cls.headers, json=payload, timeout=60)
+        r.raise_for_status()
+        return r.json()
+
+    @classmethod
+    def _patch(cls, path, payload):
+        r = requests.patch(cls.api + path, headers=cls.headers, json=payload, timeout=60)
+        r.raise_for_status()
+        return r.json()
+
+    # --- fixtures ---------------------------------------------------------
+    def _make_engagement(self, name):
+        """Create a product + dedup-on-engagement engagement, return its id."""
+        suffix = f"{os.getpid()}-{name}"
+        prod_types = self._get("/product_types/", limit=1)["results"]
+        prod_type_id = (
+            prod_types[0]["id"] if prod_types
+            else self._post("/product_types/", {"name": f"async_wait pt {suffix}"})["id"]
+        )
+        product = self._post("/products/", {
+            "name": f"async_wait prod {suffix}",
+            "description": "async_wait integration test",
+            "prod_type": prod_type_id,
+        })
+        engagement = self._post("/engagements/", {
+            "name": f"async_wait eng {suffix}",
+            "product": product["id"],
+            "target_start": "2020-01-01",
+            "target_end": "2030-01-01",
+            "deduplication_on_engagement": True,
+            "engagement_type": "CI/CD",
+        })
+        return engagement["id"]
+
+    def _generic_report(self):
+        """
+        A Generic Findings Import report of NUM_FINDINGS unique findings.
+
+        Re-importing the identical content into a second test of the same
+        dedup-on-engagement engagement marks all NUM_FINDINGS as duplicates.
+        """
+        findings = [
+            {
+                "title": f"async_wait finding {i}",
+                "severity": "High",
+                "description": f"async_wait dedup finding number {i}",
+            }
+            for i in range(self.NUM_FINDINGS)
+        ]
+        return json.dumps({"findings": findings})
+
+    def _import(self, engagement_id, mode):
+        """POST /import-scan and return (response_json, test_id)."""
+        report = self._generic_report()
+        resp = requests.post(
+            self.api + "/import-scan/",
+            headers=self.headers,
+            data={
+                "scan_type": "Generic Findings Import",
+                "engagement": engagement_id,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": False,
+                "deduplication_execution_mode": mode,
+            },
+            files={"file": ("report.json", report, "application/json")},
+            timeout=120,
+        )
+        self.assertEqual(resp.status_code, 201, resp.text)
+        body = resp.json()
+        return body, body["test"]
+
+    def _duplicates_marked(self, test_id):
+        """Count findings flagged duplicate in a test, WITHOUT any wait/retry."""
+        return self._get("/findings/", test=test_id, duplicate=True, limit=1)["count"]
+
+    # --- tests ------------------------------------------------------------
+    def test_async_wait_blocks_until_dedupe_complete(self):
+        """async_wait: response reports completion AND all dupes already marked."""
+        engagement_id = self._make_engagement("wait")
+        # First import populates the engagement.
+        self._import(engagement_id, "async_wait")
+        # Second identical import deduplicates against the first.
+        body, test_id = self._import(engagement_id, "async_wait")
+
+        self.assertTrue(
+            body.get("deduplication_complete"),
+            f"async_wait did not report deduplication_complete: {body}",
+        )
+        # No sleep/retry: async_wait must have blocked past the worker-side dedup
+        # delay until dedupe finished, so every finding is already marked duplicate.
+        marked = self._duplicates_marked(test_id)
+        self.assertEqual(
+            marked, self.NUM_FINDINGS,
+            f"async_wait returned with only {marked}/{self.NUM_FINDINGS} duplicates marked "
+            "-> the cross-process join did not block until deduplication finished",
+        )
+
+    def test_async_does_not_block(self):
+        """
+        Control: plain async must NOT report deduplication as complete.
+
+        Counterpart to the async_wait test: the same import in 'async' mode does
+        not await deduplication, so its response reports deduplication_complete
+        False. (We deliberately do not assert the duplicate count here: the async
+        worker task races the import's own DB commit, so how many are marked at
+        response time is not deterministic -- the meaningful, deterministic signal
+        is the flag. The duplicate-count guarantee is asserted on async_wait above,
+        where the worker-side delay makes it robust.)
+        """
+        engagement_id = self._make_engagement("async")
+        self._import(engagement_id, "async")
+        body, _test_id = self._import(engagement_id, "async")
+
+        self.assertFalse(
+            body.get("deduplication_complete"),
+            f"async unexpectedly reported deduplication_complete: {body}",
+        )
+
+
 def add_dedupe_tests_to_suite(suite, *, jira=False, github=False, block_execution=False):
     suite.addTest(BaseTestCase("test_login"))
     set_suite_settings(suite, jira=jira, github=github, block_execution=block_execution)
@@ -570,6 +753,10 @@ def suite():
     suite = unittest.TestSuite()
     add_dedupe_tests_to_suite(suite, jira=False, github=False, block_execution=False)
     add_dedupe_tests_to_suite(suite, jira=True, github=True, block_execution=True)
+    # Deterministic real-worker guard for 'async_wait' (independent of jira/github,
+    # so added once rather than per add_dedupe_tests_to_suite run).
+    suite.addTest(ImportAsyncWaitApiTest("test_async_wait_blocks_until_dedupe_complete"))
+    suite.addTest(ImportAsyncWaitApiTest("test_async_does_not_block"))
     return suite
 
 

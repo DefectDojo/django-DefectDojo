@@ -23,11 +23,11 @@ jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      tag_name: ${{ steps.create_release.outputs.tag_name }}
     steps:
       - name: Create Release
         id: create_release
-        uses: release-drafter/release-drafter@693d20e7c1ce1a81d3a41962f85914253b518449 # v7.3.1
+        uses: release-drafter/release-drafter@4d75298e00d9e34c483e5ff8c68d0ea1c1940c1e # v7.5.1
         with:
           version: ${{ inputs.version }}
         env:
@@ -51,26 +51,12 @@ jobs:
         with:
           pattern: oas-*
 
-      - name: Upload Release Asset - OpenAPI Specification - YAML
-        id: upload-release-asset-yaml
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
+      - name: Upload OAS schemas to release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.update_release_draft.outputs.upload_url }}
-          asset_path: ./oas-yaml/oas.yaml
-          asset_name: oas.yaml
-          asset_content_type: application/vnd.oai.openapi
-
-      - name: Upload Release Asset - OpenAPI Specification - JSON
-        id: upload-release-asset-json
-        uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1.0.2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.update_release_draft.outputs.upload_url }}
-          asset_path: ./oas-json/oas.json
-          asset_name: oas.json
-          asset_content_type: application/json
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ needs.update_release_draft.outputs.tag_name }}" \
+            ./oas-yaml/oas.yaml ./oas-json/oas.json \
+            --clobber --repo "${{ github.repository }}"
 
 
