@@ -12,7 +12,8 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.finding.vulnerability_id import finding_cwe_labels, resolve_vulnerability_id_type
+from dojo.finding.cwe import finding_cwe_labels
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location

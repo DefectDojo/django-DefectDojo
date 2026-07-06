@@ -24,7 +24,8 @@ from tagulous.models import TagField
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
-from dojo.finding.vulnerability_id import cwe_label, finding_cwe_labels, resolve_vulnerability_id_type
+from dojo.finding.cwe import cwe_label, finding_cwe_labels
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and

@@ -1,6 +1,6 @@
 from django.db import migrations
 
-from dojo.finding.vulnerability_id import cwe_label
+from dojo.finding.cwe import cwe_label
 
 BATCH_SIZE = 1000
 
