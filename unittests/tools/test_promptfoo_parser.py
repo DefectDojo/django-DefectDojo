@@ -177,6 +177,24 @@ class TestPromptfooParser(DojoTestCase):
         with self.assertRaises(ValueError):
             parser.get_findings(bad_file, Test())
 
+    def test_parser_rejects_unrecognized_structure(self):
+        # Valid JSON that is not a promptfoo results file (no results array anywhere) must fail
+        # loudly with a hint, not silently import zero findings.
+        parser = PromptfooParser()
+        bogus = io.StringIO(json.dumps({"evalId": "x", "unexpected": "shape"}))
+        with self.assertRaises(ValueError):
+            parser.get_findings(bogus, Test())
+
+    def test_parser_all_passed_returns_no_findings_without_raising(self):
+        # A recognized promptfoo file where every result passed (the target defended every
+        # probe) is a legitimate zero-findings import - it must NOT raise.
+        data = {"results": {"version": 3, "results": [
+            {"success": True, "failureReason": 0, "metadata": {"pluginId": "harmful:hate", "severity": "critical"}, "provider": {"id": "echo"}},
+            {"success": True, "failureReason": 0, "metadata": {"pluginId": "pii:direct", "severity": "medium"}, "provider": {"id": "echo"}},
+        ]}}
+        parser = PromptfooParser()
+        self.assertEqual([], parser.get_findings(io.StringIO(json.dumps(data)), Test()))
+
     def test_parser_handles_none_file(self):
         parser = PromptfooParser()
         self.assertEqual([], parser.get_findings(None, Test()))

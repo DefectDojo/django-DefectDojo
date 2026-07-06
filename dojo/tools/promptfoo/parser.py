@@ -77,9 +77,21 @@ class PromptfooParser:
 
     def get_findings(self, file, test):
         self.dupes = {}
+        if file is None:
+            return []
         data = self._load(file)
+        results = self._extract_results(data)
+        if results is None:
+            # The file parsed as JSON but did not match any promptfoo results shape. Fail
+            # loudly with a hint rather than silently importing zero findings.
+            msg = (
+                "Unrecognized promptfoo results file: could not locate the evaluation "
+                "results array (expected `results.results` from `promptfoo eval -o "
+                "results.json`). Please attach the unmodified promptfoo results JSON."
+            )
+            raise ValueError(msg)
         share_url = data.get("shareableUrl") if isinstance(data, dict) else None
-        for result in self._extract_results(data):
+        for result in results:
             if not isinstance(result, dict):
                 continue
             if result.get("success"):
@@ -87,7 +99,17 @@ class PromptfooParser:
             if result.get("failureReason") == FAILURE_REASON_ERROR:
                 continue  # provider/eval error, not a security finding
             self._process_failure(result, share_url, test)
-        return list(self.dupes.values())
+        findings = list(self.dupes.values())
+        if not findings:
+            # A recognized promptfoo file with zero findings is a legitimate, common outcome:
+            # every probe passed, i.e. the target defended all attacks. Log why so a
+            # successful-but-empty import is explained rather than silently confusing.
+            logger.info(
+                "promptfoo: parsed %d result(s) and created 0 findings - every result "
+                "passed (target defended all attacks) or errored; nothing to import.",
+                len(results),
+            )
+        return findings
 
     def _load(self, file):
         if file is None:
@@ -110,7 +132,9 @@ class PromptfooParser:
 
     def _extract_results(self, data):
         # promptfoo nests the EvaluateResult array under results.results. Accept a top-level
-        # "results" list or a bare list as lenient fallbacks for hand-trimmed exports.
+        # "results" list or a bare list as lenient fallbacks for hand-trimmed exports. Return
+        # None (not []) when nothing matches, so the caller can tell an unrecognized file apart
+        # from a valid promptfoo run that simply had no failing results.
         if isinstance(data, dict):
             results = data.get("results")
             if isinstance(results, dict) and isinstance(results.get("results"), list):
@@ -119,7 +143,7 @@ class PromptfooParser:
                 return results
         elif isinstance(data, list):
             return data
-        return []
+        return None
 
     def _process_failure(self, result, share_url, test):
         metadata = result.get("metadata") or {}
