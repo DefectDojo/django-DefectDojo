@@ -60,7 +60,7 @@
                                 start: '{{t.target_start|date:"c"}}',
                                 end: '{{t.target_end|date:"c"}}',
                                 url: '{% url 'view_test' t.id %}',
-                                color: {%  if t.engagement.active %}'#337ab7'{% else %}'#b9b9b9'{% endif %},
+                                color: {%  if t.engagement.active %}'var(--color-dd-primary-500)'{% else %}'#b9b9b9'{% endif %},
                                 overlap: true
                             },
                         {%  endfor %}
@@ -71,7 +71,7 @@
                                 start: '{{e.target_start|date:"c"}}',
                                 end: '{{e.target_end|date:"c"}}',
                                 url: '{% url 'view_engagement' e.id %}',
-                                color: {%  if e.active %}'#337ab7'{% else %}'#b9b9b9'{% endif %},
+                                color: {%  if e.active %}'var(--color-dd-primary-500)'{% else %}'#b9b9b9'{% endif %},
                                 overlap: true
                             },
                         {%  endfor %}

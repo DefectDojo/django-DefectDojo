@@ -29,3 +29,49 @@ class JIRAHelperTest(TestCase):
     def test_issue_from_jira_is_active_defaults_to_active_on_missing_attribute(self):
         """AttributeError anywhere in the fields.status.statusCategory.key chain defaults to active."""
         self.assertTrue(jira_helper.issue_from_jira_is_active(Mock(spec=[])))
+
+
+class JIRAComponentFieldTest(TestCase):
+
+    """
+    SC-13173: the JIRA project `component` field holds a comma-separated list of
+    component names. prepare_jira_issue_fields must split it into multiple Jira
+    components so Jira receives [{"name": "A"}, {"name": "B"}] instead of a single
+    component named "A,B".
+    """
+
+    def _fields(self, component_name):
+        return jira_helper.prepare_jira_issue_fields(
+            project_key="PROJ",
+            issuetype_name="Bug",
+            summary="summary",
+            description="description",
+            component_name=component_name,
+        )
+
+    def test_single_component(self):
+        fields = self._fields("Security")
+        self.assertEqual([{"name": "Security"}], fields["components"])
+
+    def test_multiple_components_split_on_comma(self):
+        fields = self._fields("Security,DevSecOps")
+        self.assertEqual([{"name": "Security"}, {"name": "DevSecOps"}], fields["components"])
+
+    def test_multiple_components_whitespace_trimmed(self):
+        fields = self._fields("Security, DevSecOps ,  Platform")
+        self.assertEqual(
+            [{"name": "Security"}, {"name": "DevSecOps"}, {"name": "Platform"}],
+            fields["components"],
+        )
+
+    def test_empty_entries_dropped(self):
+        fields = self._fields("Security,,DevSecOps,")
+        self.assertEqual([{"name": "Security"}, {"name": "DevSecOps"}], fields["components"])
+
+    def test_no_component_omits_field(self):
+        fields = self._fields("")
+        self.assertNotIn("components", fields)
+
+    def test_only_separators_omits_field(self):
+        fields = self._fields(" , , ")
+        self.assertNotIn("components", fields)

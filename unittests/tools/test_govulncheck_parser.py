@@ -136,6 +136,14 @@ class TestGovulncheckParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(201, len(findings))
 
+    def test_parse_sarif_is_rejected(self):
+        # A govulncheck SARIF report uploaded to this scan type fails with a
+        # clear message pointing to the SARIF scan type (issue #15033 follow-up).
+        with self.assertRaises(ValueError) as exp, \
+          (get_unit_tests_scans_path("govulncheck") / "issue_15033_sarif.json").open(encoding="utf-8") as testfile:
+            GovulncheckParser().get_findings(testfile, Test())
+        self.assertIn("SARIF", str(exp.exception))
+
 
 class TestGovulncheckParserV2(DojoTestCase):
 
@@ -182,3 +190,11 @@ class TestGovulncheckParserV2(DojoTestCase):
             self.assertTrue(first.fix_available)
             self.assertEqual("v0.33.0", first.fix_version)
             self.assertEqual("https://pkg.go.dev/vuln/GO-2024-3333", first.url)
+
+    def test_parse_sarif_is_rejected(self):
+        # A govulncheck SARIF report uploaded to this scan type fails with a
+        # clear message pointing to the SARIF scan type (issue #15033 follow-up).
+        with self.assertRaises(ValueError) as exp, \
+          (get_unit_tests_scans_path("govulncheck") / "issue_15033_sarif.json").open(encoding="utf-8") as testfile:
+            GovulncheckParserV2().get_findings(testfile, Test())
+        self.assertIn("SARIF", str(exp.exception))

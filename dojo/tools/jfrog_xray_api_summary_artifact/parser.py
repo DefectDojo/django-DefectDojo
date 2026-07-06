@@ -86,7 +86,10 @@ def get_item(
             with contextlib.suppress(CVSS3RHScoreDoesNotMatch, CVSS3RHMalformedError):
                 cvssv3 = CVSS3.from_rh_vector(cvss_v3).clean_vector()
 
-    impact_paths = vulnerability.get("impact_path", [])
+    # JFrog returns impact_path in arbitrary order; sort so file_path,
+    # description, and unique_id stay stable across re-imports — otherwise
+    # one CVE flaps into multiple findings as the order changes between scans.
+    impact_paths = sorted(vulnerability.get("impact_path", []))
     if len(impact_paths) > 0:
         impact_path = decode_impact_path(impact_paths[0])
 
@@ -112,6 +115,16 @@ def get_item(
     result.update(unique_id.encode())
     unique_id_from_tool = result.hexdigest()
 
+    description = (
+        impact_path.name
+        + ":"
+        + impact_path.version
+        + " -> "
+        + vulnerability["description"]
+    )
+    if len(impact_paths) > 1:
+        description += "\n\n**Impact paths:**\n" + "\n".join(f"- {p}" for p in impact_paths)
+
     finding = Finding(
         vuln_id_from_tool=vuln_id_from_tool,
         service=service,
@@ -119,11 +132,7 @@ def get_item(
         cwe=cwe,
         cvssv3=cvssv3,
         severity=severity,
-        description=impact_path.name
-        + ":"
-        + impact_path.version
-        + " -> "
-        + vulnerability["description"],
+        description=description,
         test=test,
         file_path=impact_paths[0],
         component_name=artifact_name,

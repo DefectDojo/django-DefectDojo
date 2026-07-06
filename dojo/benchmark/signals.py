@@ -3,7 +3,7 @@ import logging
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
 
-from dojo.models import Benchmark_Product
+from dojo.benchmark.models import Benchmark_Product
 from dojo.notes.helper import delete_related_notes
 
 logger = logging.getLogger(__name__)

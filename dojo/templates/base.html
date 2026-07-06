@@ -88,7 +88,7 @@
             #dd-sidebar {
                 scrollbar-width: thin;
                 scrollbar-color: rgba(255,255,255,0.2) transparent;
-                background: #003864;  /* Fuji Blue Hue 04 — deepest brand blue */
+                background: var(--color-dd-primary-900);  /* Fuji Blue Hue 04 — deepest brand blue */
             }
             /* Override dojo.css 'a' color inside sidebar */
             #dd-sidebar a,
@@ -103,7 +103,7 @@
             }
             /* Sub-nav items (inside expandable sections) */
             #dd-sidebar div[x-data] > div a {
-                color: #82B0D9;  /* Fuji Blue Hue 02 — medium light */
+                color: var(--color-dd-primary-200);  /* Fuji Blue Hue 02 — medium light */
                 font-size: 0.875rem;
             }
             #dd-sidebar div[x-data] > div a:hover {
@@ -196,7 +196,7 @@
                         </div>
                     </div>
 
-                    <!-- Findings -->
+                    <!-- Findings (Finding Groups folded in) -->
                     <div x-data="{ open: false }">
                         <a href="{% url 'open_findings' %}" @click.prevent="open = !open"
                            class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
@@ -212,18 +212,7 @@
                             {% if "view"|has_global_permission %}
                                 <a href="{% url 'templates' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Finding Templates" %}</a>
                             {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Finding Groups -->
-                    <div x-data="{ open: false }">
-                        <a href="{% url 'all_finding_groups' %}" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
-                            <i class="fa-solid fa-triangle-exclamation w-5 text-center flex-shrink-0"></i>
-                            <span class="flex-1 truncate">{% trans "Finding Groups" %}</span>
-                            <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
-                        </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
+                            <div style="margin:.25rem 1rem; border-top:1px solid rgba(255,255,255,0.1);"></div>
                             <a href="{% url 'open_finding_groups' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Open Findings Groups" %}</a>
                             <a href="{% url 'all_finding_groups' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Findings Groups" %}</a>
                             <a href="{% url 'closed_finding_groups' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Closed Findings Groups" %}</a>
@@ -514,6 +503,13 @@
                 {% for banner in additional_banners %}
                     <div role="alert" class="announcement-banner alert alert-{{ banner.style }} show"
                          data-source="{{ banner.source }}">
+                        {% if banner.dismissible %}
+                            <form method="post" action="{% url 'dismiss_os_message' %}" class="os-message-dismiss-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="token" value="{{ banner.dismiss_token }}">
+                                <button type="submit" class="os-message-dismiss" aria-label="Dismiss" title="Dismiss this message">&times;</button>
+                            </form>
+                        {% endif %}
                         {{ banner.message|safe }}{% if banner.url %} <a href="{{ banner.url }}">{{ banner.link_text }}</a>{% endif %}
                         {% if banner.expanded_html %}
                             <button type="button" class="banner-toggle collapsed"
@@ -960,7 +956,7 @@
         <!-- end #wrapper -->
 
         <!-- our JS -->
-        <script src="{% static "dojo/js/index.js" %}"></script>
+        <script src="{% static "dojo/js/index.js" %}?v={% static_v "dojo/js/index.js" %}"></script>
 
         <!-- CVSS -->
         <script src="{% static "dojo/js/cvsscalc31_helptext.js" %}"></script>
