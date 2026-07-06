@@ -289,6 +289,12 @@
                             </td>
                         </tr>
                         <tr>
+                            <td style="width: 200px;"><strong>{% trans "Deduplication execution mode" %}</strong></td>
+                            <td>
+                                {{ user.usercontactinfo.get_deduplication_execution_mode_display|default:_("Async (do not wait)") }}
+                            </td>
+                        </tr>
+                        <tr>
                             <td style="width: 200px;"><strong>{% trans "Date Joined" %}</strong></td>
                             <td>{{ user.date_joined }}</td>
                         </tr>

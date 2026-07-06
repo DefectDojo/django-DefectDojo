@@ -403,7 +403,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         )
 
     # Deduplication is enabled in the tests above, but to properly test it we must run the same import twice and capture the results.
-    def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
+    def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True, dedup_mode=None):
         """
         Test method to measure deduplication performance by importing the same scan twice.
         The second import should result in all findings being marked as duplicates.
@@ -444,6 +444,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
                                     "verified": True,
                                     "scan_type": STACK_HAWK_SCAN_TYPE,
                                     "engagement": engagement,
+                                    **({"deduplication_execution_mode": dedup_mode} if dedup_mode else {}),
                                 }
                                 importer = DefaultImporter(**import_options)
                                 _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
@@ -471,6 +472,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
                                     "verified": True,
                                     "scan_type": STACK_HAWK_SCAN_TYPE,
                                     "engagement": engagement,
+                                    **({"deduplication_execution_mode": dedup_mode} if dedup_mode else {}),
                                 }
                                 importer = DefaultImporter(**import_options)
                                 _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
@@ -550,6 +552,41 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
             expected_num_queries2=90,
             expected_num_async_tasks2=2,
         )
+
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_deduplication_performance_pghistory_async_wait(self):
+        """
+        Deduplication performance in the 'async_wait' execution mode: post-processing is
+        dispatched to a background worker, then the request joins on the result before
+        responding. The dedup queries run in the worker (a separate connection), NOT in
+        the web request, so the only web-side cost over the plain async path is +2: the
+        post-dedup notification refresh SELECT, plus one result-backend write from the
+        per-dispatch ignore_result=False that lets the request join via AsyncResult.get().
+
+        We do not use CELERY_TASK_ALWAYS_EAGER here — that would run the dispatched task
+        inline on the request's connection and wrongly count the worker's dedup queries.
+        Instead the dedup batch is dispatched async (not executed in-process) and the join
+        (AsyncResult.get) is mocked to return immediately, simulating a worker that has
+        finished. deduplication_complete is therefore True (so the refresh runs), but the
+        findings are not actually deduplicated in-test, so check_duplicates is False.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        # Enable deduplication
+        self.system_settings(enable_deduplication=True)
+
+        # Simulate the background worker's post-processing having completed so the join
+        # returns instantly without executing dedup on the request's DB connection.
+        with patch("celery.result.AsyncResult.get", return_value=None):
+            self._deduplication_performance(
+                expected_num_queries1=94,
+                expected_num_async_tasks1=2,
+                expected_num_queries2=74,
+                expected_num_async_tasks2=2,
+                dedup_mode="async_wait",
+                check_duplicates=False,
+            )
 
 
 @tag("performance")

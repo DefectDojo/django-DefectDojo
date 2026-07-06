@@ -46,6 +46,12 @@ services:
     environment:
       DD_DATABASE_URL: ${DD_TEST_DATABASE_URL:-postgresql://defectdojo:defectdojo@postgres:5432/test_defectdojo}
       DD_V3_FEATURE_LOCATIONS: ${DD_V3_FEATURE_LOCATIONS:-False}
+      # Delay deduplication batches so the async_wait integration test can
+      # deterministically distinguish a blocking join (async_wait) from a
+      # non-blocking one (async). Scoped by _FILTER to that test's findings so
+      # other dedupe tests are unaffected. Integration-test stack only; never prod.
+      DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY: 10
+      DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER: "async_wait finding"
   initializer:
     environment:
       PYTHONWARNINGS: error  # We are strict about Warnings during testing
