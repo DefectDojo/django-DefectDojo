@@ -4,7 +4,7 @@ import dateutil
 from django.conf import settings
 from django.core.files.base import ContentFile
 
-from dojo.finding.vulnerability_id import cwe_number
+from dojo.finding.cwe import cwe_number
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest

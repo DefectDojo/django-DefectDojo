@@ -6,7 +6,7 @@ from cvss import parser as cvss_parser
 from dateutil.parser import parse
 from django.conf import settings
 
-from dojo.finding.vulnerability_id import cwe_number, parse_cwes
+from dojo.finding.cwe import cwe_number, parse_cwes
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 

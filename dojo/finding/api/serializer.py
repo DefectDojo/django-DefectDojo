@@ -15,6 +15,7 @@ from rest_framework.fields import DictField
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.finding.cwe import cwe_label, cwe_number
 from dojo.finding.helper import (
     save_cwes,
     save_endpoints_template,
@@ -22,7 +23,6 @@ from dojo.finding.helper import (
     save_vulnerability_ids_template,
 )
 from dojo.finding.models import BurpRawRequestResponse
-from dojo.finding.vulnerability_id import cwe_label, cwe_number
 from dojo.jira import services as jira_services
 from dojo.jira.api.serializers import JIRAIssueSerializer
 from dojo.location.models import LocationFindingReference

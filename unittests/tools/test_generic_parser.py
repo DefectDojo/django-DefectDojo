@@ -1,6 +1,6 @@
 import datetime
 
-from dojo.finding.vulnerability_id import finding_cwe_labels
+from dojo.finding.cwe import finding_cwe_labels
 from dojo.models import Engagement, Finding, Product, Test
 from dojo.tools.generic.parser import GenericParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path

@@ -7,8 +7,8 @@ from django.utils.translation import gettext_lazy as _
 from tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
+from dojo.finding.cwe import cwe_number, parse_cwes
 from dojo.finding.queries import get_authorized_findings
-from dojo.finding.vulnerability_id import cwe_number, parse_cwes
 from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.utils import validate_locations_to_add

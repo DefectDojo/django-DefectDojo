@@ -2,7 +2,7 @@ import logging
 
 from django.core.management.base import BaseCommand
 
-from dojo.finding.vulnerability_id import cwe_label
+from dojo.finding.cwe import cwe_label
 from dojo.models import Finding, Finding_CWE
 
 logger = logging.getLogger(__name__)

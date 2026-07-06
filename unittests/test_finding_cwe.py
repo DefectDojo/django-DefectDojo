@@ -3,13 +3,13 @@ from django.test import SimpleTestCase, override_settings
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
-from dojo.finding.helper import save_cwes
-from dojo.finding.vulnerability_id import (
+from dojo.finding.cwe import (
     cwe_label,
     cwe_number,
     finding_cwe_labels,
     parse_cwes,
 )
+from dojo.finding.helper import save_cwes
 from dojo.models import Finding, Finding_CWE, User
 from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, versioned_fixtures
 
