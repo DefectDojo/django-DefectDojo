@@ -31,8 +31,8 @@ class DojoAsyncTask(Task):
         Also resets the request/task-scoped L1 settings cache at the start of every
         task (including eager): a prefork worker reuses its thread across tasks, so an
         L1 value cached during a prior task (e.g. System_Settings) would otherwise be
-        served stale even after another process changed and saved it. The shared L2
-        tier is left intact, so a reset task re-reads each singleton once from L2.
+        served stale even after another process changed and saved it. There is no
+        shared tier, so a reset task re-reads each singleton once from the DB.
 
         The apply_async method injects ``async_user_id`` into kwargs when a task
         is dispatched. Here we pop it, resolve to a user instance, and set it

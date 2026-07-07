@@ -150,11 +150,33 @@ def model_to_cache_dict(instance) -> dict:
     return {f.attname: f.value_from_object(instance) for f in instance._meta.concrete_fields}
 
 
-def cache_dict_to_model(model_cls, data: dict):
+# Attribute set on instances rebuilt for read-only cache use (``read_only=True``).
+# A guarded model's ``save()`` checks it and refuses to persist a cache-derived
+# snapshot (see ``System_Settings.save``). Instance-level, so it never leaks to a
+# freshly-fetched (``no_cache=True``) instance, which is a distinct object.
+READ_ONLY_CACHE_MARKER = "_dd_read_only_cache_snapshot"
+
+
+class ReadOnlyCachedInstanceError(RuntimeError):
+
+    """
+    Raised when code tries to save a model instance rebuilt from the read-through
+    cache. Such an instance is a point-in-time snapshot; persisting it can clobber
+    concurrent changes with stale field values. Fetch a fresh DB instance
+    (e.g. ``System_Settings.objects.get(no_cache=True)``) before saving.
+    """
+
+
+def cache_dict_to_model(model_cls, data: dict, *, read_only: bool = False):
     """
     Rebuild an in-memory model instance from a ``model_to_cache_dict`` dict.
 
     For read-only use; callers that persist changes must fetch a fresh DB instance
-    rather than saving a cache-derived one.
+    rather than saving a cache-derived one. Pass ``read_only=True`` to tag the
+    instance with ``READ_ONLY_CACHE_MARKER`` so a guarded model's ``save()`` fails
+    loudly instead of silently writing a stale snapshot.
     """
-    return model_cls(**data)
+    instance = model_cls(**data)
+    if read_only:
+        setattr(instance, READ_ONLY_CACHE_MARKER, True)
+    return instance

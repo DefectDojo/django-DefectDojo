@@ -2,6 +2,8 @@ from django.test import TestCase, override_settings
 
 from dojo.caching import (
     _L1_STORE,  # noqa: PLC2701 test needs the in-process store
+    READ_ONLY_CACHE_MARKER,
+    ReadOnlyCachedInstanceError,
     cache_dict_to_model,
     dojo_settings_cache,
     invalidate_dojo_settings_cache,
@@ -83,3 +85,38 @@ class ModelDictRoundTripTest(DojoTestCase):
         rebuilt = cache_dict_to_model(System_Settings, data)
         self.assertEqual(rebuilt.pk, settings_obj.pk)
         self.assertEqual(rebuilt.enable_deduplication, settings_obj.enable_deduplication)
+
+    def test_read_only_flag_only_when_requested(self):
+        data = model_to_cache_dict(System_Settings.objects.get(no_cache=True))
+        # default: saveable (no marker)
+        self.assertFalse(getattr(cache_dict_to_model(System_Settings, data), READ_ONLY_CACHE_MARKER, False))
+        # read_only=True: tagged as a read-only snapshot
+        self.assertTrue(getattr(cache_dict_to_model(System_Settings, data, read_only=True), READ_ONLY_CACHE_MARKER, False))
+
+
+class SystemSettingsSaveGuardTest(DojoTestCase):
+
+    """
+    The read-through cache hands back a read-only snapshot: saving the instance
+    returned by ``System_Settings.objects.get()`` must fail loudly, while a fresh
+    ``no_cache=True`` instance saves normally.
+    """
+
+    def setUp(self):
+        _L1_STORE.clear()
+
+    def tearDown(self):
+        _L1_STORE.clear()
+
+    def test_saving_cached_instance_raises(self):
+        cached = System_Settings.objects.get()  # read-through (cached) path
+        self.assertTrue(getattr(cached, READ_ONLY_CACHE_MARKER, False))
+        cached.enable_deduplication = not cached.enable_deduplication
+        with self.assertRaises(ReadOnlyCachedInstanceError):
+            cached.save()
+
+    def test_no_cache_instance_is_saveable(self):
+        fresh = System_Settings.objects.get(no_cache=True)
+        self.assertFalse(getattr(fresh, READ_ONLY_CACHE_MARKER, False))
+        fresh.enable_deduplication = not fresh.enable_deduplication
+        fresh.save()  # must not raise

@@ -138,7 +138,7 @@ class DojoTestUtilsMixin:
         return User.objects.get(username="admin")
 
     def system_settings(self, **kwargs):
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         for key, value in kwargs.items():
             setattr(ss, key, value)
         ss.save()

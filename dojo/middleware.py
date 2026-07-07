@@ -26,10 +26,10 @@ from dojo.product_announcements import LongRunningRequestProductAnnouncement
 
 logger = logging.getLogger(__name__)
 
-# Two-tier (in-process L1 + django.core.cache L2) read-through cache for the
-# System_Settings singleton, via the shared dojo_settings_cache decorator. Stored
-# as a plain dict (no pickled model graph) and rebuilt into a read-only instance
-# per call. Write paths use ``objects.get(no_cache=True)`` and are unaffected.
+# In-process (L1) read-through cache for the System_Settings singleton, via the
+# shared dojo_settings_cache decorator. Stored as a plain dict (no pickled model
+# graph) and rebuilt into a read-only instance per call. Write paths use
+# ``objects.get(no_cache=True)`` and are unaffected.
 SYSTEM_SETTINGS_CACHE_KEY = "dojo.system_settings.singleton"
 
 
@@ -50,7 +50,9 @@ def get_cached_system_settings():
     data = _cached_system_settings_dict()
     if not isinstance(data, dict):
         return System_Settings()
-    return cache_dict_to_model(System_Settings, data)
+    # read_only=True tags the rebuilt snapshot so System_Settings.save() refuses
+    # to persist it; writers must use objects.get(no_cache=True) for a fresh row.
+    return cache_dict_to_model(System_Settings, data, read_only=True)
 
 
 @receiver(models.signals.post_save, sender="dojo.System_Settings")
@@ -165,10 +167,17 @@ class System_Settings_Manager(models.Manager):
         return from_db
 
     def get(self, no_cache=False, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+        # NOTE: this override does not behave like Manager.get(). System_Settings is
+        # a singleton, so the cached path ignores any filter args/kwargs, always
+        # returns the one row, and never raises DoesNotExist/MultipleObjectsReturned
+        # (get_or_create against this manager therefore won't create — data
+        # migrations use apps.get_model(), which keeps Django's default manager).
+        # The cached instance is a read-only snapshot (see get_cached_system_settings);
+        # to modify-and-save, fetch a fresh row with no_cache=True.
         if no_cache:
             # logger.debug('no_cache specified, loading system settings from db')
             return self.get_from_db(*args, **kwargs)
-        # Read through the shared L1/L2 cache (dojo.caching). L1 is request/task
+        # Read through the in-process (L1) cache (dojo.caching). L1 is request/task
         # scoped (reset by the middleware and the Celery task base), so repeated
         # reads within a request are served in-process.
         return get_cached_system_settings()

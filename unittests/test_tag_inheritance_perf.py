@@ -137,7 +137,7 @@ class TagInheritancePerfBaselines(DojoTestCase):
         # Per-product flag is also set in _make_product_with_findings as a
         # belt-and-braces measure (tests should not be flag-coupled).
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 
@@ -461,7 +461,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     @classmethod
     def setUpTestData(cls):
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 

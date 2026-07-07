@@ -941,7 +941,7 @@ class TestNotificationWebhooks(DojoTestCase):
         self.sys_wh.url = f"{self.url_base}/delay/3"
         self.sys_wh.save()
 
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.webhooks_notifications_timeout = 1
         system_settings.save()
 

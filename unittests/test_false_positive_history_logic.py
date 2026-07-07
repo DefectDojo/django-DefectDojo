@@ -2031,26 +2031,26 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         return test_new, eng_new, product_new
 
     def enable_false_positive_history(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.false_positive_history = True
         system_settings.save()
 
     def enable_retroactive_false_positive_history(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.retroactive_false_positive_history = True
         system_settings.save()
 
     def disable_retroactive_false_positive_history(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.retroactive_false_positive_history = False
         system_settings.save()
 
     def enable_dedupe(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.enable_deduplication = True
         system_settings.save()
 
     def disable_dedupe(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.enable_deduplication = False
         system_settings.save()
