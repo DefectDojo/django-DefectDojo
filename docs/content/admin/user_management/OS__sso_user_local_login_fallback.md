@@ -27,7 +27,7 @@ Setting a real password clears both conditions at once: the account can log in l
 Run these steps from the Django shell inside the `uwsgi` container:
 
 ```bash
-docker compose exec uwsgi ./manage.py shell
+docker compose exec -it uwsgi ./manage.py shell
 ```
 
 ### A single user
@@ -70,4 +70,3 @@ If your instance has the "I forgot my password" flow enabled (`DD_FORGOT_PASSWOR
 * **Kubernetes:** run the shell in the Django pod instead, e.g. `kubectl exec -it deploy/defectdojo-django -c uwsgi -- ./manage.py shell` (adjust the deployment and container names to your release).
 * Choose a strong throwaway password. With `force_password_reset = True` the user cannot keep it, so it only needs to survive one login.
 * Keep at least one working local admin account so you are never locked out.
-* Once users have local passwords, we strongly recommend requiring MFA. See [Creating a new user](../os__creating_new_users/).
