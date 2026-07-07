@@ -1859,8 +1859,7 @@ small {
     background-color: transparent!important;
     border: none!important;
     font-weight: bold!important;
-    position: absolute!important;
-    left: 0!important;
+    position: relative!important;
 }
 
 .EasyMDEContainer .table {
