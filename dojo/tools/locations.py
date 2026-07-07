@@ -68,7 +68,9 @@ class LocationData:
             "source_file_path": source_file_path,
             "source_line": source_line,
         }
-        data.update({key: value for key, value in context.items() if value not in {"", None}})
+        # Tuple (not set) membership: uses == rather than hashing, so an unset
+        # check never crashes on an unhashable value a parser might pass.
+        data.update({key: value for key, value in context.items() if value not in ("", None)})
         return cls(type="code", data=data)
 
     @classmethod
