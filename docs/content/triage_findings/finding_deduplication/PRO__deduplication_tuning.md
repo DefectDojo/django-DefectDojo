@@ -39,6 +39,16 @@ DefectDojo Pro offers the following deduplication methods for same-tool deduplic
 #### Hash Code
 Uses a combination of selected fields to generate a unique hash. When selected, a third dropdown will appear showing the fields being used to calculate the hash.
 
+##### Content Fingerprint
+
+**Content Fingerprint** is a selectable hash field (available in all three configuration areas) that provides a *location-invariant* identity for static-analysis findings. It is derived from the vulnerable code snippet a tool includes in the finding — normalized so that indentation, line-number annotations, and formatting differences do not change it. Two findings about the same vulnerable code hash identically even when the code moved to a different line or file.
+
+Content Fingerprint is computed for tools that include a code snippet in the finding description — including **Bandit**, **Gosec**, **Brakeman**, **Checkmarx One**, and any tool whose description carries a fenced code block or SARIF snippet.
+
+> **Before selecting Content Fingerprint as a hash field**, populate fingerprints for existing findings by running `./manage.py backfill_fingerprints`. Findings imported after the feature is present get fingerprints automatically, but pre-existing findings have none — selecting the field without backfilling makes existing and incoming findings hash differently, splitting every match until the backfill runs.
+
+Content Fingerprint pairs well with **CWE** for tools that embed file paths or line numbers inside their titles, where other identity fields change every time the code moves. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#choosing-hash-fields-for-tracked-tools).
+
 #### Unique ID From Tool
 Leverages the security tool's own internal identifier for findings, ensuring perfect deduplication when the scanner provides reliable unique IDs.
 
@@ -88,6 +98,14 @@ The following algorithm options are available for Reimport Deduplication:
 
 Reimport can completely discard Findings before they are recorded, so Reimport Deduplication settings should be adjusted with caution.
 
+### Track Findings as Locations Change
+
+When a tool's Reimport Deduplication algorithm is **Hash Code**, an additional toggle appears: **Track findings as locations change**. With it enabled, a finding whose location moved between reimports — a line shift or file rename, a URL move, or a dependency version bump — is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
+
+The toggle is off by default and applies only to the Hash Code reimport algorithm (tools with a reliable Unique ID From Tool already track movement through their stable IDs). Enabling it automatically re-hashes the tool's existing findings in the background so historical data participates immediately.
+
+See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/) for how the matching works, what is preserved, and guidance for enabling it on large instances.
+
 ## Running Deduplication Retroactively on Existing Data
 
 A common situation when first turning on Deduplication Tuning is having a large backlog of Findings that were imported *before* the dedup configuration changed.  In DefectDojo Pro, you do not need to run a separate command to dedupe this historical data — **changing the Deduplication Settings for a tool automatically triggers a background re-hash of all existing Findings associated with that test type**.
@@ -112,6 +130,8 @@ For optimal results with Deduplication Tuning:
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
 - **Keep cross-tool sources in the same Asset**: Cross-Tool Deduplication is Asset-scoped.  Findings split across separate Assets will not dedupe even with matching hash fields.  See [Cross-Tool Deduplication is Scoped to a Single Asset](#cross-tool-deduplication-is-scoped-to-a-single-asset) above.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
+- **Backfill before selecting Content Fingerprint**: run `./manage.py backfill_fingerprints` first, then select the field — the triggered re-hash then has fingerprints to work with. See [Content Fingerprint](#content-fingerprint) above.
+- **Enable location tracking between scan runs**: the toggle's automatic re-hash covers the tool's whole backlog; on large instances let it finish before the next scheduled reimport. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#enabling-on-existing-data-upgrades).
 
 By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.
 
