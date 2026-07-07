@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from threading import local
 from urllib.parse import quote
 
@@ -291,6 +291,38 @@ def _drain_search_context_to_async(objects, source):
         objects.discard(entry)
 
 
+@contextmanager
+def watson_search_context_for_task():
+    """
+    Batch watson index updates for saves that happen inside a Celery task.
+
+    Celery workers serve no HTTP request, so ``AsyncSearchContextMiddleware`` never runs
+    and no watson ``search_context`` is active while the task executes. Without an active
+    context, django-watson's ``post_save`` receiver indexes every saved object
+    synchronously — one DELETE + INSERT into ``watson_searchentry`` per object. A bulk
+    import running in a worker (Pro's ``AsyncImporter``) then re-indexes findings one at a
+    time, flooding the DB with thousands of index writes.
+
+    Opening a search_context around the task makes those saves accumulate and drain in
+    ``WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE``-sized async batches on exit, exactly like the
+    request path does via ``AsyncSearchContextMiddleware``. Wire it in through
+    ``CELERY_TASK_CONTEXT_MANAGERS`` so ``PluggableContextTask`` enters it around every
+    task. An empty context (a task that saved no indexed models) drains to nothing, so this
+    is a cheap no-op for tasks that do not touch registered models.
+    """
+    search_context_manager.start()
+    try:
+        yield
+    finally:
+        # Drain accumulated objects to async batched index-update tasks, then end the
+        # (now-empty) context so watson's bulk-save short-circuits — mirrors
+        # AsyncSearchContextMiddleware._close_search_context for the request path.
+        if search_context_manager.is_active():
+            objects, _is_invalid = search_context_manager._stack[-1]
+            _drain_search_context_to_async(objects, source="watson_search_context_for_task")
+        search_context_manager.end()
+
+
 def install_intermediate_flush_hook():
     """
     Wrap `watson.search.search_context_manager.add_to_context` with a
@@ -312,6 +344,14 @@ def install_intermediate_flush_hook():
 
     def add_to_context_with_flush(self, engine, obj):
         original_add(self, engine, obj)
+        # Only the shared request/task accumulation context batches. A throwaway local
+        # SearchContextManager — e.g. the one update_watson_search_index_for_model builds to
+        # index one already-bounded batch — must never re-flush: it would re-dispatch that
+        # index task for the same batch (infinite recursion under eager celery / re-dispatch
+        # loop on a worker). watson's post_save always adds to the module-global instance, so
+        # gating on identity lets the shared context flush while private ones never do.
+        if self is not search_context_manager:
+            return
         threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
         if threshold <= 0 or not self._stack:
             return
