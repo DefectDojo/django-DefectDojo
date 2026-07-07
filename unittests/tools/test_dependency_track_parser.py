@@ -168,3 +168,10 @@ class TestDependencyTrackParser(DojoTestCase):
         self.assertEqual(0.07756, findings[0].epss_percentile)
         self.assertEqual(4.2, findings[0].cvssv3_score)
         self.assertIn("CVE-2023-45803", findings[0].unsaved_vulnerability_ids)
+
+    def test_dependency_track_parser_finding_with_analysis_detail(self):
+        with (get_unit_tests_scans_path("dependency_track") / "one_finding_with_analysis_detail.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        self.assertIn("Audit Detail: Reviewed and confirmed vulnerable. Upgrade scheduled for next sprint.", findings[0].description)

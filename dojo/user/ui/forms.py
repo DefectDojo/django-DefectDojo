@@ -80,7 +80,7 @@ class UserContactInfoForm(forms.ModelForm):
         # Swap order: password_last_reset before token_last_reset
         field_order = [
             "title", "phone_number", "cell_number", "twitter_username", "github_username",
-            "slack_username", "ui_use_tailwind", "block_execution", "force_password_reset", "reset_api_token",
+            "slack_username", "ui_use_tailwind", "block_execution", "deduplication_execution_mode", "force_password_reset", "reset_api_token",
             "password_last_reset", "token_last_reset",
         ]
 
