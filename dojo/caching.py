@@ -2,9 +2,11 @@
 In-process read-through cache for global, low-cardinality singleton config.
 
 A single per-thread **L1** tier resolves a getter L1 → DB: a hit wins; a ``None``
-result means "not cached, compute it" and is never stored. This is deliberately
-simple — it is only for global, user-INDEPENDENT, signal-invalidated singletons
-(feature flags, system settings, and the like), never per-user or per-object data.
+result means "not cached, compute it" and is never stored (unless the getter opts
+in with ``cache_none=True``, for getters where ``None`` is a legitimate answer).
+This is deliberately simple — it is only for global, user-INDEPENDENT,
+signal-invalidated singletons (feature flags, system settings, and the like),
+never per-user or per-object data.
 
 There is intentionally **no shared/cross-process (L2) tier**: freshness is provided
 by resetting L1 at every request and task boundary (middleware + the Celery task
@@ -89,27 +91,45 @@ class _L1Store:
 
 _L1_STORE = _L1Store()
 
+# Sentinel stored in L1 to represent a cached ``None`` result, so a legitimately
+# ``None`` value (e.g. "no default configured") is distinguishable from "absent".
+# Only used by getters that opt in via ``cache_none=True``.
+_CACHED_NONE = object()
 
-def dojo_settings_cache(*, key: str):
+
+def dojo_settings_cache(*, key: str, cache_none: bool = False):
     """
     Read-through in-process (L1) cache for a fixed-key singleton getter.
 
-    Resolves L1 → wrapped function. A ``None`` result is treated as "no value" and
-    is not cached (so the next call retries). Becomes a pass-through when L1 is
-    disabled (``SETTINGS_CACHE_L1_TTL=-1``). Freshness across processes comes from
-    resetting L1 each request/task (see ``reset_l1_cache``), not a shared tier.
+    Resolves L1 → wrapped function. Becomes a pass-through when L1 is disabled
+    (``SETTINGS_CACHE_L1_TTL=-1``). Freshness across processes comes from resetting
+    L1 each request/task (see ``reset_l1_cache``), not a shared tier.
+
+    By default a ``None`` result is treated as "no value" and is not cached (so the
+    next call retries) — right for singletons that always exist and where ``None``
+    means "not yet computed / transient error".
+
+    Pass ``cache_none=True`` for getters where ``None`` is a legitimate steady-state
+    answer (e.g. "no default row configured"). It caches the ``None`` too, so a
+    missing row costs one DB read per request/task instead of one per call site.
+    Safe only when the getter is signal-invalidated on the row's create/save (so the
+    cached ``None`` is dropped the moment a value appears).
     """
 
     def decorator(fn):
         @wraps(fn)
         def wrapper(*args, **kwargs):
             value = _L1_STORE.get(key)              # ---- L1 ----
+            if value is _CACHED_NONE:               # cached "no value" (cache_none=True)
+                return None
             if value is not None:
                 return value
 
             value = fn(*args, **kwargs)             # ---- miss: compute ----
             if value is not None:
                 _L1_STORE.set(key, value)
+            elif cache_none:
+                _L1_STORE.set(key, _CACHED_NONE)
             return value
 
         return wrapper
