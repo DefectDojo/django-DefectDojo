@@ -46,19 +46,26 @@ class DojoAsyncTask(Task):
         crum.impersonate in tests or request middleware) are not disrupted.
         """
         from dojo.caching import reset_l1_cache  # noqa: PLC0415
+        from dojo.request_cache import begin_task_cache, end_task_cache  # noqa: PLC0415
         reset_l1_cache()
+        # Install a fresh task-scoped request-cache (begin) and drop it afterwards
+        # (end), so cache_for_request_or_task can memoize within this task without a
+        # value leaking to the next task on this reused worker thread.
+        begin_task_cache()
+        try:
+            if "async_user_id" not in kwargs:
+                return super().__call__(*args, **kwargs)
 
-        if "async_user_id" not in kwargs:
-            return super().__call__(*args, **kwargs)
+            import crum  # noqa: PLC0415
 
-        import crum  # noqa: PLC0415
+            from dojo.models import Dojo_User  # noqa: PLC0415 circular import
 
-        from dojo.models import Dojo_User  # noqa: PLC0415 circular import
-
-        user_id = kwargs.pop("async_user_id")
-        user = Dojo_User.objects.filter(pk=user_id).first() if user_id else None
-        with crum.impersonate(user):
-            return super().__call__(*args, **kwargs)
+            user_id = kwargs.pop("async_user_id")
+            user = Dojo_User.objects.filter(pk=user_id).first() if user_id else None
+            with crum.impersonate(user):
+                return super().__call__(*args, **kwargs)
+        finally:
+            end_task_cache()
 
     def apply_async(self, args=None, kwargs=None, **options):
         """Override apply_async to inject user context and track tasks."""
