@@ -68,9 +68,10 @@ class LocationData:
             "source_file_path": source_file_path,
             "source_line": source_line,
         }
-        # Tuple (not set) membership: uses == rather than hashing, so an unset
-        # check never crashes on an unhashable value a parser might pass.
-        data.update({key: value for key, value in context.items() if value not in ("", None)})
+        # Truthiness filter (not set membership): never hashes `value`, so the
+        # unset check can't crash on an unhashable value a parser might pass.
+        # Drops None/""/0/empty — all "no data" for these context fields.
+        data.update({key: value for key, value in context.items() if value})
         return cls(type="code", data=data)
 
     @classmethod
