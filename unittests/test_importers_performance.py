@@ -392,14 +392,14 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=183,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=140,
-            expected_num_async_tasks2=3,
+            expected_num_queries1=181,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=138,
+            expected_num_async_tasks2=4,
             expected_num_queries3=44,
             expected_num_async_tasks3=3,
-            expected_num_queries4=109,
-            expected_num_async_tasks4=2,
+            expected_num_queries4=107,
+            expected_num_async_tasks4=3,
         )
 
     # Deduplication is enabled in the tests above, but to properly test it we must run the same import twice and capture the results.
@@ -719,14 +719,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=195,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=154,
-            expected_num_async_tasks2=3,
+            expected_num_queries1=193,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=152,
+            expected_num_async_tasks2=4,
             expected_num_queries3=54,
             expected_num_async_tasks3=3,
-            expected_num_queries4=113,
-            expected_num_async_tasks4=2,
+            expected_num_queries4=111,
+            expected_num_async_tasks4=3,
         )
 
     def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
