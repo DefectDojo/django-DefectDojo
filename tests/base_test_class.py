@@ -10,7 +10,7 @@ from selenium.common.exceptions import NoAlertPresentException, NoSuchElementExc
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import Select, WebDriverWait
 
 # import time
 logging.basicConfig(
@@ -353,6 +353,24 @@ class BaseTestCase(unittest.TestCase):
 
     def disable_block_execution(self):
         self.set_block_execution(block_execution=False)
+
+    def set_deduplication_execution_mode(self, mode="async"):
+        # Set the admin user's (ourselves) deduplication_execution_mode profile
+        # field. "async_wait" makes import/reimport block until background
+        # deduplication has finished before returning.
+        logger.info("setting deduplication execution mode to: %s", mode)
+        driver = self.driver
+        driver.get(self.base_url + "profile")
+        select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
+        if select.first_selected_option.get_attribute("value") != mode:
+            select.select_by_value(mode)
+            # save settings
+            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            # check it persisted after reload
+            driver.get(self.base_url + "profile")
+            select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
+            self.assertEqual(select.first_selected_option.get_attribute("value"), mode)
+        return driver
 
     def enable_deduplication(self):
         return self.enable_system_setting("id_enable_deduplication")

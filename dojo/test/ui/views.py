@@ -44,6 +44,7 @@ from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.models import (
     BurpRawRequestResponse,
+    Dojo_User,
     Endpoint,
     Finding,
     Finding_Group,
@@ -950,6 +951,10 @@ class ReImportScanResultsView(View):
             "close_old_findings": form.cleaned_data.get("close_old_findings", None),
             "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
         })
+        # Honor the user's profile deduplication_execution_mode for UI reimports. The API resolves
+        # this in the serializer; the UI has no per-import selector, so fall back to the profile
+        # (or block_execution) instead of silently defaulting to async.
+        context["deduplication_execution_mode"] = Dojo_User.resolve_deduplication_execution_mode(request.user)
         # Override the form values of active and verified
         if activeChoice := form.cleaned_data.get("active", None):
             if activeChoice == "force_to_true":

@@ -12,6 +12,20 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## June 2026: v3.0
 
+### June 29, 2026: v3.0.200
+
+* **(Reports)** Added a Graph block type to the Pro Report Builder, letting you embed Insights chart-catalog visualizations directly in reports.
+* **(Pro UI)** Dashboard V2 can now be exported as a branded, paginated PDF.
+* **(Pro UI)** Number columns now support multi-value "In List" / "Not In List" filtering.
+* **(Findings)** KEV and EPSS data is now aggregated across all CVEs on a Finding.
+* **(Custom Enrichment)** Added a dedicated error page for EPSS/KEV connectivity failures, and default KEV/EPSS URLs now persist in tuner settings across upgrades.
+* **(Import)** Reimport no longer closes and recreates Findings whose titles exceed 511 characters.
+* **(SSO)** The SAML configuration form now clarifies which fields are conditionally required.
+* **(Permissions)** The Engagement Testing Lead selector now resolves product-scoped users, and authorized-users handling has been improved.
+* **(Performance)** Heavy dashboard metric aggregations can now be cached behind `DD_METRICS_CACHE_ENABLED`.
+* **(Tools)** Xygeni parser no longer deduplicates distinct SAST/Secrets findings in the same file (now keyed on `uniqueHash`). SARIF parser now unwraps BlackDuck nested fingerprint values.
+* **(Tags)** User-set tags are now preserved when creating a Finding under product tag inheritance.
+
 ### June 22, 2026: v3.0.100
 
 * **(Pro UI)** Added native Excel (`.xlsx`) export for Findings, Engagements, and Users.
