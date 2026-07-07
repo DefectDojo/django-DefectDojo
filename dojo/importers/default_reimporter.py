@@ -18,6 +18,7 @@ from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
 from dojo.models import (
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
     Development_Environment,
     Finding,
     Notes,
@@ -142,6 +143,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         )
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
+        # In 'async_wait' mode, block until background deduplication has finished
+        # so notifications and statistics reflect the deduplicated state.
+        self.wait_for_post_processing()
         updated_count = (
             len(closed_findings) + len(reactivated_findings) + len(new_findings)
         )
@@ -459,7 +463,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         batch_findings.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
-                        dojo_dispatch_task(
+                        result = dojo_dispatch_task(
                             finding_helper.post_process_findings_batch,
                             finding_ids_batch,
                             dedupe_option=True,
@@ -471,8 +475,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
                             jira_instance_id=getattr(self.jira_instance, "id", None),
-                            force_sync=kwargs.get("force_sync", False),
+                            # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                            # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                            **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
+                            **self.post_processing_dispatch_kwargs(**kwargs),
                         )
+                        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+                            self.record_post_processing_result(result)
 
         # No chord: tasks are dispatched immediately above per batch
 

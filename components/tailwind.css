@@ -1177,6 +1177,9 @@
   box-shadow: 0 4px 16px rgba(0,0,0,.12), 0 1px 3px rgba(0,0,0,.06);
 }
 .open > .dropdown-menu { display: block; }
+/* Right-align the menu to its toggle (e.g. dropdowns pinned to the right
+   edge of a header) so it opens leftward instead of overflowing the page. */
+.dropdown-menu-right { right: 0; left: auto; }
 .dropdown-menu > li > a,
 .dropdown-menu > a {
   display: block;

@@ -8,5 +8,11 @@ findings:
 {% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_reactivated %}
   mitigated: 
 {% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_mitigated %}
-  untouched: 
+  untouched:
 {% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_untouched %}
+  new_duplicate:
+{% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_new_duplicate %}
+  reactivated_duplicate:
+{% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_reactivated_duplicate %}
+  untouched_duplicate:
+{% include 'notifications/webhooks/subtemplates/findings_list.tpl' with findings=findings_untouched_duplicate %}
