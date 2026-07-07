@@ -6,6 +6,7 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Finding, Test
+from dojo.tools.locations import LocationData
 
 
 class CheckmarxOneParser:
@@ -100,6 +101,10 @@ class CheckmarxOneParser:
                     )
                     # Add at tag indicating what kind of finding this is
                     finding.unsaved_tags = ["iac"]
+                    if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                        finding.unsaved_locations.append(
+                            LocationData.code(file_path=finding.file_path),
+                        )
                     # Add the finding to the running list
                     findings.append(finding)
         return findings
@@ -188,6 +193,10 @@ class CheckmarxOneParser:
                     finding.description += f"\n---\n{node_snippet}"
                 # Add at tag indicating what kind of finding this is
                 finding.unsaved_tags = ["sast"]
+                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=finding.file_path, line=finding.line),
+                    )
                 # Add the finding to the running list
                 findings.append(finding)
         return findings
@@ -223,6 +232,14 @@ class CheckmarxOneParser:
                 dynamic_finding=False,
                 **self.determine_state(result),
             )
+            if settings.V3_FEATURE_LOCATIONS and locations_uri:
+                finding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=locations_uri,
+                        line=locations_startLine,
+                        end_line=locations_endLine,
+                    ),
+                )
             findings.append(finding)
         return findings
 
@@ -263,7 +280,7 @@ class CheckmarxOneParser:
         if description is None:
             description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
 
-        return Finding(
+        finding = Finding(
             description=description,
             title=description,
             file_path=file_path,
@@ -273,6 +290,11 @@ class CheckmarxOneParser:
             unique_id_from_tool=unique_id_from_tool,
             **self.determine_state(vulnerability),
         )
+        if settings.V3_FEATURE_LOCATIONS and file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(file_path=file_path),
+            )
+        return finding
 
     def get_results_kics(
         self,
@@ -285,7 +307,7 @@ class CheckmarxOneParser:
         if description is None:
             description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
 
-        return Finding(
+        finding = Finding(
             title=description,
             description=description,
             severity=vulnerability.get("severity").title(),
@@ -295,6 +317,11 @@ class CheckmarxOneParser:
             unique_id_from_tool=unique_id_from_tool,
             **self.determine_state(vulnerability),
         )
+        if settings.V3_FEATURE_LOCATIONS and file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(file_path=file_path),
+            )
+        return finding
 
     def get_results_sca(
         self,

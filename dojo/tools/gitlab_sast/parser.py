@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
 
 
@@ -161,5 +164,18 @@ class GitlabSastParser:
             dynamic_finding=False)
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
+
+        if settings.V3_FEATURE_LOCATIONS and file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(
+                    file_path=file_path,
+                    line=location.get("start_line"),
+                    end_line=location.get("end_line"),
+                    source_object=sast_object or "",
+                    sink_object=sast_object or "",
+                    source_file_path=sast_source_file_path or "",
+                    source_line=sast_source_line,
+                ),
+            )
 
         return finding

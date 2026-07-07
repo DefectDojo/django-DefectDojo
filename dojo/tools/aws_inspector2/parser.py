@@ -190,6 +190,10 @@ class AWSInspector2Parser:
         finding.sast_source_file_path = f"{file_path}{file_name}"
         finding.line = start_line
         finding.sast_source_line = start_line
+        if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(file_path=finding.file_path, line=start_line, end_line=end_line),
+            )
         if start_line is None:
             start_line = "N/A"
         if end_line is None:

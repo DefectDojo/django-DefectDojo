@@ -4,9 +4,11 @@ import re
 import textwrap
 
 import dateutil.parser
+from django.conf import settings
 from django.utils.translation import gettext as _
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
 
 logger = logging.getLogger(__name__)
@@ -215,6 +217,19 @@ class SarifParser:
                 line=line,
                 references=get_references(rule),
             )
+
+            if settings.V3_FEATURE_LOCATIONS and file_path:
+                end_line = None
+                if location and "physicalLocation" in location:
+                    end_line = location["physicalLocation"].get("region", {}).get("endLine")
+                finding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=file_path,
+                        line=line,
+                        end_line=end_line,
+                        snippet=get_snippet(location) or "",
+                    ),
+                )
 
             if "ruleId" in result:
                 finding.vuln_id_from_tool = result["ruleId"]

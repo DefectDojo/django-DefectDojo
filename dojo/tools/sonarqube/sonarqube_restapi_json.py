@@ -1,9 +1,11 @@
 import re
 
 import dateutil.parser
+from django.conf import settings
 from django.utils import timezone
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class SonarQubeRESTAPIJSON:
@@ -132,6 +134,10 @@ class SonarQubeRESTAPIJSON:
                         line=line,
                         date=date,
                     )
+                    if settings.V3_FEATURE_LOCATIONS and component:
+                        item.unsaved_locations.append(
+                            LocationData.code(file_path=component, line=line),
+                        )
                     item.unsaved_tags = ["vulnerability"]
                     vulnids = []
                     if "Reference: CVE" in message:
@@ -203,6 +209,10 @@ class SonarQubeRESTAPIJSON:
                         line=line,
                         date=date,
                     )
+                    if settings.V3_FEATURE_LOCATIONS and component:
+                        item.unsaved_locations.append(
+                            LocationData.code(file_path=component, line=line),
+                        )
                     item.unsaved_tags = ["code_smell"]
                 items.append(item)
         if json_content.get("hotspots"):
@@ -252,6 +262,10 @@ class SonarQubeRESTAPIJSON:
                     line=line,
                     date=date,
                 )
+                if settings.V3_FEATURE_LOCATIONS and component:
+                    item.unsaved_locations.append(
+                        LocationData.code(file_path=component, line=line),
+                    )
                 item.unsaved_tags = ["hotspot"]
                 items.append(item)
         return items

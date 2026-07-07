@@ -1,8 +1,10 @@
 from datetime import datetime
 
+from django.conf import settings
 from html2text import html2text
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class MobSFapireport:
@@ -334,6 +336,10 @@ class MobSFapireport:
             )
             if mobsf_finding["file_path"]:
                 finding.file_path = mobsf_finding["file_path"]
+                if settings.V3_FEATURE_LOCATIONS:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=mobsf_finding["file_path"]),
+                    )
                 dupe_key = sev + title + description + mobsf_finding["file_path"]
             else:
                 dupe_key = sev + title + description

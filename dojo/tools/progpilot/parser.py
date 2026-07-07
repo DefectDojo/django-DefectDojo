@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class ProgpilotParser:
@@ -76,5 +79,16 @@ class ProgpilotParser:
                 find.file_path = vuln_file
             if vuln_cwe is not None:
                 find.cwe = int(vuln_cwe.split("CWE_")[1])
+            if settings.V3_FEATURE_LOCATIONS and find.file_path:
+                find.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=find.file_path,
+                        line=find.line,
+                        source_object=source_name or "",
+                        sink_object=sink_name or "",
+                        source_file_path=source_file or "",
+                        source_line=source_line if isinstance(source_line, int) else None,
+                    ),
+                )
             findings.append(find)
         return findings

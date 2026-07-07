@@ -11,6 +11,7 @@ from lxml import etree
 
 from dojo.models import Finding, Sonarqube_Issue
 from dojo.notifications.helper import create_notification
+from dojo.tools.locations import LocationData
 
 from .api_client import SonarQubeAPI
 
@@ -240,6 +241,10 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=issue.get("key"),
                 )
+                if settings.V3_FEATURE_LOCATIONS and component_key:
+                    find.unsaved_locations.append(
+                        LocationData.code(file_path=component_key, line=line),
+                    )
                 items.append(find)
 
         except Exception as e:
@@ -361,6 +366,10 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
                 )
+                if settings.V3_FEATURE_LOCATIONS and component_key:
+                    find.unsaved_locations.append(
+                        LocationData.code(file_path=component_key, line=line),
+                    )
                 items.append(find)
 
         except Exception as e:
