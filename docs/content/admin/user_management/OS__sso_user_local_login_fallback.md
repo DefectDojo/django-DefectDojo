@@ -30,7 +30,7 @@ Run these steps from the Django shell inside the `uwsgi` container:
 docker compose exec -it uwsgi ./manage.py shell
 ```
 
-### A single user
+### Exmaple for a single user
 
 ```python
 from dojo.user.models import Dojo_User, UserContactInfo
@@ -42,21 +42,6 @@ u.save()
 uci, _ = UserContactInfo.objects.get_or_create(user=u)
 uci.force_password_reset = True                  # force a change on next login
 uci.save()
-```
-
-### All users without a usable password (bulk)
-
-```python
-from dojo.user.models import Dojo_User, UserContactInfo
-
-for u in Dojo_User.objects.all():
-    if not u.has_usable_password():
-        u.set_password("<temporary-strong-password>")
-        u.save()
-        uci, _ = UserContactInfo.objects.get_or_create(user=u)
-        uci.force_password_reset = True
-        uci.save()
-        print("reset:", u.username)
 ```
 
 ## What the user does next
