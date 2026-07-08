@@ -646,6 +646,10 @@ class BaseImporter(ImporterOptions):
         - Type already carries the scan-type suffix (e.g. "Prisma Cloud (Generic Findings
           Import)") -> use it verbatim. This keeps the composition idempotent and prevents
           doubled names like "X (scan_type) Scan (scan_type)".
+        - Type plus a " Scan" suffix already equals the scan type (e.g. type "Horusec" with
+          scan_type "Horusec Scan") -> use the scan type as-is. This preserves the behavior of
+          dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security Hub,
+          Rusty Hog, ...) so their Test_Type name is not doubled into "Horusec Scan (Horusec Scan)".
         - Otherwise -> the intentional "{type} Scan ({scan_type})" format (also used by SARIF,
           so a report labeled 'CodeScanner' becomes 'CodeScanner Scan (SARIF)').
         """
@@ -653,6 +657,8 @@ class BaseImporter(ImporterOptions):
             return self.scan_type
         if raw_type.endswith(f" ({self.scan_type})"):
             return raw_type
+        if f"{raw_type} Scan" == self.scan_type:
+            return self.scan_type
         return f"{raw_type} Scan ({self.scan_type})"
 
     def legacy_dynamic_test_type_name(self, raw_type: str | None) -> str:

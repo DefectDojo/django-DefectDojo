@@ -439,6 +439,48 @@ class TestDojoDefaultImporter(DojoTestCase):
                 msg=f"expected 'Prisma Cloud (Generic Findings Import)', persisted='{test.test_type.name}'",
             )
 
+    # Regression: dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security
+    # Hub, Rusty Hog, ...) must not be doubled into "Horusec Scan (Horusec Scan)".
+    def test_import_scan_suffixed_dynamic_type_is_not_doubled(self):
+        """A report type of "Horusec" under scan_type "Horusec Scan" must resolve to "Horusec Scan"."""
+        horusec_scan = get_unit_tests_scans_path("horusec") / "issue_6258.json"
+        with horusec_scan.open(encoding="utf-8") as scan:
+            scan_type = "Horusec Scan"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_scan_suffix")
+            product, _ = Product.objects.get_or_create(
+                name="TestScanSuffix",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Scan Suffix Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            self.assertIsNotNone(test)
+            # Must be the plain scan type, NOT "Horusec Scan (Horusec Scan)"
+            self.assertEqual(
+                "Horusec Scan", test.test_type.name,
+                msg=f"expected 'Horusec Scan', persisted='{test.test_type.name}'",
+            )
+
     # Regression: Generic import doubled the (Generic Findings Import) suffix in the Test_Type name
     def test_reimport_generic_type_with_suffix_is_idempotent(self):
         """Reimporting a report whose type carries the scan-type suffix must not raise and must keep the same test/type."""
