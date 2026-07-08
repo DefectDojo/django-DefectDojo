@@ -57,9 +57,16 @@ class LocationEndpointViewCrossProductAuthzTest(DojoTestCase):
         super().setUp()
         self.client.force_login(self.alice)
 
+    # A cross-product request is denied by the AuthorizationMiddleware object check
+    # (URL_PERMISSIONS maps these views to ("object", Location, ...)). DefectDojo renders
+    # PermissionDenied via dojo.views.custom_unauthorized_view, which returns HTTP 400
+    # app-wide, so the denied status here is 400. The view-level get_authorized_locations
+    # lookup is defense-in-depth behind that middleware check.
+    DENIED_STATUS = 400
+
     def test_view_endpoint_cross_product_is_denied(self):
         response = self.client.get(reverse("view_endpoint", kwargs={"location_id": self.location_b.id}))
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(self.DENIED_STATUS, response.status_code)
 
     def test_view_endpoint_own_product_is_allowed(self):
         response = self.client.get(reverse("view_endpoint", kwargs={"location_id": self.location_a.id}))
@@ -71,7 +78,7 @@ class LocationEndpointViewCrossProductAuthzTest(DojoTestCase):
             reverse("edit_endpoint", kwargs={"location_id": self.location_b.id}),
             {"protocol": "https", "host": "changed.example.test"},
         )
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(self.DENIED_STATUS, response.status_code)
         self.location_b.url.refresh_from_db()
         self.assertEqual(original_host, self.location_b.url.host)
 
@@ -80,5 +87,5 @@ class LocationEndpointViewCrossProductAuthzTest(DojoTestCase):
             reverse("delete_endpoint", kwargs={"location_id": self.location_b.id}),
             {"id": self.location_b.id},
         )
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(self.DENIED_STATUS, response.status_code)
         self.assertTrue(Location.objects.filter(pk=self.location_b.id).exists())
