@@ -162,6 +162,39 @@ class TestFindingLifecycleEvents(DojoAPITestCase):
             system_settings.enable_deduplication = False
             system_settings.save()
 
+    def test_rededupe_does_not_append_duplicate_marked_duplicate_event(self):
+        """Re-running dedup on a finding that is already a duplicate of the same original records no new event."""
+        from dojo.finding.deduplication import set_duplicate
+        system_settings = System_Settings.objects.get()
+        system_settings.enable_deduplication = True
+        system_settings.save()
+        try:
+            engagement = self._engagement("lifecycle rededupe")
+            engagement.deduplication_on_engagement = True
+            engagement.save()
+            options = self._import_options(engagement, scan_type="Acunetix Scan")
+
+            with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open(encoding="utf-8") as scan:
+                importer = DefaultImporter(close_old_findings=False, **options)
+                importer.process_scan(scan, force_sync=True)
+            with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open(encoding="utf-8") as scan:
+                importer = DefaultImporter(close_old_findings=False, **options)
+                test2, _, _, _, _, _, _ = importer.process_scan(scan, force_sync=True)
+
+            duplicate = Finding.objects.filter(test=test2, duplicate=True).first()
+            self.assertIsNotNone(duplicate)
+            self.assertEqual(1, len(self._events(duplicate, Finding_Lifecycle_Event.Action.MARKED_DUPLICATE)))
+
+            # Re-run dedup on the already-duplicate pair: the guard must skip a second event.
+            set_duplicate(duplicate, duplicate.duplicate_finding)
+            self.assertEqual(
+                1, len(self._events(duplicate, Finding_Lifecycle_Event.Action.MARKED_DUPLICATE)),
+                "re-running set_duplicate on an already-duplicate finding must not append a second event",
+            )
+        finally:
+            system_settings.enable_deduplication = False
+            system_settings.save()
+
     def test_lifecycle_events_api_endpoint(self):
         engagement = self._engagement("lifecycle api")
         options = self._import_options(engagement)
