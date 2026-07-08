@@ -850,9 +850,9 @@ class CSVExportView(View):
         findings = self.add_findings_data()
         return self.build_response(findings)
 
-    def build_response(self, findings):
+    def build_response(self, findings, filename="findings.csv"):
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=findings.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         writer = csv.writer(response)
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
@@ -990,7 +990,7 @@ class ExcelExportView(View):
         findings = self.add_findings_data()
         return self.build_response(findings)
 
-    def build_response(self, findings):
+    def build_response(self, findings, filename="findings.xlsx"):
         workbook = Workbook()
         workbook.iso_dates = True
         worksheet = workbook.active
@@ -1148,5 +1148,5 @@ class ExcelExportView(View):
             content=stream,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = "attachment; filename=findings.xlsx"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         return response

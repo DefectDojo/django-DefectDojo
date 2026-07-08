@@ -1031,9 +1031,6 @@ class ReportGenerateFormatAPITest(DojoAPITestCase):
     def _product_report_url(self):
         return "/api/v2/products/1/generate_report/"
 
-    def _finding_report_url(self):
-        return "/api/v2/findings/generate_report/"
-
     def test_generate_report_defaults_to_json(self):
         response = self.client.post(self._product_report_url(), {}, format="json")
 
@@ -1052,18 +1049,21 @@ class ReportGenerateFormatAPITest(DojoAPITestCase):
 
     def test_generate_report_returns_csv(self):
         response = self.client.post(
-            self._finding_report_url(),
+            self._product_report_url(),
             {"report_type": "CSV"},
             format="json",
         )
 
         self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
         self.assertIn("text/csv", response["Content-Type"])
-        self.assertIn("attachment; filename=findings.csv", response["Content-Disposition"])
+        self.assertIn(
+            "attachment; filename=product_1_findings.csv",
+            response["Content-Disposition"],
+        )
 
     def test_generate_report_returns_excel(self):
         response = self.client.post(
-            self._finding_report_url(),
+            self._product_report_url(),
             {"report_type": "Excel"},
             format="json",
         )
@@ -1073,7 +1073,10 @@ class ReportGenerateFormatAPITest(DojoAPITestCase):
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             response["Content-Type"],
         )
-        self.assertIn("attachment; filename=findings.xlsx", response["Content-Disposition"])
+        self.assertIn(
+            "attachment; filename=product_1_findings.xlsx",
+            response["Content-Disposition"],
+        )
 
     def test_generate_report_rejects_unknown_report_type(self):
         response = self.client.post(

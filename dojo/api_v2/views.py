@@ -835,8 +835,22 @@ def report_generate(request, obj, options):
     return result
 
 
+def _report_findings_filename(obj, extension):
+    object_id = getattr(obj, "id", None)
+    if object_id is None:
+        return f"findings.{extension}"
+
+    object_type = type(obj).__name__.lower()
+    return f"{object_type}_{object_id}_findings.{extension}"
+
+
 def report_generate_response(request, obj, options):
     report_type = options.get("report_type", "JSON")
+
+    if report_type not in {"CSV", "Excel", "HTML", "JSON"}:
+        msg = f"Unsupported report_type: {report_type}"
+        raise ValidationError(msg)
+
     data = report_generate(request, obj, options)
 
     if report_type == "JSON":
@@ -847,13 +861,15 @@ def report_generate_response(request, obj, options):
         return render(request, data["report_template"], data)
 
     if report_type == "CSV":
-        return CSVExportView().build_response(data["findings"])
+        return CSVExportView().build_response(
+            data["findings"],
+            filename=_report_findings_filename(obj, "csv"),
+        )
 
-    if report_type == "Excel":
-        return ExcelExportView().build_response(data["findings"])
-
-    msg = f"Unsupported report_type: {report_type}"
-    raise ValidationError(msg)
+    return ExcelExportView().build_response(
+        data["findings"],
+        filename=_report_findings_filename(obj, "xlsx"),
+    )
 
 
 class CeleryViewSet(viewsets.ViewSet):

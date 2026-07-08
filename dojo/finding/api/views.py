@@ -33,7 +33,11 @@ from dojo.api_v2 import (
 from dojo.api_v2 import (
     serializers as api_v2_serializers,
 )
-from dojo.api_v2.views import DojoModelViewSet, get_request_boolean, report_generate
+from dojo.api_v2.views import (
+    DojoModelViewSet,
+    get_request_boolean,
+    report_generate_response,
+)
 from dojo.authorization import api_permissions as permissions
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
