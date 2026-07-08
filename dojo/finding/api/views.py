@@ -18,6 +18,7 @@ from drf_spectacular.utils import (
 )
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -32,7 +33,7 @@ from dojo.api_v2 import (
 from dojo.api_v2 import (
     serializers as api_v2_serializers,
 )
-from dojo.api_v2.views import DojoModelViewSet, report_generate_response
+from dojo.api_v2.views import DojoModelViewSet, get_request_boolean, report_generate
 from dojo.authorization import api_permissions as permissions
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
@@ -128,6 +129,17 @@ class FindingTemplatesViewSet(
             ),
         ],
     ),
+    destroy=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "push_to_jira",
+                OpenApiTypes.BOOL,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Close or reassign the linked JIRA issue when deleting this finding.",
+            ),
+        ],
+    ),
 )
 class FindingViewSet(
     prefetch.PrefetchListMixin,
@@ -158,6 +170,15 @@ class FindingViewSet(
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         serializer.save(push_to_jira=push_to_jira)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            push_to_jira = get_request_boolean(request, "push_to_jira")
+        except DRFValidationError as error:
+            raise DRFValidationError({"push_to_jira": error.detail}) from error
+        instance.delete(push_to_jira=push_to_jira)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
         if settings.V3_FEATURE_LOCATIONS:
