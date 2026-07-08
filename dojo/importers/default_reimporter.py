@@ -18,11 +18,13 @@ from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
 from dojo.jira import services as jira_services
 from dojo.models import (
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
     Development_Environment,
     Finding,
     Notes,
     Test,
     Test_Import,
+    Vulnerability_Id,
 )
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tags.inheritance import apply_inherited_tags_for_findings
@@ -141,6 +143,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         )
         # Send out som notifications to the user
         logger.debug("REIMPORT_SCAN: Generating notifications")
+        # In 'async_wait' mode, block until background deduplication has finished
+        # so notifications and statistics reflect the deduplicated state.
+        self.wait_for_post_processing()
         updated_count = (
             len(closed_findings) + len(reactivated_findings) + len(new_findings)
         )
@@ -438,6 +443,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # They don't need to be aligned since they optimize different operations.
                     if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
                         self.location_handler.persist()
+                        self.flush_vulnerability_ids()
+                        self.flush_burp_request_response()
                         # Apply parser-supplied tags for this batch before post-processing starts,
                         # so rules/deduplication tasks see the tags already on the findings.
                         bulk_apply_parser_tags(findings_with_parser_tags)
@@ -455,7 +462,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         batch_findings.clear()
                         finding_ids_batch = list(batch_finding_ids)
                         batch_finding_ids.clear()
-                        dojo_dispatch_task(
+                        result = dojo_dispatch_task(
                             finding_helper.post_process_findings_batch,
                             finding_ids_batch,
                             dedupe_option=True,
@@ -464,8 +471,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                             issue_updater_option=True,
                             push_to_jira=push_to_jira,
                             jira_instance_id=getattr(self.jira_instance, "id", None),
-                            force_sync=kwargs.get("force_sync", False),
+                            # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                            # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                            **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
+                            **self.post_processing_dispatch_kwargs(**kwargs),
                         )
+                        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+                            self.record_post_processing_result(result)
 
         # No chord: tasks are dispatched immediately above per batch
 
@@ -561,6 +573,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 mitigated_findings.append(finding)
         # Persist any accumulated location/endpoint status changes
         self.location_handler.persist()
+        self.flush_vulnerability_ids()
+        self.flush_burp_request_response()
         # push finding groups to jira since we only only want to push whole groups
         # We dont check if the finding jira sync is applicable quite yet until we can get in the loop
         # but this is a way to at least make it that far
@@ -955,24 +969,17 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
     ) -> Finding:
         """
         Reconcile vulnerability IDs for an existing finding.
-        Checks if IDs have changed before updating to avoid unnecessary database operations.
-        Uses prefetched data if available, otherwise fetches efficiently.
-
-        Args:
-            finding: The existing finding to reconcile vulnerability IDs for.
-                Must have unsaved_vulnerability_ids set.
-
-        Returns:
-            The finding object
-
+        Accumulates changes into pending_vuln_id_deletes / pending_vulnerability_ids
+        for batch flush at the batch boundary via flush_vulnerability_ids().
         """
-        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
+        vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
+        vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
         # Use prefetched data directly without triggering queries
         existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
         new_vuln_ids = set(vulnerability_ids_to_process)
 
-        # Early exit if unchanged
+        # Early exit if unchanged — no DB work needed
         if existing_vuln_ids == new_vuln_ids:
             logger.debug(
                 f"Skipping vulnerability_ids update for finding {finding.id} - "
@@ -980,8 +987,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             return finding
 
-        # Update if changed
-        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=True)
+        # Accumulate delete + insert for batch flush
+        self.pending_vuln_id_deletes.append(finding.id)
+        self.pending_vulnerability_ids.extend([
+            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            for vid in vulnerability_ids_to_process
+        ])
+        if vulnerability_ids_to_process:
+            finding.cve = vulnerability_ids_to_process[0]
+        else:
+            finding.cve = None
         return finding
 
     def finding_post_processing(

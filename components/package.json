@@ -1,6 +1,6 @@
 {
   "name": "defectdojo",
-  "version": "3.1.0-dev",
+  "version": "3.2.0-dev",
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
@@ -39,13 +39,13 @@
     "metismenu": "~3.0.7",
     "moment": "^2.30.1",
     "morris.js": "morrisjs/morris.js",
-    "pdfmake": "^0.3.8",
+    "pdfmake": "^0.3.11",
     "startbootstrap-sb-admin-2": "1.0.7"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.3",
     "@tailwindcss/forms": "^0.5",
-    "tailwindcss": "^4.1"
+    "tailwindcss": "^4.3"
   },
   "scripts": {
     "copy:fonts": "mkdir -p ../dojo/static/dojo/css/files && cp node_modules/@fontsource-variable/work-sans/files/work-sans-*-wght-normal.woff2 ../dojo/static/dojo/css/files/",

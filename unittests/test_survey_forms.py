@@ -1,6 +1,6 @@
 import json
 
-from dojo.forms import MultiExampleField, MultiWidgetBasic
+from dojo.survey.ui.forms import MultiExampleField, MultiWidgetBasic
 from unittests.dojo_test_case import DojoTestCase
 
 

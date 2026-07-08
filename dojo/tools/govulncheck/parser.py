@@ -40,6 +40,23 @@ def load_govulncheck_stream(scan_file):
         return data
 
 
+def raise_if_sarif(data):
+    """
+    Govulncheck can emit SARIF (``govulncheck -format sarif``). That format is
+    not handled by these parsers; the dedicated SARIF parser should be used
+    instead. Detect it and fail with a clear, actionable message rather than an
+    opaque KeyError or a silently empty result.
+    """
+    if isinstance(data, dict) and "runs" in data:
+        msg = (
+            "This looks like a SARIF report (it has a top-level 'runs' key). "
+            "The Govulncheck Scanner parser only accepts govulncheck's native "
+            "JSON output (govulncheck -format json). To import govulncheck SARIF "
+            "output (govulncheck -format sarif), use the 'SARIF' scan type instead."
+        )
+        raise ValueError(msg)
+
+
 class GovulncheckParser:
     def get_scan_types(self):
         return ["Govulncheck Scanner"]
@@ -139,6 +156,7 @@ class GovulncheckParser:
             msg = "Invalid JSON format"
             raise ValueError(msg)
         else:
+            raise_if_sarif(data)
             if isinstance(data, dict):
                 if data["Vulns"]:
                     # Parsing for old govulncheck output format
@@ -352,6 +370,7 @@ class GovulncheckParserV2:
 
     def get_findings(self, scan_file, test):
         data = load_govulncheck_stream(scan_file)
+        raise_if_sarif(data)
         # The v2 parser only targets the new streaming format (a list of objects).
         if not isinstance(data, list):
             return []
