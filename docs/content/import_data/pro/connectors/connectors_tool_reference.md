@@ -96,6 +96,16 @@ A working policy definition might look like the following:
 
 Once you have created your IAM user and assigned it the necessary permissions using an appropriate policy/role, you will need to generate an access key, which you can then use to create a Connector.
 
+#### Connector Mappings
+
+1. Enter the appropriate [AWS API Endpoint for your region](https://docs.aws.amazon.com/general/latest/gr/sechub.html#sechub_region) in the **Location** field**:**  for example, to retrieve results from the `us-east-1` region, you would supply
+
+`https://securityhub.us-east-1.amazonaws.com`
+2. Enter a valid **AWS Access Key** in the **Access Key** field.
+3. Enter a matching **Secret Key** in the **Secret Key** field.
+
+DefectDojo can pull Findings from more than one region using Security Hub's **cross\-region aggregation** feature. If [cross\-region aggregation](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html) is enabled, you should supply the API endpoint for your "**Aggregation Region**". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account ID and the region name.
+
 ## **Azure DevOps**
 
 The Azure DevOps connector is an **Asset Connector**: it enumerates the git repositories in every project of your Azure DevOps organization and creates a DefectDojo Asset for each repository, grouped into Organizations by Azure DevOps project. No findings are imported.
@@ -137,16 +147,6 @@ Only Bitbucket Cloud (bitbucket.org) is supported. Bitbucket Server reached end 
 4. Enter one or more workspace slugs (comma-separated) in the **Workspace Slugs** field. This field is required: Bitbucket's scoped API tokens cannot list workspaces automatically, so DefectDojo needs to be told which workspaces to read.
 
 Each repository becomes a Record named after the repository, grouped by its Bitbucket **project**.
-
-#### Connector Mappings
-
-1. Enter the appropriate [AWS API Endpoint for your region](https://docs.aws.amazon.com/general/latest/gr/sechub.html#sechub_region) in the **Location** field**:**  for example, to retrieve results from the `us-east-1` region, you would supply
-
-`https://securityhub.us-east-1.amazonaws.com`
-2. Enter a valid **AWS Access Key** in the **Access Key** field.
-3. Enter a matching **Secret Key** in the **Secret Key** field.
-
-DefectDojo can pull Findings from more than one region using Security Hub's **cross\-region aggregation** feature. If [cross\-region aggregation](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html) is enabled, you should supply the API endpoint for your "**Aggregation Region**". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account ID and the region name.
 
 ## **BurpSuite**
 
