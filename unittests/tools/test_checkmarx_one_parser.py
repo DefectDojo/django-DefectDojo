@@ -154,6 +154,40 @@ class TestCheckmarxOneParser(DojoTestCase):
             self.maxDiff = None
             test_sast_finding(sast_finding)
 
+    def test_checkmarx_vulnerabilities_from_scan_results_sast_only(self):
+        """Reports filtered to SAST contain the other scanner sections as explicit nulls."""
+        with (get_unit_tests_scans_path("checkmarx_one") / "vulnerabilities_from_scan_results_sast_only.json").open(encoding="utf-8") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            with self.subTest(i=0):
+                for finding in findings:
+                    self.assertIsNotNone(finding.title)
+                    self.assertIsNotNone(finding.test)
+                    self.assertIsNotNone(finding.date)
+                    self.assertIsNotNone(finding.severity)
+                    self.assertIsNotNone(finding.description)
+                    self.assertEqual(["sast"], finding.unsaved_tags)
+            finding_test = findings[0]
+            self.assertEqual("High", finding_test.severity)
+            self.assertEqual("Kotlin/Kotlin High Risk/Reflected XSS", finding_test.title)
+            self.assertEqual("/src/main/kotlin/domain/entity/Customer.kt", finding_test.file_path)
+            # CWE details come from the populated vulnerabilityDetails store
+            self.assertEqual(79, finding_test.cwe)
+            self.assertEqual("Fully encode all dynamic data before embedding it in output.", finding_test.mitigation)
+
+    def test_checkmarx_vulnerabilities_from_scan_results_null_vulnerability_details(self):
+        """A null vulnerabilityDetails section must not break parsing of SAST results."""
+        with (get_unit_tests_scans_path("checkmarx_one") / "vulnerabilities_from_scan_results_null_details.json").open(encoding="utf-8") as testfile:
+            parser = CheckmarxOneParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(2, len(findings))
+            finding_test = findings[0]
+            self.assertEqual("High", finding_test.severity)
+            self.assertEqual("Kotlin/Kotlin High Risk/Reflected XSS", finding_test.title)
+            # No CWE store available, so store-derived fields fall back to empty
+            self.assertEqual("", finding_test.mitigation)
+
     def test_checkmarx_one_false_positive_status(self):
         with (get_unit_tests_scans_path("checkmarx_one") / "one-open-one-false-positive.json").open(encoding="utf-8") as testfile:
             parser = CheckmarxOneParser()
