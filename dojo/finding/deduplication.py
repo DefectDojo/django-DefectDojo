@@ -161,6 +161,12 @@ def set_duplicate(new_finding, existing_finding, *, save=True):
         msg = "Skip this finding as we do not want to attach a new duplicate to a mitigated finding"
         raise Exception(msg)
 
+    # Whether this call is a real state transition. If new_finding is already a duplicate of
+    # exactly this existing_finding, a re-run (e.g. a product-wide re-deduplication) makes no
+    # change, so we must not append another MARKED_DUPLICATE lifecycle event. Capture this
+    # before mutating the fields below.
+    already_duplicate_of_existing = new_finding.duplicate and new_finding.duplicate_finding_id == existing_finding.id
+
     deduplicationLogger.debug("Setting new finding " + str(new_finding.id) + " as a duplicate of existing finding " + str(existing_finding.id))
     new_finding.duplicate = True
     new_finding.active = False
@@ -195,13 +201,16 @@ def set_duplicate(new_finding, existing_finding, *, save=True):
 
     # Provenance: record the dedupe decision with enough context to answer
     # "why is this a duplicate?" (transitively re-pointed findings record
-    # their own event through the recursive call above)
-    record_lifecycle_event(
-        new_finding.id,
-        Finding_Lifecycle_Event.Action.MARKED_DUPLICATE,
-        {"original_id": existing_finding.id, "hash_code": new_finding.hash_code},
-        actor_type=Finding_Lifecycle_Event.ActorType.DEDUPE,
-    )
+    # their own event through the recursive call above). Only record on a real
+    # transition -- re-running dedup on a finding that is already a duplicate of
+    # this same original must not append a redundant event.
+    if not already_duplicate_of_existing:
+        record_lifecycle_event(
+            new_finding.id,
+            Finding_Lifecycle_Event.Action.MARKED_DUPLICATE,
+            {"original_id": existing_finding.id, "hash_code": new_finding.hash_code},
+            actor_type=Finding_Lifecycle_Event.ActorType.DEDUPE,
+        )
 
     return all_modified
 
