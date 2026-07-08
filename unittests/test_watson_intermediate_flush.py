@@ -10,7 +10,7 @@ from the in-memory set.
 from unittest.mock import patch
 
 from django.test import override_settings
-from watson.search import search_context_manager
+from watson.search import SearchContextManager, search_context_manager
 
 from dojo.middleware import (
     _drain_search_context_to_async,  # noqa: PLC2701 -- internal helper under test
@@ -119,3 +119,22 @@ class TestIntermediateFlushHook(DojoTestCase):
                 # hook should detect the invalid flag and bail out.
                 search_context_manager.add_to_context(engine_marker, p)
             drain.assert_not_called()
+
+    @override_settings(WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=2)
+    def test_ad_hoc_context_manager_does_not_drain(self):
+        """
+        The flush wrapper is bound to the global singleton instance only. An ad-hoc
+        SearchContextManager -- e.g. the one update_watson_search_index_for_model builds to
+        index its own batch -- keeps the stock add_to_context and must NOT drain, or it would
+        dispatch a clone of itself and loop forever (queue ~0, worker pegged, nothing indexed).
+        """
+        adhoc = SearchContextManager()
+        adhoc.start()
+        try:
+            with patch("dojo.middleware._drain_search_context_to_async") as drain:
+                for p in self.products[:3]:  # past the threshold of 2
+                    adhoc.add_to_context(object(), p)
+                drain.assert_not_called()
+        finally:
+            adhoc.invalidate()
+            adhoc.end()
