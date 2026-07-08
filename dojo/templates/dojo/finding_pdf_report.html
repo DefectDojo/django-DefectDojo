@@ -104,6 +104,9 @@
                                     {% if finding.cwe > 0 %}
                                         <th>CWE</th>
                                     {% endif %}
+                                    {% if finding.vulnerability_ids %}
+                                        <th>Vulnerability IDs</th>
+                                    {% endif %}
                                     {% endblock finding_header %}
                                 </tr>
                                 <tr>
@@ -146,6 +149,9 @@
                                                 <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ finding.cwe }}
                                             </a>
                                         </td>
+                                    {% endif %}
+                                    {% if finding.vulnerability_ids %}
+                                        <td>{{ finding.vulnerability_ids }}</td>
                                     {% endif %}
                                     {% endblock finding_data %}
                                 </tr>

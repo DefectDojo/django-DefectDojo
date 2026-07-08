@@ -1216,3 +1216,40 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         deduplicationLogger.debug(qs.query)
 
     return qs
+
+
+def hashcode_values_writer(model_type, batch, fields):
+    """
+    mass_model_updater ``writer`` for the hash-recompute paths (dedupe command + tuner
+    async tasks). The hash fields are text columns, so write the whole batch with one
+    ``UPDATE t SET f = v.f FROM (VALUES (pk, f...), ...) WHERE t.pk = v.pk`` instead of
+    bulk_update's per-row CASE/WHEN. Values are bound as parameters and cast to text
+    (which also resolves the type of an all-NULL column). PostgreSQL only; falls back
+    to bulk_update on other backends.
+    """
+    from django.db import connection  # noqa: PLC0415
+
+    if not batch:
+        return
+    if connection.vendor != "postgresql":
+        model_type.objects.bulk_update(batch, fields)
+        return
+
+    meta = model_type._meta
+    columns = [meta.get_field(name).column for name in fields]
+    row_placeholder = "(" + ",".join(["%s"] * (1 + len(fields))) + ")"
+    placeholders = ",".join([row_placeholder] * len(batch))
+    params = []
+    for obj in batch:
+        params.append(obj.pk)
+        params.extend(getattr(obj, name) for name in fields)
+    value_cols = ", ".join(f"c{idx}" for idx in range(1 + len(fields)))
+    set_clause = ", ".join(f'"{col}" = v.c{idx + 1}::text' for idx, col in enumerate(columns))
+    sql = (
+        f'UPDATE "{meta.db_table}" AS t '
+        f"SET {set_clause} "
+        f"FROM (VALUES {placeholders}) AS v({value_cols}) "
+        f'WHERE t."{meta.pk.column}" = v.c0'
+    )
+    with connection.cursor() as cursor:
+        cursor.execute(sql, params)

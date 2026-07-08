@@ -2,7 +2,7 @@ import logging
 from contextlib import suppress
 from datetime import datetime
 from itertools import batched
-from time import strftime
+from time import sleep, strftime
 
 from django.conf import settings
 from django.db import transaction
@@ -470,6 +470,20 @@ def post_process_findings_batch(
     force_sync=False,
     **kwargs,
 ):
+    # Test-only hook: when DEDUPLICATION_BATCH_PROCESS_TEST_DELAY > 0 (set only in
+    # the integration-test stack) block this batch so the async_wait integration
+    # test can deterministically distinguish 'async_wait' (which joins on this
+    # task) from 'async' (which does not). Default 0 -> no effect in production.
+    # DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER (a finding-title prefix) scopes
+    # the delay to that one test's findings so unrelated dedupe tests are not slowed.
+    if (test_delay := settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY) > 0:
+        delay_filter = settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER
+        if not delay_filter or Finding.objects.filter(id__in=finding_ids, title__istartswith=delay_filter).exists():
+            logger.warning(
+                "post_process_findings_batch: TEST-ONLY delay of %ss for %d finding(s) (filter=%r)",
+                test_delay, len(finding_ids) if finding_ids else 0, delay_filter,
+            )
+            sleep(test_delay)
 
     logger.debug(
         f"post_process_findings_batch called: finding_ids_count={len(finding_ids) if finding_ids else 0}, "
@@ -987,14 +1001,15 @@ def add_locations(finding, form, *, replace=False):
     return set(locations_to_associate)
 
 
-def sanitize_vulnerability_ids(vulnerability_ids) -> None:
+def sanitize_vulnerability_ids(vulnerability_ids):
     """Remove undisired vulnerability id values"""
-    vulnerability_ids = [x for x in vulnerability_ids if x.strip()]
+    return [x for x in vulnerability_ids if x.strip()]
 
 
 def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool = True):
-    # Remove duplicates
+    # Remove duplicates and empty/whitespace IDs
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
+    vulnerability_ids = sanitize_vulnerability_ids(vulnerability_ids)
 
     # Remove old vulnerability ids if requested
     # Callers can set delete_existing=False when they know there are no existing IDs
@@ -1002,12 +1017,10 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
     if delete_existing:
         Vulnerability_Id.objects.filter(finding=finding).delete()
 
-    # Remove undisired vulnerability ids
-    sanitize_vulnerability_ids(vulnerability_ids)
-    # Save new vulnerability ids
-    # Using bulk create throws Django 50 warnings about unsaved models...
-    for vulnerability_id in vulnerability_ids:
-        Vulnerability_Id(finding=finding, vulnerability_id=vulnerability_id).save()
+    Vulnerability_Id.objects.bulk_create([
+        Vulnerability_Id(finding=finding, vulnerability_id=vid)
+        for vid in vulnerability_ids
+    ])
 
     # Set CVE
     if vulnerability_ids:

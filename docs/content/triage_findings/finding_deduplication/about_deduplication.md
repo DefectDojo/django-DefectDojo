@@ -108,6 +108,18 @@ The endpoints also have to match for the findings to be considered duplicates, s
 
 - Dedupe is triggered on import/reimport and during certain updates run via Celery in the background.
 
+### Import/reimport deduplication execution mode
+
+For import and reimport you can control how deduplication post-processing is dispatched and whether the API response waits for it. Set it per user on the profile page (**Deduplication execution mode**), or override it per request with the `deduplication_execution_mode` field on the import/reimport endpoints (the request value takes precedence over the profile).
+
+- `async` (default): deduplication and the rest of post-processing run in the background and the response returns immediately. Historical behavior; the response is produced before findings are deduplicated.
+- `async_wait`: post-processing is still dispatched to the background, but the request waits for deduplication to finish before responding. The `scan_added` notification and the statistics in the response then reflect the deduplicated state (findings that turned out to be duplicates are no longer counted/listed as new). JIRA push, product grading and other non-deduplication tasks remain asynchronous and are not awaited. The wait is bounded by `DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT` (default `60` seconds); if no worker picks up the work in time, the request responds anyway rather than hanging.
+- `sync`: import deduplication runs inline in the web request.
+
+The import/reimport response includes a `deduplication_complete` boolean indicating whether deduplication had finished by the time the response was produced (`true` for `sync` and for a completed `async_wait`, `false` for `async`).
+
+This is independent of the global `block_execution` profile flag, which forces **all** of a user's asynchronous tasks (notifications, JIRA push, product grading, deduplication, ...) to the foreground. When no execution mode is set, `block_execution=True` falls back to `sync`.
+
 ## Service field and its impact
 
 - By default, `HASH_CODE_FIELDS_ALWAYS = ["service"]`, meaning the `service` associated with a finding is appended to the hash for all scanners.

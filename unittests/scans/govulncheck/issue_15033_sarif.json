@@ -1,0 +1,624 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "govulncheck",
+          "semanticVersion": "v1.3.0",
+          "informationUri": "https://pkg.go.dev/golang.org/x/vuln/cmd/govulncheck",
+          "properties": {
+            "protocol_version": "v1.0.0",
+            "scanner_name": "govulncheck",
+            "scanner_version": "v1.3.0",
+            "db": "https://vuln.go.dev",
+            "db_last_modified": "2026-06-16T23:55:18Z",
+            "go_version": "go1.25.8",
+            "scan_level": "symbol",
+            "scan_mode": "source"
+          },
+          "rules": [
+            {
+              "id": "GO-2026-4864",
+              "shortDescription": {
+                "text": "[GO-2026-4864] TOCTOU permits root escape on Linux via Root.Chmod in os in internal/syscall/unix"
+              },
+              "fullDescription": {
+                "text": "TOCTOU permits root escape on Linux via Root.Chmod in os in internal/syscall/unix"
+              },
+              "help": {
+                "text": "On Linux, if the target of Root.Chmod is replaced with a symlink while the chmod operation is in progress, Chmod can operate on the target of the symlink, even when the target lies outside the root.\n\nThe Linux fchmodat syscall silently ignores the AT_SYMLINK_NOFOLLOW flag, which Root.Chmod uses to avoid symlink traversal. Root.Chmod checks its target before acting and returns an error if the target is a symlink lying outside the root, so the impact is limited to cases where the target is replaced with a symlink between the check and operation."
+              },
+              "helpUri": "https://pkg.go.dev/vuln/GO-2026-4864",
+              "properties": {
+                "tags": [
+                  "CVE-2026-32282"
+                ]
+              }
+            },
+            {
+              "id": "GO-2026-4865",
+              "shortDescription": {
+                "text": "[GO-2026-4865] JsBraceDepth Context Tracking Bugs (XSS) in html/template"
+              },
+              "fullDescription": {
+                "text": "JsBraceDepth Context Tracking Bugs (XSS) in html/template"
+              },
+              "help": {
+                "text": "Context was not properly tracked across template branches for JS template literals, leading to possibly incorrect escaping of content when branches were used. Additionally template actions within JS template literals did not properly track the brace depth, leading to incorrect escaping being applied.\n\nThese issues could cause actions within JS template literals to be incorrectly or improperly escaped, leading to XSS vulnerabilities."
+              },
+              "helpUri": "https://pkg.go.dev/vuln/GO-2026-4865",
+              "properties": {
+                "tags": [
+                  "CVE-2026-32289"
+                ]
+              }
+            },
+            {
+              "id": "GO-2026-4869",
+              "shortDescription": {
+                "text": "[GO-2026-4869] Unbounded allocation for old GNU sparse in archive/tar"
+              },
+              "fullDescription": {
+                "text": "Unbounded allocation for old GNU sparse in archive/tar"
+              },
+              "help": {
+                "text": "tar.Reader can allocate an unbounded amount of memory when reading a maliciously-crafted archive containing a large number of sparse regions encoded in the \"old GNU sparse map\" format."
+              },
+              "helpUri": "https://pkg.go.dev/vuln/GO-2026-4869",
+              "properties": {
+                "tags": [
+                  "CVE-2026-32288"
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "GO-2026-4864",
+          "level": "warning",
+          "message": {
+            "text": "Your code imports 1 vulnerable package (internal/syscall/unix), but doesn\u2019t appear to call any of the vulnerable symbols."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "go.mod",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "message": {
+                "text": "Findings for vulnerability GO-2026-4864"
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "GO-2026-4865",
+          "level": "error",
+          "message": {
+            "text": "Your code calls vulnerable functions in 1 package (html/template)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "go.mod",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "message": {
+                "text": "Findings for vulnerability GO-2026-4865"
+              }
+            }
+          ],
+          "codeFlows": [
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "internal/seeder/seedData.go",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 612,
+                            "startColumn": 174
+                          }
+                        },
+                        "message": {
+                          "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/seeder.*Helper.SeedTemplates"
+                        }
+                      }
+                    },
+                    {
+                      "module": "stdlib@v1.25.8",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/html/template/error.go",
+                            "uriBaseId": "%GOROOT%"
+                          },
+                          "region": {
+                            "startLine": 234,
+                            "startColumn": 17
+                          }
+                        },
+                        "message": {
+                          "text": "html/template.*Error.Error"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "message": {
+                "text": "A summarized code flow for vulnerable function html/template.*Error.Error"
+              }
+            },
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "internal/utils/utils.go",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 146,
+                            "startColumn": 21
+                          }
+                        },
+                        "message": {
+                          "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/utils.RenderGoTemplate"
+                        }
+                      }
+                    },
+                    {
+                      "module": "stdlib@v1.25.8",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/html/template/template.go",
+                            "uriBaseId": "%GOROOT%"
+                          },
+                          "region": {
+                            "startLine": 120,
+                            "startColumn": 20
+                          }
+                        },
+                        "message": {
+                          "text": "html/template.*Template.Execute"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "message": {
+                "text": "A summarized code flow for vulnerable function html/template.*Template.Execute"
+              }
+            },
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "internal/utils/utils.go",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 142,
+                            "startColumn": 54
+                          }
+                        },
+                        "message": {
+                          "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/utils.RenderGoTemplate"
+                        }
+                      }
+                    },
+                    {
+                      "module": "stdlib@v1.25.8",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/html/template/template.go",
+                            "uriBaseId": "%GOROOT%"
+                          },
+                          "region": {
+                            "startLine": 186,
+                            "startColumn": 20
+                          }
+                        },
+                        "message": {
+                          "text": "html/template.*Template.Parse"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "message": {
+                "text": "A summarized code flow for vulnerable function html/template.*Template.Parse"
+              }
+            },
+            {
+              "threadFlows": [
+                {
+                  "locations": [
+                    {
+                      "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "internal/repo/templateTypeRepo.go",
+                            "uriBaseId": "%SRCROOT%"
+                          },
+                          "region": {
+                            "startLine": 167,
+                            "startColumn": 71
+                          }
+                        },
+                        "message": {
+                          "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/repo.*Repo.BulkUpdateTemplateTypeAttributes"
+                        }
+                      }
+                    },
+                    {
+                      "module": "stdlib@v1.25.8",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/fmt/print.go",
+                            "uriBaseId": "%GOROOT%"
+                          },
+                          "region": {
+                            "startLine": 279,
+                            "startColumn": 11
+                          }
+                        },
+                        "message": {
+                          "text": "fmt.Sprint"
+                        }
+                      }
+                    },
+                    {
+                      "module": "stdlib@v1.25.8",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/fmt/print.go",
+                            "uriBaseId": "%GOROOT%"
+                          },
+                          "region": {
+                            "startLine": 1208,
+                            "startColumn": 13
+                          }
+                        },
+                        "message": {
+                          "text": "fmt.*pp.doPrint"
+                        }
+                      }
+                    },
+                    {
+                      "module": "stdlib@v1.25.8",
+                      "location": {
+                        "physicalLocation": {
+                          "artifactLocation": {
+                            "uri": "src/html/template/context.go",
+                            "uriBaseId": "%GOROOT%"
+                          },
+                          "region": {
+                            "startLine": 35,
+                            "startColumn": 18
+                          }
+                        },
+                        "message": {
+                          "text": "html/template.context.String"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "message": {
+                "text": "A summarized code flow for vulnerable function html/template.context.String"
+              }
+            }
+          ],
+          "stacks": [
+            {
+              "message": {
+                "text": "A call stack for vulnerable function html/template.*Error.Error"
+              },
+              "frames": [
+                {
+                  "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "internal/seeder/seedData.go",
+                        "uriBaseId": "%SRCROOT%"
+                      },
+                      "region": {
+                        "startLine": 612,
+                        "startColumn": 174
+                      }
+                    },
+                    "message": {
+                      "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/seeder.*Helper.SeedTemplates"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/html/template/error.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 234,
+                        "startColumn": 17
+                      }
+                    },
+                    "message": {
+                      "text": "html/template.*Error.Error"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "message": {
+                "text": "A call stack for vulnerable function html/template.*Template.Execute"
+              },
+              "frames": [
+                {
+                  "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "internal/utils/utils.go",
+                        "uriBaseId": "%SRCROOT%"
+                      },
+                      "region": {
+                        "startLine": 146,
+                        "startColumn": 21
+                      }
+                    },
+                    "message": {
+                      "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/utils.RenderGoTemplate"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/html/template/template.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 120,
+                        "startColumn": 20
+                      }
+                    },
+                    "message": {
+                      "text": "html/template.*Template.Execute"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "message": {
+                "text": "A call stack for vulnerable function html/template.*Template.Parse"
+              },
+              "frames": [
+                {
+                  "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "internal/utils/utils.go",
+                        "uriBaseId": "%SRCROOT%"
+                      },
+                      "region": {
+                        "startLine": 142,
+                        "startColumn": 54
+                      }
+                    },
+                    "message": {
+                      "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/utils.RenderGoTemplate"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/html/template/template.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 186,
+                        "startColumn": 20
+                      }
+                    },
+                    "message": {
+                      "text": "html/template.*Template.Parse"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "message": {
+                "text": "A call stack for vulnerable function html/template.context.String"
+              },
+              "frames": [
+                {
+                  "module": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv@",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "internal/repo/templateTypeRepo.go",
+                        "uriBaseId": "%SRCROOT%"
+                      },
+                      "region": {
+                        "startLine": 167,
+                        "startColumn": 71
+                      }
+                    },
+                    "message": {
+                      "text": "gitlab.widas.de/cidaas-v2/communication-management/notification-srv/internal/repo.*Repo.BulkUpdateTemplateTypeAttributes"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/fmt/print.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 279,
+                        "startColumn": 11
+                      }
+                    },
+                    "message": {
+                      "text": "fmt.Sprint"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/fmt/print.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 1208,
+                        "startColumn": 13
+                      }
+                    },
+                    "message": {
+                      "text": "fmt.*pp.doPrint"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/fmt/print.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 749,
+                        "startColumn": 22
+                      }
+                    },
+                    "message": {
+                      "text": "fmt.*pp.printArg"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/fmt/print.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 673,
+                        "startColumn": 25
+                      }
+                    },
+                    "message": {
+                      "text": "fmt.*pp.handleMethods"
+                    }
+                  }
+                },
+                {
+                  "module": "stdlib@v1.25.8",
+                  "location": {
+                    "physicalLocation": {
+                      "artifactLocation": {
+                        "uri": "src/html/template/context.go",
+                        "uriBaseId": "%GOROOT%"
+                      },
+                      "region": {
+                        "startLine": 35,
+                        "startColumn": 18
+                      }
+                    },
+                    "message": {
+                      "text": "html/template.context.String"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "ruleId": "GO-2026-4869",
+          "level": "note",
+          "message": {
+            "text": "Your code depends on 1 vulnerable module (stdlib), but doesn't appear to call any of the vulnerable symbols."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "go.mod",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              },
+              "message": {
+                "text": "Findings for vulnerability GO-2026-4869"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

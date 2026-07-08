@@ -22,6 +22,10 @@ class TestTrivyParser(DojoTestCase):
             parser = TrivyParser()
             findings = parser.get_findings(test_file, Test())
             self.assertEqual(len(findings), 93)
+            # Legacy reports have no "Class" field; tags must not contain None
+            # or the import pipeline crashes in clean_tags (TypeError)
+            for finding in findings:
+                self.assertNotIn(None, finding.unsaved_tags)
             finding = findings[0]
             self.assertEqual("Low", finding.severity)
             self.assertEqual(1, len(finding.unsaved_vulnerability_ids))

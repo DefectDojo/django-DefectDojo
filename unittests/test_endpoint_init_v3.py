@@ -13,8 +13,9 @@ These tests cover the sites that were guarded/repaired for that:
 * JIRA + GitHub issue descriptions -- now render ``finding.locations`` under V3 (the legacy
   ``finding.endpoints`` block is gated out), so a push of a finding that still carries legacy
   endpoint rows must not crash and must show location info.
-* CSV + Excel finding exports -- iterate ``finding.endpoints.all()`` guarded by
-  ``Endpoint.allow_endpoint_init()``.
+* CSV + Excel finding exports -- render ``finding.locations.all()`` under V3 (the legacy
+  ``finding.endpoints.all()`` iteration is gated out), so exporting a finding that still
+  carries legacy endpoint rows must not crash.
 * API ``report_generate`` (Product/Engagement) -- ``get_endpoint_ids(Endpoint.objects...)``.
 * API ``metadata/batch`` -- the ``endpoint`` parent fetch.
 """

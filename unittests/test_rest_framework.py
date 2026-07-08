@@ -33,20 +33,13 @@ from rest_framework.mixins import (
 )
 from rest_framework.test import APIClient
 
+from dojo.announcement.api.views import AnnouncementViewSet
 from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from dojo.api_v2.prefetch.utils import get_prefetchable_fields
 from dojo.api_v2.views import (
-    AnnouncementViewSet,
     AppAnalysisViewSet,
-    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
-    DevelopmentEnvironmentViewSet,
-    EndpointStatusViewSet,
-    EndPointViewSet,
-    EngagementViewSet,
-    FindingTemplatesViewSet,
-    FindingViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -56,24 +49,21 @@ from dojo.api_v2.views import (
     LanguageViewSet,
     NotesViewSet,
     NoteTypeViewSet,
-    ProductAPIScanConfigurationViewSet,
-    ProductTypeViewSet,
-    ProductViewSet,
-    RiskAcceptanceViewSet,
     SonarqubeIssueViewSet,
-    TestsViewSet,
-    TestTypesViewSet,
-    ToolConfigurationsViewSet,
-    ToolProductSettingsViewSet,
-    ToolTypesViewSet,
-    UserContactInfoViewSet,
-    UsersViewSet,
 )
 from dojo.asset.api.views import (
     AssetAPIScanConfigurationViewSet,
     AssetViewSet,
 )
 from dojo.authorization.roles_permissions import Permissions, permission_to_action
+from dojo.development_environment.api.views import DevelopmentEnvironmentViewSet
+from dojo.endpoint.api.views import EndpointStatusViewSet, EndPointViewSet
+from dojo.engagement.api.views import EngagementViewSet
+from dojo.finding.api.views import (
+    BurpRawRequestResponseViewSet,
+    FindingTemplatesViewSet,
+    FindingViewSet,
+)
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.views import LocationFindingReferenceViewSet, LocationProductReferenceViewSet, LocationViewSet
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -116,8 +106,16 @@ from dojo.notifications.api.views import NotificationsViewSet, NotificationWebho
 from dojo.organization.api.views import (
     OrganizationViewSet,
 )
+from dojo.product.api.views import ProductAPIScanConfigurationViewSet, ProductViewSet
+from dojo.product_type.api.views import ProductTypeViewSet
+from dojo.risk_acceptance.api.views import RiskAcceptanceViewSet
+from dojo.test.api.views import TestsViewSet, TestTypesViewSet
+from dojo.tool_config.api.views import ToolConfigurationsViewSet
+from dojo.tool_product.api.views import ToolProductSettingsViewSet
+from dojo.tool_type.api.views import ToolTypesViewSet
 from dojo.url.api.views import URLViewSet
 from dojo.url.models import URL
+from dojo.user.api.views import UserContactInfoViewSet, UsersViewSet
 
 from .dojo_test_case import (
     DojoAPITestCase,
