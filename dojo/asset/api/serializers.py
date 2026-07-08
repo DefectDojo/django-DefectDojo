@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
 from dojo.api_v2.serializers import ProductMetaSerializer, TagListSerializerField
+from dojo.authorization.authorization import raise_if_unauthorized_authorized_users_change
+from dojo.authorization.roles_permissions import Permissions
 from dojo.models import (
     Dojo_User,
     Product,
@@ -65,6 +67,7 @@ class AssetSerializer(serializers.ModelSerializer):
             if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
                 msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this asset cannot be changed until the calculation is complete."
                 raise serializers.ValidationError(msg)
+        raise_if_unauthorized_authorized_users_change(self, data, Permissions.Product_Manage_Members)
         return data
 
     def get_findings_count(self, obj) -> int:

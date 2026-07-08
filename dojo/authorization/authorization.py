@@ -219,6 +219,31 @@ def user_has_global_permission_or_403(user: Dojo_User, permission) -> None:
         raise PermissionDenied
 
 
+def raise_if_unauthorized_authorized_users_change(serializer, data, permission) -> None:
+    """
+    Guard the writable ``authorized_users`` M2M exposed on the Product /
+    Product_Type API serializers (and the V3 asset / organization aliases).
+
+    Changing who is authorized on an object is membership management, which
+    requires the object's ``*_Manage_Members`` permission -- the same
+    permission the server-rendered membership views enforce -- not plain edit
+    access. Without this guard, edit access alone would let a caller add or
+    remove authorized users through the API.
+
+    No-op on create and when the submitted set matches the current set.
+    """
+    if serializer.instance is None or "authorized_users" not in data:
+        return
+    if set(data["authorized_users"]) == set(serializer.instance.authorized_users.all()):
+        return
+    user = getattr(serializer.context.get("request"), "user", None)
+    if not user_has_permission(user, serializer.instance, permission):
+        from rest_framework.exceptions import PermissionDenied as DRFPermissionDenied  # noqa: PLC0415
+
+        msg = "You are not permitted to change the authorized users."
+        raise DRFPermissionDenied(msg)
+
+
 # ---------------------------------------------------------------------------
 # Inert role-based helpers.
 #
