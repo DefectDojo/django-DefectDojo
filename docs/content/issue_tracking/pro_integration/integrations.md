@@ -11,6 +11,7 @@ DefectDojo Pro's Integrations let you push your Findings and Finding Groups to t
 
 Supported Integrations:
 - [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
+- [Bitbucket](/issue_tracking/pro_integration/integrations/#bitbucket)
 - [GitHub](/issue_tracking/pro_integration/integrations/#github)
 - [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
 - [ServiceNow](/issue_tracking/pro_integration/integrations/#servicenow)
@@ -69,6 +70,7 @@ Project Integrations will have varying requirements for how DefectDojo will need
 For the complete list of requirements, please open the vendor specific pages below:
 
 - [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
+- [Bitbucket](/issue_tracking/pro_integration/integrations/#bitbucket)
 - [GitHub](/issue_tracking/pro_integration/integrations/#github)
 - [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
 - ServiceNow (Coming Soon)
