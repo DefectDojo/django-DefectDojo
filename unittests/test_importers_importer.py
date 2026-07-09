@@ -1143,3 +1143,91 @@ class ReimportDuplicateReactivationTest(DojoTestCase):
         self.assertIsNone(result_finding.mitigated)
         self.assertTrue(result_finding.active)
         self.assertTrue(result_finding.verified)
+
+
+# Regression: the per-batch post-processing dispatch read the push_to_jira flag computed
+# for the LAST finding of the batch and applied it to the entire batch. With finding
+# groups enabled and push_to_jira=True, a mixed batch ending in a grouped finding
+# suppressed the JIRA push for every ungrouped finding in the batch (and vice versa).
+class TestDojoImporterBatchPushToJira(DojoTestCase):
+    def _process_findings_with_groups(self, parsed_findings):
+        """Run process_findings with push_to_jira + group_by and capture per-finding dispatch flags."""
+        scan_type = "Acunetix Scan"
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="batch_push")
+        product, _ = Product.objects.get_or_create(
+            name="TestDojoImporterBatchPushToJira",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Batch Push To Jira",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        self.system_settings(enable_finding_groups=True)
+        importer = DefaultImporter(
+            user=user,
+            lead=user,
+            scan_date=None,
+            environment=environment,
+            minimum_severity="Info",
+            active=True,
+            verified=True,
+            scan_type=scan_type,
+            engagement=engagement,
+            push_to_jira=True,
+            group_by="component_name",
+        )
+        test = importer.create_test(scan_type)
+        for finding in parsed_findings:
+            finding.test = test
+        with (
+            patch("dojo.importers.default_importer.dojo_dispatch_task") as dispatch_mock,
+            patch("dojo.importers.default_importer.jira_services.push"),
+        ):
+            new_findings = importer.process_findings(parsed_findings)
+        # Map each dispatched finding id to the push_to_jira flag its batch was sent with
+        flag_by_finding_id = {}
+        for call in dispatch_mock.call_args_list:
+            finding_ids = call.args[1]
+            for finding_id in finding_ids:
+                flag_by_finding_id[finding_id] = call.kwargs["push_to_jira"]
+        findings_by_title = {finding.title: finding for finding in new_findings}
+        return flag_by_finding_id, findings_by_title
+
+    def test_batch_push_to_jira_last_finding_grouped(self):
+        # Last finding of the batch is grouped -> its False flag must NOT leak onto the
+        # ungrouped finding processed before it
+        ungrouped = Finding(title="Ungrouped Finding", severity="Medium", description="no component")
+        grouped = Finding(title="Grouped Finding", severity="Medium", description="has component", component_name="lib-a")
+        flags, findings_by_title = self._process_findings_with_groups([ungrouped, grouped])
+        grouped_db = findings_by_title["Grouped Finding"]
+        ungrouped_db = findings_by_title["Ungrouped Finding"]
+        self.assertFalse(
+            flags[grouped_db.id],
+            msg=f"grouped finding must not be pushed individually, dispatched with push_to_jira={flags[grouped_db.id]}",
+        )
+        self.assertTrue(
+            flags[ungrouped_db.id],
+            msg=f"ungrouped finding must be pushed individually, dispatched with push_to_jira={flags[ungrouped_db.id]}",
+        )
+
+    def test_batch_push_to_jira_last_finding_ungrouped(self):
+        # Last finding of the batch is ungrouped -> its True flag must NOT leak onto the
+        # grouped finding processed before it
+        grouped = Finding(title="Grouped Finding 2", severity="Medium", description="has component", component_name="lib-b")
+        ungrouped = Finding(title="Ungrouped Finding 2", severity="Medium", description="no component")
+        flags, findings_by_title = self._process_findings_with_groups([grouped, ungrouped])
+        grouped_db = findings_by_title["Grouped Finding 2"]
+        ungrouped_db = findings_by_title["Ungrouped Finding 2"]
+        self.assertFalse(
+            flags[grouped_db.id],
+            msg=f"grouped finding must not be pushed individually, dispatched with push_to_jira={flags[grouped_db.id]}",
+        )
+        self.assertTrue(
+            flags[ungrouped_db.id],
+            msg=f"ungrouped finding must be pushed individually, dispatched with push_to_jira={flags[ungrouped_db.id]}",
+        )
