@@ -129,6 +129,30 @@ DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
 3. Enter your tenant location in the **Location** field. This URL is formatted as follows:  
 ​`https://<your-region>.ast.checkmarx.net/` . Your Region can be found at the beginning of your Checkmarx URL when using the Checkmarx app. **<https://ast.checkmarx.net>** is the primary US server (which has no region prefix).
 
+## **Contrast**
+
+The Contrast connector uses the Contrast Assess REST API to import application vulnerabilities. DefectDojo discovers the applications in your Contrast organization and creates a Record for each one.
+
+#### Prerequisites
+
+You will need four values from Contrast. We recommend creating a dedicated service account so automated activity is easy to distinguish from your team's manual actions. In the Contrast UI, under **User Settings > Profile > Your Keys**, you can find:
+
+* Your organization **API Key**.
+* Your personal **Service Key**.
+* The **username** the credentials belong to (the account's login email).
+* Your **Organization ID** — the UUID of the organization to import from, also shown under **Organization Settings**.
+
+#### Connector Mappings
+
+1. Enter the base URL you use to access Contrast in the **Location** field — for the hosted product this is typically `https://app.contrastsecurity.com` (or your regional / self-hosted Team Server URL).
+2. Enter the account login email in the **Username** field.
+3. Enter the organization **API Key** in the **API Key** field.
+4. Enter the personal **Service Key** in the **Service Key** field.
+5. Enter the **Organization ID** (UUID) in the **Organization ID** field.
+6. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Contrast application becomes a Record, and its vulnerabilities are imported as findings.
+
 ## Dependency\-Track
 
 This connector fetches data from a on\-premise Dependency\-Track instance, via REST API.
@@ -147,6 +171,67 @@ To generate a Dependency\-Track API key:
 5. Click "**Select**" to confirm and save these permissions.
 
 For more information, see **[Dependency\-Track Documentation](https://docs.dependencytrack.org/integrations/rest-api/)**.
+
+## **GitGuardian**
+
+The GitGuardian connector uses the GitGuardian REST API to import **secret incidents** — exposed credentials GitGuardian has detected across your monitored sources. DefectDojo creates a Record for each monitored source (repository or perimeter) that currently has open incidents, and imports each open incident as a finding.
+
+For your security, the connector imports only incident **metadata** — the detector, severity, validity, status, and a link back to GitGuardian. The exposed secret value itself is never retrieved or stored by DefectDojo; follow the link in each finding to review the affected locations in GitGuardian.
+
+#### Prerequisites
+
+You will need a GitGuardian API key. We recommend a **Service Account token** (rather than a personal access token) so automated activity is easy to distinguish. Create it under **API** in the GitGuardian dashboard and grant these read scopes:
+
+* `incidents:read`
+* `sources:read`
+
+#### Connector Mappings
+
+1. Enter your GitGuardian API URL in the **Location** field: `https://api.gitguardian.com` for the SaaS platform, or your self-hosted instance's API URL.
+2. Enter the API key in the **Secret** field.
+
+Only **open** incidents (status `TRIGGERED` or `ASSIGNED`) are imported; incidents you resolve or ignore in GitGuardian are automatically mitigated in DefectDojo on the next sync. A confirmed-live secret (validity *valid*) is imported as a verified finding.
+
+## **Google Cloud Security Command Center**
+
+The Google Cloud SCC connector uses the Security Command Center v2 REST API to import active security findings from your Google Cloud organization, folder, or project. DefectDojo creates a Record for each Google Cloud **project** that has open findings.
+
+#### Prerequisites
+
+Security Command Center must be **activated** on your organization (the Standard tier is free). You will then need a service account that can list findings, and a JSON key for it:
+
+1. In Google Cloud, create a service account — a dedicated one for DefectDojo is recommended.
+2. Grant it the **Security Center Findings Viewer** role (`roles/securitycenter.findingsViewer`) at the scope you want to import (organization, folder, or project).
+3. Create a **JSON key** for the service account and download it.
+
+#### Connector Mappings
+
+1. Leave the **Location** field at the default `https://securitycenter.googleapis.com` unless you use a non-standard endpoint.
+2. In the **Parent Resource** field, enter the scope to import from: `organizations/{id}`, `folders/{id}`, or `projects/{id}`.
+3. Paste the full contents of the service-account **JSON key** file into the **Service Account Key** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Only `ACTIVE`, un-muted findings are imported, so findings you deactivate or mute in SCC are automatically mitigated in DefectDojo on the next sync. Each finding's affected GCP project becomes its Record.
+
+## **HackerOne**
+
+The HackerOne connector uses the HackerOne REST API to import reports from your bug bounty or vulnerability disclosure program. DefectDojo creates a Record for each program the token can access and imports its reports as findings.
+
+#### Prerequisites
+
+The connector uses HackerOne's **customer** API, which requires an **organization API token** — a personal token from your user settings only works against the hacker API and will not authenticate here.
+
+1. In HackerOne, go to **Organization Settings > API Tokens**.
+2. Create a token and note both the **identifier** and the **token** value. Read access to the program is sufficient.
+
+#### Connector Mappings
+
+1. Enter `https://api.hackerone.com` in the **Location** field.
+2. Enter the token **identifier** in the **API Token Identifier** field.
+3. Enter the token value in the **API Token** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each program becomes a Record, and its reports are imported as findings with the HackerOne severity rating preserved.
 
 ## **IriusRisk**
 
@@ -221,6 +306,23 @@ Enter `https://semgrep.dev/api/v1/` in the **Location** field.
 "Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens](https://semgrep.dev/orgs/-/settings/tokens))
 
 See [Semgrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.
+
+## **Shodan**
+
+The Shodan connector uses the Shodan REST API to import the vulnerabilities (CVEs) Shodan has observed on your internet-exposed hosts. You provide a Shodan search query that scopes the import to your own assets; DefectDojo creates a Record for each matching host and imports its CVEs as findings.
+
+#### Prerequisites
+
+You will need a Shodan API key, found on your Shodan **Account** page. Host search with vulnerability data requires a Shodan membership or a paid API plan — the free tier cannot page through search results.
+
+#### Connector Mappings
+
+1. Enter `https://api.shodan.io` in the **Location** field.
+2. Enter your Shodan API key in the **API Key** field.
+3. In the **Search Query** field, enter a Shodan query that scopes the import to your organization's assets — for example `hostname:example.com`, `net:203.0.113.0/24`, or `org:"Example Inc"`. Only hosts matching this query are imported, so keep it scoped to infrastructure you own.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each matching host becomes a Record, and each CVE Shodan detected on that host's exposed services is imported as a finding — severity is derived from the CVSS score, with EPSS and CISA KEV context included where available. Each page of search results consumes one Shodan query credit.
 
 ## SonarQube
 
