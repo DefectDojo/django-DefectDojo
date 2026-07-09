@@ -16,6 +16,7 @@ from dojo.models import (
     Product,
     Product_Type,
     Test,
+    Test_Type,
     User,
     Vulnerability_Id,
 )
@@ -396,6 +397,196 @@ class TestDojoDefaultImporter(DojoTestCase):
                 self.assertEqual("Generic Findings Import", test.test_type.name)
                 # Verify findings were processed
                 self.assertGreater(len_new_findings, 0)
+
+    # Regression: Generic import doubled the (Generic Findings Import) suffix in the Test_Type name
+    def test_import_generic_type_with_suffix_is_not_doubled(self):
+        """When the report's type already carries the scan-type suffix, it must be used verbatim (no ' Scan (...)' re-append)."""
+        generic_test_type_suffix = get_unit_tests_scans_path("generic") / "generic_test_type_suffix.json"
+        with generic_test_type_suffix.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_suffix")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericSuffix",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Suffix Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            self.assertIsNotNone(test)
+            # The suffix must NOT be doubled into "... (Generic Findings Import) Scan (Generic Findings Import)"
+            self.assertEqual(
+                "Prisma Cloud (Generic Findings Import)", test.test_type.name,
+                msg=f"expected 'Prisma Cloud (Generic Findings Import)', persisted='{test.test_type.name}'",
+            )
+
+    # Regression: dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security
+    # Hub, Rusty Hog, ...) must not be doubled into "Horusec Scan (Horusec Scan)".
+    def test_import_scan_suffixed_dynamic_type_is_not_doubled(self):
+        """A report type of "Horusec" under scan_type "Horusec Scan" must resolve to "Horusec Scan"."""
+        horusec_scan = get_unit_tests_scans_path("horusec") / "issue_6258.json"
+        with horusec_scan.open(encoding="utf-8") as scan:
+            scan_type = "Horusec Scan"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_scan_suffix")
+            product, _ = Product.objects.get_or_create(
+                name="TestScanSuffix",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Scan Suffix Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            self.assertIsNotNone(test)
+            # Must be the plain scan type, NOT "Horusec Scan (Horusec Scan)"
+            self.assertEqual(
+                "Horusec Scan", test.test_type.name,
+                msg=f"expected 'Horusec Scan', persisted='{test.test_type.name}'",
+            )
+
+    # Regression: Generic import doubled the (Generic Findings Import) suffix in the Test_Type name
+    def test_reimport_generic_type_with_suffix_is_idempotent(self):
+        """Reimporting a report whose type carries the scan-type suffix must not raise and must keep the same test/type."""
+        generic_test_type_suffix = get_unit_tests_scans_path("generic") / "generic_test_type_suffix.json"
+        with generic_test_type_suffix.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_suffix_reimport")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericSuffixReimport",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Suffix Reimport Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            original_test_type_name = test.test_type.name
+            self.assertEqual("Prisma Cloud (Generic Findings Import)", original_test_type_name)
+
+            reimport_options = {
+                "test": test,
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "close_old_findings": False,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            scan.seek(0)
+            test_after_reimport, _, _, _, _, _, _ = reimporter.process_scan(scan)
+            self.assertEqual(test.id, test_after_reimport.id)
+            test.refresh_from_db()
+            self.assertEqual(original_test_type_name, test.test_type.name)
+
+    # Regression: Generic import doubled the (Generic Findings Import) suffix in the Test_Type name
+    def test_reimport_into_legacy_doubled_test_type_still_works(self):
+        """Pre-patch data: a Test whose test_type has the old doubled name must still accept reimports."""
+        generic_test_type_suffix = get_unit_tests_scans_path("generic") / "generic_test_type_suffix.json"
+        scan_type = "Generic Findings Import"
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="test_generic_legacy_doubled")
+        product, _ = Product.objects.get_or_create(
+            name="TestGenericLegacyDoubled",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Test Generic Legacy Doubled Engagement",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        # Simulate a test created by the pre-patch code: test_type name has the doubled suffix
+        legacy_doubled_name = "Prisma Cloud (Generic Findings Import) Scan (Generic Findings Import)"
+        legacy_test_type, _ = Test_Type.objects.get_or_create(name=legacy_doubled_name)
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=legacy_test_type,
+            environment=environment,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        reimport_options = {
+            "test": test,
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": scan_type,
+            "close_old_findings": False,
+        }
+        reimporter = DefaultReImporter(**reimport_options)
+        with generic_test_type_suffix.open(encoding="utf-8") as scan:
+            # Must NOT raise "Test type mismatch" for pre-existing doubled-name test types
+            test_after_reimport, _, len_new_findings, _, _, _, _ = reimporter.process_scan(scan)
+        self.assertEqual(test.id, test_after_reimport.id)
+        test.refresh_from_db()
+        # Historical name is preserved (we do not rename existing data)
+        self.assertEqual(legacy_doubled_name, test.test_type.name)
+        self.assertGreater(len_new_findings, 0)
 
 
 class FlexibleImportTestAPI(DojoAPITestCase):
