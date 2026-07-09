@@ -13,4 +13,9 @@ urlpatterns = [
         views.dismiss_announcement,
         name="dismiss_announcement",
     ),
+    re_path(
+        r"^dismiss_os_message$",
+        views.dismiss_os_message,
+        name="dismiss_os_message",
+    ),
 ]

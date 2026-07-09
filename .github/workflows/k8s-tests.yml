@@ -16,13 +16,13 @@ jobs:
           # databases, broker and k8s are independent, so we don't need to test each combination
           # lastest k8s version (https://kubernetes.io/releases/) and the oldest officially supported version
           # are tested (https://kubernetes.io/releases/)
-          - k8s: 'v1.35.4' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
+          - k8s: 'v1.35.6' # renovate: datasource=github-releases depName=kubernetes/kubernetes versioning=loose
             os: debian
-          - k8s: '1.33.13' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
+          - k8s: '1.34.9' # renovate: datasource=custom.endoflife-oldest-maintained depName=kubernetes
             os: debian
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup Minikube
         uses: manusa/actions-setup-minikube@b65276017fdec6f1e6498129fb740e34e260dc55 # v2.18.0

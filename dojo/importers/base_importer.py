@@ -16,6 +16,8 @@ from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
 from dojo.models import (
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
+    DEDUPLICATION_EXECUTION_MODE_SYNC,
     # Import History States
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
@@ -81,6 +83,85 @@ class BaseImporter(ImporterOptions):
         self.pending_vulnerability_ids: list[Vulnerability_Id] = []
         self.pending_vuln_id_deletes: list[int] = []
         self.pending_burp_rr: list[BurpRawRequestResponse] = []
+        # Handles for async post-processing tasks to await in 'async_wait' mode.
+        # Set after ImporterOptions.__init__ so it stays out of field_names
+        # (and the compress/decompress cycle used for async dispatch).
+        self.post_processing_results = []
+        # Whether deduplication is known to be finished by the time the response
+        # is built. True for 'sync' (ran inline) and for 'async_wait' when all
+        # batches completed within the timeout; False for 'async' (dispatched,
+        # not awaited) or when an 'async_wait' join timed out/errored.
+        self.deduplication_complete = False
+
+    def post_processing_dispatch_kwargs(self, **kwargs):
+        """
+        Translate the resolved import execution mode into the force flags that
+        dojo_dispatch_task understands:
+        - SYNC: run inline in the web process (force_sync).
+        - ASYNC_WAIT: guarantee background dispatch (force_async) so we get a
+          handle to await, regardless of the user's profile mode.
+        - ASYNC (default): preserve historical behavior, honoring any externally
+          supplied force_sync and the user's sync mode via we_want_async.
+        """
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC:
+            return {"force_sync": True}
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+            return {"force_async": True}
+        return {"force_sync": kwargs.get("force_sync", False)}
+
+    def record_post_processing_result(self, result):
+        """
+        Remember an async post-processing dispatch handle so it can be awaited
+        later when running in the 'async_wait' execution mode. No-op for the
+        other modes (no handle is recorded by the caller).
+        """
+        if not hasattr(self, "post_processing_results"):
+            self.post_processing_results = []
+        if result is not None:
+            self.post_processing_results.append(result)
+
+    def wait_for_post_processing(self):
+        """
+        Block until the deduplication (and other batch) post-processing tasks
+        dispatched during this import have finished, so notifications and the
+        returned statistics reflect the deduplicated state.
+
+        Only relevant in the 'async_wait' execution mode; bounded by
+        settings.DEDUPLICATION_ASYNC_WAIT_TIMEOUT so a stuck/missing worker degrades
+        to the historical (respond-anyway) behavior instead of hanging.
+        """
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC:
+            # Batches ran inline during process_findings, so dedup is already done.
+            self.deduplication_complete = True
+            return
+        if self.deduplication_execution_mode != DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+            # 'async': post-processing was dispatched but is not awaited.
+            self.deduplication_complete = False
+            return
+        results = getattr(self, "post_processing_results", None) or []
+        if not results:
+            # Nothing was dispatched (e.g. empty import) — dedup is trivially done.
+            self.deduplication_complete = True
+            return
+        timeout = getattr(settings, "DEDUPLICATION_ASYNC_WAIT_TIMEOUT", 60)
+        logger.debug("async_wait: waiting for %d post-processing task(s) (timeout=%ss)", len(results), timeout)
+        start = time.monotonic()
+        success = True
+        for result in results:
+            if result is None or not hasattr(result, "get"):
+                continue
+            try:
+                result.get(timeout=timeout, propagate=False)
+            except Exception as e:
+                logger.warning(
+                    "async_wait: error/timeout after %.2fs waiting for post-processing task: %s",
+                    time.monotonic() - start, e,
+                )
+                success = False
+        elapsed = time.monotonic() - start
+        logger.debug("async_wait: waited %.2fs for %d post-processing task(s) (success=%s)", elapsed, len(results), success)
+        self.deduplication_complete = success
+        self.post_processing_results = []
 
     def check_child_implementation_exception(self):
         """
@@ -201,33 +282,18 @@ class BaseImporter(ImporterOptions):
         # only if they are different. This is to support meta format like SARIF
         # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
         test_raw = tests[0]
-        test_type_name = self.scan_type
         # Create a new test if it has not already been created
         if not self.test:
-            # Determine if we should use a custom test type name
-            if test_raw.type:
-                # If test_raw.type equals scan_type, use scan_type directly
-                if test_raw.type == self.scan_type:
-                    test_type_name = self.scan_type
-                else:
-                    test_type_name = f"{tests[0].type} Scan"
-                    if test_type_name != self.scan_type:
-                        test_type_name = f"{test_type_name} ({self.scan_type})"
-            self.test = self.create_test(test_type_name)
+            # Resolve the Test_Type name from the report's type (idempotent: a type that already
+            # carries the " (scan_type)" suffix is used verbatim rather than doubled)
+            self.test = self.create_test(self.resolve_dynamic_test_type_name(test_raw.type))
         else:
-            # During reimport, validate that the test_type matches
-            # Calculate the expected test_type_name from the incoming report
-            expected_test_type_name = self.scan_type
-            if test_raw.type:
-                # If test_raw.type equals scan_type, use scan_type directly
-                if test_raw.type == self.scan_type:
-                    expected_test_type_name = self.scan_type
-                else:
-                    expected_test_type_name = f"{test_raw.type} Scan"
-                    if expected_test_type_name != self.scan_type:
-                        expected_test_type_name = f"{expected_test_type_name} ({self.scan_type})"
-            # Compare with existing test's test_type name
-            if self.test.test_type.name != expected_test_type_name:
+            # During reimport, validate that the test_type matches the incoming report.
+            # Accept either the current (idempotent) name or the legacy name the pre-patch code
+            # produced, so reimports into tests created before the doubling fix keep working.
+            expected_test_type_name = self.resolve_dynamic_test_type_name(test_raw.type)
+            legacy_test_type_name = self.legacy_dynamic_test_type_name(test_raw.type)
+            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name}:
                 msg = (
                     f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
                     f"but the report contains test_type '{expected_test_type_name}'. "
@@ -572,6 +638,42 @@ class BaseImporter(ImporterOptions):
         self.test.percent_complete = percentage_value
         self.test.save()
 
+    def resolve_dynamic_test_type_name(self, raw_type: str | None) -> str:
+        """
+        Compute the Test_Type name for a dynamic-test-type report (e.g. Generic, SARIF).
+
+        - No type, or type already equals the scan type -> use the scan type as-is.
+        - Type already carries the scan-type suffix (e.g. "Prisma Cloud (Generic Findings
+          Import)") -> use it verbatim. This keeps the composition idempotent and prevents
+          doubled names like "X (scan_type) Scan (scan_type)".
+        - Type plus a " Scan" suffix already equals the scan type (e.g. type "Horusec" with
+          scan_type "Horusec Scan") -> use the scan type as-is. This preserves the behavior of
+          dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security Hub,
+          Rusty Hog, ...) so their Test_Type name is not doubled into "Horusec Scan (Horusec Scan)".
+        - Otherwise -> the intentional "{type} Scan ({scan_type})" format (also used by SARIF,
+          so a report labeled 'CodeScanner' becomes 'CodeScanner Scan (SARIF)').
+        """
+        if not raw_type or raw_type == self.scan_type:
+            return self.scan_type
+        if raw_type.endswith(f" ({self.scan_type})"):
+            return raw_type
+        if f"{raw_type} Scan" == self.scan_type:
+            return self.scan_type
+        return f"{raw_type} Scan ({self.scan_type})"
+
+    def legacy_dynamic_test_type_name(self, raw_type: str | None) -> str:
+        """
+        Reproduce the name the pre-idempotency code produced. Used only for the reimport
+        compatibility check so reimports into existing (pre-patch) tests whose test_type
+        already has a doubled suffix keep working instead of raising a mismatch error.
+        """
+        if not raw_type or raw_type == self.scan_type:
+            return self.scan_type
+        name = f"{raw_type} Scan"
+        if name != self.scan_type:
+            name = f"{name} ({self.scan_type})"
+        return name
+
     def get_or_create_test_type(
         self,
         test_type_name: str,
@@ -880,10 +982,49 @@ class BaseImporter(ImporterOptions):
             new_findings = []
         logger.debug("Scan added notifications")
 
+        # When deduplication has finished (synchronous mode, or async_wait after the
+        # join), the in-memory findings still carry their pre-dedup duplicate=False
+        # flag because deduplication runs on separately-fetched instances. Refresh the
+        # flag from the database and split each list into "real" and duplicate findings
+        # so the notification reflects post-dedup reality instead of counting/listing
+        # deduplicated findings as brand new. In plain async mode dedup has not run yet,
+        # so we leave the lists untouched (best-effort, historical behavior).
+        findings_new_duplicate: list[Finding] = []
+        findings_reactivated_duplicate: list[Finding] = []
+        findings_untouched_duplicate: list[Finding] = []
+        if getattr(self, "deduplication_complete", False):
+            all_ids = [f.id for f in (*new_findings, *findings_reactivated, *findings_untouched)]
+            duplicate_ids = set()
+            if all_ids:
+                duplicate_ids = set(
+                    Finding.objects.filter(id__in=all_ids, duplicate=True).values_list("id", flat=True),
+                )
+
+            def _split(findings):
+                kept, duplicates = [], []
+                for finding in findings:
+                    if finding.id in duplicate_ids:
+                        # refresh the in-memory flag so any template logic is correct
+                        finding.duplicate = True
+                        duplicates.append(finding)
+                    else:
+                        kept.append(finding)
+                return kept, duplicates
+
+            new_findings, findings_new_duplicate = _split(new_findings)
+            findings_reactivated, findings_reactivated_duplicate = _split(findings_reactivated)
+            findings_untouched, findings_untouched_duplicate = _split(findings_untouched)
+            # Recompute the headline count to exclude findings that turned out to be
+            # duplicates of an existing finding (they are not genuinely new activity).
+            updated_count = len(new_findings) + len(findings_reactivated) + len(findings_mitigated)
+
         new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
         findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
         findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
         findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
+        findings_new_duplicate = sorted(findings_new_duplicate, key=lambda x: x.numerical_severity)
+        findings_reactivated_duplicate = sorted(findings_reactivated_duplicate, key=lambda x: x.numerical_severity)
+        findings_untouched_duplicate = sorted(findings_untouched_duplicate, key=lambda x: x.numerical_severity)
 
         title = (
             f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
@@ -900,6 +1041,11 @@ class BaseImporter(ImporterOptions):
             engagement=test.engagement,
             product=test.engagement.product,
             findings_untouched=findings_untouched,
+            # Findings deduplicated during post-processing, split by their import action.
+            # Populated only once deduplication has completed (sync / async_wait).
+            findings_new_duplicate=findings_new_duplicate,
+            findings_reactivated_duplicate=findings_reactivated_duplicate,
+            findings_untouched_duplicate=findings_untouched_duplicate,
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )

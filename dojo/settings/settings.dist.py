@@ -96,6 +96,16 @@ env = environ.FileAwareEnv(
     DD_CELERY_BROKER_PARAMS=(str, ""),
     DD_CELERY_BROKER_TRANSPORT_OPTIONS=(str, ""),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
+    # Max seconds the 'async_wait' deduplication execution mode will wait for
+    # background deduplication/post-processing to finish before responding anyway.
+    DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT=(int, 60),
+    # Test-only: artificial delay (seconds) injected at the start of
+    # post_process_findings_batch so integration tests can deterministically
+    # observe that 'async_wait' blocks on deduplication while 'async' does not.
+    # Must stay 0 in production. The _FILTER (a finding-title prefix) scopes the
+    # delay to a single test's findings so unrelated dedupe tests are not slowed.
+    DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY=(int, 0),
+    DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER=(str, ""),
     DD_CELERY_RESULT_BACKEND=(str, "django-db"),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
@@ -147,6 +157,7 @@ env = environ.FileAwareEnv(
     DD_FORGOT_PASSWORD=(bool, True),  # do we show link "I forgot my password" on login screen
     DD_PASSWORD_RESET_TIMEOUT=(int, 259200),  # 3 days, in seconds (the deafult)
     DD_FORGOT_USERNAME=(bool, True),  # do we show link "I forgot my username" on login screen
+    DD_OS_MESSAGE_ENABLED=(bool, True),  # show the open-source "Upgrade to Pro" / OS message promo banner
     # Some security policies require allowing users to have only one active session
     DD_SINGLE_USER_SESSION=(bool, False),
     # if somebody is using own documentation how to use DefectDojo in his own company
@@ -477,6 +488,7 @@ FORGOT_PASSWORD = env("DD_FORGOT_PASSWORD")
 REQUIRE_PASSWORD_ON_USER = env("DD_REQUIRE_PASSWORD_ON_USER")
 FORGOT_USERNAME = env("DD_FORGOT_USERNAME")
 PASSWORD_RESET_TIMEOUT = env("DD_PASSWORD_RESET_TIMEOUT")
+OS_MESSAGE_ENABLED = env("DD_OS_MESSAGE_ENABLED")
 
 DOCUMENTATION_URL = env("DD_DOCUMENTATION_URL")
 
@@ -862,6 +874,9 @@ CELERY_BROKER_URL = env("DD_CELERY_BROKER_URL") \
     params=env("DD_CELERY_BROKER_PARAMS"),
 )
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
+DEDUPLICATION_ASYNC_WAIT_TIMEOUT = env("DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT")
+DEDUPLICATION_BATCH_PROCESS_TEST_DELAY = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY")
+DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = env("DD_CELERY_RESULT_EXPIRES")
