@@ -2,6 +2,8 @@ import abc
 import json
 from collections import OrderedDict
 
+import bleach
+from bleach.css_sanitizer import CSSSanitizer
 from django import forms
 from django.conf import settings
 from django.forms import Widget
@@ -216,6 +218,51 @@ class TableOfContents(Widget):
         return mark_safe(html)
 
 
+# Allow-list of the formatting the report builder's WYSIWYG editor can emit
+# (bold/italic/underline/strikethrough, lists, alignment, indentation, links,
+# images). Anything else -- <script>, on* handlers, javascript: URLs -- is
+# neutralized by bleach.clean() before the content reaches the |safe filter.
+WYSIWYG_ALLOWED_TAGS = {
+    "a", "b", "strong", "i", "em", "u", "s", "strike", "sub", "sup",
+    "p", "br", "hr", "div", "span", "blockquote", "pre", "code",
+    "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li",
+    "table", "thead", "tbody", "tr", "th", "td", "img",
+}
+WYSIWYG_ALLOWED_STYLES = [
+    "color", "background-color", "font-weight", "font-style",
+    "text-decoration", "text-align", "margin-left", "padding-left",
+]
+# http(s)/mailto for link hrefs; data: is permitted (only on <img src>, see the
+# attribute filter below) so an inline base64 image renders without opening
+# data:text/html on a link.
+WYSIWYG_ALLOWED_PROTOCOLS = ["http", "https", "mailto", "data"]
+
+
+def wysiwyg_attribute_filter(tag, name, value):
+    """
+    Bleach attribute allow-list for sanitized Custom Content.
+
+    A callable (rather than a dict) so data: URIs can be permitted on inline
+    images -- <img src="data:image/..."> -- without also allowing them on link
+    hrefs, where data:text/html would be an XSS/phishing vector. style/class are
+    allowed everywhere; their values are constrained by the css_sanitizer.
+    """
+    value = (value or "").strip().lower()
+    if name in {"style", "class"}:
+        return True
+    if tag == "a":
+        # Allow-list link schemes: data:/javascript:/obfuscated variants can't match an
+        # allowed prefix, so they are dropped (bleach's protocol check is a second layer).
+        return name in {"title", "target"} or (
+            name == "href" and value.startswith(("http://", "https://", "mailto:"))
+        )
+    if tag == "img":
+        return name in {"alt", "title", "width", "height"} or (
+            name == "src" and value.startswith(("http://", "https://", "data:image/"))
+        )
+    return False
+
+
 class WYSIWYGContent(Widget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -225,11 +272,23 @@ class WYSIWYGContent(Widget):
         self.multiple = "true"
 
     def get_html(self):
+        # Sanitize the user-supplied WYSIWYG markup before the template renders
+        # it with |safe. Keeps the editor's formatting but strips scripts,
+        # event handlers and javascript: URLs (defense in depth: today this is
+        # only self-reflected, but this closes the door if custom reports ever
+        # become saveable/shareable).
+        cleaned_content = bleach.clean(
+            self.content or "",
+            tags=WYSIWYG_ALLOWED_TAGS,
+            attributes=wysiwyg_attribute_filter,
+            protocols=WYSIWYG_ALLOWED_PROTOCOLS,
+            css_sanitizer=CSSSanitizer(allowed_css_properties=WYSIWYG_ALLOWED_STYLES),
+        )
         html = render_to_string(
             "dojo/custom_html_report_wysiwyg_content.html",
             {
                 "heading": self.heading,
-                "content": self.content,
+                "content": cleaned_content,
                 "page_break_after": self.page_break_after,
             })
         return mark_safe(html)
