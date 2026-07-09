@@ -752,7 +752,7 @@ def jira_environment(obj):
     return ""
 
 
-def push_to_jira(obj, *args, **kwargs) -> tuple[str, bool]:
+def push_to_jira(obj, *args, **kwargs) -> tuple[bool, str]:
     if obj is None:
         msg = "Cannot push None to JIRA"
         raise ValueError(msg)
@@ -773,9 +773,46 @@ def push_to_jira(obj, *args, **kwargs) -> tuple[str, bool]:
     return False, message
 
 
+def record_finding_push_outcome(finding_ids, success, message):
+    """
+    Keep Finding.processing_status truthful about the JIRA step.
+
+    add_jira_issue/update_jira_issue swallow errors internally and report
+    them as a (success, message) tuple, so a failed push never raises — the
+    batch wrapper in dojo.finding.helper cannot observe it. The push task is
+    therefore the writer of record for the JIRA outcome: a failure stamps
+    the finding(s) FAILED with the helper's message (overwriting a PROCESSED
+    stamped by the batch in async mode), and a subsequent successful push
+    heals FAILED back to PROCESSED. Successful pushes never touch PENDING
+    findings — the batch owns the happy-path stamp, and in eager execution
+    its final UPDATE excludes FAILED rows so this outcome survives there
+    too.
+    """
+    if not finding_ids:
+        return
+    try:
+        if success:
+            Finding.objects.filter(
+                id__in=finding_ids,
+                processing_status=Finding.ProcessingStatus.FAILED,
+            ).update(
+                processing_status=Finding.ProcessingStatus.PROCESSED,
+                processing_error="",
+                processed_at=timezone.now(),
+            )
+        else:
+            Finding.objects.filter(id__in=finding_ids).update(
+                processing_status=Finding.ProcessingStatus.FAILED,
+                processing_error=str(message or ""),
+                processed_at=timezone.now(),
+            )
+    except Exception:
+        logger.exception("Unable to record JIRA push outcome for findings %s", finding_ids)
+
+
 # we need thre separate celery tasks due to the decorators we're using to map to/from ids
 @app.task
-def push_finding_to_jira(finding_id, *args, **kwargs) -> tuple[str, bool]:
+def push_finding_to_jira(finding_id, *args, **kwargs) -> tuple[bool, str]:
     finding = get_object_or_none(Finding, id=finding_id)
     if not finding:
         message = f"Finding with id {finding_id} does not exist, skipping push_finding_to_jira"
@@ -783,12 +820,15 @@ def push_finding_to_jira(finding_id, *args, **kwargs) -> tuple[str, bool]:
         return False, message
 
     if finding.has_jira_issue:
-        return update_jira_issue(finding, *args, **kwargs)
-    return add_jira_issue(finding, *args, **kwargs)
+        success, message = update_jira_issue(finding, *args, **kwargs)
+    else:
+        success, message = add_jira_issue(finding, *args, **kwargs)
+    record_finding_push_outcome([finding.id], success, message)
+    return success, message
 
 
 @app.task
-def push_finding_group_to_jira(finding_group_id, *args, **kwargs) -> tuple[str, bool]:
+def push_finding_group_to_jira(finding_group_id, *args, **kwargs) -> tuple[bool, str]:
     # Prefetch the group's findings: the JIRA helpers below (jira_description,
     # jira_priority, get_sla_deadline, get_labels, ...) each call
     # finding_group.findings.all(), which would otherwise re-query per call and
@@ -801,11 +841,18 @@ def push_finding_group_to_jira(finding_group_id, *args, **kwargs) -> tuple[str, 
 
     # Look for findings that have single ticket associations separate from the group
     for finding in finding_group.findings.filter(jira_issue__isnull=False):
-        update_jira_issue(finding, *args, **kwargs)
+        single_success, single_message = update_jira_issue(finding, *args, **kwargs)
+        record_finding_push_outcome([finding.id], single_success, single_message)
     if finding_group.has_jira_issue:
         # Update the jira issue for the group
-        return update_jira_issue(finding_group, *args, **kwargs)
-    return add_jira_issue(finding_group, *args, **kwargs)
+        success, message = update_jira_issue(finding_group, *args, **kwargs)
+    else:
+        success, message = add_jira_issue(finding_group, *args, **kwargs)
+    # The group's outcome applies to every member finding
+    record_finding_push_outcome(
+        list(finding_group.findings.values_list("id", flat=True)), success, message,
+    )
+    return success, message
 
 
 @app.task
@@ -902,7 +949,7 @@ def prepare_jira_issue_fields(
     return fields
 
 
-def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
+def add_jira_issue(obj, *args, **kwargs) -> tuple[bool, str]:
     def failure_to_add_message(message: str, exception: Exception, _: Any) -> tuple[str, bool]:
         if exception:
             logger.error("Exception occurred", exc_info=exception)
@@ -1067,7 +1114,7 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
     return True, "JIRA issue created successfully."
 
 
-def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
+def update_jira_issue(obj, *args, **kwargs) -> tuple[bool, str]:
     def failure_to_update_message(message: str, exception: Exception, obj: Any) -> tuple[str, bool]:
         if exception:
             logger.error(exception)

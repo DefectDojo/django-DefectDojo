@@ -510,6 +510,7 @@ def post_process_findings_batch(
     # makes stuck/failed post-processing visible on the findings themselves
     # instead of silently dying in a worker (the exception still propagates).
     processing_status = Finding.ProcessingStatus.FAILED
+    processing_error = ""
     try:
         # Batch dedupe with single queries per algorithm; fallback to per-finding for anything else
         if dedupe_option and system_settings.enable_deduplication:
@@ -549,11 +550,22 @@ def post_process_findings_batch(
             logger.debug("push_to_jira is False, not pushing to JIRA")
 
         processing_status = Finding.ProcessingStatus.PROCESSED
+    except Exception as e:
+        processing_error = str(e) or e.__class__.__name__
+        raise
     finally:
         # Single bulk UPDATE per batch; matched findings from reimports simply
         # get a refreshed processed_at. No signals, no per-row saves.
-        Finding.objects.filter(id__in=finding_ids).update(
+        # FAILED rows are excluded: the JIRA push task stamps failures
+        # per-finding (see dojo.jira.helper.record_finding_push_outcome), and
+        # in eager execution that happens inside the try block above — this
+        # stamp must not overwrite it back to PROCESSED. In async execution
+        # the push task runs after this and is the last writer anyway.
+        Finding.objects.filter(id__in=finding_ids).exclude(
+            processing_status=Finding.ProcessingStatus.FAILED,
+        ).update(
             processing_status=processing_status,
+            processing_error=processing_error,
             processed_at=timezone.now(),
         )
 

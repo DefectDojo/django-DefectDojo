@@ -301,6 +301,11 @@ class Finding(BaseModel):
                                         editable=False,
                                         verbose_name=_("Processed At"),
                                         help_text=_("When post-import processing last completed for this finding."))
+    processing_error = models.TextField(blank=True,
+                                        default="",
+                                        editable=False,
+                                        verbose_name=_("Processing Error"),
+                                        help_text=_("Why post-import processing failed for this finding (e.g. the JIRA push error). Empty unless processing_status is failed."))
     reporter = models.ForeignKey("dojo.Dojo_User",
                                  editable=False,
                                  default=1,
