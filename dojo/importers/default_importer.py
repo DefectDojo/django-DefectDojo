@@ -402,7 +402,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Remove all the findings that are coming from the report already mitigated
         new_hash_codes = []
         new_unique_ids_from_tool = []
-        for finding in findings.values():
+        for finding in findings.values("is_mitigated", "hash_code", "unique_id_from_tool"):
             # Do not process closed findings in the report
             if finding.get("is_mitigated", False):
                 continue
