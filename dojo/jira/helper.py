@@ -705,6 +705,7 @@ def jira_description(obj, **kwargs):
     elif isinstance(obj, Finding_Group):
         kwargs["finding_group"] = obj
 
+    kwargs["V3_FEATURE_LOCATIONS"] = settings.V3_FEATURE_LOCATIONS
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
     max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
