@@ -226,6 +226,8 @@ Example:
 }
 ```
 
+The resulting Test Type name is derived from the `type` field: when `type` is omitted (or equals the scan type) the Test Type is `Generic Findings Import`; when `type` is provided it becomes `{type} Scan (Generic Findings Import)` (for the example above, `My custom Test type Scan (Generic Findings Import)`). A `type` that already ends with the `(Generic Findings Import)` suffix is used verbatim, so the suffix is never doubled.
+
 ### Sample Scan Data
 
 Sample Generic Findings Import scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/generic).

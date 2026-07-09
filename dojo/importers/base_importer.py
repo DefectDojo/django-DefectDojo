@@ -282,33 +282,18 @@ class BaseImporter(ImporterOptions):
         # only if they are different. This is to support meta format like SARIF
         # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
         test_raw = tests[0]
-        test_type_name = self.scan_type
         # Create a new test if it has not already been created
         if not self.test:
-            # Determine if we should use a custom test type name
-            if test_raw.type:
-                # If test_raw.type equals scan_type, use scan_type directly
-                if test_raw.type == self.scan_type:
-                    test_type_name = self.scan_type
-                else:
-                    test_type_name = f"{tests[0].type} Scan"
-                    if test_type_name != self.scan_type:
-                        test_type_name = f"{test_type_name} ({self.scan_type})"
-            self.test = self.create_test(test_type_name)
+            # Resolve the Test_Type name from the report's type (idempotent: a type that already
+            # carries the " (scan_type)" suffix is used verbatim rather than doubled)
+            self.test = self.create_test(self.resolve_dynamic_test_type_name(test_raw.type))
         else:
-            # During reimport, validate that the test_type matches
-            # Calculate the expected test_type_name from the incoming report
-            expected_test_type_name = self.scan_type
-            if test_raw.type:
-                # If test_raw.type equals scan_type, use scan_type directly
-                if test_raw.type == self.scan_type:
-                    expected_test_type_name = self.scan_type
-                else:
-                    expected_test_type_name = f"{test_raw.type} Scan"
-                    if expected_test_type_name != self.scan_type:
-                        expected_test_type_name = f"{expected_test_type_name} ({self.scan_type})"
-            # Compare with existing test's test_type name
-            if self.test.test_type.name != expected_test_type_name:
+            # During reimport, validate that the test_type matches the incoming report.
+            # Accept either the current (idempotent) name or the legacy name the pre-patch code
+            # produced, so reimports into tests created before the doubling fix keep working.
+            expected_test_type_name = self.resolve_dynamic_test_type_name(test_raw.type)
+            legacy_test_type_name = self.legacy_dynamic_test_type_name(test_raw.type)
+            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name}:
                 msg = (
                     f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
                     f"but the report contains test_type '{expected_test_type_name}'. "
@@ -652,6 +637,42 @@ class BaseImporter(ImporterOptions):
         """
         self.test.percent_complete = percentage_value
         self.test.save()
+
+    def resolve_dynamic_test_type_name(self, raw_type: str | None) -> str:
+        """
+        Compute the Test_Type name for a dynamic-test-type report (e.g. Generic, SARIF).
+
+        - No type, or type already equals the scan type -> use the scan type as-is.
+        - Type already carries the scan-type suffix (e.g. "Prisma Cloud (Generic Findings
+          Import)") -> use it verbatim. This keeps the composition idempotent and prevents
+          doubled names like "X (scan_type) Scan (scan_type)".
+        - Type plus a " Scan" suffix already equals the scan type (e.g. type "Horusec" with
+          scan_type "Horusec Scan") -> use the scan type as-is. This preserves the behavior of
+          dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security Hub,
+          Rusty Hog, ...) so their Test_Type name is not doubled into "Horusec Scan (Horusec Scan)".
+        - Otherwise -> the intentional "{type} Scan ({scan_type})" format (also used by SARIF,
+          so a report labeled 'CodeScanner' becomes 'CodeScanner Scan (SARIF)').
+        """
+        if not raw_type or raw_type == self.scan_type:
+            return self.scan_type
+        if raw_type.endswith(f" ({self.scan_type})"):
+            return raw_type
+        if f"{raw_type} Scan" == self.scan_type:
+            return self.scan_type
+        return f"{raw_type} Scan ({self.scan_type})"
+
+    def legacy_dynamic_test_type_name(self, raw_type: str | None) -> str:
+        """
+        Reproduce the name the pre-idempotency code produced. Used only for the reimport
+        compatibility check so reimports into existing (pre-patch) tests whose test_type
+        already has a doubled suffix keep working instead of raising a mismatch error.
+        """
+        if not raw_type or raw_type == self.scan_type:
+            return self.scan_type
+        name = f"{raw_type} Scan"
+        if name != self.scan_type:
+            name = f"{name} ({self.scan_type})"
+        return name
 
     def get_or_create_test_type(
         self,
