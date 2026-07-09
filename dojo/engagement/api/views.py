@@ -11,7 +11,7 @@ from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
-from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
+from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, report_generate_response, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.engagement.api.filters import ApiEngagementFilter
@@ -131,14 +131,13 @@ class EngagementViewSet(
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, engagement, options)
-        report = api_v2_serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, engagement, options)
 
     @extend_schema(
         methods=["GET"],
