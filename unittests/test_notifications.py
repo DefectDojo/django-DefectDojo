@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 import pghistory
 from auditlog.context import set_actor
 from crum import impersonate
-from django.test import override_settings
+from django.test import RequestFactory, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -23,6 +23,7 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    Notes,
     Notification_Webhooks,
     Notifications,
     Product,
@@ -38,6 +39,7 @@ from dojo.notifications.helper import (
     WebhookNotificationManger,
     async_create_notification,
     create_notification,
+    process_tag_notifications,
     webhook_status_cleanup,
 )
 from dojo.url.models import URL
@@ -1300,4 +1302,75 @@ class TestNotificationWebhooks(DojoTestCase):
                     "url_ui": "http://localhost:8080/user/6",
                 },
             },
+        )
+
+
+@versioned_fixtures
+class TestProcessTagNotifications(DojoTestCase):
+    """Regression tests for dojo.notifications.helper.process_tag_notifications.
+
+    @mention notifications were silently never delivered: the helper passed
+    Dojo_User objects as ``recipients`` where usernames are expected, so
+    ``_process_recipients`` (which filters ``user__username__in``) matched
+    nothing. Usernames containing ``.``, ``-``, ``@`` or ``+`` were also
+    truncated by the old word-character-only mention regex.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def _enable_mention_alerts(self, user):
+        # dojo_testdata.json ships only the system (user=None) Notifications row;
+        # the recipient lookup needs a per-user row with product=None.
+        notifications, _ = Notifications.objects.get_or_create(user=user, product=None)
+        notifications.user_mentioned = ["alert"]
+        notifications.save()
+
+    def _mention(self, author, entry):
+        note = Notes.objects.create(entry=entry, author=author)
+        request = RequestFactory().get("/")
+        request.user = author
+        with impersonate(author):
+            process_tag_notifications(
+                request,
+                note,
+                parent_url="/finding/1",
+                parent_title="Finding: Example",
+            )
+
+    def test_mentioned_user_receives_alert(self):
+        author = Dojo_User.objects.get(username="admin")
+        mentioned = Dojo_User.objects.create(username="mentionee", is_active=True)
+        self._enable_mention_alerts(mentioned)
+
+        self._mention(author, f"@{mentioned.username} please take a look")
+
+        self.assertEqual(
+            Alerts.objects.filter(user_id=mentioned, source="User Mentioned").count(),
+            1,
+            "an @mention should create exactly one in-app alert for the mentioned user",
+        )
+
+    def test_username_with_dot_is_matched(self):
+        author = Dojo_User.objects.get(username="admin")
+        mentioned = Dojo_User.objects.create(username="jane.doe", is_active=True)
+        self._enable_mention_alerts(mentioned)
+
+        self._mention(author, "thanks @jane.doe")
+
+        self.assertEqual(
+            Alerts.objects.filter(user_id=mentioned).count(),
+            1,
+            "a username containing '.' must be matched in full, not truncated to 'jane'",
+        )
+
+    def test_email_address_in_prose_is_not_a_mention(self):
+        author = Dojo_User.objects.get(username="admin")
+        mentioned = Dojo_User.objects.create(username="ops", is_active=True)
+        self._enable_mention_alerts(mentioned)
+
+        self._mention(author, "email me at someone@ops")
+
+        self.assertFalse(
+            Alerts.objects.filter(user_id=mentioned).exists(),
+            "an email-like token in prose (no whitespace before '@') must not notify",
         )
