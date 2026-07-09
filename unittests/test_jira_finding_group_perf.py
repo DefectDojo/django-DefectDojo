@@ -42,8 +42,11 @@ class JiraFindingGroupPushQueryCountTest(TestCase):
             with self.assertNumQueries(0):
                 for _ in range(5):
                     list(obj.findings.all())
-            return "ok", True
+            return True, "ok"
 
         mock_add.side_effect = _simulate_jira_helpers
+        # the push task unpacks (success, message) from every helper call,
+        # including the separate-ticket updates
+        mock_update.return_value = (True, "updated")
         push_finding_group_to_jira(group.id)
         mock_add.assert_called_once()
