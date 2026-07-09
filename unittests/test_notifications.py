@@ -1307,7 +1307,9 @@ class TestNotificationWebhooks(DojoTestCase):
 
 @versioned_fixtures
 class TestProcessTagNotifications(DojoTestCase):
-    """Regression tests for dojo.notifications.helper.process_tag_notifications.
+
+    """
+    Regression tests for dojo.notifications.helper.process_tag_notifications.
 
     @mention notifications were silently never delivered: the helper passed
     Dojo_User objects as ``recipients`` where usernames are expected, so
