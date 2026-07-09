@@ -138,6 +138,27 @@ Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, 
 
 Follow **[this guide](#custom-fields-in-jira)** to get started working with Custom Fields.
 
+#### Close / Reopen Transition fields
+
+Some Jira workflows **require** certain fields to be set as part of a transition — for example, a workflow that refuses to close an Issue unless a Resolution and a Justification field are provided on the close screen. The Custom fields setting above only applies when an Issue is *created*, so it cannot satisfy these workflows.
+
+The **Close Transition fields** and **Reopen Transition fields** settings accept a JSON object that is sent as the `fields` payload of the close / reopen transition call. For example, to close Issues with a Resolution of *Won't Fix* plus a justification value:
+
+```json
+{
+    "resolution": {"name": "Won't Fix"},
+    "customfield_10200": "Risk accepted by security team #report-false-positive"
+}
+```
+
+Leave these settings as 'null' if your Jira workflow does not require fields on transitions.
+
+**Notes:**
+
+* Fields must be present **on the transition screen** in your Jira workflow — Jira rejects transitions that attempt to set fields that are not on the screen for that transition. Your Jira admin can confirm which fields are on the close / reopen screens.
+* The same JSON is sent for *every* close (or reopen) transition for the Product or Engagement — the values are static and do not vary per Finding. If you need different fields per disposition (for example, a different Resolution for False Positive findings than for remediated findings), use the DefectDojo Pro Jira Integrator, which supports per-status transition field mappings.
+* Values use the same format as Jira's REST API: strings for text fields, `{"name": ...}` for resolutions, `[{"name": ...}]` for multi-select fields, and so on.
+
 #### Jira labels
 
 Select the relevant labels that you want the Issue to be created with in Jira, e.g. **DefectDojo**, **YourProductName..**
