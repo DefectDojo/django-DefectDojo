@@ -207,7 +207,9 @@ h1, h2, h3, h4, h5, h6,
     }
   }
 
-  .offcanvas-body .navbar-nav .nav-link {
+  // The main nav row sits inside #offcanvasNavMain but OUTSIDE
+  // .offcanvas-body in this header, so scope to .navbar-nav directly.
+  .navbar-nav .nav-link {
     font-size: 0.9375rem;
     font-weight: 500;
     padding: 0.3125rem 0.75rem;
@@ -305,7 +307,7 @@ h1, h2, h3, h4, h5, h6,
 // Inside the navy header band the offcanvas is inlined on desktop; scope the
 // light-on-navy colors so the *panel* (mobile, position: fixed) stays themed.
 @media (max-width: 991.98px) {
-  .dd-header .offcanvas-body .navbar-nav .nav-link {
+  .dd-header .offcanvas .navbar-nav .nav-link {
     color: var(--dd-ink);
 
     &:hover {
