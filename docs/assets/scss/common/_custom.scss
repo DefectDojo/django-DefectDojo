@@ -987,11 +987,41 @@ html:not([data-dd-version='pro']) .version-pro {
   }
 }
 
+// Single-line breadcrumb: long crumbs ellipsize instead of wrapping, which
+// otherwise strands a leading "/" separator at the start of the next line.
 .breadcrumb {
   font-size: 0.8125rem;
   padding: 0;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  min-width: 3rem; // every crumb keeps a readable stub + ellipsis
+  white-space: nowrap;
+
+  a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &:first-child {
+    flex-shrink: 0; // "Home" is the shortest crumb; never truncate it
+    min-width: 0;
+  }
+
+  &.active {
+    // Block, not flex: text-overflow only renders on block containers, and
+    // the current page is bare text (no inner anchor to ellipsize).
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0.5; // current page keeps roughly twice the room of ancestors
+  }
 }
 
 .breadcrumb-item a {
