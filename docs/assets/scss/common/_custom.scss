@@ -352,10 +352,6 @@ h1, h2, h3, h4, h5, h6,
 // Sidebar — column sizing, edition control, nav tree
 // ============================================================
 
-.docs-sidebar {
-  visibility: hidden; // Hide sidebar until version is resolved (JS reveals)
-}
-
 @media (min-width: 992px) {
   @supports ((position: -webkit-sticky) or (position: sticky)) {
     .docs-sidebar {
@@ -415,7 +411,6 @@ h1, h2, h3, h4, h5, h6,
   background: var(--dd-surface-2);
   border: 1px solid var(--dd-border);
   border-radius: 0.625rem;
-  visibility: hidden; // revealed by JS once the stored edition is applied
 
   button {
     appearance: none;
@@ -433,17 +428,23 @@ h1, h2, h3, h4, h5, h6,
       color: var(--dd-ink);
     }
 
-    &[aria-checked='true'] {
+    // Selected state keys off the edition stamped on <html> before first
+    // paint (custom-head.html), not aria-checked — the static markup always
+    // ships aria-checked="true" on Open Source, so styling from it would
+    // flash the wrong button when Pro is stored. JS keeps aria-checked in
+    // sync for assistive tech. :not() makes Open Source the no-JS default.
+    html:not([data-dd-version='pro']) &[data-version-value='opensource'],
+    html[data-dd-version='pro'] &[data-version-value='pro'] {
       color: #ffffff;
       font-weight: 600;
     }
 
-    &[data-version-value='opensource'][aria-checked='true'] {
+    html:not([data-dd-version='pro']) &[data-version-value='opensource'] {
       background: var(--dd-blue);
       box-shadow: 0 1px 3px rgba(23, 121, 197, 0.4);
     }
 
-    &[data-version-value='pro'][aria-checked='true'] {
+    html[data-dd-version='pro'] &[data-version-value='pro'] {
       background: var(--dd-orange);
       box-shadow: 0 1px 3px rgba(242, 86, 29, 0.4);
     }
@@ -455,9 +456,11 @@ h1, h2, h3, h4, h5, h6,
   padding-top: 0.75rem;
 }
 
-// Hide Pro-versioned content by default (opensource is default).
-// JS sets explicit inline display:block/none when version is toggled.
-.version-pro {
+// Both edition menus render; html[data-dd-version] (stamped before first
+// paint by custom-head.html, updated by custom.js on toggle) decides which
+// one shows. Without JS the attribute is absent and Open Source shows.
+html[data-dd-version='pro'] .version-opensource,
+html:not([data-dd-version='pro']) .version-pro {
   display: none;
 }
 
