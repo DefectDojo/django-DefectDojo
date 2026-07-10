@@ -14,6 +14,7 @@ from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.functions import Upper
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.functional import cached_property
@@ -1385,6 +1386,15 @@ class Vulnerability_Id(models.Model):
                 name="dojo_vulnerability_id_fts_gin",
             ),
             GinIndex(fields=["vulnerability_id"], opclasses=["gin_trgm_ops"], name="dojo_vuln_id_trgm"),
+            # Case-insensitive vulnerability-id → finding lookups (e.g. threat-intel /
+            # exploit-enrichment keyed by CVE). Scanner-provided ids are not case-normalized,
+            # so the index and any query must both fold with UPPER(). finding_id is included
+            # so the changed-key → finding fan-out is an index-only scan.
+            models.Index(
+                Upper("vulnerability_id"),
+                "finding",
+                name="dojo_vulnid_upper_idx",
+            ),
         ]
 
     def __str__(self):
