@@ -12,9 +12,14 @@ Adds, on the ten models the Pro global search (``pro/search/``) queries:
 The indexes are database-only (wrapped in ``SeparateDatabaseAndState`` with no
 state operations, so they stay out of every model's ``Meta.indexes``): they
 exist purely for global-search performance and are not part of any model's
-public schema. Building them from ``SearchVector``/``OpClass`` ORM objects
-(rather than raw SQL) is what keeps the index expression from drifting away
-from the query's compiled SQL across Django upgrades.
+public schema. The tsvector indexes are built from the same ``SearchVector``
+objects the query annotates with (rather than raw SQL), so the index
+expression cannot drift from the query's compiled SQL across Django upgrades.
+
+The trigram indexes use ``opclasses`` (a base ``Index`` option) rather than a
+``django.contrib.postgres`` ``OpClass`` expression, so they render without
+requiring that app in ``INSTALLED_APPS`` (only the Pro query side needs it,
+for the ``__trigram_word_similar`` lookup).
 
 ``AddIndexConcurrently`` / ``CREATE EXTENSION`` cannot run inside a
 transaction, hence ``atomic = False``. ``TrigramExtension`` is the sole
@@ -22,11 +27,10 @@ creator of ``pg_trgm`` here, so its symmetric reverse (dropping the extension
 after the trigram indexes are already gone) is correct.
 """
 
-from django.contrib.postgres.indexes import GinIndex, OpClass
+from django.contrib.postgres.indexes import GinIndex
 from django.contrib.postgres.operations import AddIndexConcurrently, TrigramExtension
 from django.contrib.postgres.search import SearchVector
 from django.db import migrations
-from django.db.models import F
 
 # (model_name, ((column, weight), ...), index_name) -- weighted tsvector GIN.
 _FTS_SPECS = (
@@ -80,7 +84,7 @@ def _index_operations():
         add_index.append(
             AddIndexConcurrently(
                 model_name=model_name,
-                index=GinIndex(OpClass(F(column), name="gin_trgm_ops"), name=name),
+                index=GinIndex(fields=[column], opclasses=["gin_trgm_ops"], name=name),
             ),
         )
     # database_operations only: create the indexes without recording them in
