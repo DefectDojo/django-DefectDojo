@@ -12,11 +12,13 @@ window.ddOffcanvas = Offcanvas;
 
 // Edition toggler (Open Source / Pro)
 //
-// The sidebar renders both edition menus (.version-opensource / .version-pro);
-// this shows one, persists the choice, and keeps every segmented control on
-// the page (desktop sidebar + mobile offcanvas) in sync. The sidebar and the
-// control start hidden (see _custom.scss) and are revealed only after the
-// stored edition is applied, so there is no flash of the wrong menu.
+// The sidebar renders both edition menus (.version-opensource / .version-pro).
+// Which menu shows — and which segmented-control button reads as selected —
+// is pure CSS keyed off html[data-dd-version] (see _custom.scss). An inline
+// script in custom-head.html stamps that attribute from localStorage before
+// first paint, so every page load renders the stored edition immediately with
+// no hide-then-reveal flicker. This module only handles toggling: update the
+// attribute, persist the choice, sync aria-checked for assistive tech.
 (() => {
     "use strict";
 
@@ -41,25 +43,20 @@ window.ddOffcanvas = Offcanvas;
     };
 
     const setVersion = (version) => {
-        document.querySelectorAll(".version-opensource, .version-pro").forEach(el => {
-            el.style.display = el.classList.contains(`version-${version}`) ? "block" : "none";
-        });
+        // CSS shows the matching menu and highlights the matching button
+        document.documentElement.dataset.ddVersion = version;
 
-        localStorage.setItem("version", version);
-
-        // Sync every segmented control instance, then reveal it
-        document.querySelectorAll(".dd-version-seg").forEach(seg => {
-            seg.querySelectorAll("button[data-version-value]").forEach(btn => {
-                btn.setAttribute("aria-checked", btn.dataset.versionValue === version ? "true" : "false");
-            });
-            seg.style.visibility = "visible";
-        });
-
-        // Unhide sidebar after version is applied
-        const sidebar = document.querySelector(".docs-sidebar");
-        if (sidebar) {
-            sidebar.style.visibility = "visible";
+        try {
+            localStorage.setItem("version", version);
+        } catch (e) {
+            // Storage blocked (private browsing) — toggle still works this page
         }
+
+        // aria-checked is for assistive tech only; visuals come from the
+        // html[data-dd-version] attribute above
+        document.querySelectorAll(".dd-version-seg button[data-version-value]").forEach(btn => {
+            btn.setAttribute("aria-checked", btn.dataset.versionValue === version ? "true" : "false");
+        });
 
         // Edition-aware top nav: route "Model Your Assets" to the page that
         // matches the selected version (see assetNavUrls above).
@@ -71,8 +68,10 @@ window.ddOffcanvas = Offcanvas;
     };
 
     const initVersionToggle = () => {
-        const storedVersion = localStorage.getItem("version") || "opensource";
-        setVersion(storedVersion);
+        // custom-head.html already stamped the stored edition on <html> before
+        // paint; re-applying it here syncs aria-checked and the nav link on
+        // freshly parsed (or dynamically replaced) markup.
+        setVersion(document.documentElement.dataset.ddVersion || "opensource");
     };
 
     // Delegated listener on body — catches every control instance
