@@ -8,6 +8,7 @@ from django.db.models.query_utils import Q
 import dojo.finding.helper as finding_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
+    deduplication_ordering_key,
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_uid_or_hash,
     find_candidates_for_deduplication_unique_id,
@@ -306,7 +307,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls
+        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls.
+        # Findings are also fully prepared here (test/service/hash_code) so they can be
+        # sorted by a stable content key below — this makes the "which duplicate becomes
+        # the surviving finding" decision deterministic regardless of the order the
+        # scanner emitted its findings (intra-report duplicates are matched to whichever
+        # is created first; see add_new_finding_to_candidates).
         cleaned_findings = []
         for raw_finding in parsed_findings or []:
             sanitized = self.sanitize_severity(raw_finding)
@@ -318,7 +324,27 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     self.minimum_severity,
                 )
                 continue
+            # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
+            # Finding.mitigated is DateTimeField and it requires timezone
+            if sanitized.mitigated and not sanitized.mitigated.tzinfo:
+                sanitized.mitigated = sanitized.mitigated.replace(tzinfo=self.now.tzinfo)
+            # Override the test if needed
+            if not hasattr(sanitized, "test"):
+                sanitized.test = self.test
+            # Set the service supplied at import time
+            if self.service is not None:
+                sanitized.service = self.service
+            self.location_handler.clean_unsaved(sanitized)
+            # Calculate the hash code to be used to identify duplicates
+            sanitized.hash_code = self.calculate_unsaved_finding_hash_code(sanitized)
+            deduplicationLogger.debug(f"unsaved finding's hash_code: {sanitized.hash_code}")
             cleaned_findings.append(sanitized)
+
+        # Sort by the stable content key so intra-report duplicate resolution is
+        # independent of the scanner's export order. Unsaved findings have no id, so
+        # the id tiebreak is inert here and byte-identical findings keep their relative
+        # (immaterial) order via Python's stable sort.
+        cleaned_findings.sort(key=deduplication_ordering_key)
 
         # Each entry carries the finding's own push_to_jira flag: grouped findings are pushed to
         # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
@@ -346,22 +372,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
             logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
 
-            # Prepare findings in batch: set test, service, calculate hash codes
-            for unsaved_finding in unsaved_findings_batch:
-                # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
-                # Finding.mitigated is DateTimeField and it requires timezone
-                if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
-                    unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
-                # Override the test if needed
-                if not hasattr(unsaved_finding, "test"):
-                    unsaved_finding.test = self.test
-                # Set the service supplied at import time
-                if self.service is not None:
-                    unsaved_finding.service = self.service
-                self.location_handler.clean_unsaved(unsaved_finding)
-                # Calculate the hash code to be used to identify duplicates
-                unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
-                deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
+            # Findings are already prepared (test/service/hash_code) and globally sorted above.
 
             # Fetch all candidates for this batch at once (batch candidate finding)
             candidates_by_hash, candidates_by_uid, candidates_by_key = self.get_reimport_match_candidates_for_batch(
@@ -652,13 +663,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if candidates_by_hash is None or unsaved_finding.hash_code is None:
                 return []
             matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
-            return sorted(matches, key=lambda f: f.id)
+            return sorted(matches, key=deduplication_ordering_key)
 
         if self.deduplication_algorithm == "unique_id_from_tool":
             if candidates_by_uid is None or unsaved_finding.unique_id_from_tool is None:
                 return []
             matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
-            return sorted(matches, key=lambda f: f.id)
+            return sorted(matches, key=deduplication_ordering_key)
 
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             if candidates_by_hash is None and candidates_by_uid is None:
@@ -681,14 +692,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     matches_by_id[match.id] = match
 
             matches = list(matches_by_id.values())
-            return sorted(matches, key=lambda f: f.id)
+            return sorted(matches, key=deduplication_ordering_key)
 
         if self.deduplication_algorithm == "legacy":
             if candidates_by_key is None or not unsaved_finding.title:
                 return []
             key = (unsaved_finding.title.lower(), unsaved_finding.severity)
             matches = candidates_by_key.get(key, [])
-            return sorted(matches, key=lambda f: f.id)
+            return sorted(matches, key=deduplication_ordering_key)
 
         logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
         return []

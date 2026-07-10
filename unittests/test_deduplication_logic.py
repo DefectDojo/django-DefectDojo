@@ -9,7 +9,13 @@ from django.conf import settings
 from django.core import serializers
 from django.utils import timezone
 
-from dojo.finding.deduplication import build_candidate_scope_queryset, set_duplicate
+from dojo.finding.deduplication import (
+    build_candidate_scope_queryset,
+    dedupe_batch_of_findings,
+    deduplication_ordering_key,
+    get_finding_models_for_deduplication,
+    set_duplicate,
+)
 from dojo.importers.default_importer import DefaultImporter
 from dojo.models import (
     Development_Environment,
@@ -534,6 +540,82 @@ class TestDuplicationLogic(DojoTestCase):
 
         # reset for further tests
         settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def _make_finding_in_test(self, template_id, title, hash_code):
+        """
+        Create a saved, active finding cloned from template_id with a forced hash_code.
+
+        The hash_code is written directly to the DB (bypassing save()'s recompute) so we
+        can make two findings with different content collide on the deduplication key.
+        """
+        new, _ = self.copy_and_reset_finding(find_id=template_id)
+        new.title = title
+        new.save(dedupe_option=False)
+        Finding.objects.filter(id=new.id).update(hash_code=hash_code)
+        new.refresh_from_db()
+        return new
+
+    def test_dedupe_batch_winner_is_content_stable_hash_code(self):
+        # Regression for the Fortify import-order dedupe flip: among findings that
+        # collide on the deduplication key within one import, the surviving
+        # "original" must be chosen by a stable content key, NOT by whichever was
+        # created first (lowest DB id / parser emission order).
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = []
+        try:
+            shared_hash = "content_stable_hash_flip_test"
+            # Created in REVERSE content order: "zzz" first (lower id), "aaa" second
+            # (higher id). The old behaviour would keep the lower-id "zzz" as original.
+            finding_z = self._make_finding_in_test(2, "zzz order flip finding", shared_hash)
+            finding_a = self._make_finding_in_test(2, "aaa order flip finding", shared_hash)
+            self.assertLess(finding_z.id, finding_a.id)
+            self.assertEqual(finding_z.test_id, finding_a.test_id)
+
+            batch = get_finding_models_for_deduplication([finding_z.id, finding_a.id])
+            dedupe_batch_of_findings(batch)
+
+            finding_a.refresh_from_db()
+            finding_z.refresh_from_db()
+            # "aaa" is the canonical original even though it has the HIGHER id.
+            self.assert_finding(finding_a, duplicate=False)
+            self.assert_finding(finding_z, duplicate=True, duplicate_finding_id=finding_a.id)
+        finally:
+            settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def test_dedupe_batch_pre_existing_finding_stays_original(self):
+        # Backward-compat guard: a finding that already existed before this import
+        # batch must remain the original regardless of the new finding's content key.
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = []
+        try:
+            shared_hash = "content_stable_hash_preexisting_test"
+            # Pre-existing finding has a content key that sorts AFTER the new one.
+            pre_existing = self._make_finding_in_test(2, "zzz pre-existing", shared_hash)
+            # Dedupe the pre-existing finding alone first (simulates an earlier import).
+            dedupe_batch_of_findings(get_finding_models_for_deduplication([pre_existing.id]))
+
+            new_finding = self._make_finding_in_test(2, "aaa newer import", shared_hash)
+            self.assertLess(pre_existing.id, new_finding.id)
+
+            # New batch contains only the new finding; pre-existing is a DB candidate.
+            dedupe_batch_of_findings(get_finding_models_for_deduplication([new_finding.id]))
+
+            pre_existing.refresh_from_db()
+            new_finding.refresh_from_db()
+            # Pre-existing stays original even though "aaa" would sort before "zzz".
+            self.assert_finding(pre_existing, duplicate=False)
+            self.assert_finding(new_finding, duplicate=True, duplicate_finding_id=pre_existing.id)
+        finally:
+            settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def test_deduplication_ordering_key_is_order_independent(self):
+        # The ordering key must be a pure function of finding content (+ id tiebreak),
+        # so sorting a set of findings yields the same result regardless of input order.
+        f_a = Finding.objects.get(id=2)
+        f_b = Finding.objects.get(id=3)
+        forward = sorted([f_a, f_b], key=deduplication_ordering_key)
+        backward = sorted([f_b, f_a], key=deduplication_ordering_key)
+        self.assertEqual([f.id for f in forward], [f.id for f in backward])
 
     def test_identical_except_title_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different title (and reset status)

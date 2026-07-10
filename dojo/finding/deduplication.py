@@ -1,6 +1,5 @@
 import logging
 from collections.abc import Iterator
-from operator import attrgetter
 
 import hyperlink
 from django.conf import settings
@@ -544,12 +543,81 @@ def find_candidates_for_reimport_legacy(test, findings, service=None):
     return existing_by_key
 
 
+def deduplication_ordering_key(finding):
+    """
+    Stable, content-derived sort key for choosing the canonical "original"
+    among findings that collide on the deduplication key.
+
+    Independent of parser emission order and DB id, so the winner is
+    reproducible across re-scans regardless of the order the scanner exports
+    its findings in. id is the final tiebreak and is only reached when two
+    findings are identical across every content field in the key (in which
+    case the choice is immaterial because the findings are interchangeable).
+
+    All fields referenced here are part of ``Finding.DEDUPLICATION_FIELDS``, so
+    building this key never triggers extra database queries during dedupe.
+    """
+    return (
+        finding.hash_code or "",
+        finding.unique_id_from_tool or "",
+        finding.file_path or "",
+        finding.line if finding.line is not None else -1,
+        finding.title or "",
+        finding.id or 0,
+    )
+
+
+def _candidate_sort_key(candidate, batch_min_id):
+    """
+    Order candidates so the first "older" one encountered is the canonical original.
+
+    Findings that predate the current import batch (id < batch_min_id, or when no
+    batch context is available) are ranked first and ordered by id, preserving the
+    historical "pre-existing finding stays the original" behaviour. Findings created
+    within the current batch are ranked after pre-existing ones and ordered by the
+    stable content key so the winner does not depend on parser emission order.
+
+    ``batch_min_id`` is an optional marker; when it is not an integer (absent) or the
+    candidate has no integer id yet (unsaved/preview), the candidate is treated as
+    pre-existing and ordered by id, so arithmetic is only ever done on real ids.
+    """
+    candidate_id = candidate.id if isinstance(candidate.id, int) else None
+    if not isinstance(batch_min_id, int) or candidate_id is None or candidate_id < batch_min_id:
+        return (0, candidate_id or 0)
+    return (1, deduplication_ordering_key(candidate))
+
+
+def _prepare_batch_ordering(findings):
+    """
+    Stamp every finding in a dedup batch with the batch's minimum id and return the
+    batch sorted by the stable content key.
+
+    The stamped ``_dedupe_batch_min_id`` lets ``_is_candidate_older`` tell findings
+    created within this batch apart from pre-existing candidates loaded from the DB
+    (which always have smaller ids), so pre-existing findings keep their id-based
+    ordering while intra-batch ties are broken deterministically by content.
+    """
+    batch_ids = [f.id for f in findings if f.id is not None]
+    batch_min_id = min(batch_ids) if batch_ids else None
+    for f in findings:
+        f._dedupe_batch_min_id = batch_min_id
+    return sorted(findings, key=deduplication_ordering_key)
+
+
 def _is_candidate_older(new_finding, candidate):
     # Unsaved findings (e.g. preview mode) have no PK — all DB candidates are older by definition
     if new_finding.pk is None:
         return True
-    # Ensure the newer finding is marked as duplicate of the older finding
-    is_older = candidate.id < new_finding.id
+    # Findings created within the current import batch all have ids >= batch_min_id
+    # (auto-increment guarantees pre-existing findings have smaller ids). For those
+    # we break ties by the stable content key so the "original" is deterministic
+    # regardless of the order the scanner emitted the findings. Pre-existing
+    # candidates keep the id ordering so an already-existing finding stays original.
+    batch_min_id = getattr(new_finding, "_dedupe_batch_min_id", None)
+    if batch_min_id is not None and candidate.id is not None and candidate.id >= batch_min_id:
+        is_older = deduplication_ordering_key(candidate) < deduplication_ordering_key(new_finding)
+    else:
+        is_older = candidate.id < new_finding.id
     if not is_older:
         deduplicationLogger.debug(f"candidate is newer than or equal to new finding: {new_finding.id} and candidate {candidate.id}")
     return is_older
@@ -558,7 +626,11 @@ def _is_candidate_older(new_finding, candidate):
 def get_matches_from_hash_candidates(new_finding, candidates_by_hash) -> Iterator[Finding]:
     if new_finding.hash_code is None:
         return
-    possible_matches = candidates_by_hash.get(new_finding.hash_code, [])
+    batch_min_id = getattr(new_finding, "_dedupe_batch_min_id", None)
+    possible_matches = sorted(
+        candidates_by_hash.get(new_finding.hash_code, []),
+        key=lambda c: _candidate_sort_key(c, batch_min_id),
+    )
     deduplicationLogger.debug(f"Finding {new_finding.id}: Found {len(possible_matches)} findings with same hash_code, ids={[(c.id, c.hash_code) for c in possible_matches]}")
 
     for candidate in possible_matches:
@@ -575,7 +647,11 @@ def get_matches_from_unique_id_candidates(new_finding, candidates_by_uid) -> Ite
     if new_finding.unique_id_from_tool is None:
         return
 
-    possible_matches = candidates_by_uid.get(new_finding.unique_id_from_tool, [])
+    batch_min_id = getattr(new_finding, "_dedupe_batch_min_id", None)
+    possible_matches = sorted(
+        candidates_by_uid.get(new_finding.unique_id_from_tool, []),
+        key=lambda c: _candidate_sort_key(c, batch_min_id),
+    )
     deduplicationLogger.debug(f"Finding {new_finding.id}: Found {len(possible_matches)} findings with same unique_id_from_tool, ids={[(c.id, c.unique_id_from_tool) for c in possible_matches]}")
     for candidate in possible_matches:
         if not _is_candidate_older(new_finding, candidate):
@@ -595,9 +671,10 @@ def get_matches_from_uid_or_hash_candidates(new_finding, candidates_by_uid, cand
     combined_by_id = {c.id: c for c in uid_list}
     for c in hash_list:
         combined_by_id.setdefault(c.id, c)
-    deduplicationLogger.debug("Finding %s: UID_OR_HASH: combined candidate ids (sorted)=%s", new_finding.id, sorted(combined_by_id.keys()))
-    for candidate_id in sorted(combined_by_id.keys()):
-        candidate = combined_by_id[candidate_id]
+    batch_min_id = getattr(new_finding, "_dedupe_batch_min_id", None)
+    ordered_candidates = sorted(combined_by_id.values(), key=lambda c: _candidate_sort_key(c, batch_min_id))
+    deduplicationLogger.debug("Finding %s: UID_OR_HASH: combined candidate ids (ordered)=%s", new_finding.id, [c.id for c in ordered_candidates])
+    for candidate in ordered_candidates:
         if not _is_candidate_older(new_finding, candidate):
             continue
         if is_deduplication_on_engagement_mismatch(new_finding, candidate):
@@ -623,6 +700,14 @@ def get_matches_from_legacy_candidates(new_finding, candidates_by_title, candida
         candidates.extend(candidates_by_title.get(new_finding.title, []))
     if getattr(new_finding, "cwe", 0):
         candidates.extend(candidates_by_cwe.get(new_finding.cwe, []))
+
+    # De-duplicate (a candidate can match on both title and CWE) and walk in
+    # canonical order so the first "older" candidate is the stable original.
+    batch_min_id = getattr(new_finding, "_dedupe_batch_min_id", None)
+    candidates = sorted(
+        {c.id: c for c in candidates}.values(),
+        key=lambda c: _candidate_sort_key(c, batch_min_id),
+    )
 
     for candidate in candidates:
         if not _is_candidate_older(new_finding, candidate):
@@ -813,9 +898,9 @@ def match_batch_of_findings(findings):
     enabled = System_Settings.objects.get().enable_deduplication
     if not enabled:
         return []
-    # Only sort by id for saved findings; unsaved findings have no id
+    # Only stamp/sort for saved findings; unsaved findings have no id or batch context
     if findings[0].pk is not None:
-        findings = sorted(findings, key=attrgetter("id"))
+        findings = _prepare_batch_ordering(findings)
     test = findings[0].test
     dedup_alg = test.deduplication_algorithm
     if dedup_alg == settings.DEDUPE_ALGO_HASH_CODE:
@@ -934,8 +1019,10 @@ def dedupe_batch_of_findings(findings, *args, **kwargs):
     enabled = System_Settings.objects.get().enable_deduplication
 
     if enabled:
-        # sort findings by id to ensure deduplication is deterministic/reproducible
-        findings = sorted(findings, key=attrgetter("id"))
+        # Stamp each finding with the batch's minimum id and sort by the stable
+        # content key so deduplication is deterministic and independent of the
+        # order the scanner emitted its findings (see _is_candidate_older).
+        findings = _prepare_batch_ordering(findings)
 
         test = findings[0].test
         dedup_alg = test.deduplication_algorithm
