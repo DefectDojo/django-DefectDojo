@@ -7,6 +7,7 @@ from unittest import skip
 from crum import impersonate
 from django.conf import settings
 from django.core import serializers
+from django.test import override_settings
 from django.utils import timezone
 
 from dojo.finding.deduplication import (
@@ -24,10 +25,12 @@ from dojo.models import (
     Engagement,
     Finding,
     Product,
+    Product_Type,
     System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
+    Test_Type,
     User,
     copy_model_util,
 )
@@ -616,6 +619,72 @@ class TestDuplicationLogic(DojoTestCase):
         forward = sorted([f_a, f_b], key=deduplication_ordering_key)
         backward = sorted([f_b, f_a], key=deduplication_ordering_key)
         self.assertEqual([f.id for f in forward], [f.id for f in backward])
+
+    def _dedupe_fortify_repro_scan(self, fpr_filename, engagement_name):
+        """
+        Import one corrected Fortify repro .fpr into its own (isolated) engagement
+        under a shared product, using unique_id_from_tool deduplication, and return
+        the single surviving non-duplicate finding.
+
+        The two fixtures contain the same pair of findings - which share a
+        unique_id_from_tool but have different content (different rule/title/line) -
+        in opposite document order.
+        """
+        from dojo.tools.fortify.parser import FortifyParser  # noqa: PLC0415
+
+        product_type, _ = Product_Type.objects.get_or_create(name="Fortify UID Repro PT")
+        product, _ = Product.objects.get_or_create(
+            name="Fortify UID Repro Product",
+            defaults={"description": "Fortify UID dedupe repro", "prod_type": product_type},
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="Fortify Scan")
+        engagement = Engagement.objects.create(
+            name=engagement_name,
+            product=product,
+            target_start=timezone.now().date(),
+            target_end=timezone.now().date(),
+            deduplication_on_engagement=True,  # isolate each scan's dedupe scope
+        )
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=test_type,
+            scan_type="Fortify Scan",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        with (get_unit_tests_scans_path("fortify") / fpr_filename).open(encoding="utf-8") as testfile:
+            parsed_findings = FortifyParser().get_findings(testfile, test)
+
+        admin = User.objects.get(username="admin")
+        saved = []
+        for parsed in parsed_findings:
+            parsed.test = test
+            parsed.reporter = admin
+            parsed.save(dedupe_option=False)  # defer dedupe to the batch call below
+            saved.append(parsed)
+
+        dedupe_batch_of_findings(get_finding_models_for_deduplication([f.id for f in saved]))
+
+        refreshed = [Finding.objects.get(id=f.id) for f in saved]
+        non_duplicates = [f for f in refreshed if not f.duplicate]
+        # unique_id_from_tool dedupe collapses the shared-uid pair to one original
+        self.assertEqual(len(non_duplicates), 1, f"expected exactly one original, got {[(f.id, f.line) for f in refreshed]}")
+        return non_duplicates[0]
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL})
+    def test_fortify_same_uid_different_content_original_is_order_independent(self):
+        # Corrected Fortify import-order repro. Two findings share unique_id_from_tool
+        # but differ in content, provided in opposite order across two .fpr files.
+        # Under unique_id_from_tool dedupe the surviving "original" must be the same
+        # (content-canonical) finding regardless of the scanner's export order.
+        # Pre-fix this flips (lowest-id / first-in-file wins); with the fix it is stable.
+        original_scan1 = self._dedupe_fortify_repro_scan("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uid-repro-scan1")
+        original_scan2 = self._dedupe_fortify_repro_scan("fortify_dedupe_uid_repro_scan2.fpr", "fortify-uid-repro-scan2")
+
+        self.assertEqual(original_scan1.unique_id_from_tool, original_scan2.unique_id_from_tool)
+        # The same content survives regardless of file order (line/title stable).
+        self.assertEqual(original_scan1.line, original_scan2.line)
+        self.assertEqual(original_scan1.title, original_scan2.title)
 
     def test_identical_except_title_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different title (and reset status)
