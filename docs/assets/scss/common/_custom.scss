@@ -454,6 +454,14 @@ h1, h2, h3, h4, h5, h6,
 .version-menu-wrapper {
   border-top: 1px solid var(--dd-border);
   padding-top: 0.75rem;
+  padding-right: 0.375rem;
+
+  // The theme bleeds .docs-links 24px past its column (margin-right: -24px),
+  // which pushed every item outside this scroll wrapper and clipped labels,
+  // badges, and the active pill at the right edge.
+  .docs-links {
+    margin-right: 0;
+  }
 }
 
 // Both edition menus render; html[data-dd-version] (stamped before first
@@ -500,10 +508,11 @@ html:not([data-dd-version='pro']) .version-pro {
   > ul > li > details > summary {
     font-size: 0.75rem;
     font-weight: 600;
-    letter-spacing: 0.09em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--dd-muted);
     padding: 0.375rem 0;
+    line-height: 1.5;
 
     &:hover {
       color: var(--dd-ink);
@@ -557,6 +566,21 @@ html:not([data-dd-version='pro']) .version-pro {
   cursor: pointer;
   padding-right: 1.5rem;
   list-style: none;
+
+  // A clicked summary keeps :focus-visible in most browsers; the default
+  // outline ring gets clipped by the sidebar's scroll wrapper and reads as
+  // stray horizontal lines. Use a filled state instead (still obvious for
+  // keyboard users).
+  &:focus,
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus-visible {
+    background: var(--dd-icon-tile);
+    border-radius: 0.375rem;
+    color: var(--dd-ink);
+  }
 }
 
 .section-nav details > summary::-webkit-details-marker {
