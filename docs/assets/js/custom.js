@@ -1,11 +1,24 @@
 // custom js
 
+// Mobile navigation: the site sets doks.bootstrapJavascript = false, so no
+// Bootstrap plugins load and the header's offcanvas toggles are dead markup.
+// Importing the Offcanvas plugin evaluates its module, which registers the
+// data-bs-toggle="offcanvas" click handling; the window reference keeps the
+// import (and its side effects) from being tree-shaken.
+import { Offcanvas } from 'bootstrap';
 
-// version toggler
+window.ddOffcanvas = Offcanvas;
+
+
+// Edition toggler (Open Source / Pro)
+//
+// The sidebar renders both edition menus (.version-opensource / .version-pro);
+// this shows one, persists the choice, and keeps every segmented control on
+// the page (desktop sidebar + mobile offcanvas) in sync. The sidebar and the
+// control start hidden (see _custom.scss) and are revealed only after the
+// stored edition is applied, so there is no flash of the wrong menu.
 (() => {
     "use strict";
-
-    console.log("[VersionToggle] custom.js loaded");
 
     // Asset-modelling landing pages per edition. The top nav is otherwise
     // static, so a single URL can't be correct for both editions: we keep the
@@ -28,28 +41,24 @@
     };
 
     const setVersion = (version) => {
-        console.log("[VersionToggle] Setting version to:", version);
-
         document.querySelectorAll(".version-opensource, .version-pro").forEach(el => {
             el.style.display = el.classList.contains(`version-${version}`) ? "block" : "none";
         });
 
         localStorage.setItem("version", version);
-        console.log("[VersionToggle] localStorage updated:", localStorage.getItem("version"));
 
-        // Update dropdown
-        const selects = document.querySelectorAll("#version-select");
-        selects.forEach(sel => {
-            sel.value = version;
-            sel.dataset.version = version;
-            sel.style.visibility = "visible";
+        // Sync every segmented control instance, then reveal it
+        document.querySelectorAll(".dd-version-seg").forEach(seg => {
+            seg.querySelectorAll("button[data-version-value]").forEach(btn => {
+                btn.setAttribute("aria-checked", btn.dataset.versionValue === version ? "true" : "false");
+            });
+            seg.style.visibility = "visible";
         });
 
-        // unhide sidebar after version is applied
+        // Unhide sidebar after version is applied
         const sidebar = document.querySelector(".docs-sidebar");
         if (sidebar) {
             sidebar.style.visibility = "visible";
-            console.log("[VersionToggle] Sidebar revealed");
         }
 
         // Edition-aware top nav: route "Model Your Assets" to the page that
@@ -63,18 +72,17 @@
 
     const initVersionToggle = () => {
         const storedVersion = localStorage.getItem("version") || "opensource";
-        console.log("[VersionToggle] Stored version:", storedVersion);
         setVersion(storedVersion);
     };
 
-    // Delegated listener on body
-    document.body.addEventListener("change", (e) => {
-        if (e.target && e.target.id === "version-select") {
-            console.log("[VersionToggle] Dropdown changed to:", e.target.value);
-            setVersion(e.target.value);
+    // Delegated listener on body — catches every control instance
+    document.body.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-version-value]");
+        if (btn) {
+            setVersion(btn.dataset.versionValue);
             // Only on an explicit user toggle (not on load) follow the page to
             // the matching edition when viewing an asset-modelling page.
-            switchAssetPageForVersion(e.target.value);
+            switchAssetPageForVersion(btn.dataset.versionValue);
         }
     });
 
@@ -88,6 +96,56 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
+})();
+
+
+// Code block language labels — stamp the fence language onto each
+// expressive-code frame's (empty) title span so CSS can render it in the
+// header band via attr(data-lang). Frames whose fence "language" is really
+// an editor artifact (paths, line ranges) get a generic "code" label.
+(() => {
+    "use strict";
+
+    const CLEAN_LANG = /^[a-z0-9_+#.-]{1,16}$/i;
+
+    const init = () => {
+        document.querySelectorAll(".docs-content .expressive-code .frame").forEach(frame => {
+            const title = frame.querySelector(".header .title");
+            if (!title || title.textContent.trim() !== "" || title.dataset.lang) return;
+            const code = frame.querySelector("pre code[data-lang]");
+            let lang = code ? code.dataset.lang : "";
+            if (!lang || lang === "fallback" || !CLEAN_LANG.test(lang)) lang = "code";
+            title.dataset.lang = lang;
+            frame.classList.add("dd-has-lang");
+        });
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+})();
+
+
+// Homepage hero search field — forwards to the DocSearch modal
+(() => {
+    "use strict";
+
+    const init = () => {
+        const trigger = document.getElementById("ddHomeSearch");
+        if (!trigger) return;
+        trigger.addEventListener("click", () => {
+            const btn = document.getElementsByClassName("DocSearch-Button")[0];
+            if (btn) btn.click();
+        });
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
 })();
 
 

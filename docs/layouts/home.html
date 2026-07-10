@@ -25,6 +25,11 @@
           maintained by DefectDojo Inc. and the Open-Source community.
         </p>
         {{ with .Params.lead }}<p class="lead">{{ . }}</p>{{ end }}
+        <button type="button" id="ddHomeSearch" class="dd-hero-search" aria-label="Search documentation">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+          <span class="dd-hero-search-label">Search the docs</span>
+          <span class="dd-kbd" aria-hidden="true">Ctrl K</span>
+        </button>
         <div class="hero-actions">
           <a class="btn btn-primary rounded-pill btn-lg" href="{{ if site.Params.doks.docsVersioning }}{{ site.Params.doks.docsVersion }}/{{ end }}/get_started/about/about_defectdojo/" role="button">Get Started</a>
           <a class="btn btn-outline-secondary rounded-pill btn-lg ms-2" href="/supported_tools/" role="button">Supported Tools</a>
@@ -35,9 +40,13 @@
         {{ .Content }}
       </div>
     </div>
+  </div>
+</section>
 
-    <!-- Quick navigation cards — 8 tiles, 2 rows of 4 -->
-    <div class="row justify-content-center mt-5">
+<!-- Quick navigation cards — 8 tiles, 2 rows of 4, overlapping the hero edge -->
+<div class="home-cards-band">
+  <div class="container">
+    <div class="row justify-content-center">
       <div class="col-xl-10 col-lg-11">
         <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-4">
           <div class="col">
@@ -116,7 +125,7 @@
       </div>
     </div>
   </div>
-</section>
+</div>
 {{ end }}
 
 {{ define "sidebar-prefooter" }}
