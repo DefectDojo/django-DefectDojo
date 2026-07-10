@@ -1,4 +1,17 @@
 // ============================================================
+// DefectDojo Docs design system
+//
+// Imported last in doks-core app.scss — everything here wins the
+// cascade. Selectors defined here are safelisted from PurgeCSS via
+// purgecss-whitelister (see config/postcss.config.js).
+//
+// Architecture: CSS custom properties define both themes once
+// (:root = light, [data-bs-theme="dark"] = dark); components read
+// tokens instead of hardcoding hex per mode. Navy header/footer and
+// code cards are shared brand surfaces with trust.defectdojo.com.
+// ============================================================
+
+// ============================================================
 // Font Face Declarations — Work Sans (Brand Typeface)
 // ============================================================
 
@@ -57,52 +70,297 @@
 }
 
 // ============================================================
-// Layout
+// Design tokens — light (default) + dark
+// ============================================================
+
+:root {
+  --dd-navy: #{$dd-navy};
+  --dd-navy-2: #{$dd-navy-2};
+  --dd-blue: #{$dd-fuji-blue};
+  --dd-blue-deep: #0f5e9e;
+  --dd-blue-bright: #4aa3e8;
+  --dd-orange: #{$dd-torii-orange};
+  --dd-orange-deep: #{$dd-torii-hue-03};
+
+  --dd-page: #ffffff;
+  --dd-surface: #ffffff;
+  --dd-surface-2: #f5f8fb;
+  --dd-ink: #{$dd-ink};
+  --dd-muted: #{$dd-muted};
+  --dd-border: #{$dd-border};
+  --dd-border-strong: #cfd9e6;
+  --dd-link: #0f5e9e;
+  --dd-link-hover: #{$dd-fuji-blue};
+  --dd-icon-tile: #eaf3fb;
+  --dd-icon-ink: #0f5e9e;
+  --dd-shadow-card: 0 1px 2px rgba(10, 22, 40, 0.05), 0 6px 20px -10px rgba(10, 22, 40, 0.1);
+  --dd-shadow-card-hover: 0 2px 4px rgba(10, 22, 40, 0.06), 0 14px 34px -12px rgba(10, 22, 40, 0.18);
+
+  // Navy brand surfaces (header, footer, hero, code) — same in both modes
+  --dd-hero-ink: #f2f6fc;
+  --dd-hero-muted: #b7c5d9;
+  --dd-hero-line: rgba(151, 180, 216, 0.16);
+
+  // Code cards
+  --dd-code-bg: #0d1b2f;
+  --dd-code-border: #23374f;
+  --dd-code-ink: #d7e3f4;
+  --dd-code-head: #0a1626;
+}
+
+[data-bs-theme='dark'] {
+  --dd-page: #0b1422;
+  --dd-surface: #101d31;
+  --dd-surface-2: #16253c;
+  --dd-ink: #e7edf6;
+  --dd-muted: #93a3ba;
+  --dd-border: #243449;
+  --dd-border-strong: #334761;
+  --dd-link: #4aa3e8;
+  --dd-link-hover: #7fc0f2;
+  --dd-icon-tile: #16304a;
+  --dd-icon-ink: #4aa3e8;
+  --dd-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px -10px rgba(0, 0, 0, 0.5);
+  --dd-shadow-card-hover: 0 2px 4px rgba(0, 0, 0, 0.35), 0 14px 34px -12px rgba(0, 0, 0, 0.6);
+
+  --dd-code-bg: #0e1d33;
+  --dd-code-border: #273c58;
+  --dd-code-head: #0b1728;
+}
+
+// ============================================================
+// Layout & base
 // ============================================================
 
 .container-lg {
   max-width: 100%;
 }
 
-html {
-  font-size: 85%;
+body {
+  background-color: var(--dd-page);
+  color: var(--dd-ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-// ============================================================
-// Typography — Brand Weight Hierarchy
-// ============================================================
+a {
+  color: var(--dd-link);
+
+  &:hover {
+    color: var(--dd-link-hover);
+  }
+}
 
 h1, h2, h3, h4, h5, h6,
 .h1, .h2, .h3, .h4, .h5, .h6 {
-  font-weight: 600; // Semi Bold per brand guidelines
-  color: #191919;   // Dojo Black
+  font-weight: 600;
+  color: var(--dd-ink);
+}
+
+::selection {
+  background-color: rgba($dd-fuji-blue, 0.22);
 }
 
 // ============================================================
-// Navbar
+// Header — navy brand band, both color modes
 // ============================================================
 
-.navbar .nav-link {
-  font-weight: 500; // Medium per brand guidelines for nav/buttons
+.dd-header {
+  background:
+    linear-gradient(180deg, rgba(23, 121, 197, 0.12), rgba(23, 121, 197, 0) 55%),
+    var(--dd-navy);
+  border-bottom: 1px solid rgba(151, 180, 216, 0.14);
+  padding-top: 0.5rem;
+  padding-bottom: 0.375rem;
+
+  // Brand hairline: blue→orange stripe across the very top
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: linear-gradient(90deg, var(--dd-blue) 0%, var(--dd-blue-bright) 55%, var(--dd-orange) 100%);
+  }
+
+  // Always show the dark-surface logo inside the navy band
+  .logo-lightmode {
+    display: none;
+  }
+
+  .logo-darkmode {
+    display: inline-block;
+  }
+
+  .dd-wordmark {
+    color: var(--dd-hero-ink);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+
+  .nav-link,
+  .btn-link {
+    color: var(--dd-hero-muted);
+
+    &:hover,
+    &:focus-visible {
+      color: #ffffff;
+    }
+  }
+
+  .offcanvas-body .navbar-nav .nav-link {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    padding: 0.3125rem 0.75rem;
+    border-radius: 0.5rem;
+    white-space: nowrap;
+    color: var(--dd-hero-muted);
+
+    &:hover {
+      color: #ffffff;
+      background-color: rgba(151, 180, 216, 0.12);
+    }
+
+    &.active {
+      color: #ffffff;
+      background-color: rgba(23, 121, 197, 0.28);
+    }
+  }
+
+  // Release chip next to the logo
+  .dd-release-chip {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--dd-hero-muted);
+    background: rgba(23, 121, 197, 0.18);
+    border: 1px solid rgba(151, 180, 216, 0.28);
+    border-radius: 999px;
+    padding: 0.2rem 0.75rem;
+    text-decoration: none;
+    transition: color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+      color: #ffffff;
+      border-color: rgba(151, 180, 216, 0.55);
+    }
+  }
 }
 
-.navbar .nav-link.active {
-  color: #1779C5; // Fuji Blue
+// Search pill (DocSearch trigger) in the navy header
+#searchToggleDesktop {
+  border: 1px solid rgba(151, 180, 216, 0.3);
+  border-radius: 999px;
+  padding: 0.375rem 1rem;
+  font-size: 0.875rem;
+  color: var(--dd-hero-muted);
+  background: rgba(10, 22, 40, 0.35);
+  gap: 0.375rem;
+  min-width: 13rem;
+
+  &:hover {
+    border-color: rgba(151, 180, 216, 0.6);
+    color: #ffffff;
+    background: rgba(23, 121, 197, 0.18);
+  }
+
+  .search-kbd {
+    font-family: inherit;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border: 1px solid rgba(151, 180, 216, 0.34);
+    border-radius: 0.3125rem;
+    padding: 0.05rem 0.45rem;
+    line-height: 1.5;
+    color: var(--dd-hero-muted);
+    background: rgba(151, 180, 216, 0.1);
+  }
+}
+
+.header-social-links {
+  gap: 0.125rem;
+
+  .social-link {
+    padding: 0.25rem;
+    opacity: 0.75;
+    transition: opacity 0.15s ease;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// Mobile offcanvas panels use theme surfaces (readable in both modes)
+.offcanvas {
+  background-color: var(--dd-surface);
+  color: var(--dd-ink);
+
+  .offcanvas-header .btn-link {
+    color: var(--dd-ink);
+  }
+}
+
+// Inside the navy header band the offcanvas is inlined on desktop; scope the
+// light-on-navy colors so the *panel* (mobile, position: fixed) stays themed.
+@media (max-width: 991.98px) {
+  .dd-header .offcanvas-body .navbar-nav .nav-link {
+    color: var(--dd-ink);
+
+    &:hover {
+      color: var(--dd-link);
+      background-color: var(--dd-surface-2);
+    }
+
+    &.active {
+      color: var(--dd-link);
+      background-color: var(--dd-icon-tile);
+    }
+  }
+
+  .dd-header .offcanvas .dd-wordmark {
+    color: var(--dd-ink);
+  }
+
+  .dd-header .offcanvas .logo-darkmode {
+    display: none;
+  }
+
+  .dd-header .offcanvas .logo-lightmode {
+    display: inline-block;
+  }
+
+  [data-bs-theme='dark'] .dd-header .offcanvas .logo-lightmode {
+    display: none;
+  }
+
+  [data-bs-theme='dark'] .dd-header .offcanvas .logo-darkmode {
+    display: inline-block;
+  }
+
+  .dd-header .offcanvas .dd-release-chip {
+    color: var(--dd-muted);
+    background: var(--dd-icon-tile);
+    border-color: var(--dd-border);
+  }
 }
 
 // ============================================================
-// Sidebar
+// Sidebar — column sizing, edition control, nav tree
 // ============================================================
 
 .docs-sidebar {
-  visibility: hidden; // Hide sidebar until version is resolved
+  visibility: hidden; // Hide sidebar until version is resolved (JS reveals)
 }
 
 @media (min-width: 992px) {
   @supports ((position: -webkit-sticky) or (position: sticky)) {
     .docs-sidebar {
-      display: flex !important; // Override Bootstrap d-lg-block { display: block !important }
+      display: flex !important; // Override Bootstrap d-lg-block
       flex-direction: column;
+      flex: 0 0 auto;
+      width: 17rem;
     }
 
     .docs-version-toggle {
@@ -113,95 +371,86 @@ h1, h2, h3, h4, h5, h6,
       flex: 1;
       min-height: 0; // Required: allows flex child to shrink below content size
       overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--dd-border) transparent;
     }
 
     .docs-links {
-      max-height: none; // Parent flex container now handles height/scroll
+      max-height: none; // Parent flex container handles height/scroll
       overflow: visible;
+    }
+
+    // Content column takes the remaining width beside fixed rails
+    .docs-content {
+      flex: 1 1 0;
+      width: auto;
+      min-width: 0;
+      max-width: 62rem;
     }
   }
 }
 
-.doks-sidebar .section-nav a {
-  color: #333333; // Dojo Hue 04
-  transition: color 0.15s ease, background-color 0.15s ease;
+@media (min-width: 1200px) {
+  .docs-toc {
+    flex: 0 0 auto;
+    width: 15rem;
+  }
 }
 
-.doks-sidebar .section-nav a:hover {
-  color: #1779C5; // Fuji Blue
-  background-color: rgba(#C6DDF2, 0.3); // Fuji Hue 01, subtle
+// --- Edition segmented control (Open Source ↔ Pro) ---
+
+.docs-version-toggle {
+  padding-top: 1.75rem;
+  padding-bottom: 1rem;
 }
 
-.doks-sidebar .section-nav a[aria-current="page"] {
-  color: #1779C5; // Fuji Blue
-  font-weight: 600;
-  border-left: 3px solid #1779C5;
-  padding-left: 0.5rem;
-  background-color: rgba(#C6DDF2, 0.15);
+.dd-version-seg {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  background: var(--dd-surface-2);
+  border: 1px solid var(--dd-border);
+  border-radius: 0.625rem;
+  visibility: hidden; // revealed by JS once the stored edition is applied
+
+  button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    border-radius: 0.4375rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--dd-muted);
+    transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--dd-ink);
+    }
+
+    &[aria-checked='true'] {
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    &[data-version-value='opensource'][aria-checked='true'] {
+      background: var(--dd-blue);
+      box-shadow: 0 1px 3px rgba(23, 121, 197, 0.4);
+    }
+
+    &[data-version-value='pro'][aria-checked='true'] {
+      background: var(--dd-orange);
+      box-shadow: 0 1px 3px rgba(242, 86, 29, 0.4);
+    }
+  }
 }
 
-// ============================================================
-// Buttons
-// ============================================================
-
-.btn-primary {
-  --bs-btn-bg: #1779C5;
-  --bs-btn-border-color: #1779C5;
-  --bs-btn-hover-bg: #204D87;
-  --bs-btn-hover-border-color: #204D87;
-  --bs-btn-active-bg: #003864;
-  --bs-btn-active-border-color: #003864;
-}
-
-.btn-cta {
-  --bs-btn-bg: #F2561D;
-  --bs-btn-border-color: #F2561D;
-  --bs-btn-hover-bg: #F2762E;
-  --bs-btn-hover-border-color: #F2762E;
-  --bs-btn-active-bg: #C1230D;
-  --bs-btn-active-border-color: #C1230D;
-  --bs-btn-color: #fff;
-  --bs-btn-hover-color: #fff;
-  --bs-btn-active-color: #fff;
-  font-weight: 500; // Medium for buttons
-}
-
-.hero-actions .btn-outline-secondary {
-  --bs-btn-color: #191919;
-  --bs-btn-border-color: #191919;
-  --bs-btn-hover-bg: #191919;
-  --bs-btn-hover-border-color: #191919;
-  --bs-btn-hover-color: #fff;
-  --bs-btn-active-bg: #333333;
-  --bs-btn-active-border-color: #333333;
-  --bs-btn-active-color: #fff;
-}
-
-[data-bs-theme="dark"] .hero-actions .btn-outline-secondary {
-  --bs-btn-color: #e0e0e0;
-  --bs-btn-border-color: #e0e0e0;
-  --bs-btn-hover-bg: #e0e0e0;
-  --bs-btn-hover-border-color: #e0e0e0;
-  --bs-btn-hover-color: #191919;
-  --bs-btn-active-bg: #cccccc;
-  --bs-btn-active-border-color: #cccccc;
-  --bs-btn-active-color: #191919;
-}
-
-// ============================================================
-// Version Selector
-// ============================================================
-
-#version-select[data-version="opensource"] {
-  background-color: rgba(#003864, 0.72);
-  border: 2px solid #003864;
-  color: white;
-}
-
-#version-select[data-version="pro"] {
-  background-color: rgba(#F2561D, 0.72);
-  border: 2px solid #F2561D;
-  color: white;
+.version-menu-wrapper {
+  border-top: 1px solid var(--dd-border);
+  padding-top: 0.75rem;
 }
 
 // Hide Pro-versioned content by default (opensource is default).
@@ -211,84 +460,944 @@ h1, h2, h3, h4, h5, h6,
 }
 
 // Pro badge — appears next to sidebar items with audience: pro
-// Box height is `1lh` so it equals one line-height of the surrounding text.
 .pro-badge {
   display: inline-flex;
   align-items: center;
   box-sizing: border-box;
   height: 1lh;
   margin-left: 0.5em;
-  padding: 0 0.45em;
-  border: 1px solid #F2561D;
-  border-radius: 0.25rem;
-  background-color: rgba(#F2561D, 0.72);
-  color: #fff;
-  font-size: 0.7em;
-  font-weight: 500;
+  padding: 0 0.5em;
+  border-radius: 999px;
+  background-color: rgba($dd-torii-orange, 0.14);
+  border: 1px solid rgba($dd-torii-orange, 0.35);
+  color: var(--dd-orange-deep);
+  font-size: 0.6875em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   vertical-align: middle;
   white-space: nowrap;
 }
 
+[data-bs-theme='dark'] .pro-badge {
+  color: #f0946e;
+  background-color: rgba($dd-torii-orange, 0.16);
+  border-color: rgba($dd-torii-orange, 0.45);
+}
+
+// --- Sidebar nav tree ---
+
+.doks-sidebar .section-nav,
+.docs-sidebar .section-nav {
+  padding-top: 0.25rem;
+
+  // Top-level groups read as small-caps section labels
+  > ul > li > details > summary {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--dd-muted);
+    padding: 0.375rem 0;
+
+    &:hover {
+      color: var(--dd-ink);
+    }
+  }
+
+  a {
+    display: block;
+    color: var(--dd-muted);
+    font-size: 0.9063rem;
+    line-height: 1.4;
+    margin: 0;
+    padding: 0.3125rem 0.625rem;
+    border-radius: 0.4375rem;
+    transition: color 0.13s ease, background-color 0.13s ease;
+
+    &:hover {
+      color: var(--dd-link);
+      background-color: var(--dd-surface-2);
+    }
+
+    &[aria-current='page'] {
+      color: var(--dd-link);
+      font-weight: 600;
+      background-color: var(--dd-icon-tile);
+      border-left: 0;
+      padding-left: 0.625rem;
+    }
+  }
+
+  ul.list-nested {
+    border-left: 1px solid var(--dd-border);
+    margin-left: 0.25rem;
+
+    li a {
+      margin-left: -1px;
+      border-left: 2px solid transparent;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+
+      &[aria-current='page'] {
+        border-left-color: var(--dd-blue);
+      }
+    }
+  }
+}
+
+// Chevron indicators on collapsible groups
+.section-nav details > summary {
+  position: relative;
+  cursor: pointer;
+  padding-right: 1.5rem;
+  list-style: none;
+}
+
+.section-nav details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.section-nav details > summary::after {
+  content: '';
+  position: absolute;
+  right: 0.375rem;
+  top: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1.5px solid var(--dd-muted);
+  border-bottom: 1.5px solid var(--dd-muted);
+  transform: translateY(-70%) rotate(-45deg);
+  transition: transform 0.18s ease;
+}
+
+.section-nav details[open] > summary::after {
+  transform: translateY(-70%) rotate(45deg);
+}
+
 // ============================================================
-// Cards
+// Content — the reading experience
+// ============================================================
+
+.docs-content {
+  line-height: 1.75;
+  padding-bottom: 3rem;
+
+  > h1 {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 1.25rem;
+  }
+
+  // Comfortable measure for running text; media/code/tables use full width
+  p,
+  ul,
+  ol,
+  blockquote {
+    max-width: 72ch;
+  }
+
+  p,
+  li {
+    font-size: 1.0625rem;
+  }
+
+  li {
+    margin-bottom: 0.25rem;
+  }
+
+  h2 {
+    font-size: 1.4375rem;
+    letter-spacing: -0.015em;
+    margin-top: 2.75rem;
+    padding-top: 1.375rem;
+    border-top: 1px solid var(--dd-border);
+    margin-bottom: 0.875rem;
+  }
+
+  h2:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  h3 {
+    font-size: 1.1875rem;
+    letter-spacing: -0.01em;
+    margin-top: 2rem;
+    margin-bottom: 0.625rem;
+  }
+
+  h4 {
+    font-size: 1.0313rem;
+    margin-top: 1.625rem;
+  }
+
+  // Anchor offset beneath the sticky header
+  :is(h1, h2, h3, h4, h5, h6)[id] {
+    scroll-margin-top: 7.5rem;
+  }
+
+  // Framed screenshots
+  img:not(.markdown-svg) {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--dd-border);
+    border-radius: 0.625rem;
+    box-shadow: var(--dd-shadow-card);
+    margin: 0.375rem 0 1rem;
+  }
+
+  .markdown-svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  // Tables
+  table {
+    font-size: 0.9375rem;
+    margin-bottom: 1.5rem;
+    border-color: var(--dd-border);
+
+    thead th {
+      background: var(--dd-surface-2);
+      border-bottom: 2px solid var(--dd-border-strong);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    th,
+    td {
+      border-color: var(--dd-border);
+      padding: 0.5625rem 0.875rem;
+    }
+
+    tbody tr:hover {
+      background: var(--dd-surface-2);
+    }
+  }
+
+  // Blockquotes as quiet callouts
+  blockquote {
+    border-left: 3px solid var(--dd-blue);
+    padding: 0.75rem 1.125rem;
+    margin: 1.5rem 0;
+    color: var(--dd-muted);
+    background: var(--dd-surface-2);
+    border-radius: 0 0.5rem 0.5rem 0;
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Inline code
+:not(pre) > code {
+  background-color: rgba($dd-fuji-blue, 0.08);
+  color: var(--dd-link);
+  border: 1px solid rgba($dd-fuji-blue, 0.14);
+  border-radius: 0.3125rem;
+  padding: 0.1em 0.35em;
+  font-size: 0.875em;
+}
+
+[data-bs-theme='dark'] :not(pre) > code {
+  background-color: rgba($dd-fuji-blue, 0.16);
+  color: #9fd0f5;
+  border-color: rgba($dd-fuji-blue, 0.3);
+}
+
+// ============================================================
+// Code blocks — navy cards in both modes
+//
+// doks-core wraps every fence in an "expressive-code" frame
+// (figure.frame > figcaption.header + .highlight > pre.chroma) whose
+// look is driven entirely by --ec-* variables. We retheme the frame to
+// the navy system by overriding those variables; the selector list
+// mirrors the theme's own light-mode flips so the navy palette wins in
+// BOTH color modes by cascade position.
+// ============================================================
+
+:root,
+:root:not([data-bs-theme='dark']),
+:root[data-bs-theme='light'] .expressive-code,
+[data-bs-theme='dark'] {
+  --ec-brdRad: 0.625rem;
+  --ec-brdWd: 1px;
+  --ec-brdCol: var(--dd-code-border);
+  --ec-codeBg: var(--dd-code-bg);
+  --ec-codeFg: var(--dd-code-ink);
+  --ec-codeSelBg: #1d3b53;
+  --ec-uiFontFml: var(--bs-body-font-family);
+  --ec-focusBrd: var(--dd-blue-bright);
+  --ec-sbThumbCol: rgba(151, 180, 216, 0.22);
+  --ec-sbThumbHoverCol: rgba(151, 180, 216, 0.4);
+  --ec-frm-shdCol: transparent;
+  --ec-frm-frameBoxShdCssVal: none;
+  // Terminal frames (bash/sh fences): navy title bar + slate dots
+  --ec-frm-trmBg: var(--dd-code-bg);
+  --ec-frm-trmTtbBg: var(--dd-code-head);
+  --ec-frm-trmTtbFg: #7288a3;
+  --ec-frm-trmTtbDotsFg: #4a6076;
+  --ec-frm-trmTtbDotsOpa: 1;
+  --ec-frm-trmTtbBrdBtmCol: var(--dd-code-border);
+  // Editor frames (titled fences): navy tab bar
+  --ec-frm-edBg: var(--dd-code-bg);
+  --ec-frm-edTabBarBg: var(--dd-code-head);
+  --ec-frm-edTabBarBrdCol: var(--dd-code-border);
+  --ec-frm-edTabBarBrdBtmCol: var(--dd-code-border);
+  --ec-frm-edActTabBg: var(--dd-code-bg);
+  --ec-frm-edActTabFg: #9fd0f5;
+  --ec-frm-edActTabBrdCol: var(--dd-code-border);
+  --ec-frm-edActTabIndTopCol: var(--dd-blue);
+  // Copy button
+  --ec-frm-inlBtnFg: #d7e3f4;
+  --ec-frm-inlBtnBg: #7288a3;
+  --ec-frm-inlBtnBgIdleOpa: 0;
+  --ec-frm-inlBtnBgHoverOrFocusOpa: 0.18;
+  --ec-frm-tooltipSuccessBg: #178745;
+}
+
+.expressive-code {
+  margin: 1.25rem 0 1.5rem;
+
+  // The inner Hugo .highlight is plain content inside the frame
+  .highlight {
+    margin: 0;
+    border: 0;
+    background: transparent;
+  }
+
+  .highlight pre {
+    margin: 0;
+    padding: 0.9375rem 1.125rem;
+    font-size: 0.875rem;
+    line-height: 1.65;
+
+    code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+  }
+
+  // Header band typography (terminal dots bar + stamped language label)
+  .frame.is-terminal .header,
+  .frame.dd-has-lang .header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 2.125rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7288a3;
+  }
+
+  .frame.is-terminal .header {
+    padding-inline: 3.75rem 3rem; // clear the traffic dots on the left
+  }
+
+  .frame.dd-has-lang:not(.is-terminal) .header {
+    padding-inline: 1.125rem 3rem;
+    background: var(--dd-code-head);
+    border: 1px solid var(--dd-code-border);
+    border-bottom-color: var(--dd-code-border);
+  }
+
+  .frame.dd-has-lang:not(.is-terminal) pre,
+  .frame.dd-has-lang:not(.is-terminal) code {
+    border-top: none;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+
+  // Language label stamped by custom.js onto the empty title span
+  .frame .title[data-lang]:empty::before {
+    content: attr(data-lang);
+  }
+
+  // Copy button (doks clipboard.js injects .copy > .btn-copy > div; the
+  // theme's own icon mask applies — size and recolor it for the navy card)
+  .copy button.btn-copy {
+    width: 1.875rem;
+    height: 1.875rem;
+    background: transparent;
+    opacity: 0.85;
+
+    > div {
+      position: absolute;
+      inset: 0;
+      background-color: #7288a3;
+      opacity: 1;
+      border-radius: inherit;
+      transition: background-color 0.15s ease;
+    }
+
+    &:hover {
+      opacity: 1;
+      background: rgba(151, 180, 216, 0.14);
+
+      > div {
+        background-color: #d7e3f4;
+      }
+    }
+  }
+}
+
+// Bare <pre> without a fence wrapper (rare) gets the same card look
+.docs-content > pre,
+.docs-content td > pre {
+  background: var(--dd-code-bg);
+  border: 1px solid var(--dd-code-border);
+  border-radius: 0.625rem;
+  color: var(--dd-code-ink);
+  padding: 0.9375rem 1.125rem;
+  font-size: 0.875rem;
+}
+
+// --- Chroma syntax palette, tuned for the navy card ---
+
+.chroma {
+  color: var(--dd-code-ink);
+
+  // Comments
+  .c, .c1, .ch, .cm, .cs, .cp, .cpf { color: #7288a3; font-style: italic; }
+  // Keywords & operators-as-words
+  .k, .kc, .kd, .kn, .kp, .kr, .kt, .ow { color: #82b8f0; }
+  // Strings
+  .s, .s1, .s2, .sa, .sb, .sc, .dl, .sd, .se, .sh, .si, .sx, .sr, .ss { color: #86d7a8; }
+  // Numbers
+  .m, .mb, .mf, .mh, .mi, .mo, .il { color: #f2b26b; }
+  // Names
+  .na { color: #9fd0f5; }
+  .nb, .bp { color: #9fd0f5; }
+  .nc, .nn { color: #e8c07a; }
+  .nd { color: #c3b1f7; }
+  .ne { color: #f2938c; }
+  .nf, .fm { color: #c3b1f7; }
+  .nt { color: #82b8f0; }
+  .nv, .vc, .vg, .vi, .vm { color: #d7e3f4; }
+  .nl { color: #9fd0f5; }
+  // Operators & punctuation
+  .o { color: #94a9c9; }
+  .p { color: #94a9c9; }
+  // Diff
+  .gd { color: #f2938c; background-color: rgba(242, 147, 140, 0.12); }
+  .gi { color: #86d7a8; background-color: rgba(134, 215, 168, 0.12); }
+  // Generic
+  .gh, .gu { color: #9fd0f5; font-weight: 600; }
+  .ge { font-style: italic; }
+  .gs { font-weight: 600; }
+  .gp { color: #7288a3; }
+  .err { color: #f2938c; }
+  .w { color: inherit; }
+  // Highlighted lines
+  .hl { display: block; background-color: rgba(23, 121, 197, 0.16); }
+  // Line numbers
+  .ln, .lnt { color: #566b85; margin-right: 0.75rem; }
+}
+
+// ============================================================
+// TOC ("On this page"), breadcrumbs, prev/next
+// ============================================================
+
+.page-links {
+  h3 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--dd-muted);
+  }
+
+  li:not(:first-child) {
+    border-top: 0;
+  }
+
+  li {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  #toc ul,
+  nav > ul {
+    border-left: 1px solid var(--dd-border);
+  }
+
+  a {
+    color: var(--dd-muted);
+    font-size: 0.875rem;
+    padding: 0.25rem 0 0.25rem 0.875rem;
+    margin-left: -1px;
+    border-left: 2px solid transparent;
+    transition: color 0.13s ease, border-color 0.13s ease;
+
+    &:hover {
+      color: var(--dd-ink);
+    }
+
+    &.active {
+      color: var(--dd-link);
+      font-weight: 500;
+      border-left-color: var(--dd-blue);
+      position: static;
+    }
+  }
+
+  a.active::before {
+    content: none;
+  }
+
+  li ul li {
+    padding-left: 0.5rem;
+  }
+}
+
+.breadcrumb {
+  font-size: 0.8125rem;
+  padding: 0;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.breadcrumb-item a {
+  color: var(--dd-muted);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--dd-link);
+  }
+}
+
+.breadcrumb-item.active {
+  color: var(--dd-ink);
+  font-weight: 500;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  content: "/";
+  color: var(--dd-border-strong);
+}
+
+// Prev / next cards
+.page-nav {
+  margin-top: 2.5rem;
+
+  .card {
+    background: var(--dd-surface);
+    border: 1px solid var(--dd-border);
+    border-radius: 0.75rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+
+    &:hover {
+      border-color: var(--dd-border-strong);
+      box-shadow: var(--dd-shadow-card-hover);
+      transform: translateY(-2px);
+    }
+
+    .text-body-secondary {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dd-muted) !important;
+      margin-bottom: 0.125rem;
+    }
+
+    a.stretched-link {
+      color: var(--dd-link);
+      font-weight: 600;
+      font-size: 0.9688rem;
+    }
+
+    svg {
+      color: var(--dd-muted);
+      margin: 0 0.5rem;
+    }
+  }
+}
+
+// ============================================================
+// Cards (generic) — used by list pages and search results
 // ============================================================
 
 .card {
-  border-color: #DCDCDC; // Dojo Hue 01
+  background: var(--dd-surface);
+  border-color: var(--dd-border);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .card:hover {
-  border-color: #82B0D9; // Fuji Hue 02
-  box-shadow: 0 2px 8px rgba(#1779C5, 0.1);
+  border-color: var(--dd-border-strong);
+  box-shadow: var(--dd-shadow-card-hover);
 }
 
 .card a.stretched-link {
-  color: #1779C5;
+  color: var(--dd-link);
   font-weight: 500;
 }
 
 // ============================================================
-// Code Blocks
+// Buttons
 // ============================================================
 
-:not(pre) > code {
-  background-color: rgba(#C6DDF2, 0.25); // Fuji Hue 01, subtle
-  color: #204D87; // Fuji Hue 03
-  border-radius: 3px;
-  padding: 0.15em 0.35em;
+.btn-primary {
+  --bs-btn-bg: #{$dd-fuji-blue};
+  --bs-btn-border-color: #{$dd-fuji-blue};
+  --bs-btn-hover-bg: #{$dd-fuji-hue-03};
+  --bs-btn-hover-border-color: #{$dd-fuji-hue-03};
+  --bs-btn-active-bg: #{$dd-fuji-hue-04};
+  --bs-btn-active-border-color: #{$dd-fuji-hue-04};
+  font-weight: 500;
+}
+
+.btn-cta {
+  --bs-btn-bg: #{$dd-torii-orange};
+  --bs-btn-border-color: #{$dd-torii-orange};
+  --bs-btn-hover-bg: #{$dd-torii-hue-02};
+  --bs-btn-hover-border-color: #{$dd-torii-hue-02};
+  --bs-btn-active-bg: #{$dd-torii-hue-03};
+  --bs-btn-active-border-color: #{$dd-torii-hue-03};
+  --bs-btn-color: #fff;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-color: #fff;
+  font-weight: 500;
 }
 
 // ============================================================
-// Breadcrumb
+// Homepage
 // ============================================================
 
-.breadcrumb-item a {
-  color: #1779C5;
+body.home .wrap.container-lg {
+  padding: 0;
 }
 
-.breadcrumb-item.active {
-  color: #666666; // Dojo Hue 03
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(1000px 420px at 80% -20%, rgba(23, 121, 197, 0.26), transparent 62%),
+    radial-gradient(640px 380px at 10% 115%, rgba(23, 121, 197, 0.12), transparent 60%),
+    linear-gradient(180deg, var(--dd-navy) 0%, var(--dd-navy-2) 100%);
+  color: var(--dd-hero-ink);
+  padding: 4.25rem 1.5rem 4.5rem;
+  text-align: center;
+
+  // Fine blueprint grid
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--dd-hero-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--dd-hero-line) 1px, transparent 1px);
+    background-size: 84px 84px;
+    mask-image: radial-gradient(1100px 640px at 50% 0%, rgba(0, 0, 0, 0.9), transparent 76%);
+    -webkit-mask-image: radial-gradient(1100px 640px at 50% 0%, rgba(0, 0, 0, 0.9), transparent 76%);
+    pointer-events: none;
+  }
+
+  > .container {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.hero-title {
+  font-size: clamp(2.125rem, 4.6vw, 3.125rem);
+  font-weight: 700;
+  letter-spacing: -0.022em;
+  line-height: 1.08;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+  font-size: 1.0625rem;
+  color: var(--dd-hero-muted);
+  line-height: 1.65;
+  margin-bottom: 1.5rem;
+}
+
+.hero-section .lead,
+.hero-section .text-muted {
+  color: var(--dd-hero-muted) !important;
+}
+
+.hero-section a.text-muted:hover {
+  color: #ffffff !important;
+}
+
+.hero-actions {
+  margin-bottom: 1rem;
+
+  .btn {
+    min-width: 160px;
+  }
+
+  .btn-outline-secondary {
+    --bs-btn-color: var(--dd-hero-ink);
+    --bs-btn-border-color: rgba(151, 180, 216, 0.5);
+    --bs-btn-hover-bg: rgba(151, 180, 216, 0.14);
+    --bs-btn-hover-border-color: rgba(151, 180, 216, 0.8);
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-active-bg: rgba(151, 180, 216, 0.2);
+    --bs-btn-active-border-color: rgba(151, 180, 216, 0.8);
+    --bs-btn-active-color: #ffffff;
+  }
+}
+
+// Big search field in the hero (opens DocSearch)
+.dd-hero-search {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto 1.75rem;
+  padding: 0.875rem 1.125rem;
+  border: 1px solid rgba(151, 180, 216, 0.34);
+  border-radius: 0.75rem;
+  background: rgba(10, 22, 40, 0.55);
+  color: var(--dd-hero-muted);
+  font-size: 0.9688rem;
+  text-align: left;
+  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+
+  svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    flex: none;
+    color: var(--dd-blue-bright);
+  }
+
+  .dd-hero-search-label {
+    flex: 1;
+  }
+
+  .dd-kbd {
+    flex: none;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--dd-hero-muted);
+    border: 1px solid rgba(151, 180, 216, 0.34);
+    border-radius: 0.3125rem;
+    padding: 0.15rem 0.45rem;
+    background: rgba(151, 180, 216, 0.08);
+  }
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--dd-blue-bright);
+    background: rgba(14, 36, 64, 0.75);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+}
+
+// Quick-nav cards — overlap the hero edge
+.home-cards-band {
+  position: relative;
+  z-index: 2;
+  margin-top: -3.25rem;
+  padding: 0 1.5rem;
+}
+
+.home-card {
+  display: block;
+  padding: 1.375rem 1.25rem;
+  background: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  border-radius: 0.875rem;
+  box-shadow: var(--dd-shadow-card);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+  height: 100%;
+
+  &:hover {
+    border-color: var(--dd-border-strong);
+    box-shadow: var(--dd-shadow-card-hover);
+    transform: translateY(-3px);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    margin: 0.875rem 0 0.375rem;
+    color: var(--dd-ink);
+  }
+
+  p {
+    font-size: 0.875rem;
+    color: var(--dd-muted);
+    margin-bottom: 0;
+    line-height: 1.55;
+  }
+}
+
+.home-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  background: var(--dd-icon-tile);
+  color: var(--dd-icon-ink);
+
+  svg {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+}
+
+// Community strip
+.section-features {
+  padding-top: 2rem;
+
+  h2 {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--dd-ink);
+  }
+
+  p {
+    color: var(--dd-muted);
+    font-size: 0.9375rem;
+  }
+
+  a {
+    color: var(--dd-link);
+    font-weight: 500;
+
+    &:hover {
+      color: var(--dd-link-hover);
+    }
+  }
 }
 
 // ============================================================
-// Logo — Dark / Light mode switching
+// 404
 // ============================================================
 
-.logo-darkmode {
-  display: none;
-}
-
-[data-bs-theme="dark"] .logo-lightmode {
-  display: none;
-}
-
-[data-bs-theme="dark"] .logo-darkmode {
-  display: inline-block;
+.error-code {
+  font-size: 7rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--dd-border-strong);
+  line-height: 1;
+  margin-bottom: 0.5rem;
 }
 
 // ============================================================
-// DocSearch Overrides
+// Footer — navy brand band (matches the header bookend)
+// ============================================================
+
+.site-footer {
+  background: var(--dd-navy);
+  border-top: 1px solid rgba(151, 180, 216, 0.14);
+  color: var(--dd-hero-muted);
+  margin-top: 3.5rem;
+  padding-top: 2.25rem;
+  padding-bottom: 0;
+
+  // Always the light-on-dark logo inside the navy band
+  .logo-lightmode {
+    display: none;
+  }
+
+  .logo-darkmode {
+    display: inline-block;
+  }
+
+  .text-muted,
+  small.text-muted {
+    color: rgba(183, 197, 217, 0.75) !important;
+  }
+
+  a.text-muted:hover,
+  .footer-bottom a:hover {
+    color: #ffffff !important;
+  }
+}
+
+body.home .site-footer {
+  margin-top: 3rem;
+}
+
+.footer-heading {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--dd-hero-muted);
+  margin-bottom: 0.75rem;
+}
+
+.footer-links {
+  li {
+    margin-bottom: 0.375rem;
+  }
+
+  a {
+    color: rgba(183, 197, 217, 0.9);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: #ffffff;
+      text-decoration: none;
+    }
+  }
+}
+
+.footer-social {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.footer-social-link {
+  display: inline-flex;
+  padding: 0.375rem;
+  border-radius: 0.5rem;
+  color: var(--dd-hero-muted);
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: #ffffff;
+    background: rgba(151, 180, 216, 0.12);
+    text-decoration: none;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(151, 180, 216, 0.14);
+  padding: 1rem 0;
+  margin-top: 1.5rem;
+
+  a {
+    color: rgba(183, 197, 217, 0.9);
+  }
+}
+
+// ============================================================
+// DocSearch — modal matches the design system
 // ============================================================
 
 .DocSearch-Container {
@@ -315,630 +1424,43 @@ h1, h2, h3, h4, h5, h6,
 }
 
 // ============================================================
-// Selection Color
+// Misc chrome
 // ============================================================
 
-::selection {
-  background-color: rgba(#1779C5, 0.2);
-  color: #191919;
-}
-
-// ============================================================
-// Homepage Sections
-// ============================================================
-
-.section-features h2 {
-  color: #1779C5; // Fuji Blue
-}
-
-.section-features a {
-  color: #F2561D; // Torii Orange for call-to-action links
-  font-weight: 500;
-}
-
-.section-features a:hover {
-  color: #C1230D; // Torii Hue 03
-}
-
-// ============================================================
-// Dark Mode — Brand Adaptation
-// ============================================================
-
-[data-bs-theme="dark"] {
-  // Headings in dark mode — bright white for strong contrast
-  h1, h2, h3, h4, h5, h6,
-  .h1, .h2, .h3, .h4, .h5, .h6 {
-    color: #f0f0f0;
-  }
-
-  // Links use lighter blue in dark mode
-  a {
-    color: #82B0D9; // Fuji Hue 02
-  }
-
-  a:hover {
-    color: #C6DDF2; // Fuji Hue 01
-  }
-
-  // CTA button — ensure solid fill in dark mode
-  .btn-cta {
-    --bs-btn-bg: #F2561D !important;
-    --bs-btn-border-color: #F2561D !important;
-    --bs-btn-hover-bg: #F2762E !important;
-    --bs-btn-hover-border-color: #F2762E !important;
-    --bs-btn-active-bg: #C1230D !important;
-    --bs-btn-active-border-color: #C1230D !important;
-    --bs-btn-color: #fff !important;
-    --bs-btn-hover-color: #fff !important;
-    --bs-btn-active-color: #fff !important;
-    background-color: #F2561D !important;
-    border-color: #F2561D !important;
-    color: #fff !important;
-  }
-
-  .btn-cta:hover {
-    background-color: #F2762E !important;
-    border-color: #F2762E !important;
-  }
-
-  // Primary button in dark mode
-  .btn-primary {
-    --bs-btn-bg: #1779C5;
-    --bs-btn-border-color: #1779C5;
-    --bs-btn-hover-bg: #82B0D9;
-    --bs-btn-hover-border-color: #82B0D9;
-    --bs-btn-color: #fff;
-    --bs-btn-hover-color: #fff;
-  }
-
-  // Sidebar adjustments for dark mode
-  .doks-sidebar .section-nav a {
-    color: #B3B3B3; // Dojo Hue 02
-  }
-
-  .doks-sidebar .section-nav a:hover {
-    color: #82B0D9;
-    background-color: rgba(#1779C5, 0.1);
-  }
-
-  .doks-sidebar .section-nav a[aria-current="page"] {
-    color: #82B0D9;
-    border-left-color: #82B0D9;
-    background-color: rgba(#1779C5, 0.08);
-  }
-
-  // Inline code in dark mode
-  :not(pre) > code {
-    background-color: rgba(#1779C5, 0.15);
-    color: #C6DDF2;
-  }
-
-  // Cards in dark mode
-  .card {
-    border-color: #333333;
-  }
-
-  .card:hover {
-    border-color: #82B0D9;
-    box-shadow: 0 2px 8px rgba(#1779C5, 0.15);
-  }
-
-  .card a.stretched-link {
-    color: #82B0D9;
-  }
-
-  // Version selector in dark mode
-  #version-select[data-version="opensource"] {
-    background-color: rgba(#003864, 0.85);
-    border-color: #82B0D9;
-  }
-
-  #version-select[data-version="pro"] {
-    background-color: rgba(#F2561D, 0.85);
-    border-color: #F2762E;
-  }
-
-  // Pro badge in dark mode
-  .pro-badge {
-    background-color: rgba(#F2561D, 0.85);
-    border-color: #F2762E;
-  }
-
-  // Selection color in dark mode
-  ::selection {
-    background-color: rgba(#82B0D9, 0.3);
-    color: #DCDCDC;
-  }
-
-  // Homepage features section — vibrant headings
-  .section-features h2 {
-    color: #C6DDF2; // Fuji Hue 01 — brighter for dark bg
-  }
-
-  .section-features a {
-    color: #F2561D; // Full Torii Orange — vivid on dark
-  }
-
-  .section-features a:hover {
-    color: #F2D49B; // Torii Hue 01
-  }
-
-  // Homepage description text
-  .section .lead,
-  .section .text-center {
-    color: #DCDCDC;
-  }
-
-  // Breadcrumb
-  .breadcrumb-item a {
-    color: #82B0D9;
-  }
-
-  .breadcrumb-item.active {
-    color: #B3B3B3;
-  }
-}
-
-// ============================================================
-// WORLD-CLASS ENHANCEMENTS
-// ============================================================
-
-// --- Version Selector Proper Styling ---
-
-.version-label {
-  padding-top: 2rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: #666666;
-}
-
-.version-menu-wrapper {
-  border-top: 1px solid #B3B3B3;
-  padding-top: 0.5rem;
-}
-
-[data-bs-theme="dark"] .version-label {
-  color: #B3B3B3;
-}
-
-[data-bs-theme="dark"] .version-menu-wrapper {
-  border-top-color: #333333;
-}
-
-// --- Sidebar Details/Summary Chevron Indicators ---
-
-.section-nav details > summary {
-  position: relative;
-  cursor: pointer;
-  padding-right: 1.5rem;
-  list-style: none;
-}
-
-.section-nav details > summary::-webkit-details-marker {
-  display: none;
-}
-
-.section-nav details > summary::after {
-  content: '';
-  position: absolute;
-  right: 0.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0;
-  height: 0;
-  border-left: 5px solid #666666;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  transition: transform 0.2s ease;
-}
-
-.section-nav details[open] > summary::after {
-  transform: translateY(-50%) rotate(90deg);
-}
-
-[data-bs-theme="dark"] .section-nav details > summary::after {
-  border-left-color: #B3B3B3;
-}
-
-// --- Site Footer ---
-
-.site-footer {
-  border-top: 1px solid #DCDCDC;
-  background-color: #fafafa;
-  margin-top: 3rem;
-  padding-top: 2rem;
-  padding-bottom: 0;
-}
-
-.footer-heading {
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: #666666;
-  margin-bottom: 0.75rem;
-}
-
-.footer-links {
-  li {
-    margin-bottom: 0.375rem;
-  }
-  a {
-    color: #333333;
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: color 0.15s ease;
-    &:hover {
-      color: #1779C5;
-      text-decoration: none;
-    }
-  }
-}
-
-.footer-social {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.footer-social-link {
-  color: #666666;
-  transition: color 0.15s ease;
-  &:hover {
-    color: #1779C5;
-    text-decoration: none;
-  }
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-.footer-bottom {
-  border-top: 1px solid #DCDCDC;
-  padding: 1rem 0;
-  margin-top: 1.5rem;
-}
-
-[data-bs-theme="dark"] {
-  .site-footer {
-    background-color: #111111;
-    border-top-color: #333333;
-  }
-  .footer-heading {
-    color: #B3B3B3;
-  }
-  .footer-links a {
-    color: #B3B3B3;
-    &:hover {
-      color: #82B0D9;
-    }
-  }
-  .footer-social-link {
-    color: #B3B3B3;
-    &:hover {
-      color: #82B0D9;
-    }
-  }
-  .footer-bottom {
-    border-top-color: #333333;
-  }
-}
-
-// --- Homepage Hero ---
-
-.hero-section {
-  padding: 4rem 0 3rem;
-  text-align: center;
-}
-
-.hero-title {
-  font-size: calc(2rem + 1.5vw);
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.hero-subtitle {
-  font-size: 1.125rem;
-  color: #666666;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-}
-
-.hero-actions {
-  margin-bottom: 1rem;
-}
-
-.hero-actions .btn {
-  min-width: 160px;
-}
-
-[data-bs-theme="dark"] .hero-subtitle {
-  color: #B3B3B3;
-}
-
-// --- Home Navigation Cards ---
-
-.home-card {
-  display: block;
-  padding: 1.5rem;
-  border: 1px solid #DCDCDC;
-  border-radius: 0.5rem;
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
-  height: 100%;
-
-  &:hover {
-    border-color: #82B0D9;
-    box-shadow: 0 4px 12px rgba(23, 121, 197, 0.1);
-    transform: translateY(-2px);
-    text-decoration: none;
-    color: inherit;
-  }
-
-  h3 {
-    font-size: 1rem;
-    font-weight: 600;
-    margin: 0.75rem 0 0.375rem;
-    color: #191919;
-  }
-
-  p {
-    font-size: 0.875rem;
-    color: #666666;
-    margin-bottom: 0;
-    line-height: 1.5;
-  }
-}
-
-.home-card-icon {
-  color: #1779C5;
-  svg {
-    width: 32px;
-    height: 32px;
-  }
-}
-
-[data-bs-theme="dark"] {
-  .home-card {
-    border-color: #333333;
-    &:hover {
-      border-color: #82B0D9;
-      box-shadow: 0 4px 12px rgba(23, 121, 197, 0.15);
-    }
-    h3 { color: #f0f0f0; }
-    p { color: #B3B3B3; }
-  }
-  .home-card-icon {
-    color: #82B0D9;
-  }
-}
-
-// --- 404 Page ---
-
-.error-code {
-  font-size: 8rem;
-  font-weight: 600;
-  color: #DCDCDC;
-  line-height: 1;
-  margin-bottom: 0.5rem;
-}
-
-[data-bs-theme="dark"] .error-code {
-  color: #333333;
-}
-
-// --- Back-to-Top Button Branding ---
-
-#toTop {
-  background-color: #1779C5;
-  border-color: #1779C5;
-  &:hover {
-    background-color: #204D87;
-    border-color: #204D87;
-  }
-}
-
-// --- Breadcrumb Refinements ---
-
-.breadcrumb {
-  font-size: 0.8125rem;
-  padding: 0;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-}
-
-.breadcrumb-item + .breadcrumb-item::before {
-  content: "/";
-  color: #B3B3B3;
-}
-
-// --- Scroll Progress Indicator ---
-
+// Scroll progress indicator
 .scroll-progress {
   position: fixed;
   top: 0;
   left: 0;
-  height: 3px;
-  background: linear-gradient(90deg, #1779C5, #F2561D);
+  height: 2px;
+  background: linear-gradient(90deg, var(--dd-blue), var(--dd-orange));
   z-index: 9999;
   transition: width 0.1s linear;
 }
 
-// --- Typography Refinements ---
-
-.docs-content {
-  line-height: 1.7;
-
-  h2 {
-    margin-top: 2.5rem;
-    padding-top: 1rem;
-    border-top: 1px solid #DCDCDC;
-  }
-
-  h2:first-of-type {
-    border-top: none;
-    padding-top: 0;
-  }
-
-  h3 {
-    margin-top: 2rem;
-  }
-
-  // Better table styling
-  table {
-    font-size: 0.875rem;
-    margin-bottom: 1.5rem;
-  }
-
-  // Blockquote styling
-  blockquote {
-    border-left: 3px solid #1779C5;
-    padding: 0.5rem 1rem;
-    margin: 1.5rem 0;
-    color: #666666;
-    background: rgba(#C6DDF2, 0.1);
-    border-radius: 0 0.25rem 0.25rem 0;
-  }
-}
-
-[data-bs-theme="dark"] .docs-content {
-  h2 {
-    border-top-color: #333333;
-  }
-  blockquote {
-    border-left-color: #82B0D9;
-    color: #B3B3B3;
-    background: rgba(#1779C5, 0.08);
-  }
-}
-
-// --- TOC Active State Enhancement ---
-
-.page-links a.active {
-  color: #1779C5;
-  font-weight: 500;
-  position: relative;
-}
-
-.page-links a.active::before {
-  content: '';
-  position: absolute;
-  left: -0.75rem;
-  top: 0.25rem;
-  bottom: 0.25rem;
-  width: 2px;
-  background: #1779C5;
-  border-radius: 1px;
-}
-
-[data-bs-theme="dark"] .page-links a.active {
-  color: #82B0D9;
-}
-
-[data-bs-theme="dark"] .page-links a.active::before {
-  background: #82B0D9;
-}
-
-// --- Header Nav Refinements ---
-
-.navbar-nav.flex-grow-1 {
-  gap: 0;
-  flex-wrap: wrap;
-}
-
-.navbar-nav.flex-grow-1 .nav-link {
-  font-size: 0.9rem;
-  padding: 0.375rem 0.75rem;
-  border-radius: 0.25rem;
-  white-space: nowrap;
+// Back-to-top button
+#toTop {
+  background-color: var(--dd-surface);
+  border: 1px solid var(--dd-border);
+  color: var(--dd-ink);
+  box-shadow: var(--dd-shadow-card);
 
   &:hover {
-    background-color: rgba(#C6DDF2, 0.2);
-  }
-
-  &.active {
-    background-color: rgba(#C6DDF2, 0.3);
+    border-color: var(--dd-blue);
+    color: var(--dd-blue);
+    background-color: var(--dd-surface);
   }
 }
 
-[data-bs-theme="dark"] .navbar-nav.flex-grow-1 .nav-link {
-  &:hover {
-    background-color: rgba(#1779C5, 0.15);
-  }
-  &.active {
-    background-color: rgba(#1779C5, 0.2);
-  }
+// Page footer meta (last modified / edit page)
+.page-footer-meta {
+  color: var(--dd-muted);
+  font-size: 0.8438rem;
 }
 
-// --- Search Button Refinement ---
-
-#searchToggleDesktop {
-  border: 1px solid #CDCDCD;
-  border-radius: 0.5rem;
-  padding: 0.4rem 0.875rem;
-  font-size: 0.875rem;
-  color: #555555;
-  background: #f5f5f5;
-  gap: 0.25rem;
-  min-width: 13rem;
-
-  &:hover {
-    border-color: #1779C5;
-    color: #1779C5;
-    background: #eef5fb;
-  }
-
-  .search-kbd {
-    font-family: inherit;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    border: 1px solid #CDCDCD;
-    border-radius: 0.25rem;
-    padding: 0.05rem 0.4rem;
-    line-height: 1.4;
-    color: #888888;
-    background: #ffffff;
-  }
-}
-
-[data-bs-theme="dark"] #searchToggleDesktop {
-  border-color: #444444;
-  color: #B3B3B3;
-  background: #2a2a2a;
-
-  &:hover {
-    border-color: #82B0D9;
-    color: #82B0D9;
-    background: rgba(#1779C5, 0.15);
-  }
-
-  .search-kbd {
-    border-color: #555555;
-    color: #888888;
-    background: #333333;
-  }
-}
-
-// --- Header Social Links ---
-
-.header-social-links {
-  gap: 0.125rem;
-
-  .social-link {
-    padding: 0.25rem;
-    opacity: 0.6;
-    transition: opacity 0.15s ease;
-
-    &:hover {
-      opacity: 1;
-    }
-  }
-}
-
-// --- Print Styles ---
+// ============================================================
+// Print
+// ============================================================
 
 @media print {
   .navbar,
@@ -1012,21 +1534,21 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 
-// --- Accessibility ---
+// ============================================================
+// Accessibility
+// ============================================================
 
-// Focus visible states
 *:focus-visible {
-  outline: 2px solid #1779C5;
+  outline: 2px solid var(--dd-blue-bright);
   outline-offset: 2px;
 }
 
 .btn:focus-visible {
-  outline: 2px solid #1779C5;
+  outline: 2px solid var(--dd-blue-bright);
   outline-offset: 2px;
   box-shadow: none;
 }
 
-// Reduced motion preferences
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1037,7 +1559,9 @@ h1, h2, h3, h4, h5, h6,
     scroll-behavior: auto !important;
   }
 
-  .home-card:hover {
+  .home-card:hover,
+  .page-nav .card:hover,
+  .dd-hero-search:hover {
     transform: none;
   }
 
@@ -1053,9 +1577,9 @@ h1, h2, h3, h4, h5, h6,
   left: 1rem;
   z-index: 10000;
   padding: 0.5rem 1rem;
-  background: #1779C5;
+  background: var(--dd-blue);
   color: #fff;
-  border-radius: 0 0 0.25rem 0.25rem;
+  border-radius: 0 0 0.375rem 0.375rem;
   text-decoration: none;
   font-weight: 500;
 
