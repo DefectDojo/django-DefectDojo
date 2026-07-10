@@ -1,3 +1,5 @@
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.db import models
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -25,6 +27,15 @@ class Product_Type(BaseModel):
 
     class Meta:
         ordering = ("name",)
+        indexes = [
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("name", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_product_type_fts_gin",
+            ),
+            GinIndex(fields=["name"], opclasses=["gin_trgm_ops"], name="dojo_product_type_name_trgm"),
+        ]
 
     def __str__(self):
         return self.name

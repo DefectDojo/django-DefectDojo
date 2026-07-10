@@ -2,6 +2,8 @@ import logging
 from contextlib import suppress
 
 from dateutil.relativedelta import relativedelta
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -96,6 +98,13 @@ class Engagement(BaseModel):
         ordering = ["-target_start"]
         indexes = [
             models.Index(fields=["product", "active"]),
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("name", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_engagement_fts_gin",
+            ),
+            GinIndex(fields=["name"], opclasses=["gin_trgm_ops"], name="dojo_engagement_name_trgm"),
         ]
 
     def __str__(self):

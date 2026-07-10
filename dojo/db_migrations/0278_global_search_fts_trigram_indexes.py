@@ -9,17 +9,13 @@ Adds, on the ten models the Pro global search (``pro/search/``) queries:
 * one ``gin_trgm_ops`` index on each model's short display column for the
   fuzzy ``%>`` (``__trigram_word_similar``) lookup.
 
-The indexes are database-only (wrapped in ``SeparateDatabaseAndState`` with no
-state operations, so they stay out of every model's ``Meta.indexes``): they
-exist purely for global-search performance and are not part of any model's
-public schema. The tsvector indexes are built from the same ``SearchVector``
-objects the query annotates with (rather than raw SQL), so the index
-expression cannot drift from the query's compiled SQL across Django upgrades.
-
-The trigram indexes use ``opclasses`` (a base ``Index`` option) rather than a
-``django.contrib.postgres`` ``OpClass`` expression, so they render without
-requiring that app in ``INSTALLED_APPS`` (only the Pro query side needs it,
-for the ``__trigram_word_similar`` lookup).
+Each index is declared on its model's ``Meta.indexes``; this migration is the
+paired ``AddIndexConcurrently`` that actually builds them (the same house
+style as the other functional-index migrations, e.g. 0273). The tsvector
+indexes are built from the same ``SearchVector`` objects the query annotates
+with, so the index expression cannot drift from the compiled SQL across Django
+upgrades. The trigram indexes use ``opclasses`` (a base ``Index`` option), so
+they need no ``OpClass`` expression.
 
 ``AddIndexConcurrently`` / ``CREATE EXTENSION`` cannot run inside a
 transaction, hence ``atomic = False``. ``TrigramExtension`` is the sole
@@ -87,12 +83,7 @@ def _index_operations():
                 index=GinIndex(fields=[column], opclasses=["gin_trgm_ops"], name=name),
             ),
         )
-    # database_operations only: create the indexes without recording them in
-    # model state, so no model's Meta.indexes has to carry a search-only index.
-    return [
-        TrigramExtension(),
-        migrations.SeparateDatabaseAndState(database_operations=add_index, state_operations=[]),
-    ]
+    return [TrigramExtension(), *add_index]
 
 
 class Migration(migrations.Migration):
