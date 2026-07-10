@@ -163,6 +163,28 @@ class TestSnykIssueApiParserWithJson(DojoTestCase):
         # attributes.title
         self.assertEqual("Use of Hardcoded Passwords", finding.title)
 
+    def test_parse_sca_reachability_rendered_from_raw_values(self):
+        """Pin the impact reachability format: raw Snyk values, no derived boolean.
+
+        Guards the fix for the old behavior where "no-path-found" (Snyk
+        affirmatively found NO path to the vulnerable code) and even a missing
+        value both rendered as "Reachable: Yes". The exact "Reachability: <raw>"
+        line is part of the parser's observable contract for downstream tooling.
+        """
+        findings = self.parse_json("snyk_sca_scan_api_reachability.json")
+        self.assertEqual(4, len(findings))
+        impacts = {f.unique_id_from_tool: f.impact for f in findings}
+
+        self.assertIn("Reachability: reachable", impacts["0a4f2f6a-13b8-4a3c-9d2e-7f1a2b3c4d5e"])
+        self.assertIn("Reachability: package", impacts["1b5e3a7b-24c9-4b4d-8e3f-8a2b3c4d5e6f"])
+        self.assertIn("Reachability: no-path-found", impacts["2c6f4b8c-35da-4c5e-9f4a-9b3c4d5e6f7a"])
+
+        # When Snyk reports no reachability value at all, say nothing — the old
+        # derived boolean fabricated "Reachable: Yes" here.
+        no_value_impact = impacts["3d7a5c9d-46eb-4d00-a000-000000000004"]
+        self.assertNotIn("Reachability:", no_value_impact)
+        self.assertNotIn("Reachable:", no_value_impact)
+
     def test_parse_sca_findings_status_open(self):
         findings = self.parse_json("snyk_sca_scan_api_many_vuln.json")
 
@@ -176,7 +198,7 @@ class TestSnykIssueApiParserWithJson(DojoTestCase):
 
         # attributes.coordinates -> fix_available, component info, reachability
         self.assertEqual(True, finding.fix_available)
-        self.assertIn("Reachable: No", finding.impact)  # Not reachable
+        self.assertIn("Reachability: not-applicable", finding.impact)  # Raw Snyk value, not a derived boolean
         self.assertEqual("pillow", finding.component_name)
         self.assertEqual("9.5.0", finding.component_version)
         self.assertEqual("pillow", finding.file_path)
