@@ -168,13 +168,15 @@ class GenericJSONParser:
             if finding.cve:
                 finding.unsaved_vulnerability_ids = [finding.cve]
             if unsaved_vulnerability_ids:
+                if isinstance(unsaved_vulnerability_ids, str):
+                    unsaved_vulnerability_ids = [unsaved_vulnerability_ids]
                 if finding.unsaved_vulnerability_ids:
-                    finding.unsaved_vulnerability_ids.append(
+                    finding.unsaved_vulnerability_ids.extend(
                         unsaved_vulnerability_ids,
                     )
                 else:
-                    finding.unsaved_vulnerability_ids = (
-                        unsaved_vulnerability_ids
+                    finding.unsaved_vulnerability_ids = list(
+                        unsaved_vulnerability_ids,
                     )
             test_internal.findings.append(finding)
         return test_internal
