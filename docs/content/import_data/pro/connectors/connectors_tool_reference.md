@@ -112,7 +112,7 @@ The Backstage connector is an **asset connector**: instead of importing Findings
 | `metadata.tags`, `spec.type`, `spec.lifecycle`, namespace, domain | Product tags under a `backstage:` prefix |
 | `metadata.annotations` | Stored on the Record (bounded); selected annotations can be promoted to first-class attributes or tags via **Annotation Mappings** |
 
-Records are keyed by the entity's server\-assigned `metadata.uid`, so renames in Backstage update the mapped Product **in place** on the next sync — no duplicates. Ownership changes move the Product's group assignment. Components that disappear from the catalog (or are flagged with the `backstage.io/orphan` annotation) are marked **MISSING** — DefectDojo never deletes a Product on its own. Domain and Group hierarchy (parent teams) are recorded as tags/metadata only; they do not create extra hierarchy levels.
+Records are keyed by the entity's server\-assigned `metadata.uid`, so renames in Backstage update the mapped Product **in place** on the next sync — no duplicates. The Product name always tracks the catalog: to rename a Product managed by this connector, rename the Component in Backstage (a DefectDojo\-side rename, or a custom name given during manual mapping, is reconciled back to the catalog name on the next sync unless it would collide with another Product). Ownership changes move the Product's group assignment. Components that disappear from the catalog (or are flagged with the `backstage.io/orphan` annotation) are marked **MISSING** — DefectDojo never deletes a Product on its own. Domain and Group hierarchy (parent teams) are recorded as tags/metadata only; they do not create extra hierarchy levels.
 
 #### Prerequisites
 
