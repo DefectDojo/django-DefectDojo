@@ -224,5 +224,5 @@ This maps to the ticket **Status** field, which uses numeric codes (`2` Open, `3
 A few Freshservice-specific behaviors to be aware of:
 
 - Updates sync the full ticket content - Freshservice allows the subject and description to be edited after creation.
-- Tickets are closed rather than deleted when a Finding is removed; tickets already Resolved or Closed are left untouched.
-- If your account enforces mandatory fields on closure, a close pushed from DefectDojo may be rejected by those rules and will appear in the Integration errors table.
+- Tickets are closed rather than deleted when a Finding is removed; tickets already Resolved or Closed are left untouched.  A resolution note is attached automatically on closure, so accounts that require one (a common business rule) accept the close.
+- Some accounts compute a ticket's priority from an Impact/Urgency matrix or a business rule and ignore the priority sent at creation.  DefectDojo detects this and re-applies the mapped priority with a follow-up update, so the mapping still takes effect.
