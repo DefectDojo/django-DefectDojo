@@ -192,7 +192,7 @@ The Freshservice Integration allows you to push DefectDojo Findings and Finding 
 
 - **Label** should be the label that you want to use to identify this integration.
 - **Location** should be set to your Freshservice URL: `https://yourcompany.freshservice.com`.
-- **API Key** should be a Freshservice API key.  Find it by opening your agent avatar > **Profile Settings** - the key is shown next to the change password section.
+- **API Key** should be a Freshservice API key.  Find it by clicking your profile picture (top right) > **Profile settings** - the key appears on the right below the **Delegate Approvals** section, after you complete the captcha.  If no key is shown there, API access may be disabled at the account level and an administrator has to enable it first.
 - **Requester Email** should be the email address tickets are requested on behalf of.  Freshservice requires a requester on every ticket, so DefectDojo creates tickets with this address as the requester.
 
 ### Issue Tracker Mapping
