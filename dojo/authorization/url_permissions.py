@@ -289,6 +289,12 @@ URL_PERMISSIONS = {
     "view_empty_survey": [("config", "dojo.view_engagement_survey")],
     "delete_empty_questionnaire": [("config", "dojo.delete_engagement_survey")],
     "delete_general_questionnaire": [("config", "dojo.delete_engagement_survey")],
+    # Relinking an answered questionnaire to an engagement changes the
+    # questionnaire, so it requires the questionnaire-change permission. The
+    # views also verify the user can edit the source engagement (if any) before
+    # moving the answers out of it.
+    "engagement_empty_survey": [("config", "dojo.change_engagement_survey")],
+    "existing_engagement_empty_survey": [("config", "dojo.change_engagement_survey")],
 }
 
 

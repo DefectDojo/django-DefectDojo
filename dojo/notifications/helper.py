@@ -889,9 +889,14 @@ class NotificationManager(NotificationManagerHelpers):
 
 
 def process_tag_notifications(request, note, parent_url, parent_title):
-    regex = re.compile(r"(?:\A|\s)@(\w+)\b")
+    # Django usernames may contain "@ . + - _" in addition to word characters (see
+    # Django's username validators), so capture that whole set instead of only \w.
+    # The leading (?:\A|\s)@ anchor keeps email addresses written in prose from
+    # triggering, and trailing dots are stripped so a mention that ends a sentence
+    # ("thanks @alice.") still resolves to the username.
+    regex = re.compile(r"(?:\A|\s)@([\w.@+-]+)")
 
-    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
+    usernames_to_check = {un.lower().rstrip(".") for un in regex.findall(note.entry)}
 
     users_to_notify = [
         Dojo_User.objects.filter(username=username).get()
@@ -910,7 +915,7 @@ def process_tag_notifications(request, note, parent_url, parent_title):
         title=f"{request.user} jotted a note",
         url=parent_url,
         icon="commenting",
-        recipients=users_to_notify,
+        recipients=[user.username for user in users_to_notify],
         requested_by=crum.get_current_user())
 
 
