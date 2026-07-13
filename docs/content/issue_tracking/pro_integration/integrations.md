@@ -16,6 +16,7 @@ Supported Integrations:
 - [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
 - [Freshservice](/issue_tracking/pro_integration/integrations/#freshservice)
 - [ServiceNow](/issue_tracking/pro_integration/integrations/#servicenow)
+- [Shortcut](/issue_tracking/pro_integration/integrations/#shortcut)
 
 ## Opening the Integrations page
 
@@ -76,6 +77,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
 - [Freshservice](/issue_tracking/pro_integration/integrations/#freshservice)
 - ServiceNow (Coming Soon)
+- [Shortcut](/issue_tracking/pro_integration/integrations/#shortcut)
 
 ## Error Handling and Debugging
 
