@@ -4,7 +4,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('dojo', '0277_seed_deduplication_execution_mode'),
+        ('dojo', '0278_global_search_fts_trigram_indexes'),
     ]
 
     operations = [
