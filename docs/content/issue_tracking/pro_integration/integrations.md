@@ -13,6 +13,7 @@ Supported Integrations:
 - [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
 - [GitHub](/issue_tracking/pro_integration/integrations/#github)
 - [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
+- [Freshservice](/issue_tracking/pro_integration/integrations/#freshservice)
 - [ServiceNow](/issue_tracking/pro_integration/integrations/#servicenow)
 - [Shortcut](/issue_tracking/pro_integration/integrations/#shortcut)
 
@@ -72,6 +73,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
 - [GitHub](/issue_tracking/pro_integration/integrations/#github)
 - [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
+- [Freshservice](/issue_tracking/pro_integration/integrations/#freshservice)
 - ServiceNow (Coming Soon)
 - [Shortcut](/issue_tracking/pro_integration/integrations/#shortcut)
 
