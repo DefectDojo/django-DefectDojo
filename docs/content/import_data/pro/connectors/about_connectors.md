@@ -29,9 +29,11 @@ We currently support Connectors for the following tools, with more on the way:
 * **Akamai API Security**
 * **Anchore**
 * **AWS Security Hub**
+* **Backstage** (asset inventory: builds Product hierarchy and team ownership from the Software Catalog)
 * **BurpSuite**
 * **Checkmarx ONE**
 * **Dependency-Track**
+* **Group-IB ASM**
 * **IriusRisk**
 * **JFrog Xray**
 * **Probely**

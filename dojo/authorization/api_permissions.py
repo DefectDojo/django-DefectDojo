@@ -1279,11 +1279,21 @@ class UserHasConfigurationPermissionSuperuser(
 
 class LocationFindingReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the finding the reference is attached to and
+        # the location it points at. Authorizing only the finding would let a
+        # user attach a location they cannot otherwise see to their own finding.
         return check_post_permission(
             request,
             Finding,
             "finding",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -1298,16 +1308,29 @@ class LocationFindingReferencePermission(permissions.BasePermission):
             and check_update_permission(
                 request, obj, "edit", "finding",
             )
+            and check_update_permission(
+                request, obj, "view", "location",
+            )
         )
 
 
 class LocationProductReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the product the reference is attached to and
+        # the location it points at. Authorizing only the product would let a
+        # user attach a location they cannot otherwise see to their own product.
         return check_post_permission(
             request,
             Product,
             "product",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -1321,5 +1344,8 @@ class LocationProductReferencePermission(permissions.BasePermission):
             )
             and check_update_permission(
                 request, obj, "edit", "product",
+            )
+            and check_update_permission(
+                request, obj, "view", "location",
             )
         )

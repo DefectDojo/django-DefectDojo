@@ -10,6 +10,8 @@ import dateutil
 from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
@@ -442,6 +444,14 @@ class Finding(BaseModel):
     class Meta:
         ordering = ("numerical_severity", "-date", "title", "epss_score", "epss_percentile")
         indexes = [
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("title", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_finding_fts_gin",
+            ),
+            GinIndex(fields=["title"], opclasses=["gin_trgm_ops"], name="dojo_finding_title_trgm"),
+
             models.Index(fields=["test", "active", "verified"]),
 
             models.Index(fields=["test", "is_mitigated"]),
@@ -1368,6 +1378,16 @@ class Vulnerability_Id(models.Model):
     finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
 
+    class Meta:
+        indexes = [
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("vulnerability_id", weight="A", config="english"),
+                name="dojo_vulnerability_id_fts_gin",
+            ),
+            GinIndex(fields=["vulnerability_id"], opclasses=["gin_trgm_ops"], name="dojo_vuln_id_trgm"),
+        ]
+
     def __str__(self):
         return self.vulnerability_id
 
@@ -1507,6 +1527,15 @@ class Finding_Template(models.Model):
 
     class Meta:
         ordering = ["-cwe"]
+        indexes = [
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("title", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_finding_template_fts_gin",
+            ),
+            GinIndex(fields=["title"], opclasses=["gin_trgm_ops"], name="dojo_findtmpl_title_trgm"),
+        ]
 
     def __str__(self):
         return self.title

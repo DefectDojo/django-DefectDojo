@@ -773,6 +773,9 @@ TEMPLATES = [
 INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    # Registers the postgres-specific lookups and index expressions
+    # (trigram word similarity, tsvector search) used by global search.
+    "django.contrib.postgres",
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.messages",

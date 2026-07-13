@@ -138,6 +138,38 @@ Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, 
 
 Follow **[this guide](#custom-fields-in-jira)** to get started working with Custom Fields.
 
+#### Close / Reopen Transition fields
+
+Some Jira workflows **require** certain fields to be set as part of a transition — for example, a workflow that refuses to close an Issue unless a Resolution and a Justification field are provided on the close screen. The Custom fields setting above only applies when an Issue is *created*, so it cannot satisfy these workflows.
+
+Without these settings, DefectDojo sends close / reopen transitions with no fields. A workflow that requires fields will reject that transition, and the Finding and the Jira Issue fall out of sync: the Finding shows as Mitigated in DefectDojo while the Issue remains open in Jira.
+
+The **Close Transition fields** and **Reopen Transition fields** settings accept a JSON object that is sent as the `fields` payload of the close / reopen transition call. For example, to close Issues with a Resolution of *Won't Fix* plus a justification value:
+
+```json
+{
+    "resolution": {"name": "Won't Fix"},
+    "customfield_10200": "Risk accepted by security team #report-false-positive"
+}
+```
+
+Leave these settings as 'null' if your Jira workflow does not require fields on transitions.
+
+**Which fields do you need?**
+
+* Ask your Jira admin which fields are on the close / reopen **transition screens**, and which of them are enforced by a validator. The configured JSON must satisfy **every** required field: if any required field is missing from the payload, Jira rejects the whole transition and sets nothing — supplying only some of the required fields does not help.
+* Conversely, fields must be present **on the transition screen** to be sent at all: Jira rejects transitions that attempt to set fields that are not on the screen for that transition.
+* On workflows built with Jira Cloud's current workflow editor, Jira automatically fills in the site's default Resolution when an Issue moves to a done-category status.  So, a required Resolution alone will not block a bare transition there, and the practical use of `"resolution"` in this payload is choosing a *meaningful* value (for example *False Positive*) instead of the site default. Workflows built with the classic editor, or with marketplace validator apps, can still hard-require Resolution.
+* Reopen transitions typically clear the Resolution via the workflow itself, so **Reopen Transition fields** usually only needs the custom fields your workflow requires.
+
+**Notes:**
+
+* The same JSON is sent for *every* close (or reopen) transition for the Product or Engagement — the values are static and do not vary per Finding. If you need different fields per disposition (for example, a different Resolution for False Positive findings than for remediated findings), use the DefectDojo Pro Jira Integrator, which supports per-status transition field mappings.
+* Values use the same format as Jira's REST API: strings for text fields, `{"name": ...}` for resolutions, `[{"name": ...}]` for multi-select fields, and so on.
+* If transitions were rejected while these settings were missing or incomplete, correcting the settings repairs the drift: the next status push for the Finding retries the transition with the configured fields.
+* Both settings are also available on the `/api/v2/jira_projects/` REST endpoint (`close_transition_fields` / `reopen_transition_fields`), so they can be managed via the API.
+* These fields are also applied when DefectDojo closes an Issue because its Finding was **deleted** — the values are captured at the moment the close is queued.
+
 #### Jira labels
 
 Select the relevant labels that you want the Issue to be created with in Jira, e.g. **DefectDojo**, **YourProductName..**
