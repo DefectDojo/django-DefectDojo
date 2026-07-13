@@ -93,18 +93,18 @@ class TestFortifyParser(DojoTestCase):
 
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Cross-Site Request Forgery - category.html: 219 (114E5A67-3446-4DD5-B578-D0E6FDBB304E)", finding.title)
+                self.assertEqual("Cross-Site Request Forgery - category.html: 222 (114E5A67-3446-4DD5-B578-D0E6FDBB304E)", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("1B87289954501EF8FD3861819DD98C27", finding.unique_id_from_tool)
                 self.assertEqual("public/category.html", finding.file_path)
-                self.assertEqual(219, finding.line)
+                self.assertEqual(222, finding.line)
             with self.subTest(i=1):
                 finding = findings[50]
-                self.assertEqual("Insecure Transport - footer.html: 104 (C72A3E77-8324-4FF9-B958-74FCDDF39D17)", finding.title)
+                self.assertEqual("Insecure Transport - footer.html: 107 (C72A3E77-8324-4FF9-B958-74FCDDF39D17)", finding.title)
                 self.assertEqual("Medium", finding.severity)
                 self.assertEqual("D739B2E51B127BDFA4FE07B5A7662A45", finding.unique_id_from_tool)
                 self.assertEqual("public/footer.html", finding.file_path)
-                self.assertEqual(104, finding.line)
+                self.assertEqual(107, finding.line)
 
     def test_fortify_hello_world_fpr_findings(self):
         with (get_unit_tests_scans_path("fortify") / "hello_world.fpr").open(encoding="utf-8") as testfile:
@@ -117,18 +117,45 @@ class TestFortifyParser(DojoTestCase):
 
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Password Management - HelloWorld.java: 5 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
+                self.assertEqual("Password Management - HelloWorld.java: 8 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
                 self.assertEqual("Low", finding.severity)
                 self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
-                self.assertEqual(5, finding.line)
+                self.assertEqual(8, finding.line)
             with self.subTest(i=1):
                 finding = findings[1]
-                self.assertEqual("Password Management - HelloWorld.java: 13 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
+                self.assertEqual("Password Management - HelloWorld.java: 16 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
-                self.assertEqual(13, finding.line)
+                self.assertEqual(16, finding.line)
+
+    # Regression: FPR parser stored the snippet context StartLine (reported line - 3)
+    # instead of Fortify's reported SourceLocation line, breaking file_path+line dedup.
+    def test_fortify_fpr_uses_true_source_location_line(self):
+        with (get_unit_tests_scans_path("fortify") / "many_findings.fpr").open(encoding="utf-8") as testfile:
+            parser = FortifyParser()
+            findings = parser.get_findings(testfile, Test())
+            finding = findings[0]
+            # control: the description records Fortify's reported line verbatim
+            self.assertIn("**SourceLocationLine:** 222", finding.description)
+            # the stored line must match the reported line, not the snippet start (219)
+            self.assertEqual(
+                222, finding.line,
+                msg=f"expected line=222 (SourceLocationLine), stored line={finding.line}",
+            )
+            self.assertEqual("Cross-Site Request Forgery - category.html: 222 (114E5A67-3446-4DD5-B578-D0E6FDBB304E)", finding.title)
+        with (get_unit_tests_scans_path("fortify") / "hello_world.fpr").open(encoding="utf-8") as testfile:
+            parser = FortifyParser()
+            findings = parser.get_findings(testfile, Test())
+            # near the top of a file the snippet start clamps to 1, so the offset
+            # is not even constant: reported line 3, snippet start 1
+            finding = findings[2]
+            self.assertIn("**SourceLocationLine:** 3", finding.description)
+            self.assertEqual(
+                3, finding.line,
+                msg=f"expected line=3 (SourceLocationLine), stored line={finding.line}",
+            )
 
     def test_fortify_webinspect_4_2_many_findings(self):
         with (get_unit_tests_scans_path("fortify") / "webinspect_4_2_many_findings.xml").open(encoding="utf-8") as testfile:
@@ -152,14 +179,14 @@ class TestFortifyParser(DojoTestCase):
 
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Password Management - HelloWorld.java: 5 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
+                self.assertEqual("Password Management - HelloWorld.java: 8 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
                 self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
                 self.assertTrue(finding.active)
                 self.assertFalse(finding.false_p)
                 self.assertEqual("", finding.impact)
             with self.subTest(i=1):
                 finding = findings[2]
-                self.assertEqual("Build Misconfiguration - pom.xml: 1 (FF57412F-DD28-44DE-8F4F-0AD39620768C)", finding.title)
+                self.assertEqual("Build Misconfiguration - pom.xml: 3 (FF57412F-DD28-44DE-8F4F-0AD39620768C)", finding.title)
                 self.assertEqual("87E3EC5CC8154C006783CC461A6DDEEB", finding.unique_id_from_tool)
                 self.assertFalse(finding.active)
                 self.assertTrue(finding.false_p)
@@ -176,16 +203,16 @@ class TestFortifyParser(DojoTestCase):
 
             with self.subTest(i=0):
                 finding = findings[0]
-                self.assertEqual("Password Management - HelloWorld.java: 5 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
+                self.assertEqual("Password Management - HelloWorld.java: 8 (720E3A66-55AC-4D2D-8DB9-DC30E120A52F)", finding.title)
                 # Info as rule has no metainfo/impact
                 self.assertEqual("Info", finding.severity)
                 self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
-                self.assertEqual(5, finding.line)
+                self.assertEqual(8, finding.line)
             with self.subTest(i=1):
                 finding = findings[1]
-                self.assertEqual("Password Management - HelloWorld.java: 13 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
+                self.assertEqual("Password Management - HelloWorld.java: 16 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
                 self.assertEqual("High", finding.severity)
                 self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
-                self.assertEqual(13, finding.line)
+                self.assertEqual(16, finding.line)

@@ -334,6 +334,10 @@ class FortifyFPRParser:
         return True, False
 
     def compute_line(self, vulnerability, snippet) -> str:
+        # Prefer the line Fortify reports for the vulnerability itself; the snippet
+        # StartLine includes leading context lines and does not point at the finding.
+        if vulnerability.source_location_line:
+            return vulnerability.source_location_line
         if snippet and snippet.start_line:
             return snippet.start_line
-        return vulnerability.source_location_line
+        return None
