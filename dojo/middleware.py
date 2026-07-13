@@ -350,17 +350,8 @@ def install_intermediate_flush_hook():
 
     original_add = search_context_manager.add_to_context  # bound method
 
-    def add_to_context_with_flush(self, engine, obj):
-        original_add(self, engine, obj)
-        # The intermediate flush is a request-path optimization on the global singleton
-        # context (AsyncSearchContextMiddleware). The async reindex task
-        # update_watson_search_index_for_model() builds its OWN SearchContextManager and
-        # IS the drain target -- if it re-drained its batch it would dispatch a clone of
-        # itself, discard those pks unindexed, and loop forever (queue ~0, worker pegged,
-        # nothing indexed). Only the singleton intermediate-flushes; any ad-hoc context
-        # manager indexes its own batch on end().
-        if self is not search_context_manager:
-            return
+    def add_to_context_with_flush(engine, obj):
+        original_add(engine, obj)
         threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
         if threshold <= 0 or not search_context_manager._stack:
             return
