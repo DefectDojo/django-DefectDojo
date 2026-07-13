@@ -19,6 +19,15 @@ Each tool has a different API configuration, and this guide is intended to help 
 
 Whenever possible, we recommend creating a new 'DefectDojo Bot' account within your Security Tool which will only be used by the Connector. This will help you better differentiate between actions manually taken by your team, and automated actions taken by the Connector.
 
+# **Asset Connectors**
+
+Most Connectors import **findings** from a security tool. **Asset Connectors** work differently: they import your **asset inventory** instead. An Asset Connector enumerates the assets that exist in an external platform (for example, the repositories in a GitLab group) and automatically creates and maintains the matching **Products** (Assets) and **Product Types** (Organizations) in DefectDojo. No findings are imported by an Asset Connector.
+
+* **Discover** and **Sync** both reconcile the asset list. New assets appear as `NEW` Records; once mapped (automatically, if auto-mapping is enabled), DefectDojo creates the Product and groups it under a Product Type derived from the tool — for example, the GitLab namespace or the Azure DevOps project.
+* If an asset is later removed upstream (for example, a repository is deleted), its mapped Record is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
+
+Azure DevOps, Bitbucket, GitHub, GitLab, and Jira Service Management Assets are Asset Connectors. All other Connectors listed below import findings.
+
 # **Supported Connectors**
 
 ## **Akamai API Security**
@@ -97,6 +106,26 @@ Once you have created your IAM user and assigned it the necessary permissions us
 
 DefectDojo can pull Findings from more than one region using Security Hub's **cross\-region aggregation** feature. If [cross\-region aggregation](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html) is enabled, you should supply the API endpoint for your "**Aggregation Region**". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account ID and the region name.
 
+## **Azure DevOps**
+
+The Azure DevOps connector is an **Asset Connector**: it enumerates the git repositories in every project of your Azure DevOps organization and creates a DefectDojo Asset for each repository, grouped into Organizations by Azure DevOps project. No findings are imported.
+
+#### Prerequisites
+
+You will need a Personal Access Token (PAT) for the organization. We recommend creating the token from a dedicated service account. Only read scopes are required:
+
+1. In Azure DevOps, open **User settings \> Personal access tokens \> New Token**.
+2. Click **Show all scopes**, then select **Code: Read** and **Project and Team: Read**.
+
+Only Azure DevOps Services (dev.azure.com) is supported; on-premise Azure DevOps Server is not supported at this time.
+
+#### Connector Mappings
+
+1. Enter your organization URL in the **Location** field: `https://dev.azure.com/{your-organization}`. Legacy `https://{your-organization}.visualstudio.com` URLs are also accepted, and any extra path segments (for example, a link to a specific project) are ignored.
+2. Enter the PAT in the **Secret** field.
+
+Each repository becomes a Record named after the repository, grouped by its Azure DevOps **project**. Disabled repositories are skipped, so disabling or deleting a repository flags its Record as `MISSING` on the next Sync.
+
 ## **Backstage**
 
 The Backstage connector is an **asset connector**: instead of importing Findings, it pulls your [Backstage](https://backstage.io) Software Catalog into DefectDojo and keeps your Product hierarchy and team ownership in sync with it. It is designed for organizations that maintain their service inventory and org structure in Backstage and want DefectDojo to mirror that structure instead of maintaining it by hand.
@@ -156,6 +185,28 @@ With **Auto\-Map** enabled, a single Discover \+ Sync builds the complete Produc
 * Tags and annotations are normalized and bounded to fit DefectDojo field limits (oversized values are truncated).
 
 **A note on the reverse direction:** displaying DefectDojo findings and grades *inside* Backstage (on entity pages) is a natural follow\-on that would be built as a Backstage frontend plugin consuming the DefectDojo REST API — it is deliberately out of scope for this connector, which only pulls catalog data into DefectDojo.
+
+## **Bitbucket**
+
+The Bitbucket connector is an **Asset Connector**: it enumerates the repositories in the Bitbucket Cloud workspaces you name and creates a DefectDojo Asset for each repository, grouped into Organizations by Bitbucket project. No findings are imported.
+
+#### Prerequisites
+
+Bitbucket Cloud requires a **scoped** Atlassian API token — classic (unscoped) Atlassian API tokens are rejected by Bitbucket with an "API Token provided has no Bitbucket scopes" error.
+
+1. Go to [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and choose **Create API token with scopes**.
+2. Select the **Bitbucket** app, then grant the read scopes: `read:account:bitbucket`, `read:workspace:bitbucket`, `read:repository:bitbucket`, and `read:project:bitbucket`.
+
+Only Bitbucket Cloud (bitbucket.org) is supported. Bitbucket Server reached end of life in 2024, and Bitbucket Data Center is not supported.
+
+#### Connector Mappings
+
+1. Enter `https://bitbucket.org` in the **Location** field.
+2. Enter the Atlassian account email the token belongs to in the **Email** field.
+3. Enter the scoped API token in the **Secret** field.
+4. Enter one or more workspace slugs (comma-separated) in the **Workspace Slugs** field. This field is required: Bitbucket's scoped API tokens cannot list workspaces automatically, so DefectDojo needs to be told which workspaces to read.
+
+Each repository becomes a Record named after the repository, grouped by its Bitbucket **project**.
 
 ## **BurpSuite**
 
@@ -352,6 +403,21 @@ GitHub Advanced Security features must be enabled for the repositories you want 
 
 Each non\-archived repository becomes a Record, queried across the three alert families for open alerts. An alert family that is not enabled for a repository is skipped rather than reported as resolved, so disabled features do not cause false closures.
 
+## **GitLab**
+
+The GitLab connector is an **Asset Connector**: it enumerates every project (repository) your token can access and creates a DefectDojo Asset for each one, grouped into Organizations by GitLab namespace (group or user). No findings are imported.
+
+#### Prerequisites
+
+You will need a Personal Access Token with the **read_api** scope. We recommend creating the token from a dedicated service account; the connector lists the projects that account is a member of.
+
+#### Connector Mappings
+
+1. Enter your GitLab URL in the **Location** field: `https://gitlab.com`, or the base URL of your self-hosted instance.
+2. Enter the Personal Access Token in the **Secret** field.
+
+Each project becomes a Record named after the project, grouped by its **namespace**. Projects that are pending deletion in GitLab (deleted by a user, but not yet purged by GitLab's background job) are excluded automatically, so deleting a project flags its Record as `MISSING` on the next Sync instead of leaving behind a renamed ghost asset.
+
 ## **Google Cloud Security Command Center**
 
 The Google Cloud SCC connector uses the Security Command Center v2 REST API to import active security findings from your Google Cloud organization, folder, or project. DefectDojo creates a Record for each Google Cloud **project** that has open findings.
@@ -494,6 +560,24 @@ Required token scopes for JFrog Xray:
 DefectDojo maps each Artifactory **repository** as a separate Record. On first Sync, DefectDojo generates a full historical vulnerability report; subsequent Syncs generate incremental (delta) reports covering new findings since the last Sync.
 
 See the [JFrog Xray REST API documentation](https://jfrog.com/help/r/jfrog-rest-apis/xray-rest-apis) for more information.
+
+## **Jira Service Management Assets**
+
+The JSM Assets connector is an **Asset Connector**: it enumerates the objects in your Jira Service Management Assets (formerly Insight) workspace and creates a DefectDojo Asset for each object, grouped into Organizations by object schema. No findings are imported.
+
+#### Prerequisites
+
+* Assets requires a **Jira Service Management Premium or Enterprise** plan. On Free or Standard plans the Assets API responds with `403 "Access to Assets API was denied"`, even though the rest of the site works.
+* The Atlassian account used must have **Jira Service Management product access** (an agent seat) on the site — site access alone is not enough.
+* Create a classic Atlassian API token at [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens). We recommend a dedicated service account.
+
+#### Connector Mappings
+
+1. Enter your Atlassian site URL in the **Location** field: `https://{your-site}.atlassian.net`.
+2. Enter the Atlassian account email the token belongs to in the **Email** field.
+3. Enter the API token in the **Secret** field.
+
+Each Assets object becomes a Record named after the object's label, grouped by its **object schema**.
 
 ## **Microsoft Defender**
 
