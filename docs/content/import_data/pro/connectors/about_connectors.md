@@ -33,6 +33,7 @@ We currently support Connectors for the following tools, with more on the way:
 * **BurpSuite**
 * **Checkmarx ONE**
 * **Dependency-Track**
+* **Group-IB ASM**
 * **IriusRisk**
 * **JFrog Xray**
 * **Probely**
