@@ -114,6 +114,31 @@ See [Burp Documentation](https://portswigger.net/burp/documentation/enterprise/u
 
 See the official [Burp documentation](https://portswigger.net/burp/extensibility/enterprise/graphql-api/index.html) for more information on the Burp API.
 
+## **Censys**
+
+The Censys connector reads host assets from the Censys Platform and imports each host's exposed services as findings. It uses the Censys Platform global search API to enumerate the hosts you scope it to.
+
+#### Prerequisites
+
+You will need a Censys **Platform** account with API access:
+
+* A **Personal Access Token**, created in the Censys Platform Console under Personal Access Tokens.
+* Your **Organization ID**, shown on the same settings page under "Current Organization". API access to the search endpoint requires an organization, so a Starter tier or higher is needed. Free\-tier tokens have no organization ID and cannot use the search API.
+
+Per\-host CVE and risk data is available only on Censys Core (enterprise) tiers, so on lower tiers findings represent exposed services rather than vulnerabilities.
+
+See the [Censys Platform API documentation](https://docs.censys.com/reference/get-started) for more information.
+
+#### Connector Mappings
+
+1. Enter `https://api.platform.censys.io` in the **Location** field.
+2. Enter your Personal Access Token in the **API Key** field.
+3. Enter your **Organization ID**.
+4. Enter a **Search Query** that scopes the import to your own assets, for example `host.autonomous_system.asn: <your ASN>` or `host.ip: 203.0.113.0/24`.
+5. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+DefectDojo creates a Record for each host and imports its exposed services as findings.
+
 ## **Checkmarx ONE**
 
 DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
@@ -128,6 +153,23 @@ DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
 2. Enter a valid API key. You may need to generate a new one: see [Checkmarx API Documentation](https://docs.checkmarx.com/en/34965-68618-generating-an-api-key.html#UUID-f3b6481c-47f4-6cd8-9f0d-990896e36cd6_UUID-39ccc262-c7cb-5884-52ed-e1692a635e08) for details.
 3. Enter your tenant location in the **Location** field. This URL is formatted as follows:  
 ​`https://<your-region>.ast.checkmarx.net/` . Your Region can be found at the beginning of your Checkmarx URL when using the Checkmarx app. **<https://ast.checkmarx.net>** is the primary US server (which has no region prefix).
+
+## **CrowdStrike Falcon**
+
+The CrowdStrike Falcon connector imports **Spotlight vulnerabilities** and **EDR detections** from the Falcon platform, as two separate finding types (`CrowdStrike:Spotlight` and `CrowdStrike:Detections`). DefectDojo creates a Record for each Falcon **host**.
+
+#### Prerequisites
+
+A Falcon **API client** (Client ID and secret), created in the Falcon console under **Support \> API Clients and Keys**. Grant it the scopes for the data you want to import: **Hosts: Read** (required, for host discovery), **Vulnerabilities (Spotlight): Read** (for Spotlight findings), and **Alerts: Read** (for EDR detections). The two finding types are independent — if the client lacks a scope, that finding type is skipped rather than failing the sync, so a client without **Alerts: Read** still imports Spotlight vulnerabilities.
+
+#### Connector Mappings
+
+1. Enter your Falcon cloud's API base URL in the **Location** field, matching your console region — for example `https://api.crowdstrike.com` (US\-1), `https://api.us-2.crowdstrike.com` (US\-2), `https://api.eu-1.crowdstrike.com` (EU\-1), or `https://api.laggar.gcw.crowdstrike.com` (US\-GOV\-1).
+2. Enter the API client's Client ID in the **Client ID** field.
+3. Enter the API client's secret in the **Client Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Falcon host becomes a Record, named for its hostname, OS, and type. Only **open** and **reopened** Spotlight vulnerabilities are imported, so reimport closes remediated findings.
 
 ## Dependency\-Track
 
@@ -147,6 +189,26 @@ To generate a Dependency\-Track API key:
 5. Click "**Select**" to confirm and save these permissions.
 
 For more information, see **[Dependency\-Track Documentation](https://docs.dependencytrack.org/integrations/rest-api/)**.
+
+## **Have I Been Pwned**
+
+The Have I Been Pwned (HIBP) connector uses the HIBP REST API to report which accounts on your organization's own domains have appeared in known data breaches. DefectDojo discovers each domain you have verified with HIBP and imports one finding per breach affecting that domain.
+
+#### Prerequisites
+
+You will need a Have I Been Pwned API key with domain search, which requires a **Core** subscription tier or higher. You can obtain a key from your [Have I Been Pwned account](https://haveibeenpwned.com/API/Key).
+
+You must also **verify at least one domain** on your HIBP account before any breach data is available. HIBP lets you verify a domain by DNS TXT record, meta tag, file upload, or email, under **Domain search** in your account. Until a domain is verified, the connector discovers no domains and imports no findings.
+
+#### Connector Mappings
+
+1. Enter `https://haveibeenpwned.com` in the **Location** field.
+2. Enter your API key in the **Secret** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity will not be imported.
+
+DefectDojo creates a separate Record for each domain you have verified with HIBP, and imports one finding per breach affecting accounts on that domain. Each finding's severity reflects the kind of data the breach exposed, and its description lists the affected accounts on your domain so your team can act on them.
+
+See the [Have I Been Pwned API documentation](https://haveibeenpwned.com/API/v3) for more information.
 
 ## **IriusRisk**
 
@@ -195,6 +257,35 @@ Required token scopes for JFrog Xray:
 DefectDojo maps each Artifactory **repository** as a separate Record. On first Sync, DefectDojo generates a full historical vulnerability report; subsequent Syncs generate incremental (delta) reports covering new findings since the last Sync.
 
 See the [JFrog Xray REST API documentation](https://jfrog.com/help/r/jfrog-rest-apis/xray-rest-apis) for more information.
+
+## **Microsoft Defender**
+
+The Microsoft Defender connector imports device vulnerability findings from **Microsoft Defender Vulnerability Management (MDVM)** — one finding per device / software version / CVE combination, including severity, CVSS score, exploitability level and recommended security updates. DefectDojo will discover your Defender **device groups** and create a Record for each one; devices that aren't assigned to any device group are collected under a synthetic **Unassigned** group.
+
+**Please note:** this Connector is distinct from the file\-based **"MSDefender Parser"** scan type, which imports manually exported Defender files. Choose one import path per Product to avoid duplicate findings.
+
+#### Prerequisites
+
+Your Microsoft tenant needs an active license that includes the Defender vulnerability export APIs: **Defender for Endpoint Plan 2**, **Microsoft Defender Vulnerability Management Standalone**, or MDE P1/P2 with the MDVM add\-on. (The MDVM *Add\-on* SKU on its own is not sufficient — it requires Defender for Endpoint Plan 2 underneath.)
+
+The connector authenticates as a Microsoft Entra ID **app registration** using the client credentials flow. To create one:
+
+1. In the [Azure portal](https://portal.azure.com), open **App registrations \> New registration**. Name it (for example `defectdojo-connector`), leave the defaults, and select **Register**.
+2. On the app's **Overview** page, note the **Application (client) ID** and **Directory (tenant) ID**.
+3. Open **API permissions \> Add a permission \> APIs my organization uses** and search for **WindowsDefenderATP**. If it doesn't appear, your tenant's Defender backend hasn't been provisioned yet: ensure the license is active, open [security.microsoft.com](https://security.microsoft.com) once, and retry after a few minutes.
+4. Choose **Application permissions** (*not* Delegated — Delegated permissions never appear in the connector's service token), expand **Vulnerability**, check **Vulnerability.Read.All**, and select **Add permissions**.
+5. Select **Grant admin consent** and confirm. The Status column must show a green check — without this step every API call returns a 403 error.
+6. Open **Certificates & secrets \> New client secret**, set an expiry, and copy the secret **Value** immediately (it is only shown once). The Connector stops working when the secret expires, so note the date.
+
+#### Connector Mappings
+
+1. Enter `https://api.security.microsoft.com` in the **Location** field.
+2. Enter the **Directory (tenant) ID** in the **Tenant ID** field.
+3. Enter the **Application (client) ID** in the **Client ID** field.
+4. Enter the client secret value in the **Client Secret** field.
+5. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Defender device group becomes a Record. Microsoft regenerates the vulnerability snapshot the connector reads roughly every 6 hours, and newly onboarded devices can take up to \~24 hours to produce their first vulnerability data — a brand\-new tenant will legitimately Sync zero findings until devices are onboarded and assessed. License activation itself can also take \~20 minutes or more to reach the API ("No active license found" errors during that window resolve on their own).
 
 ## Probely
 
@@ -263,6 +354,28 @@ On\-premise Tenable Connectors are not available at this time.
 2. Enter a valid **API key** in the Secret field.
 
 See [Tenable's API Documentation](https://docs.tenable.com/vulnerability-management/Content/Settings/my-account/GenerateAPIKey.htm) for more info.
+
+## **Wazuh**
+
+The Wazuh connector uses the Wazuh Indexer (OpenSearch) to fetch vulnerability findings. Wazuh 4.8 and later store detected CVEs in the Indexer rather than the Wazuh server API, so this connector reads them directly from the `wazuh-states-vulnerabilities-*` index.
+
+DefectDojo creates a Record for each Wazuh agent (endpoint) and imports that agent's detected CVEs as findings on a scheduled basis.
+
+#### Prerequisites
+
+You will need:
+
+* The base URL of your Wazuh Indexer, including the port (the Indexer listens on port 9200 by default). DefectDojo connects to the Indexer directly, so this endpoint must be reachable from DefectDojo. For self\-managed deployments this is the host running the Wazuh Indexer. For Wazuh Cloud, use the Indexer endpoint shown in your Wazuh Cloud console, which is separate from the Wazuh dashboard URL.
+* An Indexer user and password with read access to the `wazuh-states-vulnerabilities-*` index. We recommend creating a dedicated user for DefectDojo.
+
+Vulnerability detection must be enabled in Wazuh so that the vulnerability\-state index is populated. See the [Wazuh vulnerability detection documentation](https://documentation.wazuh.com/current/user-manual/capabilities/vulnerability-detection/index.html) for more information.
+
+#### Connector Mappings
+
+1. Enter your Wazuh Indexer base URL in the **Location** field, including the scheme and port, for example `https://your-indexer.example.com:9200`. Do not include a trailing path. DefectDojo constructs the search paths automatically.
+2. Enter the Indexer username in the **Username** field.
+3. Enter the Indexer password in the **Password** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity will not be imported.
 
 ## Wiz
 

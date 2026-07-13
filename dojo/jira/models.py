@@ -112,6 +112,12 @@ class JIRA_Project(models.Model):
     component = models.CharField(max_length=200, blank=True)
     custom_fields = models.JSONField(max_length=200, blank=True, null=True,
                                    help_text=_('JIRA custom field JSON mapping of Id to value, e.g. {"customfield_10122": [{"name": "8.0.1"}]}'))
+    close_transition_fields = models.JSONField(blank=True, null=True,
+                                   verbose_name=_("Close transition fields"),
+                                   help_text=_('JIRA fields to send as part of the Close transition, e.g. {"resolution": {"name": "Won\'t Fix"}, "customfield_10200": "justification"}. Use this when the JIRA workflow requires fields on the close transition screen. Fields not on the transition screen are rejected by JIRA.'))
+    reopen_transition_fields = models.JSONField(blank=True, null=True,
+                                   verbose_name=_("Reopen transition fields"),
+                                   help_text=_('JIRA fields to send as part of the Reopen transition, e.g. {"customfield_10201": "reopened by DefectDojo"}. Fields not on the transition screen are rejected by JIRA.'))
     default_assignee = models.CharField(max_length=200, blank=True, null=True,
                                      help_text=_("JIRA default assignee (name). If left blank then it defaults to whatever is configured in JIRA."))
     jira_labels = models.CharField(max_length=200, blank=True, null=True,
