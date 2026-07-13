@@ -1056,10 +1056,15 @@ class ReviewFindingForm(forms.Form):
 class DeleteFindingForm(forms.ModelForm):
     id = forms.IntegerField(required=True,
                             widget=forms.widgets.HiddenInput())
+    push_to_jira = forms.BooleanField(
+        required=False,
+        label="Push to JIRA",
+        help_text="Checking this will close or reassign the linked JIRA issue when this finding is deleted.",
+    )
 
     class Meta:
         model = Finding
-        fields = ["id"]
+        fields = ["id", "push_to_jira"]
 
 
 class CopyFindingForm(forms.Form):

@@ -905,6 +905,16 @@ CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
 WATSON_INDEX_PREFETCH_ENABLED = env("DD_WATSON_INDEX_PREFETCH_ENABLED")
 
+# Context managers wrapped around every Celery task by PluggableContextTask (see
+# dojo/celery.py). watson_search_context_for_task opens a watson search_context so bulk
+# finding saves that happen inside a worker task (which serves no HTTP request, so
+# AsyncSearchContextMiddleware never runs) accumulate and drain in batched async index
+# updates instead of indexing one finding at a time. Extend this list downstream (e.g. Pro)
+# rather than replacing it, so this batching stays wired.
+CELERY_TASK_CONTEXT_MANAGERS = [
+    "dojo.middleware.watson_search_context_for_task",
+]
+
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
     "add-alerts": {
@@ -1067,6 +1077,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # probe's occurrences) and shifts as the occurrence set changes, so dedupe on the stable identity: probe-derived
     # title + target model.
     "Garak Scan": ["title", "component_name"],
+    # promptfoo findings have no file_path/line; description holds the (per-run) attack input
+    # and model output and is unstable across runs, and severity is an aggregate that shifts
+    # with the set of failed attempts. Dedupe on the stable identity: plugin-derived title +
+    # target model.
+    "Promptfoo Scan": ["title", "component_name"],
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
@@ -1320,6 +1335,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Snyk Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
     "Garak Scan": DEDUPE_ALGO_HASH_CODE,
+    "Promptfoo Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,

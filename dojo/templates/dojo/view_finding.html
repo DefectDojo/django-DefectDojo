@@ -181,6 +181,12 @@
                                 <form id="delete-finding-form" method="post" action="{% url 'delete_finding' finding.id %}">
                                     {% csrf_token %}
                                     <input type="hidden" label="delete_finding" aria-label="delete_finding" name="id" value="{{ finding.id }}"/>
+                                    {% if system_settings.enable_jira and finding.has_jira_issue %}
+                                        <label class="small">
+                                            <input type="checkbox" name="push_to_jira" value="true"/>
+                                            {% trans "Push deletion to JIRA" %}
+                                        </label>
+                                    {% endif %}
                                 </form>
                                 </li>
                             {% endif %}
