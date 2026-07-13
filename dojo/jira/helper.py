@@ -512,10 +512,13 @@ def jira_get_resolution_id(jira, issue, status):
     return resolution_id
 
 
-def jira_transition(jira, issue, transition_id):
+def jira_transition(jira, issue, transition_id, fields=None):
     try:
         if issue and transition_id:
-            jira.transition_issue(issue, transition_id)
+            if fields:
+                jira.transition_issue(issue, transition_id, fields=fields)
+            else:
+                jira.transition_issue(issue, transition_id)
             return True
     except JIRAError as jira_error:
         logger.debug("error transitioning jira issue " + issue.key + " " + str(jira_error))
@@ -705,6 +708,7 @@ def jira_description(obj, **kwargs):
     elif isinstance(obj, Finding_Group):
         kwargs["finding_group"] = obj
 
+    kwargs["V3_FEATURE_LOCATIONS"] = settings.V3_FEATURE_LOCATIONS
     description = render_to_string(template, kwargs)
     defect_dojo_obj_url = get_full_url(obj.get_absolute_url())
     max_length = getattr(settings, "JIRA_DESCRIPTION_MAX_LENGTH", 32767)
@@ -1148,7 +1152,7 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
     # transitioning first, every webhook that fires during this sync sees
     # the intended post-transition state.
     try:
-        push_status_to_jira(obj, jira_instance, jira, issue)
+        push_status_to_jira(obj, jira_instance, jira, issue, jira_project=jira_project)
     except Exception as e:
         message = f"Failed to update the jira issue status - {e}"
         return failure_to_update_message(message, e, obj)
@@ -1244,10 +1248,13 @@ def issue_from_jira_is_active(issue_from_jira):
     return not issue_status_category_is_done(statusCategoryKey)
 
 
-def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
+def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False, jira_project=None):
     if not jira_instance:
         logger.warning("Cannot push status to JIRA for %d:%s - jira_instance is None", obj.id, to_str_typed(obj))
         return False
+
+    if jira_project is None:
+        jira_project = get_jira_project(obj)
 
     status_list = _safely_get_obj_status_for_jira(obj)
     issue_closed = False
@@ -1257,7 +1264,8 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     if not updated and any(item in status_list for item in RESOLVED_STATUS):
         if issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Resolved")
-            updated = jira_transition(jira, issue, jira_instance.close_status_key)
+            updated = jira_transition(jira, issue, jira_instance.close_status_key,
+                                      fields=jira_project.close_transition_fields if jira_project else None)
         else:
             logger.debug("Jira issue already Resolved")
             updated = False
@@ -1266,7 +1274,8 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False):
     if not issue_closed and any(item in status_list for item in OPEN_STATUS):
         if not issue_from_jira_is_active(issue):
             logger.debug("Transitioning Jira issue to Active (Reopen)")
-            updated = jira_transition(jira, issue, jira_instance.open_status_key)
+            updated = jira_transition(jira, issue, jira_instance.open_status_key,
+                                      fields=jira_project.reopen_transition_fields if jira_project else None)
         else:
             logger.debug("Jira issue already Active")
             updated = False
@@ -1429,6 +1438,8 @@ def close_epic(engagement_id, push_to_jira, **kwargs):
                 req_url = jira_instance.url + "/rest/api/latest/issue/" + \
                     jissue.jira_id + "/transitions"
                 json_data = {"transition": {"id": jira_instance.close_status_key}}
+                if jira_project.close_transition_fields:
+                    json_data["fields"] = jira_project.close_transition_fields
                 r = requests.post(
                     url=req_url,
                     auth=HTTPBasicAuth(jira_instance.username, jira_instance.password),
