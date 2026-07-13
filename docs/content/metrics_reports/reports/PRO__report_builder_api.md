@@ -22,7 +22,7 @@ export DD_IMPORTER_DOJO_API_TOKEN="YOUR_API_TOKEN"
 
 The base URL for all calls is your instance plus `/api/v2`:
 
-```
+```text
 https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2
 ```
 
