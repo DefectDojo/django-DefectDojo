@@ -1,6 +1,6 @@
 #!/bin/bash
 # called from entrypoint-initializer.sh when no admin user exists (first boot)
-cat <<EOD | python manage.py shell
+cat <<EOD | python manage.py shell --no-imports
 import os
 from django.contrib.auth.models import User
 User.objects.create_superuser(
