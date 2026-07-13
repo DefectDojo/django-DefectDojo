@@ -331,6 +331,27 @@ You will need a GitGuardian API key. We recommend a **Service Account token** (r
 
 Only **open** incidents (status `TRIGGERED` or `ASSIGNED`) are imported; incidents you resolve or ignore in GitGuardian are automatically mitigated in DefectDojo on the next sync. A confirmed-live secret (validity *valid*) is imported as a verified finding.
 
+## **GitHub Advanced Security**
+
+The GitHub Advanced Security connector imports **code scanning**, **Dependabot**, and **secret scanning** alerts from GitHub, as three separate finding types (`GitHub:CodeScanning`, `GitHub:Dependabot`, and `GitHub:SecretScanning`). DefectDojo discovers every non\-archived repository in the configured organization and creates a Record for each one.
+
+#### Prerequisites
+
+GitHub Advanced Security features must be enabled for the repositories you want to import. The connector authenticates with a GitHub **personal access token**:
+
+1. In GitHub, open **Settings \> Developer settings \> Personal access tokens** and create a token owned by (or with access to) the target organization.
+2. Grant it read access to the security alerts: a *fine\-grained* token needs **Read\-only** access to **Code scanning alerts**, **Dependabot alerts**, and **Secret scanning alerts** on the organization's repositories; a *classic* token needs the **`repo`** and **`security_events`** scopes.
+3. Confirm the token's owner can see the repositories you intend to import — the connector only sees repositories the token can access.
+
+#### Connector Mappings
+
+1. Enter `https://api.github.com` in the **Location** field. For GitHub Enterprise Server, use `https://<your-host>/api/v3`.
+2. Enter the organization login in the **Organization** field.
+3. Enter the personal access token in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each non\-archived repository becomes a Record, queried across the three alert families for open alerts. An alert family that is not enabled for a repository is skipped rather than reported as resolved, so disabled features do not cause false closures.
+
 ## **Google Cloud Security Command Center**
 
 The Google Cloud SCC connector uses the Security Command Center v2 REST API to import active security findings from your Google Cloud organization, folder, or project. DefectDojo creates a Record for each Google Cloud **project** that has open findings.
@@ -515,6 +536,40 @@ This connector uses the Probely REST API to fetch data.
 You can find an API key under the User \> API Keys menu in Probely.  
 See [Probely documentation](https://help.probely.com/en/articles/8592281-how-to-generate-an-api-key) for more info.
 
+## Qualys
+
+The Qualys connector imports **VMDR host vulnerability detections** — each joined with its Qualys KnowledgeBase (QID) metadata — from the Qualys Cloud Platform. DefectDojo creates a Record for each Qualys **host** in your subscription.
+
+#### Prerequisites
+
+A Qualys user account with **VMDR API access**, and your subscription's **API server (platform) URL** — this differs per subscription. Find it in the Qualys UI under **Help \> About**, or on the Qualys [Platform Identification](https://www.qualys.com/platform-identification/) page (for example `https://qualysapi.qualys.com` for US Platform 1, or `https://qualysapi.qg2.apps.qualys.com` for US Platform 2).
+
+#### Connector Mappings
+
+1. Enter your Qualys API server URL in the **Location** field (for example `https://qualysapi.qualys.com`).
+2. Enter the Qualys API username in the **Username** field.
+3. Enter the Qualys API password in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Qualys host becomes a Record. Detections Qualys has marked **Fixed** are excluded, so reimport closes remediated findings.
+
+## **Rapid7 InsightVM**
+
+The Rapid7 InsightVM connector imports asset vulnerability findings from your InsightVM **Security Console** (API v3), enriched with the console's global vulnerability catalog. DefectDojo creates a Record for each InsightVM **site**.
+
+#### Prerequisites
+
+Network access from DefectDojo to your Security Console, and a console **user account** — its login is used for HTTP Basic authentication. The console API is served on port **3780** by default.
+
+#### Connector Mappings
+
+1. Enter your Security Console URL, including the port, in the **Location** field — for example `https://console.example.com:3780`.
+2. Enter the console username in the **Username** field.
+3. Enter the console password in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each InsightVM site becomes a Record; the connector walks the site's assets and imports their vulnerable findings.
+
 ## **Semgrep**
 
 This connector uses the Semgrep REST API to fetch data.
@@ -587,6 +642,23 @@ On\-premise Tenable Connectors are not available at this time.
 2. Enter a valid **API key** in the Secret field.
 
 See [Tenable's API Documentation](https://docs.tenable.com/vulnerability-management/Content/Settings/my-account/GenerateAPIKey.htm) for more info.
+
+## **Veracode**
+
+The Veracode connector imports application findings from the Veracode platform, split by scan type into **SAST**, **DAST**, **SCA**, and **Manual** finding types. DefectDojo creates a Record for each Veracode **application**.
+
+#### Prerequisites
+
+Generate a Veracode **API credential** for an account that can see the applications you want to import: in the Veracode Platform, open your account menu \> **API Credentials** and select **Generate API Credentials** (see [Managing Veracode API credentials](https://docs.veracode.com/r/c_api_credentials3)). Copy both the **API ID** and the **API Secret Key** — the secret is shown only once.
+
+#### Connector Mappings
+
+1. Enter the Veracode API base URL in the **Location** field: `https://api.veracode.com` (commercial region), `https://api.veracode.eu` (European region), or `https://api.veracode.us` (US federal region).
+2. Enter the API ID in the **API ID** field.
+3. Enter the API secret key in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Veracode application becomes a Record. Only **open** findings are imported, so reimport closes findings Veracode reports as resolved.
 
 ## **Wazuh**
 
