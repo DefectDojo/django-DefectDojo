@@ -77,11 +77,12 @@ class JIRAProjectSerializer(serializers.ModelSerializer):
             msg = "Either engagement or product has to be set."
             raise serializers.ValidationError(msg)
 
-        if "custom_fields" in data and isinstance(data["custom_fields"], str):
-            try:
-                data["custom_fields"] = json.loads(data["custom_fields"])
-            except json.JSONDecodeError as e:
-                raise serializers.ValidationError({"custom_fields": f"Invalid JSON: {e}"}) from e
+        for json_field in ("custom_fields", "close_transition_fields", "reopen_transition_fields"):
+            if json_field in data and isinstance(data[json_field], str):
+                try:
+                    data[json_field] = json.loads(data[json_field])
+                except json.JSONDecodeError as e:
+                    raise serializers.ValidationError({json_field: f"Invalid JSON: {e}"}) from e
 
         return data
 

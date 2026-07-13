@@ -5,6 +5,8 @@ from urllib.parse import urlparse
 
 import hyperlink
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_ipv46_address
 from django.db import connection, models
@@ -123,6 +125,13 @@ class Endpoint(models.Model):
                 Lower("host"),
                 name="idx_ep_product_lower_host",
             ),
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("host", weight="A", config="english")
+                + SearchVector("path", weight="B", config="english"),
+                name="dojo_endpoint_fts_gin",
+            ),
+            GinIndex(fields=["host"], opclasses=["gin_trgm_ops"], name="dojo_endpoint_host_trgm"),
         ]
 
     def __init__(self, *args, **kwargs):

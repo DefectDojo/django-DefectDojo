@@ -159,6 +159,7 @@ Examples include:
 **Report-Defined Test Type Naming Rules:**
 - If the report's `type` field equals the scan type → uses scan type directly (e.g., "Generic Findings Import")
 - If the report's `type` field differs → creates "{type} Scan ({scan_type})" format (e.g., "Tool1 Scan (Generic Findings Import)")
+- If the report's `type` field already ends with the " ({scan_type})" suffix → uses it verbatim, so the suffix is never doubled (e.g., "Tool1 (Generic Findings Import)" stays "Tool1 (Generic Findings Import)")
 - If no `type` field is provided → uses scan type directly
 
 **Important Considerations:**
