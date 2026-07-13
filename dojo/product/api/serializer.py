@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from dojo.models import DojoMeta, Product, Product_API_Scan_Configuration
 
@@ -50,7 +51,47 @@ class ProductSerializer(serializers.ModelSerializer):
             if new_sla_config and old_sla_config and new_sla_config != old_sla_config:
                 msg = "Finding SLA expiration dates are currently being recalculated. The SLA configuration for this product cannot be changed until the calculation is complete."
                 raise serializers.ValidationError(msg)
+        self._validate_authorized_users_change(data)
         return data
+
+    def _validate_authorized_users_change(self, data):
+        """
+        Writing ``authorized_users`` is a member-management operation and is
+        gated behind ``Product_Manage_Members`` -- the same permission the web
+        UI requires (dojo.product.ui.views.add_product_authorized_users). The
+        rest of this endpoint is governed by ``Product_Edit``, so this keeps
+        changes to the membership list aligned with the dedicated
+        member-management permission.
+
+        No-ops when the field is absent or unchanged (replay-safe), mirroring
+        dojo.authorization.api_permissions.check_update_permission.
+        """
+        if "authorized_users" not in data:
+            return
+
+        # Field-level validation has already resolved the payload to Dojo_User
+        # instances at this point.
+        from dojo.authorization.authorization import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
+            user_has_permission,
+        )
+        from dojo.authorization.roles_permissions import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
+            Permissions,
+        )
+
+        new_ids = sorted(user.pk for user in (data.get("authorized_users") or []))
+        current_ids = (
+            sorted(self.instance.authorized_users.values_list("pk", flat=True))
+            if self.instance is not None
+            else []
+        )
+        if new_ids == current_ids:
+            return
+
+        request = self.context.get("request")
+        request_user = getattr(request, "user", None)
+        if not (request_user and user_has_permission(request_user, self.instance, Permissions.Product_Manage_Members)):
+            msg = "You do not have permission to manage authorized users for this product."
+            raise PermissionDenied(msg)
 
     def get_findings_count(self, obj) -> int:
         return obj.findings_count

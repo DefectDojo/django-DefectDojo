@@ -3,6 +3,8 @@ from __future__ import annotations
 import hashlib
 from typing import TYPE_CHECKING, Self
 
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.core.validators import MinLengthValidator
 from django.db import transaction
 from django.db.models import (
@@ -280,6 +282,13 @@ class Location(BaseModel):
         indexes = [
             Index(fields=["location_type"]),
             Index(fields=["location_value"]),
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("location_value", weight="A", config="english")
+                + SearchVector("location_type", weight="B", config="english"),
+                name="dojo_location_fts_gin",
+            ),
+            GinIndex(fields=["location_value"], opclasses=["gin_trgm_ops"], name="dojo_location_locval_trgm"),
         ]
 
 
