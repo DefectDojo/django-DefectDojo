@@ -7,6 +7,8 @@ from uuid import uuid4
 import tagulous.admin
 from django.contrib import admin
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Count
@@ -530,6 +532,16 @@ class App_Analysis(models.Model):
     created = models.DateTimeField(auto_now_add=True, null=False)
 
     tags = TagField(blank=True, force_lowercase=True)
+
+    class Meta:
+        indexes = [
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("name", weight="A", config="english"),
+                name="dojo_app_analysis_fts_gin",
+            ),
+            GinIndex(fields=["name"], opclasses=["gin_trgm_ops"], name="dojo_app_analysis_name_trgm"),
+        ]
 
     def __str__(self):
         return self.name + " | " + self.product.name

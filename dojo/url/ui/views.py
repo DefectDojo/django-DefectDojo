@@ -43,6 +43,20 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
+def _get_location_or_404(request, location_id, permission):
+    """
+    Resolve a Location for the endpoint views via the shared authorized queryset.
+
+    Keeps object retrieval in these views consistent with the list/host views, which
+    already scope Location lookups through ``get_authorized_locations``. A lookup that
+    falls outside the queryset returns 404, matching object retrieval elsewhere.
+    """
+    return get_object_or_404(
+        get_authorized_locations(permission, Location.objects.all(), request.user),
+        id=location_id,
+    )
+
+
 def view_endpoint(request: HttpRequest, location_id: int):
     return process_endpoint_view(request, location_id, host_view=False)
 
@@ -95,7 +109,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         - host_view: Boolean indicating if host view is enabled.
 
     """
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     if location.location_type != URL.get_location_type():
         messages.add_message(
             request,
@@ -288,7 +302,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
 
 def edit_endpoint(request, location_id):
     # Retrieve the Location object by ID and add breadcrumb for editing
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "edit")
     add_breadcrumb(parent=location, title="Edit", top_level=False, request=request)
     # Initialize the URLForm with the current URL instance for editing
     form = URLForm(instance=location.url)
@@ -366,7 +380,7 @@ def add_endpoint_to_finding(request, finding_id):
 
 def delete_endpoint(request, location_id):
     # Retrieve the Location object by primary key and initialize the delete form
-    location = get_object_or_404(Location, pk=location_id)
+    location = _get_location_or_404(request, location_id, "delete")
     form = DeleteEndpointForm(instance=location)
     # Handle POST request for deleting an endpoint and its relationships
     if request.method == "POST":
@@ -399,7 +413,7 @@ def delete_endpoint(request, location_id):
 
 def manage_meta_data(request, location_id):
     # Retrieve the Location object by ID and filter its associated metadata
-    location = Location.objects.get(id=location_id)
+    location = _get_location_or_404(request, location_id, "edit")
     meta_data_query = DojoMeta.objects.filter(location=location)
     # Map the foreign key for the formset to the location
     form_mapping = {"location": location}
@@ -624,10 +638,10 @@ def migrate_endpoints_view(request):
 
 
 def endpoint_report(request, location_id):
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     return generate_report(request, location, host_view=False)
 
 
 def endpoint_host_report(request, location_id):
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     return generate_report(request, location, host_view=True)

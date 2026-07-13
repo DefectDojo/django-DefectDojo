@@ -48,6 +48,52 @@ The attributes in the form are supplied as defaults and are as follows:
 - **False Positive Mapping**: `Done`
 - **Risk Accepted Mapping**: `Done`
 
+## Bitbucket
+
+The Bitbucket integration allows you to push issues to the [issue tracker](https://support.atlassian.com/bitbucket-cloud/docs/enable-an-issue-tracker/) of a Bitbucket Cloud repository.
+
+The issue tracker is optional in Bitbucket and must be enabled on the repository before DefectDojo can create Issues in it. To enable it, open the repository in Bitbucket and select **Repository settings**, then enable the issue tracker under **Features**.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to `https://bitbucket.org`.
+- **Email** should be the email address of the Atlassian account that the API token belongs to.
+- **API Token** should be set to a scoped Atlassian API token.
+
+Bitbucket app passwords are deprecated by Atlassian and will not work with this integration. To create an API token:
+
+1. Open [Atlassian account settings](https://id.atlassian.com/manage-profile/security/api-tokens) and choose **Security**, then **Create and manage API tokens**.
+2. Choose **Create API token with scopes**, name the token, and set an expiry date.
+3. Select **Bitbucket** as the app.
+4. Grant the token permission to read repositories and to read and write issues.
+
+### Issue Tracker Mapping
+
+- **Workspace** should be the slug of the workspace that contains the repository, as it appears in bitbucket.org URLs.
+- **Repository Slug** should be the slug of the repository that you want to create Issues in.
+
+### Severity Mapping Details
+
+This maps to the Bitbucket issue Priority field. The attributes in the form are supplied as defaults, and each value must be one of Bitbucket's priorities: `trivial`, `minor`, `major`, `critical`, or `blocker`.
+
+- **Severity Field Name**: `priority`
+- **Info Mapping**: `trivial`
+- **Low Mapping**: `minor`
+- **Medium Mapping**: `major`
+- **High Mapping**: `critical`
+- **Critical Mapping**: `blocker`
+
+### Status Mapping Details
+
+This maps to the Bitbucket issue State field. Each value must be one of Bitbucket's issue states: `new`, `open`, `resolved`, `on hold`, `invalid`, `duplicate`, `wontfix`, or `closed`.
+
+- **Status Field Name**: `state`
+- **Active Mapping**: `new`
+- **Closed Mapping**: `resolved`
+- **False Positive Mapping**: `invalid`
+- **Risk Accepted Mapping**: `wontfix`
+
 ## GitHub
 
 The GitHub integration allows you to add issues to a [GitHub Project](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects), which also open Issues in an associated Repo.  These Repos/Projects can be associated with either a GitHub Organization or a personal GitHub account.
@@ -183,3 +229,89 @@ This maps to the ServiceNow Impact field.
 - **Closed Mapping**: `Closed`
 - **False Positive Mapping**: `Resolved`
 - **Risk Accepted Mapping**: `Resolved`
+
+## Shortcut
+
+The Shortcut integration allows you to push DefectDojo Findings as [Shortcut](https://www.shortcut.com/) Stories. Stories are created with the story type of Bug and assigned to a Team in your Shortcut workspace.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to `https://api.app.shortcut.com`.
+- **API Token** should be set to a Shortcut API token. Tokens can be generated in Shortcut under Settings, then Your Account, then [API Tokens](https://app.shortcut.com/settings/account/api-tokens).
+
+### Issue Tracker Mapping
+
+- **Team (Group) ID** should be set to the UUID of the Shortcut Team that Stories will be created for. You can find this UUID by opening the Team page in Shortcut and copying the identifier from the URL, or by calling the Shortcut API:
+
+```
+curl -H "Shortcut-Token: {{API_TOKEN}}" https://api.app.shortcut.com/api/v3/groups
+```
+
+### Severity Mapping Details
+
+Each severity value is applied to the Story as a label. Labels are created automatically in Shortcut if they do not already exist, so the default values below can be used as they are, or replaced with label names of your choosing. When a Finding's severity changes, the old severity label is removed from the Story and the new one is added.
+
+- **Severity Field Name**: `Label`
+- **Info Mapping**: `sev-info`
+- **Low Mapping**: `sev-low`
+- **Medium Mapping**: `sev-medium`
+- **High Mapping**: `sev-high`
+- **Critical Mapping**: `sev-critical`
+
+### Status Mapping Details
+
+Each status value must be set to the numeric ID of a Workflow State in your Shortcut workspace. Workflow State IDs are unique to each workspace, so there are no default values. You can list the Workflow States and their IDs by calling the Shortcut API:
+
+```
+curl -H "Shortcut-Token: {{API_TOKEN}}" https://api.app.shortcut.com/api/v3/workflows
+```
+
+- **Status Field Name**: `Workflow State ID`
+- **Active Mapping**: the ID of the state for open work, for example a Backlog or To Do state.
+- **Closed Mapping**: the ID of a Done type state. When a Finding is deleted in DefectDojo, its Story is moved to this state.
+- **False Positive Mapping**: the ID of the state to use for False Positive Findings.
+- **Risk Accepted Mapping**: the ID of the state to use for Risk Accepted Findings.
+
+## Freshservice
+
+The Freshservice Integration allows you to push DefectDojo Findings and Finding Groups as Freshservice tickets, assigned to an agent Group of your choice.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to your Freshservice URL: `https://yourcompany.freshservice.com`.
+- **API Key** should be a Freshservice API key.  Find it by clicking your profile picture (top right) > **Profile settings** - the key appears on the right below the **Delegate Approvals** section, after you complete the captcha.  If no key is shown there, API access may be disabled at the account level and an administrator has to enable it first.
+- **Requester Email** should be the email address tickets are requested on behalf of.  Freshservice requires a requester on every ticket, so DefectDojo creates tickets with this address as the requester.
+
+### Issue Tracker Mapping
+
+- **Group ID** should be the numeric ID of the Freshservice agent group tickets will be assigned to.  Find it in the URL while viewing the group under **Admin > Agent Groups**.
+- **Workspace ID** (optional) routes tickets to a specific workspace on multi-workspace accounts.  Leave it empty to use the primary workspace.
+
+### Severity Mapping Details
+
+This maps to the Freshservice ticket **Priority** field, which uses numeric codes (`1` Low, `2` Medium, `3` High, `4` Urgent).  The priority names are also accepted:
+
+- **Severity Field Name**: `Priority`
+- **Info Mapping**: `1`
+- **Low Mapping**: `1`
+- **Medium Mapping**: `2`
+- **High Mapping**: `3`
+- **Critical Mapping**: `4`
+
+### Status Mapping Details
+
+This maps to the ticket **Status** field, which uses numeric codes (`2` Open, `3` Pending, `4` Resolved, `5` Closed).  The status names are also accepted:
+
+- **Status Field Name**: `Status`
+- **Active Mapping**: `2`
+- **Closed Mapping**: `5`
+- **False Positive Mapping**: `5`
+- **Risk Accepted Mapping**: `3`
+
+A few Freshservice-specific behaviors to be aware of:
+
+- Updates sync the full ticket content - Freshservice allows the subject and description to be edited after creation.
+- Tickets are closed rather than deleted when a Finding is removed; tickets already Resolved or Closed are left untouched.  A resolution note is attached automatically on closure, so accounts that require one (a common business rule) accept the close.
+- Some accounts compute a ticket's priority from an Impact/Urgency matrix or a business rule and ignore the priority sent at creation.  DefectDojo detects this and re-applies the mapped priority with a follow-up update, so the mapping still takes effect.
