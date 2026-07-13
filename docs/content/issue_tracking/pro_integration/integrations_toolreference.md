@@ -48,6 +48,52 @@ The attributes in the form are supplied as defaults and are as follows:
 - **False Positive Mapping**: `Done`
 - **Risk Accepted Mapping**: `Done`
 
+## Bitbucket
+
+The Bitbucket integration allows you to push issues to the [issue tracker](https://support.atlassian.com/bitbucket-cloud/docs/enable-an-issue-tracker/) of a Bitbucket Cloud repository.
+
+The issue tracker is optional in Bitbucket and must be enabled on the repository before DefectDojo can create Issues in it. To enable it, open the repository in Bitbucket and select **Repository settings**, then enable the issue tracker under **Features**.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to `https://bitbucket.org`.
+- **Email** should be the email address of the Atlassian account that the API token belongs to.
+- **API Token** should be set to a scoped Atlassian API token.
+
+Bitbucket app passwords are deprecated by Atlassian and will not work with this integration. To create an API token:
+
+1. Open [Atlassian account settings](https://id.atlassian.com/manage-profile/security/api-tokens) and choose **Security**, then **Create and manage API tokens**.
+2. Choose **Create API token with scopes**, name the token, and set an expiry date.
+3. Select **Bitbucket** as the app.
+4. Grant the token permission to read repositories and to read and write issues.
+
+### Issue Tracker Mapping
+
+- **Workspace** should be the slug of the workspace that contains the repository, as it appears in bitbucket.org URLs.
+- **Repository Slug** should be the slug of the repository that you want to create Issues in.
+
+### Severity Mapping Details
+
+This maps to the Bitbucket issue Priority field. The attributes in the form are supplied as defaults, and each value must be one of Bitbucket's priorities: `trivial`, `minor`, `major`, `critical`, or `blocker`.
+
+- **Severity Field Name**: `priority`
+- **Info Mapping**: `trivial`
+- **Low Mapping**: `minor`
+- **Medium Mapping**: `major`
+- **High Mapping**: `critical`
+- **Critical Mapping**: `blocker`
+
+### Status Mapping Details
+
+This maps to the Bitbucket issue State field. Each value must be one of Bitbucket's issue states: `new`, `open`, `resolved`, `on hold`, `invalid`, `duplicate`, `wontfix`, or `closed`.
+
+- **Status Field Name**: `state`
+- **Active Mapping**: `new`
+- **Closed Mapping**: `resolved`
+- **False Positive Mapping**: `invalid`
+- **Risk Accepted Mapping**: `wontfix`
+
 ## GitHub
 
 The GitHub integration allows you to add issues to a [GitHub Project](https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects), which also open Issues in an associated Repo.  These Repos/Projects can be associated with either a GitHub Organization or a personal GitHub account.
