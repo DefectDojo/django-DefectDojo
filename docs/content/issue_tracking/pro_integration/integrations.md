@@ -10,11 +10,14 @@ aliases:
 DefectDojo Pro's Integrations let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 
 Supported Integrations:
-- [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
-- [GitHub](/issue_tracking/pro_integration/integrations/#github)
-- [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
-- [Freshservice](/issue_tracking/pro_integration/integrations/#freshservice)
-- [ServiceNow](/issue_tracking/pro_integration/integrations/#servicenow)
+- Azure Devops
+- Bitbucket
+- Freshservice
+- GitHub
+- GitLab Boards
+- Jira
+- ServiceNow
+- Shortcut
 
 ## Opening the Integrations page
 
@@ -69,11 +72,14 @@ Project Integrations will have varying requirements for how DefectDojo will need
 
 For the complete list of requirements, please open the vendor specific pages below:
 
-- [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
-- [GitHub](/issue_tracking/pro_integration/integrations/#github)
-- [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
-- [Freshservice](/issue_tracking/pro_integration/integrations/#freshservice)
-- ServiceNow (Coming Soon)
+- [Azure Devops](/issue_tracking/pro_integration/integrations_toolreference/#azure-devops-boards)
+- [Bitbucket](/issue_tracking/pro_integration/integrations_toolreference/#bitbucket)
+- [Freshservice](/issue_tracking/pro_integration/integrations_toolreference/#freshservice)
+- [GitHub](/issue_tracking/pro_integration/integrations_toolreference/#github)
+- [GitLab Boards](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)
+- [Jira](/issue_tracking/pro_integration/integrations_toolreference/#jira)
+- [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)
+- [Shortcut](/issue_tracking/pro_integration/integrations_toolreference/#shortcut)
 
 ## Error Handling and Debugging
 

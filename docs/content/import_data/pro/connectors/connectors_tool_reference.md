@@ -19,6 +19,15 @@ Each tool has a different API configuration, and this guide is intended to help 
 
 Whenever possible, we recommend creating a new 'DefectDojo Bot' account within your Security Tool which will only be used by the Connector. This will help you better differentiate between actions manually taken by your team, and automated actions taken by the Connector.
 
+# **Asset Connectors**
+
+Most Connectors import **findings** from a security tool. **Asset Connectors** work differently: they import your **asset inventory** instead. An Asset Connector enumerates the assets that exist in an external platform (for example, the repositories in a GitLab group) and automatically creates and maintains the matching **Products** (Assets) and **Product Types** (Organizations) in DefectDojo. No findings are imported by an Asset Connector.
+
+* **Discover** and **Sync** both reconcile the asset list. New assets appear as `NEW` Records; once mapped (automatically, if auto-mapping is enabled), DefectDojo creates the Product and groups it under a Product Type derived from the tool — for example, the GitLab namespace or the Azure DevOps project.
+* If an asset is later removed upstream (for example, a repository is deleted), its mapped Record is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
+
+Azure DevOps, Bitbucket, GitHub, GitLab, and Jira Service Management Assets are Asset Connectors. All other Connectors listed below import findings.
+
 # **Supported Connectors**
 
 ## **Akamai API Security**
@@ -97,6 +106,26 @@ Once you have created your IAM user and assigned it the necessary permissions us
 
 DefectDojo can pull Findings from more than one region using Security Hub's **cross\-region aggregation** feature. If [cross\-region aggregation](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html) is enabled, you should supply the API endpoint for your "**Aggregation Region**". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account ID and the region name.
 
+## **Azure DevOps**
+
+The Azure DevOps connector is an **Asset Connector**: it enumerates the git repositories in every project of your Azure DevOps organization and creates a DefectDojo Asset for each repository, grouped into Organizations by Azure DevOps project. No findings are imported.
+
+#### Prerequisites
+
+You will need a Personal Access Token (PAT) for the organization. We recommend creating the token from a dedicated service account. Only read scopes are required:
+
+1. In Azure DevOps, open **User settings \> Personal access tokens \> New Token**.
+2. Click **Show all scopes**, then select **Code: Read** and **Project and Team: Read**.
+
+Only Azure DevOps Services (dev.azure.com) is supported; on-premise Azure DevOps Server is not supported at this time.
+
+#### Connector Mappings
+
+1. Enter your organization URL in the **Location** field: `https://dev.azure.com/{your-organization}`. Legacy `https://{your-organization}.visualstudio.com` URLs are also accepted, and any extra path segments (for example, a link to a specific project) are ignored.
+2. Enter the PAT in the **Secret** field.
+
+Each repository becomes a Record named after the repository, grouped by its Azure DevOps **project**. Disabled repositories are skipped, so disabling or deleting a repository flags its Record as `MISSING` on the next Sync.
+
 ## **Backstage**
 
 The Backstage connector is an **asset connector**: instead of importing Findings, it pulls your [Backstage](https://backstage.io) Software Catalog into DefectDojo and keeps your Product hierarchy and team ownership in sync with it. It is designed for organizations that maintain their service inventory and org structure in Backstage and want DefectDojo to mirror that structure instead of maintaining it by hand.
@@ -157,6 +186,28 @@ With **Auto\-Map** enabled, a single Discover \+ Sync builds the complete Produc
 
 **A note on the reverse direction:** displaying DefectDojo findings and grades *inside* Backstage (on entity pages) is a natural follow\-on that would be built as a Backstage frontend plugin consuming the DefectDojo REST API — it is deliberately out of scope for this connector, which only pulls catalog data into DefectDojo.
 
+## **Bitbucket**
+
+The Bitbucket connector is an **Asset Connector**: it enumerates the repositories in the Bitbucket Cloud workspaces you name and creates a DefectDojo Asset for each repository, grouped into Organizations by Bitbucket project. No findings are imported.
+
+#### Prerequisites
+
+Bitbucket Cloud requires a **scoped** Atlassian API token — classic (unscoped) Atlassian API tokens are rejected by Bitbucket with an "API Token provided has no Bitbucket scopes" error.
+
+1. Go to [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens) and choose **Create API token with scopes**.
+2. Select the **Bitbucket** app, then grant the read scopes: `read:account:bitbucket`, `read:workspace:bitbucket`, `read:repository:bitbucket`, and `read:project:bitbucket`.
+
+Only Bitbucket Cloud (bitbucket.org) is supported. Bitbucket Server reached end of life in 2024, and Bitbucket Data Center is not supported.
+
+#### Connector Mappings
+
+1. Enter `https://bitbucket.org` in the **Location** field.
+2. Enter the Atlassian account email the token belongs to in the **Email** field.
+3. Enter the scoped API token in the **Secret** field.
+4. Enter one or more workspace slugs (comma-separated) in the **Workspace Slugs** field. This field is required: Bitbucket's scoped API tokens cannot list workspaces automatically, so DefectDojo needs to be told which workspaces to read.
+
+Each repository becomes a Record named after the repository, grouped by its Bitbucket **project**.
+
 ## **BurpSuite**
 
 DefectDojo’s Burp connector calls Burp’s GraphQL API to fetch data. 
@@ -214,6 +265,46 @@ DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
 3. Enter your tenant location in the **Location** field. This URL is formatted as follows:  
 ​`https://<your-region>.ast.checkmarx.net/` . Your Region can be found at the beginning of your Checkmarx URL when using the Checkmarx app. **<https://ast.checkmarx.net>** is the primary US server (which has no region prefix).
 
+## **Cloudflare**
+
+The Cloudflare connector imports **Security Center insights** — security posture issues Cloudflare surfaces about your account and zones, such as a missing DMARC record, DNSSEC not being enabled, or a certificate problem. DefectDojo creates a Record for each zone (domain) that has open insights, plus an account-level Record for insights that are not tied to a specific zone.
+
+#### Prerequisites
+
+You will need a Cloudflare **API token** (not the legacy Global API Key). Create one under **My Profile > API Tokens > Create Token** in the Cloudflare dashboard. The quickest option is the **"Read all resources"** template; for a least-privilege token, grant **Zone > Zone > Read** (all zones) plus account-level read access for Security Center.
+
+#### Connector Mappings
+
+1. Enter `https://api.cloudflare.com/client/v4` in the **Location** field.
+2. Enter the API token in the **Secret** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+DefectDojo auto-discovers the accounts and zones the token can access — no account ID is required. Only open (active, non-dismissed) insights are imported, so insights you resolve or dismiss in Cloudflare are automatically mitigated in DefectDojo on the next sync.
+
+## **Contrast**
+
+The Contrast connector uses the Contrast Assess REST API to import application vulnerabilities. DefectDojo discovers the applications in your Contrast organization and creates a Record for each one.
+
+#### Prerequisites
+
+You will need four values from Contrast. We recommend creating a dedicated service account so automated activity is easy to distinguish from your team's manual actions. In the Contrast UI, under **User Settings > Profile > Your Keys**, you can find:
+
+* Your organization **API Key**.
+* Your personal **Service Key**.
+* The **username** the credentials belong to (the account's login email).
+* Your **Organization ID** — the UUID of the organization to import from, also shown under **Organization Settings**.
+
+#### Connector Mappings
+
+1. Enter the base URL you use to access Contrast in the **Location** field — for the hosted product this is typically `https://app.contrastsecurity.com` (or your regional / self-hosted Team Server URL).
+2. Enter the account login email in the **Username** field.
+3. Enter the organization **API Key** in the **API Key** field.
+4. Enter the personal **Service Key** in the **Service Key** field.
+5. Enter the **Organization ID** (UUID) in the **Organization ID** field.
+6. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Contrast application becomes a Record, and its vulnerabilities are imported as findings.
+
 ## **CrowdStrike Falcon**
 
 The CrowdStrike Falcon connector imports **Spotlight vulnerabilities** and **EDR detections** from the Falcon platform, as two separate finding types (`CrowdStrike:Spotlight` and `CrowdStrike:Detections`). DefectDojo creates a Record for each Falcon **host**.
@@ -249,6 +340,158 @@ To generate a Dependency\-Track API key:
 5. Click "**Select**" to confirm and save these permissions.
 
 For more information, see **[Dependency\-Track Documentation](https://docs.dependencytrack.org/integrations/rest-api/)**.
+
+## **Docker Scout**
+
+The Docker Scout connector uses the Docker Scout metrics exporter API to report the vulnerability posture of your organization's images. DefectDojo discovers each Docker Scout stream (your runtime environments) and imports a summary of the vulnerabilities and policy compliance for each.
+
+#### Prerequisites
+
+You will need a Docker personal access token created by an **owner** of a Docker organization that is **enrolled in Docker Scout**. The metrics exporter is an organization-level feature, so a personal account, or an organization that is not enrolled in Docker Scout, will not return data.
+
+Create the token from your Docker account settings under **Personal access tokens**, and note your Docker **organization namespace**, which you will also need.
+
+#### Connector Mappings
+
+1. Enter `https://api.scout.docker.com` in the **Location** field.
+2. Enter your Docker personal access token in the **Secret** field.
+3. Enter your Docker **Organization** namespace.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity will not be imported.
+
+DefectDojo creates a separate Record for each Docker Scout stream, and imports one finding per severity for the vulnerabilities Docker Scout counts in that stream, plus a finding for each image that fails your Docker Scout policy. Docker Scout's metrics API reports aggregate counts rather than individual CVEs, so these findings summarize the posture of a stream. Open the stream in Docker Scout for per-image and per-CVE detail.
+
+See the [Docker Scout documentation](https://docs.docker.com/scout/) for more information.
+
+## **GitGuardian**
+
+The GitGuardian connector uses the GitGuardian REST API to import **secret incidents** — exposed credentials GitGuardian has detected across your monitored sources. DefectDojo creates a Record for each monitored source (repository or perimeter) that currently has open incidents, and imports each open incident as a finding.
+
+For your security, the connector imports only incident **metadata** — the detector, severity, validity, status, and a link back to GitGuardian. The exposed secret value itself is never retrieved or stored by DefectDojo; follow the link in each finding to review the affected locations in GitGuardian.
+
+#### Prerequisites
+
+You will need a GitGuardian API key. We recommend a **Service Account token** (rather than a personal access token) so automated activity is easy to distinguish. Create it under **API** in the GitGuardian dashboard and grant these read scopes:
+
+* `incidents:read`
+* `sources:read`
+
+#### Connector Mappings
+
+1. Enter your GitGuardian API URL in the **Location** field: `https://api.gitguardian.com` for the SaaS platform, or your self-hosted instance's API URL.
+2. Enter the API key in the **Secret** field.
+
+Only **open** incidents (status `TRIGGERED` or `ASSIGNED`) are imported; incidents you resolve or ignore in GitGuardian are automatically mitigated in DefectDojo on the next sync. A confirmed-live secret (validity *valid*) is imported as a verified finding.
+
+## **GitHub Advanced Security**
+
+The GitHub Advanced Security connector imports **code scanning**, **Dependabot**, and **secret scanning** alerts from GitHub, as three separate finding types (`GitHub:CodeScanning`, `GitHub:Dependabot`, and `GitHub:SecretScanning`). DefectDojo discovers every non\-archived repository in the configured organization and creates a Record for each one.
+
+#### Prerequisites
+
+GitHub Advanced Security features must be enabled for the repositories you want to import. The connector authenticates with a GitHub **personal access token**:
+
+1. In GitHub, open **Settings \> Developer settings \> Personal access tokens** and create a token owned by (or with access to) the target organization.
+2. Grant it read access to the security alerts: a *fine\-grained* token needs **Read\-only** access to **Code scanning alerts**, **Dependabot alerts**, and **Secret scanning alerts** on the organization's repositories; a *classic* token needs the **`repo`** and **`security_events`** scopes.
+3. Confirm the token's owner can see the repositories you intend to import — the connector only sees repositories the token can access.
+
+#### Connector Mappings
+
+1. Enter `https://api.github.com` in the **Location** field. For GitHub Enterprise Server, use `https://<your-host>/api/v3`.
+2. Enter the organization login in the **Organization** field.
+3. Enter the personal access token in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each non\-archived repository becomes a Record, queried across the three alert families for open alerts. An alert family that is not enabled for a repository is skipped rather than reported as resolved, so disabled features do not cause false closures.
+
+## **GitLab**
+
+The GitLab connector is an **Asset Connector**: it enumerates every project (repository) your token can access and creates a DefectDojo Asset for each one, grouped into Organizations by GitLab namespace (group or user). No findings are imported.
+
+#### Prerequisites
+
+You will need a Personal Access Token with the **read_api** scope. We recommend creating the token from a dedicated service account; the connector lists the projects that account is a member of.
+
+#### Connector Mappings
+
+1. Enter your GitLab URL in the **Location** field: `https://gitlab.com`, or the base URL of your self-hosted instance.
+2. Enter the Personal Access Token in the **Secret** field.
+
+Each project becomes a Record named after the project, grouped by its **namespace**. Projects that are pending deletion in GitLab (deleted by a user, but not yet purged by GitLab's background job) are excluded automatically, so deleting a project flags its Record as `MISSING` on the next Sync instead of leaving behind a renamed ghost asset.
+
+## **Google Cloud Security Command Center**
+
+The Google Cloud SCC connector uses the Security Command Center v2 REST API to import active security findings from your Google Cloud organization, folder, or project. DefectDojo creates a Record for each Google Cloud **project** that has open findings.
+
+#### Prerequisites
+
+Security Command Center must be **activated** on your organization (the Standard tier is free). You will then need a service account that can list findings, and a JSON key for it:
+
+1. In Google Cloud, create a service account — a dedicated one for DefectDojo is recommended.
+2. Grant it the **Security Center Findings Viewer** role (`roles/securitycenter.findingsViewer`) at the scope you want to import (organization, folder, or project).
+3. Create a **JSON key** for the service account and download it.
+
+#### Connector Mappings
+
+1. Leave the **Location** field at the default `https://securitycenter.googleapis.com` unless you use a non-standard endpoint.
+2. In the **Parent Resource** field, enter the scope to import from: `organizations/{id}`, `folders/{id}`, or `projects/{id}`.
+3. Paste the full contents of the service-account **JSON key** file into the **Service Account Key** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Only `ACTIVE`, un-muted findings are imported, so findings you deactivate or mute in SCC are automatically mitigated in DefectDojo on the next sync. Each finding's affected GCP project becomes its Record.
+
+## **Group-IB ASM**
+
+The Group-IB ASM (Attack Surface Management) connector uses the Group-IB ASM REST API to pull external attack-surface **issues** (findings) into DefectDojo. DefectDojo discovers each Group-IB **company/tenant** as a separate Record and imports that company's issues on a scheduled, incremental basis. The asset each issue relates to (a domain, IP, or URL) is attached to the resulting finding as an **Endpoint**.
+
+#### Prerequisites
+
+You will need your Group-IB ASM login and an API key. We recommend creating a dedicated service account for DefectDojo so that automated activity can be distinguished from manual team actions.
+
+To generate an API key:
+
+1. Open Group-IB Attack Surface Management, click **Help** in the lower-left corner, and select **API**.
+2. Click **Generate API Key** (top-right, under your username).
+3. Enter your SSO password and click **Next**, then click **Copy token**.
+4. Store the key in a secret manager and plan for regular rotation.
+
+#### Connector Mappings
+
+Group-IB ASM authenticates with HTTP Basic Auth, where the username is your ASM login and the password is your API key. **Both values are required** — the API key alone is not sufficient.
+
+1. Enter `https://asm.group-ib.com` in the **Location** field. This is the same for all Group-IB ASM tenants.
+2. Enter your ASM login (usually an email address) in the **Username** field.
+3. Enter your API key in the **API Key** (Secret) field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity are not imported.
+
+DefectDojo maps each Group-IB **company** as a separate Record, using the company ID as the identifier. On the first Sync, DefectDojo backfills recent issue history; subsequent Syncs are incremental, pulling only issues changed since the last Sync (tracked by each issue's most recent `lastSeen` timestamp).
+
+#### Scoping to a single company (optional)
+
+By default, the connector automatically discovers the companies available to your API credentials (via the ASM `clients` endpoint) and creates one Record per company. This is the recommended setup and requires no extra configuration.
+
+If the `clients` endpoint is not available for your tenant — for example, when it is restricted to partner/MSP accounts — the connector can be scoped to one company by supplying its **company ID** as a `company_id` tool-specific field on the connector configuration. When `company_id` is set, DefectDojo uses that company directly instead of enumerating companies. Leave it unset to use automatic discovery.
+
+See the Group-IB ASM REST API manual (available in-product via **Help → API**) for more information.
+
+## **HackerOne**
+
+The HackerOne connector uses the HackerOne REST API to import reports from your bug bounty or vulnerability disclosure program. DefectDojo creates a Record for each program the token can access and imports its reports as findings.
+
+#### Prerequisites
+
+The connector uses HackerOne's **customer** API, which requires an **organization API token** — a personal token from your user settings only works against the hacker API and will not authenticate here.
+
+1. In HackerOne, go to **Organization Settings > API Tokens**.
+2. Create a token and note both the **identifier** and the **token** value. Read access to the program is sufficient.
+
+#### Connector Mappings
+
+1. Enter `https://api.hackerone.com` in the **Location** field.
+2. Enter the token **identifier** in the **API Token Identifier** field.
+3. Enter the token value in the **API Token** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each program becomes a Record, and its reports are imported as findings with the HackerOne severity rating preserved.
 
 ## **Have I Been Pwned**
 
@@ -318,6 +561,24 @@ DefectDojo maps each Artifactory **repository** as a separate Record. On first S
 
 See the [JFrog Xray REST API documentation](https://jfrog.com/help/r/jfrog-rest-apis/xray-rest-apis) for more information.
 
+## **Jira Service Management Assets**
+
+The JSM Assets connector is an **Asset Connector**: it enumerates the objects in your Jira Service Management Assets (formerly Insight) workspace and creates a DefectDojo Asset for each object, grouped into Organizations by object schema. No findings are imported.
+
+#### Prerequisites
+
+* Assets requires a **Jira Service Management Premium or Enterprise** plan. On Free or Standard plans the Assets API responds with `403 "Access to Assets API was denied"`, even though the rest of the site works.
+* The Atlassian account used must have **Jira Service Management product access** (an agent seat) on the site — site access alone is not enough.
+* Create a classic Atlassian API token at [id.atlassian.com/manage-profile/security/api-tokens](https://id.atlassian.com/manage-profile/security/api-tokens). We recommend a dedicated service account.
+
+#### Connector Mappings
+
+1. Enter your Atlassian site URL in the **Location** field: `https://{your-site}.atlassian.net`.
+2. Enter the Atlassian account email the token belongs to in the **Email** field.
+3. Enter the API token in the **Secret** field.
+
+Each Assets object becomes a Record named after the object's label, grouped by its **object schema**.
+
 ## **Microsoft Defender**
 
 The Microsoft Defender connector imports device vulnerability findings from **Microsoft Defender Vulnerability Management (MDVM)** — one finding per device / software version / CVE combination, including severity, CVSS score, exploitability level and recommended security updates. DefectDojo will discover your Defender **device groups** and create a Record for each one; devices that aren't assigned to any device group are collected under a synthetic **Unassigned** group.
@@ -347,6 +608,40 @@ The connector authenticates as a Microsoft Entra ID **app registration** using t
 
 Each Defender device group becomes a Record. Microsoft regenerates the vulnerability snapshot the connector reads roughly every 6 hours, and newly onboarded devices can take up to \~24 hours to produce their first vulnerability data — a brand\-new tenant will legitimately Sync zero findings until devices are onboarded and assessed. License activation itself can also take \~20 minutes or more to reach the API ("No active license found" errors during that window resolve on their own).
 
+## **Microsoft Defender for Cloud**
+
+The Microsoft Defender for Cloud connector imports vulnerability findings from **Microsoft Defender Vulnerability Management (MDVM)** as surfaced by Defender for Cloud — both **server** findings (Azure VM operating\-system and installed\-software CVEs) and **container\-registry** findings (container image CVEs), including severity, CVSS score, the affected package or image, and remediation. DefectDojo discovers the Azure **subscriptions** your service principal can read and creates a Record for each enabled subscription.
+
+**Please note:** this Connector is distinct from the **Microsoft Defender** connector, which imports device findings from the Defender for Endpoint API. Defender for Cloud is an Azure product with a different API surface (Azure Resource Manager / Resource Graph) and permission model (Azure RBAC). Run whichever matches where your findings live — or both, if you use both products.
+
+#### Prerequisites
+
+You need one or more **Azure subscriptions with Microsoft Defender for Cloud enabled**, with the relevant Defender plans turned on for the resources you want scanned (under **Microsoft Defender for Cloud \> Environment settings**, then select your subscription):
+
+* **Defender for Servers (Plan 2)** — Azure VM operating\-system and software CVE findings (agentless vulnerability scanning).
+* **Defender for Containers** — container\-registry image CVE findings.
+
+SQL vulnerability\-assessment and configuration/posture findings are intentionally **not** imported — this connector imports CVE vulnerabilities only.
+
+The connector authenticates as a Microsoft Entra ID **app registration** using the client credentials flow:
+
+1. In the [Azure portal](https://portal.azure.com), open **App registrations \> New registration**. Name it (for example `defectdojo-connector`), leave the defaults, and select **Register**.
+2. On the app's **Overview** page, note the **Application (client) ID** and **Directory (tenant) ID**.
+3. Open **Certificates & secrets \> New client secret**, set an expiry, and copy the secret **Value** immediately (it is shown only once). The Connector stops working when the secret expires, so note the date.
+4. Grant the app read access to each subscription you want to import: open **Subscriptions**, select your subscription, then **Access control (IAM) \> Add \> Add role assignment**. Select the **Security Reader** role (or **Reader**), and on the **Members** tab assign it to the app you created — search for it by the app's **name** or **object ID**, as the picker does not match the client ID. Repeat for every subscription.
+
+Unlike the device\-based Microsoft Defender connector, no API permissions or admin consent are required: Defender for Cloud access is governed entirely by the Azure RBAC role assignment above.
+
+#### Connector Mappings
+
+1. Enter `https://management.azure.com` in the **Location** field. (For sovereign clouds, use the matching ARM endpoint, for example `https://management.usgovcloudapi.net`.)
+2. Enter the **Directory (tenant) ID** in the **Tenant ID** field.
+3. Enter the **Application (client) ID** in the **Client ID** field.
+4. Enter the client secret value in the **Client Secret** field.
+5. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each enabled Azure subscription becomes a Record. Findings are read through Azure Resource Graph, so they surface promptly once Defender for Cloud has scanned your resources — but the scans themselves run on Microsoft's schedule: container\-registry images are usually scanned within an hour of being pushed, while a VM's first agentless vulnerability scan can take several hours. A newly enabled subscription will legitimately Sync zero findings until its resources have been scanned.
+
 ## Probely
 
 This connector uses the Probely REST API to fetch data.
@@ -358,6 +653,40 @@ This connector uses the Probely REST API to fetch data.
 
 You can find an API key under the User \> API Keys menu in Probely.  
 See [Probely documentation](https://help.probely.com/en/articles/8592281-how-to-generate-an-api-key) for more info.
+
+## Qualys
+
+The Qualys connector imports **VMDR host vulnerability detections** — each joined with its Qualys KnowledgeBase (QID) metadata — from the Qualys Cloud Platform. DefectDojo creates a Record for each Qualys **host** in your subscription.
+
+#### Prerequisites
+
+A Qualys user account with **VMDR API access**, and your subscription's **API server (platform) URL** — this differs per subscription. Find it in the Qualys UI under **Help \> About**, or on the Qualys [Platform Identification](https://www.qualys.com/platform-identification/) page (for example `https://qualysapi.qualys.com` for US Platform 1, or `https://qualysapi.qg2.apps.qualys.com` for US Platform 2).
+
+#### Connector Mappings
+
+1. Enter your Qualys API server URL in the **Location** field (for example `https://qualysapi.qualys.com`).
+2. Enter the Qualys API username in the **Username** field.
+3. Enter the Qualys API password in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Qualys host becomes a Record. Detections Qualys has marked **Fixed** are excluded, so reimport closes remediated findings.
+
+## **Rapid7 InsightVM**
+
+The Rapid7 InsightVM connector imports asset vulnerability findings from your InsightVM **Security Console** (API v3), enriched with the console's global vulnerability catalog. DefectDojo creates a Record for each InsightVM **site**.
+
+#### Prerequisites
+
+Network access from DefectDojo to your Security Console, and a console **user account** — its login is used for HTTP Basic authentication. The console API is served on port **3780** by default.
+
+#### Connector Mappings
+
+1. Enter your Security Console URL, including the port, in the **Location** field — for example `https://console.example.com:3780`.
+2. Enter the console username in the **Username** field.
+3. Enter the console password in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each InsightVM site becomes a Record; the connector walks the site's assets and imports their vulnerable findings.
 
 ## **Semgrep**
 
@@ -372,6 +701,23 @@ Enter `https://semgrep.dev/api/v1/` in the **Location** field.
 "Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens](https://semgrep.dev/orgs/-/settings/tokens))
 
 See [Semgrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.
+
+## **Shodan**
+
+The Shodan connector uses the Shodan REST API to import the vulnerabilities (CVEs) Shodan has observed on your internet-exposed hosts. You provide a Shodan search query that scopes the import to your own assets; DefectDojo creates a Record for each matching host and imports its CVEs as findings.
+
+#### Prerequisites
+
+You will need a Shodan API key, found on your Shodan **Account** page. Host search with vulnerability data requires a Shodan membership or a paid API plan — the free tier cannot page through search results.
+
+#### Connector Mappings
+
+1. Enter `https://api.shodan.io` in the **Location** field.
+2. Enter your Shodan API key in the **API Key** field.
+3. In the **Search Query** field, enter a Shodan query that scopes the import to your organization's assets — for example `hostname:example.com`, `net:203.0.113.0/24`, or `org:"Example Inc"`. Only hosts matching this query are imported, so keep it scoped to infrastructure you own.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each matching host becomes a Record, and each CVE Shodan detected on that host's exposed services is imported as a finding — severity is derived from the CVSS score, with EPSS and CISA KEV context included where available. Each page of search results consumes one Shodan query credit.
 
 ## SonarQube
 
@@ -414,6 +760,23 @@ On\-premise Tenable Connectors are not available at this time.
 2. Enter a valid **API key** in the Secret field.
 
 See [Tenable's API Documentation](https://docs.tenable.com/vulnerability-management/Content/Settings/my-account/GenerateAPIKey.htm) for more info.
+
+## **Veracode**
+
+The Veracode connector imports application findings from the Veracode platform, split by scan type into **SAST**, **DAST**, **SCA**, and **Manual** finding types. DefectDojo creates a Record for each Veracode **application**.
+
+#### Prerequisites
+
+Generate a Veracode **API credential** for an account that can see the applications you want to import: in the Veracode Platform, open your account menu \> **API Credentials** and select **Generate API Credentials** (see [Managing Veracode API credentials](https://docs.veracode.com/r/c_api_credentials3)). Copy both the **API ID** and the **API Secret Key** — the secret is shown only once.
+
+#### Connector Mappings
+
+1. Enter the Veracode API base URL in the **Location** field: `https://api.veracode.com` (commercial region), `https://api.veracode.eu` (European region), or `https://api.veracode.us` (US federal region).
+2. Enter the API ID in the **API ID** field.
+3. Enter the API secret key in the **Secret** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Veracode application becomes a Record. Only **open** findings are imported, so reimport closes findings Veracode reports as resolved.
 
 ## **Wazuh**
 
