@@ -21,7 +21,7 @@
 [[main]]
   name = "Connections"
   url = "/connections/about_connections/"
-  weight = 12
+  weight = 13
 
 [[main]]
   name = "Metrics & Reports"
