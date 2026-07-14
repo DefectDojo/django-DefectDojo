@@ -99,6 +99,8 @@ def _make_locations(product: Product, n: int) -> None:
 @override_settings(
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 class TagInheritancePerfBaselines(DojoTestCase):
 
@@ -135,7 +137,7 @@ class TagInheritancePerfBaselines(DojoTestCase):
         # Per-product flag is also set in _make_product_with_findings as a
         # belt-and-braces measure (tests should not be flag-coupled).
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 
@@ -405,10 +407,10 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 53
     EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 53
 
-    EXPECTED_CREATE_ONE_FINDING_V2 = 55
-    EXPECTED_CREATE_ONE_FINDING_V3 = 55
-    EXPECTED_CREATE_100_FINDINGS_V2 = 3124
-    EXPECTED_CREATE_100_FINDINGS_V3 = 3124
+    EXPECTED_CREATE_ONE_FINDING_V2 = 56
+    EXPECTED_CREATE_ONE_FINDING_V3 = 56
+    EXPECTED_CREATE_100_FINDINGS_V2 = 3224
+    EXPECTED_CREATE_100_FINDINGS_V3 = 3224
 
     EXPECTED_FINDING_ADD_USER_TAG_V2 = 17
     EXPECTED_FINDING_ADD_USER_TAG_V3 = 17
@@ -433,6 +435,8 @@ class TagInheritancePerfBaselines(DojoTestCase):
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
     SECURE_SSL_REDIRECT=False,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 @versioned_fixtures
 class TagInheritanceImportPerfBaselines(DojoAPITestCase):
@@ -457,7 +461,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     @classmethod
     def setUpTestData(cls):
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 
@@ -593,9 +597,9 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Multiple-CWEs feature: +2 import / +2 reimport-no-change (Finding_CWE
     # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
     # existing Finding_CWE rows for each changed finding).
-    EXPECTED_ZAP_IMPORT_V2 = 289
-    EXPECTED_ZAP_IMPORT_V3 = 313
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 76
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 88
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 158
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187
+    EXPECTED_ZAP_IMPORT_V2 = 294
+    EXPECTED_ZAP_IMPORT_V3 = 318
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 79
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 161
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 190
