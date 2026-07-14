@@ -126,6 +126,24 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # product 3: Security Podcast
 
 
+# Module-level candidate-filter hooks for FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD.
+# get_custom_method resolves the setting to a dotted path and imports it, so these must be
+# importable at module scope.
+_fp_candidate_filter_calls = []
+
+
+def _drop_all_fp_candidates(finding, candidates):
+    """Hook that discards every candidate — simulates a plugin rejecting all matches."""
+    _fp_candidate_filter_calls.append((finding, list(candidates)))
+    return []
+
+
+def _passthrough_fp_candidates(finding, candidates):
+    """Hook that keeps every candidate — FP history must behave exactly as with no hook."""
+    _fp_candidate_filter_calls.append((finding, list(candidates)))
+    return candidates
+
+
 @versioned_fixtures
 @override_settings(SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestFalsePositiveHistoryLogic(DojoTestCase):
@@ -176,6 +194,46 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # Assert that both findings belongs to the same test and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+
+    # Candidate-filter hook (FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD) #
+
+    @override_settings(
+        FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD="unittests.test_false_positive_history_logic._drop_all_fp_candidates",
+    )
+    def test_fp_history_hook_can_suppress_matches(self):
+        # A plugin hook that drops all candidates must prevent FP replication even when
+        # findings share a hash_code with an existing false-positive finding.
+        _fp_candidate_filter_calls.clear()
+        find_created_before_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_before_mark.save()
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.save()
+        find_created_after_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_after_mark.save()
+        # Hook discarded every candidate, so neither copy is marked despite the shared hash_code.
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        self.assert_finding(find_created_after_mark, false_p=False, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        # And the hook was actually invoked.
+        self.assertTrue(_fp_candidate_filter_calls)
+
+    @override_settings(
+        FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD="unittests.test_false_positive_history_logic._passthrough_fp_candidates",
+    )
+    def test_fp_history_hook_passthrough_matches_default(self):
+        # A passthrough hook must leave default FP-history behavior unchanged.
+        _fp_candidate_filter_calls.clear()
+        find_created_before_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_before_mark.save()
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.save()
+        find_created_after_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_after_mark.save()
+        # Identical outcome to test_fp_history_equal_hash_code_same_test — both copies marked.
+        self.assert_finding(find_created_before_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        self.assertTrue(_fp_candidate_filter_calls)
 
     # Finding 2 in Product 2, Engagement 1, Test 3
     def test_fp_history_equal_hash_code_same_test_non_retroactive(self):
