@@ -1,7 +1,7 @@
 # from unittest import skip
 import logging
 
-from dojo.jira_link import helper as jira_helper
+from dojo.jira import helper as jira_helper
 from dojo.models import Product
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 

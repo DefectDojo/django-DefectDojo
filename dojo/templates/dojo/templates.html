@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load navigation_tags %}
 {% load authorization_tags %}
 {% block content %}
@@ -17,7 +18,7 @@
                         {% endif %}
                         <div class="dropdown pull-right">
                             <button id="show-filters" aria-label="Filters" data-toggle="collapse" data-target="#the-filters" class="btn btn-primary toggle-filters"> <i class="fa-solid fa-filter"></i> <i class="caret"></i> </button>
-                            {% if "Finding_Add"|has_global_permission and not add_from_template and not apply_template %}
+                            {% if "add"|has_global_permission and not add_from_template and not apply_template %}
                                 <a href="{% url 'add_template' %}" class="btn btn-primary"
                                    title="Add Finding Template">
                                     <i class="fa-solid fa-plus"></i>
@@ -42,7 +43,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form|has_active_filters %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
@@ -78,16 +79,14 @@
                                 <td>
                                     {% if add_from_template %}
                                         <a href="{% url 'add_finding_from_template' tid finding.id %}"
-                                           class="template-popover" data-placement="auto bottom" data-toggle="popover"
-                                           data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
+                                           class="template-popover has-popover" title="{{ finding.title|truncatechars:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </a>
                                     {% elif apply_template %}
                                         <a href="{% url 'choose_finding_template_options' finding.id fid %}"
-                                           class="template-popover" data-placement="auto bottom" data-toggle="popover"
-                                           data-trigger="hover" title="{{ finding.title|truncatechars_html:100 }}"
+                                           class="template-popover has-popover" title="{{ finding.title|truncatechars:100 }}"
                                            data-content="{{ finding.description|truncatechars_html:500 }}">
                                             {{ finding.title }}
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
@@ -122,11 +121,11 @@
                                     </td>
                                 {% else %}
                                     <td nowrap="nowrap">
-                                        {% if "Finding_Edit"|has_global_permission %}
+                                        {% if "edit"|has_global_permission %}
                                         <a href="{% url 'edit_template' finding.id %}"
                                             class="btn btn-sm btn-secondary">Edit</a>
                                         {% endif %}
-                                        {% if "Finding_Delete"|has_global_permission %}
+                                        {% if "delete"|has_global_permission %}
                                         <form method="post" action="{% url 'delete_template' finding.id %}"
                                               style="display: inline" class="form-inline form">
                                             {% csrf_token %}
@@ -161,7 +160,7 @@
                 return confirm('Are you sure you want to delete this template?')
             });
 
-            $('[data-toggle="popover"]').popover();
+            /* popovers now use CSS has-popover class — no JS init needed */
 
             function JsonFileDownload() {
             fetch('template/export')

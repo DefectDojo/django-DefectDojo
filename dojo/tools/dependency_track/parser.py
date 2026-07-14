@@ -1,88 +1,17 @@
 import json
 import logging
 
+from dateutil import parser
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+from dojo.utils import parse_cvss_data
 
 logger = logging.getLogger(__name__)
 
 
 class DependencyTrackParser:
-
-    """
-    A class that can be used to parse the JSON Finding Packaging Format (FPF) export from OWASP Dependency Track.
-
-    See here for more info on this JSON format: https://docs.dependencytrack.org/integrations/file-formats/
-
-    A typical Finding Packaging Format (FPF) export looks like the following:
-
-    {
-        "version": "1.0",
-        "meta" : {
-            "application": "Dependency-Track",
-            "version": "3.4.0",
-            "timestamp": "2018-11-18T23:31:42Z",
-            "baseUrl": "http://dtrack.example.org"
-        },
-        "project" : {
-            "uuid": "ca4f2da9-0fad-4a13-92d7-f627f3168a56",
-            "name": "Acme Example",
-            "version": "1.0",
-            "description": "A sample application"
-        },
-        "findings" : [
-            {
-                "component": {
-                    "uuid": "b815b581-fec1-4374-a871-68862a8f8d52",
-                    "name": "timespan",
-                    "version": "2.3.0",
-                    "purl": "pkg:npm/timespan@2.3.0"
-                },
-                "vulnerability": {
-                    "uuid": "115b80bb-46c4-41d1-9f10-8a175d4abb46",
-                    "source": "NPM",
-                    "vulnId": "533",
-                    "title": "Regular Expression Denial of Service",
-                    "subtitle": "timespan",
-                    "severity": "LOW",
-                    "severityRank": 3,
-                    "cweId": 400,
-                    "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
-                    "description": "Affected versions of `timespan`...",
-                    "recommendation": "No direct patch is available..."
-                },
-                "analysis": {
-                    "state": "NOT_SET",
-                    "isSuppressed": false
-                },
-                "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:b815b581-fec1-4374-a871-68862a8f8d52:115b80bb-46c4-41d1-9f10-8a175d4abb46"
-            },
-            {
-                "component": {
-                    "uuid": "979f87f5-eaf5-4095-9d38-cde17bf9228e",
-                    "name": "uglify-js",
-                    "version": "2.4.24",
-                    "purl": "pkg:npm/uglify-js@2.4.24"
-                },
-                "vulnerability": {
-                    "uuid": "701a3953-666b-4b7a-96ca-e1e6a3e1def3",
-                    "source": "NPM",
-                    "vulnId": "48",
-                    "title": "Regular Expression Denial of Service",
-                    "subtitle": "uglify-js",
-                    "severity": "LOW",
-                    "severityRank": 3,
-                    "cweId": 400,
-                    "cweName": "Uncontrolled Resource Consumption ('Resource Exhaustion')",
-                    "description": "Versions of `uglify-js` prior to...",
-                    "recommendation": "Update to version 2.6.0 or later."
-                },
-                "analysis": {
-                    "isSuppressed": false
-                },
-                "matrix": "ca4f2da9-0fad-4a13-92d7-f627f3168a56:979f87f5-eaf5-4095-9d38-cde17bf9228e:701a3953-666b-4b7a-96ca-e1e6a3e1def3"
-            }]
-    }
-    """
 
     def _convert_dependency_track_severity_to_dojo_severity(self, dependency_track_severity):
         """
@@ -142,23 +71,14 @@ class DependencyTrackParser:
 
         title = f"{component_name}:{version_description} affected by: {vuln_id} ({source})"
 
-        # We should collect all the vulnerability ids, the FPF format can add additional IDs as aliases
-        # we add these aliases in the vulnerability_id list making sure duplicate findings get correctly deduplicated
-        # older version of Dependency-track might not include these field therefore lets check first
-        if dependency_track_finding["vulnerability"].get("aliases"):
-            # There can be multiple alias entries
-            set_of_ids = set()
-            set_of_sources = {"cveId", "sonatypeId", "ghsaId", "osvId", "snykId", "gsdId", "vulnDbId"}
-            for alias in dependency_track_finding["vulnerability"]["aliases"]:
-                for source in set_of_sources:
-                    if source in alias:
-                        set_of_ids.add(alias[source])
-            vulnerability_id = list(set_of_ids)
-        else:
-            # The vulnId is not always a CVE (e.g. if the vulnerability is not from the NVD source)
-            # So here we set the cve for the DefectDojo finding to null unless the source of the
-            # Dependency Track vulnerability is NVD
-            vulnerability_id = [vuln_id] if source is not None and source.upper() == "NVD" else None
+        # Collect all vulnerability IDs: vulnId itself plus any aliases
+        set_of_ids = {vuln_id}
+        set_of_alias_sources = {"cveId", "sonatypeId", "ghsaId", "osvId", "snykId", "gsdId", "vulnDbId"}
+        for alias in dependency_track_finding["vulnerability"].get("aliases") or []:
+            for alias_source in set_of_alias_sources:
+                if alias_source in alias:
+                    set_of_ids.add(alias[alias_source])
+        vulnerability_id = list(set_of_ids)
 
         # Default CWE to CWE-1035 Using Components with Known Vulnerabilities if there is no CWE
         if "cweId" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["cweId"] is not None:
@@ -196,8 +116,12 @@ class DependencyTrackParser:
             vulnerability_description += "\nVulnerability Subtitle: {subtitle}".format(subtitle=dependency_track_finding["vulnerability"]["subtitle"])
         if "description" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["description"] is not None:
             vulnerability_description += "\nVulnerability Description: {description}".format(description=dependency_track_finding["vulnerability"]["description"])
+        vuln_id_from_tool = None
+        unique_id_from_tool = dependency_track_finding.get("matrix")
         if "uuid" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["uuid"] is not None:
             vuln_id_from_tool = dependency_track_finding["vulnerability"]["uuid"]
+        if "matrix" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["matrix"] is not None:
+            unique_id_from_tool = dependency_track_finding["vulnerability"]["matrix"]
 
         # Get severity according to Dependency Track and convert it to a severity DefectDojo understands
         dependency_track_severity = dependency_track_finding["vulnerability"]["severity"]
@@ -209,14 +133,41 @@ class DependencyTrackParser:
         # Get the cvss score of the vulnerabililty
         cvss_score = dependency_track_finding["vulnerability"].get("cvssV3BaseScore")
 
+        cvssv3 = None
+        if "cvssV3Vector" in dependency_track_finding["vulnerability"]:
+            cvss_vector = dependency_track_finding["vulnerability"]["cvssV3Vector"]
+            cvss_data = parse_cvss_data(cvss_vector)
+            if cvss_data:
+                cvssv3 = cvss_data.get("cvssv3")
+                cvss_score = cvss_data.get("cvssv3_score")
+
+        cvssv4 = None
+        cvssv4_score = None
+        if "cvssV4Vector" in dependency_track_finding["vulnerability"]:
+            cvss_vector = dependency_track_finding["vulnerability"]["cvssV4Vector"]
+            cvss_data = parse_cvss_data(cvss_vector)
+            if cvss_data:
+                cvssv4 = cvss_data.get("cvssv4")
+                cvssv4_score = cvss_data.get("cvssv4_score")
+
         # Use the analysis state from Dependency Track to determine if the finding has already been marked as a false positive upstream
         analysis = dependency_track_finding.get("analysis")
         is_false_positive = bool(analysis is not None and analysis.get("state") == "FALSE_POSITIVE")
+
+        if analysis is not None and analysis.get("detail"):
+            vulnerability_description += f"\nAudit Detail: {analysis['detail']}"
 
         # Get the EPSS details
         epss_percentile = dependency_track_finding["vulnerability"].get("epssPercentile", None)
 
         epss_score = dependency_track_finding["vulnerability"].get("epssScore", None)
+
+        references = dependency_track_finding["vulnerability"].get("references")
+        if references:
+            if isinstance(references, list):
+                references = "\n".join(references)
+
+        published = dependency_track_finding["vulnerability"].get("published")
 
         # Build and return Finding model
         finding = Finding(
@@ -229,7 +180,9 @@ class DependencyTrackParser:
             component_name=component_name,
             component_version=component_version,
             file_path=file_path,
+            unique_id_from_tool=unique_id_from_tool,
             vuln_id_from_tool=vuln_id_from_tool,
+            references=references,
             static_finding=True,
             dynamic_finding=False)
 
@@ -242,11 +195,27 @@ class DependencyTrackParser:
 
         if cvss_score:
             finding.cvssv3_score = cvss_score
+        if cvssv3:
+            finding.cvssv3 = cvssv3
+
+        if cvssv4_score:
+            finding.cvssv4_score = cvssv4_score
+        if cvssv4:
+            finding.cvssv4 = cvssv4
+
+        if published:
+            finding.publish_date = parser.parse(published).date()
 
         if epss_score:
             finding.epss_score = epss_score
         if epss_percentile:
             finding.epss_percentile = epss_percentile
+
+        if settings.V3_FEATURE_LOCATIONS:
+            if component_purl := dependency_track_finding.get("component", {}).get("purl"):
+                finding.unsaved_locations.append(
+                    LocationData.dependency(purl=component_purl),
+                )
 
         return finding
 

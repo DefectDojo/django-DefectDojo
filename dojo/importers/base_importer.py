@@ -1,7 +1,6 @@
 import base64
 import logging
 import time
-from collections.abc import Iterable
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -13,13 +12,12 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
-from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.importers.endpoint_manager import EndpointManager
-from dojo.importers.location_manager import LocationManager
 from dojo.importers.options import ImporterOptions
-from dojo.jira_link.helper import is_keep_in_sync_with_jira
-from dojo.location.models import AbstractLocation, Location
+from dojo.jira.services import is_keep_in_sync
+from dojo.location.models import Location
 from dojo.models import (
+    DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT,
+    DEDUPLICATION_EXECUTION_MODE_SYNC,
     # Import History States
     IMPORT_CLOSED_FINDING,
     IMPORT_CREATED_FINDING,
@@ -35,9 +33,10 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
+    Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
@@ -81,11 +80,88 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
-        if settings.V3_FEATURE_LOCATIONS:
-            self.location_manager = LocationManager()
-        else:
-            # TODO: Delete this after the move to Locations
-            self.endpoint_manager = EndpointManager()
+        self.pending_vulnerability_ids: list[Vulnerability_Id] = []
+        self.pending_vuln_id_deletes: list[int] = []
+        self.pending_burp_rr: list[BurpRawRequestResponse] = []
+        # Handles for async post-processing tasks to await in 'async_wait' mode.
+        # Set after ImporterOptions.__init__ so it stays out of field_names
+        # (and the compress/decompress cycle used for async dispatch).
+        self.post_processing_results = []
+        # Whether deduplication is known to be finished by the time the response
+        # is built. True for 'sync' (ran inline) and for 'async_wait' when all
+        # batches completed within the timeout; False for 'async' (dispatched,
+        # not awaited) or when an 'async_wait' join timed out/errored.
+        self.deduplication_complete = False
+
+    def post_processing_dispatch_kwargs(self, **kwargs):
+        """
+        Translate the resolved import execution mode into the force flags that
+        dojo_dispatch_task understands:
+        - SYNC: run inline in the web process (force_sync).
+        - ASYNC_WAIT: guarantee background dispatch (force_async) so we get a
+          handle to await, regardless of the user's profile mode.
+        - ASYNC (default): preserve historical behavior, honoring any externally
+          supplied force_sync and the user's sync mode via we_want_async.
+        """
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC:
+            return {"force_sync": True}
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+            return {"force_async": True}
+        return {"force_sync": kwargs.get("force_sync", False)}
+
+    def record_post_processing_result(self, result):
+        """
+        Remember an async post-processing dispatch handle so it can be awaited
+        later when running in the 'async_wait' execution mode. No-op for the
+        other modes (no handle is recorded by the caller).
+        """
+        if not hasattr(self, "post_processing_results"):
+            self.post_processing_results = []
+        if result is not None:
+            self.post_processing_results.append(result)
+
+    def wait_for_post_processing(self):
+        """
+        Block until the deduplication (and other batch) post-processing tasks
+        dispatched during this import have finished, so notifications and the
+        returned statistics reflect the deduplicated state.
+
+        Only relevant in the 'async_wait' execution mode; bounded by
+        settings.DEDUPLICATION_ASYNC_WAIT_TIMEOUT so a stuck/missing worker degrades
+        to the historical (respond-anyway) behavior instead of hanging.
+        """
+        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_SYNC:
+            # Batches ran inline during process_findings, so dedup is already done.
+            self.deduplication_complete = True
+            return
+        if self.deduplication_execution_mode != DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+            # 'async': post-processing was dispatched but is not awaited.
+            self.deduplication_complete = False
+            return
+        results = getattr(self, "post_processing_results", None) or []
+        if not results:
+            # Nothing was dispatched (e.g. empty import) — dedup is trivially done.
+            self.deduplication_complete = True
+            return
+        timeout = getattr(settings, "DEDUPLICATION_ASYNC_WAIT_TIMEOUT", 60)
+        logger.debug("async_wait: waiting for %d post-processing task(s) (timeout=%ss)", len(results), timeout)
+        start = time.monotonic()
+        success = True
+        for result in results:
+            if result is None or not hasattr(result, "get"):
+                continue
+            try:
+                result.get(timeout=timeout, propagate=False)
+            except Exception as e:
+                logger.warning(
+                    "async_wait: error/timeout after %.2fs waiting for post-processing task: %s",
+                    time.monotonic() - start, e,
+                )
+                success = False
+        elapsed = time.monotonic() - start
+        logger.debug("async_wait: waited %.2fs for %d post-processing task(s) (success=%s)", elapsed, len(results), success)
+        self.deduplication_complete = success
+        self.post_processing_results = []
 
     def check_child_implementation_exception(self):
         """
@@ -206,33 +282,18 @@ class BaseImporter(ImporterOptions):
         # only if they are different. This is to support meta format like SARIF
         # so a report that have the label 'CodeScanner' will be changed to 'CodeScanner Scan (SARIF)'
         test_raw = tests[0]
-        test_type_name = self.scan_type
         # Create a new test if it has not already been created
         if not self.test:
-            # Determine if we should use a custom test type name
-            if test_raw.type:
-                # If test_raw.type equals scan_type, use scan_type directly
-                if test_raw.type == self.scan_type:
-                    test_type_name = self.scan_type
-                else:
-                    test_type_name = f"{tests[0].type} Scan"
-                    if test_type_name != self.scan_type:
-                        test_type_name = f"{test_type_name} ({self.scan_type})"
-            self.test = self.create_test(test_type_name)
+            # Resolve the Test_Type name from the report's type (idempotent: a type that already
+            # carries the " (scan_type)" suffix is used verbatim rather than doubled)
+            self.test = self.create_test(self.resolve_dynamic_test_type_name(test_raw.type))
         else:
-            # During reimport, validate that the test_type matches
-            # Calculate the expected test_type_name from the incoming report
-            expected_test_type_name = self.scan_type
-            if test_raw.type:
-                # If test_raw.type equals scan_type, use scan_type directly
-                if test_raw.type == self.scan_type:
-                    expected_test_type_name = self.scan_type
-                else:
-                    expected_test_type_name = f"{test_raw.type} Scan"
-                    if expected_test_type_name != self.scan_type:
-                        expected_test_type_name = f"{expected_test_type_name} ({self.scan_type})"
-            # Compare with existing test's test_type name
-            if self.test.test_type.name != expected_test_type_name:
+            # During reimport, validate that the test_type matches the incoming report.
+            # Accept either the current (idempotent) name or the legacy name the pre-patch code
+            # produced, so reimports into tests created before the doubling fix keep working.
+            expected_test_type_name = self.resolve_dynamic_test_type_name(test_raw.type)
+            legacy_test_type_name = self.legacy_dynamic_test_type_name(test_raw.type)
+            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name}:
                 msg = (
                     f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
                     f"but the report contains test_type '{expected_test_type_name}'. "
@@ -283,27 +344,6 @@ class BaseImporter(ImporterOptions):
         elapsed_time = time.perf_counter() - start_time
         logger.info(f"Parsing findings took {elapsed_time:.2f} seconds ({len(parsed_findings) if parsed_findings else 0} findings parsed)")
         return parsed_findings
-
-    def sync_process_findings(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
-        """
-        Processes findings in a synchronous manner such that all findings
-        will be processed in a worker/process/thread
-        """
-        return self.process_findings(parsed_findings, **kwargs)
-
-    def determine_process_method(
-        self,
-        parsed_findings: list[Finding],
-        **kwargs: dict,
-    ) -> list[Finding]:
-        return self.sync_process_findings(
-            parsed_findings,
-            **kwargs,
-        )
 
     def determine_deduplication_algorithm(self) -> str:
         """
@@ -366,86 +406,39 @@ class BaseImporter(ImporterOptions):
         if self.tags is not None and len(self.tags) > 0:
             self.test.tags.set(self.tags)
 
-    def apply_import_tags(
-        self,
-        new_findings: Iterable[Finding] | None = None,
-        closed_findings: Iterable[Finding] | None = None,
-        reactivated_findings: Iterable[Finding] | None = None,
-        untouched_findings: Iterable[Finding] | None = None,
-    ) -> None:
-        """Apply tags to findings and endpoints from an import operation."""
-        # Normalize None values to empty lists and convert sets/other iterables to lists
-        if untouched_findings is None:
-            untouched_findings = []
-        elif not isinstance(untouched_findings, list):
-            untouched_findings = list(untouched_findings)
+    def apply_import_tags_for_batch(self, findings: list[Finding]) -> None:
+        """
+        Apply import-time tags to a batch of already-saved findings and their endpoints.
 
-        if reactivated_findings is None:
-            reactivated_findings = []
-        elif not isinstance(reactivated_findings, list):
-            reactivated_findings = list(reactivated_findings)
-
-        if closed_findings is None:
-            closed_findings = []
-        elif not isinstance(closed_findings, list):
-            closed_findings = list(closed_findings)
-
-        if new_findings is None:
-            new_findings = []
-        elif not isinstance(new_findings, list):
-            new_findings = list(new_findings)
-
-        # Collect all affected findings
-        findings_to_tag = new_findings + closed_findings + reactivated_findings + untouched_findings
-
-        if not findings_to_tag:
+        Called per batch inside process_findings(), before post_process_findings_batch is
+        dispatched, so that rules/deduplication tasks see the import tags on the findings.
+        """
+        if not findings or not self.tags:
             return
-
-        # Add any tags to the findings imported if necessary
-        if self.apply_tags_to_findings and self.tags:
-            findings_qs = Finding.objects.filter(id__in=[f.id for f in findings_to_tag])
+        if self.apply_tags_to_findings:
             try:
                 bulk_add_tags_to_instances(
                     tag_or_tags=self.tags,
-                    instances=findings_qs,
+                    instances=findings,
                     tag_field_name="tags",
                 )
             except IntegrityError:
-                # Fallback to safe per-instance tagging if concurrent deletes occur
-                for finding in findings_to_tag:
+                for finding in findings:
                     for tag in self.tags:
                         self.add_tags_safe(finding, tag)
-
-        if settings.V3_FEATURE_LOCATIONS:
-            # Add any tags to any locations of the findings imported if necessary
-            if self.apply_tags_to_endpoints and self.tags:
-                # Collect all endpoints linked to the affected findings
-                locations_qs = Location.objects.filter(findings__finding__in=findings_to_tag).distinct()
-                try:
-                    bulk_add_tags_to_instances(
-                        tag_or_tags=self.tags,
-                        instances=locations_qs,
-                        tag_field_name="tags",
-                    )
-                except IntegrityError:
-                    for finding in findings_to_tag:
-                        for location in finding.locations.all():
-                            for tag in self.tags:
-                                self.add_tags_safe(location.location, tag)
-        # Add any tags to any endpoints of the findings imported if necessary
-        elif self.apply_tags_to_endpoints and self.tags:
-            endpoints_qs = Endpoint.objects.filter(finding__in=findings_to_tag).distinct()
+        if self.apply_tags_to_endpoints:
+            locations_qs = self.location_handler.get_locations_for_tagging(findings)
             try:
                 bulk_add_tags_to_instances(
                     tag_or_tags=self.tags,
-                    instances=endpoints_qs,
+                    instances=locations_qs,
                     tag_field_name="tags",
                 )
             except IntegrityError:
-                for finding in findings_to_tag:
-                    for endpoint in finding.endpoints.all():
+                for finding in findings:
+                    for location in self.location_handler.get_location_tag_fallback(finding):
                         for tag in self.tags:
-                            self.add_tags_safe(endpoint, tag)
+                            self.add_tags_safe(location, tag)
 
     def update_import_history(
         self,
@@ -484,14 +477,16 @@ class BaseImporter(ImporterOptions):
         import_settings["close_old_findings"] = self.close_old_findings_toggle
         import_settings["push_to_jira"] = self.push_to_jira
         import_settings["tags"] = self.tags
-        if settings.V3_FEATURE_LOCATIONS:
-            # Add the list of locations that were added exclusively at import time
-            if len(self.endpoints_to_add) > 0:
-                import_settings["locations"] = [str(location) for location in self.endpoints_to_add]
-        # TODO: Delete this after the move to Locations
-        # Add the list of endpoints that were added exclusively at import time
-        elif len(self.endpoints_to_add) > 0:
-            import_settings["endpoints"] = [str(endpoint) for endpoint in self.endpoints_to_add]
+        import_settings["scan_date"] = self.scan_date.isoformat() if self.scan_date_override else None
+        import_settings["service"] = self.service
+        import_settings["close_old_findings_product_scope"] = self.close_old_findings_product_scope
+        import_settings["do_not_reactivate"] = self.do_not_reactivate
+        import_settings["apply_tags_to_findings"] = self.apply_tags_to_findings
+        import_settings["apply_tags_to_endpoints"] = self.apply_tags_to_endpoints
+        import_settings["group_by"] = self.group_by
+        import_settings["create_finding_groups_for_all_findings"] = self.create_finding_groups_for_all_findings
+        if len(self.endpoints_to_add) > 0:
+            import_settings.update(self.location_handler.serialize_extra_locations(self.endpoints_to_add))
         # Create the test import object
         test_import = Test_Import.objects.create(
             test=self.test,
@@ -643,6 +638,42 @@ class BaseImporter(ImporterOptions):
         self.test.percent_complete = percentage_value
         self.test.save()
 
+    def resolve_dynamic_test_type_name(self, raw_type: str | None) -> str:
+        """
+        Compute the Test_Type name for a dynamic-test-type report (e.g. Generic, SARIF).
+
+        - No type, or type already equals the scan type -> use the scan type as-is.
+        - Type already carries the scan-type suffix (e.g. "Prisma Cloud (Generic Findings
+          Import)") -> use it verbatim. This keeps the composition idempotent and prevents
+          doubled names like "X (scan_type) Scan (scan_type)".
+        - Type plus a " Scan" suffix already equals the scan type (e.g. type "Horusec" with
+          scan_type "Horusec Scan") -> use the scan type as-is. This preserves the behavior of
+          dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security Hub,
+          Rusty Hog, ...) so their Test_Type name is not doubled into "Horusec Scan (Horusec Scan)".
+        - Otherwise -> the intentional "{type} Scan ({scan_type})" format (also used by SARIF,
+          so a report labeled 'CodeScanner' becomes 'CodeScanner Scan (SARIF)').
+        """
+        if not raw_type or raw_type == self.scan_type:
+            return self.scan_type
+        if raw_type.endswith(f" ({self.scan_type})"):
+            return raw_type
+        if f"{raw_type} Scan" == self.scan_type:
+            return self.scan_type
+        return f"{raw_type} Scan ({self.scan_type})"
+
+    def legacy_dynamic_test_type_name(self, raw_type: str | None) -> str:
+        """
+        Reproduce the name the pre-idempotency code produced. Used only for the reimport
+        compatibility check so reimports into existing (pre-patch) tests whose test_type
+        already has a doubled suffix keep working instead of raising a mismatch error.
+        """
+        if not raw_type or raw_type == self.scan_type:
+            return self.scan_type
+        name = f"{raw_type} Scan"
+        if name != self.scan_type:
+            name = f"{name} ({self.scan_type})"
+        return name
+
     def get_or_create_test_type(
         self,
         test_type_name: str,
@@ -791,67 +822,37 @@ class BaseImporter(ImporterOptions):
         Create BurpRawRequestResponse objects linked to the finding without
         returning the finding afterward
         """
-        if len(unsaved_req_resp := getattr(finding, "unsaved_req_resp", [])) > 0:
-            for req_resp in unsaved_req_resp:
-                burp_rr = BurpRawRequestResponse(
-                    finding=finding,
-                    burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
-                    burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")))
-                burp_rr.clean()
-                burp_rr.save()
+        for req_resp in getattr(finding, "unsaved_req_resp", []):
+            self.pending_burp_rr.append(BurpRawRequestResponse(
+                finding=finding,
+                burpRequestBase64=base64.b64encode(req_resp["req"].encode("utf-8")),
+                burpResponseBase64=base64.b64encode(req_resp["resp"].encode("utf-8")),
+            ))
 
         unsaved_request = getattr(finding, "unsaved_request", None)
         unsaved_response = getattr(finding, "unsaved_response", None)
         if unsaved_request is not None and unsaved_response is not None:
-            burp_rr = BurpRawRequestResponse(
+            self.pending_burp_rr.append(BurpRawRequestResponse(
                 finding=finding,
                 burpRequestBase64=base64.b64encode(unsaved_request.encode()),
-                burpResponseBase64=base64.b64encode(unsaved_response.encode()))
-            burp_rr.clean()
-            burp_rr.save()
+                burpResponseBase64=base64.b64encode(unsaved_response.encode()),
+            ))
+
+    def flush_burp_request_response(self) -> None:
+        if self.pending_burp_rr:
+            BurpRawRequestResponse.objects.bulk_create(self.pending_burp_rr, batch_size=1000)
+            self.pending_burp_rr.clear()
 
     def process_locations(
         self,
         finding: Finding,
-        locations_to_add: list[AbstractLocation],
+        extra_locations_to_add: list | None = None,
     ) -> None:
         """
-        Process any locations to add to the finding. Locations could come from two places
-        - Directly from the report
-        - Supplied by the user from the import form
-        These locations will be processed in to Location objects and associated with the
-        finding and product
+        Record locations/endpoints from the finding + any form-added extras.
+        Flushed to DB by location_handler.persist().
         """
-        # Save the unsaved locations
-        self.location_manager.chunk_locations_and_disperse(finding, finding.unsaved_locations)
-        # Check for any that were added in the form
-        if len(locations_to_add) > 0:
-            logger.debug("locations_to_add: %s", locations_to_add)
-            self.location_manager.chunk_locations_and_disperse(finding, locations_to_add)
-
-    # TODO: Delete this after the move to Locations
-    def process_endpoints(
-        self,
-        finding: Finding,
-        endpoints_to_add: list[Endpoint],
-    ) -> None:
-        """
-        Process any endpoints to add to the finding. Endpoints could come from two places
-        - Directly from the report
-        - Supplied by the user from the import form
-        These endpoints will be processed in to endpoints objects and associated with the
-        finding and and product
-        """
-        if settings.V3_FEATURE_LOCATIONS:
-            msg = "BaseImporter#process_endpoints() method is deprecated when V3_FEATURE_LOCATIONS is enabled"
-            raise NotImplementedError(msg)
-
-        # Save the unsaved endpoints
-        self.endpoint_manager.chunk_endpoints_and_disperse(finding, finding.unsaved_endpoints)
-        # Check for any that were added in the form
-        if len(endpoints_to_add) > 0:
-            logger.debug("endpoints_to_add: %s", endpoints_to_add)
-            self.endpoint_manager.chunk_endpoints_and_disperse(finding, endpoints_to_add)
+        self.location_handler.record_for_finding(finding, extra_locations_to_add)
 
     def sanitize_vulnerability_ids(self, finding) -> None:
         """Remove undisired vulnerability id values"""
@@ -885,20 +886,30 @@ class BaseImporter(ImporterOptions):
         finding: Finding,
     ) -> Finding:
         """
-        Store vulnerability IDs for a finding.
-        Reads from finding.unsaved_vulnerability_ids and saves them overwriting existing ones.
-
-        Args:
-            finding: The finding to store vulnerability IDs for
-
-        Returns:
-            The finding object
-
+        Accumulate Vulnerability_Id objects for bulk insert at the batch boundary.
+        Call flush_vulnerability_ids() to persist.
         """
         self.sanitize_vulnerability_ids(finding)
-        vulnerability_ids_to_process = finding.unsaved_vulnerability_ids or []
-        finding_helper.save_vulnerability_ids(finding, vulnerability_ids_to_process, delete_existing=False)
+        vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
+        vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
+        self.pending_vulnerability_ids.extend([
+            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            for vid in vulnerability_ids_to_process
+        ])
+        if vulnerability_ids_to_process:
+            finding.cve = vulnerability_ids_to_process[0]
+        else:
+            finding.cve = None
         return finding
+
+    def flush_vulnerability_ids(self) -> None:
+        """Delete stale and bulk-insert accumulated Vulnerability_Id objects, then clear buffers."""
+        if self.pending_vuln_id_deletes:
+            Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
+            self.pending_vuln_id_deletes.clear()
+        if self.pending_vulnerability_ids:
+            Vulnerability_Id.objects.bulk_create(self.pending_vulnerability_ids, batch_size=1000)
+            self.pending_vulnerability_ids.clear()
 
     def process_files(
         self,
@@ -944,31 +955,13 @@ class BaseImporter(ImporterOptions):
         # Remove risk acceptance if present (vulnerability is now fixed)
         # risk_unaccept will check if finding.risk_accepted is True before proceeding
         ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
-        if settings.V3_FEATURE_LOCATIONS:
-            # Mitigate the location statuses
-            dojo_dispatch_task(
-                LocationManager.mitigate_location_status,
-                finding.locations.all(),
-                self.user,
-                kwuser=self.user,
-                sync=True,
-            )
-        else:
-            # TODO: Delete this after the move to Locations
-            # Mitigate the endpoint statuses
-            dojo_dispatch_task(
-                EndpointManager.mitigate_endpoint_status,
-                finding.status_finding.all(),
-                self.user,
-                kwuser=self.user,
-                sync=True,
-            )
+        self.location_handler.record_mitigations_for_finding(finding, self.user)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
             # don't try to dedupe findings that we are closing
             finding.save(dedupe_option=False, product_grading_option=product_grading_option)
         else:
-            finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync_with_jira(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
+            finding.save(dedupe_option=False, push_to_jira=(self.push_to_jira or is_keep_in_sync(finding, prefetched_jira_instance=self.jira_instance)), product_grading_option=product_grading_option)
 
     def notify_scan_added(
         self,
@@ -989,10 +982,49 @@ class BaseImporter(ImporterOptions):
             new_findings = []
         logger.debug("Scan added notifications")
 
+        # When deduplication has finished (synchronous mode, or async_wait after the
+        # join), the in-memory findings still carry their pre-dedup duplicate=False
+        # flag because deduplication runs on separately-fetched instances. Refresh the
+        # flag from the database and split each list into "real" and duplicate findings
+        # so the notification reflects post-dedup reality instead of counting/listing
+        # deduplicated findings as brand new. In plain async mode dedup has not run yet,
+        # so we leave the lists untouched (best-effort, historical behavior).
+        findings_new_duplicate: list[Finding] = []
+        findings_reactivated_duplicate: list[Finding] = []
+        findings_untouched_duplicate: list[Finding] = []
+        if getattr(self, "deduplication_complete", False):
+            all_ids = [f.id for f in (*new_findings, *findings_reactivated, *findings_untouched)]
+            duplicate_ids = set()
+            if all_ids:
+                duplicate_ids = set(
+                    Finding.objects.filter(id__in=all_ids, duplicate=True).values_list("id", flat=True),
+                )
+
+            def _split(findings):
+                kept, duplicates = [], []
+                for finding in findings:
+                    if finding.id in duplicate_ids:
+                        # refresh the in-memory flag so any template logic is correct
+                        finding.duplicate = True
+                        duplicates.append(finding)
+                    else:
+                        kept.append(finding)
+                return kept, duplicates
+
+            new_findings, findings_new_duplicate = _split(new_findings)
+            findings_reactivated, findings_reactivated_duplicate = _split(findings_reactivated)
+            findings_untouched, findings_untouched_duplicate = _split(findings_untouched)
+            # Recompute the headline count to exclude findings that turned out to be
+            # duplicates of an existing finding (they are not genuinely new activity).
+            updated_count = len(new_findings) + len(findings_reactivated) + len(findings_mitigated)
+
         new_findings = sorted(new_findings, key=lambda x: x.numerical_severity)
         findings_mitigated = sorted(findings_mitigated, key=lambda x: x.numerical_severity)
         findings_reactivated = sorted(findings_reactivated, key=lambda x: x.numerical_severity)
         findings_untouched = sorted(findings_untouched, key=lambda x: x.numerical_severity)
+        findings_new_duplicate = sorted(findings_new_duplicate, key=lambda x: x.numerical_severity)
+        findings_reactivated_duplicate = sorted(findings_reactivated_duplicate, key=lambda x: x.numerical_severity)
+        findings_untouched_duplicate = sorted(findings_untouched_duplicate, key=lambda x: x.numerical_severity)
 
         title = (
             f"Created/Updated {updated_count} findings for {test.engagement.product}: {test.engagement.name}: {test}"
@@ -1009,6 +1041,11 @@ class BaseImporter(ImporterOptions):
             engagement=test.engagement,
             product=test.engagement.product,
             findings_untouched=findings_untouched,
+            # Findings deduplicated during post-processing, split by their import action.
+            # Populated only once deduplication has completed (sync / async_wait).
+            findings_new_duplicate=findings_new_duplicate,
+            findings_reactivated_duplicate=findings_reactivated_duplicate,
+            findings_untouched_duplicate=findings_untouched_duplicate,
             url=reverse("view_test", args=(test.id,)),
             url_api=reverse("test-detail", args=(test.id,)),
         )

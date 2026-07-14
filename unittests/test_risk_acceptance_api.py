@@ -4,15 +4,17 @@ from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
 
+from dojo.authorization.models import (
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Roles
 from dojo.models import (
     Engagement,
     Finding,
     Product,
     Product_Type,
-    Product_Type_Member,
     Risk_Acceptance,
-    Role,
     Test,
     Test_Type,
     User,
@@ -175,6 +177,19 @@ class TestRiskAcceptanceApi(APITestCase):
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + self.token.key)
         self.url = reverse("risk_acceptance-list")
+
+    # Helper method to create a risk acceptance for testing filters
+    def create_risk_acceptance(self):
+        risk_acceptance = Risk_Acceptance.objects.create(
+            name="Filter Test RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+        )
+        risk_acceptance.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(risk_acceptance)
+        return risk_acceptance
 
     def test_create_risk_acceptance_links_to_engagement(self):
         """Test that risk acceptance created via API appears in engagement.risk_acceptance"""
@@ -358,3 +373,135 @@ class TestRiskAcceptanceApi(APITestCase):
         response = self.client.put(f"{self.url}{ra.id}/", payload, format="json")
         self.assertEqual(403, response.status_code, response.content)
         self.assertIn("multiple engagements", str(response.data))
+
+    def test_update_expired_risk_acceptance_reinstates_findings(self):
+        """
+        Regression test for the serializer update() reinstate bug.
+
+        Extending an expired risk acceptance's expiration_date via the API must call
+        ra_helper.reinstate(): its accepted findings are set back to inactive/risk-accepted
+        and expiration_date_handled is cleared so the Celery expiry task re-processes it.
+        """
+        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=5)
+        ra = Risk_Acceptance.objects.create(
+            name="Expired RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+            expiration_date=past_date,
+            expiration_date_handled=past_date,
+        )
+        ra.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(ra)
+
+        # Simulate the post-expiry state: the expiry job already reactivated the finding
+        self.finding_a1.active = True
+        self.finding_a1.risk_accepted = False
+        self.finding_a1.save()
+
+        future_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+        payload = {
+            "expiration_date": future_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "accepted_findings": [self.finding_a1.id],
+        }
+
+        response = self.client.patch(f"{self.url}{ra.id}/", payload, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        # Finding is reinstated (only reinstate() flips these back)
+        self.finding_a1.refresh_from_db()
+        self.assertFalse(self.finding_a1.active)
+        self.assertTrue(self.finding_a1.risk_accepted)
+
+        # Flags cleared so the RA is eligible for the next Celery expiry cycle
+        ra.refresh_from_db()
+        self.assertIsNone(ra.expiration_date_handled)
+        self.assertIsNone(ra.expiration_date_warned)
+
+    def test_update_never_expired_risk_acceptance_leaves_findings_unchanged(self):
+        """
+        Regression test companion: editing the expiration_date of a risk acceptance that
+        never expired must not disturb its findings, and expiration_date_handled stays None.
+        """
+        old_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+        ra = Risk_Acceptance.objects.create(
+            name="Active RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+            expiration_date=old_date,
+        )
+        ra.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(ra)
+
+        # Normal accepted state for a live risk acceptance
+        self.finding_a1.active = False
+        self.finding_a1.risk_accepted = True
+        self.finding_a1.save()
+
+        new_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=60)
+        payload = {
+            "expiration_date": new_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "accepted_findings": [self.finding_a1.id],
+        }
+
+        response = self.client.patch(f"{self.url}{ra.id}/", payload, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        # Findings untouched
+        self.finding_a1.refresh_from_db()
+        self.assertFalse(self.finding_a1.active)
+        self.assertTrue(self.finding_a1.risk_accepted)
+
+        # Never handled, so it stays None
+        ra.refresh_from_db()
+        self.assertIsNone(ra.expiration_date_handled)
+        self.assertIsNone(ra.expiration_date_warned)
+
+    def test_risk_acceptance_created_filter(self):
+        # 1. Create a baseline Risk Acceptance using the existing test setup
+        risk_acceptance = self.create_risk_acceptance()
+
+        # 2. Manually backdate the created date to test ranges
+        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=10)
+        risk_acceptance.created = past_date
+        risk_acceptance.save()
+
+        # 3. Test `created__lt` (Less than / Before)
+        # Should return the risk acceptance because it was created 10 days ago
+        future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        response = self.client.get(reverse("risk_acceptance-list") + f"?created__lt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertIn(risk_acceptance.id, result_ids)
+
+        # 4. Test `created__gt` (Greater than / After)
+        # Should NOT return the risk acceptance because it is not newer than today
+        response = self.client.get(reverse("risk_acceptance-list") + f"?created__gt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertNotIn(risk_acceptance.id, result_ids)
+
+    def test_risk_acceptance_updated_filter(self):
+        risk_acceptance = self.create_risk_acceptance()
+
+        # Manually backdate the updated date
+        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=10)
+        # We use .update() to bypass the auto_now=True behavior on the updated field
+        type(risk_acceptance).objects.filter(pk=risk_acceptance.id).update(updated=past_date)
+
+        future_date = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+
+        # Test updated__lt
+        response = self.client.get(reverse("risk_acceptance-list") + f"?updated__lt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertIn(risk_acceptance.id, result_ids)
+
+        # Test updated__gt
+        response = self.client.get(reverse("risk_acceptance-list") + f"?updated__gt={future_date}")
+        self.assertEqual(response.status_code, 200)
+        result_ids = {item["id"] for item in response.json()["results"]}
+        self.assertNotIn(risk_acceptance.id, result_ids)

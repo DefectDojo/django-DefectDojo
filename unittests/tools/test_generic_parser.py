@@ -684,3 +684,35 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
             self.assertEqual(test.description, "The contents of this report is from a tool that gathers vulnerabilities both statically and dynamically")
             self.assertEqual(test.dynamic_tool, True)
             self.assertEqual(test.static_tool, True)
+
+    def test_parse_json_with_fix_version(self):
+        with (get_unit_tests_scans_path("generic") / "generic_report_fix_version.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            self.assertEqual(2, len(findings))
+
+            finding = findings[0]
+            self.assertEqual("test title with fix_version", finding.title)
+            self.assertTrue(finding.fix_available)
+            self.assertEqual("2.1.3", finding.fix_version)
+            self.assertEqual("spring-core", finding.component_name)
+
+            finding = findings[1]
+            self.assertEqual("test title without fix_version", finding.title)
+            self.assertFalse(finding.fix_available)
+            self.assertIsNone(finding.fix_version)
+
+    def test_parse_csv_with_fix_version(self):
+        with (get_unit_tests_scans_path("generic") / "generic_report_fix_version.csv").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            self.assertEqual(2, len(findings))
+
+            finding = findings[0]
+            self.assertEqual("Test finding with fix_version", finding.title)
+            self.assertEqual("2.1.3", finding.fix_version)
+
+            finding = findings[1]
+            self.assertEqual("Test finding without fix_version", finding.title)

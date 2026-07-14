@@ -5,7 +5,7 @@
 # Dockerfile.nginx to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.13.11-slim-trixie@sha256:51e1a0a317fdb6e170dc791bbeae63fac5272c82f43958ef74a34e170c6f8b18 AS base
+FROM python:3.14.6-slim-trixie@sha256:b877e50bd90de10af8d82c57a022fc2e0dc731c5320d762a27986facfc3355c1 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -44,10 +44,9 @@ RUN \
   # ugly fix to install postgresql-client without errors
   mkdir -p /usr/share/man/man1 /usr/share/man/man7 && \
   apt-get -y install --no-install-recommends \
-    # libopenjp2-7 libjpeg62 libtiff are required by the pillow package
+    # libopenjp2-7 libjpeg62 are required by the pillow package
     libopenjp2-7 \
     libjpeg62 \
-    libtiff6 \
     dnsutils \
     xmlsec1 \
     git \
@@ -68,7 +67,8 @@ RUN \
 	--no-cache-dir \
 	--no-index \
   --find-links=/tmp/wheels \
-  -r ./requirements.txt
+  -r ./requirements.txt && \
+  apt-get -y purge --auto-remove git
 
 COPY \
   docker/entrypoint-celery-beat.sh \
@@ -81,7 +81,7 @@ COPY \
   docker/reach_broker.sh \
   docker/certs/* \
   /
-COPY wsgi.py manage.py ./
+COPY manage.py ./
 COPY dojo/ ./dojo/
 
 # Add extra fixtures to docker image which are loaded by the initializer

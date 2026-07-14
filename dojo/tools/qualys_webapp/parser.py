@@ -7,7 +7,7 @@ from defusedxml import ElementTree
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 try:
     from django.conf.settings import QUALYS_WAS_WEAKNESS_IS_VULN
@@ -85,7 +85,7 @@ def attach_unique_extras(
 
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations.append(
-                URL(
+                LocationData.url(
                     host=truncate_str(host, 500),
                     port=port,
                     path=truncate_str(path, 500),
@@ -141,7 +141,7 @@ def attach_extras(locations, requests, responses, finding, date, qid, test):
 
     for location in locations:
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations.append(URL.from_value(location))
+            finding.unsaved_locations.append(LocationData.url(url=location))
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints.append(Endpoint.from_uri(location))

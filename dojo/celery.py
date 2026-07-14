@@ -28,23 +28,26 @@ class DojoAsyncTask(Task):
         """
         Restore user context in the celery worker via crum.impersonate.
 
-        The apply_async method injects ``async_user`` into kwargs when a task
-        is dispatched. Here we pop it and set it as the current user in
-        thread-local storage so that all downstream code — including nested
-        dojo_dispatch_task calls — sees the correct user via
-        get_current_user().
+        The apply_async method injects ``async_user_id`` into kwargs when a task
+        is dispatched. Here we pop it, resolve to a user instance, and set it
+        as the current user in thread-local storage so that all downstream
+        code — including nested dojo_dispatch_task calls — sees the correct
+        user via get_current_user().
 
-        When a task is called directly (not via apply_async), async_user is
+        When a task is called directly (not via apply_async), async_user_id is
         not in kwargs. In that case we leave the existing crum context
         intact so that callers who already set a user (e.g. via
         crum.impersonate in tests or request middleware) are not disrupted.
         """
-        if "async_user" not in kwargs:
+        if "async_user_id" not in kwargs:
             return super().__call__(*args, **kwargs)
 
         import crum  # noqa: PLC0415
 
-        user = kwargs.pop("async_user")
+        from dojo.models import Dojo_User  # noqa: PLC0415 circular import
+
+        user_id = kwargs.pop("async_user_id")
+        user = Dojo_User.objects.filter(pk=user_id).first() if user_id else None
         with crum.impersonate(user):
             return super().__call__(*args, **kwargs)
 
@@ -56,12 +59,15 @@ class DojoAsyncTask(Task):
         if kwargs is None:
             kwargs = {}
 
-        # Inject user context if not already present
-        if "async_user" not in kwargs:
-            kwargs["async_user"] = get_current_user()
+        # Inject user context for Dojo tasks only. Celery built-in tasks (e.g.
+        # celery.backend_cleanup) do not accept custom kwargs.
+        task_name = self.name or ""
+        if not task_name.startswith("celery.") and "async_user_id" not in kwargs:
+            user = get_current_user()
+            kwargs["async_user_id"] = user.id if user else None
 
         # Control flag used for sync/async decision; never pass into the task itself
-        kwargs.pop("sync", None)
+        kwargs.pop("force_sync", None)
 
         # Track dispatch
         dojo_async_task_counter.incr(
@@ -74,13 +80,44 @@ class DojoAsyncTask(Task):
         return super().apply_async(args=args, kwargs=kwargs, **options)
 
 
-class PgHistoryTask(DojoAsyncTask):
+class PluggableContextTask(DojoAsyncTask):
+
+    """
+    Extends DojoAsyncTask with pluggable context managers loaded from settings.
+
+    CELERY_TASK_CONTEXT_MANAGERS is a list of dotted paths to callables that
+    return context managers. Each task execution is wrapped in all of them.
+    This replaces the celery signal-based approach (task_prerun/task_postrun)
+    which does not work reliably with prefork worker pools.
+    """
+
+    def __call__(self, *args, **kwargs):
+        from contextlib import ExitStack  # noqa: PLC0415
+
+        from django.utils.module_loading import import_string  # noqa: PLC0415
+
+        cm_paths = getattr(settings, "CELERY_TASK_CONTEXT_MANAGERS", [])
+        if not cm_paths:
+            return super().__call__(*args, **kwargs)
+
+        # ExitStack ensures all entered context managers are properly exited
+        # (via __exit__) even if the task raises an exception, so cleanup
+        # and batch dispatch always happen.
+        with ExitStack() as stack:
+            for path in cm_paths:
+                cm_factory = import_string(path)
+                stack.enter_context(cm_factory())
+            return super().__call__(*args, **kwargs)
+
+
+class PgHistoryTask(PluggableContextTask):
 
     """
     Custom Celery base task that automatically applies pghistory context.
 
-    This class inherits from DojoAsyncTask to provide:
+    This class inherits from PluggableContextTask to provide:
     - User context injection and task tracking (from DojoAsyncTask)
+    - Pluggable context managers from settings (from PluggableContextTask)
     - Automatic pghistory context application (from this class)
 
     When a task is dispatched via dojo_dispatch_task or dojo_async_task, the current
@@ -102,8 +139,6 @@ class PgHistoryTask(DojoAsyncTask):
 
 app = Celery("dojo", task_cls=PgHistoryTask)
 
-# Using a string here means the worker will not have to
-# pickle the object when using Windows.
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)

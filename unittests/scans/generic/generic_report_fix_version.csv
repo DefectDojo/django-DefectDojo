@@ -1,0 +1,3 @@
+Date,Title,CweId,Url,Severity,Description,Mitigation,Impact,References,Active,Verified,fix_available,fix_version
+01/15/2025,Test finding with fix_version,502,,High,Vulnerability with fix version available,Upgrade to 2.1.3,,,TRUE,FALSE,TRUE,2.1.3
+01/15/2025,Test finding without fix_version,611,,Medium,Vulnerability without fix version,,,,TRUE,FALSE,FALSE,

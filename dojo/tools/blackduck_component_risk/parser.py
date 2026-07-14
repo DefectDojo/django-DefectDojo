@@ -1,7 +1,17 @@
 # Author: apipia, wheelsvt
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 from .importer import BlackduckCRImporter
+
+BLACKDUCK_ORIGIN_TO_PURL = {
+    "maven": "maven", "npmjs": "npm", "pypi": "pypi",
+    "rubygems": "gem", "nuget": "nuget", "golang": "golang",
+    "crates": "cargo", "cocoapods": "cocoapods", "packagist": "composer",
+    "github": "github",
+}
 
 
 class BlackduckComponentRiskParser:
@@ -27,6 +37,22 @@ class BlackduckComponentRiskParser:
         :param test:
         """
         components, securities, sources = self.import_data(filename)
+        # Collect product-level dependency locations for all components
+        if settings.V3_FEATURE_LOCATIONS:
+            for component in components.values():
+                origin = component.get("Origin name", "").lower().split(",")[0]
+                purl_type = BLACKDUCK_ORIGIN_TO_PURL.get(origin)
+                comp_name = component.get("Component name")
+                comp_version = component.get("Component version name")
+                if purl_type and comp_name and comp_version:
+                    test.unsaved_metadata.append(
+                        LocationData.dependency(
+                            purl_type=purl_type,
+                            name=comp_name,
+                            version=comp_version,
+                            license_expression=component.get("Licence names"),
+                        ),
+                    )
         return self.ingest_findings(components, securities, sources, test)
 
     def import_data(self, filename) -> (dict, dict, dict):

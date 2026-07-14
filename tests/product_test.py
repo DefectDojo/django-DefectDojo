@@ -43,7 +43,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown button to see options
         driver.find_element(By.ID, "dropdownMenu1").click()
         # "Click" the add prodcut button
-        driver.find_element(By.LINK_TEXT, "Add Product").click()
+        driver.find_element(By.LINK_TEXT, "Add Asset").click()
         # Fill in th product name
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("QA Test")
@@ -59,7 +59,7 @@ class ProductTest(BaseTestCase):
 
         # Assert ot the query to dtermine status of failure
         # Also confirm success even if Product is returned as already exists for test sake
-        self.assertTrue(self.is_success_message_present(text="Product added successfully")
+        self.assertTrue(self.is_success_message_present(text="Asset added successfully")
             or self.is_success_message_present(text="Product with this Name already exists."))
         self.assertFalse(self.is_error_message_present())
 
@@ -102,7 +102,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Product updated successfully")
+        self.assertTrue(self.is_success_message_present(text="Asset updated successfully")
             or self.is_success_message_present(text="Product with this Name already exists."))
         self.assertFalse(self.is_error_message_present())
 
@@ -130,7 +130,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Product updated successfully")
+        self.assertTrue(self.is_success_message_present(text="Asset updated successfully")
             or self.is_success_message_present(text="Product with this Name already exists."))
         self.assertFalse(self.is_error_message_present())
 
@@ -426,7 +426,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
-        self.assertTrue(self.is_success_message_present(text="Added Tracked File to a Product"))
+        self.assertTrue(self.is_success_message_present(text="Added Tracked File to an Asset"))
 
     @on_exception_html_source_logger
     def test_edit_product_tracking_files(self):
@@ -483,7 +483,7 @@ class ProductTest(BaseTestCase):
         # Query the site to determine if the product has been added
 
         # Assert ot the query to determine status of failure
-        self.assertTrue(self.is_success_message_present(text="Product and relationships removed."))
+        self.assertTrue(self.is_success_message_present(text="Asset and relationships removed."))
 
     @on_exception_html_source_logger
     def test_product_notifications_change(self):

@@ -23,30 +23,31 @@ class Command(BaseCommand):
         findings = Finding.objects.filter(verified=True,
                                           active=True).select_related(
             "test__engagement__product")
-        writer = csv.writer(file_path.open("w", encoding="utf-8"))
+        with file_path.open("w", encoding="utf-8", newline="") as fout:
+            writer = csv.writer(fout)
 
-        headers = [
-            "product_name",
-            "id",
-            "title",
-            "cwe",
-            "date",
-            "url",
-            "severity",
-        ]
+            headers = [
+                "product_name",
+                "id",
+                "title",
+                "cwe",
+                "date",
+                "url",
+                "severity",
+            ]
 
-        # for field in opts.fields:
-        #    headers.append(field.name)
+            # for field in opts.fields:
+            #    headers.append(field.name)
 
-        writer.writerow(headers)
-        for obj in findings:
-            row = []
-            row.append(obj.test.engagement.product)
-            for field in headers:
-                if field != "product_name":
-                    value = getattr(obj, field)
-                    if isinstance(value, str):
-                        value = value.encode("utf-8").strip()
+            writer.writerow(headers)
+            for obj in findings:
+                row = []
+                row.append(obj.test.engagement.product)
+                for field in headers:
+                    if field != "product_name":
+                        value = getattr(obj, field)
+                        if isinstance(value, str):
+                            value = value.encode("utf-8").strip()
 
-                    row.append(value)
-            writer.writerow(row)
+                        row.append(value)
+                writer.writerow(row)

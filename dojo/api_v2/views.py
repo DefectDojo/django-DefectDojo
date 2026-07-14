@@ -1,187 +1,91 @@
-import base64
 import logging
-import mimetypes
 from datetime import datetime
-from pathlib import Path
 
 import pghistory
-import tagulous
-from crum import get_current_user
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
-from django.http import FileResponse, HttpResponse
-from django.shortcuts import get_object_or_404
-from django.urls import reverse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.renderers import OpenApiJsonRenderer2
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     OpenApiParameter,
-    OpenApiResponse,
     extend_schema,
     extend_schema_view,
 )
 from drf_spectacular.views import SpectacularAPIView
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
-from rest_framework.generics import GenericAPIView
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
-import dojo.finding.helper as finding_helper
-import dojo.jira_link.helper as jira_helper
 from dojo.api_v2 import (
     mixins as dojo_mixins,
 )
 from dojo.api_v2 import (
-    permissions,
     prefetch,
     serializers,
 )
-from dojo.api_v2.prefetch.prefetcher import _Prefetcher
-from dojo.authorization.roles_permissions import Permissions
-from dojo.celery_dispatch import dojo_dispatch_task
-from dojo.cred.queries import get_authorized_cred_mappings
-from dojo.endpoint.queries import (
-    get_authorized_endpoint_status,
-    get_authorized_endpoints,
-)
-from dojo.endpoint.views import get_endpoint_ids
-from dojo.engagement.queries import get_authorized_engagements
-from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.authorization import api_permissions as permissions
+from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.endpoint.ui.views import get_endpoint_ids
 from dojo.filters import (
     ApiAppAnalysisFilter,
-    ApiCredentialsFilter,
     ApiDojoMetaFilter,
-    ApiEndpointFilter,
-    ApiEngagementFilter,
-    ApiFindingFilter,
-    ApiProductFilter,
-    ApiRiskAcceptanceFilter,
-    ApiTemplateFindingFilter,
-    ApiTestFilter,
-    ApiUserFilter,
+)
+from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
-    TestImportAPIFilter,
-)
-from dojo.finding.queries import (
-    get_authorized_findings,
-    get_authorized_stub_findings,
-)
-from dojo.finding.views import (
-    duplicate_cluster,
-    reset_finding_duplicate_status_internal,
-    set_finding_as_original_internal,
-)
-from dojo.group.queries import (
-    get_authorized_group_members,
-    get_authorized_groups,
 )
 from dojo.importers.auto_create_context import AutoCreateContextManager
-from dojo.jira_link.queries import (
-    get_authorized_jira_issues,
-    get_authorized_jira_projects,
-)
+from dojo.jira import services as jira_services
 from dojo.labels import get_labels
+from dojo.location.models import LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
-    Announcement,
-    Answer,
-    Answered_Survey,
     App_Analysis,
-    BurpRawRequestResponse,
-    Check_List,
-    Cred_Mapping,
-    Cred_User,
-    Development_Environment,
-    Dojo_Group,
-    Dojo_Group_Member,
     Dojo_User,
     DojoMeta,
     Endpoint,
-    Endpoint_Status,
-    Engagement,
-    Engagement_Presets,
-    Engagement_Survey,
-    FileUpload,
     Finding,
-    Finding_Template,
-    General_Survey,
-    Global_Role,
-    JIRA_Instance,
-    JIRA_Issue,
-    JIRA_Project,
     Language_Type,
     Languages,
     Network_Locations,
-    Note_Type,
-    NoteHistory,
-    Notes,
-    Notification_Webhooks,
-    Notifications,
     Product,
-    Product_API_Scan_Configuration,
-    Product_Group,
-    Product_Member,
-    Product_Type,
-    Product_Type_Group,
-    Product_Type_Member,
-    Question,
-    Regulation,
-    Risk_Acceptance,
-    Role,
     SLA_Configuration,
     Sonarqube_Issue,
     Sonarqube_Issue_Transition,
-    Stub_Finding,
     System_Settings,
     Test,
-    Test_Import,
-    Test_Type,
-    Tool_Configuration,
-    Tool_Product_Settings,
-    Tool_Type,
-    User,
-    UserContactInfo,
 )
 from dojo.product.queries import (
     get_authorized_app_analysis,
     get_authorized_dojo_meta,
-    get_authorized_engagement_presets,
     get_authorized_languages,
-    get_authorized_product_api_scan_configurations,
-    get_authorized_product_groups,
-    get_authorized_product_members,
     get_authorized_products,
 )
-from dojo.product_type.queries import (
-    get_authorized_product_type_groups,
-    get_authorized_product_type_members,
-    get_authorized_product_types,
-)
-from dojo.reports.views import (
+from dojo.query_utils import build_count_subquery
+from dojo.reports.ui.views import (
     prefetch_related_findings_for_report,
     report_url_resolver,
 )
-from dojo.risk_acceptance import api as ra_api
-from dojo.risk_acceptance.helper import remove_finding_from_risk_acceptance
-from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
-from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
-from dojo.tool_product.queries import get_authorized_tool_product_settings
-from dojo.user.authentication import reset_token_for_user
+from dojo.test.queries import get_authorized_tests
+from dojo.url.models import URL
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
-    async_delete,
-    generate_file_response,
-    get_setting,
+    get_celery_queue_details,
+    get_celery_queue_length,
+    get_celery_worker_status,
     get_system_setting,
-    process_tag_notifications,
+    purge_celery_queue,
+    purge_celery_queue_by_task_name,
 )
 
 logger = logging.getLogger(__name__)
@@ -256,532 +160,8 @@ class DeprecationNoticeMixin:
         return super().finalize_response(request, response, *args, **kwargs)
 
 
-# Authorization: authenticated users
-class RoleViewSet(viewsets.ReadOnlyModelViewSet):
-    serializer_class = serializers.RoleSerializer
-    queryset = Role.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name"]
-    permission_classes = (IsAuthenticated,)
-
-    def get_queryset(self):
-        return Role.objects.all().order_by("id")
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class DojoGroupViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.DojoGroupSerializer
-    queryset = Dojo_Group.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name", "social_provider"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasDojoGroupPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_groups(Permissions.Group_View).distinct()
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class DojoGroupMemberViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.DojoGroupMemberSerializer
-    queryset = Dojo_Group_Member.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "group_id", "user_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasDojoGroupMemberPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_group_members(Permissions.Group_View).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: superuser
-@extend_schema_view(**schema_with_prefetch())
-class GlobalRoleViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.GlobalRoleSerializer
-    queryset = Global_Role.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "user", "group", "role"]
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Global_Role.objects.all().order_by("id")
-
-
-# Authorization: object-based
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
-class EndPointViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.EndpointSerializer
-    queryset = Endpoint.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiEndpointFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasEndpointPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_endpoints(Permissions.Location_View).distinct()
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request, pk=None):
-        endpoint = self.get_object()
-
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, endpoint, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class EndpointStatusViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.EndpointStatusSerializer
-    queryset = Endpoint_Status.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "mitigated",
-        "false_positive",
-        "out_of_scope",
-        "risk_accepted",
-        "mitigated_by",
-        "finding",
-        "endpoint",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasEndpointStatusPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_endpoint_status(
-            Permissions.Location_View,
-        ).distinct()
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class EngagementViewSet(
-    # PrefetchDojoModelViewSet,
-    DojoModelViewSet,
-    ra_api.AcceptedRisksMixin,
-):
-    serializer_class = serializers.EngagementSerializer
-    queryset = Engagement.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiEngagementFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasEngagementPermission,
-    )
-
-    @property
-    def risk_application_model_class(self):
-        return Engagement
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if get_setting("ASYNC_OBJECT_DELETE"):
-            async_del = async_delete()
-            async_del.delete(instance)
-        else:
-            instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get_queryset(self):
-        return (
-            get_authorized_engagements(Permissions.Engagement_View)
-            .prefetch_related("notes", "risk_acceptance", "files")
-            .distinct()
-        )
-
-    @extend_schema(
-        request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
-    )
-    @action(detail=True, methods=["post"])
-    def close(self, request, pk=None):
-        eng = self.get_object()
-        close_engagement(eng)
-        return HttpResponse()
-
-    @extend_schema(
-        request=OpenApiTypes.NONE, responses={status.HTTP_200_OK: ""},
-    )
-    @action(detail=True, methods=["post"])
-    def reopen(self, request, pk=None):
-        eng = self.get_object()
-        reopen_engagement(eng)
-        return HttpResponse()
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request, pk=None):
-        engagement = self.get_object()
-
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, engagement, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.EngagementToNotesSerializer,
-        },
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.AddNewNoteOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
-    )
-    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated, permissions.UserHasEngagementNotePermission])
-    def notes(self, request, pk=None):
-        engagement = self.get_object()
-        if request.method == "POST":
-            new_note = serializers.AddNewNoteOptionSerializer(
-                data=request.data,
-            )
-            if new_note.is_valid():
-                entry = new_note.validated_data["entry"]
-                private = new_note.validated_data.get("private", False)
-                note_type = new_note.validated_data.get("note_type", None)
-            else:
-                return Response(
-                    new_note.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            notes = engagement.notes.filter(note_type=note_type).first()
-            if notes and note_type and note_type.is_single:
-                return Response("Only one instance of this note_type allowed on an engagement.", status=status.HTTP_400_BAD_REQUEST)
-
-            author = request.user
-            note = Notes(
-                entry=entry,
-                author=author,
-                private=private,
-                note_type=note_type,
-            )
-            note.save()
-            # Add an entry to the note history
-            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
-            note.history.add(history)
-            # Now add the note to the object
-            engagement.notes.add(note)
-            # Determine if we need to send any notifications for user mentioned
-            process_tag_notifications(
-                request=request,
-                note=note,
-                parent_url=request.build_absolute_uri(
-                    reverse("view_engagement", args=(engagement.id,)),
-                ),
-                parent_title=f"Engagement: {engagement.name}",
-            )
-
-            serialized_note = serializers.NoteSerializer(
-                {"author": author, "entry": entry, "private": private},
-            )
-            return Response(
-                serialized_note.data, status=status.HTTP_201_CREATED,
-            )
-        notes = engagement.notes.all()
-
-        serialized_notes = serializers.EngagementToNotesSerializer(
-            {"engagement_id": engagement, "notes": notes},
-        )
-        return Response(serialized_notes.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.EngagementToFilesSerializer,
-        },
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.AddNewFileOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.FileSerializer},
-    )
-    @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission],
-    )
-    def files(self, request, pk=None):
-        engagement = self.get_object()
-        if request.method == "POST":
-            new_file = serializers.FileSerializer(data=request.data)
-            if new_file.is_valid():
-                title = new_file.validated_data["title"]
-                file = new_file.validated_data["file"]
-            else:
-                return Response(
-                    new_file.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            file = FileUpload(title=title, file=file)
-            file.save()
-            engagement.files.add(file)
-
-            serialized_file = serializers.FileSerializer(file)
-            return Response(
-                serialized_file.data, status=status.HTTP_201_CREATED,
-            )
-
-        files = engagement.files.all()
-        serialized_files = serializers.EngagementToFilesSerializer(
-            {"engagement_id": engagement, "files": files},
-        )
-        return Response(serialized_files.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.EngagementCheckListSerializer,
-        responses={
-            status.HTTP_201_CREATED: serializers.EngagementCheckListSerializer,
-        },
-    )
-    @action(detail=True, methods=["get", "post"], permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission])
-    def complete_checklist(self, request, pk=None):
-        engagement = self.get_object()
-        check_lists = Check_List.objects.filter(engagement=engagement)
-        if request.method == "POST":
-            if check_lists.count() > 0:
-                return Response(
-                    {
-                        "message": "A completed checklist for this engagement already exists.",
-                    },
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            check_list = serializers.EngagementCheckListSerializer(
-                data=request.data,
-            )
-            if not check_list.is_valid():
-                return Response(
-                    check_list.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-            check_list = Check_List(**check_list.data)
-            check_list.engagement = engagement
-            check_list.save()
-            serialized_check_list = serializers.EngagementCheckListSerializer(
-                check_list,
-            )
-            return Response(
-                serialized_check_list.data, status=status.HTTP_201_CREATED,
-            )
-        prefetch_params = request.GET.get("prefetch", "").split(",")
-        prefetcher = _Prefetcher()
-        entry = check_lists.first()
-        # Get the queried object representation
-        result = serializers.EngagementCheckListSerializer(entry).data
-        prefetcher._prefetch(entry, prefetch_params)
-        result["prefetch"] = prefetcher.prefetched_data
-        return Response(result, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.RawFileSerializer,
-        },
-    )
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path=r"files/download/(?P<file_id>\d+)",
-        permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission],
-    )
-    def download_file(self, request, file_id, pk=None):
-        engagement = self.get_object()
-        # Get the file object
-        file_object_qs = engagement.files.filter(id=file_id)
-        file_object = (
-            file_object_qs.first() if len(file_object_qs) > 0 else None
-        )
-        if file_object is None:
-            return Response(
-                {"error": "File ID not associated with Engagement"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        # send file
-        return generate_file_response(file_object)
-
-    @extend_schema(
-        request=serializers.EngagementUpdateJiraEpicSerializer,
-        responses={status.HTTP_200_OK: serializers.EngagementUpdateJiraEpicSerializer},
-    )
-    @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
-    )
-    def update_jira_epic(self, request, pk=None):
-        engagement = self.get_object()
-        try:
-
-            if engagement.has_jira_issue:
-                dojo_dispatch_task(jira_helper.update_epic, engagement.id, **request.data)
-                response = Response(
-                    {"info": "Jira Epic update query sent"},
-                    status=status.HTTP_200_OK,
-                )
-            else:
-                dojo_dispatch_task(jira_helper.add_epic, engagement.id, **request.data)
-                response = Response(
-                    {"info": "Jira Epic create query sent"},
-                    status=status.HTTP_200_OK,
-                )
-        except ValidationError:
-            return Response(
-                {"error": "Bad Request!"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        return response
-
-
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class RiskAcceptanceViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.RiskAcceptanceSerializer
-    queryset = Risk_Acceptance.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiRiskAcceptanceFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasRiskAcceptancePermission,
-    )
-
-    def destroy(self, request, pk=None):
-        instance = self.get_object()
-        # Remove any findings on the risk acceptance
-        for finding in instance.accepted_findings.all():
-            remove_finding_from_risk_acceptance(request.user, instance, finding)
-        # return the response of the object being deleted
-        return super().destroy(request, pk=pk)
-
-    def get_queryset(self):
-        return (
-            get_authorized_risk_acceptances(Permissions.Risk_Acceptance)
-            .prefetch_related(
-                "notes", "engagement_set", "owner", "accepted_findings",
-            )
-            .distinct()
-        )
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.RiskAcceptanceProofSerializer,
-        },
-    )
-    @action(detail=True, methods=["get"], permission_classes=(IsAuthenticated, permissions.UserHasRiskAcceptanceRelatedObjectPermission))
-    def download_proof(self, request, pk=None):
-        risk_acceptance = self.get_object()
-        # Get the file object
-        file_object = risk_acceptance.path
-        if file_object is None or risk_acceptance.filename() is None:
-            return Response(
-                {"error": "Proof has not provided to this risk acceptance..."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        # Get the path of the file in media root
-        file_path = Path(settings.MEDIA_ROOT) / file_object.name
-        file_handle = file_path.open("rb")
-        # send file
-        response = FileResponse(
-            file_handle,
-            content_type=mimetypes.guess_type(str(file_path))[0] or "application/octet-stream",
-            status=status.HTTP_200_OK,
-        )
-        response["Content-Length"] = file_object.size
-        response[
-            "Content-Disposition"
-        ] = f'attachment; filename="{risk_acceptance.filename()}"'
-
-        return response
-
-
 # These are technologies in the UI and the API!
 # Authorization: object-based
 @extend_schema_view(**schema_with_prefetch())
@@ -799,841 +179,15 @@ class AppAnalysisViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_app_analysis(Permissions.Product_View)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class CredentialsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.CredentialSerializer
-    queryset = Cred_User.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Cred_User.objects.all().order_by("id")
+        return get_authorized_app_analysis("view")
 
 
 # Authorization: configuration
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class CredentialsMappingViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.CredentialMappingSerializer
-    queryset = Cred_Mapping.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiCredentialsFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasCredentialPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_cred_mappings(Permissions.Credential_View)
-
-
-# Authorization: configuration
-class FindingTemplatesViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.FindingTemplateSerializer
-    queryset = Finding_Template.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiTemplateFindingFilter
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
-
-    def get_queryset(self):
-        return Finding_Template.objects.all().order_by("id")
-
-
-# Authorization: object-based
-@extend_schema_view(
-    list=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "related_fields",
-                OpenApiTypes.BOOL,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="Expand finding external relations (engagement, environment, product, \
-                                            product_type, test, test_type)",
-            ),
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
-    retrieve=extend_schema(
-        parameters=[
-            OpenApiParameter(
-                "related_fields",
-                OpenApiTypes.BOOL,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="Expand finding external relations (engagement, environment, product, \
-                                            product_type, test, test_type)",
-            ),
-            OpenApiParameter(
-                "prefetch",
-                OpenApiTypes.STR,
-                OpenApiParameter.QUERY,
-                required=False,
-                description="List of fields for which to prefetch model instances and add those to the response",
-            ),
-        ],
-    ),
+from dojo.jira.api.views import (  # noqa: E402, F401 backward compat
+    JiraInstanceViewSet,
+    JiraIssuesViewSet,
+    JiraProjectViewSet,
 )
-class FindingViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.CreateModelMixin,
-    ra_api.AcceptedFindingsMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
-):
-    serializer_class = serializers.FindingSerializer
-    queryset = Finding.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiFindingFilter
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasFindingPermission,
-    )
-
-    # Overriding mixins.UpdateModeMixin perform_update() method to grab push_to_jira
-    # data and add that as a parameter to .save()
-    def perform_update(self, serializer):
-        # IF JIRA is enabled and this product has a JIRA configuration
-        push_to_jira = serializer.validated_data.get("push_to_jira")
-        jira_project = jira_helper.get_jira_project(serializer.instance)
-        if get_system_setting("enable_jira") and jira_project:
-            push_to_jira = push_to_jira or jira_project.push_all_issues
-
-        serializer.save(push_to_jira=push_to_jira)
-
-    def get_queryset(self):
-        if settings.V3_FEATURE_LOCATIONS:
-            findings = get_authorized_findings(
-                Permissions.Finding_View,
-            ).prefetch_related(
-                "locations__location__url",
-                "reviewers",
-                "found_by",
-                "notes",
-                "risk_acceptance_set",
-                "test",
-                "tags",
-                "jira_issue",
-                "finding_group_set",
-                "files",
-                "burprawrequestresponse_set",
-                "status_finding",
-                "finding_meta",
-                "test__test_type",
-                "test__engagement",
-                "test__environment",
-                "test__engagement__product",
-                "test__engagement__product__prod_type",
-            )
-        else:
-            # TODO: Delete this after the move to Locations
-            findings = get_authorized_findings(
-                Permissions.Finding_View,
-            ).prefetch_related(
-                "endpoints",
-                "reviewers",
-                "found_by",
-                "notes",
-                "risk_acceptance_set",
-                "test",
-                "tags",
-                "jira_issue",
-                "finding_group_set",
-                "files",
-                "burprawrequestresponse_set",
-                "status_finding",
-                "finding_meta",
-                "test__test_type",
-                "test__engagement",
-                "test__environment",
-                "test__engagement__product",
-                "test__engagement__product__prod_type",
-            )
-
-        return findings.distinct()
-
-    def get_serializer_class(self):
-        if self.request and self.request.method == "POST":
-            return serializers.FindingCreateSerializer
-        return serializers.FindingSerializer
-
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.FindingCloseSerializer,
-        responses={status.HTTP_200_OK: serializers.FindingCloseSerializer},
-    )
-    @action(detail=True, methods=["post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
-    def close(self, request, pk=None):
-        finding = self.get_object()
-
-        if request.method == "POST":
-            finding_close = serializers.FindingCloseSerializer(
-                data=request.data,
-                context={"request": request},
-            )
-            if finding_close.is_valid():
-                # Remove the prefetched tags to avoid issues with delegating to celery
-                finding.tags._remove_prefetched_objects()
-                # Use shared helper to perform close operations
-                finding_helper.close_finding(
-                    finding=finding,
-                    user=request.user,
-                    is_mitigated=finding_close.validated_data["is_mitigated"],
-                    mitigated=(finding_close.validated_data.get("mitigated") if finding_helper.can_edit_mitigated_data(request.user) else timezone.now()),
-                    mitigated_by=finding_close.validated_data.get("mitigated_by") or (request.user if not finding_helper.can_edit_mitigated_data(request.user) else None),
-                    false_p=finding_close.validated_data.get("false_p", False),
-                    out_of_scope=finding_close.validated_data.get("out_of_scope", False),
-                    duplicate=finding_close.validated_data.get("duplicate", False),
-                    note_entry=finding_close.validated_data.get("note"),
-                    note_type=finding_close.validated_data.get("note_type"),
-                )
-            else:
-                return Response(
-                    finding_close.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-        serialized_finding = serializers.FindingCloseSerializer(finding, context={"request": request})
-        return Response(serialized_finding.data)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={status.HTTP_200_OK: serializers.TagSerializer},
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.TagSerializer,
-        responses={status.HTTP_201_CREATED: serializers.TagSerializer},
-    )
-    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
-    def tags(self, request, pk=None):
-        finding = self.get_object()
-
-        if request.method == "POST":
-            new_tags = serializers.TagSerializer(data=request.data)
-            if new_tags.is_valid():
-                all_tags = finding.tags
-                all_tags = serializers.TagSerializer({"tags": all_tags}).data[
-                    "tags"
-                ]
-                for tag in new_tags.validated_data["tags"]:
-                    for sub_tag in tagulous.utils.parse_tags(tag):
-                        if sub_tag not in all_tags:
-                            all_tags.append(sub_tag)
-
-                new_tags = tagulous.utils.render_tags(all_tags)
-
-                finding.tags = new_tags
-                finding.save()
-            else:
-                return Response(
-                    new_tags.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-        tags = finding.tags
-        serialized_tags = serializers.TagSerializer({"tags": tags})
-        return Response(serialized_tags.data)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.BurpRawRequestResponseSerializer,
-        },
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.BurpRawRequestResponseSerializer,
-        responses={
-            status.HTTP_201_CREATED: serializers.BurpRawRequestResponseSerializer,
-        },
-    )
-    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
-    def request_response(self, request, pk=None):
-        finding = self.get_object()
-
-        if request.method == "POST":
-            burps = serializers.BurpRawRequestResponseSerializer(
-                data=request.data, many=isinstance(request.data, list),
-            )
-            if burps.is_valid():
-                for pair in burps.validated_data["req_resp"]:
-                    burp_rr = BurpRawRequestResponse(
-                        finding=finding,
-                        burpRequestBase64=base64.b64encode(
-                            pair["request"].encode("utf-8"),
-                        ),
-                        burpResponseBase64=base64.b64encode(
-                            pair["response"].encode("utf-8"),
-                        ),
-                    )
-                    burp_rr.clean()
-                    burp_rr.save()
-            else:
-                return Response(
-                    burps.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-        # Not necessarily Burp scan specific - these are just any request/response pairs
-        burp_req_resp = BurpRawRequestResponse.objects.filter(finding=finding)
-        var = settings.MAX_REQRESP_FROM_API
-        if var > -1:
-            burp_req_resp = burp_req_resp[:var]
-
-        burp_list = []
-        for burp in burp_req_resp:
-            request = burp.get_request()
-            response = burp.get_response()
-            burp_list.append({"request": request, "response": response})
-        serialized_burps = serializers.BurpRawRequestResponseSerializer(
-            {"req_resp": burp_list},
-        )
-        return Response(serialized_burps.data)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={status.HTTP_200_OK: serializers.FindingToNotesSerializer},
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.AddNewNoteOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
-    )
-    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingNotePermission))
-    def notes(self, request, pk=None):
-        finding = self.get_object()
-        if request.method == "POST":
-            new_note = serializers.AddNewNoteOptionSerializer(
-                data=request.data,
-            )
-            if new_note.is_valid():
-                entry = new_note.validated_data["entry"]
-                private = new_note.validated_data.get("private", False)
-                note_type = new_note.validated_data.get("note_type", None)
-            else:
-                return Response(
-                    new_note.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            if finding.notes:
-                notes = finding.notes.filter(note_type=note_type).first()
-                if notes and note_type and note_type.is_single:
-                    return Response("Only one instance of this note_type allowed on a finding.", status=status.HTTP_400_BAD_REQUEST)
-
-            author = request.user
-            note = Notes(
-                entry=entry,
-                author=author,
-                private=private,
-                note_type=note_type,
-            )
-            note.save()
-            # Add an entry to the note history
-            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
-            note.history.add(history)
-            # Now add the note to the object
-            finding.last_reviewed = note.date
-            finding.last_reviewed_by = author
-            finding.save(update_fields=["last_reviewed", "last_reviewed_by", "updated"])
-            finding.notes.add(note)
-            # Determine if we need to send any notifications for user mentioned
-            process_tag_notifications(
-                request=request,
-                note=note,
-                parent_url=request.build_absolute_uri(
-                    reverse("view_finding", args=(finding.id,)),
-                ),
-                parent_title=f"Finding: {finding.title}",
-            )
-
-            if finding.has_jira_issue:
-                jira_helper.add_comment(finding, note)
-            elif finding.has_jira_group_issue:
-                jira_helper.add_comment(finding.finding_group, note)
-
-            serialized_note = serializers.NoteSerializer(
-                {"author": author, "entry": entry, "private": private},
-            )
-            return Response(
-                serialized_note.data, status=status.HTTP_201_CREATED,
-            )
-        notes = finding.notes.all()
-
-        serialized_notes = serializers.FindingToNotesSerializer(
-            {"finding_id": finding, "notes": notes},
-        )
-        return Response(serialized_notes.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={status.HTTP_200_OK: serializers.FindingToFilesSerializer},
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.AddNewFileOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.FileSerializer},
-    )
-    @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
-    )
-    def files(self, request, pk=None):
-        finding = self.get_object()
-        if request.method == "POST":
-            new_file = serializers.FileSerializer(data=request.data)
-            if new_file.is_valid():
-                title = new_file.validated_data["title"]
-                file = new_file.validated_data["file"]
-            else:
-                return Response(
-                    new_file.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            file = FileUpload(title=title, file=file)
-            file.save()
-            finding.files.add(file)
-
-            serialized_file = serializers.FileSerializer(file)
-            return Response(
-                serialized_file.data, status=status.HTTP_201_CREATED,
-            )
-
-        files = finding.files.all()
-        serialized_files = serializers.FindingToFilesSerializer(
-            {"finding_id": finding, "files": files},
-        )
-        return Response(serialized_files.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.RawFileSerializer,
-        },
-    )
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path=r"files/download/(?P<file_id>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
-    )
-    def download_file(self, request, file_id, pk=None):
-        finding = self.get_object()
-        # Get the file object
-        file_object_qs = finding.files.filter(id=file_id)
-        file_object = (
-            file_object_qs.first() if len(file_object_qs) > 0 else None
-        )
-        if file_object is None:
-            return Response(
-                {"error": "File ID not associated with Finding"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        # send file
-        return generate_file_response(file_object)
-
-    @extend_schema(
-        request=serializers.FindingNoteSerializer,
-        responses={status.HTTP_204_NO_CONTENT: ""},
-    )
-    @action(detail=True, methods=["patch"], permission_classes=(IsAuthenticated, permissions.UserHasFindingNotePermission))
-    def remove_note(self, request, pk=None):
-        """Remove Note From Finding Note"""
-        finding = self.get_object()
-        notes = finding.notes.all()
-        if request.data["note_id"]:
-            note = get_object_or_404(Notes.objects, id=request.data["note_id"])
-            if note not in notes:
-                return Response(
-                    {"error": "Selected Note is not assigned to this Finding"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        else:
-            return Response(
-                {"error": "('note_id') parameter missing"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        if (
-            note.author.username == request.user.username
-            or request.user.is_superuser
-        ):
-            finding.notes.remove(note)
-            note.delete()
-        else:
-            return Response(
-                {"error": "Delete Failed, You are not the Note's author"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        return Response(
-            {"Success": "Selected Note has been Removed successfully"},
-            status=status.HTTP_204_NO_CONTENT,
-        )
-
-    @extend_schema(
-        methods=["PUT", "PATCH"],
-        request=serializers.TagSerializer,
-        responses={status.HTTP_204_NO_CONTENT: ""},
-    )
-    @action(detail=True, methods=["put", "patch"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
-    def remove_tags(self, request, pk=None):
-        """Remove Tag(s) from finding list of tags"""
-        finding = self.get_object()
-        delete_tags = serializers.TagSerializer(data=request.data)
-        if delete_tags.is_valid():
-            all_tags = finding.tags
-            all_tags = serializers.TagSerializer({"tags": all_tags}).data[
-                "tags"
-            ]
-
-            # serializer turns it into a string, but we need a list
-            del_tags = delete_tags.validated_data["tags"]
-            if len(del_tags) < 1:
-                return Response(
-                    {"error": "Empty Tag List Not Allowed"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            for tag in del_tags:
-                if tag not in all_tags:
-                    return Response(
-                        {
-                            "error": f"'{tag}' is not a valid tag in list '{all_tags}'",
-                        },
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                all_tags.remove(tag)
-            new_tags = tagulous.utils.render_tags(all_tags)
-            finding.tags = new_tags
-            finding.save()
-            return Response(
-                {"success": "Tag(s) Removed"},
-                status=status.HTTP_204_NO_CONTENT,
-            )
-        return Response(
-            delete_tags.errors, status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    @extend_schema(
-        responses={
-            status.HTTP_200_OK: serializers.FindingSerializer(many=True),
-        },
-    )
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path=r"duplicate",
-        filter_backends=[],
-        pagination_class=None,
-        permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
-    )
-    def get_duplicate_cluster(self, request, pk):
-        finding = self.get_object()
-        result = duplicate_cluster(request, finding)
-        serializer = serializers.FindingSerializer(
-            instance=result, many=True, context={"request": request},
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        request=OpenApiTypes.NONE,
-        responses={status.HTTP_204_NO_CONTENT: ""},
-    )
-    @action(detail=True, methods=["post"], url_path=r"duplicate/reset", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
-    def reset_finding_duplicate_status(self, request, pk):
-        checked_duplicate_id = reset_finding_duplicate_status_internal(
-            request.user, pk,
-        )
-        if checked_duplicate_id is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(
-        request=OpenApiTypes.NONE,
-        parameters=[
-            OpenApiParameter(
-                "new_fid", OpenApiTypes.INT, OpenApiParameter.PATH,
-            ),
-        ],
-        responses={status.HTTP_204_NO_CONTENT: ""},
-    )
-    @action(
-        detail=True, methods=["post"], url_path=r"original/(?P<new_fid>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
-    )
-    def set_finding_as_original(self, request, pk, new_fid):
-        success = set_finding_as_original_internal(request.user, pk, new_fid)
-        if not success:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=False, methods=["post"], permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request):
-        findings = self.get_queryset()
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, findings, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-    def _get_metadata(self, request, finding):
-        metadata = DojoMeta.objects.filter(finding=finding)
-        serializer = serializers.FindingMetaSerializer(
-            instance=metadata, many=True,
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def _edit_metadata(self, request, finding):
-        metadata_name = request.query_params.get("name", None)
-        if metadata_name is None:
-            return Response(
-                "Metadata name is required", status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        try:
-            DojoMeta.objects.update_or_create(
-                name=metadata_name,
-                finding=finding,
-                defaults={
-                    "name": request.data.get("name"),
-                    "value": request.data.get("value"),
-                },
-            )
-
-            return Response(data=request.data, status=status.HTTP_200_OK)
-        except IntegrityError:
-            return Response(
-                "Update failed because the new name already exists",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    def _add_metadata(self, request, finding):
-        metadata_data = serializers.FindingMetaSerializer(data=request.data)
-
-        if metadata_data.is_valid():
-            name = metadata_data.validated_data["name"]
-            value = metadata_data.validated_data["value"]
-
-            metadata = DojoMeta(finding=finding, name=name, value=value)
-            try:
-                metadata.validate_unique()
-                metadata.save()
-            except ValidationError:
-                return Response(
-                    "Create failed probably because the name of the metadata already exists",
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            return Response(data=metadata_data.data, status=status.HTTP_200_OK)
-        return Response(
-            metadata_data.errors, status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    def _remove_metadata(self, request, finding):
-        name = request.query_params.get("name", None)
-        if name is None:
-            return Response(
-                "A metadata name must be provided",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        metadata = get_object_or_404(
-            DojoMeta.objects, finding=finding, name=name,
-        )
-        metadata.delete()
-
-        return Response("Metadata deleted", status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.FindingMetaSerializer(many=True),
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                description="Returned if finding does not exist",
-            ),
-        },
-    )
-    @extend_schema(
-        methods=["DELETE"],
-        parameters=[
-            OpenApiParameter(
-                "name",
-                OpenApiTypes.INT,
-                OpenApiParameter.QUERY,
-                required=True,
-                description="name of the metadata to retrieve. If name is empty, return all the \
-                                    metadata associated with the finding",
-            ),
-        ],
-        responses={
-            status.HTTP_200_OK: OpenApiResponse(
-                description="Returned if the metadata was correctly deleted",
-            ),
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                description="Returned if finding does not exist",
-            ),
-            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
-                description="Returned if there was a problem with the metadata information",
-            ),
-        },
-    )
-    @extend_schema(
-        methods=["PUT"],
-        request=serializers.FindingMetaSerializer,
-        responses={
-            status.HTTP_200_OK: serializers.FindingMetaSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                description="Returned if finding does not exist",
-            ),
-            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
-                description="Returned if there was a problem with the metadata information",
-            ),
-        },
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.FindingMetaSerializer,
-        responses={
-            status.HTTP_200_OK: serializers.FindingMetaSerializer,
-            status.HTTP_404_NOT_FOUND: OpenApiResponse(
-                description="Returned if finding does not exist",
-            ),
-            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
-                description="Returned if there was a problem with the metadata information",
-            ),
-        },
-    )
-    @action(
-        detail=True,
-        methods=["post", "put", "delete", "get"],
-        filter_backends=[],
-        pagination_class=None,
-        permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
-    )
-    def metadata(self, request, pk=None):
-        finding = self.get_object()
-
-        if request.method == "GET":
-            return self._get_metadata(request, finding)
-        if request.method == "POST":
-            return self._add_metadata(request, finding)
-        if request.method in {"PUT", "PATCH"}:
-            return self._edit_metadata(request, finding)
-        if request.method == "DELETE":
-            return self._remove_metadata(request, finding)
-
-        return Response(
-            {"error", "unsupported method"}, status=status.HTTP_400_BAD_REQUEST,
-        )
-
-
-# Authorization: configuration
-class JiraInstanceViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.JIRAInstanceSerializer
-    queryset = JIRA_Instance.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "url"]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return JIRA_Instance.objects.all().order_by("id")
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class JiraIssuesViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.JIRAIssueSerializer
-    queryset = JIRA_Issue.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "jira_id",
-        "jira_key",
-        "finding",
-        "engagement",
-        "finding_group",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasJiraIssuePermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_jira_issues(Permissions.Product_View)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class JiraProjectViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.JIRAProjectSerializer
-    queryset = JIRA_Project.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "jira_instance",
-        "product",
-        "engagement",
-        "enabled",
-        "component",
-        "project_key",
-        "push_all_issues",
-        "enable_engagement_epic_mapping",
-        "push_notes",
-    ]
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasJiraProductPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_jira_projects(Permissions.Product_View)
 
 
 # Authorization: superuser
@@ -1671,33 +225,6 @@ class SonarqubeIssueTransitionViewSet(
 
 
 # Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductAPIScanConfigurationViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductAPIScanConfigurationSerializer
-    queryset = Product_API_Scan_Configuration.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "product",
-        "tool_configuration",
-        "service_key_1",
-        "service_key_2",
-        "service_key_3",
-    ]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductAPIScanConfigurationPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_api_scan_configurations(
-            Permissions.Product_API_Scan_Configuration_View,
-        )
-
-
-# Authorization: object-based
 # @extend_schema_view(**schema_with_prefetch())
 # Nested models with prefetch make the response schema too long for Swagger UI
 class DojoMetaViewSet(
@@ -1713,7 +240,7 @@ class DojoMetaViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_dojo_meta(Permissions.Product_View)
+        return get_authorized_dojo_meta("view")
 
     @extend_schema(
         methods=["post", "patch"],
@@ -1728,38 +255,57 @@ class DojoMetaViewSet(
         serialized_data = serializers.MetaMainSerializer(data=request.data)
         if serialized_data.is_valid(raise_exception=True):
             if request.method == "POST":
-                self.process_post(request.data)
+                self.process_post(request)
                 status_code = status.HTTP_201_CREATED
             if request.method == "PATCH":
-                self.process_patch(request.data)
+                self.process_patch(request)
                 status_code = status.HTTP_200_OK
 
         return Response(status=status_code, data=serialized_data.data)
 
-    def process_post(self: object, data: dict):
-        product = Product.objects.filter(id=data.get("product")).first()
-        finding = Finding.objects.filter(id=data.get("finding")).first()
-        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+    def _fetch_and_authorize_parents(self, request, permission_map):
+        """Fetch parent objects and verify the user has the required permissions."""
+        data = request.data
+        parents = {}
+        # TODO: Delete this after the move to Locations
+        with Endpoint.allow_endpoint_init():
+            for field, (model, permission) in permission_map.items():
+                obj = model.objects.filter(id=data.get(field)).first()
+                if obj:
+                    user_has_permission_or_403(request.user, obj, permission)
+                parents[field] = obj
+        return parents
+
+    def process_post(self, request):
+        data = request.data
+        parents = self._fetch_and_authorize_parents(request, {
+            "product": (Product, "edit"),
+            "finding": (Finding, "edit"),
+            "endpoint": (Endpoint, "edit"),
+        })
         metalist = data.get("metadata")
         for metadata in metalist:
             try:
                 DojoMeta.objects.create(
-                    product=product,
-                    finding=finding,
-                    endpoint=endpoint,
+                    product=parents["product"],
+                    finding=parents["finding"],
+                    endpoint=parents["endpoint"],
                     name=metadata.get("name"),
                     value=metadata.get("value"),
                     )
             except (IntegrityError) as ex:  # this should not happen as the data was validated in the batch call
                 raise ValidationError(str(ex))
 
-    def process_patch(self: object, data: dict):
-        product = Product.objects.filter(id=data.get("product")).first()
-        finding = Finding.objects.filter(id=data.get("finding")).first()
-        endpoint = Endpoint.objects.filter(id=data.get("endpoint")).first()
+    def process_patch(self, request):
+        data = request.data
+        parents = self._fetch_and_authorize_parents(request, {
+            "product": (Product, "edit"),
+            "finding": (Finding, "edit"),
+            "endpoint": (Endpoint, "edit"),
+        })
         metalist = data.get("metadata")
         for metadata in metalist:
-            dojometa = DojoMeta.objects.filter(product=product, finding=finding, endpoint=endpoint, name=metadata.get("name"))
+            dojometa = DojoMeta.objects.filter(product=parents["product"], finding=parents["finding"], endpoint=parents["endpoint"], name=metadata.get("name"))
             if dojometa:
                 try:
                     dojometa.update(
@@ -1773,772 +319,8 @@ class DojoMetaViewSet(
                 raise ValidationError(msg)
 
 
-@extend_schema_view(**schema_with_prefetch())
-class ProductViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    mixins.UpdateModelMixin,
-    viewsets.GenericViewSet,
-    dojo_mixins.DeletePreviewModelMixin,
-):
-    serializer_class = serializers.ProductSerializer
-    queryset = Product.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiProductFilter
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_products(Permissions.Product_View).distinct()
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if get_setting("ASYNC_OBJECT_DELETE"):
-            async_del = async_delete()
-            async_del.delete(instance)
-        else:
-            instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    # def list(self, request):
-    #     # Note the use of `get_queryset()` instead of `self.queryset`
-    #     queryset = self.get_queryset()
-    #     serializer = self.serializer_class(queryset, many=True)
-    #     return Response(serializer.data)
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request, pk=None):
-        product = self.get_object()
-
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, product, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductMemberViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductMemberSerializer
-    queryset = Product_Member.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_id", "user_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductMemberPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_members(
-            Permissions.Product_View,
-        ).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductGroupViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductGroupSerializer
-    queryset = Product_Group.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_id", "group_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductGroupPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_groups(
-            Permissions.Product_Group_View,
-        ).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductTypeViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductTypeSerializer
-    queryset = Product_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "critical_product",
-        "key_product",
-        "created",
-        "updated",
-    ]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductTypePermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_types(
-            Permissions.Product_Type_View,
-        ).distinct()
-
-    # Overwrite perfom_create of CreateModelMixin to add current user as owner
-    def perform_create(self, serializer):
-        serializer.save()
-        product_type_data = serializer.data
-        product_type_data.pop("authorization_groups")
-        product_type_data.pop("members")
-        member = Product_Type_Member()
-        member.user = self.request.user
-        member.product_type = Product_Type(**product_type_data)
-        member.role = Role.objects.get(is_owner=True)
-        member.save()
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if get_setting("ASYNC_OBJECT_DELETE"):
-            async_del = async_delete()
-            async_del.delete(instance)
-        else:
-            instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request, pk=None):
-        product_type = self.get_object()
-
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, product_type, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductTypeMemberViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductTypeMemberSerializer
-    queryset = Product_Type_Member.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_type_id", "user_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductTypeMemberPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_type_members(
-            Permissions.Product_Type_View,
-        ).distinct()
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.role.is_owner:
-            owners = Product_Type_Member.objects.filter(
-                product_type=instance.product_type, role__is_owner=True,
-            ).count()
-            if owners <= 1:
-                return Response(
-                    "There must be at least one owner",
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ProductTypeGroupViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ProductTypeGroupSerializer
-    queryset = Product_Type_Group.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "product_type_id", "group_id"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasProductTypeGroupPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_product_type_groups(
-            Permissions.Product_Type_Group_View,
-        ).distinct()
-
-    @extend_schema(
-        exclude=True,
-    )
-    def partial_update(self, request, pk=None):
-        # Object authorization won't work if not all data is provided
-        response = {"message": "Patch function is not offered in this path."}
-        return Response(response, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class StubFindingsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.StubFindingSerializer
-    queryset = Stub_Finding.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "title", "date", "severity", "description"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasFindingPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_stub_findings(
-            Permissions.Finding_View,
-        ).distinct()
-
-    def get_serializer_class(self):
-        if self.request and self.request.method == "POST":
-            return serializers.StubFindingCreateSerializer
-        return serializers.StubFindingSerializer
-
-
-# Authorization: authenticated, configuration
-class DevelopmentEnvironmentViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.DevelopmentEnvironmentSerializer
-    queryset = Development_Environment.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (IsAuthenticated, permissions.UserHasDevelopmentEnvironmentPermission)
-
-    def get_queryset(self):
-        return Development_Environment.objects.all().order_by("id")
-
-
-# Authorization: object-based
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class TestsViewSet(
-    PrefetchDojoModelViewSet,
-    ra_api.AcceptedRisksMixin,
-):
-    serializer_class = serializers.TestSerializer
-    queryset = Test.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiTestFilter
-    permission_classes = (IsAuthenticated, permissions.UserHasTestPermission)
-
-    @property
-    def risk_application_model_class(self):
-        return Test
-
-    def get_queryset(self):
-        return (
-            get_authorized_tests(Permissions.Test_View)
-            .prefetch_related("notes", "files")
-            .distinct()
-        )
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if get_setting("ASYNC_OBJECT_DELETE"):
-            async_del = async_delete()
-            async_del.delete(instance)
-        else:
-            instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get_serializer_class(self):
-        if self.request and self.request.method == "POST":
-            if self.action == "accept_risks":
-                return ra_api.AcceptedRiskSerializer
-            return serializers.TestCreateSerializer
-        return serializers.TestSerializer
-
-    @extend_schema(
-        request=serializers.ReportGenerateOptionSerializer,
-        responses={status.HTTP_200_OK: serializers.ReportGenerateSerializer},
-    )
-    @action(
-        detail=True, methods=["post"], permission_classes=[IsAuthenticated],
-    )
-    def generate_report(self, request, pk=None):
-        test = self.get_object()
-
-        options = {}
-        # prepare post data
-        report_options = serializers.ReportGenerateOptionSerializer(
-            data=request.data,
-        )
-        if report_options.is_valid():
-            options["include_finding_notes"] = report_options.validated_data[
-                "include_finding_notes"
-            ]
-            options["include_finding_images"] = report_options.validated_data[
-                "include_finding_images"
-            ]
-            options[
-                "include_executive_summary"
-            ] = report_options.validated_data["include_executive_summary"]
-            options[
-                "include_table_of_contents"
-            ] = report_options.validated_data["include_table_of_contents"]
-        else:
-            return Response(
-                report_options.errors, status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        data = report_generate(request, test, options)
-        report = serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={status.HTTP_200_OK: serializers.TestToNotesSerializer},
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.AddNewNoteOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.NoteSerializer},
-    )
-    @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasTestNotePermission))
-    def notes(self, request, pk=None):
-        test = self.get_object()
-        if request.method == "POST":
-            new_note = serializers.AddNewNoteOptionSerializer(
-                data=request.data,
-            )
-            if new_note.is_valid():
-                entry = new_note.validated_data["entry"]
-                private = new_note.validated_data.get("private", False)
-                note_type = new_note.validated_data.get("note_type", None)
-            else:
-                return Response(
-                    new_note.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            notes = test.notes.filter(note_type=note_type).first()
-            if notes and note_type and note_type.is_single:
-                return Response("Only one instance of this note_type allowed on a test.", status=status.HTTP_400_BAD_REQUEST)
-
-            author = request.user
-            note = Notes(
-                entry=entry,
-                author=author,
-                private=private,
-                note_type=note_type,
-            )
-            note.save()
-            # Add an entry to the note history
-            history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
-            note.history.add(history)
-            # Now add the note to the object
-            test.notes.add(note)
-            # Determine if we need to send any notifications for user mentioned
-            process_tag_notifications(
-                request=request,
-                note=note,
-                parent_url=request.build_absolute_uri(
-                    reverse("view_test", args=(test.id,)),
-                ),
-                parent_title=f"Test: {test.title}",
-            )
-
-            serialized_note = serializers.NoteSerializer(
-                {"author": author, "entry": entry, "private": private},
-            )
-            return Response(
-                serialized_note.data, status=status.HTTP_201_CREATED,
-            )
-        notes = test.notes.all()
-
-        serialized_notes = serializers.TestToNotesSerializer(
-            {"test_id": test, "notes": notes},
-        )
-        return Response(serialized_notes.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={status.HTTP_200_OK: serializers.TestToFilesSerializer},
-    )
-    @extend_schema(
-        methods=["POST"],
-        request=serializers.AddNewFileOptionSerializer,
-        responses={status.HTTP_201_CREATED: serializers.FileSerializer},
-    )
-    @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
-    )
-    def files(self, request, pk=None):
-        test = self.get_object()
-        if request.method == "POST":
-            new_file = serializers.FileSerializer(data=request.data)
-            if new_file.is_valid():
-                title = new_file.validated_data["title"]
-                file = new_file.validated_data["file"]
-            else:
-                return Response(
-                    new_file.errors, status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            file = FileUpload(title=title, file=file)
-            file.save()
-            test.files.add(file)
-
-            serialized_file = serializers.FileSerializer(file)
-            return Response(
-                serialized_file.data, status=status.HTTP_201_CREATED,
-            )
-
-        files = test.files.all()
-        serialized_files = serializers.TestToFilesSerializer(
-            {"test_id": test, "files": files},
-        )
-        return Response(serialized_files.data, status=status.HTTP_200_OK)
-
-    @extend_schema(
-        methods=["GET"],
-        responses={
-            status.HTTP_200_OK: serializers.RawFileSerializer,
-        },
-    )
-    @action(
-        detail=True,
-        methods=["get"],
-        url_path=r"files/download/(?P<file_id>\d+)",
-        permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
-    )
-    def download_file(self, request, file_id, pk=None):
-        test = self.get_object()
-        # Get the file object
-        file_object_qs = test.files.filter(id=file_id)
-        file_object = (
-            file_object_qs.first() if len(file_object_qs) > 0 else None
-        )
-        if file_object is None:
-            return Response(
-                {"error": "File ID not associated with Test"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        # send file
-        return generate_file_response(file_object)
-
-
-# Authorization: authenticated, configuration
-class TestTypesViewSet(
-    mixins.UpdateModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.ReadOnlyModelViewSet,
-):
-    serializer_class = serializers.TestTypeSerializer
-    queryset = Test_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "name",
-    ]
-    permission_classes = (IsAuthenticated, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Test_Type.objects.all().order_by("id")
-
-    def get_serializer_class(self):
-        if self.action == "create":
-            return serializers.TestTypeCreateSerializer
-        return serializers.TestTypeSerializer
-
-
-# @extend_schema_view(**schema_with_prefetch())
-# Nested models with prefetch make the response schema too long for Swagger UI
-class TestImportViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.TestImportSerializer
-    queryset = Test_Import.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-
-    filterset_class = TestImportAPIFilter
-
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasTestImportPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_test_imports(
-            Permissions.Test_View,
-        ).prefetch_related(
-            "test_import_finding_action_set",
-            "findings_affected",
-            "findings_affected__endpoints",
-            "findings_affected__status_finding",
-            "findings_affected__finding_meta",
-            "findings_affected__jira_issue",
-            "findings_affected__burprawrequestresponse_set",
-            "findings_affected__jira_issue",
-            "findings_affected__jira_issue",
-            "findings_affected__jira_issue",
-            "findings_affected__reviewers",
-            "findings_affected__notes",
-            "findings_affected__notes__author",
-            "findings_affected__notes__history",
-            "findings_affected__files",
-            "findings_affected__found_by",
-            "findings_affected__tags",
-            "findings_affected__risk_acceptance_set",
-            "test",
-            "test__tags",
-            "test__notes",
-            "test__notes__author",
-            "test__files",
-            "test__test_type",
-            "test__engagement",
-            "test__environment",
-            "test__engagement__product",
-            "test__engagement__product__prod_type",
-        )
-
-
-# Authorization: configurations
-@extend_schema_view(**schema_with_prefetch())
-class ToolConfigurationsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ToolConfigurationSerializer
-    queryset = Tool_Configuration.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "tool_type",
-        "url",
-        "authentication_type",
-    ]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return Tool_Configuration.objects.all().order_by("id")
-
-
-# Authorization: object-based
-@extend_schema_view(**schema_with_prefetch())
-class ToolProductSettingsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.ToolProductSettingsSerializer
-    queryset = Tool_Product_Settings.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "product",
-        "tool_configuration",
-        "tool_project_id",
-        "url",
-    ]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasToolProductSettingsPermission,
-    )
-
-    def get_queryset(self):
-        return get_authorized_tool_product_settings(Permissions.Product_View)
-
-
-# Authorization: configuration
-class ToolTypesViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.ToolTypeSerializer
-    queryset = Tool_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name", "description"]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return Tool_Type.objects.all().order_by("id")
-
-
-# Authorization: authenticated, configuration
-class RegulationsViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.RegulationSerializer
-    queryset = Regulation.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "name", "description"]
-    permission_classes = (IsAuthenticated, permissions.UserHasRegulationPermission)
-
-    def get_queryset(self):
-        return Regulation.objects.all().order_by("id")
-
-
-# Authorization: configuration
-class UsersViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.UserSerializer
-    queryset = User.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = ApiUserFilter
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return User.objects.all().order_by("id")
-
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if request.user == instance:
-            return Response(
-                "Users may not delete themselves",
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=True,
-        methods=["post"],
-        url_path="reset_api_token",
-        permission_classes=(IsAuthenticated, permissions.IsSuperUserOrGlobalOwner),
-        filter_backends=[],
-        pagination_class=None,
-    )
-    def reset_api_token(self, request, pk=None):
-        target_user = self.get_object()
-        reset_token_for_user(acting_user=request.user, target_user=target_user)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# Authorization: superuser
-@extend_schema_view(**schema_with_prefetch())
-class UserContactInfoViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.UserContactInfoSerializer
-    queryset = UserContactInfo.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return UserContactInfo.objects.all().order_by("id")
-
-
-# Authorization: authenticated users
-class UserProfileView(GenericAPIView):
-    permission_classes = (IsAuthenticated,)
-    pagination_class = None
-    serializer_class = serializers.UserProfileSerializer
-
-    @action(
-        detail=True, methods=["get"], filter_backends=[], pagination_class=None,
-    )
-    def get(self, request, _=None):
-        user = get_current_user()
-        user_contact_info = (
-            user.usercontactinfo if hasattr(user, "usercontactinfo") else None
-        )
-        global_role = (
-            user.global_role if hasattr(user, "global_role") else None
-        )
-        dojo_group_member = Dojo_Group_Member.objects.filter(user=user)
-        product_type_member = Product_Type_Member.objects.filter(user=user)
-        product_member = Product_Member.objects.filter(user=user)
-        serializer = serializers.UserProfileSerializer(
-            {
-                "user": user,
-                "user_contact_info": user_contact_info,
-                "global_role": global_role,
-                "dojo_group_member": dojo_group_member,
-                "product_type_member": product_type_member,
-                "product_member": product_member,
-            },
-            many=False,
-        )
-        return Response(serializer.data)
+# DevelopmentEnvironmentViewSet moved to dojo/development_environment/api/views.py
+# RegulationsViewSet moved to dojo/regulations/api/views.py
 
 
 # Authorization: authenticated users, DjangoModelPermissions
@@ -2594,7 +376,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
             jira_driver = engagement or (product or None)
-            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+            if jira_project := (jira_services.get_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
 
         # Add pghistory context for audit trail (adds to existing middleware context).
@@ -2610,39 +392,7 @@ class ImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             pghistory.context(test_id=test_id)
 
     def get_queryset(self):
-        return get_authorized_tests(Permissions.Import_Scan_Result)
-
-
-# Authorization: authenticated users, DjangoModelPermissions
-class EndpointMetaImporterView(
-    mixins.CreateModelMixin, viewsets.GenericViewSet,
-):
-
-    """
-    Imports a CSV file into a product to propagate arbitrary meta and tags on endpoints.
-
-    By Names:
-    - Provide `product_name` of existing product
-
-    By ID:
-    - Provide the id of the product in the `product` parameter
-
-    In this scenario Defect Dojo will look up the product by the provided details.
-    """
-
-    serializer_class = serializers.EndpointMetaImporterSerializer
-    parser_classes = [MultiPartParser]
-    queryset = Product.objects.none()
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasMetaImportPermission,
-    )
-
-    def perform_create(self, serializer):
-        serializer.save()
-
-    def get_queryset(self):
-        return get_authorized_products(Permissions.Location_Edit)
+        return get_authorized_tests("import")
 
 
 # Authorization: configuration
@@ -2674,7 +424,7 @@ class LanguageViewSet(
     )
 
     def get_queryset(self):
-        return get_authorized_languages(Permissions.Language_View).distinct()
+        return get_authorized_languages("view").distinct()
 
 
 # Authorization: object-based
@@ -2688,7 +438,7 @@ class ImportLanguagesView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     )
 
     def get_queryset(self):
-        return get_authorized_products(Permissions.Language_Add)
+        return get_authorized_products("add")
 
 
 # Authorization: object-based
@@ -2730,7 +480,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
     )
 
     def get_queryset(self):
-        return get_authorized_tests(Permissions.Import_Scan_Result)
+        return get_authorized_tests("import")
 
     def perform_create(self, serializer):
         auto_create = AutoCreateContextManager()
@@ -2752,7 +502,7 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
         push_to_jira = serializer.validated_data.get("push_to_jira")
         if get_system_setting("enable_jira"):
             jira_driver = test or (engagement or (product or None))
-            if jira_project := (jira_helper.get_jira_project(jira_driver) if jira_driver else None):
+            if jira_project := (jira_services.get_project(jira_driver) if jira_driver else None):
                 push_to_jira = push_to_jira or jira_project.push_all_issues
         logger.debug("push_to_jira: %s", push_to_jira)
         # Add pghistory context for audit trail (adds to existing middleware context)
@@ -2773,76 +523,31 @@ class ReImportScanView(mixins.CreateModelMixin, viewsets.GenericViewSet):
             pghistory.context(test_id=test_id_from_response)
 
 
-# Authorization: configuration
-class NoteTypeViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.NoteTypeSerializer
-    queryset = Note_Type.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "name",
-        "description",
-        "is_single",
-        "is_active",
-        "is_mandatory",
-    ]
-    permission_classes = (permissions.UserHasConfigurationPermissionSuperuser,)
-
-    def get_queryset(self):
-        return Note_Type.objects.all().order_by("id")
+from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401 -- re-export; urls.py imports by name
+from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401 -- re-export; urls.py imports by name
 
 
-class BurpRawRequestResponseViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.BurpRawRequestResponseMultiSerializer
-    queryset = BurpRawRequestResponse.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["finding"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasFindingRelatedObjectPermission,
+def _report_url_location_refs(product):
+    """
+    URL LocationProductReferences for a product, shaped for V3EndpointCompatibleSerializer.
+
+    Mirrors V3EndpointCompatibleViewSet.get_queryset so the report's ``endpoints`` field matches
+    the V3 ``/endpoints`` route. Non-URL locations (e.g. dependencies) are excluded because the
+    compat serializer only understands URL-backed locations.
+    """
+    active_finding_subquery = build_count_subquery(
+        LocationFindingReference.objects.filter(
+            location=OuterRef("location"),
+            status=FindingLocationStatus.Active,
+        ),
+        group_field="location",
     )
-
-    def get_queryset(self):
-        return (
-            BurpRawRequestResponse.objects.filter(
-                finding__in=get_authorized_findings(
-                    Permissions.Finding_View,
-                ),
-            )
-            .exclude(
-                burpRequestBase64__exact=b"",
-                burpResponseBase64__exact=b"",
-            )
-            .order_by("id")
-        )
-
-
-# Authorization: superuser
-class NotesViewSet(
-    mixins.UpdateModelMixin,
-    viewsets.ReadOnlyModelViewSet,
-):
-    serializer_class = serializers.NoteSerializer
-    queryset = Notes.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = [
-        "id",
-        "entry",
-        "author",
-        "private",
-        "date",
-        "edited",
-        "edit_time",
-        "editor",
-    ]
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Notes.objects.all().order_by("id")
+    return LocationProductReference.objects.filter(
+        product=product,
+        location__location_type=URL.LOCATION_TYPE,
+    ).annotate(
+        active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+    ).distinct()
 
 
 def report_generate(request, obj, options):
@@ -2915,10 +620,14 @@ def report_generate(request, obj, options):
                 Finding.objects.filter(test__engagement__product=product),
             ),
         )
-        ids = get_endpoint_ids(
-            Endpoint.objects.filter(product=product).distinct(),
-        )
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = _report_url_location_refs(product)
+        else:
+            # TODO: Delete this after the move to Locations
+            ids = get_endpoint_ids(
+                Endpoint.objects.filter(product=product).distinct(),
+            )
+            endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
@@ -2931,11 +640,14 @@ def report_generate(request, obj, options):
         )
         report_name = "Engagement Report: " + str(engagement)
 
-        ids = set(finding.id for finding in findings.qs)  # noqa: C401
-        ids = get_endpoint_ids(
-            Endpoint.objects.filter(product=engagement.product).distinct(),
-        )
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = _report_url_location_refs(engagement.product)
+        else:
+            # TODO: Delete this after the move to Locations
+            ids = get_endpoint_ids(
+                Endpoint.objects.filter(product=engagement.product).distinct(),
+            )
+            endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Test":
         test = obj
@@ -3108,51 +820,77 @@ def report_generate(request, obj, options):
     return result
 
 
-# Authorization: superuser
-class SystemSettingsViewSet(
-    mixins.ListModelMixin, mixins.UpdateModelMixin, viewsets.GenericViewSet,
-):
-
-    """Basic control over System Settings. Use 'id' 1 for PUT, PATCH operations"""
-
+class CeleryViewSet(viewsets.ViewSet):
     permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-    serializer_class = serializers.SystemSettingsSerializer
     queryset = System_Settings.objects.none()
 
-    def get_queryset(self):
-        return System_Settings.objects.all().order_by("id")
-
-
-# Authorization: superuser
-@extend_schema_view(**schema_with_prefetch())
-class NotificationsViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.NotificationsSerializer
-    queryset = Notifications.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "user", "product", "template"]
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)
-
-    def get_queryset(self):
-        return Notifications.objects.all().order_by("id")
-
-
-@extend_schema_view(**schema_with_prefetch())
-class EngagementPresetsViewset(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.EngagementPresetsSerializer
-    queryset = Engagement_Presets.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ["id", "title", "product"]
-    permission_classes = (
-        IsAuthenticated,
-        permissions.UserHasEngagementPresetPermission,
+    @extend_schema(
+        responses=serializers.CeleryStatusSerializer,
+        summary="Get Celery worker and queue status",
+        description=(
+            "Returns Celery worker liveness, pending queue length, and the active task "
+            "timeout/expiry configuration. Uses the Celery control channel (pidbox) for "
+            "worker status so it works correctly even when the task queue is clogged."
+        ),
     )
+    @action(detail=False, methods=["get"], url_path="status")
+    def status(self, request):
+        queue_length = get_celery_queue_length()
+        data = {
+            "worker_status": get_celery_worker_status(),
+            "broker_status": queue_length is not None,
+            "queue_length": queue_length,
+            "task_time_limit": getattr(settings, "CELERY_TASK_TIME_LIMIT", None),
+            "task_soft_time_limit": getattr(settings, "CELERY_TASK_SOFT_TIME_LIMIT", None),
+            "task_default_expires": getattr(settings, "CELERY_TASK_DEFAULT_EXPIRES", None),
+        }
+        return Response(serializers.CeleryStatusSerializer(data).data)
 
-    def get_queryset(self):
-        return get_authorized_engagement_presets(Permissions.Product_View)
+    @extend_schema(
+        request=None,
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all pending Celery tasks from the queue",
+        description=(
+            "Removes all pending tasks from the default Celery queue. Tasks already being "
+            "executed by workers are not affected. Note: if deduplication tasks were queued, "
+            "you may need to re-run deduplication manually via `python manage.py dedupe`."
+        ),
+    )
+    @action(detail=False, methods=["post"], url_path="queue/purge")
+    def queue_purge(self, request):
+        purged = purge_celery_queue()
+        return Response({"purged": purged})
+
+    @extend_schema(
+        responses=serializers.CeleryQueueTaskDetailSerializer(many=True),
+        summary="Get per-task breakdown of the Celery queue",
+        description=(
+            "Scans every message in the queue (O(N)) and returns task name, count, and "
+            "oldest/newest queue positions. May be slow for large queues."
+        ),
+    )
+    @action(detail=False, methods=["get"], url_path="queue/details")
+    def queue_details(self, request):
+        details = get_celery_queue_details()
+        if details is None:
+            return Response({"error": "Unable to read queue details."}, status=503)
+        return Response(serializers.CeleryQueueTaskDetailSerializer(details, many=True).data)
+
+    @extend_schema(
+        request={"application/json": {"type": "object", "properties": {"task_name": {"type": "string"}}, "required": ["task_name"]}},
+        responses={200: {"type": "object", "properties": {"purged": {"type": "integer"}}}},
+        summary="Purge all queued tasks with a given task name",
+        description="Removes all pending tasks matching the given task name from the default Celery queue.",
+    )
+    @action(detail=False, methods=["post"], url_path="queue/task/purge")
+    def queue_task_purge(self, request):
+        task_name = request.data.get("task_name", "").strip()
+        if not task_name:
+            return Response({"error": "task_name is required."}, status=400)
+        purged = purge_celery_queue_by_task_name(task_name)
+        if purged is None:
+            return Response({"error": "Unable to purge tasks."}, status=503)
+        return Response({"purged": purged})
 
 
 class NetworkLocationsViewset(
@@ -3196,215 +934,47 @@ class SLAConfigurationViewset(
         return SLA_Configuration.objects.all().order_by("id")
 
 
-class QuestionnaireQuestionViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    dojo_mixins.QuestionSubClassFieldsMixin,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireQuestionSerializer
-    queryset = Question.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
+# AnnouncementViewSet moved to dojo/announcement/api/views.py
 
-    def get_queryset(self):
-        return Question.objects.all().order_by("id")
+# Backward-compat re-exports for external consumers (e.g. dojo-pro) that still
+# import (or attribute-access) ViewSets from dojo.api_v2.views. The viewsets
+# moved into per-module api/views packages, and those modules import base
+# classes back from dojo.api_v2.views at import time. Eagerly importing them
+# here would create entry-order-dependent circular imports, so expose them
+# lazily via PEP 562 __getattr__ instead.
+import importlib  # noqa: E402
 
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-
-class QuestionnaireAnswerViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    dojo_mixins.AnswerSubClassFieldsMixin,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireAnswerSerializer
-    queryset = Answer.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return Answer.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+_LAZY_VIEWSET_EXPORTS = {
+    "AnnouncementViewSet":                "dojo.announcement.api.views",
+    "EndPointViewSet":                    "dojo.endpoint.api.views",
+    "EndpointMetaImporterView":           "dojo.endpoint.api.views",
+    "EndpointStatusViewSet":              "dojo.endpoint.api.views",
+    "EngagementViewSet":                  "dojo.engagement.api.views",
+    "EngagementPresetsViewset":           "dojo.engagement.api.views",
+    "BurpRawRequestResponseViewSet":      "dojo.finding.api.views",
+    "FindingViewSet":                     "dojo.finding.api.views",
+    "FindingTemplatesViewSet":            "dojo.finding.api.views",
+    "ProductAPIScanConfigurationViewSet": "dojo.product.api.views",
+    "ProductTypeViewSet":                 "dojo.product_type.api.views",
+    "RiskAcceptanceViewSet":              "dojo.risk_acceptance.api.views",
+    "SystemSettingsViewSet":              "dojo.system_settings.api.views",
+    "TestsViewSet":                       "dojo.test.api.views",
+    "TestTypesViewSet":                   "dojo.test.api.views",
+    "TestImportViewSet":                  "dojo.test.api.views",
+    "ToolConfigurationsViewSet":          "dojo.tool_config.api.views",
+    "ToolProductSettingsViewSet":         "dojo.tool_product.api.views",
+    "ToolTypesViewSet":                   "dojo.tool_type.api.views",
+    "DevelopmentEnvironmentViewSet":      "dojo.development_environment.api.views",
+    "RegulationsViewSet":                 "dojo.regulations.api.views",
+    "UserContactInfoViewSet":             "dojo.user.api.views",
+    "UsersViewSet":                       "dojo.user.api.views",
+    "UserProfileView":                    "dojo.user.api.views",
+}
 
 
-class QuestionnaireGeneralSurveyViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireGeneralSurveySerializer
-    queryset = General_Survey.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return General_Survey.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-
-class QuestionnaireEngagementSurveyViewSet(
-    viewsets.ReadOnlyModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireEngagementSurveySerializer
-    queryset = Engagement_Survey.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return Engagement_Survey.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-        request=OpenApiTypes.NONE,
-        parameters=[
-            OpenApiParameter(
-                "engagement_id", OpenApiTypes.INT, OpenApiParameter.PATH,
-            ),
-        ],
-        responses={status.HTTP_200_OK: serializers.QuestionnaireAnsweredSurveySerializer},
-    )
-    @action(
-        detail=True, methods=["post"], url_path=r"link_engagement/(?P<engagement_id>\d+)",
-    )
-    def link_engagement(self, request, pk, engagement_id):
-        # Get the answered survey
-        engagement_survey = self.get_object()
-        # Safely get the engagement
-        engagement = get_object_or_404(Engagement.objects, pk=engagement_id)
-        # Link the engagement
-        answered_survey, _ = Answered_Survey.objects.get_or_create(engagement=engagement, survey=engagement_survey)
-        # Send a favorable response
-        serialized_answered_survey = serializers.QuestionnaireAnsweredSurveySerializer(answered_survey)
-        return Response(serialized_answered_survey.data)
-
-
-@extend_schema_view(**schema_with_prefetch())
-class QuestionnaireAnsweredSurveyViewSet(
-    prefetch.PrefetchListMixin,
-    prefetch.PrefetchRetrieveMixin,
-    viewsets.ReadOnlyModelViewSet,
-    DeprecationNoticeMixin,
-):
-    deprecated = True
-    end_of_life_date = datetime(2026, 6, 1)
-    serializer_class = serializers.QuestionnaireAnsweredSurveySerializer
-    queryset = Answered_Survey.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    permission_classes = (
-        permissions.UserHasEngagementRelatedObjectPermission,
-        DjangoModelPermissions,
-    )
-
-    def get_queryset(self):
-        return Answered_Survey.objects.all().order_by("id")
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(
-        deprecated=True,
-        description="This endpoint is deprecated and will be removed on 2026-06-01.",
-    )
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-
-# Authorization: configuration
-class AnnouncementViewSet(
-    DojoModelViewSet,
-):
-    serializer_class = serializers.AnnouncementSerializer
-    queryset = Announcement.objects.none()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.UserHasConfigurationPermissionStaff,)
-
-    def get_queryset(self):
-        return Announcement.objects.all().order_by("id")
-
-
-class NotificationWebhooksViewSet(
-    PrefetchDojoModelViewSet,
-):
-    serializer_class = serializers.NotificationWebhooksSerializer
-    queryset = Notification_Webhooks.objects.all()
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = "__all__"
-    permission_classes = (permissions.IsSuperUser, DjangoModelPermissions)  # TODO: add permission also for other users
+def __getattr__(name):
+    module_path = _LAZY_VIEWSET_EXPORTS.get(name)
+    if module_path is None:
+        msg = f"module 'dojo.api_v2.views' has no attribute {name!r}"
+        raise AttributeError(msg)
+    return getattr(importlib.import_module(module_path), name)

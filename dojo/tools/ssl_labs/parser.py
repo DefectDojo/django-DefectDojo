@@ -6,7 +6,7 @@ from datetime import datetime
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class SslLabsParser:
@@ -349,7 +349,7 @@ class SslLabsParser:
     def add_location(self, finding, host, port, protocol):
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations.append(
-                URL(host=host, port=port, protocol=protocol),
+                LocationData.url(host=host, port=port, protocol=protocol),
             )
         else:
             # TODO: Delete this after the move to Locations
@@ -360,7 +360,7 @@ class SslLabsParser:
     def add_location_from_request_url(self, finding, request_url):
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations.append(
-                URL.from_value(request_url),
+                LocationData.url(url=request_url),
             )
         else:
             # TODO: Delete this after the move to Locations

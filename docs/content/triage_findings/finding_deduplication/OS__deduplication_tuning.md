@@ -1,5 +1,5 @@
 ---
-title: "Deduplication Tuning"
+title: "Deduplication Tuning (Open Source)"
 description: "Configure deduplication in DefectDojo Open Source: algorithms, hash fields, endpoints, and service"
 weight: 5
 audience: opensource
@@ -106,12 +106,32 @@ Notes:
 
 ## After changing deduplication settings
 
+After changing algorithms or Hash computation, you will need to **recompute hashes** for the affected parser/test type before the new matching behavior will apply consistently across existing data.
+
+Note: Recomputing hashes can be lead to long wait times on large instances. Plan maintenance windows accordingly.
+
 - Changes to dedupe configuration (e.g., `HASHCODE_FIELDS_PER_SCANNER`, `HASH_CODE_FIELDS_ALWAYS`, `DEDUPLICATION_ALGORITHM_PER_PARSER`) are not applied retroactively automatically. To re-evaluate existing findings you must run the management command below.
+
+### Running dedup on a backlog of pre-existing data
+
+When you first configure dedup settings (or change them later), Findings that were imported before the change keep their old hashes until you re-run dedup explicitly.  Use the `dedupe` management command to re-hash and/or re-evaluate existing Findings.
 
 Run inside the uwsgi container. Example (hash codes only, no dedupe):
 
 ```bash
 docker compose exec uwsgi /bin/bash -c "python manage.py dedupe --hash_code_only"
+```
+
+To **recompute hashes and run dedup** for all parsers (the typical "I just turned on dedup and want to clean up the backlog" workflow):
+
+```bash
+docker compose exec uwsgi /bin/bash -c "python manage.py dedupe"
+```
+
+To target a specific parser only:
+
+```bash
+docker compose exec uwsgi /bin/bash -c "python manage.py dedupe --parser 'Trivy Scan'"
 ```
 
 Help/usage:
@@ -124,7 +144,7 @@ options:
   --dedupe_sync         Run dedupe in the foreground, default false
 ```
 
-If you submit dedupe to Celery (without `--dedupe_sync`), allow time for tasks to complete before evaluating results.
+If you submit dedupe to Celery (without `--dedupe_sync`), allow time for tasks to complete before evaluating results.  On large instances this can take a substantial amount of time — monitor Celery worker logs to track progress.
 
 ## Where to configure
 

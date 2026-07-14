@@ -8,6 +8,14 @@ aliases:
 
 Here are some common issues with the Jira integration, and ways to address them.
 
+## DefectDojo cannot reach Jira (or other outbound services) at all
+
+If DefectDojo's Jira integration fails with connection errors that look like "connection refused", "no route to host", or generic TLS handshake failures — and the credentials themselves are valid — your DefectDojo instance may be behind a firewall that requires outbound traffic to go through a forward HTTPS proxy.
+
+For on-prem Pro deployments, set the `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` environment variables on the deployment.  `dojo-compose-cli` propagates these to the `uwsgi`, `celeryworker`, and Connector containers automatically.  See [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/) for the full configuration walkthrough.
+
+> Note: setting `HTTPS_PROXY` configures **outbound** traffic from DefectDojo only.  It does not affect Jira's ability to deliver **inbound** webhooks to DefectDojo — see [Changes made to Jira issues are not updating Findings in DefectDojo](#changes-made-to-jira-issues-are-not-updating-findings-in-defectdojo) below for that case.
+
 ## Unable to setup Jira configuration in DefectDojo due to 404, 401 or 403 errors
 Jira Cloud:
 - Consult the Jira Cloud REST API documentation on authentication: https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/
@@ -55,6 +63,12 @@ For example:
 curl -H "Authorization: Bearer ATATT1234567890abcdefghijklmnopqrstuvwxyz" https://<COMPANY>.atlassian.net/rest/api/latest/issue/<JIRA_ISSUE_KEY>/transitions?expand=transitions.fields
 ```
 
+## Jira Service Accounts Are Not Supported
+
+Jira Cloud Service Accounts (created via Atlassian's admin console) use a different API host than standard user accounts and are **not currently supported** by DefectDojo's Jira integration. Attempting to use a Service Account API token or OAuth 2.0 credentials from a Service Account will result in HTTP 403 errors.
+
+To set up the Jira integration, create a standard Jira user account (with a valid email address) and generate an API token from that account. If you want to clearly identify issues created by DefectDojo, create a dedicated user named something like "DefectDojo" and use its API token for the integration.
+
 ## I can't find an Epic Name ID for my Space
 Certain Spaces in Jira, such as Team-Managed Spaces, do not use Epics and therefore will not have an Epic Name ID.  In this case, set Epic Name ID to 0 in DefectDojo.
 
@@ -65,7 +79,7 @@ Using the 'Push To Jira' workflow triggers an asynchronous process, however an I
 
 Common reasons issues are not created:
 * The Default Issue Type you have selected is not usable with the Jira Space
-* Issues in the Space have required attributes that prevent them from being created via DefectDojo (see our guide to [Custom Fields](../jira_guide/#custom-fields-in-jira))
+* Issues in the Space have required attributes that prevent them from being created via DefectDojo (which can be handled via Custom Fields in Jira)
 
 
 ## Error: Product Misconfigured or no permissions in Jira?
@@ -77,11 +91,11 @@ This error message can appear when attempting to add a created Jira configuratio
 
 ## Changes made to Jira issues are not updating Findings in DefectDojo
 
-* Start by confirming that the [DefectDojo webhook receiver](../jira_guide/#step-3-configure-bidirectional-sync-jira-webhook) is configured correctly and can successfully receive updates.
+* Start by confirming that the DefectDojo webhook receiver is configured correctly and can successfully receive updates.
 
 * Ensure the SSL certificate used by Defect Dojo is trusted by JIRA. For JIRA Cloud you must use [a valid SSL/TLS certificate, signed by a globally trusted certificate authority](https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-registering-webhooks-with-non-secure-urls/)
 
-* If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close [Transition IDs](../jira_guide/#step-3-configure-bidirectional-sync-jira-webhook)).
+* If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close Transition IDs).
 
 * [Test](https://support.atlassian.com/jira/kb/testing-webhooks-in-jira-cloud/) your JIRA webhook using a public endpoint such as Pipedream or Beeceptor:
 

@@ -3,7 +3,10 @@ import hashlib
 import logging
 from typing import Any
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo import RlJsonInfo
 from dojo.tools.reversinglabs_spectraassure.rlJsonInfo.cve_info_node import CveInfoNode
 
@@ -71,6 +74,11 @@ class ReversinglabsSpectraassureParser:
         finding.unsaved_vulnerability_ids = [cve]
         finding.unsaved_tags = node.tags
         finding.impact = node.impact
+
+        if settings.V3_FEATURE_LOCATIONS and node.component_purl:
+            finding.unsaved_locations.append(
+                LocationData.dependency(purl=node.component_purl),
+            )
 
         return finding
 

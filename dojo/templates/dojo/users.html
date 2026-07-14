@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load i18n %}
 {% load navigation_tags %}
 {% load authorization_tags %}
@@ -11,6 +12,7 @@
     {% trans "Email" as email %}
     {% trans "Active" as active %}
     {% trans "Superuser" as superuser %}
+    {% trans "Staff" as staff %}
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
@@ -37,7 +39,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form|has_active_filters %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=filtered.form %}
                 </div>
             </div>
@@ -66,7 +68,7 @@
                                     <th class="nowrap, text-center">{% dojo_sort request active 'is_active' %}</th>
                                     {% comment %} The display field is translated in the function. No need to translate here as well{% endcomment %}
                                     <th class="nowrap, text-center">{% dojo_sort request superuser 'is_superuser' %}</th>
-                                    <th class="nowrap">{% trans "Global Role" %}</th>
+                                    <th class="nowrap, text-center">{% dojo_sort request staff 'is_staff' %}</th>
                                     <th class="nowrap">{% trans "Date Joined" %}</th>
                                     <th class="nowrap">{% trans "Last Login" %}</th>
                                     <th class="nowrap">{% trans "Token Last Reset" %}</th>
@@ -80,7 +82,7 @@
                                     <tr>
                                         <td>
                                             <ul>
-                                                <li class="dropdown" style="list-style:none;position:absolute">
+                                                <li class="dropdown" style="list-style:none">
                                                     <a href="#" aria-haspopup="true" aria-label="User options menu" class="dropdown-toggle" data-toggle="dropdown" aria-expanded="true" id="dropdownMenuUser">&nbsp;<b class="fa-solid fa-ellipsis-vertical"></b>&nbsp;</a>
                                                     <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuUser">
                                                         <li role="presentation">
@@ -126,7 +128,9 @@
                                         <td class="text-center">{% if u.is_superuser %}
                                             <i class="text-success fa-solid fa-check"></i>{% else %}
                                             <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
-                                        <td>{% if u.global_role.role %} {{ u.global_role.role }} {% endif %}</td>
+                                        <td class="text-center">{% if u.is_staff %}
+                                            <i class="text-success fa-solid fa-check"></i>{% else %}
+                                            <i class="text-danger fa-solid fa-xmark"></i>{% endif %}</td>
                                         <td>{{ u.date_joined }}</td>
                                         <td>{% if u.last_login %}{{ u.last_login }}{% else %}{% trans "Never" %}{% endif %}</td>
                                         <td>{% if u.usercontactinfo.token_last_reset %}{{ u.usercontactinfo.token_last_reset }}{% else %}{% trans "Never" %}{% endif %}</td>

@@ -1,8 +1,9 @@
 ---
-title: "MCP Server (Pro)"
+title: "MCP Server"
 description: "DefectDojo's MCP Server allows you to use LLMs with DefectDojo Pro"
 draft: false
-weight: 2
+audience: pro
+weight: 23
 aliases:
   - /en/ai/mcp_server_pro
 ---

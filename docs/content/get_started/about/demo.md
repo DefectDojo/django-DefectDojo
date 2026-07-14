@@ -10,7 +10,7 @@ Two online demos are available for DefectDojo.  Both come pre-loaded with data a
 Demo servers are reset on a daily basis, and are publicly accessible; do not put sensitive data in the demo.
 
 ### 🔸 DefectDojo Pro Demo
-DefectDojo Pro can be tested at [pro.demo.defectdojo.org](https://pro.demo.defectdojo.org)
+DefectDojo Pro can be tested at [pro.demo.defectdojo.com](https://pro.demo.defectdojo.com)
 
 Log in with `admin / 1Defectdojo@demo#appsec`.
 

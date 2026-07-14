@@ -1,48 +1,473 @@
-$(function () {
-    $('body').append('<a id="toTop" title="Back to Top" class="btn btn-primary btn-circle"><i class="fa-solid fa-arrow-up fa-fw"></i></a>');
-    $(window).scroll(function () {
-        if ($(this).scrollTop() > 300) {
-            $('#toTop').fadeIn();
-        } else {
-            $('#toTop').fadeOut();
+/* ============================================================
+   Bootstrap JS replacement shims (vanilla JS)
+   Replaces bootstrap.min.js for: dropdowns, collapses, tooltips
+   ============================================================ */
+
+/* ---- Dropdown shim ----
+   Handles [data-toggle="dropdown"] by toggling .open on parent.
+   Bootstrap CSS rule  .open > .dropdown-menu { display: block }  does the rest.
+   Also fires jQuery events (show/shown/hide/hidden.bs.dropdown) so existing
+   table-responsive overflow handlers keep working.
+*/
+(function () {
+    function fireJQueryEvent(el, name) {
+        if (typeof jQuery !== 'undefined') {
+            jQuery(el).trigger(name);
+        }
+    }
+
+    function closeAllDropdowns(except) {
+        document.querySelectorAll('.open').forEach(function (el) {
+            if (el !== except) {
+                el.classList.remove('open');
+                fireJQueryEvent(el, 'hide.bs.dropdown');
+                fireJQueryEvent(el, 'hidden.bs.dropdown');
+            }
+        });
+    }
+
+    document.addEventListener('click', function (e) {
+        var toggle = e.target.closest('[data-toggle="dropdown"]');
+        if (toggle) {
+            e.preventDefault();
+            e.stopPropagation();
+            var parent = toggle.closest('.dropdown, .btn-group, .dropup') || toggle.parentElement;
+            var wasOpen = parent.classList.contains('open');
+
+            // Close all other open dropdowns
+            closeAllDropdowns(parent);
+
+            if (wasOpen) {
+                parent.classList.remove('open');
+                fireJQueryEvent(parent, 'hide.bs.dropdown');
+                fireJQueryEvent(parent, 'hidden.bs.dropdown');
+            } else {
+                parent.classList.add('open');
+                fireJQueryEvent(parent, 'show.bs.dropdown');
+                fireJQueryEvent(parent, 'shown.bs.dropdown');
+            }
+            return;
+        }
+
+        // Clicks inside an open dropdown menu (e.g. selecting options in the
+        // bulk edit form) must not collapse the menu. Only clicks outside any
+        // open dropdown — or on a submit button, which navigates anyway —
+        // should close it.
+        if (e.target.closest('.open > .dropdown-menu')) return;
+
+        // Click outside any dropdown → close all
+        closeAllDropdowns(null);
+    });
+
+    // Escape key closes dropdowns
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeAllDropdowns(null);
+    });
+})();
+
+/* ---- OS promo banner dismiss ----
+   Persist the dismissal per-user (the form carries csrfmiddlewaretoken) and
+   hide the banner instantly. Degrades to a normal form POST when JS is off.
+*/
+document.addEventListener('submit', function (e) {
+    var form = e.target.closest('.os-message-dismiss-form');
+    if (!form) return;
+    e.preventDefault();
+    var banner = form.closest('.announcement-banner');
+    if (banner) {
+        banner.style.transition = 'opacity 0.2s';
+        banner.style.opacity = '0';
+        setTimeout(function () { banner.remove(); }, 200);
+    }
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+    });
+});
+
+/* ---- Collapse shim ----
+   Handles [data-toggle="collapse"] by toggling .in on the target element.
+   CSS in tailwind.css:  .collapse { display:none }  .collapse.in { display:block }
+*/
+/* Animate a collapse target open/closed by sliding its height between 0 and
+   its natural size, then settling to auto (open) or display:none via .in
+   (closed). Falls back to an instant toggle when reduced motion is requested. */
+function animateCollapse(target, toggle) {
+    if (target._ddCollapsing) return;  // ignore clicks while mid-animation
+    var willOpen = !target.classList.contains('in');
+    if (toggle) toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        target.classList.toggle('in', willOpen);
+        return;
+    }
+
+    var DURATION = 250;
+    var finished = false;
+    target._ddCollapsing = true;
+
+    if (willOpen) target.classList.add('in');     // make it measurable / visible
+
+    // Animate height AND vertical padding together, so the panel collapses all
+    // the way to 0 instead of stalling at the panel-body's padding "floor".
+    var cs = getComputedStyle(target);
+    var padTop = cs.paddingTop, padBottom = cs.paddingBottom;
+    // In border-box (Tailwind's default) the height property already includes
+    // padding, so animate to the full scrollHeight; only subtract in content-box.
+    var fullH = cs.boxSizing === 'border-box'
+        ? target.scrollHeight
+        : target.scrollHeight - parseFloat(padTop) - parseFloat(padBottom);
+    var contentH = fullH + 'px';
+    var collapsed = { height: '0px', paddingTop: '0px', paddingBottom: '0px' };
+    var expanded = { height: contentH, paddingTop: padTop, paddingBottom: padBottom };
+    var from = willOpen ? collapsed : expanded;
+    var to = willOpen ? expanded : collapsed;
+
+    target.style.overflow = 'hidden';
+    target.style.height = from.height;
+    target.style.paddingTop = from.paddingTop;
+    target.style.paddingBottom = from.paddingBottom;
+    void target.offsetHeight;                     // force reflow so the transition runs
+    target.style.transition = 'height ' + DURATION + 'ms ease, padding ' + DURATION + 'ms ease';
+    target.style.height = to.height;
+    target.style.paddingTop = to.paddingTop;
+    target.style.paddingBottom = to.paddingBottom;
+
+    function done() {
+        if (finished) return;
+        finished = true;
+        if (!willOpen) target.classList.remove('in');  // hide before clearing styles
+        target.style.transition = '';
+        target.style.height = '';
+        target.style.paddingTop = '';
+        target.style.paddingBottom = '';
+        target.style.overflow = '';
+        target._ddCollapsing = false;
+        target.removeEventListener('transitionend', onEnd);
+    }
+    function onEnd(ev) { if (ev.target === target && ev.propertyName === 'height') done(); }
+    target.addEventListener('transitionend', onEnd);
+    setTimeout(done, DURATION + 80);          // fallback if transitionend doesn't fire
+}
+
+document.addEventListener('click', function (e) {
+    var toggle = e.target.closest('[data-toggle="collapse"]');
+    if (!toggle) return;
+
+    // Don't prevent default for links with real href (non-collapse)
+    var targetSel = toggle.getAttribute('data-target')
+                  || toggle.getAttribute('href');
+    if (!targetSel || targetSel === '#') return;
+
+    e.preventDefault();
+
+    // Handle comma-separated targets (rare but possible)
+    targetSel.split(',').forEach(function (sel) {
+        sel = sel.trim();
+        if (!sel) return;
+        var target = document.querySelector(sel);
+        if (target) {
+            animateCollapse(target, toggle);
+        }
+    });
+});
+
+/* ---- Tooltip / Popover jQuery shims ----
+   Replace Bootstrap tooltip/popover plugins with lightweight implementations.
+   For has-popover elements, CSS ::after shows data-content on hover.
+*/
+(function waitForJQuery() {
+    if (typeof jQuery === 'undefined') {
+        // jQuery not loaded yet (unlikely since it's in <head>), retry
+        return setTimeout(waitForJQuery, 50);
+    }
+
+    // $.fn.tooltip — Bootstrap-compatible shim replacing both Bootstrap and jQuery UI tooltip.
+    // Supports: init (no-arg or options), 'show', 'hide', 'destroy', 'fixTitle'
+    // Always override — jQuery UI tooltip doesn't support Bootstrap's string-action API.
+    (function () {
+        var TOOLTIP_CLASS = 'dd-tooltip';
+
+        function createTooltipEl(text) {
+            var tip = document.createElement('div');
+            tip.className = TOOLTIP_CLASS;
+            tip.textContent = text;
+            tip.style.cssText =
+                'position:absolute;z-index:1070;background:#333;color:#fff;' +
+                'border-radius:4px;padding:4px 8px;font-size:12px;line-height:1.4;' +
+                'white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;';
+            document.body.appendChild(tip);
+            return tip;
+        }
+
+        function positionTooltip(el, tip, placement) {
+            var rect = el.getBoundingClientRect();
+            tip.style.display = 'block';
+            tip.style.opacity = '1';
+            var tw = tip.offsetWidth, th = tip.offsetHeight;
+            var gap = 6;
+            if (placement === 'bottom') {
+                tip.style.top = (rect.bottom + window.scrollY + gap) + 'px';
+                tip.style.left = (rect.left + window.scrollX + rect.width / 2 - tw / 2) + 'px';
+            } else if (placement === 'left') {
+                tip.style.top = (rect.top + window.scrollY + rect.height / 2 - th / 2) + 'px';
+                tip.style.left = (rect.left + window.scrollX - tw - gap) + 'px';
+            } else if (placement === 'right') {
+                tip.style.top = (rect.top + window.scrollY + rect.height / 2 - th / 2) + 'px';
+                tip.style.left = (rect.right + window.scrollX + gap) + 'px';
+            } else {
+                // default: top
+                tip.style.top = (rect.top + window.scrollY - th - gap) + 'px';
+                tip.style.left = (rect.left + window.scrollX + rect.width / 2 - tw / 2) + 'px';
+            }
+        }
+
+        function initTooltip(el, opts) {
+            if (el._ddTooltip) return; // already initialized
+            var placement = (opts && opts.placement) || el.getAttribute('data-placement') || 'top';
+            // Save title and remove native tooltip to avoid double display
+            var title = el.getAttribute('title') || el.getAttribute('data-original-title') || '';
+            if (el.getAttribute('title')) {
+                el.setAttribute('data-original-title', title);
+                el.removeAttribute('title');
+            }
+            el._ddTooltip = { placement: placement, tip: null };
+            el._ddTooltipShow = function () {
+                var text = el.getAttribute('data-original-title') || '';
+                if (!text) return;
+                if (!el._ddTooltip.tip) {
+                    el._ddTooltip.tip = createTooltipEl(text);
+                } else {
+                    el._ddTooltip.tip.textContent = text;
+                }
+                positionTooltip(el, el._ddTooltip.tip, el._ddTooltip.placement);
+            };
+            el._ddTooltipHide = function () {
+                if (el._ddTooltip && el._ddTooltip.tip) {
+                    el._ddTooltip.tip.style.opacity = '0';
+                    el._ddTooltip.tip.style.display = 'none';
+                }
+            };
+            el.addEventListener('mouseenter', el._ddTooltipShow);
+            el.addEventListener('mouseleave', el._ddTooltipHide);
+        }
+
+        jQuery.fn.tooltip = function (action) {
+            if (typeof action === 'object' || action === undefined) {
+                // Init
+                var opts = action || {};
+                return this.each(function () { initTooltip(this, opts); });
+            }
+            return this.each(function () {
+                var el = this;
+                if (action === 'show') {
+                    if (!el._ddTooltip) initTooltip(el, {});
+                    if (el._ddTooltipShow) el._ddTooltipShow();
+                } else if (action === 'hide') {
+                    if (el._ddTooltipHide) el._ddTooltipHide();
+                } else if (action === 'destroy') {
+                    if (el._ddTooltip && el._ddTooltip.tip) {
+                        el._ddTooltip.tip.remove();
+                    }
+                    if (el._ddTooltipShow) el.removeEventListener('mouseenter', el._ddTooltipShow);
+                    if (el._ddTooltipHide) el.removeEventListener('mouseleave', el._ddTooltipHide);
+                    // Restore native title
+                    var orig = el.getAttribute('data-original-title');
+                    if (orig) {
+                        el.setAttribute('title', orig);
+                        el.removeAttribute('data-original-title');
+                    }
+                    delete el._ddTooltip;
+                    delete el._ddTooltipShow;
+                    delete el._ddTooltipHide;
+                } else if (action === 'fixTitle') {
+                    // Re-read title attr (may have been changed by JS) into data-original-title
+                    var t = el.getAttribute('title');
+                    if (t) {
+                        el.setAttribute('data-original-title', t);
+                        el.removeAttribute('title');
+                    }
+                }
+            });
+        };
+    })();
+
+    // $.fn.popover — lightweight shim that shows/hides data-content
+    if (!jQuery.fn.popover) {
+        jQuery.fn.popover = function (action) {
+            return this.each(function () {
+                var el = this;
+                var content = el.getAttribute('data-content');
+                if (!content) return;
+
+                if (action === 'show') {
+                    // Create or show the popover element
+                    var pop = el._ddPopover;
+                    if (!pop) {
+                        pop = document.createElement('div');
+                        pop.className = 'dd-popover';
+                        pop.textContent = content;
+                        pop.style.cssText =
+                            'position:absolute;z-index:1070;background:#fff;border:1px solid #ccc;' +
+                            'border-radius:4px;padding:6px 10px;font-size:12px;box-shadow:0 2px 6px rgba(0,0,0,.15);' +
+                            'white-space:nowrap;pointer-events:none;';
+                        document.body.appendChild(pop);
+                        el._ddPopover = pop;
+                    }
+                    // Position near the element
+                    var rect = el.getBoundingClientRect();
+                    var placement = el.getAttribute('data-placement') || 'right';
+                    pop.style.display = 'block';
+                    if (placement === 'right') {
+                        pop.style.top = (rect.top + window.scrollY + rect.height / 2 - 14) + 'px';
+                        pop.style.left = (rect.right + window.scrollX + 6) + 'px';
+                    } else if (placement === 'left') {
+                        pop.style.top = (rect.top + window.scrollY + rect.height / 2 - 14) + 'px';
+                        pop.style.left = (rect.left + window.scrollX - pop.offsetWidth - 6) + 'px';
+                    } else if (placement === 'top') {
+                        pop.style.top = (rect.top + window.scrollY - pop.offsetHeight - 6) + 'px';
+                        pop.style.left = (rect.left + window.scrollX + rect.width / 2 - pop.offsetWidth / 2) + 'px';
+                    } else {
+                        pop.style.top = (rect.bottom + window.scrollY + 6) + 'px';
+                        pop.style.left = (rect.left + window.scrollX + rect.width / 2 - pop.offsetWidth / 2) + 'px';
+                    }
+                } else if (action === 'hide') {
+                    if (el._ddPopover) el._ddPopover.style.display = 'none';
+                } else if (action === 'destroy') {
+                    if (el._ddPopover) {
+                        el._ddPopover.remove();
+                        el._ddPopover = null;
+                    }
+                }
+            });
+        };
+    }
+
+    // $.fn.highlight — no-op shim (jquery-highlight plugin removed)
+    // Templates still call $('body').highlight(term); this prevents errors.
+    if (!jQuery.fn.highlight) {
+        jQuery.fn.highlight = function () { return this; };
+    }
+
+})();
+
+
+/* ============================================================
+   Vanilla JS initialization (no jQuery dependency)
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ---- Accessibility: make .has-popover help icons keyboard-focusable ----
+    document.querySelectorAll('.has-popover[data-content]').forEach(function (el) {
+        if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+        if (!el.hasAttribute('role')) el.setAttribute('role', 'img');
+        if (!el.getAttribute('aria-label') && el.getAttribute('data-content')) {
+            el.setAttribute('aria-label', el.getAttribute('data-content'));
         }
     });
 
-    $('#toTop').click(function(){
-        $("html, body").animate({ scrollTop: 0 }, 600);
-        return false;
+    // ---- Back-to-top button ----
+    var toTop = document.createElement('a');
+    toTop.id = 'toTop';
+    toTop.title = 'Back to Top';
+    toTop.setAttribute('aria-label', 'Back to Top');
+    toTop.className = 'btn btn-primary btn-circle';
+    toTop.innerHTML = '<i class="fa-solid fa-arrow-up fa-fw"></i>';
+    toTop.style.display = 'none';
+    document.body.appendChild(toTop);
+
+    window.addEventListener('scroll', function () {
+        toTop.style.display = window.scrollY > 300 ? '' : 'none';
     });
 
-
-    $(".datepicker").datepicker({"dateFormat": "yy-mm-dd"});
-
-    $('form#replace_risk_file input[type="file"], div.controls.file input').change(function () {
-        $(this).closest("form").submit()
+    toTop.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    $('a.accept-all-findings').click(function () {
-        $("ul#id_accepted_findings input").attr('checked', true);
-    })
+    // ---- File upload auto-submit ----
+    document.querySelectorAll('form#replace_risk_file input[type="file"], div.controls.file input').forEach(function (el) {
+        el.addEventListener('change', function () {
+            this.closest('form').submit();
+        });
+    });
 
+    // ---- Accept all findings checkboxes ----
+    document.querySelectorAll('a.accept-all-findings').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelectorAll('ul#id_accepted_findings input').forEach(function (cb) {
+                cb.checked = true;
+            });
+        });
+    });
+
+    // ---- Alert auto-dismiss (fade out after 20s) ----
     setTimeout(function () {
-        $('.alert-dismissible').not('.announcement-banner').slideUp('slow')
+        document.querySelectorAll('.alert-dismissible:not(.announcement-banner)').forEach(function (el) {
+            el.classList.add('fade-out');
+            setTimeout(function () { el.remove(); }, 350);
+        });
     }, 20000);
 
-    $('#side-menu').metisMenu();
+    // ---- Auto-focus first form field ----
+    var content = document.getElementById('base-content');
+    if (content) {
+        var form = content.querySelector('form');
+        if (form) {
+            var focusable = form.querySelector(
+                'input:not([type=hidden]):not([type=submit]):not([type=checkbox]):not(.datepicker), select, textarea'
+            );
+            // Skip filter inputs, quick-add inputs, and specific textareas
+            if (focusable &&
+                !focusable.closest('.filters') &&
+                focusable.id !== 'id_entry' &&
+                focusable.id !== 'quick_add_finding' &&
+                focusable.tagName !== 'BUTTON') {
+                focusable.focus();
+            }
+        }
+    }
 
-    // auto focus on first form field
-    $('#base-content form:first *:input[type!=hidden]:first').not('button, input[type=submit]').not('.filters :input, textarea#id_entry, input#quick_add_finding').not('input[type=checkbox]').not('.datepicker').focus();
+    // ---- Progress crumbs smooth scroll ----
+    var progressCrumbs = document.getElementById('progress-crumbs');
+    if (progressCrumbs) {
+        progressCrumbs.addEventListener('click', function (e) {
+            var link = e.target.closest('a');
+            if (link) {
+                e.preventDefault();
+                var href = link.getAttribute('href');
+                var target = document.querySelector(href);
+                if (target) {
+                    window.scrollTo({
+                        top: target.offsetTop - 55,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    }
 
-    $('a#minimize-menu').on('click', sidebar);
+    // ---- Flatpickr datepicker init ----
+    if (typeof flatpickr !== 'undefined') {
+        flatpickr('.datepicker', { dateFormat: 'Y-m-d', allowInput: true });
+    }
 
-    $("ul#progress-crumbs a").on('click', function() {
-        var href = $(this).attr('href');
-        $('html, body').animate({
-            scrollTop: $(href).offset().top - 55
-        }, 500);
-        return false;
+    // ---- Re-initialize third-party plugins after htmx content swaps ----
+    document.body.addEventListener('htmx:afterSwap', function (evt) {
+        // Re-init datepickers in swapped content
+        var pickers = evt.detail.target.querySelectorAll('.datepicker');
+        if (pickers.length && typeof flatpickr !== 'undefined') {
+            flatpickr(pickers, { dateFormat: 'Y-m-d', allowInput: true });
+        }
+        // Re-init DataTables in swapped content
+        var tables = evt.detail.target.querySelectorAll('table.dataTable');
+        if (tables.length && typeof jQuery !== 'undefined' && jQuery.fn.DataTable) {
+            tables.forEach(function (t) { jQuery(t).DataTable(); });
+        }
     });
-
 });
 
 $.fn.serializeObject = function()
@@ -62,32 +487,6 @@ $.fn.serializeObject = function()
     return o;
 };
 
-function sidebar() {  // minimize side nav bar
-    var action = 'min';
-    var remove = 'max';
-    var speed = 250;
-    var width = '50';
-    var fontSize = '18';
-
-    if (($.cookie('dojo-sidebar') == 'min') || ($('body').hasClass('min'))) {
-        action = 'max';
-        remove = 'min';
-        $.cookie('dojo-sidebar', 'max', {expires: 10000, path: '/'});
-        width = '175px';
-        fontSize = '14px';
-        speed = 100;
-    }
-    else {
-        action = 'min';
-        remove = 'max';
-        $.cookie('dojo-sidebar', 'min', {expires: 10000, path: '/'});
-    }
-
-    $('body').switchClass(remove, action);
-
-    return false;
-}
-
 //methods removed in django 3.1. we copy them here to keep this popup thing working
 // but this definately needs a rework, but with UI v2 in the works this is acceptable
 function id_to_windowname(text) {
@@ -105,7 +504,7 @@ function windowname_to_id(text) {
 function emptyEndpoints(win) {
     var name = windowname_to_id(win.name);
     var elem = document.getElementById(name);
-    $(elem).empty();
+    if (elem) elem.innerHTML = '';
 }
 
 function html_unescape(text) {
@@ -128,19 +527,17 @@ function dismissAddAnotherPopupDojo(win, newId, newRepr) {
     var o;
     if (elem) {
         var elemName = elem.nodeName.toUpperCase();
-        if (elemName == 'SELECT') {
-            var s = "#" + elem.id + " option[value='" + newId + "']";
-            if ($(s).length <= 0) {
+        if (elemName === 'SELECT') {
+            var existing = elem.querySelector("option[value='" + newId + "']");
+            if (!existing) {
                 o = new Option(newRepr, newId);
                 elem.options[elem.options.length] = o;
-                o.selected = true
-                $(o).attr('selected', 'selected');
+                o.selected = true;
+            } else {
+                existing.selected = true;
             }
-            else {
-                $(s).attr('selected', 'selected');
-            }
-        } else if (elemName == 'INPUT') {
-            if (elem.className.indexOf('vManyToManyRawIdAdminField') != -1 && elem.value) {
+        } else if (elemName === 'INPUT') {
+            if (elem.className.indexOf('vManyToManyRawIdAdminField') !== -1 && elem.value) {
                 elem.value += ',' + newId;
             } else {
                 elem.value = newId;
@@ -154,90 +551,7 @@ function dismissAddAnotherPopupDojo(win, newId, newRepr) {
     }
 }
 
-function punchcard(element, data, ticks) {
-    var d1 = data;
-    var options = {
-        xaxis: {
-            ticks: ticks,
-            min: -.8,
-            max: ticks.length - .2,
-            tickLength: 0,
-        },
-        series: {
-            bubbles: {
-                active: true,
-                debug: {
-                    active: true
-                },
-                show: true,
-                bubblelabel: {
-                    show: false,
-                },
-            },
-            nearBy: {
-                distance: 5
-            }
-        },
-        yaxis: {
-            autoscaleMargin: 0.1,
-            ticks: [[6, 'Sun'], [5, 'Mon'], [4, 'Tue'], [3, 'Wed'], [2, 'Thur'], [1, 'Fri'], [0, 'Sat']],
-            min: -.5,
-            max: 6.5,
-            tickLength: 0,
-        },
-        grid: {
-            hoverable: true,
-            borderWidth: {top: 0, right: 0, bottom: 1, left: 0},
-            borderColor: '#e7e7e7',
-            clickable: true,
-            markings: function (axes) {
-                var markings = [];
-
-                for (var x = 0; x < axes.yaxis.max; x += .5)
-                    markings.push({yaxis: {from: x, to: x},});
-
-                for (var x = -0; x < axes.xaxis.max; x += 1)
-                    markings.push({xaxis: {from: x, to: x}});
-
-                for (var x = -.5; x < axes.yaxis.max + 1; x += 1)
-                    markings.push({yaxis: {from: x, to: x - .75}, color: 'white'});
-
-
-                return markings;
-
-
-            }
-        },
-        tooltip: true,
-        tooltipOpts: {
-            content: function (label, xval, yval, flotItem) {
-                for (var x = 0; x < flotItem.series.data.length; x++) {
-                    if (xval == flotItem.series.data[x][0] && yval == flotItem.series.data[x][1]) {
-                        yeah = flotItem.series.data[x][3];
-                        break;
-                    }
-                }
-                return yeah + ' Findings';
-            },
-            shifts: {
-                y: -40,
-                x: -20
-            }
-        },
-        legend: {
-            show: false,
-        }
-
-
-    };
-    var p4 = $.plot($(element),
-        [{
-            data: d1,
-            color: "#444",
-        }],
-        options);
-
-}
+// punchcard() function moved to metrics.js (Chart.js bubble chart)
 
 function togglePassVisibility() {
     var passwdInput = document.getElementById("id_password");
@@ -328,26 +642,28 @@ generateGUID = (typeof(window.crypto) != 'undefined' &&
     }
 
 function clear_form(form){
-    $(form).find(':input').each(function() {
-        console.log(this.type)
-        switch(this.type) {
+    var formEl = (form instanceof HTMLElement) ? form : form[0]; // Handle both DOM and jQuery
+    formEl.querySelectorAll('input, select, textarea').forEach(function(el) {
+        switch(el.type) {
             case 'number':
             case 'password':
             case 'select-one':
             case 'text':
             case 'textarea':
-                $(this).val('');
+                el.value = '';
                 break;
             case 'checkbox':
             case 'radio':
-                this.checked = false;
+                el.checked = false;
                 break;
-                case 'select-multiple':
-                // Clear all types of multiple select versions
-                if ($(this).hasClass('select2-hidden-accessible')) {
-                    $(this).data('select2').$container.find(".select2-selection__choice").remove(); 
+            case 'select-multiple':
+                // Clear select2 widgets (requires jQuery for select2 API)
+                if (typeof jQuery !== 'undefined' && jQuery(el).hasClass('select2-hidden-accessible')) {
+                    jQuery(el).data('select2').$container.find('.select2-selection__choice').remove();
                 }
-                $(this).val(null).trigger('change'); 
+                // Clear selected options
+                Array.from(el.options).forEach(function(opt) { opt.selected = false; });
+                el.dispatchEvent(new Event('change'));
                 break;
         }
     });

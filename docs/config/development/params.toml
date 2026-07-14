@@ -1,0 +1,6 @@
+# Development overrides — reduce image processing to avoid WebPEncode OOM errors.
+# The full responsive set (6 widths + LQIP) is applied in production only.
+[thulite_images]
+  [thulite_images.defaults]
+    widths = [480, 1200]
+    lqip = ""

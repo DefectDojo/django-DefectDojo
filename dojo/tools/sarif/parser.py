@@ -385,8 +385,9 @@ class SarifParser:
 def get_rules(run):
     rules = {}
     rules_array = run["tool"]["driver"].get("rules", [])
-    if len(rules_array) == 0 and run["tool"].get("extensions") is not None:
-        rules_array = run["tool"]["extensions"][0].get("rules", [])
+    if not rules_array:
+        for extension in run["tool"].get("extensions", []):
+            rules_array.extend(extension.get("rules", []))
     for item in rules_array:
         rules[item["id"]] = item
     return rules
@@ -631,6 +632,9 @@ def get_fingerprints_hashes(values):
             key_method = key
             key_method_version = 0
         value = values[key]
+        # some tools (e.g. BlackDuck) wrap the hash as {"value": "<hash>"} instead of a plain string
+        if isinstance(value, dict):
+            value = value.get("value", "")
         if fingerprints.get(key_method):
             if fingerprints[key_method]["version"] < key_method_version:
                 fingerprints[key_method] = {

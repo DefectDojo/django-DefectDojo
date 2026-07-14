@@ -1,4 +1,5 @@
 import logging
+from unittest import mock
 
 from django.utils import timezone
 
@@ -12,6 +13,61 @@ logger = logging.getLogger(__name__)
 
 
 class TestDojoCloseOld(DojoTestCase):
+    # Regression: close_old_findings fetched every Finding column (incl. description) via
+    # findings.values() just to collect is_mitigated/hash_code/unique_id_from_tool.
+    def test_close_old_findings_only_fetches_needed_columns(self):
+        scan_type = "Acunetix Scan"
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="closeold")
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        product, _ = Product.objects.get_or_create(
+            name="TestDojoCloseOldColumns",
+            description="Test",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Close Old Needed Columns",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        import_options = {
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "active": True,
+            "verified": False,
+            "engagement": engagement,
+            "scan_type": scan_type,
+        }
+        # Seed an older test with 4 findings that the close-old pass should mitigate
+        with (get_unit_tests_scans_path("acunetix") / "many_findings.xml").open(encoding="utf-8") as many_findings_scan:
+            importer = DefaultImporter(close_old_findings=False, **import_options)
+            _, _, len_new_findings, _, _, _, _ = importer.process_scan(many_findings_scan)
+            self.assertEqual(4, len_new_findings)
+        # Import a report with a single finding, without closing, to get the new test
+        with (get_unit_tests_scans_path("acunetix") / "one_finding.xml").open(encoding="utf-8") as single_finding_scan:
+            importer = DefaultImporter(close_old_findings=False, **import_options)
+            test, _, len_new_findings, _, _, _, _ = importer.process_scan(single_finding_scan)
+            self.assertEqual(1, len_new_findings)
+        # Call close_old_findings directly with the new test's queryset and spy on values()
+        importer = DefaultImporter(close_old_findings=True, **import_options)
+        importer.test = test
+        findings_queryset = test.finding_set.all()
+        with mock.patch.object(findings_queryset, "values", wraps=findings_queryset.values) as values_spy:
+            closed_findings = importer.close_old_findings(findings_queryset)
+        values_spy.assert_called_once_with(
+            "is_mitigated", "hash_code", "unique_id_from_tool",
+        )
+        # Control: narrowing the columns must not change which findings get closed
+        # (the 4 findings from the older test; dedupe is off, so the overlapping
+        # finding closes too — same semantics as test_close_old_same_engagement)
+        self.assertEqual(
+            4, len(closed_findings),
+            msg=f"expected 4 old findings closed, got {len(closed_findings)}",
+        )
+
     def test_close_old_same_engagement(self):
         scan_type = "Acunetix Scan"
         user, _ = User.objects.get_or_create(username="admin")

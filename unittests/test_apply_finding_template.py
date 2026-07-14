@@ -9,23 +9,26 @@ from django.http import Http404
 from django.test.client import RequestFactory
 from django.utils import timezone
 
-from dojo.finding import views
+from dojo.authorization.models import (
+    Product_Member,
+    Role,
+)
 from dojo.finding.helper import save_endpoints_template, save_vulnerability_ids_template
+from dojo.finding.ui import views
 from dojo.models import (
+    Dojo_User,
     Engagement,
     Finding,
     Finding_Template,
     Notes,
     Product,
-    Product_Member,
     Product_Type,
-    Role,
     System_Settings,
     Test,
     Test_Type,
     Vulnerability_Id,
 )
-from dojo.test import views as test_views
+from dojo.test.ui import views as test_views
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
 
@@ -105,9 +108,14 @@ class FindingTemplateTestUtil:
 
     @staticmethod
     def create_user_with_role(product, role_name, *, is_staff=False):
-        """Create a user with a specific role on a product"""
+        """
+        Create a user with a specific role on a product. Under the
+        legacy authorization model the role is informational only —
+        callers needing actual access must add the user to
+        product.authorized_users.
+        """
         user_count = User.objects.count()
-        user = User()
+        user = Dojo_User()
         user.is_staff = is_staff
         user.is_superuser = False
         user.username = f"TestUser{role_name}{user_count}"
@@ -217,13 +225,16 @@ class TestApplyFindingTemplate(DojoTestCase):
                                     "impact": "template impact"},
                                    )
 
-    def test_reader_role_cannot_apply_template(self):
-        """Test that a Reader role user (read-only) cannot apply template"""
-        reader_user = FindingTemplateTestUtil.create_user_with_role(
-            self.finding.test.engagement.product, "Reader", is_staff=False,
-        )
+    def test_authorized_user_can_apply_template(self):
+        """
+        Legacy: any user in product.authorized_users can apply a template
+        (Reader/Writer/Maintainer/Owner all collapse to one bit of access).
+        """
+        product = self.finding.test.engagement.product
+        member = FindingTemplateTestUtil.create_user_with_role(product, "Writer", is_staff=False)
+        product.authorized_users.add(member)
         request = FindingTemplateTestUtil.create_post_request(
-            reader_user, self.apply_template_url,
+            member, self.apply_template_url,
             data={"title": "Finding for Testing Apply Template functionality",
                   "cwe": "89",
                   "severity": "High",
@@ -231,27 +242,31 @@ class TestApplyFindingTemplate(DojoTestCase):
                   "mitigation": "template mitigation",
                   "impact": "template impact"},
         )
-        with impersonate(reader_user), self.assertRaises(PermissionDenied):
-            views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
-
-    def test_writer_role_can_apply_template(self):
-        """Test that a Writer role user (non-staff) can apply template"""
-        writer_user = FindingTemplateTestUtil.create_user_with_role(
-            self.finding.test.engagement.product, "Writer", is_staff=False,
-        )
-        request = FindingTemplateTestUtil.create_post_request(
-            writer_user, self.apply_template_url,
-            data={"title": "Finding for Testing Apply Template functionality",
-                  "cwe": "89",
-                  "severity": "High",
-                  "description": "Finding for Testing Apply Template Functionality",
-                  "mitigation": "template mitigation",
-                  "impact": "template impact"},
-        )
-        with impersonate(writer_user):
+        with impersonate(member):
             result = views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
             self.assertEqual(302, result.status_code)
             self.assertEqual(f"/finding/{self.finding.id}", result.url)
+
+    def test_non_member_cannot_apply_template(self):
+        """
+        Legacy: a user with no authorized_users membership and no staff
+        flag is denied — covers the case test_reader_role_cannot_apply_template
+        used to assert under RBAC.
+        """
+        product = self.finding.test.engagement.product
+        outsider = FindingTemplateTestUtil.create_user_with_role(product, "Reader", is_staff=False)
+        # Deliberately NOT added to product.authorized_users.
+        request = FindingTemplateTestUtil.create_post_request(
+            outsider, self.apply_template_url,
+            data={"title": "Finding for Testing Apply Template functionality",
+                  "cwe": "89",
+                  "severity": "High",
+                  "description": "Finding for Testing Apply Template Functionality",
+                  "mitigation": "template mitigation",
+                  "impact": "template impact"},
+        )
+        with impersonate(outsider), self.assertRaises(PermissionDenied):
+            views.apply_template_to_finding(request, fid=self.finding.id, tid=self.template.id)
 
     def test_apply_template_to_finding_with_illegal_finding_fails(self):
         with self.assertRaises(Http404):

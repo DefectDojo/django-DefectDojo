@@ -5,7 +5,7 @@ weight: 4
 aliases:
   - /en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport
 ---
-One of DefectDojo’s strengths is that the data model can accommodate many different use\-cases and applications. You’ll likely change your approach as you master the software and discover ways to optimize your workflow.
+One of DefectDojo’s strengths is that the data model can accommodate many different use-cases and applications. You’ll likely change your approach as you master the software and discover ways to optimize your workflow.
 
 By default, DefectDojo does not delete any duplicate Findings that are created. Each Finding is considered to be a separate instance of a vulnerability. So in this case, **Duplicate Findings** can be an indicator that a process change is required to your workflow.
 
@@ -46,7 +46,7 @@ DefectDojo has two methods for importing test data to create Findings: **Import*
 
 Each time you import new vulnerability reports into DefectDojo, those reports will be stored in a Test object. A Test object can be created by a user ahead of time to hold a future **Import**. If a user wants to import data without specifying a Test destination, a new Test will be created to store the incoming report.
 
-Tests are flexible objects, and although they can only hold one *kind* of report, they can handle multiple instances of that same report through the **Reimport** method. To learn more about Reimport, see our **[article](/import_data/import_intro/import_vs_reimport/)** on this topic.
+Tests are flexible objects, and although they can only hold one *kind* of report, they can handle multiple instances of that same report through the **Reimport** method. To learn more about Reimport, see our **[article](/import_data/import_intro/reimport/)** on this topic.
 
 
 ## Using Reimport for continual Tests

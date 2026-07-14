@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils.dateparse import parse_datetime
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +94,7 @@ class HydraParser:
             service=metadata.service_type,
         )
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations = [URL(host=host, port=port)]
+            finding.unsaved_locations = [LocationData.url(host=host, port=port)]
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints = [Endpoint(host=host, port=port)]

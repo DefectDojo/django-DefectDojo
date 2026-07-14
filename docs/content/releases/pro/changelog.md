@@ -8,9 +8,247 @@ aliases:
 
 Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release notes are focused on UX, so will not include all code changes.
 
-For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/changelog/os_upgrading/upgrading_guide/).
+For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
-## Feb 2025: v2.55
+## July 2026: v3.1
+
+### July 7, 2026: v3.1.0
+
+* **(Insights)** Added export functionality and per-metric descriptions to Insights charts.
+* **(Connectors)** Added Connectors filtering\
+* **(Prioritization)** Added a per-user Products/Assets count column to the prioritization engine.
+* **(Import)** Import and reimport can now wait for deduplication to finish before returning. Reimport title hashing now applies the full titlecase transform for multi-line titles.
+* **(Jira)** Project settings now support multiple components. Issue status is now read from `statusCategory` instead of the resolution field.
+* **(Reports)** PDF reports now show vulnerability IDs.
+* **(Security)** Tool Configuration credentials are now encrypted with AES-256-GCM.
+* **(Pro UI)** Breadcrumbs are now deterministic and derived from the object hierarchy.
+* **(Locations)** Legacy endpoint access in Make Template and Merge Findings is now guarded behind the Locations feature flag, and the finding Asset-tag (AND) filter uses the v3 Asset vocabulary.
+* **(UI)** Finding Groups now fold under Findings in the sidebar; filter category accordions and collapse panels animate smoothly; right-aligned dropdown menus no longer overflow off the page edge; new-UI styling uses brand/design tokens instead of hardcoded colors; and a global required-fields notice was added for WCAG H90 compliance. The open source message banner can now be disabled and dismissed.
+* **(Tools)** Added an Alert Logic CSV parser and a Garak (NVIDIA LLM vulnerability scanner) parser. The GitHub Vulnerability parser now sets `fix_available`; Dependency-Track FPF findings now include `analysis.detail` in the description; the Trivy parser no longer crashes on legacy reports missing the `Class` field; govulncheck now rejects SARIF reports with a clear error pointing to the SARIF scan type; and JFrog Xray impact paths are now deterministic.
+* **(Performance)** Faster imports and deduplication: batched `Vulnerability_Id` and `BurpRawRequestResponse` inserts, skip-unchanged-row and `VALUES` fast-write dedup paths, batched prefetching of Pro relations, Watson search index prefetch with async indexing, a new `sla_expiration_date` index for the global finding list, a case-insensitive product-name index, and a fix for finding-group Jira push N+1 queries.
+
+### June 29, 2026: v3.0.200
+
+* **(Reports)** Added a Graph block type to the Pro Report Builder, letting you embed Insights chart-catalog visualizations directly in reports.
+* **(Pro UI)** Dashboard V2 can now be exported as a branded, paginated PDF.
+* **(Pro UI)** Number columns now support multi-value "In List" / "Not In List" filtering.
+* **(Findings)** KEV and EPSS data is now aggregated across all CVEs on a Finding.
+* **(Custom Enrichment)** Added a dedicated error page for EPSS/KEV connectivity failures, and default KEV/EPSS URLs now persist in tuner settings across upgrades.
+* **(Import)** Reimport no longer closes and recreates Findings whose titles exceed 511 characters.
+* **(SSO)** The SAML configuration form now clarifies which fields are conditionally required.
+* **(Permissions)** The Engagement Testing Lead selector now resolves product-scoped users, and authorized-users handling has been improved.
+* **(Performance)** Heavy dashboard metric aggregations can now be cached behind `DD_METRICS_CACHE_ENABLED`.
+* **(Tools)** Xygeni parser no longer deduplicates distinct SAST/Secrets findings in the same file (now keyed on `uniqueHash`). SARIF parser now unwraps BlackDuck nested fingerprint values.
+* **(Tags)** User-set tags are now preserved when creating a Finding under product tag inheritance.
+
+### June 22, 2026: v3.0.100
+
+* **(Pro UI)** Added native Excel (`.xlsx`) export for Findings, Engagements, and Users.
+* **(Pro UI)** Bulk "Add to Existing Finding Group" no longer fails with an "Invalid pk 'None'" error.
+* **(Classic UI)** Fixed the disclaimer border rendering in the new UI.
+* **(Findings)** Blank component values are now normalized to NULL for consistent matching and filtering.
+* **(Reports)** Added DefectDojo Pro Report Builder guides (UI, API, and LLM).
+* **(Tools)** Added a PICUS Breach and Attack Simulation CSV parser.
+* **(Tools)** Added a Govulncheck Scanner V2 parser.
+* **(Tools)** cargo-audit parser now parses CVSS vectors and derives severity from them.
+
+### June 18, 2026: v3.0.2
+
+* **(SSO)** SAML now keeps the Pro group-mapping backend as the active authentication backend.
+* **(API)** Restored `members` and `authorization_groups` fields on the Asset and Organization serializers.
+* **(API)** Registered the `asset_*` / `organization_*` RBAC alias routes.
+* **(API)** Restored RBAC fields on `/api/v2/user_profile/`.
+
+### June 17, 2026: v3.0.1
+
+* **(Pro UI)** Calendar sidebar now honors the "Enable Calendar" system setting.
+* **(Pro UI)** Keyword search no longer blanks the Components table.
+* **(Reports)** Added a Finding quick report via the reporting engine.
+* **(SSO)** Azure AD configuration now requires and defaults the Application ID URI.
+* **(Locations)** Single-location filter now resolves correctly against the Location model.
+* **(API)** Fixed a 500 error when deleting an Organization/Asset that still has deprecated endpoints; the new-UI banner now points at 3.3.0.
+* **(API)** Refactored and enhanced API permissions.
+
+### June 15, 2026: v3.0.0
+
+* **(Locations)** Locations are now enabled by default, superseding the legacy Endpoint model. The legacy Endpoint API stays read-compatible and your data is preserved. See [Locations enabled by default](/releases/os_upgrading/3.0/#locations-enabled-by-default).
+* **(Assets & Organizations)** "Product Type" → "Organization" and "Product" → "Asset" relabeling (UI labels + URL routing) is now on by default. The change is cosmetic — API endpoints and field names are unchanged. See [Asset / Organization labels enabled by default](/releases/os_upgrading/3.0/#asset--organization-labels-enabled-by-default).
+* **(Authorization)** Open Source restores the **Authorized Users** panel on Product/Product Type detail under the legacy authorization model; Pro deployments retain full RBAC and are not impacted. See [Authorized Users panel replaces Members/Groups under legacy authorization](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization).
+* **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
+* **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
+* **(API)** Removed the Credential Manager feature and its API endpoints. See [Removal: Credential Manager](/releases/os_upgrading/3.0/#removal-credential-manager).
+* **(API)** Removed the Stub Findings feature and its API endpoint. See [Removal: Stub Findings](/releases/os_upgrading/3.0/#removal-stub-findings).
+* **(Search)** Watson search index updates during import/reimport are now batched, tunable via `DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE`. See [Configuration change in Watson Search Indexing](/releases/os_upgrading/3.0/#configuration-change-in-watson-search-indexing).
+
+## May 2026: v2.58
+
+### May 26, 2026: v2.58.4
+
+* **(Pro UI)** Migrated the Pro UI select buttons to the new shared component for consistent behavior across forms.
+* **(Reports)** Lowered the minimum permission required to access reporting, so more roles can reach reports without elevated privileges.
+* **(Tools)** CycloneDX parser no longer drops the `vector` field on import.
+
+### May 18, 2026: v2.58.3
+
+* **(Licensing)** Pro features are now blocked at 130% license usage, with weekly finding-usage enforcement backed by a new auditable multi-enforcement License Policy. The capacity alert threshold was raised from 80% to 90%.
+* **(Pro UI)** Added UI support for relative location relationships.
+* **(Permissions)** Finding duplicate API actions now enforce object-level permission checks, report views are scoped to the requesting user's authorized products, and location finding references are anchored to the finding's own product.
+
+### May 11, 2026: v2.58.2
+
+* **(Connectors)** Connectors now support subtypes, so a single connector type can be configured against multiple flavors of the same upstream tool.
+* **(Pro UI)** Jira push success/error messages are now displayed correctly in the Pro UI, so it's clear whether the push actually reached Jira.
+* **(MCP)** MCP acknowledgement settings are now consistent across superusers, so toggling acknowledgement no longer drifts between admin accounts.
+* **(Classic UI)** The Celery Status page is now gated behind the `celery_status` feature flag, off by default.
+
+### May 6, 2026: v2.58.1
+
+* **(Pro UI)** You can now activate or deactivate Test Types and Users directly from their list menus, so retiring or restoring entries no longer requires opening the edit form.
+* **(Pro UI)** Anchor links now open in a new tab as expected, so following a reference no longer pulls you away from the page you were working on.
+* **(Pro UI)** Adding findings to an existing Risk Acceptance works reliably again. A recent performance improvement caused the form to fail for some users; you can now resume managing accepted findings without errors.
+* **(Pro UI)** Your customized table column order is now preserved across page refreshes. Previously only column visibility carried over, so any rearranging you did would silently revert to the default — forcing you to reorder columns every session.
+* **(API)** Fixed a 500 error when fetching vulnerable endpoints (`GET /api/vue/endpoints/{id}/vulnerable/`), restoring reliable access to vulnerability data for an endpoint.
+
+### May 4, 2026: v2.58.0
+
+* **(Pro UI)** Added shared table preferences so saved column/filter configurations on list views can be shared across users.
+* **(Pro UI)** Markdown content now wraps text correctly, preventing horizontal overflow on long lines.
+* **(Performance)** Pro UI List Virtualization
+* **(Performance)** Improved import performance by optimizing import queries and bulk-applying parser-supplied per-finding tags.
+* **(Performance)** Locations endpoints optimized for faster retrieval on large datasets.
+* **(SBOM)** SBOM imports now support replace mode for re-importing the full inventory of a component set.
+* **(Reports)** Beat Reporting feature is now available for Cloud subscribers
+* **(API)** Added `created` and `updated` date filters to the Risk Acceptance API.
+* **(Jira)** Webhook handler no longer mis-mitigates findings on non-"done" Jira issue transitions.
+* **(Deployment)** Default Celery task serializer is now JSON, removing pickle from the task dispatch path.
+* **(Tools)** Added Qualys VMDR CSV parser.
+* **(Tools)** Coverity API parser now supports `RESOURCE_LEAK` quality findings.
+* **(Tools)** SonarQube parser now falls back to `mdDesc` when populating finding descriptions.
+* **(Settings)** `MAX_ZIP_*` limits are now configurable via settings.
+
+## Apr 2026: v2.57
+
+### Apr 27, 2026: v2.57.3
+
+* **(Pro UI)** Asset menu now shows the Permissions tab for users with an inherited Organization role.
+* **(Pro UI)** Added an Environment column to the Test list and Findings list.
+* **(Pro UI)** Asset hierarchy refreshes immediately after editing an asset, so changes are reflected without a manual reload.
+* **(Pro UI)** Standardized the "Test Type" label and split Test and Test Type into separate columns on the test list.
+* **(Pro UI)** Corrected the Product column label on the Group page under the V3 relabeling.
+* **(Pro UI)** Removed the duplicate greeting message shown after login.
+* **(Performance)** Create-path notifications are now dispatched asynchronously, removing a source of slow POST latency.
+* **(Deployment)** On premise deployments now include the Orchestrator services. Please see [additional instructions](/releases/pro/ddorch-database) for more details
+* **(Notifications)** Improved the format and display of SLA breach notifications.
+* **(Engineer Metrics)** Fixed a KeyError that could be raised when loading the Engineer Metrics page.
+* **(Tools)** Contrast parser no longer collapses distinct findings that share a rule name.
+* **(Tools)** Dependency Track parser no longer drops vulnerability IDs when `aliases` is empty.
+* **(Tools)** Added WatchGuard security advisories as a supported Vulnerability ID source.
+
+### Apr 20, 2026: v2.57.2
+
+* **(Pro UI)** Search and filter state is now preserved when closing a Finding from a Finding list, so you don't lose your place after editing.
+* **(Risk Acceptance)** Bulk Edit no longer leaves Simple Risk Acceptance findings in an inconsistent "Active + Risk Accepted" state. Reactivating a previously risk-accepted Finding now behaves correctly.
+* **(Risk SLA)** Creating a Risk SLA no longer silently coerces unchecked `enforce_*_risk` options to `True`.
+* **(Surveys)** Fixed survey access for both authenticated users and anonymous links.
+* **(Universal Parser)** Non-ASCII scan names no longer cause a `UnicodeEncodeError` on import. CSV files with `""`-escaped quotes in multiline fields now parse correctly.
+* **(API)** Import/Reimport now validates consistency between ID-based and name-based identifiers, catching mismatched payloads earlier.
+* **(Permissions)** Moving an Engagement between Products now requires appropriate permission on both the source and target Product.
+* **(Reports)** Fixed a CSS overflow issue in rendered reports. Cleaned up endpoint template rendering for user fields.
+* **(Tools)** `govulncheck` parser now records `fix_available` and `fix_version`. Risk Recon parser now validates URLs via a shared SSRF utility. Added Mozilla Foundation security advisories as a supported Vulnerability ID source.
+
+### Apr 13, 2026: v2.57.1
+
+* **(Pro UI)** Object-level history views no longer default to a 31-day date filter, so the full history is visible on load.
+* **(Pro UI)** Audit Log "changes" filter now searches only the names of changed fields, reducing false matches.
+* **(Pro UI)** Predefined Finding filters now sync UI state correctly, so the active filter indicator reflects the applied filter.
+* **(Deduplication)** Added a UI for global component deduplication settings, behind a feature flag.
+* **(Rules Engine)** Fixed a preview timeout that occurred when rules were previewed against large Finding sets.
+* **(Universal Parser)** CSV/XML query path now displays correctly in the Universal Parser UI.
+* **(Import)** Additional parameters are now stored in import settings, making them available for reuse on reimport.
+* **(Tools)** Wazuh 4.8 parser now correctly attaches endpoints and locations to findings.
+* **(Tools)** Invicti parser now uses `FirstSeenDate` when populating Finding dates when `DD_USE_FIRST_SEEN` is enabled.
+* **(Tools)** `govulncheck` parser fixed for NDJSON output.
+* **(Tools)** Added CNNVD as a supported Vulnerability ID source.
+
+### Apr 7, 2026: v2.57.0
+
+* **(Custom Enrichment)** On-prem administrators can now configure custom URLs for EPSS and KEV enrichment data sources under **Settings → Finding Enrichment Settings**. Each source (EPSS scores and CISA Known Exploited Vulnerabilities) can be independently enabled and pointed to an internal mirror or proxy. A **Test Configuration** button validates connectivity before saving. Findings with CVE IDs are automatically enriched with EPSS score/percentile and KEV status during enrichment runs.
+* **(Performance)** Optimized API response times across all endpoints with selective field loading and conditional prefetches.
+* **(Performance)** Improved Dashboard load times by eliminating redundant authorization queries and caching license lookups.
+* **(Performance)** Improved deduplication performance by batching duplicate marking and deferring large text fields.
+* **(Performance)** Improved false-positive history processing performance during async imports by using batch operations.
+* **(Pro UI)** Asset hierarchy filter dropdowns now only show relevant options (e.g., Parent filter shows only assets that have children).
+* **(Security)** Hardened container configurations for improved runtime security.
+* **(Universal Parser)** Added a list view and field mappings modal to the Pro UI for managing Universal Parser configurations.
+* **(Universal Parser)** Added support for 7 new fields: `file_path`, `component_name`, `component_version`, `line`, `steps_to_reproduce`, `severity_justification`, and CVSSv4 vectors.
+
+## Mar 2026: v2.56
+
+### Mar 30, 2026: v2.56.4
+
+* **(Deduplication)** Fixed an issue where cross-tool deduplication could silently fail to match duplicates when findings were imported across different scan tools.
+* **(Pro UI)** Audit Log table now supports global search and query parameter–based filtering.
+* **(Pro UI)** Improved page load performance for large listing tables (Findings, Endpoints, etc.) by reducing unnecessary computation during pagination.
+
+### Mar 23, 2026: v2.56.3
+
+* **(MFA)** All authenticated users can now access their own MFA settings page, regardless of role.
+* **(Pro UI)** Alerts table now uses server-side filtering, sorting, and pagination for improved performance.
+* **(Pro UI)** Removed the deprecated Credentials section from System Settings.
+* **(Pro UI)** Fixed boolean filters on the Product Types table for the Critical and Key Asset columns.
+* **(Pro UI)** Fixed a filter alignment issue on the Engagements table.
+* **(Pro UI)** Standardized the Test field label to "Title" across all screens.
+* **(Rules Engine)** Fixed a timeout (502 error) that could occur when previewing rules against a large number of Findings.
+
+### Mar 16, 2026: v2.56.2
+
+* **(API)** Added pagination limit enforcement and deprecation warnings for unpaginated API requests.
+* **(Jira)** Custom field values are now properly encoded and decoded as JSON, with validation errors shown for invalid input.
+* **(Pro UI)** The New Risk Acceptance form now pre-fills the expiration date using the system default number of days.
+* **(Pro UI)** Improved handling of Group membership and permissions in the UI.
+* **(SBOM)** SBOM imports are now processed asynchronously, improving upload responsiveness for large files.
+
+### Mar 12, 2026: v2.56.1
+
+* **(Pro UI)** Finding Groups can now be filtered by computed status: resolved, active, or risk-accepted.
+* **(Users)** Filters selected on the Users List are now included when exporting to CSV, so your export reflects the current view.
+* **(Jira)** Basic auth failures with Jira are now surfaced as warnings, making it easier to diagnose connection issues.
+
+### Mar 5, 2026: v2.56.0
+
+* **(API)** Restricted Note Types are now accessible via the API.
+* **(Connectors)** Added **IriusRisk** connector: see [tools reference](/en/connecting_your_tools/connectors/connectors_tool_reference/) for configuration instructions.
+* **(SAML)** SAML settings now support optional group attributes, allowing configurations that don't provide group mappings to work without errors.
+* **(SMTP)** Fixed an issue where DefectDojo would attempt SMTP authentication even when no credentials were configured, which could cause email delivery failures.
+* **(Universal Parser)** The Universal Parser now falls back to `clevercsv` for non-standard or malformed CSV files, improving compatibility with edge-case scanner outputs.
+
+
+## Feb 2026: v2.55
+
+### Feb 26, 2026: v2.55.5
+
+* **(Rules Engine)** Rules Engine now automatically retries when encountering database lock contention or serialization conflicts, reducing the likelihood of a rule run failing due to temporary load on the system.
+
+### Feb 24, 2026: v2.55.4
+
+* **(Connectors)** Added Akamai API Security, JFrog Xray to Connectors.
+* **(Surveys)** Anonymous surveys: users can now access surveys without logging in when anonymous surveys are enabled.
+* **(Pro UI)** The Pro UI editor now uses Markdown-based editing for text fields.  This resolves issues with HTML-string encoding, especially when Findings were manually entered or edited.
+* **(Rules Engine)** Added **Set Mitigation Policy** action type: Rules can now assign a pre-configured Mitigation Policy to matching Findings.
+* **(Rules Engine)** Added **Add to Risk Acceptance** action type: Rules can now add matching Findings to an existing Risk Acceptance record, automatically setting them as risk-accepted and inactive, and handling Jira integration and endpoint statuses.
+
+### Feb 17, 2026: v2.55.3
+
+* **(Pro UI)** Added “Scheduled” status to Engagements to enhances the tracking and management of Engagements.
+
+### Feb 10, 2026: v2.55.2
+
+* **(Pro UI)** Enhanced Organization addition permissions with configuration checks.
+
+### Feb 4, 2026: v2.55.1
+
+* **(Pro UI)** Findings: Added support for Custom Fields; key-value pairs that can be added to Findings.
+* **(Pro UI)** Fixed an issue where a date filter could throw a 500 error.
 
 ### Feb 2, 2026: v2.55.0
 
@@ -41,53 +279,53 @@ No significant UX changes.
 
 ## Dec 2025: v2.53
 
-### Dec 29, 2025: v2.53.5
+#### Dec 29, 2025: v2.53.5
 
 * **(Pro UI)** Added Finding count columns to Engagement table.
 * **(Pro UI)** Enter/Return no longer automatically submits forms.
 
-### Dec 22, 2025: v2.53.4
+#### Dec 22, 2025: v2.53.4
 
 * **(Pro UI)** Asset Hierarchy now uses separate tabs for Asset selection and for the rendered Asset tree:
 ![image](images/asset-hierarchy-2.53.4.png)
 
-### Dec 15, 2025: v2.53.3
+#### Dec 15, 2025: v2.53.3
 
 *DefectDojo v2.53.2 does not have a corresponding Pro release.*
 
 * **(Connectors)** Support for private CA certificates has been added to Connectors to assist with connectivity.
 
-### Dec 8, 2025: v2.53.1
+#### Dec 8, 2025: v2.53.1
 
-* **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/asset_modelling/hierarchy/pro__assets_organizations/) for details, and information on opting in to the Beta.
+* **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/assets_organizations/) for details, and information on opting in to the Beta.
 * **(Findings)** Added new KEV fields for ransomware, exploits, and date handling.
 * **(Pro UI)** Added Table Preferences menu, allowing you to store preset lists of columns for each table.
 
 ![image](images/pro_tablepreferences.png)
 
-### Dec 1, 2025: v2.53.0
+#### Dec 1, 2025: v2.53.0
 
 * **(Pro UI)** Added Asset Hierarchy.
 * **(Priority)** Priority and Risk can now be overridden manually, or through Rules Engine.
 
 ## Nov 2025: v2.52
 
-### Nov 24, 2025: v2.52.3
+#### Nov 24, 2025: v2.52.3
 
 * **(Pro UI)** Improved error messaging for failed Imports.
 * **(Pro UI)** Added Engagement Tags column to Finding lists
 
 
-### Nov 17, 2025: v2.52.2
+#### Nov 17, 2025: v2.52.2
 
 * No significant feature changes.
 
-### Nov 10, 2025: v2.52.1
+#### Nov 10, 2025: v2.52.1
 
 * **(Pro UI)** Finding view now shows all associated Endpoints, not just Active Endpoints
 
 
-### Nov 3, 2025: v2.52.0
+#### Nov 3, 2025: v2.52.0
 
 * **(Pro UI)** In-app Contact Support form now requires a valid email address in your user profile.
 * **(Pro UI)** You can now Add Files to Findings through the Pro UI directly from Finding Lists.
@@ -107,6 +345,7 @@ No significant UX changes.
 #### Oct 20, 2025: v2.51.2
 
 * **(Connectors)** Added Anchore Enterprise Connector.
+* **(Rules Engine)** Rules can now be scheduled to run automatically on a recurring or one-time basis.  From the Rules list, use the **⋮** menu on any rule to open the **Schedule Rule** form.
 
 
 #### Oct 14, 2025: v2.51.1
@@ -339,7 +578,7 @@ Hotfix release - no significant feature changes.
 ![image](images/risk_table.png)
 
 - **(Pro UI)** Added a link to Universal Importer to the sidebar, which provides access to the [Universal Importer and DefectDojo CLI](/import_data/pro/specialized_import/external_tools/) tools.
-- **(Pro UI)** Added smart Prioritization and Risk fields to DefectDojo Pro, which can be used to more easily triage Findings based on the impact of the Product they affect.  See [Priority](/asset_modelling/hierarchy/pro__priority_sla/) documentation for more information.
+- **(Pro UI)** Added smart Prioritization and Risk fields to DefectDojo Pro, which can be used to more easily triage Findings based on the impact of the Product they affect.  See [Priority](/asset_modelling/pro_hierarchy/priority_sla/) documentation for more information.
 - **(Tools)** Updated Fortify Webinspect parser to handle Fortify's new XML report format.
 
 #### Apr 14, 2025: v2.45.1
@@ -607,7 +846,7 @@ configuration fields.
 - **(API)**  It is now possible to prefetch a Finding with attached files via API.
 - **(Login)**  A new "Forgot Username" link has been added to the login form.  The link will navigate to a page which requests the user's email address. The username will be sent to that address if it exists.
 - **Risk Acceptances**  Notes are now added to Findings when they are removed from Risk Acceptances.
-- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](/triage_findings/findings_workflows/risk_acceptances/) for more details.
+- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](/triage_findings/findings_workflows/pro__risk_acceptance/) for more details.
 - **Tools**  Qualys HackerGuardian parser added.
 - **Tools**  Semgrep Parser updated with new severity mappings. HackerOne parser updated and now supports bug bounty reports.
 - **Tools**  fixed an issue where certain tools would not process asyncronously: Whitehat_Sentinel, SSLyze, SSLscan, Qualys_Webapp, Mend, Intsights, H1, and Blackduck.

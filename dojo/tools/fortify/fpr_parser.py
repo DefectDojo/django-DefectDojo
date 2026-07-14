@@ -1,12 +1,12 @@
 import logging
 import re
-import zipfile
 from xml.etree.ElementTree import Element
 
 from defusedxml import ElementTree
 
 from dojo.models import Finding, Test
 from dojo.tools.fortify.fortify_data import DescriptionData, RuleData, SnippetData, VulnerabilityData
+from dojo.tools.utils import safe_read_all_zip
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +26,9 @@ class FortifyFPRParser:
         pass
 
     def parse_fpr(self, filename, test):
-        if str(filename.__class__) == "<class '_io.TextIOWrapper'>":
-            input_zip = zipfile.ZipFile(filename.name, "r")
-        else:
-            input_zip = zipfile.ZipFile(filename, "r")
         # Read each file from the zip artifact into a dict with the format of
         # filename: file_content
-        zip_data = {name: input_zip.read(name) for name in input_zip.namelist()}
+        zip_data = safe_read_all_zip(filename)
         root, self.namespaces = self.identify_root(zip_data, "audit.fvdl", "No audit.fvdl file found in the zip")
         audit_log, self.namespaces_audit_log = self.identify_root(zip_data, "audit.xml")
         return self.convert_vulnerabilities_to_findings(root, audit_log, test)

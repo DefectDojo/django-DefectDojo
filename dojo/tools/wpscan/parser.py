@@ -5,7 +5,7 @@ import json
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class WpscanParser:
@@ -153,7 +153,7 @@ class WpscanParser:
                 ),
             )
             if settings.V3_FEATURE_LOCATIONS:
-                location = URL.from_value(interesting_finding["url"])
+                location = LocationData.url(url=interesting_finding["url"])
                 finding.unsaved_locations = [location]
             else:
                 # TODO: Delete this after the move to Locations

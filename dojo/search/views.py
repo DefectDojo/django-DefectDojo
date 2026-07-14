@@ -9,12 +9,11 @@ from django.shortcuts import render
 from django.utils.translation import gettext as _
 from watson import search as watson
 
-from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoints
-from dojo.endpoint.views import prefetch_for_endpoints
+from dojo.endpoint.ui.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids, prefetch_for_findings
+from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
 from dojo.location.queries import get_authorized_locations, prefetch_for_locations
 from dojo.models import Engagement, Finding, Finding_Template, Languages, Product, Test
@@ -122,18 +121,18 @@ def simple_search(request):
             search_languages = "language" in operators or search_tags or not (operators or search_finding_id)
             search_technologies = "technology" in operators or search_tags or not (operators or search_finding_id)
 
-            authorized_findings = get_authorized_findings(Permissions.Finding_View)
-            authorized_tests = get_authorized_tests(Permissions.Test_View)
-            authorized_engagements = get_authorized_engagements(Permissions.Engagement_View)
-            authorized_products = get_authorized_products(Permissions.Product_View)
+            authorized_findings = get_authorized_findings("view")
+            authorized_tests = get_authorized_tests("view")
+            authorized_engagements = get_authorized_engagements("view")
+            authorized_products = get_authorized_products("view")
             if settings.V3_FEATURE_LOCATIONS:
-                authorized_endpoints = get_authorized_locations(Permissions.Location_View)
+                authorized_endpoints = get_authorized_locations("view")
             else:
                 # TODO: Delete this after the move to Locations
-                authorized_endpoints = get_authorized_endpoints(Permissions.Location_View)
+                authorized_endpoints = get_authorized_endpoints("view")
             authorized_finding_templates = Finding_Template.objects.all()
-            authorized_app_analysis = get_authorized_app_analysis(Permissions.Product_View)
-            authorized_vulnerability_ids = get_authorized_vulnerability_ids(Permissions.Finding_View)
+            authorized_app_analysis = get_authorized_app_analysis("view")
+            authorized_vulnerability_ids = get_authorized_vulnerability_ids("view")
 
             # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 

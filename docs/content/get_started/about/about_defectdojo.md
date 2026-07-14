@@ -7,7 +7,16 @@ weight: 1
 aliases:
   - /en/about_defectdojo/about_docs
 ---
+<div class="version-opensource">
+
 ![image](images/dashboard.png)
+
+</div>
+<div class="version-pro">
+
+![image](images/Introduction_to_Dashboard_Features.png)
+
+</div>
 
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Inc. and open-source contributors maintain this documentation to support both the Community and Pro editions of DefectDojo.</span>
@@ -59,8 +68,8 @@ For teams managing a smaller volume of Findings, DefectDojo Open-Source is a gre
 There are a few supported ways to install DefectDojo’s Open-Source edition ([available on Github](https://github.com/DefectDojo/django-DefectDojo)):
 
 [Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) is the easiest method to install the core program and services required to run DefectDojo.
-Our [Architecture](https://docs.defectdojo.com/open_source/installation/architecture/) guide gives you an overview of each service and component used by DefectDojo.
-[Running In Production](https://docs.defectdojo.com/open_source/installation/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
+Our [Architecture](https://docs.defectdojo.com/get_started/open_source/architecture/) guide gives you an overview of each service and component used by DefectDojo.
+[Running In Production](https://docs.defectdojo.com/get_started/open_source/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
 
 Kubernetes is not fully supported at the Open-Source level, but this guide can be referenced and used as a starting point to integrate DefectDojo into Kubernetes architecture.
 
@@ -77,7 +86,7 @@ DefectDojo Inc. hosts a Pro edition of this software for commercial purposes.  A
 * **[CLI Tools](/import_data/pro/specialized_import/external_tools/)** for rapid integration with your systems
 * **[Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab
 * **[Improved Metrics](/metrics_reports/pro_metrics/pro__overview/)** for executive reporting and high-level analysis
-* **[Priority And Risk](/asset_modelling/hierarchy/pro__priority_sla/)** to identify the Findings of highest urgency, system-wide
+* **[Priority And Risk](/asset_modelling/pro_hierarchy/priority_sla/)** to identify the Findings of highest urgency, system-wide
 * **Premium Support** and implementation guidance for your organization
 
 The Pro edition is available as a cloud-hosted SaaS offering, and is also available for installation on-premises.

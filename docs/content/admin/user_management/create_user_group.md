@@ -1,10 +1,14 @@
 ---
 title: "Share permissions: User Groups"
-description: "Share and maintain permissions for many users"
+description: "Share and maintain permissions for many users in DefectDojo Pro"
 weight: 3
+audience: pro
 aliases:
   - /en/customize_dojo/user_management/create_user_group
 ---
+
+> **DefectDojo Pro feature.** User Groups and the underlying RBAC system are part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
+
 If you have a significant number of DefectDojo users, you may want to create one or more **Groups**, in order to set the same Role\-Based Access Control (RBAC) rules for many users simultaneously. Only Superusers can create User Groups.
 
 Groups can work in multiple ways:

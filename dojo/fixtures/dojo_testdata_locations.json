@@ -202,40 +202,40 @@
       "remote_addr": null,
       "timestamp": "2021-10-22T01:24:54.921Z",
       "additional_data": null
-      }
-    },
-    {
-      "model": "auditlog.logentry",
-      "pk": 804,
-      "fields": {
-        "content_type": 28,
-        "object_pk": "2",
-        "object_id": 2,
-        "object_repr": "Internal CRM App",
-        "action": 0,
-        "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Internal CRM App\"], \"description\": [\"None\", \"* New product in development that attempts to follow all best practices\"], \"product_manager\": [\"None\", \"(product_manager)\"], \"technical_contact\": [\"None\", \"(product_manager)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Commerce\"], \"id\": [\"None\", \"2\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"medium\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"construction\"], \"origin\": [\"None\", \"internal\"], \"external_audience\": [\"None\", \"False\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
-        "actor": null,
-        "remote_addr": null,
-        "timestamp": "2021-10-22T01:24:55.044Z",
-        "additional_data": null
-      }
-    },
-    {
-      "model": "auditlog.logentry",
-      "pk": 805,
-      "fields": {
-        "content_type": 28,
-        "object_pk": "3",
-        "object_id": 3,
-        "object_repr": "Apple Accounting Software",
-        "action": 0,
-        "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Apple Accounting Software\"], \"description\": [\"None\", \"Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\\r\\n\\r\\n**Core modules**\\r\\n\\r\\n* Accounts receivable\\u2014where the company enters money received\\r\\n* Accounts payable\\u2014where the company enters its bills and pays money it owes\\r\\n* General ledger\\u2014the company's \\\"books\\\"\\r\\n* Billing\\u2014where the company produces invoices to clients/customers\"], \"product_manager\": [\"None\", \"(admin)\"], \"technical_contact\": [\"None\", \"(user2)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Billing\"], \"id\": [\"None\", \"3\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"high\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"production\"], \"origin\": [\"None\", \"purchased\"], \"user_records\": [\"None\", \"5000\"], \"external_audience\": [\"None\", \"True\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
-        "actor": null,
-        "remote_addr": null,
-        "timestamp": "2021-10-22T01:24:55.071Z",
-        "additional_data": null
-      }
-    },
+    }
+  },
+  {
+    "model": "auditlog.logentry",
+    "pk": 804,
+    "fields": {
+      "content_type": 28,
+      "object_pk": "2",
+      "object_id": 2,
+      "object_repr": "Internal CRM App",
+      "action": 0,
+      "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Internal CRM App\"], \"description\": [\"None\", \"* New product in development that attempts to follow all best practices\"], \"product_manager\": [\"None\", \"(product_manager)\"], \"technical_contact\": [\"None\", \"(product_manager)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Commerce\"], \"id\": [\"None\", \"2\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"medium\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"construction\"], \"origin\": [\"None\", \"internal\"], \"external_audience\": [\"None\", \"False\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
+      "actor": null,
+      "remote_addr": null,
+      "timestamp": "2021-10-22T01:24:55.044Z",
+      "additional_data": null
+    }
+  },
+  {
+    "model": "auditlog.logentry",
+    "pk": 805,
+    "fields": {
+      "content_type": 28,
+      "object_pk": "3",
+      "object_id": 3,
+      "object_repr": "Apple Accounting Software",
+      "action": 0,
+      "changes": "{\"product\": [\"None\", \"dojo.Cred_Mapping.None\"], \"product_meta\": [\"None\", \"dojo.DojoMeta.None\"], \"name\": [\"None\", \"Apple Accounting Software\"], \"description\": [\"None\", \"Accounting software is typically composed of various modules, different sections dealing with particular areas of accounting. Among the most common are:\\r\\n\\r\\n**Core modules**\\r\\n\\r\\n* Accounts receivable\\u2014where the company enters money received\\r\\n* Accounts payable\\u2014where the company enters its bills and pays money it owes\\r\\n* General ledger\\u2014the company's \\\"books\\\"\\r\\n* Billing\\u2014where the company produces invoices to clients/customers\"], \"product_manager\": [\"None\", \"(admin)\"], \"technical_contact\": [\"None\", \"(user2)\"], \"team_manager\": [\"None\", \"(user2)\"], \"prod_type\": [\"None\", \"Billing\"], \"id\": [\"None\", \"3\"], \"tid\": [\"None\", \"0\"], \"business_criticality\": [\"None\", \"high\"], \"platform\": [\"None\", \"web\"], \"lifecycle\": [\"None\", \"production\"], \"origin\": [\"None\", \"purchased\"], \"user_records\": [\"None\", \"5000\"], \"external_audience\": [\"None\", \"True\"], \"internet_accessible\": [\"None\", \"False\"], \"enable_simple_risk_acceptance\": [\"None\", \"False\"], \"enable_full_risk_acceptance\": [\"None\", \"True\"]}",
+      "actor": null,
+      "remote_addr": null,
+      "timestamp": "2021-10-22T01:24:55.071Z",
+      "additional_data": null
+    }
+  },
   {
     "pk": 1,
     "model": "dojo.system_settings",
@@ -824,7 +824,7 @@
       "query": "",
       "path": "endpoint/420/edit/",
       "port": 80,
-      "hash": "f28d3752e452cde3e00a3aaf885fe153037ae69d9726e6a0936ee7da3225c1ad"
+      "identity_hash": "f28d3752e452cde3e00a3aaf885fe153037ae69d9726e6a0936ee7da3225c1ad"
     }
   },
   {
@@ -838,7 +838,7 @@
       "query": "",
       "path": "",
       "port": 21,
-      "hash": "025d6b16f8cfba2d8e15e85deb81963a84d5dd3c700614f8e8fda87378cf58aa"
+      "identity_hash": "025d6b16f8cfba2d8e15e85deb81963a84d5dd3c700614f8e8fda87378cf58aa"
     }
   },
   {
@@ -852,7 +852,7 @@
       "query": "",
       "path": "",
       "port": 22,
-      "hash": "03009c0636425af566fb6b737db82852812fe2969107ef299530a248f78c4761"
+      "identity_hash": "03009c0636425af566fb6b737db82852812fe2969107ef299530a248f78c4761"
     }
   },
   {
@@ -866,7 +866,7 @@
       "query": "",
       "path": "",
       "port": 21,
-      "hash": "3c82808602507ea78a48dc605d86476f5cc609f99d446d1a9c9539d5c7c10166"
+      "identity_hash": "3c82808602507ea78a48dc605d86476f5cc609f99d446d1a9c9539d5c7c10166"
     }
   },
   {
@@ -880,7 +880,7 @@
       "query": "",
       "path": "",
       "port": 80,
-      "hash": "c1f60206ce7dac6202baec6f6251006e499113356869f605d0168f13e1d593ac"
+      "identity_hash": "c1f60206ce7dac6202baec6f6251006e499113356869f605d0168f13e1d593ac"
     }
   },
   {
@@ -894,7 +894,7 @@
       "query": "",
       "path": "",
       "port": 80,
-      "hash": "99e0dbdf63598bfa7c3310a6785638117134c44ac59a38785e9e81fece0878da"
+      "identity_hash": "99e0dbdf63598bfa7c3310a6785638117134c44ac59a38785e9e81fece0878da"
     }
   },
   {
@@ -908,7 +908,7 @@
       "query": "",
       "path": "",
       "port": 443,
-      "hash": "26259e2d4e77789a856808509ba2d9a50838bdc76d71f596a1bb346bbcb30332"
+      "identity_hash": "26259e2d4e77789a856808509ba2d9a50838bdc76d71f596a1bb346bbcb30332"
     }
   },
   {
@@ -922,7 +922,7 @@
       "query": "",
       "path": "f6",
       "port": 443,
-      "hash": "4e5614106ea6ca9c15c3328731036b06ab32c45fb2ed013601350748e2d3ed85"
+      "identity_hash": "4e5614106ea6ca9c15c3328731036b06ab32c45fb2ed013601350748e2d3ed85"
     }
   },
   {
@@ -2096,42 +2096,6 @@
     }
   },
   {
-    "pk": 2,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 1",
-      "test": 3,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
-    "pk": 3,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 2",
-      "test": 14,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
-    "pk": 4,
-    "model": "dojo.stub_finding",
-    "fields": {
-      "description": "test stub finding",
-      "reporter": 1,
-      "title": "test stub finding 3",
-      "test": 13,
-      "date": "2017-12-20",
-      "severity": "High"
-    }
-  },
-  {
     "pk": 1,
     "model": "dojo.finding_template",
     "fields": {
@@ -2931,26 +2895,10 @@
     }
   },
   {
-    "model": "dojo.language_type",
-    "pk": 1,
-    "fields": {
-      "language": "JSON",
-      "color": "#882B0F"
-    }
-  },
-  {
-    "model": "dojo.language_type",
-    "pk": 2,
-    "fields": {
-      "language": "Python",
-      "color": "#3572A5"
-    }
-  },
-  {
     "model": "dojo.languages",
     "pk": 1,
     "fields": {
-      "language": 1,
+      "language": 94,
       "product": 1,
       "user": 1,
       "files": 2,
@@ -3057,38 +3005,6 @@
       "name": "Can view log entry",
       "content_type": 7,
       "codename": "view_logentry"
-    }
-  },
-  {
-    "model": "dojo.cred_user",
-    "pk": 1,
-    "fields": {
-      "name": "Cred Product",
-      "username": "admin",
-      "password": "AES.1:2f3cb6d1d412a0552a46b67d972d14f5:6617146b4d29492551dfc62e4a697aca",
-      "role": "admin",
-      "authentication": "Form",
-      "http_authentication": "Basic",
-      "description": "test",
-      "url": "https://google.com",
-      "environment": 1,
-      "login_regex": null,
-      "logout_regex": null,
-      "is_valid": true,
-      "notes": []
-    }
-  },
-  {
-    "model": "dojo.cred_mapping",
-    "pk": 1,
-    "fields": {
-      "cred_id": 1,
-      "product": 1,
-      "finding": null,
-      "engagement": null,
-      "test": null,
-      "is_authn_provider": false,
-      "url": "https://google.com"
     }
   },
   {

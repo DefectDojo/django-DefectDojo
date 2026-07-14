@@ -6,7 +6,7 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Endpoint, Finding
-from dojo.url.models import URL
+from dojo.tools.locations import LocationData
 
 
 class AcunetixJSONParser:
@@ -138,7 +138,7 @@ class AcunetixJSONParser:
                     finding.active = False
             finding.unsaved_req_resp = [{"req": request, "resp": response}]
             if settings.V3_FEATURE_LOCATIONS:
-                finding.unsaved_locations = [URL.from_value(url)]
+                finding.unsaved_locations = [LocationData.url(url=url)]
             else:
                 # TODO: Delete this after the move to Locations
                 finding.unsaved_endpoints = [Endpoint.from_uri(url)]

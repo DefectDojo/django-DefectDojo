@@ -16,16 +16,17 @@ from django.http import HttpRequest
 from django.utils import timezone
 from django.utils.translation import gettext as _
 
-from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoint_status_for_queryset
 from dojo.filters import (
     MetricsEndpointFilter,
     MetricsEndpointFilterWithoutObjectLookups,
-    MetricsFindingFilter,
-    MetricsFindingFilterWithoutObjectLookups,
 )
 from dojo.finding.helper import ACCEPTED_FINDINGS_QUERY, CLOSED_FINDINGS_QUERY, OPEN_FINDINGS_QUERY
 from dojo.finding.queries import get_authorized_findings
+from dojo.finding.ui.filters import (
+    MetricsFindingFilter,
+    MetricsFindingFilterWithoutObjectLookups,
+)
 from dojo.models import Endpoint_Status, Finding, Product_Type
 from dojo.utils import (
     get_system_setting,
@@ -47,7 +48,7 @@ def finding_queries(
 ) -> dict[str, Any]:
     # Get the initial list of findings the user is authorized to see
     all_authorized_findings: QuerySet[Finding] = get_authorized_findings(
-        Permissions.Finding_View,
+        "view",
         user=request.user,
     ).select_related(
         "reporter",
@@ -76,11 +77,12 @@ def finding_queries(
 
     # Filter by the date ranges supplied
     all_findings_within_date_range = all_authorized_findings.filter(date__range=[start_date, end_date])
-    # Get the list of closed findings filtered by mitigated date (not discovery date)
-    # This ensures findings closed within the date range are included even if discovered outside it
+    # Filter closed findings by mitigated date (not discovery date).
+    # Use timezone.now() as the upper bound so findings closed after the latest
+    # discovery date are not excluded from the counter.
     closed_filtered_findings = all_authorized_findings.filter(
         CLOSED_FINDINGS_QUERY,
-        mitigated__range=[start_date, end_date],
+        mitigated__range=[start_date, timezone.now()],
         mitigated__isnull=False,
     )
     accepted_filtered_findings = all_findings_within_date_range.filter(ACCEPTED_FINDINGS_QUERY)
@@ -185,7 +187,7 @@ def endpoint_queries(
         "finding__reporter",
     )
 
-    endpoints_query = get_authorized_endpoint_status_for_queryset(Permissions.Location_View, endpoints_query, request.user)
+    endpoints_query = get_authorized_endpoint_status_for_queryset("view", endpoints_query, request.user)
     filter_string_matching = get_system_setting("filter_string_matching", False)
     filter_class = MetricsEndpointFilterWithoutObjectLookups if filter_string_matching else MetricsEndpointFilter
     endpoints = filter_class(request.GET, queryset=endpoints_query)
@@ -231,8 +233,8 @@ def endpoint_queries(
             "finding__test__engagement__product",
         )
 
-    endpoints_closed = get_authorized_endpoint_status_for_queryset(Permissions.Location_View, endpoints_closed, request.user)
-    accepted_endpoints = get_authorized_endpoint_status_for_queryset(Permissions.Location_View, accepted_endpoints, request.user)
+    endpoints_closed = get_authorized_endpoint_status_for_queryset("view", endpoints_closed, request.user)
+    accepted_endpoints = get_authorized_endpoint_status_for_queryset("view", accepted_endpoints, request.user)
     accepted_endpoints_counts = severity_count(accepted_endpoints, "aggregate", "finding__severity")
 
     weeks_between, months_between = period_deltas(start_date, end_date)
@@ -339,7 +341,7 @@ class MetricsType(_MetricsTypeEntry, Enum):
     ENDPOINT = ("finding__severity", "mitigated")
 
 
-def query_counts(
+def query_counts[MetricsQuerySet: (QuerySet[Finding], QuerySet[Endpoint_Status])](
     open_qs: MetricsQuerySet,
     active_qs: MetricsQuerySet,
     accepted_qs: MetricsQuerySet,

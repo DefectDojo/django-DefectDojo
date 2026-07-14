@@ -16,6 +16,7 @@ from dojo.models import (
     Product,
     Product_Type,
     Test,
+    Test_Type,
     User,
     Vulnerability_Id,
 )
@@ -397,6 +398,196 @@ class TestDojoDefaultImporter(DojoTestCase):
                 # Verify findings were processed
                 self.assertGreater(len_new_findings, 0)
 
+    # Regression: Generic import doubled the (Generic Findings Import) suffix in the Test_Type name
+    def test_import_generic_type_with_suffix_is_not_doubled(self):
+        """When the report's type already carries the scan-type suffix, it must be used verbatim (no ' Scan (...)' re-append)."""
+        generic_test_type_suffix = get_unit_tests_scans_path("generic") / "generic_test_type_suffix.json"
+        with generic_test_type_suffix.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_suffix")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericSuffix",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Suffix Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            self.assertIsNotNone(test)
+            # The suffix must NOT be doubled into "... (Generic Findings Import) Scan (Generic Findings Import)"
+            self.assertEqual(
+                "Prisma Cloud (Generic Findings Import)", test.test_type.name,
+                msg=f"expected 'Prisma Cloud (Generic Findings Import)', persisted='{test.test_type.name}'",
+            )
+
+    # Regression: dynamic parsers whose scan_type already ends in " Scan" (Horusec, AWS Security
+    # Hub, Rusty Hog, ...) must not be doubled into "Horusec Scan (Horusec Scan)".
+    def test_import_scan_suffixed_dynamic_type_is_not_doubled(self):
+        """A report type of "Horusec" under scan_type "Horusec Scan" must resolve to "Horusec Scan"."""
+        horusec_scan = get_unit_tests_scans_path("horusec") / "issue_6258.json"
+        with horusec_scan.open(encoding="utf-8") as scan:
+            scan_type = "Horusec Scan"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_scan_suffix")
+            product, _ = Product.objects.get_or_create(
+                name="TestScanSuffix",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Scan Suffix Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            self.assertIsNotNone(test)
+            # Must be the plain scan type, NOT "Horusec Scan (Horusec Scan)"
+            self.assertEqual(
+                "Horusec Scan", test.test_type.name,
+                msg=f"expected 'Horusec Scan', persisted='{test.test_type.name}'",
+            )
+
+    # Regression: Generic import doubled the (Generic Findings Import) suffix in the Test_Type name
+    def test_reimport_generic_type_with_suffix_is_idempotent(self):
+        """Reimporting a report whose type carries the scan-type suffix must not raise and must keep the same test/type."""
+        generic_test_type_suffix = get_unit_tests_scans_path("generic") / "generic_test_type_suffix.json"
+        with generic_test_type_suffix.open(encoding="utf-8") as scan:
+            scan_type = "Generic Findings Import"
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_suffix_reimport")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericSuffixReimport",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Suffix Reimport Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, _, _, _, _, _ = importer.process_scan(scan)
+            original_test_type_name = test.test_type.name
+            self.assertEqual("Prisma Cloud (Generic Findings Import)", original_test_type_name)
+
+            reimport_options = {
+                "test": test,
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": scan_type,
+                "close_old_findings": False,
+            }
+            reimporter = DefaultReImporter(**reimport_options)
+            scan.seek(0)
+            test_after_reimport, _, _, _, _, _, _ = reimporter.process_scan(scan)
+            self.assertEqual(test.id, test_after_reimport.id)
+            test.refresh_from_db()
+            self.assertEqual(original_test_type_name, test.test_type.name)
+
+    # Regression: Generic import doubled the (Generic Findings Import) suffix in the Test_Type name
+    def test_reimport_into_legacy_doubled_test_type_still_works(self):
+        """Pre-patch data: a Test whose test_type has the old doubled name must still accept reimports."""
+        generic_test_type_suffix = get_unit_tests_scans_path("generic") / "generic_test_type_suffix.json"
+        scan_type = "Generic Findings Import"
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="test_generic_legacy_doubled")
+        product, _ = Product.objects.get_or_create(
+            name="TestGenericLegacyDoubled",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Test Generic Legacy Doubled Engagement",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        # Simulate a test created by the pre-patch code: test_type name has the doubled suffix
+        legacy_doubled_name = "Prisma Cloud (Generic Findings Import) Scan (Generic Findings Import)"
+        legacy_test_type, _ = Test_Type.objects.get_or_create(name=legacy_doubled_name)
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=legacy_test_type,
+            environment=environment,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        reimport_options = {
+            "test": test,
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": scan_type,
+            "close_old_findings": False,
+        }
+        reimporter = DefaultReImporter(**reimport_options)
+        with generic_test_type_suffix.open(encoding="utf-8") as scan:
+            # Must NOT raise "Test type mismatch" for pre-existing doubled-name test types
+            test_after_reimport, _, len_new_findings, _, _, _, _ = reimporter.process_scan(scan)
+        self.assertEqual(test.id, test_after_reimport.id)
+        test.refresh_from_db()
+        # Historical name is preserved (we do not rename existing data)
+        self.assertEqual(legacy_doubled_name, test.test_type.name)
+        self.assertGreater(len_new_findings, 0)
+
 
 class FlexibleImportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
@@ -461,7 +652,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
             self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_import_by_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=0, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -474,7 +665,7 @@ class FlexibleImportTestAPI(DojoAPITestCase):
 
         mock.assert_not_called()
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_import_by_product_type_name_not_exists_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=1, endpoints=0):
             import0 = self.import_scan_with_params(NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -666,7 +857,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
             self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
                 engagement=None, engagement_name=ENGAGEMENT_NAME_NEW, expected_http_status_code=400)
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_reimport_by_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=0, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -679,7 +870,7 @@ class FlexibleReimportTestAPI(DojoAPITestCase):
 
         mock.assert_not_called()
 
-    @patch("dojo.jira_link.helper.get_jira_project")
+    @patch("dojo.jira.helper.get_jira_project")
     def test_reimport_by_product_type_not_exists_product_name_not_exists_engagement_name_auto_create(self, mock):
         with assertImportModelsCreated(self, tests=1, engagements=1, products=1, product_types=1, endpoints=0):
             import0 = self.reimport_scan_with_params(None, NPM_AUDIT_NO_VULN_FILENAME, scan_type=NPM_AUDIT_SCAN_TYPE, product_name=PRODUCT_NAME_NEW,
@@ -803,14 +994,15 @@ class TestImporterUtils(DojoAPITestCase):
         }
 
     def test_handle_vulnerability_ids_references_and_cve(self):
-        # Why doesn't this test use the test db and query for one?
         vulnerability_ids = ["CVE", "REF-1", "REF-2"]
         finding = Finding()
         finding.unsaved_vulnerability_ids = vulnerability_ids
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
@@ -827,7 +1019,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
 
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("CVE", finding.vulnerability_ids[0])
         self.assertEqual("CVE", finding.cve)
@@ -841,7 +1035,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.reporter = self.testuser
         finding.save()
         finding.unsaved_vulnerability_ids = vulnerability_ids
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
 
         self.assertEqual("REF-1", finding.vulnerability_ids[0])
         self.assertEqual("REF-1", finding.cve)
@@ -854,7 +1050,9 @@ class TestImporterUtils(DojoAPITestCase):
         finding.test = self.test
         finding.reporter = self.testuser
         finding.save()
-        DefaultImporter(**self.importer_data).store_vulnerability_ids(finding)
+        importer = DefaultImporter(**self.importer_data)
+        importer.store_vulnerability_ids(finding)
+        importer.flush_vulnerability_ids()
         self.assertEqual(finding.cve, None)
         self.assertEqual(finding.unsaved_vulnerability_ids, None)
         self.assertEqual(finding.vulnerability_ids, [])
@@ -880,7 +1078,9 @@ class TestImporterUtils(DojoAPITestCase):
 
         # Process with empty list - should clear all IDs
         finding.unsaved_vulnerability_ids = []
-        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+        reimporter.reconcile_vulnerability_ids(finding)
+        reimporter.flush_vulnerability_ids()
         # Save the finding to persist the cve=None change
         finding.save()
 
@@ -917,7 +1117,9 @@ class TestImporterUtils(DojoAPITestCase):
         # Process with different IDs - should replace old IDs
         new_vulnerability_ids = ["CVE-2021-9999", "GHSA-xxxx-yyyy"]
         finding.unsaved_vulnerability_ids = new_vulnerability_ids
-        DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"]).reconcile_vulnerability_ids(finding)
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+        reimporter.reconcile_vulnerability_ids(finding)
+        reimporter.flush_vulnerability_ids()
         # Save the finding to persist the cve change
         finding.save()
 
@@ -933,3 +1135,290 @@ class TestImporterUtils(DojoAPITestCase):
         vuln_ids = list(Vulnerability_Id.objects.filter(finding=finding).values_list("vulnerability_id", flat=True))
         self.assertEqual(set(new_vulnerability_ids), set(vuln_ids))
         finding.delete()
+
+    def test_reconcile_vulnerability_ids_cross_finding_batch(self):
+        """Multiple findings accumulated before flush — one delete+insert pair per changed finding."""
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+
+        # finding_a: IDs change (CVE-A → CVE-B)
+        finding_a = Finding(test=self.test, reporter=self.testuser)
+        finding_a.save()
+        Vulnerability_Id.objects.create(finding=finding_a, vulnerability_id="CVE-A-OLD")
+        finding_a.cve = "CVE-A-OLD"
+        finding_a.save()
+
+        # finding_b: IDs change (CVE-B1, CVE-B2 → CVE-B-NEW)
+        finding_b = Finding(test=self.test, reporter=self.testuser)
+        finding_b.save()
+        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B1")
+        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B2")
+        finding_b.cve = "CVE-B1"
+        finding_b.save()
+
+        # finding_c: IDs unchanged — should not appear in delete/insert buffers
+        finding_c = Finding(test=self.test, reporter=self.testuser)
+        finding_c.save()
+        Vulnerability_Id.objects.create(finding=finding_c, vulnerability_id="CVE-C-SAME")
+        finding_c.cve = "CVE-C-SAME"
+        finding_c.save()
+
+        finding_a.unsaved_vulnerability_ids = ["CVE-A-NEW"]
+        finding_b.unsaved_vulnerability_ids = ["CVE-B-NEW"]
+        finding_c.unsaved_vulnerability_ids = ["CVE-C-SAME"]
+
+        # Accumulate all three before any flush
+        reimporter.reconcile_vulnerability_ids(finding_a)
+        reimporter.reconcile_vulnerability_ids(finding_b)
+        reimporter.reconcile_vulnerability_ids(finding_c)
+
+        # pending_vuln_id_deletes only contains changed findings, not finding_c
+        self.assertIn(finding_a.id, reimporter.pending_vuln_id_deletes)
+        self.assertIn(finding_b.id, reimporter.pending_vuln_id_deletes)
+        self.assertNotIn(finding_c.id, reimporter.pending_vuln_id_deletes)
+        self.assertEqual(2, len(reimporter.pending_vulnerability_ids))
+
+        # Old IDs still in DB (not yet deleted)
+        self.assertEqual(1, Vulnerability_Id.objects.filter(finding=finding_a).count())
+        self.assertEqual(2, Vulnerability_Id.objects.filter(finding=finding_b).count())
+
+        reimporter.flush_vulnerability_ids()
+
+        # Buffers cleared
+        self.assertEqual([], reimporter.pending_vuln_id_deletes)
+        self.assertEqual([], reimporter.pending_vulnerability_ids)
+
+        # finding_a: old deleted, new inserted
+        vuln_ids_a = list(Vulnerability_Id.objects.filter(finding=finding_a).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-A-NEW"], vuln_ids_a)
+        self.assertEqual("CVE-A-NEW", finding_a.cve)
+
+        # finding_b: both old deleted, new inserted
+        vuln_ids_b = list(Vulnerability_Id.objects.filter(finding=finding_b).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-B-NEW"], vuln_ids_b)
+        self.assertEqual("CVE-B-NEW", finding_b.cve)
+
+        # finding_c: unchanged — IDs untouched
+        vuln_ids_c = list(Vulnerability_Id.objects.filter(finding=finding_c).values_list("vulnerability_id", flat=True))
+        self.assertEqual(["CVE-C-SAME"], vuln_ids_c)
+
+        finding_a.delete()
+        finding_b.delete()
+        finding_c.delete()
+
+    def test_reconcile_vulnerability_ids_unchanged_no_db_write(self):
+        """Early-exit path: unchanged IDs never touch pending buffers."""
+        reimporter = DefaultReImporter(test=self.test, environment=self.importer_data["environment"], scan_type=self.importer_data["scan_type"])
+
+        finding = Finding(test=self.test, reporter=self.testuser)
+        finding.save()
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
+        finding.cve = "CVE-2020-1234"
+        finding.save()
+
+        finding.unsaved_vulnerability_ids = ["CVE-2020-1234"]
+        reimporter.reconcile_vulnerability_ids(finding)
+
+        self.assertEqual([], reimporter.pending_vuln_id_deletes)
+        self.assertEqual([], reimporter.pending_vulnerability_ids)
+
+        finding.delete()
+
+
+class ReimportDuplicateReactivationTest(DojoTestCase):
+
+    """
+    Regression test for https://github.com/DefectDojo/django-DefectDojo/issues/14910
+
+    Reimport reactivation of a mitigated finding must not produce an invalid
+    active/verified duplicate finding state.
+    """
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="admin", is_superuser=True)
+        Development_Environment.objects.get_or_create(name="Development")
+        self.product_type, _ = Product_Type.objects.get_or_create(name="dup_reactivation_pt")
+        self.product, _ = Product.objects.get_or_create(
+            name="DupReactivationProduct",
+            description="test product",
+            prod_type=self.product_type,
+        )
+        self.engagement = Engagement.objects.create(
+            name="Dup Reactivation Engagement",
+            product=self.product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        self.test = self.create_test(engagement=self.engagement, scan_type=NPM_AUDIT_SCAN_TYPE, title="dup reactivation test")
+
+    def _make_finding(self, title, **kwargs):
+        return Finding.objects.create(
+            title=title,
+            test=self.test,
+            severity="High",
+            reporter=self.user,
+            **kwargs,
+        )
+
+    def test_reactivation_keeps_duplicate_inactive_and_unverified(self):
+        # Original active finding
+        original = self._make_finding("original finding", active=True, verified=True)
+        # Mitigated finding that is marked as a duplicate of the original
+        existing_duplicate = self._make_finding(
+            "duplicate finding",
+            active=False,
+            verified=False,
+            duplicate=True,
+            duplicate_finding=original,
+            is_mitigated=True,
+            mitigated=timezone.now(),
+            mitigated_by=self.user,
+        )
+        # The reimported (unsaved) finding that re-matches the duplicate, and is active/not mitigated
+        unsaved_finding = self._make_finding("duplicate finding incoming", active=True, verified=True)
+
+        reimporter = DefaultReImporter(
+            test=self.test,
+            user=self.user,
+            scan_type=NPM_AUDIT_SCAN_TYPE,
+            active=True,
+            verified=True,
+            do_not_reactivate=False,
+        )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
+
+        result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing_duplicate)
+
+        result_finding.refresh_from_db()
+        # The mitigation is cleared (the finding reappeared in the scan)...
+        self.assertFalse(result_finding.is_mitigated)
+        self.assertIsNone(result_finding.mitigated)
+        # ...but a duplicate must never become active or verified (issue #14910)
+        self.assertTrue(result_finding.duplicate)
+        self.assertFalse(result_finding.active)
+        self.assertFalse(result_finding.verified)
+
+    def test_reactivation_of_non_duplicate_still_activates(self):
+        # A regular mitigated finding (not a duplicate) must still reactivate as before
+        existing = self._make_finding(
+            "regular finding",
+            active=False,
+            verified=False,
+            is_mitigated=True,
+            mitigated=timezone.now(),
+            mitigated_by=self.user,
+        )
+        unsaved_finding = self._make_finding("regular finding incoming", active=True, verified=True)
+
+        reimporter = DefaultReImporter(
+            test=self.test,
+            user=self.user,
+            scan_type=NPM_AUDIT_SCAN_TYPE,
+            active=True,
+            verified=True,
+            do_not_reactivate=False,
+        )
+        # These accumulators are normally initialised inside process_findings(); set them
+        # here because the test drives process_matched_mitigated_finding() directly.
+        reimporter.new_items = []
+        reimporter.reactivated_items = []
+        reimporter.unchanged_items = []
+
+        result_finding, _ = reimporter.process_matched_mitigated_finding(unsaved_finding, existing)
+
+        result_finding.refresh_from_db()
+        self.assertFalse(result_finding.is_mitigated)
+        self.assertIsNone(result_finding.mitigated)
+        self.assertTrue(result_finding.active)
+        self.assertTrue(result_finding.verified)
+
+
+# Regression: the per-batch post-processing dispatch read the push_to_jira flag computed
+# for the LAST finding of the batch and applied it to the entire batch. With finding
+# groups enabled and push_to_jira=True, a mixed batch ending in a grouped finding
+# suppressed the JIRA push for every ungrouped finding in the batch (and vice versa).
+class TestDojoImporterBatchPushToJira(DojoTestCase):
+    def _process_findings_with_groups(self, parsed_findings):
+        """Run process_findings with push_to_jira + group_by and capture per-finding dispatch flags."""
+        scan_type = "Acunetix Scan"
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="batch_push")
+        product, _ = Product.objects.get_or_create(
+            name="TestDojoImporterBatchPushToJira",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Batch Push To Jira",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        self.system_settings(enable_finding_groups=True)
+        importer = DefaultImporter(
+            user=user,
+            lead=user,
+            scan_date=None,
+            environment=environment,
+            minimum_severity="Info",
+            active=True,
+            verified=True,
+            scan_type=scan_type,
+            engagement=engagement,
+            push_to_jira=True,
+            group_by="component_name",
+        )
+        test = importer.create_test(scan_type)
+        for finding in parsed_findings:
+            finding.test = test
+        with (
+            patch("dojo.importers.default_importer.dojo_dispatch_task") as dispatch_mock,
+            patch("dojo.importers.default_importer.jira_services.push"),
+        ):
+            new_findings = importer.process_findings(parsed_findings)
+        # Map each dispatched finding id to the push_to_jira flag its batch was sent with
+        flag_by_finding_id = {}
+        for call in dispatch_mock.call_args_list:
+            finding_ids = call.args[1]
+            for finding_id in finding_ids:
+                flag_by_finding_id[finding_id] = call.kwargs["push_to_jira"]
+        findings_by_title = {finding.title: finding for finding in new_findings}
+        return flag_by_finding_id, findings_by_title
+
+    def test_batch_push_to_jira_last_finding_grouped(self):
+        # Last finding of the batch is grouped -> its False flag must NOT leak onto the
+        # ungrouped finding processed before it
+        ungrouped = Finding(title="Ungrouped Finding", severity="Medium", description="no component")
+        grouped = Finding(title="Grouped Finding", severity="Medium", description="has component", component_name="lib-a")
+        flags, findings_by_title = self._process_findings_with_groups([ungrouped, grouped])
+        grouped_db = findings_by_title["Grouped Finding"]
+        ungrouped_db = findings_by_title["Ungrouped Finding"]
+        self.assertFalse(
+            flags[grouped_db.id],
+            msg=f"grouped finding must not be pushed individually, dispatched with push_to_jira={flags[grouped_db.id]}",
+        )
+        self.assertTrue(
+            flags[ungrouped_db.id],
+            msg=f"ungrouped finding must be pushed individually, dispatched with push_to_jira={flags[ungrouped_db.id]}",
+        )
+
+    def test_batch_push_to_jira_last_finding_ungrouped(self):
+        # Last finding of the batch is ungrouped -> its True flag must NOT leak onto the
+        # grouped finding processed before it
+        grouped = Finding(title="Grouped Finding 2", severity="Medium", description="has component", component_name="lib-b")
+        ungrouped = Finding(title="Ungrouped Finding 2", severity="Medium", description="no component")
+        flags, findings_by_title = self._process_findings_with_groups([grouped, ungrouped])
+        grouped_db = findings_by_title["Grouped Finding 2"]
+        ungrouped_db = findings_by_title["Ungrouped Finding 2"]
+        self.assertFalse(
+            flags[grouped_db.id],
+            msg=f"grouped finding must not be pushed individually, dispatched with push_to_jira={flags[grouped_db.id]}",
+        )
+        self.assertTrue(
+            flags[ungrouped_db.id],
+            msg=f"ungrouped finding must be pushed individually, dispatched with push_to_jira={flags[ungrouped_db.id]}",
+        )
