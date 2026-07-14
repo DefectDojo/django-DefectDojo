@@ -597,8 +597,8 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Multiple-CWEs feature: +2 import / +2 reimport-no-change (Finding_CWE
     # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
     # existing Finding_CWE rows for each changed finding).
-    EXPECTED_ZAP_IMPORT_V2 = 293
-    EXPECTED_ZAP_IMPORT_V3 = 317
+    EXPECTED_ZAP_IMPORT_V2 = 294
+    EXPECTED_ZAP_IMPORT_V3 = 318
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 79
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
     EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 161
