@@ -4,7 +4,7 @@ import logging
 import tagulous
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
@@ -38,6 +38,7 @@ from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
     BurpRawRequestResponseMultiSerializer,
     BurpRawRequestResponseSerializer,
+    FindingBulkUpdateSerializer,
     FindingCloseSerializer,
     FindingCreateSerializer,
     FindingMetaSerializer,
@@ -649,6 +650,84 @@ class FindingViewSet(
         if not success:
             return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        methods=["PATCH"],
+        request=FindingBulkUpdateSerializer,
+        responses={
+            status.HTTP_200_OK: FindingSerializer(many=True),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Validation failed: unknown field, invalid value, unknown finding id, "
+                            "duplicate id, or more findings than the per-request limit.",
+            ),
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="The user lacks edit permission on at least one referenced finding; "
+                            "the entire batch is rejected and rolled back.",
+            ),
+        },
+    )
+    @action(
+        detail=False,
+        methods=["patch"],
+        url_path="bulk",
+        filter_backends=[],
+        pagination_class=None,
+    )
+    def bulk_update(self, request):
+        """
+        Update an allowlisted set of fields on many findings in a single atomic request.
+
+        The request body is ``{"findings": [{"id": <int>, ...}, ...]}`` where each item
+        carries the target finding id plus any subset of the allowlisted fields
+        (epss_score, epss_percentile, known_exploited, ransomware_used, kev_date). The
+        user must have edit permission on every referenced finding; if any check fails,
+        the entire batch is rolled back and a 403 is returned. Findings are never pushed
+        to JIRA from this endpoint.
+        """
+        serializer = FindingBulkUpdateSerializer(
+            data=request.data, context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        updated_findings = self._perform_bulk_update(
+            request, serializer.validated_data["findings"],
+        )
+        # Re-fetch through the viewset queryset so the response reuses the same
+        # prefetching and authorization scoping as a normal finding list.
+        response_findings = self.get_queryset().filter(
+            id__in=[finding.id for finding in updated_findings],
+        )
+        response_serializer = FindingSerializer(
+            response_findings, many=True, context={"request": request},
+        )
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    @transaction.atomic
+    def _perform_bulk_update(self, request, items):
+        updated_findings = []
+        for item in items:
+            finding = item["id"]
+            # Per-item authorization mirrors a normal PATCH: require edit permission
+            # on each finding. check_object_permissions raises a 403 on the first
+            # failure and, because this whole method runs in one transaction, that
+            # 403 rolls back any updates already applied earlier in the batch.
+            self.check_object_permissions(request, finding)
+            for field, value in item.items():
+                if field == "id":
+                    continue
+                setattr(finding, field, value)
+            # The allowlisted fields never affect the dedupe hash or JIRA sync, so
+            # the expensive post-save processing is skipped for performance. The row
+            # is still UPDATEd, which fires the pghistory trigger, so audit history
+            # is recorded exactly as it is for a normal PATCH.
+            finding.save(
+                dedupe_option=False,
+                rules_option=False,
+                product_grading_option=False,
+                issue_updater_option=False,
+                push_to_jira=False,
+            )
+            updated_findings.append(finding)
+        return updated_findings
 
     @extend_schema(
         request=api_v2_serializers.ReportGenerateOptionSerializer,

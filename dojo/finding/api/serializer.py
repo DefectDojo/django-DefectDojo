@@ -687,6 +687,92 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         return value
 
 
+# Fields that may be changed through the bulk-update endpoint. Kept to an
+# explicit allowlist so the endpoint stays a narrow enrichment tool (EPSS / KEV
+# threat-intelligence metadata) and can never be used to mass-edit sensitive
+# finding attributes such as severity, status or ownership.
+BULK_UPDATE_ALLOWED_FIELDS = (
+    "epss_score",
+    "epss_percentile",
+    "known_exploited",
+    "ransomware_used",
+    "kev_date",
+)
+
+# Upper bound on the number of findings a single bulk request may touch. The
+# whole batch is applied in one transaction, so this caps the amount of work
+# (and the database lock footprint) of a single request.
+BULK_UPDATE_MAX_FINDINGS = 200
+
+
+class FindingBulkUpdateFieldsSerializer(serializers.ModelSerializer):
+
+    """
+    A single item in a bulk finding update: the target finding ``id`` plus any
+    subset of the allowlisted fields.
+
+    Unknown fields are rejected with a 400 so that typos, or attempts to update
+    non-allowlisted attributes, fail loudly instead of being silently ignored
+    (which is DRF's default behaviour).
+    """
+
+    id = serializers.PrimaryKeyRelatedField(queryset=Finding.objects.all())
+
+    class Meta:
+        model = Finding
+        fields = ("id", *BULK_UPDATE_ALLOWED_FIELDS)
+        # Every allowlisted field is optional; each item only sends what it changes.
+        extra_kwargs = {field: {"required": False} for field in BULK_UPDATE_ALLOWED_FIELDS}
+
+    def to_internal_value(self, data):
+        # Reject unknown keys before DRF drops them, so callers learn about
+        # mistakes instead of having part of their payload silently ignored.
+        if isinstance(data, dict):
+            unknown_fields = set(data) - set(self.fields)
+            if unknown_fields:
+                raise serializers.ValidationError({
+                    field: ["This field cannot be updated through the bulk endpoint."]
+                    for field in sorted(unknown_fields)
+                })
+        return super().to_internal_value(data)
+
+    def validate(self, data):
+        # Reject no-op items so callers get clear feedback instead of a write
+        # that silently changes nothing.
+        if not any(field in data for field in BULK_UPDATE_ALLOWED_FIELDS):
+            msg = f"Provide at least one field to update: {', '.join(BULK_UPDATE_ALLOWED_FIELDS)}."
+            raise serializers.ValidationError(msg)
+        return data
+
+
+class FindingBulkUpdateSerializer(serializers.Serializer):
+
+    """
+    Request body for ``PATCH /api/v2/findings/bulk/``.
+
+    Shape: ``{"findings": [{"id": 123, "epss_score": 0.42}, ...]}``.
+    """
+
+    findings = FindingBulkUpdateFieldsSerializer(many=True, allow_empty=False)
+
+    def validate_findings(self, value):
+        if len(value) > BULK_UPDATE_MAX_FINDINGS:
+            msg = (
+                f"A bulk update is limited to {BULK_UPDATE_MAX_FINDINGS} findings "
+                f"per request, but {len(value)} were provided."
+            )
+            raise serializers.ValidationError(msg)
+        # A finding listed twice would receive two conflicting updates in the
+        # same transaction; reject duplicates up front instead of silently
+        # letting the last item win.
+        ids = [item["id"].pk for item in value]
+        duplicates = sorted({finding_id for finding_id in ids if ids.count(finding_id) > 1})
+        if duplicates:
+            msg = f"Each finding may only appear once per bulk update. Duplicate ids: {duplicates}."
+            raise serializers.ValidationError(msg)
+        return value
+
+
 class FindingTemplateSerializer(serializers.ModelSerializer):
     vulnerability_ids = serializers.SerializerMethodField()
     endpoints = serializers.SerializerMethodField()
