@@ -51,6 +51,7 @@ mainSections = ["docs"]
     "get_started",
     "releases",
     "import_data",
+    "connections",
     "triage_findings",
     "metrics_reports",
     "admin",
