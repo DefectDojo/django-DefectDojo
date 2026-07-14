@@ -1393,10 +1393,6 @@ class Vulnerability_Id(models.Model):
             # Leading on vulnerability_id (the unique constraint's index leads on finding), for
             # GROUP BY vulnerability_id / lookups by exact id.
             models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
-        ]
-
-    class Meta:
-        indexes = [
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
                 SearchVector("vulnerability_id", weight="A", config="english"),
