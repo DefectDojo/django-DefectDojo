@@ -100,12 +100,17 @@ class SemgrepParser:
                 # manage CWE
                 if "cwe" in item["extra"]["metadata"]:
                     if isinstance(item["extra"]["metadata"].get("cwe"), list):
+                        cwe_list = item["extra"]["metadata"].get("cwe")
                         finding.cwe = int(
-                            item["extra"]["metadata"]
-                            .get("cwe")[0]
+                            cwe_list[0]
                             .partition(":")[0]
                             .partition("-")[2],
                         )
+                        # Persist the full list of CWEs via the Finding_CWE relation
+                        finding.unsaved_cwes = [
+                            int(cwe.partition(":")[0].partition("-")[2])
+                            for cwe in cwe_list
+                        ]
                     else:
                         finding.cwe = int(
                             item["extra"]["metadata"]
@@ -168,12 +173,17 @@ class SemgrepParser:
                 # manage CWE
                 if "cweIds" in item["advisory"]["references"]:
                     if isinstance(item["advisory"]["references"].get("cweIds"), list):
+                        cwe_ids = item["advisory"]["references"].get("cweIds")
                         finding.cwe = int(
-                            item["advisory"]["references"]
-                            .get("cweIds")[0]
+                            cwe_ids[0]
                             .partition(":")[0]
                             .partition("-")[2],
                         )
+                        # Persist the full list of CWEs via the Finding_CWE relation
+                        finding.unsaved_cwes = [
+                            int(cwe.partition(":")[0].partition("-")[2])
+                            for cwe in cwe_ids
+                        ]
                     else:
                         finding.cwe = int(
                             item["advisory"]["references"]

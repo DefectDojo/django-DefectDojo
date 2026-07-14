@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "uuid": "11111111-1111-1111-1111-111111111111",
+    "timestamp": "2026-01-01T00:00:00Z",
+    "projectName": "multi-cwe-project",
+    "scanType": "sast",
+    "format": "sast-xygeni",
+    "reportProperties": {
+      "tool.name": "Xygeni",
+      "tool.version": "6.7.0"
+    }
+  },
+  "rules": [],
+  "vulnerabilities": [
+    {
+      "detector": "python.multi_weakness_example",
+      "kind": "injection",
+      "severity": "high",
+      "location": {
+        "filepath": "app/handlers/multi.py",
+        "beginLine": 42,
+        "endLine": 42,
+        "code": "eval(request.GET['payload'])"
+      },
+      "language": "python",
+      "confidence": "high",
+      "cwes": [
+        "CWE-94",
+        "CWE-95"
+      ],
+      "tags": [
+        "CWE:94",
+        "CWE:95",
+        "in-app-code"
+      ],
+      "uniqueHash": "MULTI-CWE-HASH-1",
+      "cwe": 94,
+      "issueId": "SAS.injection.python.multi_weakness_example.app/handlers/multi.py.42",
+      "explanation": "Dynamic code execution from untrusted input allows arbitrary code injection."
+    },
+    {
+      "detector": "python.single_weakness_example",
+      "kind": "authentication",
+      "severity": "low",
+      "location": {
+        "filepath": "app/handlers/single.py",
+        "beginLine": 10,
+        "endLine": 10,
+        "code": "response.set_cookie('sid', sid)"
+      },
+      "language": "python",
+      "confidence": "high",
+      "cwes": [
+        "CWE-352"
+      ],
+      "tags": [
+        "CWE:352"
+      ],
+      "uniqueHash": "SINGLE-CWE-HASH-1",
+      "cwe": 352,
+      "issueId": "SAS.authentication.python.single_weakness_example.app/handlers/single.py.10",
+      "explanation": "State-changing request without CSRF protection."
+    }
+  ],
+  "errors": []
+}

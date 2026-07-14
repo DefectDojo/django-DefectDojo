@@ -922,8 +922,12 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.name)
 
                 endpoint_value = ""
-                for endpoint in finding.endpoints.all():
-                    endpoint_value += f"{endpoint}; "
+                if settings.V3_FEATURE_LOCATIONS:
+                    for location_ref in finding.locations.all():
+                        endpoint_value += f"{location_ref.location}; "
+                else:
+                    for endpoint in finding.endpoints.all():
+                        endpoint_value += f"{endpoint}; "
                 endpoint_value = endpoint_value.removesuffix("; ")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
@@ -1090,8 +1094,12 @@ class ExcelExportView(View):
                 col_num += 1
 
                 endpoint_value = ""
-                for endpoint in finding.endpoints.all():
-                    endpoint_value += f"{endpoint}; \n"
+                if settings.V3_FEATURE_LOCATIONS:
+                    for location_ref in finding.locations.all():
+                        endpoint_value += f"{location_ref.location}; \n"
+                else:
+                    for endpoint in finding.endpoints.all():
+                        endpoint_value += f"{endpoint}; \n"
                 endpoint_value = endpoint_value.removesuffix("; \n")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."

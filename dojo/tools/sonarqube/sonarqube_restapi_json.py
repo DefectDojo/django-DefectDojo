@@ -69,15 +69,17 @@ class SonarQubeRESTAPIJSON:
                     message = issue.get("message")
                     line = issue.get("line")
                     cwe = None
+                    cwes = []
                     try:
                         date = str(dateutil.parser.parse(issue.get("creationDate")).date())
                     except (ValueError, TypeError, dateutil.parser.ParserError):
                         date = timezone.now()
                     if "Category: CWE-" in message:
                         cwe_pattern = r"Category: CWE-\d{1,5}"
-                        cwes = re.findall(cwe_pattern, message)
+                        cwe_matches = re.findall(cwe_pattern, message)
+                        cwes = [match.split("Category: CWE-")[1] for match in cwe_matches]
                         if cwes:
-                            cwe = cwes[0].split("Category: CWE-")[1]
+                            cwe = cwes[0]
                     cvss = None
                     if "CVSS Score: " in message:
                         cvss_pattern = r"CVSS Score: \d{1}.\d{1}"
@@ -133,6 +135,8 @@ class SonarQubeRESTAPIJSON:
                         date=date,
                     )
                     item.unsaved_tags = ["vulnerability"]
+                    if cwes:
+                        item.unsaved_cwes = cwes
                     vulnids = []
                     if "Reference: CVE" in message:
                         cve_pattern = r"Reference: CVE-\d{4}-\d{4,7}"

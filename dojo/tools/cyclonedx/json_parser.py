@@ -134,13 +134,9 @@ class CycloneDXJSONParser:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
                 # if there is some CWE
                 cwes = vulnerability.get("cwes")
-                if cwes and len(cwes) > 1:
-                    # TODO: support more than one CWE
-                    LOGGER.debug(
-                        "more than one CWE for a finding %s. NOT supported by parser API", cwes,
-                    )
                 if cwes and len(cwes) > 0:
                     finding.cwe = cwes[0]
+                    finding.unsaved_cwes = cwes
                 # Check for mitigation
                 analysis = vulnerability.get("analysis")
                 if analysis:

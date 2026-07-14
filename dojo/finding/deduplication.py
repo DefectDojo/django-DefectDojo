@@ -340,11 +340,11 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
         queryset = Finding.objects.filter(scope_q)
 
     if settings.V3_FEATURE_LOCATIONS:
-        prefetch_list = ["locations__location__url", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["locations__location__url", "vulnerability_id_set", "finding_cwe_set", "found_by"]
     else:
         # TODO: Delete this after the move to Locations
         # Base prefetches for both modes
-        prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["endpoints", "vulnerability_id_set", "finding_cwe_set", "found_by"]
 
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)

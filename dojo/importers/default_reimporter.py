@@ -13,6 +13,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
@@ -320,7 +321,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 continue
             cleaned_findings.append(sanitized)
 
-        batch_finding_ids: list[int] = []
+        # Each entry carries the finding's own push_to_jira flag: grouped findings are pushed to
+        # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
+        # same batch must still be pushed. The batch is partitioned by flag at dispatch time
+        # instead of applying one finding's flag to the whole batch.
+        batch_finding_ids: list[tuple[int, bool]] = []
         batch_findings: list[Finding] = []
         # Findings that were newly created (else branch below) — pass these to
         # `apply_inherited_tags_for_findings` instead of `batch_findings` so
@@ -423,7 +428,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
-                    batch_finding_ids.append(finding.id)
+                    batch_finding_ids.append((finding.id, push_to_jira))
                     batch_findings.append(finding)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
@@ -460,24 +465,30 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         apply_inherited_tags_for_findings(new_findings_in_batch)
                         new_findings_in_batch.clear()
                         batch_findings.clear()
-                        finding_ids_batch = list(batch_finding_ids)
+                        # Partition the batch by each finding's own push_to_jira flag so one
+                        # finding's grouping state is not applied to the whole batch. Uniform
+                        # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
+                        finding_ids_by_push: dict[bool, list[int]] = {}
+                        for finding_id, finding_push_to_jira in batch_finding_ids:
+                            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(finding_id)
                         batch_finding_ids.clear()
-                        result = dojo_dispatch_task(
-                            finding_helper.post_process_findings_batch,
-                            finding_ids_batch,
-                            dedupe_option=True,
-                            rules_option=True,
-                            product_grading_option=True,
-                            issue_updater_option=True,
-                            push_to_jira=push_to_jira,
-                            jira_instance_id=getattr(self.jira_instance, "id", None),
-                            # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
-                            # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
-                            **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
-                            **self.post_processing_dispatch_kwargs(**kwargs),
-                        )
-                        if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
-                            self.record_post_processing_result(result)
+                        for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
+                            result = dojo_dispatch_task(
+                                finding_helper.post_process_findings_batch,
+                                finding_ids_batch,
+                                dedupe_option=True,
+                                rules_option=True,
+                                product_grading_option=True,
+                                issue_updater_option=True,
+                                push_to_jira=push_to_jira_batch,
+                                jira_instance_id=getattr(self.jira_instance, "id", None),
+                                # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                                # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                                **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
+                                **self.post_processing_dispatch_kwargs(**kwargs),
+                            )
+                            if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+                                self.record_post_processing_result(result)
 
         # No chord: tasks are dispatched immediately above per batch
 
@@ -975,6 +986,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
+        # Reconcile CWEs independently of the vulnerability_ids early-exit below (CWEs may change
+        # while vulnerability_ids do not, and vice versa).
+        self.reconcile_cwes(finding)
+
         # Use prefetched data directly without triggering queries
         existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
         new_vuln_ids = set(vulnerability_ids_to_process)
@@ -990,7 +1005,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Accumulate delete + insert for batch flush
         self.pending_vuln_id_deletes.append(finding.id)
         self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
             for vid in vulnerability_ids_to_process
         ])
         if vulnerability_ids_to_process:

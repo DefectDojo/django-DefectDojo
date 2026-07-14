@@ -123,10 +123,10 @@ class TestIntermediateFlushHook(DojoTestCase):
     @override_settings(WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE=2)
     def test_ad_hoc_context_manager_does_not_drain(self):
         """
-        The flush wrapper is bound to the global singleton instance only. An ad-hoc
-        SearchContextManager -- e.g. the one update_watson_search_index_for_model builds to
-        index its own batch -- keeps the stock add_to_context and must NOT drain, or it would
-        dispatch a clone of itself and loop forever (queue ~0, worker pegged, nothing indexed).
+        The intermediate flush is a request-path optimization on the global singleton. An
+        ad-hoc SearchContextManager -- e.g. the one update_watson_search_index_for_model builds to
+        index its own batch -- must NOT drain, or it would dispatch a clone of itself and loop
+        forever (queue ~0, worker pegged, nothing indexed).
         """
         adhoc = SearchContextManager()
         adhoc.start()

@@ -7,6 +7,8 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.db.models import OuterRef, Value
+from django.db.models.functions import Coalesce
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.shortcuts import render
 from django.utils import timezone
@@ -49,6 +51,8 @@ from dojo.finding.ui.filters import (
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.jira import services as jira_services
 from dojo.labels import get_labels
+from dojo.location.models import LocationFindingReference, LocationProductReference
+from dojo.location.status import FindingLocationStatus
 from dojo.models import (
     App_Analysis,
     Dojo_User,
@@ -71,6 +75,7 @@ from dojo.product.queries import (
     get_authorized_languages,
     get_authorized_products,
 )
+from dojo.query_utils import build_count_subquery
 from dojo.reports.ui.views import (
     CSVExportView,
     ExcelExportView,
@@ -78,6 +83,7 @@ from dojo.reports.ui.views import (
     report_url_resolver,
 )
 from dojo.test.queries import get_authorized_tests
+from dojo.url.models import URL
 from dojo.user.utils import get_configuration_permissions_codenames
 from dojo.utils import (
     get_celery_queue_details,
@@ -276,11 +282,13 @@ class DojoMetaViewSet(
         """Fetch parent objects and verify the user has the required permissions."""
         data = request.data
         parents = {}
-        for field, (model, permission) in permission_map.items():
-            obj = model.objects.filter(id=data.get(field)).first()
-            if obj:
-                user_has_permission_or_403(request.user, obj, permission)
-            parents[field] = obj
+        # TODO: Delete this after the move to Locations
+        with Endpoint.allow_endpoint_init():
+            for field, (model, permission) in permission_map.items():
+                obj = model.objects.filter(id=data.get(field)).first()
+                if obj:
+                    user_has_permission_or_403(request.user, obj, permission)
+                parents[field] = obj
         return parents
 
     def process_post(self, request):
@@ -534,6 +542,29 @@ from dojo.note_type.api.views import NoteTypeViewSet  # noqa: E402, F401
 from dojo.notes.api.views import NotesViewSet  # noqa: E402, F401
 
 
+def _report_url_location_refs(product):
+    """
+    URL LocationProductReferences for a product, shaped for V3EndpointCompatibleSerializer.
+
+    Mirrors V3EndpointCompatibleViewSet.get_queryset so the report's ``endpoints`` field matches
+    the V3 ``/endpoints`` route. Non-URL locations (e.g. dependencies) are excluded because the
+    compat serializer only understands URL-backed locations.
+    """
+    active_finding_subquery = build_count_subquery(
+        LocationFindingReference.objects.filter(
+            location=OuterRef("location"),
+            status=FindingLocationStatus.Active,
+        ),
+        group_field="location",
+    )
+    return LocationProductReference.objects.filter(
+        product=product,
+        location__location_type=URL.LOCATION_TYPE,
+    ).annotate(
+        active_finding_count=Coalesce(active_finding_subquery, Value(0)),
+    ).distinct()
+
+
 def report_generate(request, obj, options):
     user = Dojo_User.objects.get(id=request.user.id)
     product_type = None
@@ -626,10 +657,14 @@ def report_generate(request, obj, options):
                 Finding.objects.filter(test__engagement__product=product),
             ),
         )
-        ids = get_endpoint_ids(
-            Endpoint.objects.filter(product=product).distinct(),
-        )
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = _report_url_location_refs(product)
+        else:
+            # TODO: Delete this after the move to Locations
+            ids = get_endpoint_ids(
+                Endpoint.objects.filter(product=product).distinct(),
+            )
+            endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Engagement":
         engagement = obj
@@ -644,11 +679,14 @@ def report_generate(request, obj, options):
         )
         report_name = "Engagement Report: " + str(engagement)
 
-        ids = set(finding.id for finding in findings.qs)  # noqa: C401
-        ids = get_endpoint_ids(
-            Endpoint.objects.filter(product=engagement.product).distinct(),
-        )
-        endpoints = Endpoint.objects.filter(id__in=ids)
+        if settings.V3_FEATURE_LOCATIONS:
+            endpoints = _report_url_location_refs(engagement.product)
+        else:
+            # TODO: Delete this after the move to Locations
+            ids = get_endpoint_ids(
+                Endpoint.objects.filter(product=engagement.product).distinct(),
+            )
+            endpoints = Endpoint.objects.filter(id__in=ids)
 
     elif type(obj).__name__ == "Test":
         test = obj
