@@ -392,10 +392,10 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=184,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=143,
-            expected_num_async_tasks2=3,
+            expected_num_queries1=182,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=141,
+            expected_num_async_tasks2=4,
             expected_num_queries3=46,
             expected_num_async_tasks3=3,
             expected_num_queries4=107,
@@ -719,10 +719,10 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=196,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=157,
-            expected_num_async_tasks2=3,
+            expected_num_queries1=194,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=155,
+            expected_num_async_tasks2=4,
             expected_num_queries3=56,
             expected_num_async_tasks3=3,
             expected_num_queries4=111,
