@@ -9,11 +9,6 @@
   weight = 12
 
 [[main]]
-  name = "Connections"
-  url = "/connections/about_connections/"
-  weight = 12
-
-[[main]]
   name = "Triage Findings"
   url = "/triage_findings/findings_workflows/intro_to_findings/"
   weight = 12
@@ -22,6 +17,11 @@
   name = "Model Your Assets"
   url = "/asset_modelling/engagements_tests/os__assets/"
   weight = 13
+
+[[main]]
+  name = "Connections"
+  url = "/connections/about_connections/"
+  weight = 12
 
 [[main]]
   name = "Metrics & Reports"
