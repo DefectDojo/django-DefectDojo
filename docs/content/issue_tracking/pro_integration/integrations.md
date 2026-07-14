@@ -19,6 +19,7 @@ Supported Integrations:
 - ServiceDesk Plus
 - ServiceNow
 - Shortcut
+- Zendesk
 
 ## Opening the Integrations page
 
@@ -82,6 +83,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)
 - [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)
 - [Shortcut](/issue_tracking/pro_integration/integrations_toolreference/#shortcut)
+- [Zendesk](/issue_tracking/pro_integration/integrations_toolreference/#zendesk)
 
 ## Error Handling and Debugging
 
