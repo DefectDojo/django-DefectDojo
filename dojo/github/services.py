@@ -1,6 +1,7 @@
 import logging
 import sys
 
+from django.conf import settings
 from django.template.loader import render_to_string
 from github import Auth, Github
 
@@ -160,4 +161,5 @@ def github_body(find):
     template = "issue-trackers/jira_full/jira-description.tpl"
     kwargs = {}
     kwargs["finding"] = find
+    kwargs["V3_FEATURE_LOCATIONS"] = settings.V3_FEATURE_LOCATIONS
     return render_to_string(template, kwargs)

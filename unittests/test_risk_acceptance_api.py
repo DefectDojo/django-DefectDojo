@@ -374,6 +374,92 @@ class TestRiskAcceptanceApi(APITestCase):
         self.assertEqual(403, response.status_code, response.content)
         self.assertIn("multiple engagements", str(response.data))
 
+    def test_update_expired_risk_acceptance_reinstates_findings(self):
+        """
+        Regression test for the serializer update() reinstate bug.
+
+        Extending an expired risk acceptance's expiration_date via the API must call
+        ra_helper.reinstate(): its accepted findings are set back to inactive/risk-accepted
+        and expiration_date_handled is cleared so the Celery expiry task re-processes it.
+        """
+        past_date = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=5)
+        ra = Risk_Acceptance.objects.create(
+            name="Expired RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+            expiration_date=past_date,
+            expiration_date_handled=past_date,
+        )
+        ra.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(ra)
+
+        # Simulate the post-expiry state: the expiry job already reactivated the finding
+        self.finding_a1.active = True
+        self.finding_a1.risk_accepted = False
+        self.finding_a1.save()
+
+        future_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+        payload = {
+            "expiration_date": future_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "accepted_findings": [self.finding_a1.id],
+        }
+
+        response = self.client.patch(f"{self.url}{ra.id}/", payload, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        # Finding is reinstated (only reinstate() flips these back)
+        self.finding_a1.refresh_from_db()
+        self.assertFalse(self.finding_a1.active)
+        self.assertTrue(self.finding_a1.risk_accepted)
+
+        # Flags cleared so the RA is eligible for the next Celery expiry cycle
+        ra.refresh_from_db()
+        self.assertIsNone(ra.expiration_date_handled)
+        self.assertIsNone(ra.expiration_date_warned)
+
+    def test_update_never_expired_risk_acceptance_leaves_findings_unchanged(self):
+        """
+        Regression test companion: editing the expiration_date of a risk acceptance that
+        never expired must not disturb its findings, and expiration_date_handled stays None.
+        """
+        old_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30)
+        ra = Risk_Acceptance.objects.create(
+            name="Active RA",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+            expiration_date=old_date,
+        )
+        ra.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(ra)
+
+        # Normal accepted state for a live risk acceptance
+        self.finding_a1.active = False
+        self.finding_a1.risk_accepted = True
+        self.finding_a1.save()
+
+        new_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=60)
+        payload = {
+            "expiration_date": new_date.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "accepted_findings": [self.finding_a1.id],
+        }
+
+        response = self.client.patch(f"{self.url}{ra.id}/", payload, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        # Findings untouched
+        self.finding_a1.refresh_from_db()
+        self.assertFalse(self.finding_a1.active)
+        self.assertTrue(self.finding_a1.risk_accepted)
+
+        # Never handled, so it stays None
+        ra.refresh_from_db()
+        self.assertIsNone(ra.expiration_date_handled)
+        self.assertIsNone(ra.expiration_date_warned)
+
     def test_risk_acceptance_created_filter(self):
         # 1. Create a baseline Risk Acceptance using the existing test setup
         risk_acceptance = self.create_risk_acceptance()

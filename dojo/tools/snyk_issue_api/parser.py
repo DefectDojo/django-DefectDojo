@@ -262,6 +262,10 @@ class SnykIssueApiParser:
             risk_accepted=False,
         )
 
+        # Persist the full list of CWEs via the Finding_CWE relation
+        if cwes:
+            finding.unsaved_cwes = cwes
+
         # sca only
         if attributes.get("key"):
             finding.vuln_id_from_tool = attributes.get("key")

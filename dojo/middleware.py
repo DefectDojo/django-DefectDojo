@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from threading import local
 from urllib.parse import quote
 
@@ -317,35 +317,75 @@ def _drain_search_context_to_async(objects, source):
         objects.discard(entry)
 
 
+@contextmanager
+def watson_search_context_for_task():
+    """
+    Batch watson index updates for saves that happen inside a Celery task.
+
+    Celery workers serve no HTTP request, so ``AsyncSearchContextMiddleware`` never runs
+    and no watson ``search_context`` is active while the task executes. Without an active
+    context, django-watson's ``post_save`` receiver indexes every saved object
+    synchronously — one DELETE + INSERT into ``watson_searchentry`` per object. A bulk
+    import running in a worker (Pro's ``AsyncImporter``) then re-indexes findings one at a
+    time, flooding the DB with thousands of index writes.
+
+    Opening a search_context around the task makes those saves accumulate and drain in
+    ``WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE``-sized async batches on exit, exactly like the
+    request path does via ``AsyncSearchContextMiddleware``. Wire it in through
+    ``CELERY_TASK_CONTEXT_MANAGERS`` so ``PluggableContextTask`` enters it around every
+    task. An empty context (a task that saved no indexed models) drains to nothing, so this
+    is a cheap no-op for tasks that do not touch registered models.
+    """
+    search_context_manager.start()
+    try:
+        yield
+    finally:
+        # Drain accumulated objects to async batched index-update tasks, then end the
+        # (now-empty) context so watson's bulk-save short-circuits — mirrors
+        # AsyncSearchContextMiddleware._close_search_context for the request path.
+        if search_context_manager.is_active():
+            objects, _is_invalid = search_context_manager._stack[-1]
+            _drain_search_context_to_async(objects, source="watson_search_context_for_task")
+        search_context_manager.end()
+
+
 def install_intermediate_flush_hook():
     """
-    Wrap `watson.search.search_context_manager.add_to_context` with a
-    size-based flush. Once the per-request set reaches
+    Wrap `add_to_context` on the module-global `watson.search.search_context_manager`
+    with a size-based flush. Once the shared accumulation set reaches
     `WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE`, drain it into async tasks
     and clear it in place. Bounds memory on long-running requests
     (large imports) and starts celery batches earlier instead of
     dispatching all at end-of-request.
 
+    The wrapper is bound to the singleton INSTANCE, not the class: only the shared
+    request/task accumulation context batches. A throwaway local SearchContextManager
+    — e.g. the one update_watson_search_index_for_model builds to index one
+    already-bounded batch — keeps the stock method and indexes its own batch on
+    end(). If local contexts flushed too, that index task would re-dispatch itself
+    for the same batch (infinite recursion under eager celery / re-dispatch loop on
+    a worker). watson's post_save always adds to the module-global instance, so the
+    singleton is the only place the flush is needed.
+
     Idempotent — safe to call multiple times.
     Setting WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE to 0 or below disables
     the hook at runtime.
     """
-    cls = search_context_manager.__class__
-    if getattr(cls, "_dd_intermediate_flush_installed", False):
+    if getattr(search_context_manager, "_dd_intermediate_flush_installed", False):
         return
 
-    original_add = cls.add_to_context
+    original_add = search_context_manager.add_to_context  # bound method
 
-    def add_to_context_with_flush(self, engine, obj):
-        original_add(self, engine, obj)
+    def add_to_context_with_flush(engine, obj):
+        original_add(engine, obj)
         threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
-        if threshold <= 0 or not self._stack:
+        if threshold <= 0 or not search_context_manager._stack:
             return
-        objects, is_invalid = self._stack[-1]
+        objects, is_invalid = search_context_manager._stack[-1]
         if is_invalid or len(objects) < threshold:
             return
         _drain_search_context_to_async(objects, source="AsyncSearchContextMiddleware[intermediate]")
 
-    cls.add_to_context = add_to_context_with_flush
-    cls._dd_intermediate_flush_installed = True
-    logger.debug("AsyncSearchContextMiddleware: intermediate flush hook installed on %s", cls.__name__)
+    search_context_manager.add_to_context = add_to_context_with_flush
+    search_context_manager._dd_intermediate_flush_installed = True
+    logger.debug("AsyncSearchContextMiddleware: intermediate flush hook installed on the global search_context_manager")

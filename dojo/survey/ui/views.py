@@ -818,6 +818,10 @@ def engagement_empty_survey(request, esid):
         if form.is_valid():
             product = form.cleaned_data.get("product")
             user_has_permission_or_403(request.user, product, "add")
+            # If the questionnaire is already linked to an engagement, make sure
+            # the user can edit that source engagement before moving its answers.
+            if survey.engagement:
+                user_has_permission_or_403(request.user, survey.engagement, "edit")
             engagement = Engagement(
                 product_id=product.id,
                 target_start=tz.now().date(),

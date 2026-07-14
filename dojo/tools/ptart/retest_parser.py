@@ -91,6 +91,9 @@ class PTARTRetestParser:
             finding.unsaved_tags = original_hit["labels"]
 
         finding.cwe = ptart_tools.parse_cwe_from_hit(original_hit)
+        unsaved_cwes = ptart_tools.parse_cwes_from_hit(original_hit)
+        if unsaved_cwes:
+            finding.unsaved_cwes = unsaved_cwes
 
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations = ptart_tools.parse_locations_from_hit(original_hit)

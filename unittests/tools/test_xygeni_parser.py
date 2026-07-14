@@ -85,6 +85,30 @@ class TestXygeniParser(DojoTestCase):
             "the detector is the shared, non-unique grouping id",
         )
 
+    def test_sast_multi_cwe_populates_unsaved_cwes(self):
+        # A SAST finding carrying several CWEs keeps the first as Finding.cwe (the primary)
+        # and exposes the full list via Finding.unsaved_cwes, which the import pipeline
+        # persists into the Finding_CWE relation.
+        with self._load("sast_multi_cwe_fabricated.json") as testfile:
+            findings = XygeniParser().get_findings(testfile, Test())
+
+        multi = next(
+            (f for f in findings if f.unique_id_from_tool == "MULTI-CWE-HASH-1"),
+            None,
+        )
+        self.assertIsNotNone(multi, "expected the multi-CWE SAST finding by uniqueHash")
+        self.assertEqual(94, multi.cwe, "primary cwe stays the first/numeric cwe")
+        self.assertEqual([94, 95], multi.unsaved_cwes, "full CWE list is surfaced")
+
+        # A single-CWE finding still gets a one-element unsaved_cwes list.
+        single = next(
+            (f for f in findings if f.unique_id_from_tool == "SINGLE-CWE-HASH-1"),
+            None,
+        )
+        self.assertIsNotNone(single, "expected the single-CWE SAST finding by uniqueHash")
+        self.assertEqual(352, single.cwe)
+        self.assertEqual([352], single.unsaved_cwes)
+
     def test_sca_many_findings(self):
         with self._load("sca_many_findings.json") as testfile:
             findings = XygeniParser().get_findings(testfile, Test())
@@ -115,6 +139,25 @@ class TestXygeniParser(DojoTestCase):
         self.assertIn("0.7.0", match.mitigation)
         # overallCvssScore = -1.0 in this fixture → must be dropped, not surfaced
         self.assertIsNone(match.cvssv3_score)
+
+    def test_sca_multi_cwe_populates_unsaved_cwes(self):
+        # The dot-prop@4.2.0 / CVE-2020-8116 advisory carries two CWEs. The first stays the
+        # primary Finding.cwe; the full list is surfaced via Finding.unsaved_cwes.
+        with self._load("sca_many_findings.json") as testfile:
+            findings = XygeniParser().get_findings(testfile, Test())
+
+        match = next(
+            (
+                f for f in findings
+                if f.component_name == "dot-prop"
+                and f.component_version == "4.2.0"
+                and f.vuln_id_from_tool == "CVE-2020-8116"
+            ),
+            None,
+        )
+        self.assertIsNotNone(match, "expected the dot-prop@4.2.0 / CVE-2020-8116 SCA finding")
+        self.assertEqual(1321, match.cwe, "primary cwe is the first CWE in the list")
+        self.assertEqual([1321, 471], match.unsaved_cwes)
 
     def test_secrets_many_findings(self):
         with self._load("secrets_many_findings.json") as testfile:

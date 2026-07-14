@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bom xmlns="http://cyclonedx.org/schema/bom/1.4" serialNumber="urn:uuid:272fe4b7-83a4-4a0f-b235-3b82e833c0e9" version="1">
+  <metadata>
+    <timestamp>2022-07-22T09:45:22+01:00</timestamp>
+    <tools>
+      <tool>
+        <vendor>anchore</vendor>
+        <name>grype</name>
+        <version>0.41.0</version>
+      </tool>
+    </tools>
+    <component type="file">
+      <name>./example</name>
+    </component>
+  </metadata>
+  <components>
+    <component bom-ref="pkg:maven/org.example/example@1.0.0?package-id=abcdef0123456789" type="library">
+      <name>example</name>
+      <version>1.0.0</version>
+      <purl>pkg:maven/org.example/example@1.0.0</purl>
+    </component>
+  </components>
+  <vulnerabilities>
+    <vulnerability>
+      <id>CVE-2021-99999</id>
+      <source>
+        <name>nvd:cpe</name>
+        <url>http://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-99999</url>
+      </source>
+      <ratings>
+        <rating>
+          <severity>critical</severity>
+        </rating>
+        <rating>
+          <score>10</score>
+          <method>CVSSv31</method>
+          <vector>CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H</vector>
+        </rating>
+      </ratings>
+      <cwes>
+        <cwe>79</cwe>
+        <cwe>89</cwe>
+      </cwes>
+      <description>Example vulnerability with more than one CWE.</description>
+      <affects>
+        <target>
+          <ref>pkg:maven/org.example/example@1.0.0?package-id=abcdef0123456789</ref>
+        </target>
+      </affects>
+    </vulnerability>
+  </vulnerabilities>
+</bom>

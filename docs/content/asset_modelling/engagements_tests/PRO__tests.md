@@ -35,7 +35,7 @@ While each method differs primarily in how scan data is parsed and ingested, the
 
 When no native parser exists for a given tool, [**Generic Findings Import**](/supported_tools/parsers/generic_findings_import) allows you to import findings using a standardized JSON or CSV schema, regardless of the original source. 
 
-DefectDojo parses the provided data, creates a new Test (or imports into an existing one), and attaches the Findings. A corresponding Test Type is also created in the format “`{Test Name}` (Generic Findings Import).”
+DefectDojo parses the provided data, creates a new Test (or imports into an existing one), and attaches the Findings. A corresponding Test Type is also created based on the report's optional `type` field: when `type` is omitted (or equals the scan type) the Test Type is “Generic Findings Import”; when `type` is provided it becomes “`{type}` Scan (Generic Findings Import)” (a `type` that already ends with the “(Generic Findings Import)” suffix is used verbatim).
 
 #### Universal Parser 
 

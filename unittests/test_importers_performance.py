@@ -345,9 +345,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self._import_reimport_performance(
             expected_num_queries1=157,
             expected_num_async_tasks1=2,
-            expected_num_queries2=122,
+            expected_num_queries2=124,
             expected_num_async_tasks2=1,
-            expected_num_queries3=29,
+            expected_num_queries3=30,
             expected_num_async_tasks3=1,
             expected_num_queries4=106,
             expected_num_async_tasks4=0,
@@ -367,11 +367,11 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=175,
+            expected_num_queries1=176,
             expected_num_async_tasks1=2,
-            expected_num_queries2=131,
+            expected_num_queries2=134,
             expected_num_async_tasks2=1,
-            expected_num_queries3=38,
+            expected_num_queries3=40,
             expected_num_async_tasks3=1,
             expected_num_queries4=106,
             expected_num_async_tasks4=0,
@@ -392,14 +392,14 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=187,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=143,
-            expected_num_async_tasks2=3,
-            expected_num_queries3=47,
+            expected_num_queries1=186,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=144,
+            expected_num_async_tasks2=4,
+            expected_num_queries3=49,
             expected_num_async_tasks3=3,
-            expected_num_queries4=117,
-            expected_num_async_tasks4=2,
+            expected_num_queries4=115,
+            expected_num_async_tasks4=3,
         )
 
     # Deduplication is enabled in the tests above, but to properly test it we must run the same import twice and capture the results.
@@ -547,9 +547,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=111,
+            expected_num_queries1=112,
             expected_num_async_tasks1=2,
-            expected_num_queries2=92,
+            expected_num_queries2=93,
             expected_num_async_tasks2=2,
         )
 
@@ -672,9 +672,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self._import_reimport_performance(
             expected_num_queries1=164,
             expected_num_async_tasks1=2,
-            expected_num_queries2=131,
+            expected_num_queries2=133,
             expected_num_async_tasks2=1,
-            expected_num_queries3=37,
+            expected_num_queries3=38,
             expected_num_async_tasks3=1,
             expected_num_queries4=107,
             expected_num_async_tasks4=0,
@@ -694,11 +694,11 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=184,
+            expected_num_queries1=185,
             expected_num_async_tasks1=2,
-            expected_num_queries2=142,
+            expected_num_queries2=145,
             expected_num_async_tasks2=1,
-            expected_num_queries3=48,
+            expected_num_queries3=50,
             expected_num_async_tasks3=1,
             expected_num_queries4=107,
             expected_num_async_tasks4=0,
@@ -719,14 +719,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=199,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=157,
-            expected_num_async_tasks2=3,
-            expected_num_queries3=57,
+            expected_num_queries1=198,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=158,
+            expected_num_async_tasks2=4,
+            expected_num_queries3=59,
             expected_num_async_tasks3=3,
-            expected_num_queries4=121,
-            expected_num_async_tasks4=2,
+            expected_num_queries4=119,
+            expected_num_async_tasks4=3,
         )
 
     def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
@@ -846,8 +846,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=120,
+            expected_num_queries1=121,
             expected_num_async_tasks1=2,
-            expected_num_queries2=203,
+            expected_num_queries2=204,
             expected_num_async_tasks2=2,
         )

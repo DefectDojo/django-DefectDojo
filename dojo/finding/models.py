@@ -10,6 +10,8 @@ import dateutil
 from dateutil.parser import parse as datetutilsparse
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.urls import reverse
@@ -22,6 +24,8 @@ from tagulous.models import TagField
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
+from dojo.finding.cwe import cwe_label, finding_cwe_labels
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and
@@ -34,6 +38,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+DELETE_JIRA_SYNC_UNSET = object()
 
 
 class Finding(BaseModel):
@@ -441,6 +446,14 @@ class Finding(BaseModel):
     class Meta:
         ordering = ("numerical_severity", "-date", "title", "epss_score", "epss_percentile")
         indexes = [
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("title", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_finding_fts_gin",
+            ),
+            GinIndex(fields=["title"], opclasses=["gin_trgm_ops"], name="dojo_finding_title_trgm"),
+
             models.Index(fields=["test", "active", "verified"]),
 
             models.Index(fields=["test", "is_mitigated"]),
@@ -534,6 +547,9 @@ class Finding(BaseModel):
         self.unsaved_tags = None
         self.unsaved_files = None
         self.unsaved_vulnerability_ids = None
+        # Extra CWE numbers a parser wants to attach in addition to the primary self.cwe.
+        # Persisted as Finding_CWE rows (multiple CWEs per finding). None = none supplied.
+        self.unsaved_cwes = None
 
     def __str__(self):
         return self.title
@@ -689,13 +705,18 @@ class Finding(BaseModel):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
+        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util)
+        for vulnerability_id in self.vulnerability_id_set.all():
+            Vulnerability_Id.objects.create(finding=copy, vulnerability_id=vulnerability_id.vulnerability_id)
+        for finding_cwe in self.finding_cwe_set.all():
+            Finding_CWE.objects.create(finding=copy, cwe=finding_cwe.cwe)
 
         return copy
 
-    def delete(self, *args, product_grading_option=True, **kwargs):
+    def delete(self, *args, product_grading_option=True, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
-        finding_helper.finding_delete(self)
+        finding_helper.finding_delete(self, push_to_jira=push_to_jira)
         super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
@@ -778,6 +799,11 @@ class Finding(BaseModel):
                 my_vulnerability_ids = self.get_vulnerability_ids()
                 fields_to_hash += my_vulnerability_ids
                 deduplicationLogger.debug(hashcodeField + " : " + my_vulnerability_ids)
+            elif hashcodeField == "cwes":
+                # For the CWE set (primary cwe + additional CWEs), need to compute the field
+                my_cwes = self.get_cwes()
+                fields_to_hash += my_cwes
+                deduplicationLogger.debug(hashcodeField + " : " + my_cwes)
             else:
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
                 fields_to_hash += str(getattr(self, hashcodeField))
@@ -822,6 +848,28 @@ class Finding(BaseModel):
             return ""
 
         return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
+
+    # Get CWEs (canonical CWE-<n> labels) to use for hash_code computation.
+    # Mirrors get_vulnerability_ids: the saved path reads the reverse relation directly (never the
+    # cached `cwes` property, which could be stale if accessed before the rows were written), and
+    # falls back to the unsaved values before the finding is saved. save_cwes persists the primary
+    # self.cwe as a Finding_CWE row too, so finding_cwe_set already carries the full set.
+    def get_cwes(self):
+
+        def _get_unsaved_cwes(finding) -> str:
+            # primary self.cwe + any unsaved extra CWEs, canonical CWE-<n>, deduplicated
+            labels = finding_cwe_labels(finding.cwe, finding.unsaved_cwes)
+            return "".join(sorted(labels))
+
+        def _get_saved_cwes(finding) -> str:
+            if finding.id is not None:
+                # Use the reverse relation (finding_cwe_set) rather than the cached `cwes` property
+                # so prefetch is honored and a stale cached value can never corrupt the hash.
+                labels = [row.cwe for row in finding.finding_cwe_set.all()]
+                return "".join(sorted(labels))
+            return ""
+
+        return _get_saved_cwes(self) or _get_unsaved_cwes(self)
 
     # Get locations/endpoints to use for hash_code computation
     def get_locations(self):
@@ -1343,6 +1391,19 @@ class Finding(BaseModel):
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
 
+    @cached_property
+    def cwes(self):
+        # All CWEs for this finding in canonical CWE-<n> form: the additional Finding_CWE rows
+        # (already stored as CWE-<n> strings) with the primary self.cwe first, deduplicated.
+        # The single primary `cwe` field is merged in for backward compatibility, exactly as the
+        # `cve` field is merged into `vulnerability_ids`. We keep both fields to stay flexible
+        # until the single `cwe` field is not needed anymore and can be removed.
+        labels = [row.cwe for row in self.finding_cwe_set.all()]
+        primary = cwe_label(self.cwe)
+        if primary is not None:
+            labels.insert(0, primary)
+        return list(dict.fromkeys(label for label in labels if label))
+
     @property
     def violates_sla(self):
         return (self.sla_expiration_date and self.sla_expiration_date < timezone.now().date())
@@ -1366,9 +1427,56 @@ class Finding(BaseModel):
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    # Autodetected from the id prefix (CVE, GHSA, ...); NULL when there is no non-numeric
+    # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
+    vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
+        ]
+        indexes = [
+            # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
+            # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
+            models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("vulnerability_id", weight="A", config="english"),
+                name="dojo_vulnerability_id_fts_gin",
+            ),
+            GinIndex(fields=["vulnerability_id"], opclasses=["gin_trgm_ops"], name="dojo_vuln_id_trgm"),
+        ]
 
     def __str__(self):
         return self.vulnerability_id
+
+    def save(self, *args, **kwargs):
+        # bulk_create paths set the type at construction; this covers save()/get_or_create.
+        self.vulnerability_id_type = resolve_vulnerability_id_type(self.vulnerability_id)
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("view_finding", args=[str(self.finding.id)])
+
+
+class Finding_CWE(models.Model):
+    # A CWE weakness associated with a finding. Separate from Vulnerability_Id because a CWE is a
+    # weakness class, not a vulnerability instance identifier — it must not participate in
+    # hash_code, vulnerability-id deduplication, or the cve field. Stored as the canonical
+    # ``CWE-<n>`` string (mirrors Vulnerability_Id.vulnerability_id). The primary CWE also stays on
+    # the legacy int Finding.cwe; this relation lets a finding carry multiple CWEs.
+    finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
+    # "CWE-<n>": 4 for the "CWE-" prefix + up to 7 digits (CWE-9999999) — far beyond the current
+    # max (~CWE-1428) yet tight. (Postgres varchar(n) is a length bound, not a storage cost.)
+    cwe = models.CharField(max_length=11, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "cwe"], name="unique_finding_cwe"),
+        ]
+
+    def __str__(self):
+        return self.cwe
 
     def get_absolute_url(self):
         return reverse("view_finding", args=[str(self.finding.id)])
@@ -1506,6 +1614,15 @@ class Finding_Template(models.Model):
 
     class Meta:
         ordering = ["-cwe"]
+        indexes = [
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("title", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_finding_template_fts_gin",
+            ),
+            GinIndex(fields=["title"], opclasses=["gin_trgm_ops"], name="dojo_findtmpl_title_trgm"),
+        ]
 
     def __str__(self):
         return self.title

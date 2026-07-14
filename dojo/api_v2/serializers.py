@@ -254,12 +254,6 @@ class MetaMainSerializer(serializers.Serializer):
         default=None,
         allow_null=True,
     )
-    endpoint = serializers.PrimaryKeyRelatedField(
-        queryset=Endpoint.objects.all(),
-        required=False,
-        default=None,
-        allow_null=True,
-    )
     finding = serializers.PrimaryKeyRelatedField(
         queryset=Finding.objects.all(),
         required=False,
@@ -267,6 +261,17 @@ class MetaMainSerializer(serializers.Serializer):
         allow_null=True,
     )
     metadata = MetadataSerializer(many=True)
+
+    # TODO: Delete this after the move to Locations
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not settings.V3_FEATURE_LOCATIONS:
+            self.fields["endpoint"] = serializers.PrimaryKeyRelatedField(
+                queryset=Endpoint.objects.all(),
+                required=False,
+                default=None,
+                allow_null=True,
+            )
 
     def validate(self, data):
         product_id = data.get("product", None)
@@ -998,10 +1003,22 @@ class AddNewFileOptionSerializer(serializers.ModelSerializer):
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
+    REPORT_TYPE_CHOICES = (
+        ("JSON", "JSON"),
+        ("HTML", "HTML"),
+        ("CSV", "CSV"),
+        ("Excel", "Excel"),
+    )
+
     include_finding_notes = serializers.BooleanField(default=False)
     include_finding_images = serializers.BooleanField(default=False)
     include_executive_summary = serializers.BooleanField(default=False)
     include_table_of_contents = serializers.BooleanField(default=False)
+    report_type = serializers.ChoiceField(
+        choices=REPORT_TYPE_CHOICES,
+        default="JSON",
+        help_text="Format for the generated report.",
+    )
 
 
 class ExecutiveSummarySerializer(serializers.Serializer):
@@ -1052,7 +1069,6 @@ class ReportGenerateSerializer(serializers.Serializer):
     report_info = serializers.CharField(max_length=200)
     test = TestSerializer(many=False, read_only=True)
     endpoint = EndpointSerializer(many=False, read_only=True)
-    endpoints = EndpointSerializer(many=True, read_only=True)
     findings = FindingSerializer(many=True, read_only=True)
     user = UserStubSerializer(many=False, read_only=True)
     team_name = serializers.CharField(max_length=200)
@@ -1062,6 +1078,22 @@ class ReportGenerateSerializer(serializers.Serializer):
     finding_notes = FindingToNotesSerializer(
         many=True, allow_null=True, required=False,
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Locations are the default under V3; V3EndpointCompatibleSerializer presents them with the
+        # same endpoint-compatible shape the V3 /endpoints route uses. Legacy Endpoints are the
+        # V2-only exception. The lazy import avoids a circular import: endpoint_compat imports this
+        # module (and its viewset references ReportGenerateSerializer in @extend_schema at
+        # class-definition time).
+        if settings.V3_FEATURE_LOCATIONS:
+            from dojo.location.api.endpoint_compat import (  # noqa: PLC0415
+                V3EndpointCompatibleSerializer,
+            )
+            self.fields["endpoints"] = V3EndpointCompatibleSerializer(many=True, read_only=True)
+        else:
+            # TODO: Delete this after the move to Locations
+            self.fields["endpoints"] = EndpointSerializer(many=True, read_only=True)
 
 
 from dojo.jira.api.serializers import (  # noqa: E402, F401 backward compat
