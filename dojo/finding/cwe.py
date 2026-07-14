@@ -13,7 +13,11 @@ def cwe_number(value) -> int | None:
     if not token.isdigit():
         return None
     number = int(token)
-    return number if number > 0 else None
+    # Finding_CWE.cwe stores the "CWE-<n>" label in a varchar(11), so n is bounded to 7 digits.
+    # Reject anything larger here (clean None -> 400/skip) instead of 500-ing at insert.
+    if number <= 0 or number > 9_999_999:
+        return None
+    return number
 
 
 def cwe_label(value) -> str | None:

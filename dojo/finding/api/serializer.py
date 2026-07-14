@@ -483,9 +483,12 @@ class FindingSerializer(serializers.ModelSerializer):
         )
 
         # Sync the CWE relation (separate from vulnerability ids) after the new cwe is applied.
+        # Only touch the CWE rows when the request actually carried `cwes`; calling save_cwes()
+        # unconditionally would wipe a finding's extra Finding_CWE rows on any partial PATCH that
+        # omits the field (mirrors the guarded vulnerability-id path above).
         if parsed_cwes is not None:
             instance.unsaved_cwes = parsed_cwes[1:]
-        save_cwes(instance)
+            save_cwes(instance)
 
         if settings.V3_FEATURE_LOCATIONS and locations is not None:
             for location_ref in instance.locations.all():
