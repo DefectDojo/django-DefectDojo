@@ -59,10 +59,11 @@ Two finding attributes hold a *set* of values rather than a single value: vulner
 | `vulnerability_ids` | they have the **exact same set** of vulnerability IDs |
 | `vulnerability_ids_partial` | they share **at least one** vulnerability ID |
 | `vulnerability_ids_subset` | one finding's vulnerability IDs are a **subset** of the other's |
+| `cwes` | they have the **exact same set** of CWEs |
 | `cwes_partial` | they share **at least one** CWE |
 | `cwes_subset` | one finding's CWEs are a **subset** of the other's |
 
-The `_partial` and `_subset` fields are compared per finding pair rather than folded into the hash: the remaining Hash Code Fields group the candidate findings, and the set comparison then narrows that group. (Exact matching, `vulnerability_ids`, is folded into the hash directly.)
+The `_partial` and `_subset` fields are compared per finding pair rather than folded into the hash: the remaining Hash Code Fields group the candidate findings, and the set comparison then narrows that group. (Exact matching — `vulnerability_ids` and `cwes` — is folded into the hash directly.)
 
 **Empty values.** If a finding has no vulnerability IDs (or no CWEs) for the configured matcher:
 
@@ -72,7 +73,7 @@ The `_partial` and `_subset` fields are compared per finding pair rather than fo
 **Configuration rules** (enforced when you save settings):
 
 - A vulnerability IDs field (`vulnerability_ids`, `vulnerability_ids_partial`, or `vulnerability_ids_subset`) may be used on its own — a CVE or GHSA identifies a specific vulnerability instance.
-- CWE fields (`cwes_partial`, `cwes_subset`) may **not** be the only criteria. A CWE is a weakness *class*, not a specific instance, so matching on CWE alone would merge unrelated findings. Pair a CWE matcher with an identifying field such as `title` or `file_path`.
+- CWE fields (`cwes`, `cwes_partial`, `cwes_subset`) may **not** be the only criteria. A CWE is a weakness *class*, not a specific instance, so matching on CWE alone would merge unrelated findings. Pair a CWE matcher with an identifying field such as `title` or `file_path`.
 
 ## Cross Tool Deduplication
 
