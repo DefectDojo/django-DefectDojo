@@ -24,6 +24,7 @@ from tagulous.models import TagField
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and
@@ -700,6 +701,9 @@ class Finding(BaseModel):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
+        # Copy the vulnerability ids (relation rows aren't copied by copy_model_util)
+        for vulnerability_id in self.vulnerability_id_set.all():
+            Vulnerability_Id.objects.create(finding=copy, vulnerability_id=vulnerability_id.vulnerability_id)
 
         return copy
 
@@ -1377,9 +1381,18 @@ class Finding(BaseModel):
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    # Autodetected from the id prefix (CVE, GHSA, ...); NULL when there is no non-numeric
+    # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
+    vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
+        ]
         indexes = [
+            # Leading on vulnerability_id (the unique constraint's index leads on finding), for
+            # GROUP BY vulnerability_id / lookups by exact id.
+            models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
                 SearchVector("vulnerability_id", weight="A", config="english"),
@@ -1390,6 +1403,11 @@ class Vulnerability_Id(models.Model):
 
     def __str__(self):
         return self.vulnerability_id
+
+    def save(self, *args, **kwargs):
+        # bulk_create paths set the type at construction; this covers save()/get_or_create.
+        self.vulnerability_id_type = resolve_vulnerability_id_type(self.vulnerability_id)
+        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse("view_finding", args=[str(self.finding.id)])

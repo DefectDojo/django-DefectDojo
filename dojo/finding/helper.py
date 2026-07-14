@@ -26,6 +26,7 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
@@ -1068,7 +1069,7 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
         Vulnerability_Id.objects.filter(finding=finding).delete()
 
     Vulnerability_Id.objects.bulk_create([
-        Vulnerability_Id(finding=finding, vulnerability_id=vid)
+        Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
         for vid in vulnerability_ids
     ])
 
