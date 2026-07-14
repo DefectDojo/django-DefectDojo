@@ -5,6 +5,7 @@ import shlex
 
 from django.conf import settings
 from django.db.models import Q
+from django.http import HttpResponseGone
 from django.shortcuts import render
 from django.utils.translation import gettext as _
 from watson import search as watson
@@ -67,6 +68,12 @@ def simple_search(request):
     operators: {'tags': ['anchore'], 'vulnerability_id': ['CVE-2020-1234']}
     keywords:  ['jquery']
     """
+    if not settings.WATSON_SEARCH_ENABLED:
+        # Legacy watson-backed search is retired: return 410 rather than query
+        # models that are no longer registered with watson. Pro overrides this
+        # route with a redirect to its native search UI.
+        return HttpResponseGone("Legacy search has been disabled.")
+
     tests = None
     findings = None
     finding_templates = None
