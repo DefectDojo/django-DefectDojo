@@ -590,9 +590,12 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # the async watson indexer, executed inline under CELERY_TASK_ALWAYS_EAGER);
     # +5 reimport (no-change + with-new) queries from removal of
     # WATSON_ASYNC_INDEX_UPDATE_THRESHOLD making async dispatch unconditional.
-    EXPECTED_ZAP_IMPORT_V2 = 287
-    EXPECTED_ZAP_IMPORT_V3 = 311
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 148
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 177
+    # Multiple-CWEs feature: +2 import / +2 reimport-no-change (Finding_CWE
+    # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
+    # existing Finding_CWE rows for each changed finding).
+    EXPECTED_ZAP_IMPORT_V2 = 289
+    EXPECTED_ZAP_IMPORT_V3 = 313
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 76
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 88
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 158
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 187

@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from tagulous.forms import TagField
 
 from dojo.endpoint.utils import validate_endpoints_to_add
+from dojo.finding.cwe import cwe_number, parse_cwes
 from dojo.finding.queries import get_authorized_findings
 from dojo.jira import services as jira_services
 from dojo.location.models import Location
@@ -41,6 +42,36 @@ vulnerability_ids_field = forms.CharField(max_length=5000,
     help_text="Ids of vulnerabilities in security advisories associated with this finding. Can be Common Vulnerabilities and Exposures (CVE) or from other sources."
                 "You may enter one vulnerability id per line.",
     widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
+
+cwes_field = forms.CharField(max_length=500,
+    required=False,
+    label="CWEs",
+    help_text="CWE numbers associated with this finding. You may enter one per line (e.g. 89 or CWE-89). The first is the primary CWE.",
+    widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
+
+
+class CweFormMixin:
+
+    """
+    Persist the 'cwes' textarea as the primary Finding.cwe plus extra Finding_CWE rows.
+
+    Mirrors how the 'vulnerability_ids' textarea maps to cve + Vulnerability_Id rows.
+    """
+
+    def clean_cwes(self):
+        value = self.cleaned_data.get("cwes", "")
+        invalid = [token for token in value.replace(",", "\n").split() if cwe_number(token) is None]
+        if invalid:
+            msg = f"Invalid CWE(s): {', '.join(invalid)}. Enter numbers like 89 or CWE-89, one per line."
+            raise forms.ValidationError(msg)
+        return value
+
+    def save(self, commit=True):  # noqa: FBT002
+        cwes = parse_cwes(self.cleaned_data.get("cwes"))
+        self.instance.cwe = cwe_number(cwes[0]) if cwes else 0
+        self.instance.unsaved_cwes = cwes[1:]
+        return super().save(commit=commit)
+
 
 EFFORT_FOR_FIXING_INVALID_CHOICE = _("Select valid choice: Low,Medium,High")
 
@@ -183,11 +214,11 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
         self.fields["accepted_findings"].queryset = get_authorized_findings("edit")
 
 
-class AddFindingForm(forms.ModelForm):
+class AddFindingForm(CweFormMixin, forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
-    cwe = forms.IntegerField(required=False)
+    cwes = cwes_field
     vulnerability_ids = vulnerability_ids_field
     cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
     cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
@@ -219,7 +250,7 @@ class AddFindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
+    field_order = ("title", "date", "cwes", "vulnerability_ids", "severity", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
                    "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "verified", "false_p", "duplicate", "out_of_scope",
                    "risk_accepted", "under_defect_review")
 
@@ -279,15 +310,15 @@ class AddFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "cwe", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date")
 
 
-class AdHocFindingForm(forms.ModelForm):
+class AdHocFindingForm(CweFormMixin, forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
-    cwe = forms.IntegerField(required=False)
+    cwes = cwes_field
     vulnerability_ids = vulnerability_ids_field
 
     cvss_info = forms.CharField(
@@ -327,7 +358,7 @@ class AdHocFindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation",
+    field_order = ("title", "date", "cwes", "vulnerability_ids", "severity", "cvss_info", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation",
                    "impact", "request", "response", "steps_to_reproduce", "severity_justification", "endpoints", "endpoints_to_add", "references",
                    "active", "verified", "false_p", "duplicate", "out_of_scope", "risk_accepted", "under_defect_review", "sla_start_date", "sla_expiration_date")
 
@@ -385,16 +416,16 @@ class AdHocFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "cwe", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "endpoints", "sla_start_date",
                    "sla_expiration_date")
 
 
-class PromoteFindingForm(forms.ModelForm):
+class PromoteFindingForm(CweFormMixin, forms.ModelForm):
     title = forms.CharField(max_length=1000)
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
-    cwe = forms.IntegerField(required=False)
+    cwes = cwes_field
     vulnerability_ids = vulnerability_ids_field
 
     cvss_info = forms.CharField(
@@ -423,7 +454,7 @@ class PromoteFindingForm(forms.ModelForm):
     references = forms.CharField(widget=forms.Textarea, required=False)
 
     # the onyl reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
+    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwes", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
                    "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce",
                     "severity_justification", "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified",
                     "false_p", "duplicate", "out_of_scope", "risk_accept", "under_defect_review")
@@ -469,16 +500,16 @@ class PromoteFindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "active", "false_p", "verified", "endpoint_status", "cve", "cwe", "inherited_tags",
                    "duplicate", "out_of_scope", "under_review", "reviewers", "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "planned_remediation_date", "planned_remediation_version", "effort_for_fixing")
 
 
-class FindingForm(forms.ModelForm):
+class FindingForm(CweFormMixin, forms.ModelForm):
     title = forms.CharField(max_length=1000)
     group = forms.ModelChoiceField(required=False, queryset=Finding_Group.objects.none(), help_text="The Finding Group to which this finding belongs, leave empty to remove the finding from the group. Groups can only be created via Bulk Edit for now.")
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
-    cwe = forms.IntegerField(required=False)
+    cwes = cwes_field
     vulnerability_ids = vulnerability_ids_field
 
     cvss_info = forms.CharField(
@@ -522,7 +553,7 @@ class FindingForm(forms.ModelForm):
             "invalid_choice": EFFORT_FOR_FIXING_INVALID_CHOICE})
 
     # the only reliable way without hacking internal fields to get predicatble ordering is to make it explicit
-    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwe", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
+    field_order = ("title", "group", "date", "sla_start_date", "sla_expiration_date", "cwes", "vulnerability_ids", "severity", "cvss_info", "cvssv3",
                    "cvssv3_score", "cvssv4", "cvssv4_score", "description", "mitigation", "impact", "request", "response", "steps_to_reproduce", "severity_justification",
                    "endpoints", "endpoints_to_add", "references", "active", "mitigated", "mitigated_by", "verified", "false_p", "duplicate",
                    "out_of_scope", "risk_accept", "under_defect_review")
@@ -536,6 +567,10 @@ class FindingForm(forms.ModelForm):
             else False
 
         super().__init__(*args, **kwargs)
+
+        # Pre-fill all CWEs (primary first, CWE-<n> form) on edit; mirrors the vulnerability_ids field.
+        if self.instance and self.instance.pk:
+            self.fields["cwes"].initial = "\n".join(self.instance.cwes)
 
         if settings.V3_FEATURE_LOCATIONS:
             self.fields["endpoints"].queryset = Location.objects.filter(products__product=self.instance.test.engagement.product)
@@ -634,7 +669,7 @@ class FindingForm(forms.ModelForm):
 
     class Meta:
         model = Finding
-        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "inherited_tags",
+        exclude = ("reporter", "url", "numerical_severity", "under_review", "reviewers", "cve", "cwe", "inherited_tags",
                    "review_requested_by", "is_mitigated", "jira_creation", "jira_change", "sonarqube_issue",
                    "endpoints", "endpoint_status")
 

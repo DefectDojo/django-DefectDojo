@@ -19,6 +19,7 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
+from dojo.finding.cwe import finding_cwe_labels
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
     do_dedupe_finding_task_internal,
@@ -37,6 +38,7 @@ from dojo.models import (
     Engagement,
     FileUpload,
     Finding,
+    Finding_CWE,
     Finding_Group,
     JIRA_Instance,
     Notes,
@@ -1078,6 +1080,24 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
         finding.cve = vulnerability_ids[0]
     else:
         finding.cve = None
+
+
+def save_cwes(finding, *, delete_existing: bool = True):
+    """
+    Persist the finding's CWEs as Finding_CWE rows.
+
+    The primary Finding.cwe plus any parser-supplied unsaved_cwes, stored as canonical CWE-<n>
+    strings. CWE is a weakness class, kept separate from vulnerability ids.
+    """
+    cwe_values = finding_cwe_labels(finding.cwe, getattr(finding, "unsaved_cwes", None))
+
+    if delete_existing:
+        Finding_CWE.objects.filter(finding=finding).delete()
+
+    Finding_CWE.objects.bulk_create(
+        [Finding_CWE(finding=finding, cwe=cwe) for cwe in cwe_values],
+        ignore_conflicts=True,
+    )
 
 
 def save_vulnerability_ids_template(finding_template, vulnerability_ids):

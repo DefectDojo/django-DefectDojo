@@ -101,3 +101,11 @@ class TestApiEdgescanParser(DojoTestCase):
             self.assertEqual(1, len(self.get_unsaved_locations(finding_2)))
             self.assertEqual(self.get_unsaved_locations(finding_2)[0].host, "example.test.com")
             self.assertFalse(self.get_unsaved_locations(finding_2)[0].protocol)
+
+    def test_parse_file_with_multi_cwe_finding(self):
+        with (get_unit_tests_scans_path("api_edgescan") / "many_vulns_multi_cwe_fabricated.json").open(encoding="utf-8") as testfile:
+            parser = ApiEdgescanParser()
+            findings = parser.get_findings(testfile, Test())
+            # The multi-CWE vulnerability is the first entry in the file and therefore the first finding.
+            self.assertEqual(findings[0].cwe, 77)
+            self.assertEqual(findings[0].unsaved_cwes, [77, 548])
