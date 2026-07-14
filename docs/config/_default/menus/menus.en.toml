@@ -35,7 +35,7 @@
 
 [[main]]
   name = "Issue Tracking"
-  url = "/issue_tracking/intro/intro/"
+  url = "/connections/downstream/downstream_connections/"
   weight = 15
 
 [[main]]

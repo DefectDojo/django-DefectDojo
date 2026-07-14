@@ -1,12 +1,13 @@
 ---
-title: "Integrators Tool Reference"
-description: "Detailed setup guides for Integrators"
+title: "Downstream Connections Tool Reference"
+description: "Detailed setup guides for Downstream Connections"
 weight: 1
 audience: pro
 aliases:
   - /en/share_your_findings/integrations_toolreference
+  - /issue_tracking/pro_integration/integrations_toolreference/
 ---
-Here are specific instructions detailing how to set up a DefectDojo Integration with a third party Issue Tracker.
+Here are specific instructions detailing how to set up a DefectDojo Downstream Connection with a third party Issue Tracker.
 
 ## Azure DevOps Boards
 
@@ -280,7 +281,7 @@ By default Jira issues use DefectDojo's built-in title and body. To customize th
 
 ### How it works
 
-- **Create / Update / Delete:** creating pushes a new issue and records the link on the Finding; updating edits the existing issue; deleting a Finding force-closes its issue (nothing is deleted in Jira). Pushes can be manual ("Push to Integrators") or automatic per the Issue Tracker Assignment.
+- **Create / Update / Delete:** creating pushes a new issue and records the link on the Finding; updating edits the existing issue; deleting a Finding force-closes its issue (nothing is deleted in Jira). Pushes can be manual ("Push to Integrator") or automatic per the Issue Tracker Assignment.
 - **Status reconciliation:** after creating (and on every update) DefectDojo reads the issue's current status and, if it differs from the mapped target, finds a single workflow transition that reaches it and applies it. If no such transition exists, the mapping records an error rather than failing silently. Any transition-scoped custom fields are sent with that transition.
 - **Ticket link:** the link surfaced on the Finding is `https://your-site.atlassian.net/browse/{ISSUE-KEY}` — always your public site URL, never the internal gateway.
 - **Token lifecycle (OAuth):** DefectDojo owns the whole flow — it performs the authorization-code exchange, stores the access and refresh tokens, and refreshes on demand before a push, persisting the new refresh token each time (Atlassian rotates it on every refresh).
