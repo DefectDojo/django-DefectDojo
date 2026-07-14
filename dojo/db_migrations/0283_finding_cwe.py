@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     migrations are never mixed with schema migrations."""
 
     dependencies = [
-        ("dojo", "0278_unique_finding_vulnerability_id"),
+        ("dojo", "0282_unique_finding_vulnerability_id"),
     ]
 
     operations = [

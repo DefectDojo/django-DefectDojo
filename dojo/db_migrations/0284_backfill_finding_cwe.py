@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
     Finding.cwe field."""
 
     dependencies = [
-        ("dojo", "0279_finding_cwe"),
+        ("dojo", "0283_finding_cwe"),
     ]
 
     operations = [
