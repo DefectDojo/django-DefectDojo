@@ -16,6 +16,7 @@ Supported Integrations:
 - GitHub
 - GitLab Boards
 - Jira
+- PagerDuty
 - ServiceDesk Plus
 - ServiceNow
 - Shortcut
@@ -80,6 +81,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [GitHub](/issue_tracking/pro_integration/integrations_toolreference/#github)
 - [GitLab Boards](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)
 - [Jira](/issue_tracking/pro_integration/integrations_toolreference/#jira)
+- [PagerDuty](/issue_tracking/pro_integration/integrations_toolreference/#pagerduty)
 - [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)
 - [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)
 - [Shortcut](/issue_tracking/pro_integration/integrations_toolreference/#shortcut)
