@@ -4,7 +4,7 @@ description: "Understanding Engagements in DefectDojo OS"
 audience: opensource
 weight: 3
 ---
-Product Types → Products → **ENGAGEMENTS** → Tests → Findings 
+Organizations → Assets → **ENGAGEMENTS** → Tests → Findings 
 
 ## Overview 
 
