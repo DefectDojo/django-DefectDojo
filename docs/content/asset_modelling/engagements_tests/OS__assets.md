@@ -175,6 +175,6 @@ In practice, Assets should be defined to reflect how systems are built and deplo
 
 Assets can be mapped directly to Jira Projects, which push the Asset’s Findings into a Jira instance.
 
-Because Findings inherit risk, priority, and ownership from their parent Asset, the Asset effectively determines the remediation context that flows into Jira tickets and Integrator workflows.
+Because Findings inherit risk, priority, and ownership from their parent Asset, the Asset effectively determines the remediation context that flows into Jira tickets and Downstream Connection workflows.
 
 Importantly, Assets are also the primary determining factor in a Finding’s SLA characteristics. Therefore, the SLA of a Findings depends on the SLA configuration of its parent Asset. More information about SLA configurations can be found [here](/asset_modelling/os_hierarchy/os__sla_configuration/#main-content). 
