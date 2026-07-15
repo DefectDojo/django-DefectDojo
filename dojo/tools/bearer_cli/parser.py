@@ -49,6 +49,8 @@ class BearerCLIParser:
                     # the fingerprint is not constant over time, but because it's not used for dedupe it's safe and useful to set it
                     unique_id_from_tool=bearerfinding["fingerprint"],
                 )
+                if bearerfinding["cwe_ids"]:
+                    finding.unsaved_cwes = bearerfinding["cwe_ids"]
 
                 items.append(finding)
 

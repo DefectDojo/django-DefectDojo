@@ -18,6 +18,7 @@ from drf_spectacular.utils import (
 )
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -32,7 +33,11 @@ from dojo.api_v2 import (
 from dojo.api_v2 import (
     serializers as api_v2_serializers,
 )
-from dojo.api_v2.views import DojoModelViewSet, report_generate
+from dojo.api_v2.views import (
+    DojoModelViewSet,
+    get_request_boolean,
+    report_generate_response,
+)
 from dojo.authorization import api_permissions as permissions
 from dojo.finding.api.filters import ApiFindingFilter, ApiTemplateFindingFilter
 from dojo.finding.api.serializer import (
@@ -129,6 +134,17 @@ class FindingTemplatesViewSet(
             ),
         ],
     ),
+    destroy=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "push_to_jira",
+                OpenApiTypes.BOOL,
+                OpenApiParameter.QUERY,
+                required=False,
+                description="Close or reassign the linked JIRA issue when deleting this finding.",
+            ),
+        ],
+    ),
 )
 class FindingViewSet(
     prefetch.PrefetchListMixin,
@@ -159,6 +175,15 @@ class FindingViewSet(
             push_to_jira = push_to_jira or jira_project.push_all_issues
 
         serializer.save(push_to_jira=push_to_jira)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            push_to_jira = get_request_boolean(request, "push_to_jira")
+        except DRFValidationError as error:
+            raise DRFValidationError({"push_to_jira": error.detail}) from error
+        instance.delete(push_to_jira=push_to_jira)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def get_queryset(self):
         if settings.V3_FEATURE_LOCATIONS:
@@ -460,7 +485,7 @@ class FindingViewSet(
         responses={status.HTTP_201_CREATED: api_v2_serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasFindingFilePermission),
     )
     def files(self, request, pk=None):
         finding = self.get_object()
@@ -498,7 +523,7 @@ class FindingViewSet(
     @action(
         detail=True,
         methods=["get"],
-        url_path=r"files/download/(?P<file_id>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission),
+        url_path=r"files/download/(?P<file_id>\d+)", permission_classes=(IsAuthenticated, permissions.UserHasFindingFilePermission),
     )
     def download_file(self, request, file_id, pk=None):
         finding = self.get_object()
@@ -760,14 +785,13 @@ class FindingViewSet(
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, findings, options)
-        report = api_v2_serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, findings, options)
 
     def _get_metadata(self, request, finding):
         metadata = DojoMeta.objects.filter(finding=finding)

@@ -75,6 +75,7 @@ def get_item(vulnerability, test):
 
     vulnerability_ids = []
     cwe = None
+    unsaved_cwes = []
     cvssv3 = None
     cvss_v3 = "No CVSS v3 score."
     mitigation = None
@@ -88,6 +89,7 @@ def get_item(vulnerability, test):
         # take only the first one for now, limitation of DD model.
         if len(cves[0].get("cwe", [])) > 0:
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
+            unsaved_cwes = [decode_cwe_number(value) for value in cves[0].get("cwe", [])]
         if "cvss_v3" in cves[0]:
             cvss_v3 = cves[0]["cvss_v3"]
             # this dedicated package will clean the vector
@@ -168,6 +170,8 @@ def get_item(vulnerability, test):
     )
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids
+    if unsaved_cwes:
+        finding.unsaved_cwes = unsaved_cwes
 
     if settings.V3_FEATURE_LOCATIONS and component_name and component_version:
         finding.unsaved_locations.append(

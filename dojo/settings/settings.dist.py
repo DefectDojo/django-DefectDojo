@@ -280,6 +280,15 @@ env = environ.FileAwareEnv(
     DD_V3_FEATURE_LOCATIONS=(bool, True),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
+    # Shared cache backend (django.core.cache). When set, Django uses RedisCache
+    # (e.g. redis://valkey:6379/1); when empty it falls back to LocMemCache. Used
+    # by general framework caching; the singleton settings cache (dojo/caching.py)
+    # is in-process only and does not read or write this backend.
+    DD_CACHE_URL=(str, ""),
+    # In-process (L1) read-through cache for global singleton getters (see
+    # dojo/caching.py). Per-thread freshness budget in seconds; -1 disables it.
+    # Reset every request/task, so each request/task reads the singleton once.
+    DD_SETTINGS_CACHE_L1_TTL=(int, 30),
     # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
     **NOTIFICATIONS_ENV_DEFAULTS,
 )
@@ -327,6 +336,20 @@ ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
+
+# Default cache backend (django.core.cache). Redis when DD_CACHE_URL is set,
+# else per-process LocMemCache. General framework caching only; the singleton
+# settings cache (dojo/caching.py) is in-process and does not use this backend.
+if env("DD_CACHE_URL"):
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": env("DD_CACHE_URL"),
+        },
+    }
+
+# In-process singleton cache (dojo/caching.py)
+SETTINGS_CACHE_L1_TTL = env("DD_SETTINGS_CACHE_L1_TTL")
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -809,7 +832,7 @@ INSTALLED_APPS = (
 DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.common.CommonMiddleware",
     "dojo.middleware.APITrailingSlashMiddleware",
-    "dojo.middleware.DojoSytemSettingsMiddleware",
+    "dojo.middleware.DojoSettingsManagerMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -904,6 +927,16 @@ CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 # Watson async index update settings
 WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
 WATSON_INDEX_PREFETCH_ENABLED = env("DD_WATSON_INDEX_PREFETCH_ENABLED")
+
+# Context managers wrapped around every Celery task by PluggableContextTask (see
+# dojo/celery.py). watson_search_context_for_task opens a watson search_context so bulk
+# finding saves that happen inside a worker task (which serves no HTTP request, so
+# AsyncSearchContextMiddleware never runs) accumulate and drain in batched async index
+# updates instead of indexing one finding at a time. Extend this list downstream (e.g. Pro)
+# rather than replacing it, so this batching stays wired.
+CELERY_TASK_CONTEXT_MANAGERS = [
+    "dojo.middleware.watson_search_context_for_task",
+]
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -1067,6 +1100,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # probe's occurrences) and shifts as the occurrence set changes, so dedupe on the stable identity: probe-derived
     # title + target model.
     "Garak Scan": ["title", "component_name"],
+    # promptfoo findings have no file_path/line; description holds the (per-run) attack input
+    # and model output and is unstable across runs, and severity is an aggregate that shifts
+    # with the set of failed attempts. Dedupe on the stable identity: plugin-derived title +
+    # target model.
+    "Promptfoo Scan": ["title", "component_name"],
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
@@ -1217,7 +1255,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners). If `V3_FEATURE_LOCATIONS` is True, Dojo uses locations (URLs) instead.
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ["title", "cwe", "vulnerability_ids", "line", "file_path", "payload", "component_name", "component_version", "description", "endpoints", "unique_id_from_tool", "severity", "vuln_id_from_tool", "mitigation"]
+HASHCODE_ALLOWED_FIELDS = ["title", "cwe", "cwes", "vulnerability_ids", "line", "file_path", "payload", "component_name", "component_version", "description", "endpoints", "unique_id_from_tool", "severity", "vuln_id_from_tool", "mitigation"]
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ["service"]
@@ -1320,6 +1358,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Snyk Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
     "Garak Scan": DEDUPE_ALGO_HASH_CODE,
+    "Promptfoo Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
