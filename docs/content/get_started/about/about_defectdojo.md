@@ -81,7 +81,7 @@ If you run into trouble with an Open-Source install, we highly recommend asking 
 
 DefectDojo Inc. hosts a Pro edition of this software for commercial purposes.  Along with a sleek, modern UI, DefectDojo Pro includes:
 
-* [Connectors](/import_data/pro/connectors/about_connectors/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
+* [Connectors](/connections/upstream/about/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
 * **Configurable Import Methods**: [Universal Parser](/supported_tools/parsers/universal_parser/), [Smart Upload](/import_data/pro/specialized_import/smart_upload/)
 * **[CLI Tools](/import_data/pro/specialized_import/external_tools/)** for rapid integration with your systems
 * **[Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab

@@ -42,7 +42,7 @@ DefectDojo Pro expands on the above workflows further, adding:
   - An optimized upload method which processes Findings in the background.
   - The ability to quickly build a [command-line pipeline](/import_data/pro/specialized_import/external_tools/) using our Universal Importer and DefectDojo CLI apps, allowing you to easily import, reimport, and export data to your DefectDojo Pro instance.
   - A [Universal Parser](/import_data/pro/specialized_import/universal_parser/) to turn any .json or .csv report into an actional set of Findings and have DefectDojo Pro will parse the data however you like.
-  - [Connectors](/import_data/pro/connectors/about_connectors/), which provide an instant connection to supported tools to import new Finding data so you can get an automated Import pipeline established without the need to set up any API calls or cron jobs.
+  - [Connectors](/connections/upstream/about/), which provide an instant connection to supported tools to import new Finding data so you can get an automated Import pipeline established without the need to set up any API calls or cron jobs.
 
 ### How does DefectDojo handle access control?
 

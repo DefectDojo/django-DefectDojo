@@ -25,7 +25,7 @@ DefectDojo can parse data from 180+ security reports and counting.
 
 **Smart Upload** allows you to split infrastructure-wide scan files up by component or endpoint, and easily combine those results with other Findings from the same location.
 
-| [Connectors](/import_data/pro/connectors/about_connectors/): supported tools | [Smart Upload](/import_data/pro/specialized_import/smart_upload/): supported tools |
+| [Connectors](/connections/upstream/about/): supported tools | [Smart Upload](/import_data/pro/specialized_import/smart_upload/): supported tools |
 | --- | --- |
 | AWS Security Hub, BurpSuite, Checkmarx ONE, Dependency-Track, Probely, Semgrep, SonarQube, Snyk, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable, Wiz | 
 

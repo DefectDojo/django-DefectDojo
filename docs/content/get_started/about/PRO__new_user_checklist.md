@@ -25,4 +25,4 @@ All of these features can be automated, and because DefectDojo can handle over 2
 ### Pro Features
 - If your organization uses Jira, ServiceNow, AzureDevops, GitHub or GitLab for issue tracking, check out our [documentation](/issue_tracking/intro/intro/) on those integrations.
 - Customize your [main Dashboard](/metrics_reports/dashboards/introduction_dashboard/) with filtered tiles to view your environment at a glance.
-- Learn how to rapidly import data and mirror your team's existing security environment with [Connectors](/import_data/pro/connectors/about_connectors/).
+- Learn how to rapidly import data and mirror your team's existing security environment with [Connectors](/connections/upstream/about/).

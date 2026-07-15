@@ -50,4 +50,4 @@ The proxy configuration documented here applies to **outbound** calls *from* Def
 
 The most common case where this matters is Jira's bidirectional sync, which relies on Jira posting webhooks to DefectDojo's `/jira/webhook/<secret>` endpoint when issues change.  If DefectDojo is behind a firewall that prevents Jira from reaching it directly, setting `HTTPS_PROXY` will not solve that — you will need to address the inbound networking separately (a reverse proxy / load balancer with the appropriate firewall rules, an inbound NAT rule, or similar).
 
-For Jira-specific troubleshooting, see [Troubleshooting Jira errors](/issue_tracking/jira/troubleshooting_jira/).
+For Jira-specific troubleshooting, see [Troubleshooting Jira errors](/connections/downstream/troubleshooting_jira/).

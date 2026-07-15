@@ -21,7 +21,7 @@ There are two main ways that DefectDojo can upload Finding reports.
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users have an additional three methods to handle reports and data:
 
 * Via **Universal Importer** or **DefectDojo CLI**, command line tools which leverage the DefectDojo API: See [Universal Importer & DefectDojo-CLI guides](/import_data/pro/specialized_import/external_tools/)
-* Via **Connectors** for certain tools, an ‘out of the box’ data integration: See [Connectors Guide](/import_data/pro/connectors/about_connectors/)
+* Via **Connectors** for certain tools, an ‘out of the box’ data integration: See [Connectors Guide](/connections/upstream/about/)
 * Via **Smart Upload** for certain tools, an importer designed to handle infrastructure scans: See [Smart Upload Guide](/import_data/pro/specialized_import/smart_upload/)
 
 ### Comparing Upload Methods

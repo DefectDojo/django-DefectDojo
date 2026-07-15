@@ -145,7 +145,7 @@ In DefectDojo Pro, Connectors are mapped to different Assets in DefectDojo Pro, 
 
 Once a Connector has been attached to an Asset, it will import scan results and create or update Engagements, Tests, and Findings within that Asset.
 
-For more information about Connectors, click [here](/import_data/pro/connectors/about_connectors/#main-content). 
+For more information about Connectors, click [here](/connections/upstream/about/#main-content). 
 
 ### CI/CD Pipelines 
 
@@ -168,7 +168,7 @@ This means that the same vulnerability may receive a different Priority or Risk 
 
 ### Jira / Integrators Relationships
 
-Assets can be mapped directly to [Jira](/issue_tracking/jira/pro__jira_guide/#main-content) or [Integrators](/issue_tracking/pro_integration/integrations_toolreference/#main-content) instances (e.g. GitHub, GitLab, ServiceNow, etc.), which push the Asset’s Findings outward into external ticketing/work-management systems.
+Assets can be mapped directly to [Jira](/connections/downstream/pro__jira_guide/#main-content) or [Integrators](/connections/downstream/downstream_toolreference/#main-content) instances (e.g. GitHub, GitLab, ServiceNow, etc.), which push the Asset’s Findings outward into external ticketing/work-management systems.
 
 Because Findings inherit risk, priority, and ownership from their parent Asset, the Asset effectively determines the remediation context that flows into Jira tickets and Integrator workflows.
 
