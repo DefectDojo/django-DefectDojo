@@ -4,7 +4,6 @@ description: "How DefectDojo calculates an Asset Health Grade"
 weight: 7
 audience: opensource
 aliases:
-  - /en/working_with_findings/organizing_engagements_tests/product_health_grade
   - /asset_modelling/os_hierarchy/product_health_grade/
   - /en/asset_modelling/os_hierarchy/product_health_grade/
 ---

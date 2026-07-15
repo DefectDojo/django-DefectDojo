@@ -14,4 +14,6 @@ seo:
   robots: "" # custom robot tags (optional)
 exclude_search: true
 audience: pro
+aliases:
+  - /issue_tracking/pro_integration/
 ---

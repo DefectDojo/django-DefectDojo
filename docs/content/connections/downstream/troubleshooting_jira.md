@@ -3,7 +3,8 @@ title: "Troubleshooting Jira errors"
 description: "Fixing issues with a Jira integration"
 weight: 2
 aliases:
-   - /en/share_your_findings/troubleshooting_jira/
+  - /issue_tracking/jira/troubleshooting_jira/
+  - /en/share_your_findings/troubleshooting_jira/
 ---
 
 Here are some common issues with the Jira integration, and ways to address them.
