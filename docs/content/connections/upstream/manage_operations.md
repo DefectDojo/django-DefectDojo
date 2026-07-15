@@ -2,11 +2,12 @@
 title: "Managing Operations"
 description: "Check the status of your Connector's Discover & Sync Operations"
 aliases:
+  - /import_data/pro/connectors/manage_operations/
   - /en/connecting_your_tools/connectors/manage_operations
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Upstream Connections are a DefectDojo Pro-only feature.</span>
 
-Once an API connector is set up, it will run two Operations on a recurring basis:
+Once an Upstream Connection is set up, it will run two Operations on a recurring basis:
 
 * **Discover** will learn the connected tool's structure, and will create records in DefectDojo of any unmapped data;
 * **Sync** will import new Findings from the tool based on your mappings.
@@ -73,7 +74,7 @@ To learn more about Products, Engagements, Tests and Findings, see our [Product 
 
 To have DefectDojo run a Sync operation off\-schedule:
 
-1. Navigate to the **Manage Records \& Operations** page for the connector you want to use. From the **API Connectors** page, click the drop\-down menu on the Connector you wish to work with, and select Manage Records \& Operations.  
+1. Navigate to the **Manage Records \& Operations** page for the connector you want to use. From the **Upstream Connections** page, click the **Manage Configuration** drop\-down menu on the Connector you wish to work with, and select **Manage Records \& Operations**.  
 ​
 2. From this page, click the **Sync** button. This button is located next to the **Mapped Records** header.
 

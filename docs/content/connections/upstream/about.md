@@ -1,5 +1,5 @@
 ---
-title: "About Connectors"
+title: "Upstream Connections"
 description: "Seamlessly connect DefectDojo to your security tools suite"
 summary: ""
 date: 2023-09-07T16:06:50+02:00
@@ -16,15 +16,16 @@ seo:
   robots: "" # custom robot tags (optional)
 pro-feature: true
 aliases:
+  - /import_data/pro/connectors/about_connectors/
   - /en/connecting_your_tools/connectors/about_connectors
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Upstream Connections are a DefectDojo Pro-only feature.</span>
 
 DefectDojo allows users to build sophisticated API integrations, and gives users full control over how their vulnerability data is organized. 
 
-But everyone needs a starting point, and that's where Connectors come in. Connectors are designed to get your security tools connected and importing data to DefectDojo as quickly as possible.
+But everyone needs a starting point, and that's where Upstream Connections come in. Upstream Connections (formerly known as **API Connectors**) are designed to get your security tools connected and importing data to DefectDojo as quickly as possible.
 
-We currently support Connectors for the following tools, with more on the way:
+We currently support Upstream Connections for the following tools, with more on the way:
 
 * **Akamai API Security**
 * **Anchore**
@@ -43,19 +44,19 @@ We currently support Connectors for the following tools, with more on the way:
 * **Tenable**
 * **Wiz**
 
-These Connectors provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
+These connections provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 
-## Connectors Quick\-Start
+## Upstream Connections Quick\-Start
 
 If you're using DefectDojo's **Auto\-Map** settings, you can have your first Connector up and running in no time.
 
-1. Set up a [Connector](../add_edit_connectors/) from a supported tool.
+1. Set up a [Connector](../add_edit/) from a supported tool.
 2. [Discover](../manage_operations/#discover-operations) your tool's data hierarchy.
 3. [Sync](../manage_operations/#sync-operations) the vulnerabilities found with your tool into DefectDojo.
 
 That's all, really! And remember, even if you create your Connector the 'easy' way, you can easily change the way things are set up later, without losing any of your work.
 
-## How Connectors Work
+## How Upstream Connections Work
 
 As long as you have the API key from the tool you're trying to connect, a connector can be added in just a few minutes. Once the connection is working, DefectDojo will **Discover** your tool's environment to see how you're organizing your scan data.
 
@@ -73,6 +74,6 @@ Fortunately, DefectDojo can still handle manual import for a wide range of secur
 
 # **Next Steps**
 
-* Check out the Connectors page by switching to DefectDojo's **Pro UI**.
-* Follow our guide to [create your first Connector](../add_edit_connectors/).
+* Check out the **Upstream Connections** page by switching to DefectDojo's **Pro UI** and opening **Connections \> Upstream Connections** under the **Import** header.
+* Follow our guide to [create your first Connector](../add_edit/).
 * Check out the process of [Running Operations](../manage_operations/) with your Connected security tools and see how they can be configured to import data.

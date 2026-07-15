@@ -1,10 +1,11 @@
 ---
-title: "Tool-Specific Connector Setup"
+title: "Upstream Connections Tool Reference"
 description: "Our list of supported Connector tools, and how to set them up with DefectDojo"
 aliases:
+  - /import_data/pro/connectors/connectors_tool_reference/
   - /en/connecting_your_tools/connectors/connectors_tool_reference
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Upstream Connections are a DefectDojo Pro-only feature.</span>
 
 When setting up a Connector for a supported tool, you'll need to give DefectDojo specific information related to the tool's API. At a base level, you'll need:
 

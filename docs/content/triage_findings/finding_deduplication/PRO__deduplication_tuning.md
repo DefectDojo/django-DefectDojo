@@ -110,7 +110,7 @@ For optimal results with Deduplication Tuning:
 - **Test changes carefully**: After adjusting deduplication settings, monitor a few imports to ensure proper behavior.
 - **Plan retroactive re-hashes**: Changing dedup settings re-hashes every existing Finding from that tool in the background.  See [Running Deduplication Retroactively on Existing Data](#running-deduplication-retroactively-on-existing-data) above.
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
-- **Keep cross-tool sources in the same Asset**: Cross-Tool Deduplication is Asset-scoped.  Findings split across separate Assets will not dedupe even with matching hash fields.  See [Cross-Tool Deduplication is Scoped to a Single Asset](#cross-tool-deduplication-is-scoped-to-a-single-asset) above.
+- **Keep cross-tool sources in the same Asset**: Cross-Tool Deduplication is Asset-scoped.  Findings split across separate Assets will not dedupe even with matching hash fields.  See [Cross Tool Deduplication](#cross-tool-deduplication) above.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
 
 By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.

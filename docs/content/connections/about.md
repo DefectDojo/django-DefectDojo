@@ -60,5 +60,5 @@ On the **Downstream Connections** page:
 
 ## Next Steps
 
-* Read [About Connectors](/import_data/pro/connectors/about_connectors/) and [add your first Upstream Connection](/import_data/pro/connectors/add_edit_connectors/) to start importing findings automatically.
-* Read the [Downstream Connections guide](/connections/downstream/downstream_connections/) to push findings to your issue trackers.
+* Read [About Upstream Connections](/connections/upstream/about/) and [add your first Upstream Connection](/connections/upstream/add_edit/) to start importing findings automatically.
+* Read the [Downstream Connections guide](/connections/downstream/about/) to push findings to your issue trackers.

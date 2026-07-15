@@ -75,16 +75,16 @@ Each vendor will have varying requirements for how DefectDojo will need to inter
 
 For the complete list of requirements, please open the vendor specific pages below:
 
-- [Azure Devops](/connections/downstream/downstream_connections_toolreference/#azure-devops-boards)
-- [Bitbucket](/connections/downstream/downstream_connections_toolreference/#bitbucket)
-- [Freshservice](/connections/downstream/downstream_connections_toolreference/#freshservice)
-- [GitHub](/connections/downstream/downstream_connections_toolreference/#github)
-- [GitLab Boards](/connections/downstream/downstream_connections_toolreference/#gitlab)
-- [Jira](/connections/downstream/downstream_connections_toolreference/#jira)
-- [ServiceDesk Plus](/connections/downstream/downstream_connections_toolreference/#servicedesk-plus)
-- [ServiceNow](/connections/downstream/downstream_connections_toolreference/#servicenow)
-- [Shortcut](/connections/downstream/downstream_connections_toolreference/#shortcut)
-- [Zendesk](/connections/downstream/downstream_connections_toolreference/#zendesk)
+- [Azure Devops](/connections/downstream/downstream_toolreference/#azure-devops-boards)
+- [Bitbucket](/connections/downstream/downstream_toolreference/#bitbucket)
+- [Freshservice](/connections/downstream/downstream_toolreference/#freshservice)
+- [GitHub](/connections/downstream/downstream_toolreference/#github)
+- [GitLab Boards](/connections/downstream/downstream_toolreference/#gitlab)
+- [Jira](/connections/downstream/downstream_toolreference/#jira)
+- [ServiceDesk Plus](/connections/downstream/downstream_toolreference/#servicedesk-plus)
+- [ServiceNow](/connections/downstream/downstream_toolreference/#servicenow)
+- [Shortcut](/connections/downstream/downstream_toolreference/#shortcut)
+- [Zendesk](/connections/downstream/downstream_toolreference/#zendesk)
 
 ## Error Handling and Debugging
 

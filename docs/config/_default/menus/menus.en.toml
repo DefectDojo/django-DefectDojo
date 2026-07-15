@@ -20,7 +20,7 @@
 
 [[main]]
   name = "Connections"
-  url = "/connections/about_connections/"
+  url = "/connections/about/"
   weight = 13
 
 [[main]]
@@ -35,7 +35,7 @@
 
 [[main]]
   name = "Issue Tracking"
-  url = "/connections/downstream/downstream_connections/"
+  url = "/connections/downstream/about/"
   weight = 15
 
 [[main]]
