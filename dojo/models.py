@@ -401,6 +401,7 @@ from dojo.finding.models import (  # noqa: E402 -- re-export; class-body FKs bel
     CWE,  # noqa: F401 -- re-export
     BurpRawRequestResponse,  # noqa: F401 -- re-export
     Finding,
+    Finding_CWE,  # noqa: F401 -- re-export
     Finding_Group,  # noqa: F401 -- re-export
     Finding_Template,
     Vulnerability_Id,  # noqa: F401 -- re-export

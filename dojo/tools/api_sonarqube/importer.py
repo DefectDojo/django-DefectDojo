@@ -198,11 +198,13 @@ class SonarQubeApiImporter:
                     description = self.clean_rule_description_html(
                         rule_details,
                     )
-                    cwe = self.clean_cwe(rule_details)
+                    cwes = self.clean_cwes(rule_details)
+                    cwe = cwes[0] if cwes else None
                     references = sonarqube_permalink + self.get_references(rule_details)
                 else:
                     description = ""
                     cwe = None
+                    cwes = []
                     references = sonarqube_permalink
 
                 sonarqube_issue, _ = Sonarqube_Issue.objects.update_or_create(
@@ -240,6 +242,8 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=issue.get("key"),
                 )
+                if cwes:
+                    find.unsaved_cwes = cwes
                 items.append(find)
 
         except Exception as e:
@@ -321,7 +325,8 @@ class SonarQubeApiImporter:
                         "vulnerabilityDescription", "No description provided.",
                     ),
                 )
-                cwe = self.clean_cwe(rule.get("fixRecommendations", ""))
+                cwes = self.clean_cwes(rule.get("fixRecommendations", ""))
+                cwe = cwes[0] if cwes else None
                 try:
                     sonarqube_permalink = f"[Hotspot permalink]({sonarUrl}security_hotspots?id={hotspot['project']}&hotspots={hotspot['key']}) \n"
                 except KeyError:
@@ -361,6 +366,8 @@ class SonarQubeApiImporter:
                     sonarqube_issue=sonarqube_issue,
                     unique_id_from_tool=f"hotspot:{hotspot.get('key')}",
                 )
+                if cwes:
+                    find.unsaved_cwes = cwes
                 items.append(find)
 
         except Exception as e:
@@ -392,11 +399,16 @@ class SonarQubeApiImporter:
         return h.handle(raw_html)
 
     @staticmethod
-    def clean_cwe(raw_html):
-        search = re.search(r"CWE-(\d+)", raw_html)
-        if search:
-            return int(search.group(1))
-        return None
+    def clean_cwes(raw_html):
+        # A single SonarQube rule can reference multiple CWEs (e.g. in the "See" section).
+        seen = set()
+        cwes = []
+        for match in re.findall(r"CWE-(\d+)", raw_html):
+            cwe = int(match)
+            if cwe not in seen:
+                seen.add(cwe)
+                cwes.append(cwe)
+        return cwes
 
     @staticmethod
     def get_rule_details(rule):

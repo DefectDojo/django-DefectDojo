@@ -346,6 +346,11 @@ class TrivyParser:
                 )
                 finding.unsaved_tags = [tag for tag in (vul_type, target_class) if tag]
 
+                # Persist the full list of CWEs via the Finding_CWE relation
+                cwe_ids = vuln.get("CweIDs", [])
+                if cwe_ids:
+                    finding.unsaved_cwes = [int(c.split("-")[1]) for c in cwe_ids]
+
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
 

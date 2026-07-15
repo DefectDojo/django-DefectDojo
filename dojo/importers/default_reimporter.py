@@ -13,6 +13,7 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
@@ -985,6 +986,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
+        # Reconcile CWEs independently of the vulnerability_ids early-exit below (CWEs may change
+        # while vulnerability_ids do not, and vice versa).
+        self.reconcile_cwes(finding)
+
         # Use prefetched data directly without triggering queries
         existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
         new_vuln_ids = set(vulnerability_ids_to_process)
@@ -1000,7 +1005,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Accumulate delete + insert for batch flush
         self.pending_vuln_id_deletes.append(finding.id)
         self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid)
+            Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
             for vid in vulnerability_ids_to_process
         ])
         if vulnerability_ids_to_process:

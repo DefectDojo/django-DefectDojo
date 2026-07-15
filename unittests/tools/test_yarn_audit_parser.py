@@ -58,6 +58,7 @@ class TestYarnAuditParser(DojoTestCase):
             findings = parser.get_findings(testfile, self.get_test())
             self.assertEqual(2, len(findings))
             self.assertEqual(findings[0].cwe, 918)
+            self.assertEqual(findings[0].unsaved_cwes, [918, 1333])
             self.assertEqual(findings[1].cwe, 1035)
             self.assertEqual(findings[1].cve, None)
             self.assertEqual(findings[1].unsaved_vulnerability_ids[0], "CVE-2021-3807")
@@ -81,6 +82,16 @@ class TestYarnAuditParser(DojoTestCase):
             self.assertEqual(findings[0].cwe, "1321")
             self.assertEqual(findings[1].unsaved_vulnerability_ids[0], "CVE-2022-25851")
             self.assertEqual(findings[1].cve, None)
+
+    def test_yarn_audit_parser_multi_cwe_fabricated_copy(self):
+        # Fabricated copy: the first advisory's cwe list carries multiple CWEs
+        # (["CWE-1321", "CWE-915"]); the primary CWE is the first (1321).
+        with (get_unit_tests_scans_path("yarn_audit") / "issue_6495_multi_cwe_fabricated.json").open(encoding="utf-8") as testfile:
+            parser = YarnAuditParser()
+            findings = parser.get_findings(testfile, self.get_test())
+            testfile.close()
+            self.assertEqual(findings[0].cwe, "1321")
+            self.assertEqual(findings[0].unsaved_cwes, ["CWE-1321", "CWE-915"])
 
     def test_yarn_audit_parser_yarn2_audit_issue9911(self):
         with (get_unit_tests_scans_path("yarn_audit") / "yarn2_audit_issue9911.json").open(encoding="utf-8") as testfile:
