@@ -100,9 +100,20 @@ class TestSemgrepParser(DojoTestCase):
             self.assertEqual("index.js", finding.file_path)
             self.assertEqual(12, finding.line)
             self.assertEqual(352, finding.cwe)
+            self.assertEqual([352], finding.unsaved_cwes)
             self.assertEqual("javascript.express.security.audit.express-check-csurf-middleware-usage.express-check-csurf-middleware-usage", finding.vuln_id_from_tool)
             self.assertIn("const app = express();", finding.description)
             self.assertIn("A CSRF middleware was not detected in your express application. Ensure you are either using one  such as `csurf` or `csrf` (see rule references) and/or you are properly doing CSRF validation in your routes with a token or cookies.", finding.description)
+
+    def test_parse_multiple_cwes(self):
+        with (get_unit_tests_scans_path("semgrep") / "multiple_cwes_fabricated.json").open(encoding="utf-8") as testfile:
+            parser = SemgrepParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            # primary CWE is the first in the list; the full list is persisted via unsaved_cwes
+            self.assertEqual(327, finding.cwe)
+            self.assertEqual([327, 696], finding.unsaved_cwes)
 
     def test_different_lines_same_fingerprint(self):
         with (get_unit_tests_scans_path("semgrep") / "semgrep_version_1_30_0_line_26.json").open(encoding="utf-8") as testfile:

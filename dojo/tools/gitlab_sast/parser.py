@@ -126,6 +126,7 @@ class GitlabSastParser:
 
         mitigation = vuln.get("solution", "")
         cwe = None
+        unsaved_cwes = []
         vulnerability_id = None
         references = ""
         if "identifiers" in vuln:
@@ -133,8 +134,10 @@ class GitlabSastParser:
                 if identifier["type"].lower() == "cwe":
                     if isinstance(identifier["value"], int):
                         cwe = identifier["value"]
+                        unsaved_cwes.append(identifier["value"])
                     elif identifier["value"].isdigit():
                         cwe = int(identifier["value"])
+                        unsaved_cwes.append(int(identifier["value"]))
                 elif identifier["type"].lower() == "cve":
                     vulnerability_id = identifier["value"]
                 else:
@@ -159,9 +162,11 @@ class GitlabSastParser:
             sast_sink_object=sast_object,
             sast_source_file_path=sast_source_file_path,
             sast_source_line=sast_source_line,
-            cwe=cwe,
+            cwe=unsaved_cwes[0] if unsaved_cwes else cwe,
             static_finding=True,
             dynamic_finding=False)
+        if unsaved_cwes:
+            finding.unsaved_cwes = unsaved_cwes
         if vulnerability_id:
             finding.unsaved_vulnerability_ids = [vulnerability_id]
 

@@ -108,6 +108,18 @@ The endpoints also have to match for the findings to be considered duplicates, s
 
 - Dedupe is triggered on import/reimport and during certain updates run via Celery in the background.
 
+### Import/reimport deduplication execution mode
+
+For import and reimport you can control how deduplication post-processing is dispatched and whether the API response waits for it. Set it per user on the profile page (**Deduplication execution mode**), or override it per request with the `deduplication_execution_mode` field on the import/reimport endpoints (the request value takes precedence over the profile).
+
+- `async` (default): deduplication and the rest of post-processing run in the background and the response returns immediately. Historical behavior; the response is produced before findings are deduplicated.
+- `async_wait`: post-processing is still dispatched to the background, but the request waits for deduplication to finish before responding. The `scan_added` notification and the statistics in the response then reflect the deduplicated state (findings that turned out to be duplicates are no longer counted/listed as new). JIRA push, product grading and other non-deduplication tasks remain asynchronous and are not awaited. The wait is bounded by `DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT` (default `60` seconds); if no worker picks up the work in time, the request responds anyway rather than hanging.
+- `sync`: import deduplication runs inline in the web request.
+
+The import/reimport response includes a `deduplication_complete` boolean indicating whether deduplication had finished by the time the response was produced (`true` for `sync` and for a completed `async_wait`, `false` for `async`).
+
+This is independent of the global `block_execution` profile flag, which forces **all** of a user's asynchronous tasks (notifications, JIRA push, product grading, deduplication, ...) to the foreground. When no execution mode is set, `block_execution=True` falls back to `sync`.
+
 ## Service field and its impact
 
 - By default, `HASH_CODE_FIELDS_ALWAYS = ["service"]`, meaning the `service` associated with a finding is appended to the hash for all scanners.
@@ -147,3 +159,5 @@ Sometimes, Deduplication does not work as expected.  Here are some examples of w
 | Duplicates are created across different tools | Cross-tool matching is disabled or too strict | <strong>Cross Tool Deduplication (Pro only)</strong> (hash-based matching) |
 | The same SCA dependency imported into multiple Products creates separate Findings instead of duplicates | Deduplication is scoped per Product by default | <strong>Global Component Deduplication (Pro only)</strong> ([enable for your SCA tools](/triage_findings/finding_deduplication/pro__global_component_deduplication/)) |
 | Excess duplicates of the same Finding are being created, across Tests | Asset Hierarchy is not set up correctly | [Consider Reimport for continual testing](/triage_findings/finding_deduplication/avoid_excess_duplicates/) |
+
+When automatic deduplication misses Findings that you believe belong together, you can link them by hand from the View Finding page. See Similar Findings for how to discover related Findings and mark them as duplicates manually ([Open Source](/triage_findings/finding_deduplication/os__similar_findings/) | [Pro](/triage_findings/finding_deduplication/pro__similar_findings/)).

@@ -1,6 +1,8 @@
 from django.test import TestCase
 
+from dojo.models import Test
 from dojo.tools.snyk_issue_api.parser import SnykIssueApiParser
+from unittests.dojo_test_case import get_unit_tests_scans_path
 
 
 class TestSnykIssueApiParser(TestCase):
@@ -361,3 +363,14 @@ class TestSnykIssueApiParser(TestCase):
         # Test None input
         result = parser.extract_convert_created_date(None)
         self.assertIsNone(result)
+
+    def test_get_findings_multiple_cwes(self):
+        with (get_unit_tests_scans_path("snyk_issue_api") / "snyk_code_scan_api_many_vuln.json").open(encoding="utf-8") as testfile:
+            parser = SnykIssueApiParser()
+            findings = parser.get_findings(testfile, Test())
+            by_id = {f.unique_id_from_tool: f for f in findings}
+            # This issue carries two CWE classes (CWE-259, CWE-798).
+            # primary cwe is the first entry; the full list is persisted via unsaved_cwes
+            finding = by_id["922e2d65-d2ce-4a5c-818c-ab196ba834c3"]
+            self.assertEqual(259, finding.cwe)
+            self.assertEqual([259, 798], finding.unsaved_cwes)

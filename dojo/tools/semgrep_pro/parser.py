@@ -61,6 +61,15 @@ class SemgrepProParser:
                     finding.cwe = int(cwe_name.split("-")[1].split(":")[0])
                 except (ValueError, IndexError, KeyError):
                     finding.cwe = None
+                # Persist the full list of CWEs via the Finding_CWE relation
+                parsed_cwes = []
+                for cwe_name in item["rule"]["cwe_names"]:
+                    try:
+                        parsed_cwes.append(int(cwe_name.split("-")[1].split(":")[0]))
+                    except (ValueError, IndexError, KeyError):
+                        continue
+                if parsed_cwes:
+                    finding.unsaved_cwes = parsed_cwes
 
             # Add references if available
             references = []

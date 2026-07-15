@@ -186,6 +186,8 @@ class AWSInspector2Parser:
         string_cwes = ", ".join(cwes)
         # populate fields
         finding.cwe = cwes[0] if cwes else None
+        if cwes:
+            finding.unsaved_cwes = cwes
         finding.file_path = f"{file_path}{file_name}"
         finding.sast_source_file_path = f"{file_path}{file_name}"
         finding.line = start_line

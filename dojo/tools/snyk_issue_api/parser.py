@@ -269,6 +269,9 @@ class SnykIssueApiParser:
             finding.unsaved_locations.append(
                 LocationData.code(file_path=file_path, line=line),
             )
+        # Persist the full list of CWEs via the Finding_CWE relation
+        if cwes:
+            finding.unsaved_cwes = cwes
 
         # sca only
         if attributes.get("key"):

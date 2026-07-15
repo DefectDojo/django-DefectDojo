@@ -62,6 +62,8 @@ class BearerCLIParser:
                             source_line=bearerfinding["source"]["start"],
                         ),
                     )
+                if bearerfinding["cwe_ids"]:
+                    finding.unsaved_cwes = bearerfinding["cwe_ids"]
 
                 items.append(finding)
 

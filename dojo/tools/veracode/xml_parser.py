@@ -289,6 +289,11 @@ class VeracodeXMLParser:
             return int(cweSearch.group(1))
         return None
 
+    @staticmethod
+    def _get_cwes(val):
+        # Match all CWEs found in the value.
+        return [int(match) for match in re.findall(r"CWE-(\d+)", val, re.IGNORECASE)]
+
     @classmethod
     def __xml_sca_flaw_to_finding(
         cls, test, report_date, _vendor, library, version, xml_node,
@@ -305,6 +310,9 @@ class VeracodeXMLParser:
         finding.severity = cls.__xml_flaw_to_severity(xml_node)
         finding.unsaved_vulnerability_ids = [xml_node.attrib["cve_id"]]
         finding.cwe = cls._get_cwe(xml_node.attrib["cwe_id"])
+        cwes = cls._get_cwes(xml_node.attrib["cwe_id"])
+        if cwes:
+            finding.unsaved_cwes = cwes
         finding.title = f"Vulnerable component: {library}:{version}"
         finding.component_name = library
         finding.component_version = version

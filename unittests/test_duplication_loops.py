@@ -378,7 +378,7 @@ class TestDuplicationLoops(DojoTestCase):
     # Test that Delete Duplicate Findings & Maximum Duplicate is correctly deleting olding finding first based off of finding date value
     def test_delete_duplicate_order(self):
         # Turn on delete duplicates and set the maximum dedupe value to 1
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.delete_duplicates = True
         system_settings.max_dupes = 1
         system_settings.save()
@@ -409,7 +409,7 @@ class TestDuplicationLoops(DojoTestCase):
 
     def test_delete_duplicate_order_same_date_tiebreak_by_id(self):
         """When duplicate findings share the same date, excess deletes use id as tie-break (oldest id first)."""
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.delete_duplicates = True
         system_settings.max_dupes = 1
         system_settings.save()
