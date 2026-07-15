@@ -421,7 +421,7 @@ The Pro UI has been significantly reorganized, with changes to page organization
 
 #### August 25: 2.49.3
 
-[Integrations](/issue_tracking/intro/intro/) has been added to DefectDojo Pro, adding an Jira-style integrations for Azure DevOps, GitHub and GitLab boards.
+[Integrations](/connections/issue_tracking/) has been added to DefectDojo Pro, adding an Jira-style integrations for Azure DevOps, GitHub and GitLab boards.
 
 * **(API)** Basic Auth Login has been removed from the swagger form.  Only cookieAuth and tokenAuth are accepted.
 * **(API)** When MFA is enabled, an MFA code will be required to use the `/api-token-auth` endpoint.

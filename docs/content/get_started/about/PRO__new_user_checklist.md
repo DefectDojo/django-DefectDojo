@@ -23,6 +23,6 @@ This is the essence of DefectDojo - import security data, organize it, and prese
 All of these features can be automated, and because DefectDojo can handle over 200 tools (at time of writing) you should be all set to create a functional security inventory of your entire organizational output.
 
 ### Pro Features
-- If your organization uses Jira, ServiceNow, AzureDevops, GitHub or GitLab for issue tracking, check out our [documentation](/issue_tracking/intro/intro/) on those integrations.
+- If your organization uses Jira, ServiceNow, AzureDevops, GitHub or GitLab for issue tracking, check out our [documentation](/connections/issue_tracking/) on those integrations.
 - Customize your [main Dashboard](/metrics_reports/dashboards/introduction_dashboard/) with filtered tiles to view your environment at a glance.
 - Learn how to rapidly import data and mirror your team's existing security environment with [Connectors](/connections/upstream/about/).
