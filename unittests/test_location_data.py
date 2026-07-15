@@ -6,7 +6,6 @@ from unittests.dojo_test_case import DojoTestCase, skip_unless_v3
 
 
 class TestLocationDataCodeFactory(DojoTestCase):
-
     def test_code_factory_identity_keys(self):
         data = LocationData.code(file_path="src/db/queries.py", line=42)
         self.assertEqual("code", data.type)
@@ -42,7 +41,6 @@ class TestLocationDataCodeFactory(DojoTestCase):
 
 @skip_unless_v3
 class TestGetLocationsHashSymmetry(DojoTestCase):
-
     @classmethod
     def setUpTestData(cls):
         product_type = Product_Type.objects.create(name="hash symmetry type")
@@ -77,6 +75,32 @@ class TestGetLocationsHashSymmetry(DojoTestCase):
             LocationData.url(url="https://example.com/login", host="example.com", protocol="https", path="login"),
         ]
         self.assertIn("example.com", finding.get_locations())
+
+    def test_raw_abstract_location_instances_are_filtered_by_type(self):
+        """
+        Pin the actual fix: LocationData non-URL entries are already dropped
+        by the URL-only LocationManager during cleaning, so only a raw
+        AbstractLocation instance (e.g. a plugin's Dependency/CodeLocation
+        model object, passed through untyped by make_abstract_locations)
+        reaches the hash comprehension — without the type filter it leaks
+        into the endpoints ingredient and drifts the pre-save hash.
+        """
+        from unittest.mock import MagicMock
+
+        from dojo.url.models import URL
+
+        dependency_location = MagicMock(spec=URL)
+        dependency_location.get_location_type.return_value = "dependency"
+        dependency_location.get_location_value.return_value = "pkg:npm/lodash@4.17.21"
+
+        finding = self._finding()
+        finding.unsaved_locations = [
+            LocationData.url(url="https://example.com/login", host="example.com", protocol="https", path="login"),
+            dependency_location,
+        ]
+        value = finding.get_locations()
+        self.assertIn("example.com", value)
+        self.assertNotIn("lodash", value)
 
     def test_mixed_unsaved_locations_hash_only_urls(self):
         finding = self._finding()
