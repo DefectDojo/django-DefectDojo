@@ -10,7 +10,7 @@ django-pghistory==3.9.2
 django-dbbackup==5.3.0
 django-environ==0.14.0
 django-filter==25.2
-django-htmx==1.27.0
+django-htmx==1.28.0
 django-imagekit==6.1.0
 django-multiselectfield==1.0.1
 django-polymorphic==4.11.5
