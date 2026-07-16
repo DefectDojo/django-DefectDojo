@@ -1,7 +1,10 @@
+from unittest.mock import MagicMock
+
 from django.utils import timezone
 
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type
 from dojo.tools.locations import LocationData
+from dojo.url.models import URL
 from unittests.dojo_test_case import DojoTestCase, skip_unless_v3
 
 
@@ -85,10 +88,6 @@ class TestGetLocationsHashSymmetry(DojoTestCase):
         reaches the hash comprehension — without the type filter it leaks
         into the endpoints ingredient and drifts the pre-save hash.
         """
-        from unittest.mock import MagicMock
-
-        from dojo.url.models import URL
-
         dependency_location = MagicMock(spec=URL)
         dependency_location.get_location_type.return_value = "dependency"
         dependency_location.get_location_value.return_value = "pkg:npm/lodash@4.17.21"
