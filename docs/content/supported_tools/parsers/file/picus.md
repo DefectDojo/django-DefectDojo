@@ -21,7 +21,7 @@ DefectDojo imports a single scan file at a time and does not unpack archives. If
 
 ## Default Deduplication Hashcode Fields
 
-Picus findings deduplicate using the hashcode algorithm on a single stable [hashcode field](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/), the tool-native action identifier:
+Picus findings deduplicate using the hashcode algorithm on a single stable [hashcode field](/en/working_with_findings/finding_deduplication/about_deduplication/), the tool-native action identifier:
 
 - vuln_id_from_tool (populated from the Picus `actionId`)
 

@@ -43,7 +43,7 @@ DefectDojo parses the provided data, creates a new Test (or imports into an exis
 
 #### Connectors 
 
-[**Connectors**](/connections/upstream/about_connectors) can be used to automatically ingest and organize vulnerability data from external tools via API calls. Once configured, a Connector fetches scan results, parses the data, and creates new Tests or updates existing Tests depending on its configuration. Findings are then attached to the corresponding Test.
+[**Connectors**](/connections/upstream/about/) can be used to automatically ingest and organize vulnerability data from external tools via API calls. Once configured, a Connector fetches scan results, parses the data, and creates new Tests or updates existing Tests depending on its configuration. Findings are then attached to the corresponding Test.
 
 #### Test Creation Mechanism Comparison 
 

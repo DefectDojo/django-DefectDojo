@@ -75,7 +75,7 @@ To understand the difference, it’s helpful to think of Import as recording a s
 
 Here is an analogy; if you were an accountant, you could use Import to track a single receipt, while you would use Reimport to track a continuous ledger of expenses
 
-Both methods also use Deduplication differently: while two discrete Imported Tests in the same Product will identify and label duplicate Findings separately, Reimport will not create any Findings it identifies as [duplicates](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport/) within the Test.
+Both methods also use Deduplication differently: while two discrete Imported Tests in the same Product will identify and label duplicate Findings separately, Reimport will not create any Findings it identifies as [duplicates](/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport/) within the Test.
 
 Generally speaking, if a point-in-time report is what you need, Import is the best method to use. If you are continuously running and ingesting reports from a tool, Reimport is the better method for keeping things organized.
 

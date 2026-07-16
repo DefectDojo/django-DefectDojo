@@ -68,8 +68,8 @@ For teams managing a smaller volume of Findings, DefectDojo Open-Source is a gre
 There are a few supported ways to install DefectDojo’s Open-Source edition ([available on Github](https://github.com/DefectDojo/django-DefectDojo)):
 
 [Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) is the easiest method to install the core program and services required to run DefectDojo.
-Our [Architecture](https://docs.defectdojo.com/get_started/open_source/architecture/) guide gives you an overview of each service and component used by DefectDojo.
-[Running In Production](https://docs.defectdojo.com/get_started/open_source/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
+Our [Architecture](/get_started/open_source/architecture/) guide gives you an overview of each service and component used by DefectDojo.
+[Running In Production](/get_started/open_source/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
 
 Kubernetes is not fully supported at the Open-Source level, but this guide can be referenced and used as a starting point to integrate DefectDojo into Kubernetes architecture.
 

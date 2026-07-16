@@ -105,7 +105,7 @@ For teams running Snyk across multiple applications and repositories:
 ## Default Deduplication Hashcode Fields
 
 By default, DefectDojo identifies duplicate Findings using these 
-[hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+[hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - vuln id from tool
 - file path

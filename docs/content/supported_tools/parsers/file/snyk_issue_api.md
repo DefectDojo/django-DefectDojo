@@ -61,7 +61,7 @@ The impact field combines multiple pieces of information:
 - Line numbers: Only the starting line is stored in the Finding model, but both start and end lines are included in the impact field for reference
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - unique id from tool
 - file path

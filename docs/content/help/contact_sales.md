@@ -54,7 +54,7 @@ Before you complete the process, please confirm the plan you want to use along w
 
 ## Step 6: Review and Submit your Request
 
-We'll prompt you to look over your request one more time. Once submitted, only Firewall rules can be changed by your team without assistance from Support. To contact Support, please email [support@defectdojo.com](mailto:support@defectdojo.com) or follow the instructions in [this article](https://docs.defectdojo.com/en/about_defectdojo/contact_defectdojo_support/).
+We'll prompt you to look over your request one more time. Once submitted, only Firewall rules can be changed by your team without assistance from Support. To contact Support, please email [support@defectdojo.com](mailto:support@defectdojo.com) or follow the instructions in [this article](/en/about_defectdojo/contact_defectdojo_support/).
 
 ![image](images/request_a_trial_6.png)
 

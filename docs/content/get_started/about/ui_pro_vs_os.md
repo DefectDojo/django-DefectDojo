@@ -13,7 +13,7 @@ The Pro UI brings the following enhancements to DefectDojo:
 
 - Modern and sleek design using Vue.js.
 - Optimized data delivery and load times, especially for large datasets.
-- Access to new Pro features, including [Upstream Connections (API Connectors)](/connections/upstream/about/), [Universal Importer](/import_data/pro/specialized_import/external_tools/), and [Pro Metrics](https://docs.defectdojo.com/metrics_reports/pro_metrics/pro__overview/) views.
+- Access to new Pro features, including [Upstream Connections (API Connectors)](/connections/upstream/about/), [Universal Importer](/import_data/pro/specialized_import/external_tools/), and [Pro Metrics](/metrics_reports/pro_metrics/pro__overview/) views.
 - Improved UI workflows: better filtering, dashboards, and navigation.
 
 ## Switching To The Pro UI

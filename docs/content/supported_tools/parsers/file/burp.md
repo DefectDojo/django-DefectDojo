@@ -4,7 +4,7 @@ toc_hide: true
 ---
 ### File Types
 DefectDojo parser accepts Burp Issue data as an .xml file.
-To parse an HTML file instead, use this method: https://docs.defectdojo.com/supported_tools/file/burp_suite_dast/
+To parse an HTML file instead, use this method: [Burp Suite DAST](/supported_tools/parsers/file/burp_suite_dast/)
 
 When the Burp report is generated, **the recommended option is Base64
 encoding both the request and response fields** - e.g. check the box
@@ -44,7 +44,7 @@ All XML elements are required and will be parsed as strings.
 Sample Burp scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/burp).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity

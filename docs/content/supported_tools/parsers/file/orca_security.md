@@ -20,7 +20,7 @@ The parser auto-detects the format: files starting with `[` are treated as JSON,
 
 ## Default Deduplication Hashcode Fields
 
-By default, DefectDojo identifies duplicate Findings using the [hashcode deduplication algorithm](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/) with the following fields:
+By default, DefectDojo identifies duplicate Findings using the [hashcode deduplication algorithm](/en/working_with_findings/finding_deduplication/about_deduplication/) with the following fields:
 
 - title
 - component_name

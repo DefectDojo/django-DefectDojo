@@ -17,7 +17,7 @@ The IriusRisk parser accepts CSV file format. To generate this file from IriusRi
 
 ## Default Deduplication Hashcode Fields
 
-DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - component_name
