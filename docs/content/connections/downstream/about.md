@@ -17,6 +17,7 @@ Supported Downstream Connections:
 - GitHub
 - GitLab Boards
 - Jira
+- PagerDuty
 - ServiceDesk Plus
 - ServiceNow
 - Shortcut
@@ -81,6 +82,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [GitHub](/connections/downstream/downstream_toolreference/#github)
 - [GitLab Boards](/connections/downstream/downstream_toolreference/#gitlab)
 - [Jira](/connections/downstream/downstream_toolreference/#jira)
+- [PagerDuty](/connections/downstream/downstream_toolreference/#pagerduty)
 - [ServiceDesk Plus](/connections/downstream/downstream_toolreference/#servicedesk-plus)
 - [ServiceNow](/connections/downstream/downstream_toolreference/#servicenow)
 - [Shortcut](/connections/downstream/downstream_toolreference/#shortcut)

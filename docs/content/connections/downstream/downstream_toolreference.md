@@ -539,3 +539,44 @@ A few Zendesk-specific behaviors to be aware of:
 - The ticket description is the first comment in Zendesk and cannot be edited after creation, so pushing an updated Finding will sync the ticket's subject, priority, and status, but not description changes.
 - Tickets are marked `solved` rather than deleted when a Finding is removed; Zendesk closes solved tickets automatically after a period of time.
 - `closed` is a final status - closed tickets cannot be updated at all, and pushing a Finding whose ticket has closed will report an error.
+
+## PagerDuty
+
+The PagerDuty Integration allows you to push DefectDojo Findings and Finding Groups as PagerDuty Incidents on a Service of your choice.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to your regional PagerDuty REST API base URL: `https://api.pagerduty.com` for US accounts, or `https://api.eu.pagerduty.com` for EU accounts.
+- **API Token** should be set to a PagerDuty REST API key.  An administrator can create one in PagerDuty under **Integrations > API Access Keys**.
+- **From Email** should be the email address of a valid PagerDuty user on the account.  PagerDuty requires it when creating or updating incidents.
+
+### Issue Tracker Mapping
+
+- **Service ID** should be the ID of the PagerDuty Service that Incidents will be created on (e.g. `PXXXXXX`).  You can find it in the URL while viewing the Service.
+
+### Severity Mapping Details
+
+By default this maps to the Incident **Urgency** field, which accepts `high` and `low`:
+
+- **Severity Field Name**: `Urgency`
+- **Info Mapping**: `low`
+- **Low Mapping**: `low`
+- **Medium Mapping**: `low`
+- **High Mapping**: `high`
+- **Critical Mapping**: `high`
+
+Alternatively, set **Severity Field Name** to `Priority` and use your account's Incident Priority names (e.g. `P1` - `P5`) as the mapping values.  Priority names are resolved against the priorities configured on your PagerDuty account; an unknown name will report an error on push.
+
+### Status Mapping Details
+
+- **Status Field Name**: `Status`
+- **Active Mapping**: `triggered`
+- **Closed Mapping**: `resolved`
+- **False Positive Mapping**: `resolved`
+- **Risk Accepted Mapping**: `acknowledged`
+
+A few PagerDuty-specific behaviors to be aware of:
+
+- PagerDuty has no incident deletion - removing a Finding resolves its Incident instead.
+- Incident links open the Incident's web URL as returned by PagerDuty, so they work regardless of region.

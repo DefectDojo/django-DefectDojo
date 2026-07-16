@@ -22,7 +22,7 @@ weight: 1
 | Import enhancements | ❌ Standard imports only | ✔️ Background imports, Smart Upload, Universal Parser, CLI uploads |
 | Tool integrations | ❌ Manual/API-driven | ✔️ Built-in **Upstream Connections** (API Connectors) for popular AppSec and cloud tools |
 | Jira integration | ✔️ Included | ✔️ Included |
-| Project management integrations | ❌ Not included | ✔️ **Downstream Connections** to **Jira**, **Azure DevOps**, **GitHub**, **GitLab**, **ServiceNow**, **Bitbucket**, **Shortcut**, **Zendesk**, **ServiceDesk Plus** and **Freshservice** |
+| Project management integrations | ❌ Not included | ✔️ **Downstream Connections** to **Jira**, **Azure DevOps**, **GitHub**, **GitLab**, **ServiceNow**, **Bitbucket**, **Shortcut**, **PagerDuty**, **Zendesk**, **ServiceDesk Plus** and **Freshservice** |
 | Finding enhancements | ❌ Not included | ✔️ Automatic KEV, EPSS scoring and Ransomware tracking |
 | SOC & AppSec unification | ❌ AppSec-focused only | ✔️ Unified AppSec and SOC findings |
 | AI & next-generation features | ❌ Not included | ✔️ AI-assisted workflows, reporting and MCP support |
