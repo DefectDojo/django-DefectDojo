@@ -50,6 +50,11 @@ Attempts to use the tool's unique ID first, then falls back to the hash code if 
 #### Global Component
 Matches findings by component name and version across **all Products** in the instance, rather than within a single Product or Engagement. Intended for SCA tools where the same vulnerable dependency appears in many Products. This algorithm is off by default and must be enabled by DefectDojo Support. See [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) for details.
 
+#### Global Vulnerability ID
+Matches findings by their **vulnerability IDs** (CVE, GHSA, …) across **all Products** in the instance, rather than within a single Product or Engagement. Intended for tools that report the same CVE across many Products. Off by default and enabled by DefectDojo Support.
+
+> **Two tools on the same instance-wide algorithm become mutual deduplication candidates.** When two *different* tools are both configured with an instance-wide algorithm (Global Component, or Global Vulnerability ID), their findings share a constant grouping hash, so a finding from either tool is considered for deduplication against the other on that shared dimension (component, or vulnerability ID). This is the intended cross-tool behavior — enable it only when you want those tools to dedupe together.
+
 ### Set-based Hash Code Fields (Vulnerability IDs and CWEs)
 
 Two finding attributes hold a *set* of values rather than a single value: vulnerability IDs (CVE, GHSA, …) and CWEs. When using the **Hash Code** algorithm (Same Tool or Cross Tool), you can add the following fields to **Hash Code Fields** to control how those sets are compared:
@@ -126,6 +131,8 @@ What this means in practice:
 If you make several configuration changes in quick succession, each one queues its own re-hash job.  Allow the previous job to finish before evaluating results, especially when comparing Findings counts before and after the change.
 
 > **Note for self-hosted Pro:** The background job runs in the Celery worker pool.  If you have starved or backlogged workers, the re-hash can take longer than expected — check worker health if results don't appear within the timeframe you would expect for your instance size.
+
+> **Feature flags do not gate an existing configuration.** A tool's saved Deduplication Settings stay in effect for as long as they are configured; turning off a related feature flag does **not** retroactively revert that tool to default deduplication. To change or stop a tool's deduplication behavior, update its Deduplication Settings directly (which also queues the background re-hash described above).
 
 ## Deduplication Best Practices
 
