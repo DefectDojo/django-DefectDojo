@@ -499,12 +499,12 @@ The Harbor connector uses the Harbor v2.0 REST API to import container image vul
 
 #### Prerequisites
 
-You will need a Harbor account (or a **robot account**) with pull/read access to the projects you want to import. We recommend a dedicated robot account: in Harbor, open a project (or **Administration \> Robot Accounts** for a system robot), create a robot with the **pull** permission on repositories and artifacts, and copy its name (`robot$<name>`) and secret. A regular username/password also works.
+You will need a Harbor account (or a **robot account**) with pull/read access to the projects you want to import. We recommend a dedicated robot account: in Harbor, open a project (or **Administration \> Robot Accounts** for a system robot), create a robot with the **pull** permission on repositories and artifacts, and copy its full name and secret. Robot names start with `robot$` by default, but the prefix is configurable per Harbor instance (some use `robot_`) — copy the name exactly as Harbor displays it. A regular username/password also works.
 
 #### Connector Mappings
 
 1. Enter your Harbor URL in the **Location** field — for example `https://harbor.example.com`. DefectDojo appends the `/api/v2.0` API path automatically.
-2. Enter the Harbor username, or a robot account name (`robot$<name>`), in the **Username** field.
+2. Enter the Harbor username, or a robot account name exactly as Harbor shows it (`robot$<name>` by default), in the **Username** field.
 3. Enter the password or robot account secret in the **Secret** field. It is sent using HTTP Basic authentication.
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
