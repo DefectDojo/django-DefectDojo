@@ -22,7 +22,7 @@ See our [Pro UI Guide](/get_started/about/ui_pro_vs_os/) for more information.
 
 ### Assets/Organizations
 
-DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/assets_organizations/) for details.
+DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/asset_hierarchy/) for details.
 
 ![image](images/asset_hierarchy_diagram.png)
 

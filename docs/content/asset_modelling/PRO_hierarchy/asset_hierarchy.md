@@ -5,6 +5,7 @@ audience: pro
 weight: 1
 aliases:
   - /en/working_with_findings/organizing_engagements_tests/pro_assets_organizations
+  - /asset_modelling/pro_hierarchy/assets_organizations
 ---
 DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.
 

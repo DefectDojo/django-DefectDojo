@@ -29,7 +29,7 @@ window.ddOffcanvas = Offcanvas;
     // matching edition's page so the main content follows the toggle.
     const assetNavUrls = {
         opensource: "/asset_modelling/engagements_tests/os__assets/",
-        pro: "/asset_modelling/pro_hierarchy/assets_organizations/",
+        pro: "/asset_modelling/pro_hierarchy/asset_hierarchy/",
     };
 
     const switchAssetPageForVersion = (version) => {

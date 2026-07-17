@@ -182,4 +182,4 @@ You can visualize the structure of Assets in DefectDojo and change relationships
 
 After selecting the Assets to be visualized from the corresponding table, click **View Asset Hierarchy** to generate a flow chart of the relationship between the chosen Assets, if any.
 
-Further information on the effect of nesting Assets on deduplication, RBAC, and other details, as well as example use cases, can be found [here](/asset_modelling/pro_hierarchy/assets_organizations/#asset-nesting-examples).
+Further information on the effect of nesting Assets on deduplication, RBAC, and other details, as well as example use cases, can be found [here](/asset_modelling/pro_hierarchy/asset_hierarchy/#asset-nesting-examples).
