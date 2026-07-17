@@ -1,5 +1,5 @@
 ---
-title: "Assets and Organization structure"
+title: "Asset Hierarchy"
 description: "DefectDojo Pro - Product Hierarchy Overhaul"
 audience: pro
 weight: 1
