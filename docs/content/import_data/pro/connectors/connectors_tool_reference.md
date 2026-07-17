@@ -362,6 +362,22 @@ DefectDojo creates a separate Record for each Docker Scout stream, and imports o
 
 See the [Docker Scout documentation](https://docs.docker.com/scout/) for more information.
 
+## **Edgescan**
+
+The Edgescan connector uses the Edgescan REST API to import open vulnerabilities across your whole Edgescan account. DefectDojo enumerates every Edgescan **asset** and creates a Record for each one, then imports that asset's open vulnerabilities as findings — there is no per\-asset configuration.
+
+#### Prerequisites
+
+You will need an Edgescan API token. Create one from your Edgescan account under **Account settings \> API tokens**: enter a label, click **Create**, and copy the generated token (it is shown only once). We recommend a dedicated account for the Connector so automated activity is easy to distinguish.
+
+#### Connector Mappings
+
+1. Enter your Edgescan URL in the **Location** field — `https://live.edgescan.com` for the standard hosted platform, or your tenant's host if different.
+2. Enter your Edgescan API token in the **Secret** field. It is sent as the `X-API-TOKEN` header.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Edgescan asset becomes a Record, and each open vulnerability on that asset is imported as a finding. Severity is mapped from Edgescan's numeric scale (1–5) to DefectDojo's Info–Critical, and CVE references, the CWE, and a CVSS v3 vector are included where Edgescan provides them.
+
 ## **GitGuardian**
 
 The GitGuardian connector uses the GitGuardian REST API to import **secret incidents** — exposed credentials GitGuardian has detected across your monitored sources. DefectDojo creates a Record for each monitored source (repository or perimeter) that currently has open incidents, and imports each open incident as a finding.
