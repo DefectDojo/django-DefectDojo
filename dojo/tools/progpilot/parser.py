@@ -1,6 +1,21 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
+
+
+def _first(value):
+    """
+    Collapse progpilot taint-source fields to a scalar.
+
+    progpilot reports them as single-element arrays (e.g. source_name=["$sql"],
+    source_line=[610]); the location context expects the scalar value.
+    """
+    if isinstance(value, list):
+        return value[0] if value else None
+    return value
 
 
 class ProgpilotParser:
@@ -76,5 +91,19 @@ class ProgpilotParser:
                 find.file_path = vuln_file
             if vuln_cwe is not None:
                 find.cwe = int(vuln_cwe.split("CWE_")[1])
+            if settings.V3_FEATURE_LOCATIONS and find.file_path:
+                source_name_scalar = _first(source_name)
+                source_file_scalar = _first(source_file)
+                source_line_scalar = _first(source_line)
+                find.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=find.file_path,
+                        line=find.line,
+                        source_object=str(source_name_scalar) if source_name_scalar else "",
+                        sink_object=str(sink_name) if sink_name else "",
+                        source_file_path=str(source_file_scalar) if source_file_scalar else "",
+                        source_line=source_line_scalar if isinstance(source_line_scalar, int) else None,
+                    ),
+                )
             findings.append(find)
         return findings

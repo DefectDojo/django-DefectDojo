@@ -2,8 +2,10 @@ import hashlib
 import json
 
 from dateutil import parser
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GgshieldParser:
@@ -100,6 +102,15 @@ class GgshieldParser:
             static_finding=True,
             date=findings["commit_date"],
         )
+
+        if settings.V3_FEATURE_LOCATIONS and findings["file_path"]:
+            finding.unsaved_locations.append(
+                LocationData.code(
+                    file_path=findings["file_path"],
+                    line=line_start,
+                    end_line=line_end,
+                ),
+            )
 
         key = hashlib.md5(
             (

@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class SemgrepParser:
@@ -87,6 +90,11 @@ class SemgrepParser:
                     vuln_id_from_tool=item["check_id"],
                     nb_occurences=1,
                 )
+
+                if settings.V3_FEATURE_LOCATIONS and item["path"]:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=item["path"], line=item["start"]["line"]),
+                    )
 
                 # fingerprint detection
                 unique_id_from_tool = item.get("extra", {}).get("fingerprint")

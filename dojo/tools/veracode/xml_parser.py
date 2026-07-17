@@ -247,6 +247,15 @@ class VeracodeXMLParser:
         if isinstance(sast_source_obj, str):
             finding.sast_source_object = sast_source_obj or None
 
+        if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(
+                    file_path=finding.file_path,
+                    line=finding.line,
+                    source_object=sast_source_obj if isinstance(sast_source_obj, str) else "",
+                ),
+            )
+
         finding.unsaved_tags = ["sast"]
 
         return finding
