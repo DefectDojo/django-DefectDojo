@@ -18,6 +18,7 @@ from dojo.models import (
     Test_Import,
     Test_Type,
 )
+from dojo.notes.helper import notes_prefetch
 from dojo.risk_acceptance import api as ra_api
 from dojo.test.api.filters import ApiTestFilter, TestImportAPIFilter
 from dojo.test.api.serializer import (
@@ -58,7 +59,7 @@ class TestsViewSet(
     def get_queryset(self):
         return (
             get_authorized_tests("view")
-            .prefetch_related("notes", "files")
+            .prefetch_related(notes_prefetch(), "files")
             .distinct()
         )
 
