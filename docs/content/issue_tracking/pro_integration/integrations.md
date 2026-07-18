@@ -19,6 +19,7 @@ Supported Integrations:
 - GitLab Boards
 - Jira
 - Linear
+- Opsgenie
 - PagerDuty
 - ServiceDesk Plus
 - ServiceNow
@@ -98,6 +99,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [GitLab Boards](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)
 - [Jira](/issue_tracking/pro_integration/integrations_toolreference/#jira)
 - [Linear](/issue_tracking/pro_integration/integrations_toolreference/#linear)
+- [Opsgenie](/issue_tracking/pro_integration/integrations_toolreference/#opsgenie)
 - [PagerDuty](/issue_tracking/pro_integration/integrations_toolreference/#pagerduty)
 - [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)
 - [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)
