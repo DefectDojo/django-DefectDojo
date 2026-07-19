@@ -195,6 +195,13 @@ def _handle_not_found(request: HttpRequest, exc: Http404) -> JsonResponse:
     )
 
 
+# Why DRF constants in a ninja API: v3 deliberately REUSES v2's battle-tested internals -- the
+# import permission helpers, check_auto_create_permission, and dojo/finding/services.py all raise
+# rest_framework exceptions (the finding services do so intentionally: it is the exact exception
+# type the reference v2 serializer raises, D7). Those are DRF APIException subclasses; without the
+# adapter below they would surface as 500s instead of problem+json. These two maps translate a DRF
+# exception's status code onto the closed v3 error contract (I9). DRF itself stays installed
+# regardless -- all of v2 runs on it and v3's tokens live in rest_framework.authtoken.
 _DRF_ERROR_TYPES = {400: "validation", 401: "unauthorized", 403: "forbidden", 404: "not-found"}
 _DRF_ERROR_TITLES = {
     400: "Validation failed",
