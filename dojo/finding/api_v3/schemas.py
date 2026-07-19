@@ -118,15 +118,18 @@ class FindingSlim(Schema):
 def _finding_location_edges(finding) -> list[dict]:
     """
     ``expand=locations`` special renderer (§4.6): swap the cheap ``locations_count`` for the edge
-    rows ``[{location: {id, name, type}, status, audit_time}]``. ``finding.locations`` is the
-    ``LocationFindingReference`` reverse manager (edge carries ``status``/``audit_time``); the
-    ``locations__location`` prefetch declared on the ExpandRel keeps the query count constant.
+    rows ``[{location: {id, name, type}, status, audit_time, auditor: {id, name}|null}]``.
+    ``finding.locations`` is the ``LocationFindingReference`` reverse manager (edge carries
+    ``status``/``audit_time``/``auditor``); the ``locations__location`` and ``locations__auditor``
+    prefetches declared on the ExpandRel keep the query count constant. The ``auditor`` ref was
+    deferred from OS2 and added in OS4 to match the ``/findings/{id}/locations`` sub-resource (§12).
     """
     return [
         {
             "location": to_location_ref(ref.location),
             "status": ref.status,
             "audit_time": ref.audit_time,
+            "auditor": to_ref(ref.auditor),
         }
         for ref in finding.locations.all()
     ]
@@ -147,7 +150,7 @@ FindingSlim.EXPANDABLE = {
         path="locations",
         to_many=True,
         special=_finding_location_edges,
-        prefetch_paths=("locations__location",),
+        prefetch_paths=("locations__location", "locations__auditor"),
         replaces="locations_count",
     ),
 }

@@ -19,6 +19,7 @@ from pathlib import Path
 from django.conf import settings
 
 from dojo.api_v3.api import api_v3
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Engagement, Finding, Product, Product_Type, Test
 
 from .base import ApiV3TestCase
@@ -63,6 +64,13 @@ class TestApiV3QueryReport(ApiV3TestCase):
                 clone = model.objects.get(pk=template.pk)
                 clone.pk = None
                 clone.save()
+        # Fan out location edges so the sub-resource per-row queries (if any) trip the threshold.
+        self._loc_finding = Finding.objects.order_by("pk").first()
+        self._loc_product = Product.objects.order_by("pk").first()
+        for i in range(_ROW_FANOUT):
+            loc = Location.objects.create(location_type="url", location_value=f"query-report loc {i}")
+            LocationFindingReference.objects.create(location=loc, finding=self._loc_finding, status="Active")
+            LocationProductReference.objects.create(location=loc, product=self._loc_product, status="Active")
 
     def _representative_requests(self) -> dict[str, str]:
         """OpenAPI GET path -> concrete request URL. Extend when a phase adds endpoints."""
@@ -84,6 +92,10 @@ class TestApiV3QueryReport(ApiV3TestCase):
             "/engagements/{engagement_id}": self.v3_url(f"engagements/{Engagement.objects.first().pk}"),
             "/tests": self.v3_url(f"tests?{limit}"),
             "/tests/{test_id}": self.v3_url(f"tests/{Test.objects.first().pk}"),
+            "/locations": self.v3_url(f"locations?{limit}"),
+            "/locations/{location_id}": self.v3_url(f"locations/{Location.objects.order_by('pk').first().pk}"),
+            "/findings/{finding_id}/locations": self.v3_url(f"findings/{self._loc_finding.pk}/locations?{limit}"),  # noqa: RUF027
+            "/products/{product_id}/locations": self.v3_url(f"products/{self._loc_product.pk}/locations?{limit}"),  # noqa: RUF027
         }
 
     def _openapi_get_paths(self) -> set[str]:

@@ -29,7 +29,7 @@ from ninja import Router, Schema
 from ninja.constants import NOT_SET
 
 from dojo.api_v3.errors import json_response, not_found_problem
-from dojo.api_v3.expand import apply_fields, parse_fields, plan, plan_queryset, serialize
+from dojo.api_v3.expand import allowed_field_names, apply_fields, parse_fields, plan, plan_queryset, serialize
 from dojo.api_v3.filtering import (
     FilterSpec,
     apply_filters,
@@ -160,7 +160,7 @@ def build_findings_router(
         )
         page_qs = plan_queryset(page_qs, select_related, prefetch)
 
-        allowed_fields = set(schema.model_fields)
+        allowed_fields = allowed_field_names(schema)
         fields = parse_fields(request.GET.get("fields"), allowed_fields)
 
         def serialize_row(obj: object) -> dict:
@@ -190,7 +190,7 @@ def build_findings_router(
             msg = f"Finding {finding_id} not found"
             raise not_found_problem(msg)
 
-        allowed_fields = set(detail_schema.model_fields)
+        allowed_fields = allowed_field_names(detail_schema)
         fields = parse_fields(request.GET.get("fields"), allowed_fields)
         data = apply_fields(serialize(obj, detail_schema, expand_tree), fields)
         return json_response(data)
