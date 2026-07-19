@@ -213,6 +213,18 @@ if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH
             ),
         ]
 
+# API v3 (alpha) -- mounted conditionally on V3_FEATURE_LOCATIONS (D5/§4.1). With the flag off the
+# whole /api/v3-alpha/ tree is absent. The prefix and version live in settings (single source).
+if getattr(settings, "V3_FEATURE_LOCATIONS", False):
+    from dojo.api_v3.api import api_v3
+
+    api_v2_urls += [
+        re_path(
+            r"^{}{}/".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            api_v3.urls,
+        ),
+    ]
+
 urlpatterns = []
 
 # sometimes urlpatterns needed be added from local_settings.py before other URLs of core dojo

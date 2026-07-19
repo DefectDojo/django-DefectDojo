@@ -13,6 +13,7 @@ django-filter==26.1
 django-htmx==1.28.0
 django-imagekit==6.1.0
 django-multiselectfield==1.0.1
+django-ninja==1.6.2  # API v3 framework (alpha); pulls pydantic v2 (already present transitively)
 django-polymorphic==4.11.6
 django-crispy-forms==2.6
 django_extensions==4.1
