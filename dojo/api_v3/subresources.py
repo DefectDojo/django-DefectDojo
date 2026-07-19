@@ -28,6 +28,14 @@ Routes are thin (I6). Sub-resource lists are parent-scoped and simple -- no expa
 machinery, only the shared pagination envelope (§12); therefore no FilterSpecs and no snapshot
 regeneration.
 
+**Note side-effects stay out of the kernel (I5/I6).** v2's per-resource notes ``@action`` fires
+resource-specific side-effects on create (finding: JIRA comment sync + ``last_reviewed`` stamping +
+@mention notifications; engagement/test: @mention notifications only). To reach v2 parity without
+importing any JIRA/notification machinery here, ``build_notes_router`` takes an optional
+``on_note_created(parent, note, *, user)`` callback, invoked *after* the note is persisted and linked
+to the parent. The callback is a resource **service** function (``dojo/<resource>/services.py``) that
+owns all such side-effects; the kernel merely calls it.
+
 Inner view functions are registered manually (not via ``@router.get``) so each can be given a
 unique ``__name__`` per resource -- the factory is called once per parent resource, and identical
 closure names would otherwise collide into duplicate OpenAPI ``operationId``s.
@@ -184,9 +192,16 @@ def build_notes_router(
     get_parent_queryset: Callable[[HttpRequest], QuerySet],
     view_permission="view",
     create_permission="view",
+    on_note_created: Callable[..., None] | None = None,
     auth=NOT_SET,
 ) -> Router:
-    """``GET`` (paginated) + ``POST`` ``/{resource}/{id}/notes`` (§4.12)."""
+    """
+    ``GET`` (paginated) + ``POST`` ``/{resource}/{id}/notes`` (§4.12).
+
+    ``on_note_created(parent, note, *, user)`` -- optional resource-service callback fired after the
+    new note is persisted and linked; it owns the resource's v2 note side-effects (JIRA comment sync,
+    ``last_reviewed`` stamping, @mention notifications). The kernel imports none of that machinery.
+    """
     router = Router(tags=[resource], auth=auth)
     notes_path = f"/{resource}/{{int:parent_id}}/notes"
 
@@ -209,6 +224,12 @@ def build_notes_router(
         history = NoteHistory.objects.create(data=note.entry, time=note.date, current_editor=note.author)
         note.history.add(history)
         parent.notes.add(note)
+        # Resource-specific side-effects (JIRA comment sync, last_reviewed stamping, @mention
+        # notifications) live in the resource's service layer (I5/I6); the kernel imports none of
+        # that machinery -- it only invokes the callback the factory was configured with, matching
+        # v2's per-resource notes @action (dojo/<resource>/api/views.py).
+        if on_note_created is not None:
+            on_note_created(parent, note, user=request.user)
         return json_response(_serialize_note(note), status=201)
 
     list_notes.__name__ = f"list_{resource}_notes"

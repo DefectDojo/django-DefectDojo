@@ -308,6 +308,113 @@ class TestApiV3SubresourcesPagination(_SubResourceBase):
         self.assertIsNone(body["previous"])
 
 
+class TestApiV3NoteSideEffectsFinding(_SubResourceBase):
+
+    """
+    v2 parity for finding note-create side-effects (mirrors ``dojo/finding/api/views.py`` notes
+    @action): ``last_reviewed`` stamping, JIRA comment sync on the linked issue / finding-group issue,
+    and @mention notifications. JIRA is mocked at the service seam (``dojo.finding.services
+    .jira_services.add_comment``); the mention path is exercised end-to-end through the real
+    ``process_tag_notifications`` parser, capturing ``create_notification``.
+    """
+
+    _ADD_COMMENT = "dojo.finding.services.jira_services.add_comment"
+    _CREATE_NOTIFICATION = "dojo.notifications.helper.create_notification"
+
+    def _post_note(self, *, entry="side-effect note", parent=None):
+        parent = parent or self.finding
+        response = self.client.post(
+            self.v3_url(f"findings/{parent.pk}/notes"), {"entry": entry}, format="json",
+        )
+        self.assertEqual(201, response.status_code, response.content[:400])
+        return response.json()
+
+    def test_finding_note_stamps_last_reviewed(self):
+        body = self._post_note()
+        note = Notes.objects.get(pk=body["id"])
+        self.finding.refresh_from_db()
+        self.assertEqual(note.date, self.finding.last_reviewed)
+        self.assertEqual(self.admin.pk, self.finding.last_reviewed_by_id)
+
+    def test_finding_note_jira_comment_when_linked(self):
+        with mock.patch.object(Finding, "has_jira_issue", new_callable=mock.PropertyMock, return_value=True), \
+             mock.patch(self._ADD_COMMENT) as add_comment:
+            self._post_note()
+        add_comment.assert_called_once()
+        self.assertEqual(self.finding.pk, add_comment.call_args.args[0].pk)
+
+    def test_finding_note_no_jira_comment_when_not_linked(self):
+        # The default fixture finding has neither a linked issue nor a finding-group issue.
+        self.assertFalse(self.finding.has_jira_issue)
+        self.assertFalse(self.finding.has_jira_group_issue)
+        with mock.patch(self._ADD_COMMENT) as add_comment:
+            self._post_note()
+        add_comment.assert_not_called()
+
+    def test_finding_note_group_jira_comment_when_group_linked(self):
+        with mock.patch.object(Finding, "has_jira_issue", new_callable=mock.PropertyMock, return_value=False), \
+             mock.patch.object(Finding, "has_jira_group_issue", new_callable=mock.PropertyMock, return_value=True), \
+             mock.patch(self._ADD_COMMENT) as add_comment:
+            self._post_note()
+        add_comment.assert_called_once()
+        # The finding-group branch comments on the group, not the finding (v2 parity).
+        expected_pk = getattr(self.finding.finding_group, "pk", None)
+        self.assertEqual(expected_pk, getattr(add_comment.call_args.args[0], "pk", None))
+
+    def test_finding_note_mention_dispatches_user_mentioned_notification(self):
+        Dojo_User.objects.create_user(username="v3_mention_target", password="x")  # noqa: S106
+        with mock.patch(self._CREATE_NOTIFICATION) as create_notif:
+            self._post_note(entry="hey @v3_mention_target please review")
+        mention_calls = [c for c in create_notif.call_args_list if c.kwargs.get("event") == "user_mentioned"]
+        self.assertEqual(1, len(mention_calls))
+        self.assertIn("v3_mention_target", mention_calls[0].kwargs["recipients"])
+
+
+class TestApiV3NoteSideEffectsEngagementTest(_SubResourceBase):
+
+    """
+    v2 parity for engagement/test note-create side-effects: @mention notifications **only** -- their
+    v2 @actions (``dojo/engagement/api/views.py``, ``dojo/test/api/views.py``) have no JIRA comment
+    sync and no ``last_reviewed`` stamping (neither model even has that field, so a 201 is itself
+    evidence the finding-only side-effects did not run).
+    """
+
+    _CREATE_NOTIFICATION = "dojo.notifications.helper.create_notification"
+    _JIRA_ADD_COMMENT = "dojo.jira.services.add_comment"
+
+    def _assert_mention_notified(self, resource, parent, username):
+        Dojo_User.objects.create_user(username=username, password="x")  # noqa: S106
+        with mock.patch(self._CREATE_NOTIFICATION) as create_notif:
+            response = self.client.post(
+                self.v3_url(f"{resource}/{parent.pk}/notes"), {"entry": f"cc @{username}"}, format="json",
+            )
+        self.assertEqual(201, response.status_code, response.content[:400])
+        mention_calls = [c for c in create_notif.call_args_list if c.kwargs.get("event") == "user_mentioned"]
+        self.assertEqual(1, len(mention_calls))
+        self.assertIn(username, mention_calls[0].kwargs["recipients"])
+
+    def test_engagement_note_mention_dispatches_notification(self):
+        self._assert_mention_notified("engagements", self.engagement, "v3_eng_mention")
+
+    def test_test_note_mention_dispatches_notification(self):
+        self._assert_mention_notified("tests", self.test, "v3_test_mention")
+
+    def test_engagement_and_test_notes_fire_no_jira_comment(self):
+        # Parity guard: unlike the finding @action, the engagement/test @actions never sync a JIRA
+        # comment. Patched at the source (dojo.jira.services.add_comment) so a mis-wired finding
+        # callback would also be caught here.
+        with mock.patch(self._JIRA_ADD_COMMENT) as add_comment:
+            eng = self.client.post(
+                self.v3_url(f"engagements/{self.engagement.pk}/notes"), {"entry": "no jira"}, format="json",
+            )
+            tst = self.client.post(
+                self.v3_url(f"tests/{self.test.pk}/notes"), {"entry": "no jira"}, format="json",
+            )
+        self.assertEqual(201, eng.status_code, eng.content[:400])
+        self.assertEqual(201, tst.status_code, tst.content[:400])
+        add_comment.assert_not_called()
+
+
 class TestApiV3SubresourcesQueryCounts(_SubResourceBase):
 
     """MANDATORY: finding notes/tags/files list query counts are independent of row count."""

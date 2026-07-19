@@ -184,24 +184,36 @@ at the repository root.
 The alpha delivers the contract and the seven read/write surfaces above. These are **known,
 deliberate** gaps — several exist so the alpha stayed additive and reviewable:
 
-- **Note side-effects are not fired yet.** Creating a note via `POST .../{id}/notes` persists the
-  note but does **not** yet trigger the side-effects the v2 UI/serializer path does — JIRA comment
-  sync, `last_reviewed` / `last_reviewed_by` stamping, and `@mention` notifications. These arrive on
-  the post-alpha convergence track.
+- **Note side-effects have v2 parity in the alpha.** Creating a note via `POST .../{id}/notes` fires
+  the same side-effects as the v2 notes endpoints, per resource: findings get JIRA comment sync (on a
+  linked issue, else the finding-group issue), `last_reviewed` / `last_reviewed_by` stamping, and
+  `@mention` notifications; engagements and tests get `@mention` notifications only (their v2
+  endpoints have neither JIRA sync nor `last_reviewed` stamping).
 - **Finding writes mirror the v2 serializer, not the UI view.** The finding create/update service
   reproduces the v2 API serializer semantics (JIRA push, risk acceptance, vuln-ids/CWE). UI-only
   behaviors are deferred: auto-mitigation when `active` flips off, false-positive-history
   reactivation, `last_reviewed` stamping, finding-group push, GitHub sync, and JIRA link/unlink.
-- **Locations are URL-only.** Only the `URL` location subtype persists today; `Code` and
-  `Dependency` subtypes are dropped on import until their models land. Locations are **read-only** in
-  the alpha (lifecycle is import-driven).
 - **No bulk or workflow actions yet.** No bulk operations, no workflow actions
   (`close`/`request_review`/`mark_duplicate`), no aggregation/chart endpoints, no saved views, no
   CSV export, no delete-impact preview. Cursor pagination and background-import jobs are reserved in
-  the grammar (they return `400 "not yet available"`) but not implemented.
-- **Counts above the cap are estimates.** Below `COUNT_CAP` (default 10,000) `count` is exact. Above
-  it, `count` is the Postgres planner's row estimate for the filtered query, clamped to ≥ CAP+1 and
-  flagged `"count_exact": false` in `meta`. Estimates depend on planner statistics and may drift;
-  when you page-jump near an estimated end you may get an empty `results` with `next: null`.
+  the grammar (they return `400 "not yet available"`) but not implemented. These are recorded as
+  explicit post-alpha work items in the plan's backlog.
+
+## Platform limitations (not v3 gaps)
+
+- **Locations are URL-only.** Only the `URL` location subtype has a persistable model in the
+  codebase today; `Code` and `Dependency` location data is dropped on import until their models
+  land. This is a limitation of the underlying Location subsystem, not of the v3 API — v3 simply
+  refuses to advertise location types the backend cannot store. Locations are **read-only** in the
+  alpha (lifecycle is import-driven).
+
+## Design decisions to be aware of
+
+- **Counts above the cap are estimates — by design.** Below `COUNT_CAP` (default 10,000) `count` is
+  exact. Above it, `count` is the Postgres planner's row estimate for the filtered query, clamped to
+  ≥ CAP+1 and flagged `"count_exact": false` in `meta`. This is the documented count strategy
+  (bounded cost on unbounded tables), not a deficiency awaiting a fix. Estimates depend on planner
+  statistics and may drift; when you page-jump near an estimated end you may get an empty `results`
+  with `next: null`.
 
 See `API_V3_PLAN.md` in the repository for the full contract specification and decision log.
