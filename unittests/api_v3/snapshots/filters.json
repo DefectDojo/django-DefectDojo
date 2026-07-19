@@ -1,4 +1,36 @@
 {
+  "engagement": {
+    "model": "Engagement",
+    "orderings": [
+      "created",
+      "id",
+      "name",
+      "target_start",
+      "updated"
+    ],
+    "params": [
+      "created__gte",
+      "created__lte",
+      "engagement_type",
+      "id__in",
+      "lead",
+      "name__icontains",
+      "product",
+      "product__in",
+      "product_type",
+      "status",
+      "target_end__gte",
+      "target_end__lte",
+      "target_start__gte",
+      "target_start__lte",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "name"
+    ]
+  },
   "finding": {
     "model": "Finding",
     "orderings": [
@@ -86,6 +118,40 @@
       "name"
     ]
   },
+  "test": {
+    "model": "Test",
+    "orderings": [
+      "created",
+      "id",
+      "target_start",
+      "title",
+      "updated"
+    ],
+    "params": [
+      "created__gte",
+      "created__lte",
+      "engagement",
+      "engagement__in",
+      "environment",
+      "id__in",
+      "lead",
+      "product",
+      "product__in",
+      "product_type",
+      "target_end__gte",
+      "target_end__lte",
+      "target_start__gte",
+      "target_start__lte",
+      "test_type",
+      "title__icontains",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "title"
+    ]
+  },
   "user": {
     "model": "Dojo_User",
     "orderings": [
@@ -115,4 +181,3 @@
     ]
   }
 }
-
