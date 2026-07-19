@@ -207,7 +207,8 @@ class TestApiV3FindingsLocationsExpand(ApiV3TestCase):
         rows = detail["locations"]
         self.assertEqual(existing + 2, len(rows))
         for row in rows:
-            self.assertEqual({"location", "status", "audit_time"}, set(row))
+            # OS4 added `auditor` to the expand=locations edge rows (§12).
+            self.assertEqual({"location", "status", "audit_time", "auditor"}, set(row))
             self.assertEqual({"id", "name", "type"}, set(row["location"]))
         by_name = {row["location"]["name"]: row for row in rows}
         self.assertEqual("url", by_name["https://example.com/os2-a"]["location"]["type"])

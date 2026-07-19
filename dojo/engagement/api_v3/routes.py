@@ -31,7 +31,7 @@ from ninja import Router, Schema
 from ninja.constants import NOT_SET
 
 from dojo.api_v3.errors import json_response, not_found_problem, validation_problem
-from dojo.api_v3.expand import apply_fields, parse_fields, plan, plan_queryset, serialize
+from dojo.api_v3.expand import allowed_field_names, apply_fields, parse_fields, plan, plan_queryset, serialize
 from dojo.api_v3.filtering import (
     FilterSpec,
     apply_filters,
@@ -171,7 +171,7 @@ def build_engagements_router(
         page_qs = filtered.select_related(*schema.SELECT_RELATED).prefetch_related(*schema.PREFETCH_RELATED)
         page_qs = plan_queryset(page_qs, select_related, prefetch)
 
-        fields = parse_fields(request.GET.get("fields"), set(schema.model_fields))
+        fields = parse_fields(request.GET.get("fields"), allowed_field_names(schema))
 
         def serialize_row(obj: object) -> dict:
             return apply_fields(serialize(obj, schema, expand_tree), fields)
@@ -191,7 +191,7 @@ def build_engagements_router(
         if obj is None:
             msg = f"Engagement {engagement_id} not found"
             raise not_found_problem(msg)
-        fields = parse_fields(request.GET.get("fields"), set(detail_schema.model_fields))
+        fields = parse_fields(request.GET.get("fields"), allowed_field_names(detail_schema))
         return json_response(apply_fields(serialize(obj, detail_schema, expand_tree), fields))
 
     @router.post("/engagements", response=detail_schema, url_name="engagements_create")

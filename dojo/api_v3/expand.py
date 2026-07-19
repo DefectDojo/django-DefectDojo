@@ -176,6 +176,18 @@ def serialize(obj: object, schema: type, expand_tree: dict) -> dict:
 
 # --- ?fields= projection (§4.7) ----------------------------------------------------------------
 
+def allowed_field_names(schema: type) -> set[str]:
+    """
+    The ``?fields=`` allowlist for a schema: its declared fields **plus** its registered expandable
+    keys (§4.7 + the OS4 fields/expand interplay decision, §12). This lets ``?expand=locations&
+    fields=id,title,locations`` name an expand key in ``fields=`` while a genuinely unknown name
+    still 400s. Expand keys are not model fields (e.g. ``locations`` replaces ``locations_count``),
+    so they must be added explicitly; without expand the key simply renders nothing (``apply_fields``
+    only keeps keys actually present in the serialized dict).
+    """
+    return set(schema.model_fields) | set(getattr(schema, "EXPANDABLE", {}))
+
+
 def parse_fields(raw: str | None, allowed: set[str]) -> set[str] | None:
     """Return the requested field allowlist (``id`` always included) or None. Unknown -> 400."""
     if not raw:

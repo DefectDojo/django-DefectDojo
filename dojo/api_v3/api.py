@@ -58,6 +58,11 @@ def build_api() -> NinjaAPI:
     from dojo.api_v3.import_routes import build_import_router  # noqa: PLC0415
     from dojo.engagement.api_v3.routes import build_engagements_router  # noqa: PLC0415
     from dojo.finding.api_v3.routes import build_findings_router  # noqa: PLC0415
+    from dojo.location.api_v3.routes import (  # noqa: PLC0415
+        build_finding_locations_router,
+        build_locations_router,
+        build_product_locations_router,
+    )
     from dojo.product.api_v3.routes import build_products_router  # noqa: PLC0415
     from dojo.product_type.api_v3.routes import build_product_types_router  # noqa: PLC0415
     from dojo.test.api_v3.routes import build_tests_router  # noqa: PLC0415
@@ -69,6 +74,9 @@ def build_api() -> NinjaAPI:
     api.add_router("", build_engagements_router())
     api.add_router("", build_tests_router())
     api.add_router("", build_users_router())
+    api.add_router("", build_locations_router())
+    api.add_router("", build_finding_locations_router())
+    api.add_router("", build_product_locations_router())
     api.add_router("", build_import_router())
     return api
 

@@ -74,6 +74,21 @@
       "title"
     ]
   },
+  "location": {
+    "model": "Location",
+    "orderings": [
+      "id",
+      "name"
+    ],
+    "params": [
+      "name__icontains",
+      "product",
+      "type"
+    ],
+    "search_fields": [
+      "location_value"
+    ]
+  },
   "product": {
     "model": "Product",
     "orderings": [
