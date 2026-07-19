@@ -1,4 +1,27 @@
 {
+  "asset": {
+    "model": "Product",
+    "orderings": [
+      "created",
+      "id",
+      "name",
+      "updated"
+    ],
+    "params": [
+      "created__gte",
+      "created__lte",
+      "id__in",
+      "name__icontains",
+      "organization",
+      "organization__in",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "name"
+    ]
+  },
   "engagement": {
     "model": "Engagement",
     "orderings": [
@@ -9,15 +32,15 @@
       "updated"
     ],
     "params": [
+      "asset",
+      "asset__in",
       "created__gte",
       "created__lte",
       "engagement_type",
       "id__in",
       "lead",
       "name__icontains",
-      "product",
-      "product__in",
-      "product_type",
+      "organization",
       "status",
       "target_end__gte",
       "target_end__lte",
@@ -43,6 +66,8 @@
     ],
     "params": [
       "active",
+      "asset",
+      "asset__in",
       "created__gte",
       "created__lte",
       "cwe",
@@ -54,10 +79,8 @@
       "false_p",
       "id__in",
       "is_mitigated",
+      "organization",
       "out_of_scope",
-      "product",
-      "product__in",
-      "product_type",
       "reporter",
       "risk_accepted",
       "severity",
@@ -81,38 +104,15 @@
       "name"
     ],
     "params": [
+      "asset",
       "name__icontains",
-      "product",
       "type"
     ],
     "search_fields": [
       "location_value"
     ]
   },
-  "product": {
-    "model": "Product",
-    "orderings": [
-      "created",
-      "id",
-      "name",
-      "updated"
-    ],
-    "params": [
-      "created__gte",
-      "created__lte",
-      "id__in",
-      "name__icontains",
-      "product_type",
-      "product_type__in",
-      "updated__gte",
-      "updated__lte"
-    ],
-    "search_fields": [
-      "description",
-      "name"
-    ]
-  },
-  "product_type": {
+  "organization": {
     "model": "Product_Type",
     "orderings": [
       "created",
@@ -143,6 +143,8 @@
       "updated"
     ],
     "params": [
+      "asset",
+      "asset__in",
       "created__gte",
       "created__lte",
       "engagement",
@@ -150,9 +152,7 @@
       "environment",
       "id__in",
       "lead",
-      "product",
-      "product__in",
-      "product_type",
+      "organization",
       "target_end__gte",
       "target_end__lte",
       "target_start__gte",

@@ -59,24 +59,24 @@ def build_api() -> NinjaAPI:
     from dojo.engagement.api_v3.routes import build_engagements_router  # noqa: PLC0415
     from dojo.finding.api_v3.routes import build_findings_router  # noqa: PLC0415
     from dojo.location.api_v3.routes import (  # noqa: PLC0415
+        build_asset_locations_router,
         build_finding_locations_router,
         build_locations_router,
-        build_product_locations_router,
     )
-    from dojo.product.api_v3.routes import build_products_router  # noqa: PLC0415
-    from dojo.product_type.api_v3.routes import build_product_types_router  # noqa: PLC0415
+    from dojo.product.api_v3.routes import build_assets_router  # noqa: PLC0415
+    from dojo.product_type.api_v3.routes import build_organizations_router  # noqa: PLC0415
     from dojo.test.api_v3.routes import build_tests_router  # noqa: PLC0415
     from dojo.user.api_v3.routes import build_users_router  # noqa: PLC0415
 
     api.add_router("", build_findings_router())
-    api.add_router("", build_product_types_router())
-    api.add_router("", build_products_router())
+    api.add_router("", build_organizations_router())
+    api.add_router("", build_assets_router())
     api.add_router("", build_engagements_router())
     api.add_router("", build_tests_router())
     api.add_router("", build_users_router())
     api.add_router("", build_locations_router())
     api.add_router("", build_finding_locations_router())
-    api.add_router("", build_product_locations_router())
+    api.add_router("", build_asset_locations_router())
     api.add_router("", build_import_router())
 
     _mount_subresources(api)
@@ -89,11 +89,12 @@ def _mount_subresources(api: NinjaAPI) -> None:
     *models* actually store them (storage support matrix, see .claude/os5-report.md / §12):
 
     - notes + files: finding, engagement, test (each has a ``Notes``/``FileUpload`` M2M).
-    - tags:          finding, engagement, test, product (each has a ``TagField`` and a writable v3
-                     resource). product_type/user have no such fields; location has a ``TagField``
-                     but is a read-only, superuser-only resource with no v2 tag-mutation endpoint
-                     and already surfaces ``tags[]`` on its read shape -- so no tag sub-resource is
-                     attached to it (§12).
+    - tags:          finding, engagement, test, asset (each has a ``TagField`` and a writable v3
+                     resource; per D11 the Product resource is exposed as ``/assets``). organization
+                     (product_type)/user have no such fields; location has a ``TagField`` but is a
+                     read-only, superuser-only resource with no v2 tag-mutation endpoint and already
+                     surfaces ``tags[]`` on its read shape -- so no tag sub-resource is attached to
+                     it (§12).
 
     Deferred here (not at module top) so the kernel ``subresources.py`` stays resource-agnostic;
     this mount is the composition root, alongside the router-factory imports above.
@@ -112,7 +113,7 @@ def _mount_subresources(api: NinjaAPI) -> None:
     from dojo.test.queries import get_authorized_tests  # noqa: PLC0415
     from dojo.test.services import process_note_added as test_process_note_added  # noqa: PLC0415
 
-    # Parent authorized-view queryset resolvers. finding/product take an explicit user; engagement/
+    # Parent authorized-view queryset resolvers. finding/asset take an explicit user; engagement/
     # test read the current user from crum (their signatures take no user kwarg) -- matching how the
     # v2 viewsets and the OS3 route factories call them.
     def findings_qs(request):
@@ -124,7 +125,7 @@ def _mount_subresources(api: NinjaAPI) -> None:
     def tests_qs(request):
         return get_authorized_tests(Permissions.Test_View)
 
-    def products_qs(request):
+    def assets_qs(request):
         return get_authorized_products(Permissions.Product_View, user=request.user)
 
     file_view = Permissions.Product_Tracking_Files_View
@@ -156,7 +157,7 @@ def _mount_subresources(api: NinjaAPI) -> None:
 
     tagged = (
         *notes_and_files,
-        ("products", "Product", products_qs),
+        ("assets", "Asset", assets_qs),
     )
     for resource, label, qs in tagged:
         api.add_router("", build_tags_router(resource=resource, parent_label=label, get_parent_queryset=qs))

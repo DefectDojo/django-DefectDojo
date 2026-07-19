@@ -12,8 +12,8 @@ from .base import ApiV3TestCase
 
 _SLIM_KEYS = {
     "id", "title", "severity", "active", "verified", "false_p", "duplicate", "risk_accepted",
-    "out_of_scope", "is_mitigated", "date", "cwe", "test", "engagement", "product",
-    "product_type", "reporter", "locations_count", "tags", "created", "updated",
+    "out_of_scope", "is_mitigated", "date", "cwe", "test", "engagement", "asset",
+    "organization", "reporter", "locations_count", "tags", "created", "updated",
 }
 
 
@@ -30,7 +30,7 @@ class TestApiV3FindingsSlim(ApiV3TestCase):
         row = self.get_json("findings")["results"][0]
         self.assertEqual(_SLIM_KEYS, set(row))
         # Refs are closed {id, name}; parent chain is denormalized onto the finding.
-        for key in ("test", "engagement", "product", "product_type"):
+        for key in ("test", "engagement", "asset", "organization"):
             self.assertEqual({"id", "name"}, set(row[key]), key)
         self.assertIsInstance(row["locations_count"], int)
         self.assertIsInstance(row["tags"], list)
@@ -59,7 +59,7 @@ class TestApiV3FindingsExpand(ApiV3TestCase):
         self.assertIn("engagement", row["test"])
         # engagement nested inside test is itself a slim (carries name, not just id).
         self.assertIn("name", row["test"]["engagement"])
-        self.assertIn("product", row["test"]["engagement"])
+        self.assertIn("asset", row["test"]["engagement"])
 
     def test_expand_reporter(self):
         row = self.get_json("findings", data={"expand": "reporter"})["results"][0]

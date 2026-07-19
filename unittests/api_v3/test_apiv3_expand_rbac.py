@@ -17,7 +17,7 @@ two-product world, authorize a non-superuser on exactly one product, and assert 
 data never leaks through any v3 projection.
 
 Setup mirrors the OSS authorization model used by the other v3 RBAC tests
-(``test_apiv3_products.py`` / ``test_apiv3_subresources.py``): membership via the legacy
+(``test_apiv3_assets.py`` / ``test_apiv3_subresources.py``): membership via the legacy
 ``product.authorized_users`` M2M, which the auth-filter plugin resolves into the finding queryset.
 """
 from __future__ import annotations
@@ -109,18 +109,18 @@ class TestApiV3ExpandRbacPositive(_TwoProductWorld):
         # test ref swapped for the test slim, engagement inlined inside it, all belonging to product A.
         self.assertIn("engagement", detail["test"])
         self.assertEqual(self.test_a.engagement.id, detail["test"]["engagement"]["id"])
-        self.assertEqual(self.product_a.id, detail["test"]["engagement"]["product"]["id"])
+        self.assertEqual(self.product_a.id, detail["test"]["engagement"]["asset"]["id"])
 
     def test_authorized_member_list_expands_only_own_product(self):
         body = self.get_json(
             "findings", client=self.member_client(),
-            data={"expand": "test.engagement,product,product_type", "limit": 250},
+            data={"expand": "test.engagement,asset,organization", "limit": 250},
         )
         self.assertEqual(len(self.findings_a), body["count"])
         for row in body["results"]:
             # Denormalized parent refs AND expanded objects must all be product A.
-            self.assertEqual(self.product_a.id, row["product"]["id"])
-            self.assertEqual(self.product_a.id, row["test"]["engagement"]["product"]["id"])
+            self.assertEqual(self.product_a.id, row["asset"]["id"])
+            self.assertEqual(self.product_a.id, row["test"]["engagement"]["asset"]["id"])
 
     def test_authorized_member_include_counts_reflects_own_product(self):
         body = self.get_json("findings", client=self.member_client(), data={"include": "counts"})
@@ -136,7 +136,7 @@ class TestApiV3ExpandRbacCrossProduct(_TwoProductWorld):
 
     def test_list_never_includes_other_product_rows(self):
         body = self.get_json("findings", client=self.member_client(), data={"limit": 250})
-        seen_products = {row["product"]["id"] for row in body["results"]}
+        seen_products = {row["asset"]["id"] for row in body["results"]}
         self.assertEqual({self.product_a.id}, seen_products)
         self.assertNotIn(self.product_b.id, seen_products)
 
@@ -149,7 +149,7 @@ class TestApiV3ExpandRbacCrossProduct(_TwoProductWorld):
 
     def test_filter_by_other_product_returns_empty(self):
         # A filter naming product B must still be intersected with the authorized queryset -> empty.
-        body = self.get_json("findings", client=self.member_client(), data={"product": self.product_b.id})
+        body = self.get_json("findings", client=self.member_client(), data={"asset": self.product_b.id})
         self.assertEqual(0, body["count"])
         self.assertEqual([], body["results"])
 

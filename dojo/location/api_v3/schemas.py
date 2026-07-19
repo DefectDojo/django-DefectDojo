@@ -1,5 +1,5 @@
 """
-Location response schemas + the finding/product location edge schemas for API v3 (§4.5, §4.14, OS4).
+Location response schemas + the finding/asset location edge schemas for API v3 (§4.5, §4.14, OS4).
 
 ``LocationSlim`` (list) and ``LocationDetail`` (retrieve). Every schema is a named, importable,
 subclassable ninja Schema (I4) and declares (as ``ClassVar`` so pydantic does not treat them as
@@ -11,10 +11,11 @@ subtype is persistable today (D5), so ``LocationDetail`` adds the URL-subtype fi
 (``protocol/host/port/path/query/fragment``) pulled from the ``url`` reverse one-to-one; for a
 non-URL location (none exist in alpha) those fields render ``null``.
 
-``FindingLocationEdge`` / ``ProductLocationEdge`` document the edge-row shape of the
-``/findings/{id}/locations`` and ``/products/{id}/locations`` sub-resources for OpenAPI (I1/I4);
+``FindingLocationEdge`` / ``AssetLocationEdge`` document the edge-row shape of the
+``/findings/{id}/locations`` and ``/assets/{id}/locations`` sub-resources for OpenAPI (I1/I4);
 their runtime serialization is manual dicts (like the list envelopes) so ``LocationRef`` is emitted
-with its ``type`` field.
+with its ``type`` field. (Per D11 the product location sub-resource is exposed on the wire as
+``/assets/{id}/locations``; the model/module paths are not renamed -- §12.)
 """
 from __future__ import annotations
 
@@ -35,15 +36,15 @@ if TYPE_CHECKING:
     from dojo.api_v3.expand import ExpandRel
 
 __all__ = [
+    "AssetLocationEdge",
+    "AssetLocationListResponse",
     "FindingLocationEdge",
     "FindingLocationListResponse",
     "LocationDetail",
     "LocationListResponse",
     "LocationSlim",
-    "ProductLocationEdge",
-    "ProductLocationListResponse",
+    "asset_location_edge",
     "finding_location_edge",
-    "product_location_edge",
 ]
 
 
@@ -142,11 +143,11 @@ class FindingLocationEdge(Schema):
     auditor: Ref | None
 
 
-class ProductLocationEdge(Schema):
+class AssetLocationEdge(Schema):
 
     """
-    One row of ``GET /products/{id}/locations`` (§4.14): location ref + edge status.
-    ``LocationProductReference`` has no ``audit_time``/``auditor`` columns, so the product edge
+    One row of ``GET /assets/{id}/locations`` (§4.14): location ref + edge status.
+    ``LocationProductReference`` has no ``audit_time``/``auditor`` columns, so the asset edge
     carries only ``status`` (§12).
     """
 
@@ -176,14 +177,14 @@ class FindingLocationListResponse(Schema):
     meta: dict | None = None
 
 
-class ProductLocationListResponse(Schema):
+class AssetLocationListResponse(Schema):
 
-    """OpenAPI documentation of the ``/products/{id}/locations`` envelope (I1)."""
+    """OpenAPI documentation of the ``/assets/{id}/locations`` envelope (I1)."""
 
     count: int
     next: str | None
     previous: str | None
-    results: list[ProductLocationEdge]
+    results: list[AssetLocationEdge]
     meta: dict | None = None
 
 
@@ -199,7 +200,7 @@ def finding_location_edge(ref) -> dict:
     }
 
 
-def product_location_edge(ref) -> dict:
+def asset_location_edge(ref) -> dict:
     """Serialize a ``LocationProductReference`` edge row (§4.14): location ref + status (no audit)."""
     return {
         "location": to_location_ref(ref.location),

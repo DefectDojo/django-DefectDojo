@@ -103,8 +103,8 @@ class TestApiV3Import(ApiV3TestCase):
     # --- auto mode --------------------------------------------------------------------------
     def test_auto_mode_creates_then_reuses(self):
         created = self._v3_import(
-            mode="auto", product_name="v3 Auto Product", engagement_name="v3 Auto Eng",
-            product_type_name="v3 Auto PT", auto_create_context="true",
+            mode="auto", asset_name="v3 Auto Product", engagement_name="v3 Auto Eng",
+            organization_name="v3 Auto PT", auto_create_context="true",
         )
         self.assertEqual("import", created["mode_resolved"])
         first_test = created["test"]["id"]
@@ -112,8 +112,8 @@ class TestApiV3Import(ApiV3TestCase):
 
         # Auto again with the same identifiers resolves the existing test -> reimport.
         reused = self._v3_import(
-            mode="auto", product_name="v3 Auto Product", engagement_name="v3 Auto Eng",
-            product_type_name="v3 Auto PT", auto_create_context="true",
+            mode="auto", asset_name="v3 Auto Product", engagement_name="v3 Auto Eng",
+            organization_name="v3 Auto PT", auto_create_context="true",
         )
         self.assertEqual("reimport", reused["mode_resolved"])
         self.assertEqual(first_test, reused["test"]["id"])

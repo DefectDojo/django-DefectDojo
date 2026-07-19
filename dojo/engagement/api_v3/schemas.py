@@ -5,11 +5,14 @@ Engagement response + write schemas for API v3 (§4.5, §4.11, OS3b).
 (where OS1 first defined it so finding ``?expand=`` had a target); the finding module now re-exports
 this copy so there is exactly one class per model (verified is-identity in the tests, mirroring the
 OS3a relocation pattern -- see §12). ``EngagementDetail`` adds the documented heavier read fields
-(§4.5). ``product``/``product_type``/``lead`` are expandable relations (§4.6).
+(§4.5). ``asset``/``organization``/``lead`` are expandable relations (§4.6). Per D11 the
+Product/Product_Type models are exposed on the wire as ``asset``/``organization`` (the ref keys and
+the ``asset`` write FK -> model ``product``); the models/DB/module paths are not renamed (§12).
 
 Write schemas mirror the v2 ``EngagementSerializer`` (a ``ModelSerializer`` excluding
-``inherited_tags``): the model requires ``target_start``, ``target_end`` and ``product``; everything
-else is optional. Relations are referenced by integer id (§4.11); ``editable=False`` /
+``inherited_tags``): the model requires ``target_start``, ``target_end`` and ``product`` (exposed on
+the wire as ``asset``); everything else is optional. Relations are referenced by integer id (§4.11);
+``editable=False`` /
 server-managed fields (``active``, ``notes``, ``files``, ``progress``, ``risk_acceptance``,
 ``done_testing``, ``id``, ``created``, ``updated``) are never writable; unknown fields are rejected
 (``extra="forbid"``).
@@ -24,8 +27,8 @@ from ninja import Schema
 from dojo.api_v3.expand import ExpandRel
 from dojo.api_v3.refs import Ref, to_ref
 from dojo.models import Engagement
-from dojo.product.api_v3.schemas import ProductSlim
-from dojo.product_type.api_v3.schemas import ProductTypeSlim
+from dojo.product.api_v3.schemas import AssetSlim
+from dojo.product_type.api_v3.schemas import OrganizationSlim
 from dojo.user.api_v3.schemas import UserSlim
 
 
@@ -37,8 +40,8 @@ class EngagementSlim(Schema):
 
     id: int
     name: str | None
-    product: Ref
-    product_type: Ref
+    asset: Ref
+    organization: Ref
     lead: Ref | None
     status: str | None
     engagement_type: str | None
@@ -50,11 +53,11 @@ class EngagementSlim(Schema):
     updated: datetime | None
 
     @staticmethod
-    def resolve_product(obj) -> dict | None:
+    def resolve_asset(obj) -> dict | None:
         return to_ref(obj.product)
 
     @staticmethod
-    def resolve_product_type(obj) -> dict | None:
+    def resolve_organization(obj) -> dict | None:
         return to_ref(obj.product.prod_type)
 
     @staticmethod
@@ -67,8 +70,8 @@ class EngagementSlim(Schema):
 
 
 EngagementSlim.EXPANDABLE = {
-    "product": ExpandRel(attr="product", path="product", schema=ProductSlim),
-    "product_type": ExpandRel(attr="product.prod_type", path="product__prod_type", schema=ProductTypeSlim),
+    "asset": ExpandRel(attr="product", path="product", schema=AssetSlim),
+    "organization": ExpandRel(attr="product.prod_type", path="product__prod_type", schema=OrganizationSlim),
     "lead": ExpandRel(attr="lead", path="lead", schema=UserSlim),
 }
 
@@ -96,11 +99,11 @@ class EngagementDetail(EngagementSlim):
 
 class EngagementWrite(Schema):
 
-    """Create payload (POST). ``product``/``target_start``/``target_end`` required (mirrors v2)."""
+    """Create payload (POST). ``asset``/``target_start``/``target_end`` required (mirrors v2)."""
 
     model_config = {"extra": "forbid"}
 
-    product: int
+    asset: int
     target_start: date
     target_end: date
     name: str | None = None
@@ -131,7 +134,7 @@ class EngagementUpdate(Schema):
 
     model_config = {"extra": "forbid"}
 
-    product: int | None = None
+    asset: int | None = None
     target_start: date | None = None
     target_end: date | None = None
     name: str | None = None

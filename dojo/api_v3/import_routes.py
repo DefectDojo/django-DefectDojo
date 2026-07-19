@@ -7,6 +7,11 @@ Consolidated import endpoint for API v3 (§4.13).
 to ``dojo/importers/services.py`` (I6). Destructive flags are never implied by mode -- when
 omitted, importer defaults apply and the response echoes the effective values.
 
+Per D11 the auto-create form fields speak the new domain language on the wire: ``asset_name`` and
+``organization_name`` (mapped internally to the ``AutoCreateContextManager``'s ``product_name`` /
+``product_type_name`` context keys, and to the ``dojo/importers/services.py`` facade's kwargs of the
+same internal names -- those are not part of the v3 wire surface). See §12.
+
 Background processing is reserved (grammar only): ``background=true`` returns 400 in alpha.
 """
 from __future__ import annotations
@@ -40,9 +45,9 @@ class ImportForm(Schema):
     mode: str = "auto"
     engagement: int | None = None
     test: int | None = None
-    product_name: str | None = None
+    asset_name: str | None = None
     engagement_name: str | None = None
-    product_type_name: str | None = None
+    organization_name: str | None = None
     test_title: str | None = None
     auto_create_context: bool = False
     close_old_findings: bool | None = None
@@ -80,20 +85,20 @@ def _resolve_engagement_for_import(request: HttpRequest, payload: ImportForm) ->
         return engagement
     if not payload.auto_create_context:
         raise validation_problem(
-            {"engagement": ["Need engagement or product_name + engagement_name to perform import"]},
+            {"engagement": ["Need engagement or asset_name + engagement_name to perform import"]},
         )
     _require_permission(
         allowed=check_auto_create_permission(
-            request.user, None, payload.product_name, None, payload.engagement_name, None,
-            payload.product_type_name,
-            "Need engagement or product_name + engagement_name to perform import",
+            request.user, None, payload.asset_name, None, payload.engagement_name, None,
+            payload.organization_name,
+            "Need engagement or asset_name + engagement_name to perform import",
         ),
     )
     auto = AutoCreateContextManager()
     context = {
-        "product_name": payload.product_name,
+        "product_name": payload.asset_name,
         "engagement_name": payload.engagement_name,
-        "product_type_name": payload.product_type_name,
+        "product_type_name": payload.organization_name,
         "auto_create_context": payload.auto_create_context,
     }
     auto.process_import_meta_data_from_dict(context)
@@ -114,9 +119,9 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> None:
     auto = AutoCreateContextManager()
     context = {
         "scan_type": payload.scan_type,
-        "product_name": payload.product_name,
+        "product_name": payload.asset_name,
         "engagement_name": payload.engagement_name,
-        "product_type_name": payload.product_type_name,
+        "product_type_name": payload.organization_name,
         "test_title": payload.test_title,
         "auto_create_context": payload.auto_create_context,
     }
@@ -129,13 +134,13 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> None:
         return
     if not payload.auto_create_context:
         raise validation_problem(
-            {"test": ["Need test or product_name + engagement_name + scan_type to perform reimport"]},
+            {"test": ["Need test or asset_name + engagement_name + scan_type to perform reimport"]},
         )
     _require_permission(
         allowed=check_auto_create_permission(
-            request.user, context.get("product"), payload.product_name, context.get("engagement"),
-            payload.engagement_name, None, payload.product_type_name,
-            "Need test or product_name + engagement_name + scan_type to perform reimport",
+            request.user, context.get("product"), payload.asset_name, context.get("engagement"),
+            payload.engagement_name, None, payload.organization_name,
+            "Need test or asset_name + engagement_name + scan_type to perform reimport",
         ),
     )
 
@@ -195,9 +200,9 @@ def build_import_router(*, auth=NOT_SET) -> Router:
                 _check_auto_permission(request, payload)
                 result = auto_import_scan(
                     engagement=get_object_or_none(Engagement, pk=payload.engagement) if payload.engagement else None,
-                    product_name=payload.product_name,
+                    product_name=payload.asset_name,
                     engagement_name=payload.engagement_name,
-                    product_type_name=payload.product_type_name,
+                    product_type_name=payload.organization_name,
                     close_old_findings=payload.close_old_findings,
                     **common,
                 )

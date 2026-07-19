@@ -1,11 +1,13 @@
 """
-Location read routes + finding/product location sub-resources for API v3 (§4.14, OS4).
+Location read routes + finding/asset location sub-resources for API v3 (§4.14, OS4).
 
-Three router factories (I5), all **read-only** (location lifecycle is import-driven, §4.14):
+Three router factories (I5), all **read-only** (location lifecycle is import-driven, §4.14). Per D11
+the product location sub-resource is exposed on the wire as ``/assets/{id}/locations`` (the model /
+``get_authorized_products`` / ORM paths are not renamed -- §12):
 
-- ``build_locations_router()``          -> ``GET /locations`` + ``GET /locations/{id}``
-- ``build_finding_locations_router()``  -> ``GET /findings/{id}/locations`` (edge rows)
-- ``build_product_locations_router()``  -> ``GET /products/{id}/locations`` (edge rows)
+- ``build_locations_router()``        -> ``GET /locations`` + ``GET /locations/{id}``
+- ``build_finding_locations_router()``-> ``GET /findings/{id}/locations`` (edge rows)
+- ``build_asset_locations_router()``  -> ``GET /assets/{id}/locations`` (edge rows)
 
 Routes are thin (I6): authorize -> filter/plan -> serialize -> shape. RBAC:
 
@@ -14,13 +16,13 @@ Routes are thin (I6): authorize -> filter/plan -> serialize -> shape. RBAC:
   see §12). v3 gates the whole resource behind ``request.user.is_superuser`` (403 otherwise) and
   draws rows from ``get_authorized_locations`` (I8, forward-compatible: a downstream distribution can
   scope the queryset without a route change).
-- the sub-resources use **parent-inherited authorization**: the parent finding/product is resolved
+- the sub-resources use **parent-inherited authorization**: the parent finding/asset is resolved
   through ``get_authorized_findings``/``get_authorized_products`` (I8); an unknown *or unauthorized*
   parent is a 404 (never leak existence, §4.10). The edge rows are then drawn from the parent's own
   reverse manager, so a caller who can see the parent sees its edges.
 
-These live in the location module (not the finding/product route factories) so all location code
-stays together and the finding/product factories are untouched (§12).
+These live in the location module (not the finding/asset route factories) so all location code
+stays together and the finding/asset factories are untouched (§12).
 """
 from __future__ import annotations
 
@@ -37,13 +39,13 @@ from dojo.api_v3.pagination import paginate
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
 from dojo.location.api_v3.schemas import (
+    AssetLocationListResponse,
     FindingLocationListResponse,
     LocationDetail,
     LocationListResponse,
     LocationSlim,
-    ProductLocationListResponse,
+    asset_location_edge,
     finding_location_edge,
-    product_location_edge,
 )
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.queries import get_authorized_locations
@@ -62,9 +64,9 @@ LOCATION_FILTER_SPEC = register_filter_spec("location", FilterSpec(
     filters={
         "type": filter_field("location_type", "exact", "char"),
         "name__icontains": filter_field("location_value", "icontains", "char"),
-        # A location relates to a product via LocationProductReference (mirrors the v2 LocationFilter
+        # A location relates to an asset via LocationProductReference (mirrors the v2 LocationFilter
         # `product` filter, field_name="products__product"). Distinct: the join can duplicate rows.
-        "product": filter_field("products__product", "exact", "number", distinct=True),
+        "asset": filter_field("products__product", "exact", "number", distinct=True),
     },
     orderings={
         "id": "id",
@@ -156,31 +158,31 @@ def build_finding_locations_router(*, queryset_hook: Callable | None = None, aut
     return router
 
 
-def build_product_locations_router(*, queryset_hook: Callable | None = None, auth=NOT_SET) -> Router:
+def build_asset_locations_router(*, queryset_hook: Callable | None = None, auth=NOT_SET) -> Router:
     """
-    Build the ``GET /products/{id}/locations`` sub-resource router (I5). Edge rows carry the location
+    Build the ``GET /assets/{id}/locations`` sub-resource router (I5). Edge rows carry the location
     ref + edge ``status`` only -- ``LocationProductReference`` has no audit columns (§12).
     ``select_related("location")`` keeps the query count constant.
     """
-    router = Router(tags=["products"], auth=auth)
+    router = Router(tags=["assets"], auth=auth)
 
     @router.get(
-        "/products/{int:product_id}/locations",
-        response=ProductLocationListResponse,
-        url_name="product_locations_list",
+        "/assets/{int:asset_id}/locations",
+        response=AssetLocationListResponse,
+        url_name="asset_locations_list",
     )
-    def list_product_locations(request: HttpRequest, product_id: int):
-        products = get_authorized_products(Permissions.Product_View, user=request.user)
+    def list_asset_locations(request: HttpRequest, asset_id: int):
+        assets = get_authorized_products(Permissions.Product_View, user=request.user)
         if queryset_hook is not None:
-            products = queryset_hook(products, request)
-        product = products.filter(pk=product_id).first()
-        if product is None:
-            msg = f"Product {product_id} not found"
+            assets = queryset_hook(assets, request)
+        asset = assets.filter(pk=asset_id).first()
+        if asset is None:
+            msg = f"Asset {asset_id} not found"
             raise not_found_problem(msg)
 
-        edges = LocationProductReference.objects.filter(product=product).order_by("id")
+        edges = LocationProductReference.objects.filter(product=asset).order_by("id")
         page_qs = edges.select_related("location")
-        envelope = paginate(request, count_qs=edges, page_qs=page_qs, serialize=product_location_edge)
+        envelope = paginate(request, count_qs=edges, page_qs=page_qs, serialize=asset_location_edge)
         return json_response(envelope)
 
     return router

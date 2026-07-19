@@ -1,7 +1,7 @@
 """
 Test CRUD routes for API v3 (§4.5, §4.9, §4.11, OS3b).
 
-``build_tests_router()`` is a router factory (I5), same shape as ``build_products_router``. Routes
+``build_tests_router()`` is a router factory (I5), same shape as ``build_assets_router``. Routes
 are thin (I6): authorize -> filter -> plan queryset -> serialize -> shape. RBAC flows only through
 ``get_authorized_tests`` for reads (I8) and the v2 ``user_has_permission`` semantics for writes,
 mirroring the v2 ``UserHasTestPermission`` permission class exactly:
@@ -77,9 +77,9 @@ TEST_FILTER_SPEC = register_filter_spec("test", FilterSpec(
         "title__icontains": filter_field("title", "icontains", "char"),
         "engagement": filter_field("engagement", "exact", "number"),
         "engagement__in": filter_field("engagement", "in", "number"),
-        "product": filter_field("engagement__product", "exact", "number"),
-        "product__in": filter_field("engagement__product", "in", "number"),
-        "product_type": filter_field("engagement__product__prod_type", "exact", "number"),
+        "asset": filter_field("engagement__product", "exact", "number"),
+        "asset__in": filter_field("engagement__product", "in", "number"),
+        "organization": filter_field("engagement__product__prod_type", "exact", "number"),
         "test_type": filter_field("test_type", "exact", "number"),
         "environment": filter_field("environment", "exact", "number"),
         "lead": filter_field("lead", "exact", "number"),

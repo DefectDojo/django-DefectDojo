@@ -1,13 +1,22 @@
 """
-Product CRUD routes for API v3 (§4.5, §4.9, §4.11, OS3a).
+Asset CRUD routes for API v3 (§4.5, §4.9, §4.11, OS3a; renamed per D11).
 
-``build_products_router()`` is a router factory (I5), same signature style as
-``build_findings_router``. Routes are thin (I6): authorize -> filter -> plan queryset -> serialize
--> shape. RBAC flows only through ``get_authorized_products`` for reads (I8) and the v2
-``user_has_permission`` semantics for writes, mirroring the v2 ``UserHasProductPermission`` class:
+**D11 wire rename:** the ``Product`` model is exposed on the wire as ``asset`` and its parent
+``Product_Type`` FK as ``organization`` -- paths (``/assets``), the OpenAPI tag, the filter registry
+name, the schema classes and the write FK field (``organization`` -> model ``prod_type``) all use the
+new domain language. The Django model / DB table / ``dojo/product/`` module path are **not** renamed
+(see §12); ORM field paths, ``get_authorized_products`` and the ``Product_*`` permission enums keep
+their names (they point at the real model). The wire field ``asset_manager`` maps to the model's
+``product_manager`` FK (relabel term "Asset Manager"); ``technical_contact``/``team_manager`` are
+unchanged (no product token). See §12.
 
-- create (POST):   ``add`` permission on the target ``prod_type`` referenced in the payload
-- update (PATCH):  object ``edit`` permission, plus ``add`` on a *reassigned* ``prod_type``
+``build_assets_router()`` is a router factory (I5), same signature style as ``build_findings_router``.
+Routes are thin (I6): authorize -> filter -> plan queryset -> serialize -> shape. RBAC flows only
+through ``get_authorized_products`` for reads (I8) and the v2 ``user_has_permission`` semantics for
+writes, mirroring the v2 ``UserHasProductPermission`` class:
+
+- create (POST):   ``add`` permission on the target organization (``prod_type``) in the payload
+- update (PATCH):  object ``edit`` permission, plus ``add`` on a *reassigned* organization
                    (mirrors ``check_update_permission(request, obj, "add", "prod_type")``)
 - delete (DELETE): object ``delete`` permission (staff-only for non-staff members, legacy model)
 - read:            object ``view`` via the authorized queryset (404 for unknown-or-unauthorized)
@@ -41,10 +50,10 @@ from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_User, Endpoint, Product, Product_Type, SLA_Configuration
 from dojo.product.api_v3.schemas import (
-    ProductDetail,
-    ProductSlim,
-    ProductUpdate,
-    ProductWrite,
+    AssetDetail,
+    AssetSlim,
+    AssetUpdate,
+    AssetWrite,
 )
 from dojo.product.queries import get_authorized_products
 from dojo.utils import async_delete, get_object_or_none, get_setting
@@ -55,15 +64,15 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
     from django.http import HttpRequest
 
-# --- Product filter vocabulary (§4.9, minimal set) --------------------------------------------
+# --- Asset filter vocabulary (§4.9, minimal set) ----------------------------------------------
 
-PRODUCT_FILTER_SPEC = register_filter_spec("product", FilterSpec(
+ASSET_FILTER_SPEC = register_filter_spec("asset", FilterSpec(
     model=Product,
     filters={
         "id__in": filter_field("id", "in", "number"),
         "name__icontains": filter_field("name", "icontains", "char"),
-        "product_type": filter_field("prod_type", "exact", "number"),
-        "product_type__in": filter_field("prod_type", "in", "number"),
+        "organization": filter_field("prod_type", "exact", "number"),
+        "organization__in": filter_field("prod_type", "in", "number"),
         "created__gte": filter_field("created", "gte", "datetime"),
         "created__lte": filter_field("created", "lte", "datetime"),
         "updated__gte": filter_field("updated", "gte", "datetime"),
@@ -78,20 +87,26 @@ PRODUCT_FILTER_SPEC = register_filter_spec("product", FilterSpec(
     search_fields=["name", "description"],
 ))
 
-_USER_FK_FIELDS = ("product_manager", "technical_contact", "team_manager")
+# Wire write-field -> model attribute for the user-role FKs. ``asset_manager`` is the D11 wire name
+# for the model's ``product_manager`` FK; the other two are unchanged (no product token).
+_USER_FK_FIELDS = {
+    "asset_manager": "product_manager",
+    "technical_contact": "technical_contact",
+    "team_manager": "team_manager",
+}
 
 # Sentinel distinguishing "tags omitted" from "tags set to null/empty" on PATCH.
 _UNSET = object()
 
 
-class ProductListResponse(Schema):
+class AssetListResponse(Schema):
 
     """OpenAPI documentation of the list envelope (I1); runtime serialization is manual."""
 
     count: int
     next: str | None
     previous: str | None
-    results: list[ProductSlim]
+    results: list[AssetSlim]
     meta: dict | None = None
 
 
@@ -126,10 +141,10 @@ def _destroy(instance: Product) -> None:
 
 def _apply_optional_relations_and_scalars(instance: Product, data: dict) -> None:
     """Apply the user-FK, SLA and scalar fields present in ``data`` (create + update share this)."""
-    for field in _USER_FK_FIELDS:
-        if field in data:
-            pk = data.pop(field)
-            setattr(instance, field, _resolve_user_fk(field, pk) if pk is not None else None)
+    for wire_field, model_attr in _USER_FK_FIELDS.items():
+        if wire_field in data:
+            pk = data.pop(wire_field)
+            setattr(instance, model_attr, _resolve_user_fk(wire_field, pk) if pk is not None else None)
     if "sla_configuration" in data:
         pk = data.pop("sla_configuration")
         if pk is not None:
@@ -141,19 +156,19 @@ def _apply_optional_relations_and_scalars(instance: Product, data: dict) -> None
         setattr(instance, key, value)
 
 
-def build_products_router(
+def build_assets_router(
     *,
-    schema: type = ProductSlim,
-    detail_schema: type = ProductDetail,
-    filter_spec: FilterSpec = PRODUCT_FILTER_SPEC,
+    schema: type = AssetSlim,
+    detail_schema: type = AssetDetail,
+    filter_spec: FilterSpec = ASSET_FILTER_SPEC,
     queryset_hook: Callable | None = None,
     auth=NOT_SET,
 ) -> Router:
-    """Build the products router (I5)."""
-    router = Router(tags=["products"], auth=auth)
+    """Build the assets router (I5)."""
+    router = Router(tags=["assets"], auth=auth)
 
-    @router.get("/products", response=ProductListResponse, url_name="products_list")
-    def list_products(request: HttpRequest):
+    @router.get("/assets", response=AssetListResponse, url_name="assets_list")
+    def list_assets(request: HttpRequest):
         filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
 
         expand_tree, select_related, prefetch = plan(schema, request.GET.get("expand"))
@@ -171,28 +186,28 @@ def build_products_router(
             envelope.setdefault("meta", {}).update(include_meta)
         return json_response(envelope)
 
-    @router.get("/products/{int:product_id}", response=detail_schema, url_name="products_detail")
-    def get_product(request: HttpRequest, product_id: int):
+    @router.get("/assets/{int:asset_id}", response=detail_schema, url_name="assets_detail")
+    def get_asset(request: HttpRequest, asset_id: int):
         expand_tree, select_related, prefetch = plan(detail_schema, request.GET.get("expand"))
         qs = _base_queryset(request, queryset_hook).select_related(*detail_schema.SELECT_RELATED).prefetch_related(*detail_schema.PREFETCH_RELATED)
         qs = plan_queryset(qs, select_related, prefetch)
-        obj = qs.filter(pk=product_id).first()
+        obj = qs.filter(pk=asset_id).first()
         if obj is None:
-            msg = f"Product {product_id} not found"
+            msg = f"Asset {asset_id} not found"
             raise not_found_problem(msg)
         fields = parse_fields(request.GET.get("fields"), allowed_field_names(detail_schema))
         return json_response(apply_fields(serialize(obj, detail_schema, expand_tree), fields))
 
-    @router.post("/products", response=detail_schema, url_name="products_create")
-    def create_product(request: HttpRequest, payload: ProductWrite):
+    @router.post("/assets", response=detail_schema, url_name="assets_create")
+    def create_asset(request: HttpRequest, payload: AssetWrite):
         data = payload.dict()
         tags = data.pop("tags")
-        prod_type_id = data.pop("prod_type")
-        # Mirror check_post_permission(request, Product_Type, "prod_type", "add"): 404 if the
-        # target product type doesn't exist, 403 if the user can't add products to it.
-        prod_type = get_object_or_none(Product_Type, pk=prod_type_id)
+        organization_id = data.pop("organization")
+        # Mirror check_post_permission(request, Product_Type, "prod_type", "add"): 404 if the target
+        # organization doesn't exist, 403 if the user can't add assets to it.
+        prod_type = get_object_or_none(Product_Type, pk=organization_id)
         if prod_type is None:
-            msg = f"Product_Type {prod_type_id} not found"
+            msg = f"Organization {organization_id} not found"
             raise not_found_problem(msg)
         if not user_has_permission(request.user, prod_type, Permissions.Product_Type_Add_Product):
             raise PermissionDenied
@@ -207,24 +222,24 @@ def build_products_router(
             raise _validation_from_django(exc) from exc
         return json_response(serialize(instance, detail_schema, {}), status=201)
 
-    @router.patch("/products/{int:product_id}", response=detail_schema, url_name="products_update")
-    def update_product(request: HttpRequest, product_id: int, payload: ProductUpdate):
-        instance = _base_queryset(request, queryset_hook).filter(pk=product_id).first()
+    @router.patch("/assets/{int:asset_id}", response=detail_schema, url_name="assets_update")
+    def update_asset(request: HttpRequest, asset_id: int, payload: AssetUpdate):
+        instance = _base_queryset(request, queryset_hook).filter(pk=asset_id).first()
         if instance is None:
-            msg = f"Product {product_id} not found"
+            msg = f"Asset {asset_id} not found"
             raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
         if not user_has_permission(request.user, instance, Permissions.Product_Edit):
             raise PermissionDenied  # 403: visible but not editable
 
         data = payload.dict(exclude_unset=True)
         tags = data.pop("tags", _UNSET)
-        if "prod_type" in data:
-            new_pt_id = data.pop("prod_type")
+        if "organization" in data:
+            new_org_id = data.pop("organization")
             # Mirror check_update_permission: only re-check when the FK actually changes.
-            if new_pt_id is not None and new_pt_id != instance.prod_type_id:
-                new_pt = get_object_or_none(Product_Type, pk=new_pt_id)
+            if new_org_id is not None and new_org_id != instance.prod_type_id:
+                new_pt = get_object_or_none(Product_Type, pk=new_org_id)
                 if new_pt is None:
-                    msg = f"Product_Type {new_pt_id} not found"
+                    msg = f"Organization {new_org_id} not found"
                     raise not_found_problem(msg)
                 if not user_has_permission(request.user, new_pt, Permissions.Product_Type_Add_Product):
                     raise PermissionDenied
@@ -239,11 +254,11 @@ def build_products_router(
             raise _validation_from_django(exc) from exc
         return json_response(serialize(instance, detail_schema, {}))
 
-    @router.delete("/products/{int:product_id}", url_name="products_delete")
-    def delete_product(request: HttpRequest, product_id: int):
-        instance = _base_queryset(request, queryset_hook).filter(pk=product_id).first()
+    @router.delete("/assets/{int:asset_id}", url_name="assets_delete")
+    def delete_asset(request: HttpRequest, asset_id: int):
+        instance = _base_queryset(request, queryset_hook).filter(pk=asset_id).first()
         if instance is None:
-            msg = f"Product {product_id} not found"
+            msg = f"Asset {asset_id} not found"
             raise not_found_problem(msg)
         if not user_has_permission(request.user, instance, Permissions.Product_Delete):
             raise PermissionDenied

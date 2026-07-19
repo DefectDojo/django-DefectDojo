@@ -10,11 +10,12 @@ fields):
   expand planner can keep the query count constant,
 - ``EXPANDABLE``      -- its expandable relations (§4.6).
 
-The parent slims (``EngagementSlim``/``TestSlim``/``TestTypeSlim``/``EnvironmentSlim``/``ProductSlim``
-/``ProductTypeSlim``/``UserSlim``) live in their own resource modules; this module **re-exports**
+The parent slims (``EngagementSlim``/``TestSlim``/``TestTypeSlim``/``EnvironmentSlim``/``AssetSlim``
+/``OrganizationSlim``/``UserSlim``) live in their own resource modules; this module **re-exports**
 them (OS3a relocated product/product_type/user; OS3b relocated engagement/test) so there is exactly
 one canonical class per model shared by the resource endpoints and the finding ``?expand=`` targets
-(I4). See §12.
+(I4). Per D11 the Product/Product_Type models are exposed on the wire as ``asset``/``organization``
+(the ref keys ``finding.asset``/``finding.organization`` and expand keys below). See §12.
 
 Write schemas (``FindingWrite`` create, ``FindingUpdate`` PATCH) are the editable subset of the
 detail fields; required-vs-optional mirrors the v2 ``FindingCreateSerializer`` / ``FindingSerializer``.
@@ -37,20 +38,20 @@ from dojo.api_v3.refs import Ref, to_location_ref, to_ref
 # expand targets (below) and the resource endpoints serialize through the same schema (I4, §12).
 from dojo.engagement.api_v3.schemas import EngagementSlim
 from dojo.models import Finding
-from dojo.product.api_v3.schemas import ProductSlim
-from dojo.product_type.api_v3.schemas import ProductTypeSlim
+from dojo.product.api_v3.schemas import AssetSlim
+from dojo.product_type.api_v3.schemas import OrganizationSlim
 from dojo.test.api_v3.schemas import EnvironmentSlim, TestSlim, TestTypeSlim
 from dojo.user.api_v3.schemas import UserSlim
 
 __all__ = [
+    "AssetSlim",
     "EngagementSlim",
     "EnvironmentSlim",
     "FindingDetail",
     "FindingSlim",
     "FindingUpdate",
     "FindingWrite",
-    "ProductSlim",
-    "ProductTypeSlim",
+    "OrganizationSlim",
     "TestSlim",
     "TestTypeSlim",
     "UserSlim",
@@ -78,8 +79,8 @@ class FindingSlim(Schema):
     cwe: int | None
     test: Ref
     engagement: Ref
-    product: Ref
-    product_type: Ref
+    asset: Ref
+    organization: Ref
     reporter: Ref | None
     locations_count: int
     tags: list[str]
@@ -95,11 +96,11 @@ class FindingSlim(Schema):
         return to_ref(obj.test.engagement)
 
     @staticmethod
-    def resolve_product(obj) -> dict | None:
+    def resolve_asset(obj) -> dict | None:
         return to_ref(obj.test.engagement.product)
 
     @staticmethod
-    def resolve_product_type(obj) -> dict | None:
+    def resolve_organization(obj) -> dict | None:
         return to_ref(obj.test.engagement.product.prod_type)
 
     @staticmethod
@@ -139,11 +140,11 @@ FindingSlim.EXPANDABLE = {
     "test": ExpandRel(attr="test", path="test", schema=TestSlim),
     "reporter": ExpandRel(attr="reporter", path="reporter", schema=UserSlim),
     "engagement": ExpandRel(attr="test.engagement", path="test__engagement", schema=EngagementSlim),
-    "product": ExpandRel(attr="test.engagement.product", path="test__engagement__product", schema=ProductSlim),
-    "product_type": ExpandRel(
+    "asset": ExpandRel(attr="test.engagement.product", path="test__engagement__product", schema=AssetSlim),
+    "organization": ExpandRel(
         attr="test.engagement.product.prod_type",
         path="test__engagement__product__prod_type",
-        schema=ProductTypeSlim,
+        schema=OrganizationSlim,
     ),
     "locations": ExpandRel(
         attr="locations",

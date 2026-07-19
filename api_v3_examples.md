@@ -2,7 +2,7 @@
 
 > **Auto-generated, do not hand-edit.** Every request/response below was captured by `unittests/api_v3/test_apiv3_examples.py` (`DD_API_V3_EXAMPLES=1`, CI-excluded) making **real** in-process requests against the test fixture. Tokens are redacted; long lists are truncated to ~3 rows. Regenerate with the command in that file's docstring.
 
-Captured: 2026-07-19T13:07:38.917110+00:00
+Captured: 2026-07-19T19:08:11.540226+00:00
 
 ## Conventions (see `API_V3_PLAN.md` §4)
 
@@ -18,7 +18,7 @@ Captured: 2026-07-19T13:07:38.917110+00:00
 ---
 ### Finding — GET detail (slim + detail fields)
 
-Retrieve a single finding. Relations render as closed `{id, name}` refs (§4.4); the parent chain (`test`/`engagement`/`product`/`product_type`) is denormalized onto the finding. `locations_count` is an annotation; the full list is a sub-resource (§4.14).
+Retrieve a single finding. Relations render as closed `{id, name}` refs (§4.4); the parent chain (`test`/`engagement`/`asset`/`organization`) is denormalized onto the finding. `locations_count` is an annotation; the full list is a sub-resource (§4.14).
 
 **Request**
 
@@ -51,11 +51,11 @@ Authorization: Token <your-api-token>
     "id": 1,
     "name": "1st Quarter Engagement"
   },
-  "product": {
+  "asset": {
     "id": 2,
     "name": "Security How-to"
   },
-  "product_type": {
+  "organization": {
     "id": 2,
     "name": "ebooks"
   },
@@ -120,11 +120,11 @@ Authorization: Token <your-api-token>
     "engagement": {
       "id": 1,
       "name": "1st Quarter Engagement",
-      "product": {
+      "asset": {
         "id": 2,
         "name": "Security How-to"
       },
-      "product_type": {
+      "organization": {
         "id": 2,
         "name": "ebooks"
       },
@@ -141,11 +141,11 @@ Authorization: Token <your-api-token>
       "created": null,
       "updated": null
     },
-    "product": {
+    "asset": {
       "id": 2,
       "name": "Security How-to"
     },
-    "product_type": {
+    "organization": {
       "id": 2,
       "name": "ebooks"
     },
@@ -165,11 +165,11 @@ Authorization: Token <your-api-token>
     "id": 1,
     "name": "1st Quarter Engagement"
   },
-  "product": {
+  "asset": {
     "id": 2,
     "name": "Security How-to"
   },
-  "product_type": {
+  "organization": {
     "id": 2,
     "name": "ebooks"
   },
@@ -268,11 +268,11 @@ Authorization: Token <your-api-token>
         "id": 1,
         "name": "1st Quarter Engagement"
       },
-      "product": {
+      "asset": {
         "id": 2,
         "name": "Security How-to"
       },
-      "product_type": {
+      "organization": {
         "id": 2,
         "name": "ebooks"
       },
@@ -282,8 +282,8 @@ Authorization: Token <your-api-token>
       },
       "locations_count": 0,
       "tags": [],
-      "created": "2026-07-19T13:07:38.625Z",
-      "updated": "2026-07-19T13:07:38.625Z"
+      "created": "2026-07-19T19:08:10.759Z",
+      "updated": "2026-07-19T19:08:10.759Z"
     },
     {
       "id": 235,
@@ -306,11 +306,11 @@ Authorization: Token <your-api-token>
         "id": 1,
         "name": "1st Quarter Engagement"
       },
-      "product": {
+      "asset": {
         "id": 2,
         "name": "Security How-to"
       },
-      "product_type": {
+      "organization": {
         "id": 2,
         "name": "ebooks"
       },
@@ -320,8 +320,8 @@ Authorization: Token <your-api-token>
       },
       "locations_count": 0,
       "tags": [],
-      "created": "2026-07-19T13:07:38.625Z",
-      "updated": "2026-07-19T13:07:38.625Z"
+      "created": "2026-07-19T19:08:10.759Z",
+      "updated": "2026-07-19T19:08:10.759Z"
     }
   ]
 }
@@ -370,11 +370,11 @@ Authorization: Token <your-api-token>
         "id": 1,
         "name": "1st Quarter Engagement"
       },
-      "product": {
+      "asset": {
         "id": 2,
         "name": "Security How-to"
       },
-      "product_type": {
+      "organization": {
         "id": 2,
         "name": "ebooks"
       },
@@ -408,11 +408,11 @@ Authorization: Token <your-api-token>
         "id": 1,
         "name": "1st Quarter Engagement"
       },
-      "product": {
+      "asset": {
         "id": 2,
         "name": "Security How-to"
       },
-      "product_type": {
+      "organization": {
         "id": 2,
         "name": "ebooks"
       },
@@ -459,7 +459,7 @@ Authorization: Token <your-api-token>
 Content-Type: application/json
 
 {
-  "entry": "Reviewed with the product team; scheduled for the next sprint.",
+  "entry": "Reviewed with the security team; scheduled for the next sprint.",
   "private": false
 }
 ```
@@ -469,15 +469,15 @@ Content-Type: application/json
 ```json
 {
   "id": 2,
-  "entry": "Reviewed with the product team; scheduled for the next sprint.",
+  "entry": "Reviewed with the security team; scheduled for the next sprint.",
   "author": {
     "id": 1,
     "name": "admin"
   },
   "private": false,
   "edited": false,
-  "created": "2026-07-19T13:07:38.688Z",
-  "updated": "2026-07-19T13:07:38.688Z"
+  "created": "2026-07-19T19:08:10.880Z",
+  "updated": "2026-07-19T19:08:10.880Z"
 }
 ```
 
@@ -505,15 +505,15 @@ Authorization: Token <your-api-token>
   "results": [
     {
       "id": 2,
-      "entry": "Reviewed with the product team; scheduled for the next sprint.",
+      "entry": "Reviewed with the security team; scheduled for the next sprint.",
       "author": {
         "id": 1,
         "name": "admin"
       },
       "private": false,
       "edited": false,
-      "created": "2026-07-19T13:07:38.688Z",
-      "updated": "2026-07-19T13:07:38.688Z"
+      "created": "2026-07-19T19:08:10.880Z",
+      "updated": "2026-07-19T19:08:10.880Z"
     }
   ]
 }
@@ -619,11 +619,11 @@ Content-Type: application/json
     "id": 1,
     "name": "1st Quarter Engagement"
   },
-  "product": {
+  "asset": {
     "id": 2,
     "name": "Security How-to"
   },
-  "product_type": {
+  "organization": {
     "id": 2,
     "name": "ebooks"
   },
@@ -633,8 +633,8 @@ Content-Type: application/json
   },
   "locations_count": 0,
   "tags": [],
-  "created": "2026-07-19T13:07:38.711Z",
-  "updated": "2026-07-19T13:07:38.759Z",
+  "created": "2026-07-19T19:08:11.022Z",
+  "updated": "2026-07-19T19:08:11.072Z",
   "description": "before patch",
   "mitigation": null,
   "impact": null,
@@ -665,7 +665,7 @@ Content-Type: multipart/form-data
 multipart/form-data fields:
   mode=import            # auto | import | reimport (default auto)
   scan_type=ZAP Scan
-  engagement=4           # or test= / product_name+engagement_name+auto_create_context
+  engagement=4           # or test= / asset_name+engagement_name+auto_create_context
   file=@0_zap_sample.xml
   active=true
   verified=true
@@ -693,14 +693,14 @@ multipart/form-data fields:
 
 ---
 
-### Product — GET detail
+### Asset — GET detail
 
-A simple entity for contrast with findings: identity, `product_type` ref, and the documented heavier detail fields.
+A simple entity for contrast with findings: identity, `organization` ref, and the documented heavier detail fields.
 
 **Request**
 
 ```http
-GET /api/v3-alpha/products/1
+GET /api/v3-alpha/assets/1
 Authorization: Token <your-api-token>
 ```
 
@@ -711,7 +711,7 @@ Authorization: Token <your-api-token>
   "id": 1,
   "name": "Python How-to",
   "description": "test product",
-  "product_type": {
+  "organization": {
     "id": 1,
     "name": "books"
   },
@@ -724,7 +724,7 @@ Authorization: Token <your-api-token>
   "origin": null,
   "external_audience": false,
   "internet_accessible": false,
-  "product_manager": {
+  "asset_manager": {
     "id": 1,
     "name": "admin"
   },
@@ -742,14 +742,14 @@ Authorization: Token <your-api-token>
 
 ---
 
-### Product — GET list
+### Asset — GET list
 
 Same envelope and grammar as findings; slim rows only on list (§4.5).
 
 **Request**
 
 ```http
-GET /api/v3-alpha/products?limit=2
+GET /api/v3-alpha/assets?limit=2
 Authorization: Token <your-api-token>
 ```
 
@@ -758,14 +758,14 @@ Authorization: Token <your-api-token>
 ```json
 {
   "count": 3,
-  "next": "http://testserver/api/v3-alpha/products?limit=2&offset=2",
+  "next": "http://testserver/api/v3-alpha/assets?limit=2&offset=2",
   "previous": null,
   "results": [
     {
       "id": 1,
       "name": "Python How-to",
       "description": "test product",
-      "product_type": {
+      "organization": {
         "id": 1,
         "name": "books"
       },
@@ -778,7 +778,7 @@ Authorization: Token <your-api-token>
       "id": 2,
       "name": "Security How-to",
       "description": "test product",
-      "product_type": {
+      "organization": {
         "id": 2,
         "name": "ebooks"
       },
@@ -794,21 +794,21 @@ Authorization: Token <your-api-token>
 
 ---
 
-### Product — POST (create)
+### Asset — POST (create)
 
-Create a product. Relations are referenced by integer id (§4.11); unknown fields are rejected (400). Response is the created detail shape (`201`).
+Create an asset. Relations are referenced by integer id (§4.11); unknown fields are rejected (400). Response is the created detail shape (`201`).
 
 **Request**
 
 ```http
-POST /api/v3-alpha/products
+POST /api/v3-alpha/assets
 Authorization: Token <your-api-token>
 Content-Type: application/json
 
 {
-  "name": "Example v3 Product",
+  "name": "Example v3 Asset",
   "description": "Created via the v3 API examples harness",
-  "prod_type": 1,
+  "organization": 1,
   "lifecycle": "production",
   "tags": [
     "pci",
@@ -822,9 +822,9 @@ Content-Type: application/json
 ```json
 {
   "id": 4,
-  "name": "Example v3 Product",
+  "name": "Example v3 Asset",
   "description": "Created via the v3 API examples harness",
-  "product_type": {
+  "organization": {
     "id": 1,
     "name": "books"
   },
@@ -833,14 +833,14 @@ Content-Type: application/json
     "example",
     "pci"
   ],
-  "created": "2026-07-19T13:07:38.890Z",
-  "updated": "2026-07-19T13:07:38.890Z",
+  "created": "2026-07-19T19:08:11.467Z",
+  "updated": "2026-07-19T19:08:11.467Z",
   "business_criticality": null,
   "platform": null,
   "origin": null,
   "external_audience": false,
   "internet_accessible": false,
-  "product_manager": null,
+  "asset_manager": null,
   "technical_contact": null,
   "team_manager": null
 }
@@ -849,14 +849,14 @@ Content-Type: application/json
 
 ---
 
-### Product — PATCH (partial update)
+### Asset — PATCH (partial update)
 
 Partial update; only the changed field is sent.
 
 **Request**
 
 ```http
-PATCH /api/v3-alpha/products/4
+PATCH /api/v3-alpha/assets/4
 Authorization: Token <your-api-token>
 Content-Type: application/json
 
@@ -870,9 +870,9 @@ Content-Type: application/json
 ```json
 {
   "id": 4,
-  "name": "Example v3 Product",
+  "name": "Example v3 Asset",
   "description": "Updated description via PATCH",
-  "product_type": {
+  "organization": {
     "id": 1,
     "name": "books"
   },
@@ -881,14 +881,14 @@ Content-Type: application/json
     "example",
     "pci"
   ],
-  "created": "2026-07-19T13:07:38.890Z",
-  "updated": "2026-07-19T13:07:38.912Z",
+  "created": "2026-07-19T19:08:11.467Z",
+  "updated": "2026-07-19T19:08:11.530Z",
   "business_criticality": null,
   "platform": null,
   "origin": null,
   "external_audience": false,
   "internet_accessible": false,
-  "product_manager": null,
+  "asset_manager": null,
   "technical_contact": null,
   "team_manager": null
 }

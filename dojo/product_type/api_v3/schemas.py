@@ -1,17 +1,24 @@
 """
-Product_Type response + write schemas for API v3 (§4.5, §4.11, OS3a).
+Organization response + write schemas for API v3 (§4.5, §4.11, OS3a; renamed per D11).
 
-``ProductTypeSlim`` is the canonical parent slim (relocated here from ``dojo/finding/api_v3`` where
+**D11 wire rename:** v3 speaks the new domain language -- the ``Product_Type`` model is exposed on
+the wire as ``organization``. The schema classes are ``Organization*`` and the Django model
+(``Product_Type``) / DB table / module path are deliberately **not** renamed (the DTO layer is what
+decouples wire names from models). See §12.
+
+``OrganizationSlim`` is the canonical parent slim (relocated here from ``dojo/finding/api_v3`` where
 OS1 first defined it -- see §12; the finding module now re-exports this copy so there is one class,
 not two, keeping expand targets and this resource in lock-step). Every schema is a named,
 importable, subclassable ninja ``Schema`` (I4) and declares the ``ClassVar`` machinery the expand
 planner reads (``django_model``/``SELECT_RELATED``/``PREFETCH_RELATED``/``EXPANDABLE``).
 
-Write schemas (``ProductTypeWrite`` create, ``ProductTypeUpdate`` PATCH) are the editable subset of
+Write schemas (``OrganizationWrite`` create, ``OrganizationUpdate`` PATCH) are the editable subset of
 the detail fields; required-vs-optional mirrors the v2 ``ProductTypeSerializer`` (a ``ModelSerializer``
 over the model -- ``name`` required, the rest defaulted). Server-managed fields (``id``/``created``/
 ``updated``) are never writable, and unknown fields are rejected (``extra="forbid"``) so write
-validation is consistent with the kernel's strict query contract (§12).
+validation is consistent with the kernel's strict query contract (§12). ``critical_product``/
+``key_product`` keep their model-column names (D11 excludes DB columns; the UI relabel itself retains
+them, e.g. ``org.critical_product_label`` -- see §12).
 """
 from __future__ import annotations
 
@@ -26,7 +33,7 @@ if TYPE_CHECKING:
     from dojo.api_v3.expand import ExpandRel
 
 
-class ProductTypeSlim(Schema):
+class OrganizationSlim(Schema):
     django_model: ClassVar = Product_Type
     SELECT_RELATED: ClassVar[tuple] = ()
     PREFETCH_RELATED: ClassVar[tuple] = ()
@@ -41,12 +48,12 @@ class ProductTypeSlim(Schema):
     updated: datetime | None
 
 
-class ProductTypeDetail(ProductTypeSlim):
+class OrganizationDetail(OrganizationSlim):
 
-    """Detail (retrieve) shape. Product_Type has no heavier read fields today, so it equals slim."""
+    """Detail (retrieve) shape. Organization has no heavier read fields today, so it equals slim."""
 
 
-class ProductTypeWrite(Schema):
+class OrganizationWrite(Schema):
 
     """Create payload (POST). ``name`` is required; the rest mirror the model defaults (§6 OS3)."""
 
@@ -58,7 +65,7 @@ class ProductTypeWrite(Schema):
     key_product: bool = False
 
 
-class ProductTypeUpdate(Schema):
+class OrganizationUpdate(Schema):
 
     """Partial update payload (PATCH). Every field optional; only provided keys are applied."""
 
