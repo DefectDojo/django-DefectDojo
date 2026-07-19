@@ -470,6 +470,12 @@
                                 <a href="{% url 'swagger-ui_oa3' %}" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fa-solid fa-book fa-fw"></i> {% trans "API v2 OpenAPI3 Docs" %}
                                 </a>
+                                {% if V3_FEATURE_LOCATIONS %}
+                                    {# v3 mounts conditionally on this flag (D5) — an unguarded url tag would break every page when it is off #}
+                                    <a href="{% url 'api_v3:openapi-view' %}" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                        <i class="fa-solid fa-book fa-fw"></i> {% trans "API v3 Docs (alpha)" %}
+                                    </a>
+                                {% endif %}
                                 <a href="{{ DOCUMENTATION_URL }}" target="_blank" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                                     <i class="fa-solid fa-circle-question fa-fw"></i> {% trans "Documentation" %}
                                 </a>
