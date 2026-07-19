@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING
 
 from django.conf import settings
 
-from dojo.api_v3.errors import expand_problem
+from dojo.api_v3.errors import expand_problem, fields_problem
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -36,9 +36,16 @@ class ExpandRel:
 
     attr: str                       # python attribute path on the object (may be dotted)
     path: str                       # django ORM relation path segment(s) relative to the model
-    schema: type                    # target slim schema class
+    schema: type | None = None      # target slim schema class (None for a special renderer)
     to_many: bool = False           # True -> prefetch_related; False -> select_related
     special: Callable | None = None  # optional custom renderer(obj) -> value (e.g. edge rows)
+    # Prefetch paths a *special* renderer needs so serialising it never triggers per-row queries
+    # (a special renderer bypasses the schema-driven select/prefetch planning below). Relative to
+    # this rel's model; the walker prefixes them with the current django path.
+    prefetch_paths: tuple[str, ...] = ()
+    # Slim field this expansion replaces in the output (e.g. ``locations`` replaces
+    # ``locations_count`` -- §4.6 "swaps locations_count for edge rows"). None -> pure add.
+    replaces: str | None = None
 
 
 def parse_expand(raw: str | None) -> list[list[str]]:
@@ -84,16 +91,19 @@ def _walk(
         raise expand_problem(msg)
 
     full_path = f"{django_prefix}__{rel.path}" if django_prefix else rel.path
-    if rel.special is None:
-        if rel.to_many:
-            prefetch.add(full_path)
-        else:
-            select_related.add(full_path)
-            # Pull in the target schema's own ref/tag dependencies so serializing the expanded
-            # object never triggers per-row queries -- this is what keeps the query count constant
-            # under expand (the headline guarantee).
-            select_related.update(f"{full_path}__{sr}" for sr in getattr(rel.schema, "SELECT_RELATED", ()))
-            prefetch.update(f"{full_path}__{pf}" for pf in getattr(rel.schema, "PREFETCH_RELATED", ()))
+    if rel.special is not None:
+        # A special renderer produces the value itself; it declares its own prefetch paths so the
+        # query count stays constant (e.g. locations edge rows via prefetch_related, §4.6).
+        prefetch.update(f"{django_prefix}__{pf}" if django_prefix else pf for pf in rel.prefetch_paths)
+    elif rel.to_many:
+        prefetch.add(full_path)
+    else:
+        select_related.add(full_path)
+        # Pull in the target schema's own ref/tag dependencies so serializing the expanded
+        # object never triggers per-row queries -- this is what keeps the query count constant
+        # under expand (the headline guarantee).
+        select_related.update(f"{full_path}__{sr}" for sr in getattr(rel.schema, "SELECT_RELATED", ()))
+        prefetch.update(f"{full_path}__{pf}" for pf in getattr(rel.schema, "PREFETCH_RELATED", ()))
 
     subtree = tree.setdefault(head, {})
     if rest:
@@ -148,6 +158,9 @@ def serialize(obj: object, schema: type, expand_tree: dict) -> dict:
     registry: dict[str, ExpandRel] = getattr(schema, "EXPANDABLE", {})
     for key, subtree in expand_tree.items():
         rel = registry[key]
+        if rel.replaces is not None:
+            # e.g. expand=locations swaps the cheap `locations_count` for the edge rows (§4.6).
+            data.pop(rel.replaces, None)
         if rel.special is not None:
             data[key] = rel.special(obj)
             continue
@@ -171,7 +184,7 @@ def parse_fields(raw: str | None, allowed: set[str]) -> set[str] | None:
     unknown = requested - allowed
     if unknown:
         msg = f"unknown field(s): {', '.join(sorted(unknown))}"
-        raise expand_problem(msg)
+        raise fields_problem(msg)
     requested.add("id")
     return requested
 

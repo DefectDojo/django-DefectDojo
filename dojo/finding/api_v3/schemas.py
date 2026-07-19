@@ -22,7 +22,7 @@ from typing import ClassVar
 from ninja import Schema
 
 from dojo.api_v3.expand import ExpandRel
-from dojo.api_v3.refs import Ref, to_ref
+from dojo.api_v3.refs import Ref, to_location_ref, to_ref
 from dojo.models import (
     Development_Environment,
     Dojo_User,
@@ -282,6 +282,23 @@ class FindingSlim(Schema):
         return [t.name for t in obj.tags.all()]
 
 
+def _finding_location_edges(finding) -> list[dict]:
+    """
+    ``expand=locations`` special renderer (§4.6): swap the cheap ``locations_count`` for the edge
+    rows ``[{location: {id, name, type}, status, audit_time}]``. ``finding.locations`` is the
+    ``LocationFindingReference`` reverse manager (edge carries ``status``/``audit_time``); the
+    ``locations__location`` prefetch declared on the ExpandRel keeps the query count constant.
+    """
+    return [
+        {
+            "location": to_location_ref(ref.location),
+            "status": ref.status,
+            "audit_time": ref.audit_time,
+        }
+        for ref in finding.locations.all()
+    ]
+
+
 FindingSlim.EXPANDABLE = {
     "test": ExpandRel(attr="test", path="test", schema=TestSlim),
     "reporter": ExpandRel(attr="reporter", path="reporter", schema=UserSlim),
@@ -291,6 +308,14 @@ FindingSlim.EXPANDABLE = {
         attr="test.engagement.product.prod_type",
         path="test__engagement__product__prod_type",
         schema=ProductTypeSlim,
+    ),
+    "locations": ExpandRel(
+        attr="locations",
+        path="locations",
+        to_many=True,
+        special=_finding_location_edges,
+        prefetch_paths=("locations__location",),
+        replaces="locations_count",
     ),
 }
 
