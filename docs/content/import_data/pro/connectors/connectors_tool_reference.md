@@ -145,25 +145,6 @@ You will need a Cobalt.io **personal API token**. We recommend creating a dedica
 
 DefectDojo maps each Cobalt.io **asset** as a separate Record. Findings are imported for each mapped asset, with their Cobalt.io state (for example `valid_fix`, `wont_fix`, `invalid`) driving the finding status in DefectDojo.
 
-## **Coverity**
-
-The Coverity connector uses the Coverity Connect REST API to pull static analysis (SAST) issues from your on\-premise Coverity Connect server. DefectDojo discovers every project on the instance and creates a separate Record for each **project**.
-
-#### Prerequisites
-
-You will need a Coverity Connect account. We recommend creating a dedicated service account for DefectDojo. For authentication you can use the account password or, preferably, a Coverity **authentication key** generated under your user preferences in Coverity Connect.
-
-The connector reads issues from a saved Coverity **view**. The configured view must expose the columns the importer maps \- `cid`, `displayType`, `displayImpact`, `displayIssueKind`, `checker`, `status`, `classification`, `firstDetected`, `cwe`, `displayFile`, `occurrenceCount` and `lastTriaged`. The built\-in **Outstanding Issues** view exposes these by default.
-
-#### Connector Mappings
-
-1. Enter your Coverity Connect server URL in the **Location** field, for example `https://coverity.example.com:8443`.
-2. Enter the Coverity Connect **username** in the **Username** field.
-3. Enter the account password or authentication key in the **Secret** field.
-4. Optionally, set a **View Name** to read from a specific saved view (defaults to **Outstanding Issues**), and enable **Import all issue kinds** to widen the default import filter (Security issues plus Quality `RESOURCE_LEAK` issues) to every issue kind.
-
-DefectDojo maps each Coverity **project** as a separate Record.
-
 ## Dependency\-Track
 
 This connector fetches data from a on\-premise Dependency\-Track instance, via REST API.
