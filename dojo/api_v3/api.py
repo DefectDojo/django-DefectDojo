@@ -57,8 +57,14 @@ def build_api() -> NinjaAPI:
     # stays "resources import kernel", never the reverse.
     from dojo.api_v3.import_routes import build_import_router  # noqa: PLC0415
     from dojo.finding.api_v3.routes import build_findings_router  # noqa: PLC0415
+    from dojo.product.api_v3.routes import build_products_router  # noqa: PLC0415
+    from dojo.product_type.api_v3.routes import build_product_types_router  # noqa: PLC0415
+    from dojo.user.api_v3.routes import build_users_router  # noqa: PLC0415
 
     api.add_router("", build_findings_router())
+    api.add_router("", build_product_types_router())
+    api.add_router("", build_products_router())
+    api.add_router("", build_users_router())
     api.add_router("", build_import_router())
     return api
 

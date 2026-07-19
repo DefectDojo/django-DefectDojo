@@ -25,74 +25,17 @@ from dojo.api_v3.expand import ExpandRel
 from dojo.api_v3.refs import Ref, to_location_ref, to_ref
 from dojo.models import (
     Development_Environment,
-    Dojo_User,
     Engagement,
     Finding,
-    Product,
-    Product_Type,
     Test,
     Test_Type,
 )
 
-
-class UserSlim(Schema):
-    django_model: ClassVar = Dojo_User
-    SELECT_RELATED: ClassVar[tuple] = ()
-    PREFETCH_RELATED: ClassVar[tuple] = ()
-    EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
-
-    id: int
-    username: str
-    first_name: str
-    last_name: str
-    email: str
-    is_active: bool
-    is_superuser: bool
-    last_login: datetime | None
-
-
-class ProductTypeSlim(Schema):
-    django_model: ClassVar = Product_Type
-    SELECT_RELATED: ClassVar[tuple] = ()
-    PREFETCH_RELATED: ClassVar[tuple] = ()
-    EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
-
-    id: int
-    name: str
-    description: str | None
-    critical_product: bool | None
-    key_product: bool | None
-    created: datetime | None
-    updated: datetime | None
-
-
-class ProductSlim(Schema):
-    django_model: ClassVar = Product
-    SELECT_RELATED: ClassVar[tuple] = ("prod_type",)
-    PREFETCH_RELATED: ClassVar[tuple] = ("tags",)
-    EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
-
-    id: int
-    name: str
-    description: str | None
-    product_type: Ref
-    lifecycle: str | None
-    tags: list[str]
-    created: datetime | None
-    updated: datetime | None
-
-    @staticmethod
-    def resolve_product_type(obj) -> dict | None:
-        return to_ref(obj.prod_type)
-
-    @staticmethod
-    def resolve_tags(obj) -> list[str]:
-        return [t.name for t in obj.tags.all()]
-
-
-ProductSlim.EXPANDABLE = {
-    "product_type": ExpandRel(attr="prod_type", path="prod_type", schema=ProductTypeSlim),
-}
+# Canonical parent slims live in their own resource modules as of OS3a (§12): the finding expand
+# targets (below) reference these single canonical classes rather than a private duplicate.
+from dojo.product.api_v3.schemas import ProductSlim
+from dojo.product_type.api_v3.schemas import ProductTypeSlim
+from dojo.user.api_v3.schemas import UserSlim
 
 
 class EngagementSlim(Schema):

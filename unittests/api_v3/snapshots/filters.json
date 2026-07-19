@@ -41,5 +41,78 @@
       "description",
       "title"
     ]
+  },
+  "product": {
+    "model": "Product",
+    "orderings": [
+      "created",
+      "id",
+      "name",
+      "updated"
+    ],
+    "params": [
+      "created__gte",
+      "created__lte",
+      "id__in",
+      "name__icontains",
+      "product_type",
+      "product_type__in",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "name"
+    ]
+  },
+  "product_type": {
+    "model": "Product_Type",
+    "orderings": [
+      "created",
+      "id",
+      "name",
+      "updated"
+    ],
+    "params": [
+      "created__gte",
+      "created__lte",
+      "id__in",
+      "name__icontains",
+      "updated__gte",
+      "updated__lte"
+    ],
+    "search_fields": [
+      "description",
+      "name"
+    ]
+  },
+  "user": {
+    "model": "Dojo_User",
+    "orderings": [
+      "date_joined",
+      "id",
+      "last_login",
+      "username"
+    ],
+    "params": [
+      "date_joined__gte",
+      "date_joined__lte",
+      "email__icontains",
+      "first_name__icontains",
+      "id__in",
+      "is_active",
+      "is_superuser",
+      "last_login__gte",
+      "last_login__lte",
+      "last_name__icontains",
+      "username__icontains"
+    ],
+    "search_fields": [
+      "email",
+      "first_name",
+      "last_name",
+      "username"
+    ]
   }
 }
+
