@@ -78,7 +78,73 @@ def build_api() -> NinjaAPI:
     api.add_router("", build_finding_locations_router())
     api.add_router("", build_product_locations_router())
     api.add_router("", build_import_router())
+
+    _mount_subresources(api)
     return api
+
+
+def _mount_subresources(api: NinjaAPI) -> None:
+    """
+    Mount the generic notes / tags / files sub-resources (§4.12, OS5) on the resources whose
+    *models* actually store them (storage support matrix, see .claude/os5-report.md / §12):
+
+    - notes + files: finding, engagement, test (each has a ``Notes``/``FileUpload`` M2M).
+    - tags:          finding, engagement, test, product (each has a ``TagField`` and a writable v3
+                     resource). product_type/user have no such fields; location has a ``TagField``
+                     but is a read-only, superuser-only resource with no v2 tag-mutation endpoint
+                     and already surfaces ``tags[]`` on its read shape -- so no tag sub-resource is
+                     attached to it (§12).
+
+    Deferred here (not at module top) so the kernel ``subresources.py`` stays resource-agnostic;
+    this mount is the composition root, alongside the router-factory imports above.
+    """
+    from dojo.api_v3.subresources import (  # noqa: PLC0415
+        build_files_router,
+        build_notes_router,
+        build_tags_router,
+    )
+    from dojo.authorization.roles_permissions import Permissions  # noqa: PLC0415
+    from dojo.engagement.queries import get_authorized_engagements  # noqa: PLC0415
+    from dojo.finding.queries import get_authorized_findings  # noqa: PLC0415
+    from dojo.product.queries import get_authorized_products  # noqa: PLC0415
+    from dojo.test.queries import get_authorized_tests  # noqa: PLC0415
+
+    # Parent authorized-view queryset resolvers. finding/product take an explicit user; engagement/
+    # test read the current user from crum (their signatures take no user kwarg) -- matching how the
+    # v2 viewsets and the OS3 route factories call them.
+    def findings_qs(request):
+        return get_authorized_findings(Permissions.Finding_View, user=request.user)
+
+    def engagements_qs(request):
+        return get_authorized_engagements(Permissions.Engagement_View)
+
+    def tests_qs(request):
+        return get_authorized_tests(Permissions.Test_View)
+
+    def products_qs(request):
+        return get_authorized_products(Permissions.Product_View, user=request.user)
+
+    file_view = Permissions.Product_Tracking_Files_View
+    file_add = Permissions.Product_Tracking_Files_Add
+
+    notes_and_files = (
+        ("findings", "Finding", findings_qs),
+        ("engagements", "Engagement", engagements_qs),
+        ("tests", "Test", tests_qs),
+    )
+    for resource, label, qs in notes_and_files:
+        api.add_router("", build_notes_router(resource=resource, parent_label=label, get_parent_queryset=qs))
+        api.add_router("", build_files_router(
+            resource=resource, parent_label=label, get_parent_queryset=qs,
+            view_permission=file_view, add_permission=file_add,
+        ))
+
+    tagged = (
+        *notes_and_files,
+        ("products", "Product", products_qs),
+    )
+    for resource, label, qs in tagged:
+        api.add_router("", build_tags_router(resource=resource, parent_label=label, get_parent_queryset=qs))
 
 
 api_v3 = build_api()

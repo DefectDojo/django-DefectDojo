@@ -69,7 +69,9 @@ def capture_request(client, label: str, path: str) -> EndpointCapture:
         response = client.get(path)
     shapes = Counter(normalize_sql(q["sql"]) for q in ctx.captured_queries)
     rows = None
-    if response.status_code == 200:
+    # Streaming responses (e.g. the files-download FileResponse) have no `.content`; skip body
+    # parsing for them -- they are single-object endpoints, not paginated lists.
+    if response.status_code == 200 and not getattr(response, "streaming", False):
         try:
             body = response.json()
             rows = len(body["results"]) if isinstance(body, dict) and "results" in body else None
