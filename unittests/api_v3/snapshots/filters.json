@@ -1,0 +1,45 @@
+{
+  "finding": {
+    "model": "Finding",
+    "orderings": [
+      "created",
+      "date",
+      "id",
+      "severity",
+      "title",
+      "updated"
+    ],
+    "params": [
+      "active",
+      "created__gte",
+      "created__lte",
+      "cwe",
+      "cwe__in",
+      "date__gte",
+      "date__lte",
+      "duplicate",
+      "engagement",
+      "false_p",
+      "id__in",
+      "is_mitigated",
+      "out_of_scope",
+      "product",
+      "product__in",
+      "product_type",
+      "reporter",
+      "risk_accepted",
+      "severity",
+      "severity__in",
+      "tags__in",
+      "test",
+      "title__icontains",
+      "updated__gte",
+      "updated__lte",
+      "verified"
+    ],
+    "search_fields": [
+      "description",
+      "title"
+    ]
+  }
+}

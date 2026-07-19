@@ -16,7 +16,13 @@ from ninja.constants import NOT_SET
 
 from dojo.api_v3.errors import json_response, not_found_problem
 from dojo.api_v3.expand import apply_fields, parse_fields, plan, plan_queryset, serialize
-from dojo.api_v3.filtering import FilterSpec, apply_filters, filter_field
+from dojo.api_v3.filtering import (
+    FilterSpec,
+    apply_filters,
+    filter_field,
+    register_filter_spec,
+    severity_rank_order,
+)
 from dojo.api_v3.include import apply_includes
 from dojo.api_v3.pagination import paginate
 from dojo.authorization.roles_permissions import Permissions
@@ -32,7 +38,7 @@ if TYPE_CHECKING:
 
 # --- Findings filter vocabulary (§4.9) --------------------------------------------------------
 
-FINDING_FILTER_SPEC = FilterSpec(
+FINDING_FILTER_SPEC = register_filter_spec("finding", FilterSpec(
     model=Finding,
     filters={
         "id__in": filter_field("id", "in", "number"),
@@ -65,13 +71,14 @@ FINDING_FILTER_SPEC = FilterSpec(
     orderings={
         "id": "id",
         "date": "date",
-        "severity": "severity",
         "title": "title",
         "created": "created",
         "updated": "updated",
     },
+    # `o=severity` sorts by rank (Critical first), not alphabetically (§4.9).
+    order_expressions={"severity": severity_rank_order},
     search_fields=["title", "description"],
-)
+))
 
 _ALLOWED_INCLUDES = {"counts"}
 

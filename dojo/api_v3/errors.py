@@ -121,6 +121,12 @@ def expand_problem(detail: str) -> ProblemDetail:
     return ProblemDetail(status=400, error_type="expand", title="Invalid expand", detail=detail)
 
 
+def fields_problem(detail: str) -> ProblemDetail:
+    # `?fields=` (§4.7) is a distinct capability from `?expand=`; a distinct type URI keeps the
+    # error contract closed (I9: new error kinds get new type URIs, not new shapes).
+    return ProblemDetail(status=400, error_type="fields", title="Invalid fields", detail=detail)
+
+
 def filter_problem(detail: str) -> ProblemDetail:
     return ProblemDetail(status=400, error_type="filter", title="Invalid filter", detail=detail)
 
