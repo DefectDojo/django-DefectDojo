@@ -129,6 +129,41 @@ DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
 3. Enter your tenant location in the **Location** field. This URL is formatted as follows:  
 ​`https://<your-region>.ast.checkmarx.net/` . Your Region can be found at the beginning of your Checkmarx URL when using the Checkmarx app. **<https://ast.checkmarx.net>** is the primary US server (which has no region prefix).
 
+## **Cobalt.io**
+
+The Cobalt.io connector uses the Cobalt.io API (v2) to pull pentest findings from your Cobalt.io organization. DefectDojo discovers every organization your API token can access and creates a separate Record for each **asset** (the unit Cobalt pentests).
+
+#### Prerequisites
+
+You will need a Cobalt.io **personal API token**. We recommend creating a dedicated service account for DefectDojo to clearly distinguish automated activity from manual team actions. Generate a token from **Settings \> API Tokens** in the Cobalt.io UI. Organization tokens are discovered automatically \- you do not need to supply them.
+
+#### Connector Mappings
+
+1. Enter the Cobalt.io API base URL in the **Location** field: `https://api.cobalt.io` (or your regional host, for example `https://api.us.cobalt.io`).
+2. Enter your **personal API token** in the **Secret** field.
+3. Optionally, enter an **Organization Token** to pin the sync to a single organization. When left blank, DefectDojo syncs every organization the personal API token can access.
+
+DefectDojo maps each Cobalt.io **asset** as a separate Record. Findings are imported for each mapped asset, with their Cobalt.io state (for example `valid_fix`, `wont_fix`, `invalid`) driving the finding status in DefectDojo.
+
+## **Coverity**
+
+The Coverity connector uses the Coverity Connect REST API to pull static analysis (SAST) issues from your on\-premise Coverity Connect server. DefectDojo discovers every project on the instance and creates a separate Record for each **project**.
+
+#### Prerequisites
+
+You will need a Coverity Connect account. We recommend creating a dedicated service account for DefectDojo. For authentication you can use the account password or, preferably, a Coverity **authentication key** generated under your user preferences in Coverity Connect.
+
+The connector reads issues from a saved Coverity **view**. The configured view must expose the columns the importer maps \- `cid`, `displayType`, `displayImpact`, `displayIssueKind`, `checker`, `status`, `classification`, `firstDetected`, `cwe`, `displayFile`, `occurrenceCount` and `lastTriaged`. The built\-in **Outstanding Issues** view exposes these by default.
+
+#### Connector Mappings
+
+1. Enter your Coverity Connect server URL in the **Location** field, for example `https://coverity.example.com:8443`.
+2. Enter the Coverity Connect **username** in the **Username** field.
+3. Enter the account password or authentication key in the **Secret** field.
+4. Optionally, set a **View Name** to read from a specific saved view (defaults to **Outstanding Issues**), and enable **Import all issue kinds** to widen the default import filter (Security issues plus Quality `RESOURCE_LEAK` issues) to every issue kind.
+
+DefectDojo maps each Coverity **project** as a separate Record.
+
 ## Dependency\-Track
 
 This connector fetches data from a on\-premise Dependency\-Track instance, via REST API.
@@ -195,6 +230,23 @@ Required token scopes for JFrog Xray:
 DefectDojo maps each Artifactory **repository** as a separate Record. On first Sync, DefectDojo generates a full historical vulnerability report; subsequent Syncs generate incremental (delta) reports covering new findings since the last Sync.
 
 See the [JFrog Xray REST API documentation](https://jfrog.com/help/r/jfrog-rest-apis/xray-rest-apis) for more information.
+
+## **Nuclei (ProjectDiscovery Cloud)**
+
+The Nuclei connector uses the ProjectDiscovery Cloud Platform (PDCP) REST API to pull [nuclei](https://github.com/projectdiscovery/nuclei) scan results from your PDCP account. DefectDojo discovers every scan in the account and creates a separate Record for each **scan**.
+
+#### Prerequisites
+
+You will need a ProjectDiscovery Cloud **API key**. We recommend creating a dedicated service account for DefectDojo to clearly distinguish automated activity from manual team actions. Generate a key from **Settings \> API Key** in the ProjectDiscovery Cloud UI ([cloud.projectdiscovery.io](https://cloud.projectdiscovery.io)). Results reach PDCP either from hosted scans or from the nuclei CLI run with `-dashboard`.
+
+#### Connector Mappings
+
+1. Enter the PDCP API base URL in the **Location** field: `https://api.projectdiscovery.io`.
+2. Enter your **API key** in the **Secret** field.
+3. Optionally, enter a **Team ID** to scope the sync to a team workspace (found under **Settings \> Team**). When left blank, DefectDojo syncs your personal workspace.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+DefectDojo maps each PDCP **scan** as a separate Record and imports that scan's findings across every severity, including informational.
 
 ## Probely
 
