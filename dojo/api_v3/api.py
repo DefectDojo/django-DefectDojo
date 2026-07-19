@@ -105,9 +105,12 @@ def _mount_subresources(api: NinjaAPI) -> None:
     )
     from dojo.authorization.roles_permissions import Permissions  # noqa: PLC0415
     from dojo.engagement.queries import get_authorized_engagements  # noqa: PLC0415
+    from dojo.engagement.services import process_note_added as engagement_process_note_added  # noqa: PLC0415
     from dojo.finding.queries import get_authorized_findings  # noqa: PLC0415
+    from dojo.finding.services import process_note_added as finding_process_note_added  # noqa: PLC0415
     from dojo.product.queries import get_authorized_products  # noqa: PLC0415
     from dojo.test.queries import get_authorized_tests  # noqa: PLC0415
+    from dojo.test.services import process_note_added as test_process_note_added  # noqa: PLC0415
 
     # Parent authorized-view queryset resolvers. finding/product take an explicit user; engagement/
     # test read the current user from crum (their signatures take no user kwarg) -- matching how the
@@ -127,13 +130,25 @@ def _mount_subresources(api: NinjaAPI) -> None:
     file_view = Permissions.Product_Tracking_Files_View
     file_add = Permissions.Product_Tracking_Files_Add
 
+    # Note-created side-effect callbacks per resource (v2 parity): the finding service fires JIRA
+    # comment sync + last_reviewed stamping + @mention notifications; engagement/test fire @mention
+    # notifications only (their v2 @actions have no JIRA/last_reviewed) -- see §12. The kernel notes
+    # factory imports none of this machinery; it only invokes the callback wired here (I5/I6).
+    note_callbacks = {
+        "findings": finding_process_note_added,
+        "engagements": engagement_process_note_added,
+        "tests": test_process_note_added,
+    }
     notes_and_files = (
         ("findings", "Finding", findings_qs),
         ("engagements", "Engagement", engagements_qs),
         ("tests", "Test", tests_qs),
     )
     for resource, label, qs in notes_and_files:
-        api.add_router("", build_notes_router(resource=resource, parent_label=label, get_parent_queryset=qs))
+        api.add_router("", build_notes_router(
+            resource=resource, parent_label=label, get_parent_queryset=qs,
+            on_note_created=note_callbacks[resource],
+        ))
         api.add_router("", build_files_router(
             resource=resource, parent_label=label, get_parent_queryset=qs,
             view_permission=file_view, add_permission=file_add,

@@ -28,6 +28,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+from crum import get_current_request
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ValidationError
@@ -40,11 +41,12 @@ from dojo.finding.helper import (
 )
 from dojo.jira import services as jira_services
 from dojo.models import SEVERITIES, Dojo_User, Finding, Test_Type
-from dojo.notifications.helper import async_create_notification
+from dojo.notifications.helper import async_create_notification, process_tag_notifications
 from dojo.utils import get_object_or_none
 
 if TYPE_CHECKING:
     from dojo.models import Test
+    from dojo.notes.models import Notes
 
 logger = logging.getLogger(__name__)
 
@@ -264,12 +266,55 @@ def update_finding(finding: Finding, *, changes: dict, user, push_to_jira: bool 
     return finding
 
 
-def delete_finding(finding: Finding, *, user) -> None:
+def delete_finding(finding: Finding, *, user, push_to_jira: bool | None = None) -> None:
     """
     Delete ``finding``. Mirrors the v2 ``FindingViewSet.destroy`` calculation/dedup hooks: the
     model's ``Finding.delete()`` runs ``finding_helper.finding_delete`` (dedup reassignment) and
     ``perform_product_grading`` (§12). ``user`` is part of the service contract (I6); the model
     resolves the acting user via crum.
+
+    ``push_to_jira`` is the v2 tri-state: ``None`` (default) lets the JIRA delete-sync run with its
+    default semantics — exactly what v2's ``destroy`` passes when the query param is absent. Passing
+    no value at all would hit ``Finding.delete()``'s suppress-sentinel and silently skip the JIRA
+    close/reassign (divergence D17, a confirmed v3 regression — see API_V3_DIVERGENCE_ANALYSIS.md).
     """
     logger.debug("api_v3 delete_finding id=%s by user=%s", finding.pk, getattr(user, "username", user))
-    finding.delete()
+    finding.delete(push_to_jira=push_to_jira)
+
+
+def process_note_added(finding: Finding, note: Notes, *, user) -> None:
+    """
+    Fire the same side-effects as the v2 finding notes ``@action`` create branch
+    (``dojo/finding/api/views.py`` -- ``finding.last_reviewed`` stamping, ``process_tag_notifications``,
+    and ``jira_services.add_comment``) after a note has been persisted and linked to ``finding``:
+
+    1. ``last_reviewed`` / ``last_reviewed_by`` stamping (finding notes only -- engagement/test don't);
+    2. @mention notifications -- the **exact** v2 parsing/notification helper is reused, not reimplemented;
+    3. JIRA comment sync on the finding's linked issue, else its finding-group issue -- same conditions as v2.
+
+    I6: keyword-only ``user``, no HTTP object in the signature. The v2 @mention helper
+    (``process_tag_notifications``) needs the request to build the absolute mention URL, so it is read
+    from crum -- set for the whole request by ``CurrentRequestUserMiddleware``, the same context bridge
+    ``delete_finding`` relies on. With no request available (a pure non-HTTP call) mentions are skipped
+    while the other side-effects still fire (§12).
+    """
+    # (1) last_reviewed / last_reviewed_by stamping -- mirrors the v2 finding notes @action exactly.
+    finding.last_reviewed = note.date
+    finding.last_reviewed_by = user
+    finding.save(update_fields=["last_reviewed", "last_reviewed_by", "updated"])
+
+    # (2) @mention notifications -- reuse the exact v2 parsing/notification code path.
+    request = get_current_request()
+    if request is not None:
+        process_tag_notifications(
+            request=request,
+            note=note,
+            parent_url=request.build_absolute_uri(reverse("view_finding", args=(finding.id,))),
+            parent_title=f"Finding: {finding.title}",
+        )
+
+    # (3) JIRA comment sync -- same conditions as v2 (linked issue, else finding-group issue).
+    if finding.has_jira_issue:
+        jira_services.add_comment(finding, note)
+    elif finding.has_jira_group_issue:
+        jira_services.add_comment(finding.finding_group, note)

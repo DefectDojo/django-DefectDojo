@@ -193,6 +193,22 @@ class TestApiV3FindingDelete(ApiV3TestCase):
         self.assertEqual(204, response.status_code)
         self.assertFalse(Finding.objects.filter(pk=finding.id).exists())
 
+    def test_delete_runs_jira_sync_with_v2_default(self):
+        # D17 regression pin (API_V3_DIVERGENCE_ANALYSIS.md): v3 delete must pass the v2 tri-state
+        # default push_to_jira=None so finding_delete's JIRA close/reassign runs. A bare
+        # finding.delete() hits the model's suppress-sentinel and silently skips it.
+        # Use a fresh standalone finding: mocking finding_delete skips its dedup FK reassignment,
+        # so deleting a fixture finding referenced via duplicate_finding would violate the FK.
+        finding = Finding.objects.first()
+        finding.pk = None
+        finding.title = "d17 regression pin"
+        finding.save()
+        with patch("dojo.finding.helper.finding_delete") as mock_finding_delete:
+            response = self.client.delete(self.v3_url(f"findings/{finding.id}"))
+        self.assertEqual(204, response.status_code)
+        mock_finding_delete.assert_called_once()
+        self.assertIsNone(mock_finding_delete.call_args.kwargs.get("push_to_jira", "MISSING"))
+
 
 class TestApiV3FindingWriteRbac(ApiV3TestCase):
 
