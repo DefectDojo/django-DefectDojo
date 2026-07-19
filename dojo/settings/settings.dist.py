@@ -125,6 +125,13 @@ env = environ.FileAwareEnv(
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
+    # Master switch for django-watson. When True (default) the post-save/pre-delete
+    # search indexers are registered on 9 models (write-amplification on every save,
+    # Finding imports especially) and the legacy /simple_search page (watson's only
+    # reader) is served. When False, nothing is registered, /simple_search returns
+    # 410 Gone, and installwatson is skipped. Pro ships this False: its native
+    # Postgres search (pro/search/) fully replaces watson.
+    DD_WATSON_SEARCH_ENABLED=(bool, True),
     # Batch size for async watson search-index update tasks. Also doubles as
     # the per-request intermediate-flush threshold: once the in-memory watson
     # context reaches this many pending objects mid-request,
@@ -205,7 +212,10 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
-    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
+    # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
+    # because backdating a mitigation can distort SLA-compliance metrics. Changing this
+    # value requires a service restart to take effect.
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
@@ -773,6 +783,9 @@ TEMPLATES = [
 INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    # Registers the postgres-specific lookups and index expressions
+    # (trigram word similarity, tsvector search) used by global search.
+    "django.contrib.postgres",
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.messages",
@@ -844,6 +857,15 @@ if env("DD_WHITENOISE"):
         "whitenoise.middleware.WhiteNoiseMiddleware",
     ]
     MIDDLEWARE += WHITE_NOISE
+
+# django-watson master switch (see DD_WATSON_SEARCH_ENABLED above). Pro ships this
+# off because its native Postgres search replaces watson; disabling strips the app
+# and its request-scoped indexing middleware so no post-save index writes happen
+# and installwatson is never needed.
+WATSON_SEARCH_ENABLED = env("DD_WATSON_SEARCH_ENABLED")
+if not WATSON_SEARCH_ENABLED:
+    INSTALLED_APPS = tuple(app for app in INSTALLED_APPS if app != "watson")
+    MIDDLEWARE = [m for m in MIDDLEWARE if m != "dojo.middleware.AsyncSearchContextMiddleware"]
 
 EMAIL_CONFIG = env.email_url(
     "DD_EMAIL_URL", default="smtp://user@:password@localhost:25")
