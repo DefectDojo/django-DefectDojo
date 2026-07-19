@@ -1,14 +1,23 @@
 """
-Product response + write schemas for API v3 (§4.5, §4.11, OS3a).
+Asset response + write schemas for API v3 (§4.5, §4.11, OS3a; renamed per D11).
 
-``ProductSlim`` is the canonical parent slim (relocated here from ``dojo/finding/api_v3`` where OS1
-first defined it -- see §12; the finding module now re-exports this copy). ``ProductDetail`` adds the
-documented heavier read fields (§4.5). ``product_type`` is an expandable relation (§4.6).
+**D11 wire rename:** v3 speaks the new domain language -- the ``Product`` model is exposed on the
+wire as ``asset`` and its parent ``Product_Type`` FK as ``organization``. The schema classes are
+``Asset*``; the Django model (``Product``) / DB table / module path are deliberately **not** renamed
+(the DTO layer is what decouples wire names from models). See §12.
+
+``AssetSlim`` is the canonical parent slim (relocated here from ``dojo/finding/api_v3`` where OS1
+first defined it -- see §12; the finding module now re-exports this copy). ``AssetDetail`` adds the
+documented heavier read fields (§4.5). ``organization`` is an expandable relation (§4.6).
 
 Write schemas mirror the v2 ``ProductSerializer`` required/optional split: the model requires
-``name``, ``description`` and ``prod_type``; everything else is optional (``sla_configuration``
-defaults to the model default when omitted). Relations are referenced by integer id (§4.11);
-server-managed fields are never writable; unknown fields are rejected (``extra="forbid"``).
+``name``, ``description`` and ``prod_type`` (exposed on the wire as ``organization``); everything
+else is optional (``sla_configuration`` defaults to the model default when omitted). Relations are
+referenced by integer id (§4.11); server-managed fields are never writable; unknown fields are
+rejected (``extra="forbid"``). The user-role ref ``asset_manager`` is the wire name for the model's
+``product_manager`` FK (the UI relabel's canonical term is "Asset Manager"); ``critical_product`` /
+``key_product`` (on ``organization``) keep their model-column names because the relabel itself
+retains them (``org.critical_product_label``). See §12.
 """
 from __future__ import annotations
 
@@ -20,10 +29,10 @@ from ninja import Schema
 from dojo.api_v3.expand import ExpandRel
 from dojo.api_v3.refs import Ref, to_ref
 from dojo.models import Product
-from dojo.product_type.api_v3.schemas import ProductTypeSlim
+from dojo.product_type.api_v3.schemas import OrganizationSlim
 
 
-class ProductSlim(Schema):
+class AssetSlim(Schema):
     django_model: ClassVar = Product
     SELECT_RELATED: ClassVar[tuple] = ("prod_type",)
     PREFETCH_RELATED: ClassVar[tuple] = ("tags",)
@@ -32,14 +41,14 @@ class ProductSlim(Schema):
     id: int
     name: str
     description: str | None
-    product_type: Ref
+    organization: Ref
     lifecycle: str | None
     tags: list[str]
     created: datetime | None
     updated: datetime | None
 
     @staticmethod
-    def resolve_product_type(obj) -> dict | None:
+    def resolve_organization(obj) -> dict | None:
         return to_ref(obj.prod_type)
 
     @staticmethod
@@ -47,12 +56,12 @@ class ProductSlim(Schema):
         return [t.name for t in obj.tags.all()]
 
 
-ProductSlim.EXPANDABLE = {
-    "product_type": ExpandRel(attr="prod_type", path="prod_type", schema=ProductTypeSlim),
+AssetSlim.EXPANDABLE = {
+    "organization": ExpandRel(attr="prod_type", path="prod_type", schema=OrganizationSlim),
 }
 
 
-class ProductDetail(ProductSlim):
+class AssetDetail(AssetSlim):
 
     """Slim + the documented heavier read fields (§4.5). Retrieve returns detail; list returns slim."""
 
@@ -64,12 +73,12 @@ class ProductDetail(ProductSlim):
     origin: str | None
     external_audience: bool | None
     internet_accessible: bool | None
-    product_manager: Ref | None
+    asset_manager: Ref | None
     technical_contact: Ref | None
     team_manager: Ref | None
 
     @staticmethod
-    def resolve_product_manager(obj) -> dict | None:
+    def resolve_asset_manager(obj) -> dict | None:
         return to_ref(obj.product_manager)
 
     @staticmethod
@@ -81,20 +90,20 @@ class ProductDetail(ProductSlim):
         return to_ref(obj.team_manager)
 
 
-class ProductWrite(Schema):
+class AssetWrite(Schema):
 
-    """Create payload (POST). ``name``/``description``/``prod_type`` required (§6 OS3, mirrors v2)."""
+    """Create payload (POST). ``name``/``description``/``organization`` required (§6 OS3, mirrors v2)."""
 
     model_config = {"extra": "forbid"}
 
     name: str
     description: str
-    prod_type: int
+    organization: int
     business_criticality: str | None = None
     platform: str | None = None
     lifecycle: str | None = None
     origin: str | None = None
-    product_manager: int | None = None
+    asset_manager: int | None = None
     technical_contact: int | None = None
     team_manager: int | None = None
     sla_configuration: int | None = None
@@ -103,7 +112,7 @@ class ProductWrite(Schema):
     tags: list[str] | None = None
 
 
-class ProductUpdate(Schema):
+class AssetUpdate(Schema):
 
     """Partial update payload (PATCH). Every field optional; only provided keys are applied."""
 
@@ -111,12 +120,12 @@ class ProductUpdate(Schema):
 
     name: str | None = None
     description: str | None = None
-    prod_type: int | None = None
+    organization: int | None = None
     business_criticality: str | None = None
     platform: str | None = None
     lifecycle: str | None = None
     origin: str | None = None
-    product_manager: int | None = None
+    asset_manager: int | None = None
     technical_contact: int | None = None
     team_manager: int | None = None
     sla_configuration: int | None = None

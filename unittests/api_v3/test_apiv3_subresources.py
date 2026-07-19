@@ -1,7 +1,7 @@
 """
 Generic notes / tags / files sub-resource tests for API v3 (§4.12, OS5).
 
-Covers the storage support matrix (notes/files: finding/engagement/test; tags: those + product),
+Covers the storage support matrix (notes/files: finding/engagement/test; tags: those + asset),
 note privacy (v2 parity: private notes are returned, not per-user filtered), parent-authorization
 inheritance (404 unknown-or-unauthorized parent, 403 write), multipart upload + streamed download
 roundtrip, tag replace/append/delete semantics + normalization, the pagination envelope on the
@@ -42,7 +42,7 @@ class _SubResourceBase(ApiV3TestCase):
             ("engagements", self.engagement),
             ("tests", self.test),
         ]
-        self.tag_parents = [*self.note_file_parents, ("products", self.product)]
+        self.tag_parents = [*self.note_file_parents, ("assets", self.product)]
 
 
 class TestApiV3SubresourcesNotes(_SubResourceBase):
@@ -180,8 +180,8 @@ class TestApiV3SubresourcesTags(_SubResourceBase):
                 self.assertIsInstance(body["tags"], list)
 
     def test_tags_replace_append_delete_semantics(self):
-        # Product tags have clean semantics (no inheritance-sticky re-add); inheritance is off by
-        # default anyway, but products are the crispest surface for the exact-set assertions.
+        # Asset tags have clean semantics (no inheritance-sticky re-add); inheritance is off by
+        # default anyway, but assets are the crispest surface for the exact-set assertions.
         for resource, parent in self.tag_parents:
             with self.subTest(resource=resource):
                 base = self.v3_url(f"{resource}/{parent.pk}/tags")
@@ -219,10 +219,10 @@ class TestApiV3SubresourcesSupportMatrix(_SubResourceBase):
     def test_unsupported_notes_and_files_are_404(self):
         pt_id = self.product.prod_type_id
         for path in (
-            f"product_types/{pt_id}/notes",
-            f"product_types/{pt_id}/files",
-            f"products/{self.product.pk}/notes",   # product has tags but no notes/files
-            f"products/{self.product.pk}/files",
+            f"organizations/{pt_id}/notes",
+            f"organizations/{pt_id}/files",
+            f"assets/{self.product.pk}/notes",   # asset has tags but no notes/files
+            f"assets/{self.product.pk}/files",
             f"users/{self.admin.pk}/notes",
             f"users/{self.admin.pk}/files",
         ):
@@ -230,13 +230,13 @@ class TestApiV3SubresourcesSupportMatrix(_SubResourceBase):
                 self.assertEqual(404, self.client.get(self.v3_url(path)).status_code)
 
     def test_unsupported_tags_are_404(self):
-        # product_type / user have no TagField; location has one but is read-only + superuser-only
-        # with no v2 tag-mutation endpoint, so no tag sub-resource is attached (tags[] is on its
-        # read shape instead).
+        # organization (product_type) / user have no TagField; location has one but is read-only +
+        # superuser-only with no v2 tag-mutation endpoint, so no tag sub-resource is attached (tags[]
+        # is on its read shape instead).
         from dojo.location.models import Location  # noqa: PLC0415
         location = Location.objects.first()
         for path in (
-            f"product_types/{self.product.prod_type_id}/tags",
+            f"organizations/{self.product.prod_type_id}/tags",
             f"users/{self.admin.pk}/tags",
             *([f"locations/{location.pk}/tags"] if location else []),
         ):
@@ -253,7 +253,7 @@ class TestApiV3SubresourcesAuthInheritance(_SubResourceBase):
             "findings/9999999/notes",
             "engagements/9999999/files",
             "tests/9999999/tags",
-            "products/9999999/tags",
+            "assets/9999999/tags",
         ):
             with self.subTest(path=path):
                 self.assertEqual(404, self.client.get(self.v3_url(path)).status_code)

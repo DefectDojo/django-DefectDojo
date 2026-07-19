@@ -5,8 +5,9 @@ Test response + write schemas for API v3 (§4.5, §4.11, OS3b).
 here from ``dojo/finding/api_v3`` (where OS1 first defined it for finding ``?expand=``); the finding
 module now re-exports these copies so there is exactly one class per model (verified is-identity in
 the tests -- see §12). ``TestDetail`` adds the documented heavier read fields (§4.5).
-``test_type``/``engagement``/``product``/``product_type``/``environment``/``lead`` are expandable
-relations (§4.6).
+``test_type``/``engagement``/``asset``/``organization``/``environment``/``lead`` are expandable
+relations (§4.6). Per D11 the Product/Product_Type models are exposed on the wire as
+``asset``/``organization`` (ref keys + expand keys); the models/DB/module paths are not renamed (§12).
 
 Write schemas mirror the v2 ``TestCreateSerializer`` (create) and ``TestSerializer`` (update): the
 model requires ``engagement``, ``test_type``, ``target_start`` and ``target_end``. ``engagement`` is
@@ -26,8 +27,8 @@ from dojo.api_v3.expand import ExpandRel
 from dojo.api_v3.refs import Ref, to_ref
 from dojo.engagement.api_v3.schemas import EngagementSlim
 from dojo.models import Development_Environment, Test, Test_Type
-from dojo.product.api_v3.schemas import ProductSlim
-from dojo.product_type.api_v3.schemas import ProductTypeSlim
+from dojo.product.api_v3.schemas import AssetSlim
+from dojo.product_type.api_v3.schemas import OrganizationSlim
 from dojo.user.api_v3.schemas import UserSlim
 
 
@@ -62,8 +63,8 @@ class TestSlim(Schema):
     name: str | None
     test_type: Ref
     engagement: Ref
-    product: Ref
-    product_type: Ref
+    asset: Ref
+    organization: Ref
     environment: Ref | None
     lead: Ref | None
     target_start: datetime | None
@@ -86,11 +87,11 @@ class TestSlim(Schema):
         return to_ref(obj.engagement)
 
     @staticmethod
-    def resolve_product(obj) -> dict | None:
+    def resolve_asset(obj) -> dict | None:
         return to_ref(obj.engagement.product)
 
     @staticmethod
-    def resolve_product_type(obj) -> dict | None:
+    def resolve_organization(obj) -> dict | None:
         return to_ref(obj.engagement.product.prod_type)
 
     @staticmethod
@@ -109,8 +110,8 @@ class TestSlim(Schema):
 TestSlim.EXPANDABLE = {
     "test_type": ExpandRel(attr="test_type", path="test_type", schema=TestTypeSlim),
     "engagement": ExpandRel(attr="engagement", path="engagement", schema=EngagementSlim),
-    "product": ExpandRel(attr="engagement.product", path="engagement__product", schema=ProductSlim),
-    "product_type": ExpandRel(attr="engagement.product.prod_type", path="engagement__product__prod_type", schema=ProductTypeSlim),
+    "asset": ExpandRel(attr="engagement.product", path="engagement__product", schema=AssetSlim),
+    "organization": ExpandRel(attr="engagement.product.prod_type", path="engagement__product__prod_type", schema=OrganizationSlim),
     "lead": ExpandRel(attr="lead", path="lead", schema=UserSlim),
     "environment": ExpandRel(attr="environment", path="environment", schema=EnvironmentSlim),
 }

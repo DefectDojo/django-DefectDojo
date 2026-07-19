@@ -1,9 +1,9 @@
 """
-Locations resource + finding/product location sub-resources for API v3 (§4.14, OS4).
+Locations resource + finding/asset location sub-resources for API v3 (§4.14, OS4).
 
 Covers: the read-only ``/locations`` resource (slim/detail shapes incl. URL-subtype fields, filters,
 orderings, pagination, the v2 superuser-only RBAC mirror, constant query count); the
-``/findings/{id}/locations`` and ``/products/{id}/locations`` edge sub-resources (edge shapes,
+``/findings/{id}/locations`` and ``/assets/{id}/locations`` edge sub-resources (edge shapes,
 auditor ref, parent-inherited authorization 404, pagination, constant query count); the
 ``?fields=`` / ``?expand=`` interplay; and flag-off behaviour (whole /api/v3-alpha/ tree absent).
 """
@@ -26,7 +26,7 @@ from .base import ApiV3TestCase
 _SLIM_KEYS = {"id", "name", "type", "tags"}
 _DETAIL_KEYS = _SLIM_KEYS | {"protocol", "host", "port", "path", "query", "fragment"}
 _FINDING_EDGE_KEYS = {"location", "status", "audit_time", "auditor"}
-_PRODUCT_EDGE_KEYS = {"location", "status"}
+_ASSET_EDGE_KEYS = {"location", "status"}
 _LOCATION_REF_KEYS = {"id", "name", "type"}
 
 
@@ -75,9 +75,9 @@ class TestApiV3LocationsRead(ApiV3TestCase):
         for row in body["results"]:
             self.assertIn("bar.foo", row["name"])
 
-    def test_filter_product(self):
-        # Fixture: LocationProductReference links product 1 -> location 6.
-        body = self.get_json("locations", data={"product": 1, "limit": 250})
+    def test_filter_asset(self):
+        # Fixture: LocationProductReference links asset (product) 1 -> location 6.
+        body = self.get_json("locations", data={"asset": 1, "limit": 250})
         ids = {row["id"] for row in body["results"]}
         self.assertIn(6, ids)
 
@@ -221,34 +221,34 @@ class TestApiV3FindingLocationsSubResource(ApiV3TestCase):
         self.assertEqual(first, second, f"sub-resource query count grew: {first} -> {second}")
 
 
-class TestApiV3ProductLocationsSubResource(ApiV3TestCase):
+class TestApiV3AssetLocationsSubResource(ApiV3TestCase):
 
-    """GET /products/{id}/locations edge rows: location ref + status only (no audit columns, §12)."""
+    """GET /assets/{id}/locations edge rows: location ref + status only (no audit columns, §12)."""
 
     def _attach(self, product, value, status="Active"):
         location = Location.objects.create(location_type="url", location_value=value)
         return LocationProductReference.objects.create(location=location, product=product, status=status)
 
     def test_edge_shape_and_location_ref(self):
-        # Fixture: product 1 -> location 6 (Active).
-        body = self.get_json("products/1/locations")
+        # Fixture: asset (product) 1 -> location 6 (Active).
+        body = self.get_json("assets/1/locations")
         self.assertEqual({"count", "next", "previous", "results"}, set(body) - {"meta"})
         self.assertGreaterEqual(body["count"], 1)
         row = next(r for r in body["results"] if r["location"]["id"] == 6)
-        self.assertEqual(_PRODUCT_EDGE_KEYS, set(row))
+        self.assertEqual(_ASSET_EDGE_KEYS, set(row))
         self.assertEqual(_LOCATION_REF_KEYS, set(row["location"]))
         self.assertEqual("url", row["location"]["type"])
         self.assertEqual("Active", row["status"])
 
     def test_unknown_parent_is_404(self):
-        response = self.client.get(self.v3_url("products/99999999/locations"))
+        response = self.client.get(self.v3_url("assets/99999999/locations"))
         self.assertEqual(404, response.status_code)
         self.assertEqual("application/problem+json", response["Content-Type"])
 
     def test_unauthorized_parent_is_404(self):
-        limited = User.objects.create_user(username="v3_loc_prodlimited", password="x")  # noqa: S106
+        limited = User.objects.create_user(username="v3_loc_assetlimited", password="x")  # noqa: S106
         client = self.token_client(user=limited)
-        response = client.get(self.v3_url("products/1/locations"))
+        response = client.get(self.v3_url("assets/1/locations"))
         self.assertEqual(404, response.status_code, response.content[:300])
 
     def test_query_count_is_independent_of_edge_count(self):
@@ -256,7 +256,7 @@ class TestApiV3ProductLocationsSubResource(ApiV3TestCase):
 
         def query_count() -> int:
             with CaptureQueriesContext(connection) as ctx:
-                response = self.client.get(self.v3_url(f"products/{product.id}/locations"), {"limit": 250})
+                response = self.client.get(self.v3_url(f"assets/{product.id}/locations"), {"limit": 250})
                 self.assertEqual(200, response.status_code, response.content[:500])
             return len(ctx.captured_queries)
 
@@ -312,7 +312,7 @@ class TestApiV3LocationsFlagOff(ApiV3TestCase):
                 clear_url_caches()
                 importlib.reload(dojo.urls)
                 # Nothing under the v3 prefix resolves once the flag is off -- the mount is gone.
-                for path in ("locations", "findings", "products", "import"):
+                for path in ("locations", "findings", "assets", "import"):
                     with self.assertRaises(Resolver404):
                         resolve(self.v3_url(path), urlconf=dojo.urls)
         finally:

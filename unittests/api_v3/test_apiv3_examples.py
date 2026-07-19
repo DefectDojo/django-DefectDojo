@@ -103,7 +103,7 @@ class TestApiV3Examples(ApiV3TestCase):
         ])
 
         self._capture_findings(finding)
-        self._capture_products()
+        self._capture_assets()
         self._write(_OUT)
 
     # --- findings (the complex entity) ----------------------------------------------------------
@@ -113,7 +113,7 @@ class TestApiV3Examples(ApiV3TestCase):
         self._record(
             title="Finding — GET detail (slim + detail fields)",
             intro="Retrieve a single finding. Relations render as closed `{id, name}` refs (§4.4); the "
-                  "parent chain (`test`/`engagement`/`product`/`product_type`) is denormalized onto the "
+                  "parent chain (`test`/`engagement`/`asset`/`organization`) is denormalized onto the "
                   "finding. `locations_count` is an annotation; the full list is a sub-resource (§4.14).",
             method="GET", url=self.v3_url(f"findings/{fid}"),
             response=self.client.get(self.v3_url(f"findings/{fid}")),
@@ -149,7 +149,7 @@ class TestApiV3Examples(ApiV3TestCase):
         )
 
         # notes sub-resource: POST then GET
-        note_body = {"entry": "Reviewed with the product team; scheduled for the next sprint.", "private": False}
+        note_body = {"entry": "Reviewed with the security team; scheduled for the next sprint.", "private": False}
         self._record(
             title="Finding — POST a note (sub-resource)",
             intro="Notes are one generic sub-resource across resources (§4.12). Authorization is "
@@ -202,7 +202,7 @@ class TestApiV3Examples(ApiV3TestCase):
             "multipart/form-data fields:\n"
             "  mode=import            # auto | import | reimport (default auto)\n"
             "  scan_type=ZAP Scan\n"
-            "  engagement=4           # or test= / product_name+engagement_name+auto_create_context\n"
+            "  engagement=4           # or test= / asset_name+engagement_name+auto_create_context\n"
             "  file=@0_zap_sample.xml\n"
             "  active=true\n"
             "  verified=true"
@@ -221,32 +221,32 @@ class TestApiV3Examples(ApiV3TestCase):
             req_body=import_desc, response=response,
         )
 
-    # --- products (the simple contrast) ---------------------------------------------------------
-    def _capture_products(self) -> None:
+    # --- assets (the simple contrast) -----------------------------------------------------------
+    def _capture_assets(self) -> None:
         product = Product.objects.first()
         self._record(
-            title="Product — GET detail",
-            intro="A simple entity for contrast with findings: identity, `product_type` ref, and the "
+            title="Asset — GET detail",
+            intro="A simple entity for contrast with findings: identity, `organization` ref, and the "
                   "documented heavier detail fields.",
-            method="GET", url=self.v3_url(f"products/{product.id}"),
-            response=self.client.get(self.v3_url(f"products/{product.id}")),
+            method="GET", url=self.v3_url(f"assets/{product.id}"),
+            response=self.client.get(self.v3_url(f"assets/{product.id}")),
         )
         self._record(
-            title="Product — GET list",
+            title="Asset — GET list",
             intro="Same envelope and grammar as findings; slim rows only on list (§4.5).",
-            method="GET", url=self.v3_url("products?limit=2"),
-            response=self.client.get(self.v3_url("products?limit=2")), truncate=True,
+            method="GET", url=self.v3_url("assets?limit=2"),
+            response=self.client.get(self.v3_url("assets?limit=2")), truncate=True,
         )
 
         pt = Product_Type.objects.first()
-        create_body = {"name": "Example v3 Product", "description": "Created via the v3 API examples harness",
-                       "prod_type": pt.id, "lifecycle": "production", "tags": ["pci", "example"]}
-        create_resp = self.client.post(self.v3_url("products"), create_body, format="json")
+        create_body = {"name": "Example v3 Asset", "description": "Created via the v3 API examples harness",
+                       "organization": pt.id, "lifecycle": "production", "tags": ["pci", "example"]}
+        create_resp = self.client.post(self.v3_url("assets"), create_body, format="json")
         self._record(
-            title="Product — POST (create)",
-            intro="Create a product. Relations are referenced by integer id (§4.11); unknown fields "
+            title="Asset — POST (create)",
+            intro="Create an asset. Relations are referenced by integer id (§4.11); unknown fields "
                   "are rejected (400). Response is the created detail shape (`201`).",
-            method="POST", url=self.v3_url("products"),
+            method="POST", url=self.v3_url("assets"),
             req_headers=[f"Authorization: Token {_TOKEN_PLACEHOLDER}", "Content-Type: application/json"],
             req_body=_pretty(create_body), response=create_resp,
         )
@@ -254,12 +254,12 @@ class TestApiV3Examples(ApiV3TestCase):
         new_id = create_resp.json().get("id") if create_resp.status_code == 201 else product.id
         patch_body = {"description": "Updated description via PATCH"}
         self._record(
-            title="Product — PATCH (partial update)",
+            title="Asset — PATCH (partial update)",
             intro="Partial update; only the changed field is sent.",
-            method="PATCH", url=self.v3_url(f"products/{new_id}"),
+            method="PATCH", url=self.v3_url(f"assets/{new_id}"),
             req_headers=[f"Authorization: Token {_TOKEN_PLACEHOLDER}", "Content-Type: application/json"],
             req_body=_pretty(patch_body),
-            response=self.client.patch(self.v3_url(f"products/{new_id}"), patch_body, format="json"),
+            response=self.client.patch(self.v3_url(f"assets/{new_id}"), patch_body, format="json"),
         )
 
     # --- output ---------------------------------------------------------------------------------

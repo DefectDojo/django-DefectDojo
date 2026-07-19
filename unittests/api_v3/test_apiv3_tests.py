@@ -13,7 +13,7 @@ from dojo.test.api_v3.schemas import EnvironmentSlim, TestSlim, TestTypeSlim
 from .base import ApiV3TestCase
 
 _SLIM_KEYS = {
-    "id", "name", "test_type", "engagement", "product", "product_type", "environment",
+    "id", "name", "test_type", "engagement", "asset", "organization", "environment",
     "lead", "target_start", "target_end", "percent_complete", "tags", "created", "updated",
 }
 
@@ -111,10 +111,10 @@ class TestApiV3TestsQueryCount(ApiV3TestCase):
     def test_query_count_is_independent_of_row_count(self):
         self._bulk(10, 0)
         first = self._query_count({"limit": 250})
-        first_expand = self._query_count({"limit": 250, "expand": "engagement.product,test_type"})
+        first_expand = self._query_count({"limit": 250, "expand": "engagement.asset,test_type"})
         self._bulk(90, 100)
         second = self._query_count({"limit": 250})
-        second_expand = self._query_count({"limit": 250, "expand": "engagement.product,test_type"})
+        second_expand = self._query_count({"limit": 250, "expand": "engagement.asset,test_type"})
         self.assertEqual(first, second, f"query count grew (no expand): {first} -> {second}")
         self.assertEqual(first_expand, second_expand, f"query count grew (expand): {first_expand} -> {second_expand}")
 

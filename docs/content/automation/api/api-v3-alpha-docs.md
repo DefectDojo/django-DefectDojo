@@ -19,9 +19,10 @@ aliases:
 API v3 is a **new, parallel API** that runs next to the existing [API v2](../api-v2-docs/). v2 is
 **not changed** by v3 and remains fully supported — v3 is entirely additive.
 
-The alpha covers seven objects — `product_type`, `product`, `engagement`, `test`, `finding`,
+The alpha covers seven objects — `organization`, `asset`, `engagement`, `test`, `finding`,
 `location`, `user` — plus a single consolidated `import` endpoint. Everything else stays on v2 until
-v3 reaches parity.
+v3 reaches parity. (`organization` and `asset` are the v3 wire names for what v2 calls `product_type`
+and `product` — see [Naming: organizations and assets](#naming-organizations-and-assets).)
 
 What v3 gives you over v2:
 
@@ -127,16 +128,45 @@ never leaked) · `400` validation/expand/filter errors.
 
 ## v2 → v3 mapping
 
+This table doubles as the rename documentation (D11): `product_type` → `organization`,
+`product` → `asset` on the v3 wire.
+
 | Object | v2 | v3 (alpha) | Notes |
 |---|---|---|---|
-| Product type | `/api/v2/product_types/` | `/api/v3-alpha/product_types` | CRUD (PATCH-only partial update) |
-| Product | `/api/v2/products/` | `/api/v3-alpha/products` | CRUD |
+| Organization (v2 "product type") | `/api/v2/product_types/` | `/api/v3-alpha/organizations` | **Renamed** (D11); CRUD (PATCH-only partial update) |
+| Asset (v2 "product") | `/api/v2/products/` | `/api/v3-alpha/assets` | **Renamed** (D11); CRUD |
 | Engagement | `/api/v2/engagements/` | `/api/v3-alpha/engagements` | CRUD |
 | Test | `/api/v2/tests/` | `/api/v3-alpha/tests` | CRUD |
 | Finding | `/api/v2/findings/` | `/api/v3-alpha/findings` | CRUD + `?expand=`, `?include=counts` |
 | Location | `/api/v2/endpoints/` (legacy `Endpoint`) | `/api/v3-alpha/locations` | **Concept change** (see below); read-only in alpha |
 | User | `/api/v2/users/` | `/api/v3-alpha/users` | Read + self; admin-only writes |
 | Import | `/api/v2/import-scan/` + `/api/v2/reimport-scan/` | `/api/v3-alpha/import` | **Consolidated** — one endpoint, `mode=auto\|import\|reimport` |
+
+### Naming: organizations and assets
+
+v3 speaks the product's new domain language: what v2 calls a **product type** is an
+**`organization`** on the v3 wire, and what v2 calls a **product** is an **`asset`**. This renames
+the wire surface consistently and completely (D11, "all-or-nothing"): the paths (`/organizations`,
+`/assets`), the ref keys (`finding.asset`, `finding.organization`, `engagement.asset`,
+`asset.organization`), the filter params (`asset=`, `organization=`, …), the `?expand=` keys
+(`expand=asset`, `expand=organization`), the import form fields (`asset_name`, `organization_name`),
+the OpenAPI tags and schema classes, and this documentation.
+
+**Why now:** a brand-new API should not bake the legacy names into a surface that clients will
+codegen against for years. The alpha is the only time this rename is free — after beta it would mean
+permanent aliases and deprecations.
+
+**Unconditional — the API naming does not follow the UI relabel flag.** The web UI's
+product-type→organization / product→asset relabel is governed by
+`DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` (default on). The **v3 API ignores that flag**: v3 always
+speaks `organizations`/`assets` regardless of the deployment's UI labels. A per-instance API contract
+would be poison for code generation, so the wire names are fixed.
+
+**Not renamed:** the underlying Django models (`Product_Type`, `Product`), the database tables, and
+the internal module paths are unchanged — the DTO layer is exactly what decouples the wire names from
+the models. (A handful of scalar model-column fields keep their names on the wire — the
+`organization` flags `critical_product`/`key_product` and the `asset` user-role ref `asset_manager`,
+whose model column is `product_manager`; these are model-field passthroughs, not entity references.)
 
 ### Locations replace endpoints
 
@@ -145,14 +175,14 @@ the status (`Active` / `Mitigated` / `FalsePositive` / `RiskAccepted` / `OutOfSc
 edge. Slim findings carry `locations_count`; the full edge list is a sub-resource:
 
 - `GET /api/v3-alpha/findings/{id}/locations` → `{ location: {id, name, type}, status, audit_time, auditor }`
-- `GET /api/v3-alpha/products/{id}/locations` → `{ location: {id, name, type}, status }`
+- `GET /api/v3-alpha/assets/{id}/locations` → `{ location: {id, name, type}, status }`
 
 ### Import in one call
 
 `POST /api/v3-alpha/import` (multipart) covers all three flows. `mode=auto` resolves an existing
-target via product/engagement names; `import` and `reimport` are explicit. **Destructive flags are
-never implied by mode** — if you omit `close_old_findings`, the importer default applies and the
-response echoes the effective value:
+target via `asset_name` + `engagement_name` (+ optional `organization_name`); `import` and `reimport`
+are explicit. **Destructive flags are never implied by mode** — if you omit `close_old_findings`, the
+importer default applies and the response echoes the effective value:
 
 ```jsonc
 { "mode_resolved": "reimport", "test": { "id": 9, "name": "ZAP Scan" },
@@ -164,7 +194,7 @@ response echoes the effective value:
 
 Where v2 accreted per-resource actions and mechanisms, v3 has **one generic sub-resource** for each,
 attached to every resource whose model stores it (notes/files: finding, engagement, test; tags:
-those plus product):
+those plus asset):
 
 ```
 GET / POST         /api/v3-alpha/<resource>/{id}/notes      { "entry": "...", "private": false }

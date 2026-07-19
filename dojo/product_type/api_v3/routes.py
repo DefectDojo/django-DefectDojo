@@ -1,7 +1,13 @@
 """
-Product_Type CRUD routes for API v3 (§4.5, §4.9, §4.11, OS3a).
+Organization CRUD routes for API v3 (§4.5, §4.9, §4.11, OS3a; renamed per D11).
 
-``build_product_types_router()`` is a router factory (I5), same signature style as
+**D11 wire rename:** the ``Product_Type`` model is exposed on the wire as ``organization`` -- paths
+(``/organizations``), the OpenAPI tag, the filter registry name and the schema classes all use the
+new domain language. The Django model / DB table / ``dojo/product_type/`` module path are **not**
+renamed (see §12); ORM field paths, ``get_authorized_product_types`` and the ``Product_Type_*``
+permission enums keep their names (they point at the real model).
+
+``build_organizations_router()`` is a router factory (I5), same signature style as
 ``build_findings_router``. Routes are thin (I6): authorize -> filter -> plan queryset -> serialize
 -> shape. RBAC flows only through ``get_authorized_product_types`` for reads (I8) and the v2
 ``user_has_permission``/``user_has_global_permission`` semantics for writes, mirroring the v2
@@ -41,10 +47,10 @@ from dojo.authorization.authorization import user_has_global_permission, user_ha
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Endpoint, Product_Type
 from dojo.product_type.api_v3.schemas import (
-    ProductTypeDetail,
-    ProductTypeSlim,
-    ProductTypeUpdate,
-    ProductTypeWrite,
+    OrganizationDetail,
+    OrganizationSlim,
+    OrganizationUpdate,
+    OrganizationWrite,
 )
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import async_delete, get_setting
@@ -55,9 +61,9 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
     from django.http import HttpRequest
 
-# --- Product_Type filter vocabulary (§4.9, minimal set) ---------------------------------------
+# --- Organization filter vocabulary (§4.9, minimal set) ---------------------------------------
 
-PRODUCT_TYPE_FILTER_SPEC = register_filter_spec("product_type", FilterSpec(
+ORGANIZATION_FILTER_SPEC = register_filter_spec("organization", FilterSpec(
     model=Product_Type,
     filters={
         "id__in": filter_field("id", "in", "number"),
@@ -77,14 +83,14 @@ PRODUCT_TYPE_FILTER_SPEC = register_filter_spec("product_type", FilterSpec(
 ))
 
 
-class ProductTypeListResponse(Schema):
+class OrganizationListResponse(Schema):
 
     """OpenAPI documentation of the list envelope (I1); runtime serialization is manual."""
 
     count: int
     next: str | None
     previous: str | None
-    results: list[ProductTypeSlim]
+    results: list[OrganizationSlim]
     meta: dict | None = None
 
 
@@ -113,19 +119,19 @@ def _destroy(instance: Product_Type) -> None:
             instance.delete()
 
 
-def build_product_types_router(
+def build_organizations_router(
     *,
-    schema: type = ProductTypeSlim,
-    detail_schema: type = ProductTypeDetail,
-    filter_spec: FilterSpec = PRODUCT_TYPE_FILTER_SPEC,
+    schema: type = OrganizationSlim,
+    detail_schema: type = OrganizationDetail,
+    filter_spec: FilterSpec = ORGANIZATION_FILTER_SPEC,
     queryset_hook: Callable | None = None,
     auth=NOT_SET,
 ) -> Router:
-    """Build the product_types router (I5)."""
-    router = Router(tags=["product_types"], auth=auth)
+    """Build the organizations router (I5)."""
+    router = Router(tags=["organizations"], auth=auth)
 
-    @router.get("/product_types", response=ProductTypeListResponse, url_name="product_types_list")
-    def list_product_types(request: HttpRequest):
+    @router.get("/organizations", response=OrganizationListResponse, url_name="organizations_list")
+    def list_organizations(request: HttpRequest):
         filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
 
         expand_tree, select_related, prefetch = plan(schema, request.GET.get("expand"))
@@ -143,20 +149,20 @@ def build_product_types_router(
             envelope.setdefault("meta", {}).update(include_meta)
         return json_response(envelope)
 
-    @router.get("/product_types/{int:product_type_id}", response=detail_schema, url_name="product_types_detail")
-    def get_product_type(request: HttpRequest, product_type_id: int):
+    @router.get("/organizations/{int:organization_id}", response=detail_schema, url_name="organizations_detail")
+    def get_organization(request: HttpRequest, organization_id: int):
         expand_tree, select_related, prefetch = plan(detail_schema, request.GET.get("expand"))
         qs = _base_queryset(request, queryset_hook).select_related(*detail_schema.SELECT_RELATED).prefetch_related(*detail_schema.PREFETCH_RELATED)
         qs = plan_queryset(qs, select_related, prefetch)
-        obj = qs.filter(pk=product_type_id).first()
+        obj = qs.filter(pk=organization_id).first()
         if obj is None:
-            msg = f"Product_Type {product_type_id} not found"
+            msg = f"Organization {organization_id} not found"
             raise not_found_problem(msg)
         fields = parse_fields(request.GET.get("fields"), allowed_field_names(detail_schema))
         return json_response(apply_fields(serialize(obj, detail_schema, expand_tree), fields))
 
-    @router.post("/product_types", response=detail_schema, url_name="product_types_create")
-    def create_product_type(request: HttpRequest, payload: ProductTypeWrite):
+    @router.post("/organizations", response=detail_schema, url_name="organizations_create")
+    def create_organization(request: HttpRequest, payload: OrganizationWrite):
         # Mirror UserHasProductTypePermission: POST requires global "add".
         if not user_has_global_permission(request.user, "add"):
             raise PermissionDenied
@@ -167,11 +173,11 @@ def build_product_types_router(
             raise _validation_from_django(exc) from exc
         return json_response(serialize(instance, detail_schema, {}), status=201)
 
-    @router.patch("/product_types/{int:product_type_id}", response=detail_schema, url_name="product_types_update")
-    def update_product_type(request: HttpRequest, product_type_id: int, payload: ProductTypeUpdate):
-        instance = _base_queryset(request, queryset_hook).filter(pk=product_type_id).first()
+    @router.patch("/organizations/{int:organization_id}", response=detail_schema, url_name="organizations_update")
+    def update_organization(request: HttpRequest, organization_id: int, payload: OrganizationUpdate):
+        instance = _base_queryset(request, queryset_hook).filter(pk=organization_id).first()
         if instance is None:
-            msg = f"Product_Type {product_type_id} not found"
+            msg = f"Organization {organization_id} not found"
             raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
         if not user_has_permission(request.user, instance, Permissions.Product_Type_Edit):
             raise PermissionDenied  # 403: visible but not editable
@@ -183,11 +189,11 @@ def build_product_types_router(
             raise _validation_from_django(exc) from exc
         return json_response(serialize(instance, detail_schema, {}))
 
-    @router.delete("/product_types/{int:product_type_id}", url_name="product_types_delete")
-    def delete_product_type(request: HttpRequest, product_type_id: int):
-        instance = _base_queryset(request, queryset_hook).filter(pk=product_type_id).first()
+    @router.delete("/organizations/{int:organization_id}", url_name="organizations_delete")
+    def delete_organization(request: HttpRequest, organization_id: int):
+        instance = _base_queryset(request, queryset_hook).filter(pk=organization_id).first()
         if instance is None:
-            msg = f"Product_Type {product_type_id} not found"
+            msg = f"Organization {organization_id} not found"
             raise not_found_problem(msg)
         if not user_has_permission(request.user, instance, Permissions.Product_Type_Delete):
             raise PermissionDenied

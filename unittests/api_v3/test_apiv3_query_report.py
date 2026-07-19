@@ -108,10 +108,10 @@ class TestApiV3QueryReport(ApiV3TestCase):
         return {
             "/findings": self.v3_url(f"findings?{limit}&expand=test.engagement,locations&include=counts"),
             "/findings/{finding_id}": self.v3_url(f"findings/{finding_id}?expand=test.engagement"),  # noqa: RUF027
-            "/products": self.v3_url(f"products?{limit}&expand=product_type"),
-            "/products/{product_id}": self.v3_url(f"products/{product_id}"),  # noqa: RUF027
-            "/product_types": self.v3_url(f"product_types?{limit}"),
-            "/product_types/{product_type_id}": self.v3_url(f"product_types/{product_type_id}"),  # noqa: RUF027
+            "/assets": self.v3_url(f"assets?{limit}&expand=organization"),
+            "/assets/{asset_id}": self.v3_url(f"assets/{product_id}"),
+            "/organizations": self.v3_url(f"organizations?{limit}"),
+            "/organizations/{organization_id}": self.v3_url(f"organizations/{product_type_id}"),
             "/users": self.v3_url(f"users?{limit}"),
             "/users/{user_id}": self.v3_url(f"users/{user_id}"),  # noqa: RUF027
             "/engagements": self.v3_url(f"engagements?{limit}"),
@@ -121,8 +121,8 @@ class TestApiV3QueryReport(ApiV3TestCase):
             "/locations": self.v3_url(f"locations?{limit}"),
             "/locations/{location_id}": self.v3_url(f"locations/{Location.objects.order_by('pk').first().pk}"),
             "/findings/{finding_id}/locations": self.v3_url(f"findings/{self._loc_finding.pk}/locations?{limit}"),  # noqa: RUF027
-            "/products/{product_id}/locations": self.v3_url(f"products/{self._loc_product.pk}/locations?{limit}"),  # noqa: RUF027
-            # OS5 notes / files / tags sub-resources (finding/engagement/test; tags also on product).
+            "/assets/{asset_id}/locations": self.v3_url(f"assets/{self._loc_product.pk}/locations?{limit}"),
+            # OS5 notes / files / tags sub-resources (finding/engagement/test; tags also on asset).
             "/findings/{parent_id}/notes": self.v3_url(f"findings/{self._sub_finding.pk}/notes?{limit}"),
             "/engagements/{parent_id}/notes": self.v3_url(f"engagements/{self._sub_engagement.pk}/notes?{limit}"),
             "/tests/{parent_id}/notes": self.v3_url(f"tests/{self._sub_test.pk}/notes?{limit}"),
@@ -135,7 +135,7 @@ class TestApiV3QueryReport(ApiV3TestCase):
             "/findings/{parent_id}/tags": self.v3_url(f"findings/{self._sub_finding.pk}/tags"),
             "/engagements/{parent_id}/tags": self.v3_url(f"engagements/{self._sub_engagement.pk}/tags"),
             "/tests/{parent_id}/tags": self.v3_url(f"tests/{self._sub_test.pk}/tags"),
-            "/products/{parent_id}/tags": self.v3_url(f"products/{self._loc_product.pk}/tags"),
+            "/assets/{parent_id}/tags": self.v3_url(f"assets/{self._loc_product.pk}/tags"),
         }
 
     def _openapi_get_paths(self) -> set[str]:

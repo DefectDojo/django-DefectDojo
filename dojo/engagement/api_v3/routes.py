@@ -1,22 +1,24 @@
 """
 Engagement CRUD routes for API v3 (§4.5, §4.9, §4.11, OS3b).
 
-``build_engagements_router()`` is a router factory (I5), same shape as ``build_products_router``.
+``build_engagements_router()`` is a router factory (I5), same shape as ``build_assets_router``.
 Routes are thin (I6): authorize -> filter -> plan queryset -> serialize -> shape. RBAC flows only
 through ``get_authorized_engagements`` for reads (I8) and the v2 ``user_has_permission`` semantics
-for writes, mirroring the v2 ``UserHasEngagementPermission`` permission class exactly:
+for writes, mirroring the v2 ``UserHasEngagementPermission`` permission class exactly. Per D11 the
+target ``Product`` is exposed on the wire as ``asset`` (write FK -> model ``product``); the model /
+ORM paths / permission enums are not renamed (§12):
 
-- create (POST):   ``add`` permission on the target ``product`` referenced in the payload
-                   (404 if the product doesn't exist, 403 if unauthorized -- mirrors
+- create (POST):   ``add`` permission on the target asset referenced in the payload
+                   (404 if the asset doesn't exist, 403 if unauthorized -- mirrors
                    ``check_post_permission(request, Product, "product", "add")``)
-- update (PATCH):  object ``edit`` permission, plus ``add`` on a *reassigned* ``product``
+- update (PATCH):  object ``edit`` permission, plus ``add`` on a *reassigned* asset
                    (mirrors ``check_update_permission(request, obj, "add", "product")``)
 - delete (DELETE): object ``delete`` permission (staff-only for non-staff members, legacy model)
 - read:            object ``view`` via the authorized queryset (404 for unknown-or-unauthorized)
 
 Deletion mirrors the v2 ``EngagementViewSet.destroy`` exactly: async delete when
 ``ASYNC_OBJECT_DELETE`` is set, else a plain synchronous ``instance.delete()`` -- note there is **no**
-``Endpoint.allow_endpoint_init()`` wrapper here (unlike product/product_type destroy), mirroring v2
+``Endpoint.allow_endpoint_init()`` wrapper here (unlike asset/organization destroy), mirroring v2
 (§12). Relations are referenced by integer id (§4.11).
 """
 from __future__ import annotations
@@ -65,9 +67,9 @@ ENGAGEMENT_FILTER_SPEC = register_filter_spec("engagement", FilterSpec(
     filters={
         "id__in": filter_field("id", "in", "number"),
         "name__icontains": filter_field("name", "icontains", "char"),
-        "product": filter_field("product", "exact", "number"),
-        "product__in": filter_field("product", "in", "number"),
-        "product_type": filter_field("product__prod_type", "exact", "number"),
+        "asset": filter_field("product", "exact", "number"),
+        "asset__in": filter_field("product", "in", "number"),
+        "organization": filter_field("product__prod_type", "exact", "number"),
         "lead": filter_field("lead", "exact", "number"),
         "status": filter_field("status", "exact", "char"),
         "engagement_type": filter_field("engagement_type", "exact", "char"),
@@ -198,12 +200,12 @@ def build_engagements_router(
     def create_engagement(request: HttpRequest, payload: EngagementWrite):
         data = payload.dict()
         tags = data.pop("tags")
-        product_id = data.pop("product")
+        product_id = data.pop("asset")
         # Mirror check_post_permission(request, Product, "product", "add"): 404 if the target
-        # product doesn't exist, 403 if the user can't add engagements to it.
+        # asset doesn't exist, 403 if the user can't add engagements to it.
         product = get_object_or_none(Product, pk=product_id)
         if product is None:
-            msg = f"Product {product_id} not found"
+            msg = f"Asset {product_id} not found"
             raise not_found_problem(msg)
         if not user_has_permission(request.user, product, Permissions.Engagement_Add):
             raise PermissionDenied
@@ -231,13 +233,13 @@ def build_engagements_router(
 
         data = payload.dict(exclude_unset=True)
         tags = data.pop("tags", _UNSET)
-        if "product" in data:
-            new_product_id = data.pop("product")
+        if "asset" in data:
+            new_product_id = data.pop("asset")
             # Mirror check_update_permission: only re-check `add` when the FK actually changes.
             if new_product_id is not None and new_product_id != instance.product_id:
                 new_product = get_object_or_none(Product, pk=new_product_id)
                 if new_product is None:
-                    msg = f"Product {new_product_id} not found"
+                    msg = f"Asset {new_product_id} not found"
                     raise not_found_problem(msg)
                 if not user_has_permission(request.user, new_product, Permissions.Engagement_Add):
                     raise PermissionDenied
