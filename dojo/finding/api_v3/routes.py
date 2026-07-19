@@ -1,16 +1,30 @@
 """
-Findings read routes for API v3 (§4.5, §4.6, §4.8, OS1).
+Findings read + write routes for API v3 (§4.5, §4.6, §4.8, OS1 read / OS3b write).
 
 ``build_findings_router()`` is a router *factory* (I5): the OS mount calls it with defaults; a
 downstream distribution can call it with a subclassed schema / extra filters / a queryset hook and
-mount the result under its own prefix -- no fork. Routes are thin (I6): authorize -> filter ->
-plan queryset -> serialize -> shape; all RBAC flows through ``get_authorized_findings`` (I8).
+mount the result under its own prefix -- no fork. Routes are thin (I6): authorize -> parse ->
+service -> serialize; all RBAC flows through ``get_authorized_findings`` (reads) and the v2
+``UserHasFindingPermission`` semantics (writes, I8), and **all** write side-effects/orchestration
+live in ``dojo/finding/services.py`` (D7), never in the route:
+
+- create (POST):   ``add`` permission on the target ``test`` referenced in the payload (404 if it
+                   doesn't exist, 403 if unauthorized -- mirrors
+                   ``check_post_permission(request, Test, "test", "add")``).
+- update (PATCH):  object ``edit`` permission (404 for unknown-or-unauthorized, 403 if visible but
+                   not editable). Mirrors ``perform_update``: ``push_to_jira`` is OR-ed with the
+                   JIRA project's ``push_all_issues`` when JIRA is enabled.
+- delete (DELETE): object ``delete`` permission; delegates to the service, whose ``Finding.delete()``
+                   runs the same dedup/grading hooks as the v2 ``FindingViewSet.destroy`` (§12).
 """
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count
+from django.http import HttpResponse
 from ninja import Router, Schema
 from ninja.constants import NOT_SET
 
@@ -25,10 +39,14 @@ from dojo.api_v3.filtering import (
 )
 from dojo.api_v3.include import apply_includes
 from dojo.api_v3.pagination import paginate
+from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.finding.api_v3.schemas import FindingDetail, FindingSlim
+from dojo.finding.api_v3.schemas import FindingDetail, FindingSlim, FindingUpdate, FindingWrite
 from dojo.finding.queries import get_authorized_findings
-from dojo.models import Finding
+from dojo.finding.services import create_finding, delete_finding, update_finding
+from dojo.jira import services as jira_services
+from dojo.models import Finding, Test
+from dojo.utils import get_object_or_none, get_system_setting
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -105,6 +123,20 @@ def _base_queryset(request: HttpRequest, queryset_hook: Callable | None) -> Quer
     return qs
 
 
+def _detail_object(request: HttpRequest, queryset_hook: Callable | None, detail_schema: type, finding_id: int):
+    """
+    Fetch a finding through the authorized queryset with the detail schema's relations +
+    ``locations_count`` annotation loaded, so the write responses serialize identically to GET.
+    """
+    qs = (
+        _base_queryset(request, queryset_hook)
+        .select_related(*detail_schema.SELECT_RELATED)
+        .prefetch_related(*detail_schema.PREFETCH_RELATED)
+        .annotate(locations_count=Count("locations", distinct=True))
+    )
+    return qs.filter(pk=finding_id).first()
+
+
 def build_findings_router(
     *,
     schema: type = FindingSlim,
@@ -162,5 +194,63 @@ def build_findings_router(
         fields = parse_fields(request.GET.get("fields"), allowed_fields)
         data = apply_fields(serialize(obj, detail_schema, expand_tree), fields)
         return json_response(data)
+
+    @router.post("/findings", response=detail_schema, url_name="findings_create")
+    def create_finding_route(request: HttpRequest, payload: FindingWrite):
+        data = payload.dict()
+        test_id = data.pop("test")
+        push_to_jira = data.pop("push_to_jira")
+        vulnerability_ids = data.pop("vulnerability_ids")
+        # Mirror UserHasFindingPermission -> check_post_permission(request, Test, "test", "add"):
+        # 404 if the test doesn't exist, 403 if the user can't add findings to it.
+        test = get_object_or_none(Test, pk=test_id)
+        if test is None:
+            msg = f"Test {test_id} not found"
+            raise not_found_problem(msg)
+        if not user_has_permission(request.user, test, Permissions.Finding_Add):
+            raise PermissionDenied
+        finding = create_finding(
+            test=test, data=data, user=request.user,
+            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids,
+        )
+        obj = _detail_object(request, queryset_hook, detail_schema, finding.pk) or finding
+        return json_response(serialize(obj, detail_schema, {}), status=201)
+
+    @router.patch("/findings/{int:finding_id}", response=detail_schema, url_name="findings_update")
+    def update_finding_route(request: HttpRequest, finding_id: int, payload: FindingUpdate):
+        finding = _base_queryset(request, queryset_hook).filter(pk=finding_id).first()
+        if finding is None:
+            msg = f"Finding {finding_id} not found"
+            raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
+        if not user_has_permission(request.user, finding, Permissions.Finding_Edit):
+            raise PermissionDenied  # 403: visible but not editable
+
+        changes = payload.dict(exclude_unset=True)
+        push_to_jira = changes.pop("push_to_jira", False)
+        vulnerability_ids = changes.pop("vulnerability_ids", None)
+        # Mirror FindingViewSet.perform_update: OR push_to_jira with the project's push_all_issues.
+        jira_project = jira_services.get_project(finding)
+        if get_system_setting("enable_jira") and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
+
+        update_finding(
+            finding, changes=changes, user=request.user,
+            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids,
+        )
+        obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
+        return json_response(serialize(obj, detail_schema, {}))
+
+    @router.delete("/findings/{int:finding_id}", url_name="findings_delete")
+    def delete_finding_route(request: HttpRequest, finding_id: int):
+        finding = _base_queryset(request, queryset_hook).filter(pk=finding_id).first()
+        if finding is None:
+            msg = f"Finding {finding_id} not found"
+            raise not_found_problem(msg)
+        if not user_has_permission(request.user, finding, Permissions.Finding_Delete):
+            raise PermissionDenied
+        delete_finding(finding, user=request.user)
+        response = HttpResponse(status=204)
+        response["X-API-Status"] = settings.API_V3_STATUS
+        return response
 
     return router

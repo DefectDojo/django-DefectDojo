@@ -1,170 +1,60 @@
 """
-Finding response schemas for API v3 (§4.5).
+Finding response + write schemas for API v3 (§4.5, §4.11).
 
-``FindingSlim`` (list) and ``FindingDetail`` (retrieve) plus the parent slim schemas needed to
-serve ``?expand=`` targets (§4.6). Every schema is a named, importable, subclassable ninja Schema
-(I4) and declares (as ``ClassVar`` so pydantic does not treat them as fields):
+``FindingSlim`` (list) and ``FindingDetail`` (retrieve). Every schema is a named, importable,
+subclassable ninja Schema (I4) and declares (as ``ClassVar`` so pydantic does not treat them as
+fields):
 
 - ``django_model``    -- the mapped model (used by the expand cycle guard),
 - ``SELECT_RELATED`` / ``PREFETCH_RELATED`` -- the relation paths its resolvers read, so the
   expand planner can keep the query count constant,
 - ``EXPANDABLE``      -- its expandable relations (§4.6).
 
-Slim = identity + primary status fields + parent refs + timestamps, with no per-row computed
-fields (``locations_count`` is a queryset annotation, which is allowed). The parent slims live
-here for OS1 (findings-only); OS3 relocates the canonical copies to their resource modules.
+The parent slims (``EngagementSlim``/``TestSlim``/``TestTypeSlim``/``EnvironmentSlim``/``ProductSlim``
+/``ProductTypeSlim``/``UserSlim``) live in their own resource modules; this module **re-exports**
+them (OS3a relocated product/product_type/user; OS3b relocated engagement/test) so there is exactly
+one canonical class per model shared by the resource endpoints and the finding ``?expand=`` targets
+(I4). See §12.
+
+Write schemas (``FindingWrite`` create, ``FindingUpdate`` PATCH) are the editable subset of the
+detail fields; required-vs-optional mirrors the v2 ``FindingCreateSerializer`` / ``FindingSerializer``.
+Relations are referenced by integer id (§4.11); ``test`` is writable only on create
+(``editable=False`` on the model, mirrors v2). Server-managed fields are never writable and unknown
+fields are rejected (``extra="forbid"``). All side-effect / status-invariant validation lives in the
+service (``dojo/finding/services.py``, D7); the schemas do field typing + strictness only.
 """
 from __future__ import annotations
 
-from datetime import date, datetime  # noqa: TC003 -- runtime import: pydantic resolves the schema field types
+import datetime  # noqa: TC003 -- runtime import: pydantic resolves the schema field types
 from typing import ClassVar
 
 from ninja import Schema
 
 from dojo.api_v3.expand import ExpandRel
 from dojo.api_v3.refs import Ref, to_location_ref, to_ref
-from dojo.models import (
-    Development_Environment,
-    Engagement,
-    Finding,
-    Test,
-    Test_Type,
-)
 
-# Canonical parent slims live in their own resource modules as of OS3a (§12): the finding expand
-# targets (below) reference these single canonical classes rather than a private duplicate.
+# Canonical parent slims live in their own resource modules; re-exported here so the finding
+# expand targets (below) and the resource endpoints serialize through the same schema (I4, §12).
+from dojo.engagement.api_v3.schemas import EngagementSlim
+from dojo.models import Finding
 from dojo.product.api_v3.schemas import ProductSlim
 from dojo.product_type.api_v3.schemas import ProductTypeSlim
+from dojo.test.api_v3.schemas import EnvironmentSlim, TestSlim, TestTypeSlim
 from dojo.user.api_v3.schemas import UserSlim
 
-
-class EngagementSlim(Schema):
-    django_model: ClassVar = Engagement
-    SELECT_RELATED: ClassVar[tuple] = ("product__prod_type", "lead")
-    PREFETCH_RELATED: ClassVar[tuple] = ("tags",)
-    EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
-
-    id: int
-    name: str | None
-    product: Ref
-    product_type: Ref
-    lead: Ref | None
-    status: str | None
-    engagement_type: str | None
-    target_start: date | None
-    target_end: date | None
-    active: bool | None
-    tags: list[str]
-    created: datetime | None
-    updated: datetime | None
-
-    @staticmethod
-    def resolve_product(obj) -> dict | None:
-        return to_ref(obj.product)
-
-    @staticmethod
-    def resolve_product_type(obj) -> dict | None:
-        return to_ref(obj.product.prod_type)
-
-    @staticmethod
-    def resolve_lead(obj) -> dict | None:
-        return to_ref(obj.lead)
-
-    @staticmethod
-    def resolve_tags(obj) -> list[str]:
-        return [t.name for t in obj.tags.all()]
-
-
-EngagementSlim.EXPANDABLE = {
-    "product": ExpandRel(attr="product", path="product", schema=ProductSlim),
-    "product_type": ExpandRel(attr="product.prod_type", path="product__prod_type", schema=ProductTypeSlim),
-    "lead": ExpandRel(attr="lead", path="lead", schema=UserSlim),
-}
-
-
-class TestTypeSlim(Schema):
-    django_model: ClassVar = Test_Type
-    SELECT_RELATED: ClassVar[tuple] = ()
-    PREFETCH_RELATED: ClassVar[tuple] = ()
-    EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
-
-    id: int
-    name: str
-    active: bool | None
-
-
-class EnvironmentSlim(Schema):
-    django_model: ClassVar = Development_Environment
-    SELECT_RELATED: ClassVar[tuple] = ()
-    PREFETCH_RELATED: ClassVar[tuple] = ()
-    EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
-
-    id: int
-    name: str
-
-
-class TestSlim(Schema):
-    django_model: ClassVar = Test
-    SELECT_RELATED: ClassVar[tuple] = ("test_type", "engagement__product__prod_type", "environment", "lead")
-    PREFETCH_RELATED: ClassVar[tuple] = ("tags",)
-    EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
-
-    id: int
-    name: str | None
-    test_type: Ref
-    engagement: Ref
-    product: Ref
-    product_type: Ref
-    environment: Ref | None
-    lead: Ref | None
-    target_start: datetime | None
-    target_end: datetime | None
-    percent_complete: int | None
-    tags: list[str]
-    created: datetime | None
-    updated: datetime | None
-
-    @staticmethod
-    def resolve_name(obj) -> str | None:
-        return obj.title
-
-    @staticmethod
-    def resolve_test_type(obj) -> dict | None:
-        return to_ref(obj.test_type)
-
-    @staticmethod
-    def resolve_engagement(obj) -> dict | None:
-        return to_ref(obj.engagement)
-
-    @staticmethod
-    def resolve_product(obj) -> dict | None:
-        return to_ref(obj.engagement.product)
-
-    @staticmethod
-    def resolve_product_type(obj) -> dict | None:
-        return to_ref(obj.engagement.product.prod_type)
-
-    @staticmethod
-    def resolve_environment(obj) -> dict | None:
-        return to_ref(obj.environment)
-
-    @staticmethod
-    def resolve_lead(obj) -> dict | None:
-        return to_ref(obj.lead)
-
-    @staticmethod
-    def resolve_tags(obj) -> list[str]:
-        return [t.name for t in obj.tags.all()]
-
-
-TestSlim.EXPANDABLE = {
-    "test_type": ExpandRel(attr="test_type", path="test_type", schema=TestTypeSlim),
-    "engagement": ExpandRel(attr="engagement", path="engagement", schema=EngagementSlim),
-    "product": ExpandRel(attr="engagement.product", path="engagement__product", schema=ProductSlim),
-    "product_type": ExpandRel(attr="engagement.product.prod_type", path="engagement__product__prod_type", schema=ProductTypeSlim),
-    "lead": ExpandRel(attr="lead", path="lead", schema=UserSlim),
-    "environment": ExpandRel(attr="environment", path="environment", schema=EnvironmentSlim),
-}
+__all__ = [
+    "EngagementSlim",
+    "EnvironmentSlim",
+    "FindingDetail",
+    "FindingSlim",
+    "FindingUpdate",
+    "FindingWrite",
+    "ProductSlim",
+    "ProductTypeSlim",
+    "TestSlim",
+    "TestTypeSlim",
+    "UserSlim",
+]
 
 
 class FindingSlim(Schema):
@@ -184,7 +74,7 @@ class FindingSlim(Schema):
     risk_accepted: bool
     out_of_scope: bool
     is_mitigated: bool
-    date: date | None
+    date: datetime.date | None
     cwe: int | None
     test: Ref
     engagement: Ref
@@ -193,8 +83,8 @@ class FindingSlim(Schema):
     reporter: Ref | None
     locations_count: int
     tags: list[str]
-    created: datetime | None
-    updated: datetime | None
+    created: datetime.datetime | None
+    updated: datetime.datetime | None
 
     @staticmethod
     def resolve_test(obj) -> dict | None:
@@ -275,9 +165,86 @@ class FindingDetail(FindingSlim):
     references: str | None
     file_path: str | None
     line: int | None
-    mitigated: datetime | None
+    mitigated: datetime.datetime | None
     mitigated_by: Ref | None
 
     @staticmethod
     def resolve_mitigated_by(obj) -> dict | None:
         return to_ref(obj.mitigated_by)
+
+
+# --- Write schemas (§4.11, §6 OS3 write-schema rule) ------------------------------------------
+
+class FindingWrite(Schema):
+
+    """
+    Create payload (POST /findings). ``test``/``title``/``severity``/``description``/``active``/
+    ``verified`` required (mirrors ``FindingCreateSerializer``: ``active``/``verified`` carry
+    ``extra_kwargs required=True``). ``vulnerability_ids`` is a flat ``list[str]`` (§4.11); the
+    service persists them and mirrors the first into the ``cve`` field. ``found_by`` references
+    ``Test_Type`` ids; ``reporter``/``mitigated_by`` reference user ids.
+    """
+
+    model_config = {"extra": "forbid"}
+
+    test: int
+    title: str
+    severity: str
+    description: str
+    active: bool
+    verified: bool
+    date: datetime.date | None = None
+    cwe: int | None = None
+    false_p: bool | None = None
+    duplicate: bool | None = None
+    out_of_scope: bool | None = None
+    risk_accepted: bool | None = None
+    is_mitigated: bool | None = None
+    mitigation: str | None = None
+    impact: str | None = None
+    steps_to_reproduce: str | None = None
+    severity_justification: str | None = None
+    references: str | None = None
+    file_path: str | None = None
+    line: int | None = None
+    mitigated: datetime.datetime | None = None
+    mitigated_by: int | None = None
+    reporter: int | None = None
+    found_by: list[int] | None = None
+    vulnerability_ids: list[str] | None = None
+    tags: list[str] | None = None
+    push_to_jira: bool = False
+
+
+class FindingUpdate(Schema):
+
+    """Partial update payload (PATCH). ``test`` is not writable (editable=False, mirrors v2)."""
+
+    model_config = {"extra": "forbid"}
+
+    title: str | None = None
+    severity: str | None = None
+    description: str | None = None
+    active: bool | None = None
+    verified: bool | None = None
+    date: datetime.date | None = None
+    cwe: int | None = None
+    false_p: bool | None = None
+    duplicate: bool | None = None
+    out_of_scope: bool | None = None
+    risk_accepted: bool | None = None
+    is_mitigated: bool | None = None
+    mitigation: str | None = None
+    impact: str | None = None
+    steps_to_reproduce: str | None = None
+    severity_justification: str | None = None
+    references: str | None = None
+    file_path: str | None = None
+    line: int | None = None
+    mitigated: datetime.datetime | None = None
+    mitigated_by: int | None = None
+    reporter: int | None = None
+    found_by: list[int] | None = None
+    vulnerability_ids: list[str] | None = None
+    tags: list[str] | None = None
+    push_to_jira: bool = False
