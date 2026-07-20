@@ -11,7 +11,7 @@ Unlike the other deduplication algorithms, Global Component matching is **not sc
 
 ## Enabling the Global Component Algorithm
 
-Global Component Deduplication is gated behind a feature flag and is **off by default**. To request that it be enabled on your instance, contact [DefectDojo Support](mailto:support@defectdojo.com).
+Global Component Deduplication is gated behind a feature flag and is **off by default**. A superuser can turn it on from **Settings > Feature Flags** on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
 Once the feature is enabled, **Global Component** will become available as an option in the **Deduplication Algorithm** dropdown for both Same Tool and Cross Tool Deduplication settings in the Tuner.
 

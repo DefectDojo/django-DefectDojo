@@ -104,6 +104,12 @@ See our [Universal Parser Guide](/import_data/pro/specialized_import/universal_p
 
 ![image](images/universal_parser_3.png)
 
+## Managing optional features
+
+Many of the capabilities above are optional and ship behind a feature flag, so you can adopt them when you are ready. A superuser can turn most of them on and off directly from **Settings > Feature Flags**, without contacting support.
+
+See the [Feature Flags](/admin/feature_flags/pro__feature_flags/) guide for how to enable a feature, and for why a feature might be locked or unavailable on your installation type.
+
 ## Support
 
 DefectDojo Pro subscriptions include world-class support for both on-premise and Cloud installations.  Our team is available to help your organization implement and maximize your use of DefectDojo Pro.  Your subscription includes:
