@@ -19,6 +19,7 @@ from dojo.finding.deduplication import (
     set_duplicate,
 )
 from dojo.importers.default_importer import DefaultImporter
+from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     Development_Environment,
     Endpoint,
@@ -31,6 +32,7 @@ from dojo.models import (
     Test,
     Test_Import,
     Test_Import_Finding_Action,
+    Test_Type,
     User,
     copy_model_util,
 )
@@ -654,14 +656,17 @@ class TestDuplicationLogic(DojoTestCase):
 
     def _dedupe_fortify_repro_scan(self, fpr_filename, engagement_name):
         """
-        Import one corrected Fortify repro .fpr into its own (isolated) engagement
-        under a shared product via the real importer (so findings are created in
-        stable content-key order), using unique_id_from_tool deduplication, and
-        return the single surviving non-duplicate finding.
+        Reimport one corrected Fortify repro .fpr into its own (isolated)
+        engagement under a shared product via the real reimporter (so findings
+        are created in stable content-key order), using unique_id_from_tool
+        deduplication, and return the single surviving non-duplicate finding.
 
-        The two fixtures contain the same pair of findings - which share a
-        unique_id_from_tool but have different content (different rule/title/line) -
-        in opposite document order.
+        The customer-reported flip is a reimport phenomenon: the surviving
+        "original" among findings that collide on the dedupe key changed with
+        the scanner's export order between re-scans. The two fixtures contain
+        the same pair of findings - which share a unique_id_from_tool but have
+        different content (different rule/title/line) - in opposite document
+        order.
         """
         product_type, _ = Product_Type.objects.get_or_create(name="Fortify UID Repro PT")
         product, _ = Product.objects.get_or_create(
@@ -675,38 +680,42 @@ class TestDuplicationLogic(DojoTestCase):
             target_end=timezone.now().date(),
             deduplication_on_engagement=True,  # isolate each scan's dedupe scope
         )
+        test_type, _ = Test_Type.objects.get_or_create(name="Fortify Scan")
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=test_type,
+            scan_type="Fortify Scan",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
         admin = User.objects.get(username="admin")
-        environment, _ = Development_Environment.objects.get_or_create(name="Development")
         with (get_unit_tests_scans_path("fortify") / fpr_filename).open(encoding="utf-8") as scan:
-            importer = DefaultImporter(
-                scan=scan,
-                scan_type="Fortify Scan",
-                engagement=engagement,
+            reimporter = DefaultReImporter(
+                test=test,
                 user=admin,
                 lead=admin,
-                environment=environment,
-                scan_date=timezone.now(),
-                min_severity="Info",
+                scan_date=None,
+                minimum_severity="Info",
                 active=True,
                 verified=True,
-                push_to_jira=False,
-                close_old_findings=False,
+                force_sync=True,
+                scan_type="Fortify Scan",
             )
-            test, _, _len_new, _, _, _, _ = importer.process_scan(scan)
+            reimporter.process_scan(scan)
 
         # Deduplicate explicitly so the test does not depend on the async/eager
-        # configuration of import post-processing. Dedupe is idempotent, so this
+        # configuration of reimport post-processing. Dedupe is idempotent, so this
         # is safe even when post-processing already deduplicated the batch.
         finding_ids = list(Finding.objects.filter(test=test).values_list("id", flat=True))
         dedupe_batch_of_findings(get_finding_models_for_deduplication(finding_ids))
 
         findings = list(Finding.objects.filter(test=test).order_by("id"))
-        # The importer must have created the findings in stable content-key order,
+        # The reimporter must have created the findings in stable content-key order,
         # i.e. id order equals deduplication_ordering_key order.
         self.assertEqual(
             [f.id for f in findings],
             [f.id for f in sorted(findings, key=deduplication_ordering_key)],
-            "importer did not create findings in deduplication_ordering_key order",
+            "reimporter did not create findings in deduplication_ordering_key order",
         )
         non_duplicates = [f for f in findings if not f.duplicate]
         # unique_id_from_tool dedupe collapses the shared-uid pair to one original

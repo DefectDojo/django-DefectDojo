@@ -546,16 +546,16 @@ def find_candidates_for_reimport_legacy(test, findings, service=None):
 
 def deduplication_ordering_key(finding):
     """
-    Stable, content-derived sort key used by the importers to decide the order
+    Stable, content-derived sort key used by the reimporter to decide the order
     findings from one report are created (and therefore get their ids) in.
 
     Deduplication itself always picks the lowest-id finding as the canonical
-    "original". Because the importers sort a report's findings by this key
-    BEFORE saving them, "lowest id" within one import equals "canonical by
-    content", so the winner among findings that collide on the deduplication
-    key is reproducible across re-scans regardless of the order the scanner
-    exports its findings in. Findings from earlier imports always have smaller
-    ids, so an already-established original never flips.
+    "original". Because the reimporter sorts a report's findings by this key
+    BEFORE saving them, "lowest id" among findings created by one reimport
+    equals "canonical by content", so the winner among findings that collide
+    on the deduplication key is reproducible across re-scans regardless of the
+    order the scanner exports its findings in. Findings from earlier imports
+    always have smaller ids, so an already-established original never flips.
 
     id is the final tiebreak and is only reached when two findings are
     identical across every content field in the key (in which case the choice
@@ -583,7 +583,7 @@ def _is_candidate_older(new_finding, candidate):
     # independently from concurrent dedupe batches (and from the `dedupe`
     # management command over pre-existing findings), so it has to be globally
     # antisymmetric — for any pair, exactly one side may see the other as
-    # "older". Content-stable winner selection is achieved by the importers
+    # "older". Content-stable winner selection is achieved by the reimporter
     # creating a report's findings in deduplication_ordering_key order instead.
     is_older = candidate.id < new_finding.id
     if not is_older:
