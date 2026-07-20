@@ -2,7 +2,10 @@ import contextlib
 import json
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class SemgrepProParser:
@@ -45,6 +48,11 @@ class SemgrepProParser:
                 active=active,
                 verified=verified,
             )
+
+            if settings.V3_FEATURE_LOCATIONS and file_path:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=file_path, line=line or None),
+                )
 
             # Add CWE if available
             if "rule" in item and "cwe_names" in item["rule"]:

@@ -286,6 +286,46 @@ By default Jira issues use DefectDojo's built-in title and body. To customize th
 - **Token lifecycle (OAuth):** DefectDojo owns the whole flow — it performs the authorization-code exchange, stores the access and refresh tokens, and refreshes on demand before a push, persisting the new refresh token each time (Atlassian rotates it on every refresh).
 - **Credential storage:** all connection credentials (passwords, tokens, client secrets, OAuth tokens) are encrypted at rest and are never returned through the API — editing a connection shows a "leave blank to keep" placeholder for stored secrets.
 
+## PagerDuty
+
+The PagerDuty Integration allows you to push DefectDojo Findings and Finding Groups as PagerDuty Incidents, opened on a PagerDuty Service of your choice.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to `https://api.pagerduty.com`.  If your PagerDuty account is hosted in the EU service region, use `https://api.eu.pagerduty.com` instead.
+- **API Token** should be set to a PagerDuty REST API key.  An account administrator can create one in the PagerDuty web app under **Integrations > API Access Keys > Create New API Key**.  Leave "Read-only" unchecked - DefectDojo needs to create and update incidents.
+- **From Email** should be the email address of a valid user on your PagerDuty account.  PagerDuty requires this address when creating or updating incidents, and it will be shown as the incident requester.
+
+### Issue Tracker Mapping
+
+- **Service ID** should be the ID of the PagerDuty Service that incidents will be opened on.  You can find it at the end of the URL while looking at the Service in PagerDuty, for example `https://{your-subdomain}.pagerduty.com/service-directory/{service id}`.
+
+### Severity Mapping Details
+
+By default this maps to the PagerDuty incident **Urgency** field, which only accepts `high` or `low`:
+
+- **Severity Field Name**: `Urgency`
+- **Info Mapping**: `low`
+- **Low Mapping**: `low`
+- **Medium Mapping**: `low`
+- **High Mapping**: `high`
+- **Critical Mapping**: `high`
+
+Alternatively, if your PagerDuty account has [Priorities](https://support.pagerduty.com/main/docs/incident-priority) enabled, you can map severities to Priority names instead.  Set the **Severity Field Name** to `Priority` and use your account's Priority names (for example `P1` through `P5`) as the mapping values.  When mapping to Priority, the incident's Urgency is left to your Service's own urgency rules.
+
+### Status Mapping Details
+
+PagerDuty incidents have three statuses: `triggered`, `acknowledged`, and `resolved`.
+
+- **Status Field Name**: `Status`
+- **Active Mapping**: `triggered`
+- **Closed Mapping**: `resolved`
+- **False Positive Mapping**: `resolved`
+- **Risk Accepted Mapping**: `acknowledged`
+
+Note that `resolved` is a final status in PagerDuty - a resolved incident cannot be reopened.  Also note that PagerDuty does not allow an incident's title or description to be edited after creation, so pushing an updated Finding will sync its status, urgency, and priority, but not content changes.
+
 ## ServiceNow
 
 The ServiceNow Integration allows you to push DefectDojo Findings as ServiceNow Incidents.
@@ -430,3 +470,111 @@ A few Freshservice-specific behaviors to be aware of:
 - Updates sync the full ticket content - Freshservice allows the subject and description to be edited after creation.
 - Tickets are closed rather than deleted when a Finding is removed; tickets already Resolved or Closed are left untouched.  A resolution note is attached automatically on closure, so accounts that require one (a common business rule) accept the close.
 - Some accounts compute a ticket's priority from an Impact/Urgency matrix or a business rule and ignore the priority sent at creation.  DefectDojo detects this and re-applies the mapped priority with a follow-up update, so the mapping still takes effect.
+
+## ServiceDesk Plus
+
+The ManageEngine ServiceDesk Plus Integration allows you to push DefectDojo Findings and Finding Groups as ServiceDesk Plus requests, assigned to a support Group of your choice.  Both the **cloud** (ServiceDesk Plus OnDemand) and **on-premises** editions are supported by the same integration - the credentials you provide determine which mode is used.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to your ServiceDesk Plus URL: `https://sdpondemand.manageengine.com` for the cloud edition (or your regional equivalent), or your server's address for on-premises installs.
+
+Then provide **one** of the two credential sets:
+
+#### On-premises: Technician Key
+
+- **Technician Key** should be an API key generated for a technician on your server, under **Admin > General Settings > API**.  Leave the Zoho OAuth fields empty.
+
+#### Cloud: Zoho OAuth
+
+The cloud edition authenticates through Zoho Accounts OAuth:
+
+1. Open the [Zoho API Console](https://api-console.zoho.com/) and create a **Self Client**.
+2. Note the **Client ID** and **Client Secret**.
+3. In the Self Client's "Generate Code" tab, enter the scope `SDPOnDemand.requests.ALL`, choose a duration, and generate the code.
+4. Exchange the code for a refresh token:
+
+```
+curl --request POST \
+ --url 'https://accounts.zoho.com/oauth/v2/token' \
+ --data 'grant_type=authorization_code' \
+ --data 'client_id={{CLIENT_ID}}' \
+ --data 'client_secret={{CLIENT_SECRET}}' \
+ --data 'code={{GENERATED_CODE}}'
+```
+
+5. Enter the **Client ID**, **Client Secret**, and the returned **Refresh Token** in the instance form.  If your account is hosted outside the US data center, set **Token URL** to your regional Zoho Accounts endpoint (for example `https://accounts.zoho.eu/oauth/v2/token`).
+
+### Issue Tracker Mapping
+
+- **Group Name** should be the name of the ServiceDesk Plus support group requests will be assigned to, exactly as it appears under **Admin > Users > Support Groups**.
+
+### Severity Mapping Details
+
+This maps to the ServiceDesk Plus request **Priority** field by name, using your account's priority names:
+
+- **Severity Field Name**: `Priority`
+- **Info Mapping**: `Low`
+- **Low Mapping**: `Normal`
+- **Medium Mapping**: `Medium`
+- **High Mapping**: `High`
+- **Critical Mapping**: `High`
+
+### Status Mapping Details
+
+This maps to the request **Status** field by name.  The defaults use the built-in statuses:
+
+- **Status Field Name**: `Status`
+- **Active Mapping**: `Open`
+- **Closed Mapping**: `Closed`
+- **False Positive Mapping**: `Closed`
+- **Risk Accepted Mapping**: `On Hold`
+
+A few ServiceDesk Plus-specific behaviors to be aware of:
+
+- Updates sync the full request content - unlike most trackers, ServiceDesk Plus allows the subject and description to be edited after creation.
+- Requests are closed rather than deleted when a Finding is removed; requests already Closed or Resolved are left untouched.
+- If your account makes fields mandatory on closure (for example a resolution), a close pushed from DefectDojo may be rejected by those rules and will appear in the Integration errors table.
+
+## Zendesk
+
+The Zendesk Integration allows you to push DefectDojo Findings and Finding Groups as Zendesk tickets, assigned to a Zendesk Group of your choice.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to your Zendesk account URL, for example `https://your-subdomain.zendesk.com`.
+- **Email** should be the email address of the Zendesk agent the API token belongs to.
+- **API Token** should be set to a Zendesk API token.  An administrator can create one in the Zendesk Admin Center under **Apps and integrations > APIs > Zendesk API** (token access must be enabled).
+
+### Issue Tracker Mapping
+
+- **Group ID** should be the numeric ID of the Zendesk Group that tickets will be assigned to.  You can find it in the Admin Center under **People > Team > Groups**, or in the URL while viewing the group.
+
+### Severity Mapping Details
+
+This maps to the Zendesk ticket **Priority** field, which accepts `low`, `normal`, `high`, and `urgent`:
+
+- **Severity Field Name**: `Priority`
+- **Info Mapping**: `low`
+- **Low Mapping**: `low`
+- **Medium Mapping**: `normal`
+- **High Mapping**: `high`
+- **Critical Mapping**: `urgent`
+
+### Status Mapping Details
+
+Zendesk tickets support the statuses `new`, `open`, `pending`, `hold`, `solved`, and `closed`.  Note that `hold` must be enabled on your account before it can be used.
+
+- **Status Field Name**: `Status`
+- **Active Mapping**: `new`
+- **Closed Mapping**: `solved`
+- **False Positive Mapping**: `solved`
+- **Risk Accepted Mapping**: `pending`
+
+A few Zendesk-specific behaviors to be aware of:
+
+- The ticket description is the first comment in Zendesk and cannot be edited after creation, so pushing an updated Finding will sync the ticket's subject, priority, and status, but not description changes.
+- Tickets are marked `solved` rather than deleted when a Finding is removed; Zendesk closes solved tickets automatically after a period of time.
+- `closed` is a final status - closed tickets cannot be updated at all, and pushing a Finding whose ticket has closed will report an error.

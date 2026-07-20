@@ -19,7 +19,7 @@ aliases:
 </div>
 
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Inc. and open-source contributors maintain this documentation to support both the Community and Pro editions of DefectDojo.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo, Inc. and open-source contributors maintain this documentation to support both the Community and Pro editions of DefectDojo.</span>
 
 ## What is DefectDojo?
 
@@ -79,7 +79,7 @@ If you run into trouble with an Open-Source install, we highly recommend asking 
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/XUES0mCCGOI?si=2GEnd1iHlLcQE0R3" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
-DefectDojo Inc. hosts a Pro edition of this software for commercial purposes.  Along with a sleek, modern UI, DefectDojo Pro includes:
+DefectDojo, Inc. hosts a Pro edition of this software for commercial purposes.  Along with a sleek, modern UI, DefectDojo Pro includes:
 
 * [Connectors](/import_data/pro/connectors/about_connectors/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
 * **Configurable Import Methods**: [Universal Parser](/supported_tools/parsers/universal_parser/), [Smart Upload](/import_data/pro/specialized_import/smart_upload/)
@@ -120,7 +120,7 @@ Whether you’re a Pro or an Open-Source user, we have many resources to help yo
 
 ## Connect With Us
 
-To get in touch with the DefectDojo Inc team, you can always reach out to [hello@defectdojo.com](mailto:hello@defectdojo.com).
+To get in touch with the DefectDojo, Inc. team, you can always reach out to [hello@defectdojo.com](mailto:hello@defectdojo.com).
 
 We regularly on [LinkedIn](https://www.linkedin.com/company/33245534) and also host online presentations for AppSec professionals that can be accessed live or on demand. You can learn about upcoming events on our [Events page](https://defectdojo.com/events) or watch past presentations on our [YouTube Channel](https://www.youtube.com/@defectdojo).
 

@@ -28,6 +28,12 @@ class DojoAsyncTask(Task):
         """
         Restore user context in the celery worker via crum.impersonate.
 
+        Also resets the request/task-scoped L1 settings cache at the start of every
+        task (including eager): a prefork worker reuses its thread across tasks, so an
+        L1 value cached during a prior task (e.g. System_Settings) would otherwise be
+        served stale even after another process changed and saved it. There is no
+        shared tier, so a reset task re-reads each singleton once from the DB.
+
         The apply_async method injects ``async_user_id`` into kwargs when a task
         is dispatched. Here we pop it, resolve to a user instance, and set it
         as the current user in thread-local storage so that all downstream
@@ -39,17 +45,27 @@ class DojoAsyncTask(Task):
         intact so that callers who already set a user (e.g. via
         crum.impersonate in tests or request middleware) are not disrupted.
         """
-        if "async_user_id" not in kwargs:
-            return super().__call__(*args, **kwargs)
+        from dojo.caching import reset_l1_cache  # noqa: PLC0415
+        from dojo.request_cache import begin_task_cache, end_task_cache  # noqa: PLC0415
+        reset_l1_cache()
+        # Install a fresh task-scoped request-cache (begin) and drop it afterwards
+        # (end), so cache_for_request_or_task can memoize within this task without a
+        # value leaking to the next task on this reused worker thread.
+        begin_task_cache()
+        try:
+            if "async_user_id" not in kwargs:
+                return super().__call__(*args, **kwargs)
 
-        import crum  # noqa: PLC0415
+            import crum  # noqa: PLC0415
 
-        from dojo.models import Dojo_User  # noqa: PLC0415 circular import
+            from dojo.models import Dojo_User  # noqa: PLC0415 circular import
 
-        user_id = kwargs.pop("async_user_id")
-        user = Dojo_User.objects.filter(pk=user_id).first() if user_id else None
-        with crum.impersonate(user):
-            return super().__call__(*args, **kwargs)
+            user_id = kwargs.pop("async_user_id")
+            user = Dojo_User.objects.filter(pk=user_id).first() if user_id else None
+            with crum.impersonate(user):
+                return super().__call__(*args, **kwargs)
+        finally:
+            end_task_cache()
 
     def apply_async(self, args=None, kwargs=None, **options):
         """Override apply_async to inject user context and track tasks."""

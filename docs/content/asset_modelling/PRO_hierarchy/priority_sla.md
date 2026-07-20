@@ -35,7 +35,7 @@ vulnerabilities in your organization, and also provides a framework to assist in
 compliance with regulatory standards.
 
 
-Learn more about Priority and Risk with DefectDojo Inc's May 2025 Office Hours:
+Learn more about Priority and Risk with DefectDojo, Inc.'s May 2025 Office Hours:
 <iframe width="560" height="315" src="https://www.youtube.com/embed/4SN0BWWsVm4?si=VYUzEGNeijjhoD22" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 

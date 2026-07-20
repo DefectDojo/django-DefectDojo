@@ -2,7 +2,10 @@ import hashlib
 import json
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class NoseyParkerParser:
@@ -101,6 +104,10 @@ class NoseyParkerParser:
                     dynamic_finding=False,
 
                 )
+                if settings.V3_FEATURE_LOCATIONS and filepath:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=filepath, line=line_num),
+                    )
                 self.dupes[key] = finding
 
     def version_0_22_0(self, line, test):
@@ -160,4 +167,8 @@ class NoseyParkerParser:
                     nb_occurences=1,
                     dynamic_finding=False,
                 )
+                if settings.V3_FEATURE_LOCATIONS and filepath:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=filepath, line=line_num),
+                    )
                 self.dupes[key] = finding
