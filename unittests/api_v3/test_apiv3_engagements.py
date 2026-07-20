@@ -68,6 +68,27 @@ class TestApiV3EngagementsRead(ApiV3TestCase):
         self.get_json("engagements", data={"expand": "not_a_relation"}, expected=400)
 
 
+class TestApiV3EngagementsFieldsOptUp(ApiV3TestCase):
+
+    """`?fields=` opt-up into detail fields is uniform across resources (§4.7 Part A) -- engagements."""
+
+    def test_description_absent_from_default_list(self):
+        row = self.get_json("engagements")["results"][0]
+        self.assertEqual(_SLIM_KEYS, set(row))
+        self.assertNotIn("description", row)
+
+    def test_fields_opts_up_into_description(self):
+        engagement = Engagement.objects.first()
+        engagement.description = "opt-up-engagement-description"
+        engagement.save(update_fields=["description"])
+        row = next(
+            r for r in self.get_json("engagements", data={"fields": "id,name,description", "limit": 250})["results"]
+            if r["id"] == engagement.id
+        )
+        self.assertEqual({"id", "name", "description"}, set(row))
+        self.assertEqual("opt-up-engagement-description", row["description"])
+
+
 class TestApiV3EngagementsFilters(ApiV3TestCase):
 
     def test_filter_asset(self):

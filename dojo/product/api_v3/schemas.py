@@ -67,6 +67,14 @@ class AssetDetail(AssetSlim):
 
     # Detail fetch pulls the extra parent FKs so the ref resolvers below issue no extra queries.
     SELECT_RELATED: ClassVar[tuple] = ("prod_type", "product_manager", "technical_contact", "team_manager")
+    # Fixed joins for the user-role refs when a LIST ``?fields=`` opts up into them (§4.7 Part A). The
+    # wire field ``asset_manager`` maps to the model FK ``product_manager`` (D11), so the join path is
+    # declared here rather than derived from the wire name; added by the kernel only when requested.
+    DETAIL_SELECT_RELATED: ClassVar[dict[str, tuple[str, ...]]] = {
+        "asset_manager": ("product_manager",),
+        "technical_contact": ("technical_contact",),
+        "team_manager": ("team_manager",),
+    }
 
     business_criticality: str | None
     platform: str | None

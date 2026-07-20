@@ -89,6 +89,88 @@ class TestApiV3FindingsFields(ApiV3TestCase):
         self.get_json("findings", data={"fields": "id,not_a_field"}, expected=400)
 
 
+class TestApiV3FindingsFieldsOptUp(ApiV3TestCase):
+
+    """`?fields=` on the LIST endpoint may opt UP into the detail field set (§4.7 Part A)."""
+
+    def test_fields_opts_up_into_detail_fields(self):
+        # impact + references are detail-only fields; requesting them returns exactly the projection.
+        row = self.get_json("findings", data={"fields": "id,title,impact,references"})["results"][0]
+        self.assertEqual({"id", "title", "impact", "references"}, set(row))
+
+    def test_detail_fields_absent_from_default_list(self):
+        # The default (no fields=) list is the slim shape exactly -- detail fields never appear.
+        row = self.get_json("findings")["results"][0]
+        self.assertEqual(_SLIM_KEYS, set(row))
+        self.assertNotIn("impact", row)
+        self.assertNotIn("references", row)
+
+    def test_opt_up_value_matches_detail_get(self):
+        finding = Finding.objects.first()
+        finding.impact = "opt-up-impact-value"
+        finding.save(update_fields=["impact"])
+        row = next(
+            r for r in self.get_json("findings", data={"fields": "id,impact", "limit": 250})["results"]
+            if r["id"] == finding.id
+        )
+        self.assertEqual("opt-up-impact-value", row["impact"])
+        # Identical to what the detail GET (which serializes with FindingDetail) returns.
+        self.assertEqual(self.get_json(f"findings/{finding.id}")["impact"], row["impact"])
+
+    def test_detail_only_relation_ref_via_fields(self):
+        # mitigated_by is a detail-only relation rendered as a {id, name} ref (fixed join, Part A).
+        finding = Finding.objects.first()
+        finding.mitigated_by = self.admin
+        finding.save(update_fields=["mitigated_by"])
+        row = next(
+            r for r in self.get_json("findings", data={"fields": "id,mitigated_by", "limit": 250})["results"]
+            if r["id"] == finding.id
+        )
+        self.assertEqual({"id", "mitigated_by"}, set(row))
+        self.assertEqual({"id", "name"}, set(row["mitigated_by"]))
+        self.assertEqual(self.admin.username, row["mitigated_by"]["name"])
+
+    def test_fields_mixing_slim_detail_and_expandable_keys(self):
+        # title (slim) + impact (detail) + locations (an EXPANDABLE key, not a model field).
+        body = self.get_json(
+            "findings", data={"fields": "id,title,impact,locations", "expand": "locations"},
+        )
+        row = body["results"][0]
+        self.assertEqual({"id", "title", "impact", "locations"}, set(row))
+        self.assertIsInstance(row["locations"], list)
+
+    def test_unknown_field_still_400_under_opt_up_allowlist(self):
+        self.get_json("findings", data={"fields": "id,not_a_field"}, expected=400)
+
+
+class TestApiV3FindingsDefer(ApiV3TestCase):
+
+    """Part B: the LIST row query defers the heavy detail columns that were not requested."""
+
+    def _main_row_sql(self, params: dict) -> str:
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(self.v3_url("findings"), params)
+            self.assertEqual(200, response.status_code, response.content[:500])
+        # The main row query is the one selecting the finding table's slim `title` column.
+        rows = [q["sql"] for q in ctx.captured_queries if '"dojo_finding"."title"' in q["sql"]]
+        self.assertEqual(1, len(rows), f"expected exactly one main finding row query, got {len(rows)}")
+        return rows[0]
+
+    def test_default_list_does_not_select_deferred_columns(self):
+        sql = self._main_row_sql({"limit": 250})
+        self.assertIn('"dojo_finding"."title"', sql)          # a slim column is always selected
+        self.assertNotIn('"dojo_finding"."impact"', sql)      # heavy detail columns are deferred
+        self.assertNotIn('"dojo_finding"."description"', sql)
+        self.assertNotIn('"dojo_finding"."mitigation"', sql)
+
+    def test_requesting_impact_un_defers_impact(self):
+        sql = self._main_row_sql({"limit": 250, "fields": "id,impact"})
+        self.assertIn('"dojo_finding"."impact"', sql)         # requested -> selected
+        # Other heavy detail columns stay deferred ("un-defers exactly impact").
+        self.assertNotIn('"dojo_finding"."mitigation"', sql)
+        self.assertNotIn('"dojo_finding"."description"', sql)
+
+
 class TestApiV3FindingsFilters(ApiV3TestCase):
 
     def test_filter_severity(self):
