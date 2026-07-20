@@ -11,6 +11,7 @@ from django.test import override_settings
 from django.utils import timezone
 
 from dojo.finding.deduplication import (
+    _is_candidate_older,  # noqa: PLC2701 -- the antisymmetry regression test targets this helper directly
     build_candidate_scope_queryset,
     dedupe_batch_of_findings,
     deduplication_ordering_key,
@@ -30,7 +31,6 @@ from dojo.models import (
     Test,
     Test_Import,
     Test_Import_Finding_Action,
-    Test_Type,
     User,
     copy_model_util,
 )
@@ -558,17 +558,20 @@ class TestDuplicationLogic(DojoTestCase):
         new.refresh_from_db()
         return new
 
-    def test_dedupe_batch_winner_is_content_stable_hash_code(self):
-        # Regression for the Fortify import-order dedupe flip: among findings that
-        # collide on the deduplication key within one import, the surviving
-        # "original" must be chosen by a stable content key, NOT by whichever was
-        # created first (lowest DB id / parser emission order).
+    def test_dedupe_batch_winner_is_lowest_id_and_rerun_is_stable(self):
+        # Batch deduplication itself must always keep the LOWEST id as the original.
+        # Content-stable winner selection for one report is achieved by the importers
+        # creating findings in deduplication_ordering_key order (see the Fortify
+        # order-independence test below), NOT by re-picking winners inside dedupe.
+        # This keeps the "older" relation globally antisymmetric across concurrent
+        # dedupe batches and keeps re-running dedupe (e.g. the `dedupe` management
+        # command) from flipping established originals on pre-existing data.
         dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
         settings.DEDUPE_ALGO_ENDPOINT_FIELDS = []
         try:
-            shared_hash = "content_stable_hash_flip_test"
+            shared_hash = "lowest_id_rerun_stability_test"
             # Created in REVERSE content order: "zzz" first (lower id), "aaa" second
-            # (higher id). The old behaviour would keep the lower-id "zzz" as original.
+            # (higher id) — simulating pre-existing data created before this upgrade.
             finding_z = self._make_finding_in_test(2, "zzz order flip finding", shared_hash)
             finding_a = self._make_finding_in_test(2, "aaa order flip finding", shared_hash)
             self.assertLess(finding_z.id, finding_a.id)
@@ -579,11 +582,40 @@ class TestDuplicationLogic(DojoTestCase):
 
             finding_a.refresh_from_db()
             finding_z.refresh_from_db()
-            # "aaa" is the canonical original even though it has the HIGHER id.
-            self.assert_finding(finding_a, duplicate=False)
-            self.assert_finding(finding_z, duplicate=True, duplicate_finding_id=finding_a.id)
+            # The lower-id "zzz" stays the original even though "aaa" sorts first by content.
+            self.assert_finding(finding_z, duplicate=False)
+            self.assert_finding(finding_a, duplicate=True, duplicate_finding_id=finding_z.id)
+
+            # Re-running dedupe over the same findings (the `dedupe` management command
+            # scenario) must not flip the established original.
+            dedupe_batch_of_findings(get_finding_models_for_deduplication([finding_z.id, finding_a.id]))
+            finding_a.refresh_from_db()
+            finding_z.refresh_from_db()
+            self.assert_finding(finding_z, duplicate=False)
+            self.assert_finding(finding_a, duplicate=True, duplicate_finding_id=finding_z.id)
         finally:
             settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def test_is_candidate_older_is_antisymmetric(self):
+        # For any pair of saved findings, at most one direction may be "older" —
+        # dedupe batches run concurrently (and the `dedupe` command re-processes
+        # pre-existing findings), so a symmetric or context-dependent answer could
+        # mark two findings as duplicates of each other.
+        from types import SimpleNamespace  # noqa: PLC0415
+
+        def mk(fid, title):
+            return SimpleNamespace(pk=fid, id=fid, hash_code="SAMEHASH", unique_id_from_tool=None,
+                                   file_path=None, line=None, title=title)
+
+        # Content key order ("aaa" < "zzz") deliberately opposes id order.
+        older_by_id = mk(100, "zzz content")
+        newer_by_id = mk(1200, "aaa content")
+        self.assertFalse(
+            _is_candidate_older(older_by_id, newer_by_id) and _is_candidate_older(newer_by_id, older_by_id),
+            "both directions claim the other finding is older — mutual set_duplicate would corrupt data",
+        )
+        self.assertTrue(_is_candidate_older(newer_by_id, older_by_id))
+        self.assertFalse(_is_candidate_older(older_by_id, newer_by_id))
 
     def test_dedupe_batch_pre_existing_finding_stays_original(self):
         # Backward-compat guard: a finding that already existed before this import
@@ -623,21 +655,19 @@ class TestDuplicationLogic(DojoTestCase):
     def _dedupe_fortify_repro_scan(self, fpr_filename, engagement_name):
         """
         Import one corrected Fortify repro .fpr into its own (isolated) engagement
-        under a shared product, using unique_id_from_tool deduplication, and return
-        the single surviving non-duplicate finding.
+        under a shared product via the real importer (so findings are created in
+        stable content-key order), using unique_id_from_tool deduplication, and
+        return the single surviving non-duplicate finding.
 
         The two fixtures contain the same pair of findings - which share a
         unique_id_from_tool but have different content (different rule/title/line) -
         in opposite document order.
         """
-        from dojo.tools.fortify.parser import FortifyParser  # noqa: PLC0415
-
         product_type, _ = Product_Type.objects.get_or_create(name="Fortify UID Repro PT")
         product, _ = Product.objects.get_or_create(
             name="Fortify UID Repro Product",
             defaults={"description": "Fortify UID dedupe repro", "prod_type": product_type},
         )
-        test_type, _ = Test_Type.objects.get_or_create(name="Fortify Scan")
         engagement = Engagement.objects.create(
             name=engagement_name,
             product=product,
@@ -645,30 +675,42 @@ class TestDuplicationLogic(DojoTestCase):
             target_end=timezone.now().date(),
             deduplication_on_engagement=True,  # isolate each scan's dedupe scope
         )
-        test = Test.objects.create(
-            engagement=engagement,
-            test_type=test_type,
-            scan_type="Fortify Scan",
-            target_start=timezone.now(),
-            target_end=timezone.now(),
-        )
-        with (get_unit_tests_scans_path("fortify") / fpr_filename).open(encoding="utf-8") as testfile:
-            parsed_findings = FortifyParser().get_findings(testfile, test)
-
         admin = User.objects.get(username="admin")
-        saved = []
-        for parsed in parsed_findings:
-            parsed.test = test
-            parsed.reporter = admin
-            parsed.save(dedupe_option=False)  # defer dedupe to the batch call below
-            saved.append(parsed)
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        with (get_unit_tests_scans_path("fortify") / fpr_filename).open(encoding="utf-8") as scan:
+            importer = DefaultImporter(
+                scan=scan,
+                scan_type="Fortify Scan",
+                engagement=engagement,
+                user=admin,
+                lead=admin,
+                environment=environment,
+                scan_date=timezone.now(),
+                min_severity="Info",
+                active=True,
+                verified=True,
+                push_to_jira=False,
+                close_old_findings=False,
+            )
+            test, _, _len_new, _, _, _, _ = importer.process_scan(scan)
 
-        dedupe_batch_of_findings(get_finding_models_for_deduplication([f.id for f in saved]))
+        # Deduplicate explicitly so the test does not depend on the async/eager
+        # configuration of import post-processing. Dedupe is idempotent, so this
+        # is safe even when post-processing already deduplicated the batch.
+        finding_ids = list(Finding.objects.filter(test=test).values_list("id", flat=True))
+        dedupe_batch_of_findings(get_finding_models_for_deduplication(finding_ids))
 
-        refreshed = [Finding.objects.get(id=f.id) for f in saved]
-        non_duplicates = [f for f in refreshed if not f.duplicate]
+        findings = list(Finding.objects.filter(test=test).order_by("id"))
+        # The importer must have created the findings in stable content-key order,
+        # i.e. id order equals deduplication_ordering_key order.
+        self.assertEqual(
+            [f.id for f in findings],
+            [f.id for f in sorted(findings, key=deduplication_ordering_key)],
+            "importer did not create findings in deduplication_ordering_key order",
+        )
+        non_duplicates = [f for f in findings if not f.duplicate]
         # unique_id_from_tool dedupe collapses the shared-uid pair to one original
-        self.assertEqual(len(non_duplicates), 1, f"expected exactly one original, got {[(f.id, f.line) for f in refreshed]}")
+        self.assertEqual(len(non_duplicates), 1, f"expected exactly one original, got {[(f.id, f.line) for f in findings]}")
         return non_duplicates[0]
 
     @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL})
