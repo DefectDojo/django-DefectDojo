@@ -92,6 +92,12 @@ class LocationDetail(LocationSlim):
     # The URL subtype is a reverse one-to-one; load it in the detail fetch so the resolvers below
     # issue no per-object query.
     SELECT_RELATED: ClassVar[tuple] = ("url",)
+    # The URL-subtype fields are read through the ``url`` reverse-O2O (not own-model columns, so never
+    # deferrable); when a LIST ``?fields=`` opts up into any of them the kernel adds this fixed join
+    # so the resolvers issue no per-row query (§4.7 Part A).
+    DETAIL_SELECT_RELATED: ClassVar[dict[str, tuple[str, ...]]] = dict.fromkeys(
+        ("protocol", "host", "port", "path", "query", "fragment"), ("url",),
+    )
 
     protocol: str | None
     host: str | None

@@ -161,6 +161,11 @@ class FindingDetail(FindingSlim):
 
     """Slim + the documented heavier fields (§4.5). List returns slim; retrieve returns detail."""
 
+    # Fixed join for the ``mitigated_by`` ref when a LIST ``?fields=`` opts up into it (§4.7 Part A):
+    # the kernel adds this select_related only when ``mitigated_by`` is requested, so the ref renders
+    # from the join with no per-row query. (GET /{id} loads it lazily; a single object query is fine.)
+    DETAIL_SELECT_RELATED: ClassVar[dict[str, tuple[str, ...]]] = {"mitigated_by": ("mitigated_by",)}
+
     description: str | None
     mitigation: str | None
     impact: str | None

@@ -205,3 +205,98 @@ def apply_fields(data: dict, fields: set[str] | None) -> dict:
     if fields is None:
         return data
     return {k: v for k, v in data.items() if k in fields}
+
+
+# --- LIST-endpoint slim/detail field planning + deferral (Part A opt-up / Part B defer) --------
+
+@dataclass(frozen=True)
+class ListFieldPlan:
+
+    """
+    The serialization + queryset plan for one LIST request's ``?fields=`` selection.
+
+    ``?fields=`` on a list may opt **up** into the detail field set (Jira-style, §4.7): the allowlist
+    is ``DetailSchema fields`` plus the ``EXPANDABLE`` keys, and when a requested field is beyond the slim set
+    the row serializes with the detail shape. Independently, LIST querysets ``defer()`` the heavy
+    own-model detail columns that were **not** requested, so a default list never fetches them from
+    the DB (Part B). Both are resource-agnostic: the kernel derives everything from the two schemas
+    and the model's ``concrete_fields``.
+    """
+
+    base_schema: type                        # slim schema; base serialization always runs through it
+    detail_schema: type                      # detail schema; source of the spliced detail-only fields
+    detail_extra: tuple[str, ...]            # requested detail-only fields to splice onto the slim row
+    defer: tuple[str, ...]                   # own-model concrete columns to .defer() on the LIST queryset
+    select_related: tuple[str, ...]          # fixed joins for requested detail-only relation refs
+    requested: frozenset[str] | None         # the parsed ?fields= set (id included) or None
+
+    @property
+    def serialization_schema(self) -> type:
+        # The schema whose declared field set shapes the row (the task's "serialization_schema"):
+        # detail once the request opted up beyond slim, else slim. Serialization itself always runs
+        # through ``base_schema`` so no deferred column is ever read (see ``serialize_list_row``).
+        return self.detail_schema if self.detail_extra else self.base_schema
+
+
+def _own_concrete_columns(model: type) -> set[str]:
+    """
+    Own-model concrete columns that are NOT relations. Relations (FK/O2O columns) are excluded so we
+    never defer a column a ref renderer needs (§Part B: "never defer properties, annotations, or
+    relations"); properties/annotations are not ``concrete_fields`` at all.
+    """
+    return {f.name for f in model._meta.concrete_fields if not f.is_relation}
+
+
+def plan_list_fields(slim_schema: type, detail_schema: type, requested: set[str] | None) -> ListFieldPlan:
+    """
+    Given ``(slim_schema, detail_schema, requested_fields)`` return the LIST serialization/queryset
+    plan (Part A opt-up + Part B defer). ``requested`` is the already-parsed/validated ``?fields=``
+    set (``id`` included) or ``None`` for the default (no ``?fields=``) request.
+
+    - ``defer`` = detail-only concrete own-model columns **minus** the requested fields. On a default
+      list this defers every heavy detail column (they are never serialized by the slim shape); a
+      ``?fields=impact`` request un-defers exactly ``impact``.
+    - ``detail_extra`` = the requested detail-only fields (spliced onto the slim row).
+    - ``select_related`` = the fixed joins the requested detail-only *relation* refs need, declared by
+      the detail schema's ``DETAIL_SELECT_RELATED`` (so D11 wire↔model naming and reverse-O2O joins
+      resolve correctly); applied only when such a field is requested and never per row.
+    """
+    slim_fields = set(slim_schema.model_fields)
+    detail_only = set(detail_schema.model_fields) - slim_fields
+    model = getattr(slim_schema, "django_model", None)
+    concrete = _own_concrete_columns(model) if model is not None else set()
+    defer_candidates = detail_only & concrete
+
+    requested_set = set(requested) if requested is not None else set()
+    detail_extra = tuple(sorted(requested_set & detail_only))
+    defer = tuple(sorted(defer_candidates - requested_set))
+
+    detail_select_related: dict[str, tuple[str, ...]] = getattr(detail_schema, "DETAIL_SELECT_RELATED", {})
+    select_related: set[str] = set()
+    for name in detail_extra:
+        select_related.update(detail_select_related.get(name, ()))
+
+    return ListFieldPlan(
+        base_schema=slim_schema,
+        detail_schema=detail_schema,
+        detail_extra=detail_extra,
+        defer=defer,
+        select_related=tuple(sorted(select_related)),
+        requested=frozenset(requested) if requested is not None else None,
+    )
+
+
+def serialize_list_row(obj: object, plan: ListFieldPlan, expand_tree: dict) -> dict:
+    """
+    Serialize one LIST row honoring an opt-up ``?fields=`` projection (Part A) **without ever reading
+    a deferred column** (Part B). The base slim serialization touches only always-loaded slim
+    columns/refs/annotations; each requested detail-only field is then spliced on -- concrete columns
+    via ``getattr`` (un-deferred because ``plan.defer`` excludes requested fields) and relation refs
+    via the detail schema's resolver (loaded by ``plan.select_related``). The output is identical to
+    ``apply_fields(serialize(obj, detail_schema, expand_tree), requested)`` but issues no per-row query.
+    """
+    data = serialize(obj, plan.base_schema, expand_tree)
+    for name in plan.detail_extra:
+        resolver = getattr(plan.detail_schema, f"resolve_{name}", None)
+        data[name] = resolver(obj) if resolver else getattr(obj, name)
+    return apply_fields(data, plan.requested)

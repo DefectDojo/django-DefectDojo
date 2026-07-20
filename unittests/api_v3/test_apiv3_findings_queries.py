@@ -63,3 +63,41 @@ class TestApiV3FindingsQueryCount(ApiV3TestCase):
             queries_10_expand, queries_100_expand,
             f"query count must not grow with row count (expand): {queries_10_expand} vs {queries_100_expand}",
         )
+
+    def test_query_count_constant_with_beyond_slim_fields(self):
+        """
+        `?fields=` opting up into detail fields stays row-count-independent (§4.7 Part A/B).
+
+        Includes ``mitigated_by`` (a detail-only relation ref) to prove its extra ``select_related``
+        is a fixed join, not a per-row query.
+        """
+        test = Test.objects.first()
+        params = {"limit": 250, "fields": "id,title,impact,references,mitigated_by"}
+
+        self._bulk_create_findings(10, test)
+        queries_10 = self._query_count(params)
+
+        self._bulk_create_findings(90, test)
+        queries_100 = self._query_count(params)
+
+        self.assertGreaterEqual(self.get_json("findings", data={"limit": 250})["count"], 100)
+        self.assertEqual(
+            queries_10, queries_100,
+            f"opt-up query count must not grow with row count: {queries_10} vs {queries_100}",
+        )
+
+    def test_default_list_query_count_unchanged_by_defer(self):
+        """
+        Deferring the heavy detail columns changes the SELECT column list, never the query count.
+
+        The default list is still the same constant number of queries with defer active (Part B).
+        """
+        test = Test.objects.first()
+        self._bulk_create_findings(50, test)
+        default_queries = self._query_count({"limit": 250})
+        # Requesting a detail column un-defers it but issues no additional query (row-column, not per-row).
+        opt_up_queries = self._query_count({"limit": 250, "fields": "id,title,impact"})
+        self.assertEqual(
+            default_queries, opt_up_queries,
+            f"opting up into a detail column must not add queries: {default_queries} vs {opt_up_queries}",
+        )

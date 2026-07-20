@@ -109,6 +109,9 @@ class TestApiV3Examples(ApiV3TestCase):
     # --- findings (the complex entity) ----------------------------------------------------------
     def _capture_findings(self, finding: Finding) -> None:
         fid = finding.id
+        # Populate a detail-only field so the `?fields=` opt-up example below shows a real value.
+        finding.impact = "Unauthorized disclosure of customer data if exploited."
+        finding.save(update_fields=["impact"])
 
         self._record(
             title="Finding — GET detail (slim + detail fields)",
@@ -145,6 +148,19 @@ class TestApiV3Examples(ApiV3TestCase):
                   "authorized* queryset into `meta` in one aggregate query — no second round-trip (§4.8).",
             method="GET", url=self.v3_url("findings?include=counts&limit=2"),
             response=self.client.get(self.v3_url("findings?include=counts&limit=2")),
+            truncate=True,
+        )
+
+        self._record(
+            title="Finding — GET list with `?fields=` opting into a detail field (`impact`)",
+            intro="A list returns the slim shape by default. `?fields=` may name any **detail** field "
+                  "(here `impact`, normally only on the detail endpoint) and it is returned on the list "
+                  "with no second request (§4.7). Fields are row-columns, so this is a wider `SELECT` on "
+                  "the same single query — never a per-row cost; the default list defers these heavy "
+                  "columns entirely and requesting one un-defers exactly it.",
+            method="GET",
+            url=self.v3_url(f"findings?id__in={fid}&fields=id,title,severity,impact"),
+            response=self.client.get(self.v3_url(f"findings?id__in={fid}&fields=id,title,severity,impact")),
             truncate=True,
         )
 
@@ -288,7 +304,8 @@ class TestApiV3Examples(ApiV3TestCase):
              "reference relations by integer id — the asymmetry is intentional (§4.11)."),
             ("- **`?expand=` (§4.6):** dotted paths swap refs for slim objects inline and drive the "
              "queryset (the real N+1 fix). Budget-guarded."),
-            "- **`?fields=` (§4.7):** comma-separated allowlist; `id` is always included.",
+            ("- **`?fields=` (§4.7):** comma-separated allowlist; `id` is always included. On a list it "
+             "may also request any detail field (a wider SELECT on one query, never per-row)."),
             ("- **`?include=counts` (§4.8):** adds aggregate totals to `meta` over the filtered, "
              "authorized queryset."),
             ("- **Errors (§4.10):** RFC 9457 `application/problem+json` with a `fields` extension for "

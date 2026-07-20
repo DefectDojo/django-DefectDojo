@@ -33,7 +33,16 @@ from ninja import Router
 from ninja.constants import NOT_SET
 
 from dojo.api_v3.errors import json_response, not_found_problem
-from dojo.api_v3.expand import allowed_field_names, apply_fields, parse_fields, plan, plan_queryset, serialize
+from dojo.api_v3.expand import (
+    allowed_field_names,
+    apply_fields,
+    parse_fields,
+    plan,
+    plan_list_fields,
+    plan_queryset,
+    serialize,
+    serialize_list_row,
+)
 from dojo.api_v3.filtering import FilterSpec, apply_filters, filter_field, register_filter_spec
 from dojo.api_v3.pagination import paginate
 from dojo.authorization.roles_permissions import Permissions
@@ -101,13 +110,18 @@ def build_locations_router(
         filtered = apply_filters(request, _base_queryset(request), filter_spec)
 
         expand_tree, select_related, prefetch = plan(schema, request.GET.get("expand"))
-        page_qs = filtered.select_related(*schema.SELECT_RELATED).prefetch_related(*schema.PREFETCH_RELATED)
+        # ?fields= may opt up into the detail field set (§4.7 Part A); the URL-subtype detail fields
+        # are read through the `url` reverse-O2O (not own-model columns) so nothing is deferrable, but
+        # the join is added only when such a field is requested (Part B / DETAIL_SELECT_RELATED).
+        fields = parse_fields(request.GET.get("fields"), allowed_field_names(detail_schema))
+        fplan = plan_list_fields(schema, detail_schema, fields)
+        page_qs = filtered.select_related(*schema.SELECT_RELATED, *fplan.select_related).prefetch_related(*schema.PREFETCH_RELATED)
         page_qs = plan_queryset(page_qs, select_related, prefetch)
-
-        fields = parse_fields(request.GET.get("fields"), allowed_field_names(schema))
+        if fplan.defer:
+            page_qs = page_qs.defer(*fplan.defer)
 
         def serialize_row(obj: object) -> dict:
-            return apply_fields(serialize(obj, schema, expand_tree), fields)
+            return serialize_list_row(obj, fplan, expand_tree)
 
         envelope = paginate(request, count_qs=filtered, page_qs=page_qs, serialize=serialize_row)
         return json_response(envelope)

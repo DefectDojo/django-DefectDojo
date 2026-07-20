@@ -2,7 +2,7 @@
 
 > **Auto-generated, do not hand-edit.** Every request/response below was captured by `unittests/api_v3/test_apiv3_examples.py` (`DD_API_V3_EXAMPLES=1`, CI-excluded) making **real** in-process requests against the test fixture. Tokens are redacted; long lists are truncated to ~3 rows. Regenerate with the command in that file's docstring.
 
-Captured: 2026-07-19T19:08:11.540226+00:00
+Captured: 2026-07-20T19:26:55.505452+00:00
 
 ## Conventions (see `API_V3_PLAN.md` §4)
 
@@ -11,7 +11,7 @@ Captured: 2026-07-19T19:08:11.540226+00:00
 - **Envelope (§4.3):** every list is `{count, next, previous, results, meta?}` and nothing else (I1). `next`/`previous` are opaque URLs; default `limit=25`, max `250`.
 - **Refs (§4.4):** relations render as `{id, name}` (locations add `type`). Write payloads reference relations by integer id — the asymmetry is intentional (§4.11).
 - **`?expand=` (§4.6):** dotted paths swap refs for slim objects inline and drive the queryset (the real N+1 fix). Budget-guarded.
-- **`?fields=` (§4.7):** comma-separated allowlist; `id` is always included.
+- **`?fields=` (§4.7):** comma-separated allowlist; `id` is always included. On a list it may also request any detail field (a wider SELECT on one query, never per-row).
 - **`?include=counts` (§4.8):** adds aggregate totals to `meta` over the filtered, authorized queryset.
 - **Errors (§4.10):** RFC 9457 `application/problem+json` with a `fields` extension for validation errors.
 
@@ -69,7 +69,7 @@ Authorization: Token <your-api-token>
   "updated": null,
   "description": "test finding",
   "mitigation": "test mitigation",
-  "impact": "High",
+  "impact": "Unauthorized disclosure of customer data if exploited.",
   "steps_to_reproduce": null,
   "severity_justification": null,
   "references": "",
@@ -182,7 +182,7 @@ Authorization: Token <your-api-token>
   "updated": null,
   "description": "test finding",
   "mitigation": "test mitigation",
-  "impact": "High",
+  "impact": "Unauthorized disclosure of customer data if exploited.",
   "steps_to_reproduce": null,
   "severity_justification": null,
   "references": "",
@@ -258,7 +258,7 @@ Authorization: Token <your-api-token>
       "risk_accepted": false,
       "out_of_scope": false,
       "is_mitigated": false,
-      "date": "2026-07-19",
+      "date": "2026-07-20",
       "cwe": 0,
       "test": {
         "id": 3,
@@ -282,8 +282,8 @@ Authorization: Token <your-api-token>
       },
       "locations_count": 0,
       "tags": [],
-      "created": "2026-07-19T19:08:10.759Z",
-      "updated": "2026-07-19T19:08:10.759Z"
+      "created": "2026-07-20T19:26:55.152Z",
+      "updated": "2026-07-20T19:26:55.152Z"
     },
     {
       "id": 235,
@@ -296,7 +296,7 @@ Authorization: Token <your-api-token>
       "risk_accepted": false,
       "out_of_scope": false,
       "is_mitigated": false,
-      "date": "2026-07-19",
+      "date": "2026-07-20",
       "cwe": 0,
       "test": {
         "id": 3,
@@ -320,8 +320,8 @@ Authorization: Token <your-api-token>
       },
       "locations_count": 0,
       "tags": [],
-      "created": "2026-07-19T19:08:10.759Z",
-      "updated": "2026-07-19T19:08:10.759Z"
+      "created": "2026-07-20T19:26:55.152Z",
+      "updated": "2026-07-20T19:26:55.152Z"
     }
   ]
 }
@@ -447,6 +447,38 @@ Authorization: Token <your-api-token>
 
 ---
 
+### Finding — GET list with `?fields=` opting into a detail field (`impact`)
+
+A list returns the slim shape by default. `?fields=` may name any **detail** field (here `impact`, normally only on the detail endpoint) and it is returned on the list with no second request (§4.7). Fields are row-columns, so this is a wider `SELECT` on the same single query — never a per-row cost; the default list defers these heavy columns entirely and requesting one un-defers exactly it.
+
+**Request**
+
+```http
+GET /api/v3-alpha/findings?id__in=2&fields=id,title,severity,impact
+Authorization: Token <your-api-token>
+```
+
+**Response** — `200`
+
+```json
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 2,
+      "title": "High Impact Test Finding",
+      "severity": "High",
+      "impact": "Unauthorized disclosure of customer data if exploited."
+    }
+  ]
+}
+```
+
+
+---
+
 ### Finding — POST a note (sub-resource)
 
 Notes are one generic sub-resource across resources (§4.12). Authorization is inherited from the parent finding.
@@ -476,8 +508,8 @@ Content-Type: application/json
   },
   "private": false,
   "edited": false,
-  "created": "2026-07-19T19:08:10.880Z",
-  "updated": "2026-07-19T19:08:10.880Z"
+  "created": "2026-07-20T19:26:55.268Z",
+  "updated": "2026-07-20T19:26:55.268Z"
 }
 ```
 
@@ -512,8 +544,8 @@ Authorization: Token <your-api-token>
       },
       "private": false,
       "edited": false,
-      "created": "2026-07-19T19:08:10.880Z",
-      "updated": "2026-07-19T19:08:10.880Z"
+      "created": "2026-07-20T19:26:55.268Z",
+      "updated": "2026-07-20T19:26:55.268Z"
     }
   ]
 }
@@ -609,7 +641,7 @@ Content-Type: application/json
   "risk_accepted": false,
   "out_of_scope": false,
   "is_mitigated": false,
-  "date": "2026-07-19",
+  "date": "2026-07-20",
   "cwe": 0,
   "test": {
     "id": 3,
@@ -633,8 +665,8 @@ Content-Type: application/json
   },
   "locations_count": 0,
   "tags": [],
-  "created": "2026-07-19T19:08:11.022Z",
-  "updated": "2026-07-19T19:08:11.072Z",
+  "created": "2026-07-20T19:26:55.312Z",
+  "updated": "2026-07-20T19:26:55.340Z",
   "description": "before patch",
   "mitigation": null,
   "impact": null,
@@ -833,8 +865,8 @@ Content-Type: application/json
     "example",
     "pci"
   ],
-  "created": "2026-07-19T19:08:11.467Z",
-  "updated": "2026-07-19T19:08:11.467Z",
+  "created": "2026-07-20T19:26:55.477Z",
+  "updated": "2026-07-20T19:26:55.477Z",
   "business_criticality": null,
   "platform": null,
   "origin": null,
@@ -881,8 +913,8 @@ Content-Type: application/json
     "example",
     "pci"
   ],
-  "created": "2026-07-19T19:08:11.467Z",
-  "updated": "2026-07-19T19:08:11.530Z",
+  "created": "2026-07-20T19:26:55.477Z",
+  "updated": "2026-07-20T19:26:55.500Z",
   "business_criticality": null,
   "platform": null,
   "origin": null,

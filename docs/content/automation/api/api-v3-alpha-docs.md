@@ -96,8 +96,18 @@ add `"type": "<location_type>"`. On writes you reference a relation by its **int
 | Param | Does | Example |
 |---|---|---|
 | `?expand=` | Swaps a ref for the target's slim object **inline** and drives the queryset. Comma-separated dotted paths, budget-guarded. | `?expand=test.engagement,reporter` |
-| `?fields=` | Allowlist of fields to return (`id` always included). The picker facility. | `?fields=id,title,severity` |
+| `?fields=` | Allowlist of fields to return (`id` always included). The picker facility; on a list it may also request any **detail** field. | `?fields=id,title,impact` |
 | `?include=counts` | Adds severity/status totals over the **filtered, authorized** queryset to `meta`, in one query — no second round-trip. | `?include=counts` |
+
+**`?fields=` on lists may opt up into the detail shape.** A list returns the slim shape by default.
+`?fields=` accepts any field in the slim **or** the detail set (plus expand keys), so a list can pull
+a normally detail-only field like `impact` or `references` without a second request to the detail
+endpoint — `GET /findings?fields=id,title,impact`. Fields are plain row-columns, so this is a wider
+`SELECT` on the same single query, never a per-row cost: the default list stops fetching the heavy
+detail columns from the DB entirely, and naming one in `?fields=` un-defers exactly that column.
+**Guard:** only *row-columns* are eligible. Anything computed per row (SLA/age math, per-row counts)
+is permanently out of `?fields=` — it would reintroduce the N+1 the slim default removes. An unknown
+field name still returns `400`.
 
 A finding's locations are special: `?expand=locations` replaces the cheap `locations_count` with the
 full edge rows `{location, status, audit_time, auditor}`.
