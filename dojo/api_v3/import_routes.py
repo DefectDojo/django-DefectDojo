@@ -29,8 +29,9 @@ from dojo.authorization.api_permissions import check_auto_create_permission
 from dojo.authorization.authorization import user_has_permission
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.services import auto_import_scan, import_scan, reimport_scan
+from dojo.jira import services as jira_services
 from dojo.models import Engagement, Test
-from dojo.utils import get_object_or_none
+from dojo.utils import get_object_or_none, get_system_setting
 
 if TYPE_CHECKING:
     from django.http import HttpRequest
@@ -55,6 +56,7 @@ class ImportForm(Schema):
     minimum_severity: str = "Info"
     active: bool | None = None
     verified: bool | None = None
+    push_to_jira: bool = False
     scan_date: date | None = None
     service: str | None = None
     version: str | None = None
@@ -104,6 +106,20 @@ def _resolve_engagement_for_import(request: HttpRequest, payload: ImportForm) ->
     return auto.get_or_create_engagement(**context)
 
 
+def _resolve_push_to_jira(payload: ImportForm, jira_driver: object) -> bool:
+    """
+    Mirror the v2 import/reimport viewsets (``dojo/api_v2/views.py:391-404`` / ``517-535``): the
+    request's ``push_to_jira`` is OR-ed with the resolved JIRA project's ``push_all_issues`` when
+    JIRA is enabled -- the same OR the v3 finding route applies on writes. Canonical per D7.
+    """
+    push = payload.push_to_jira
+    if jira_driver is not None and get_system_setting("enable_jira"):
+        jira_project = jira_services.get_project(jira_driver)
+        if jira_project:
+            push = push or jira_project.push_all_issues
+    return push
+
+
 def _resolve_test_for_reimport(request: HttpRequest, test_id: int) -> Test:
     test = get_object_or_none(Test, pk=test_id)
     if test is None:
@@ -113,8 +129,13 @@ def _resolve_test_for_reimport(request: HttpRequest, test_id: int) -> Test:
     return test
 
 
-def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> None:
-    """Mirror UserHasReimportPermission: resolve target and check, else check auto-create."""
+def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> object | None:
+    """
+    Mirror UserHasReimportPermission: resolve target and check, else check auto-create.
+
+    Returns the resolved JIRA driver (``test or engagement or product``, mirroring the v2 reimport
+    viewset) so the caller can OR ``push_to_jira`` with the project's ``push_all_issues``.
+    """
     auto = AutoCreateContextManager()
     context = {
         "scan_type": payload.scan_type,
@@ -130,7 +151,7 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> None:
     target_test = auto.get_target_test_if_exists(**context)
     if target_test is not None:
         _require_permission(allowed=user_has_permission(request.user, target_test, "import"))
-        return
+        return target_test
     if not payload.auto_create_context:
         raise validation_problem(
             {"test": ["Need test or asset_name + engagement_name + scan_type to perform reimport"]},
@@ -142,6 +163,7 @@ def _check_auto_permission(request: HttpRequest, payload: ImportForm) -> None:
             "Need test or asset_name + engagement_name + scan_type to perform reimport",
         ),
     )
+    return context.get("engagement") or context.get("product")
 
 
 def build_import_router(*, auth=NOT_SET) -> Router:
@@ -164,6 +186,7 @@ def build_import_router(*, auth=NOT_SET) -> Router:
             "minimum_severity": payload.minimum_severity,
             "active": payload.active,
             "verified": payload.verified,
+            "push_to_jira": payload.push_to_jira,
             "tags": _split_tags(payload.tags),
             "scan_date": payload.scan_date,
             "service": payload.service,
@@ -178,6 +201,8 @@ def build_import_router(*, auth=NOT_SET) -> Router:
         try:
             if payload.mode == "import":
                 target_engagement = _resolve_engagement_for_import(request, payload)
+                # OR push_to_jira with the resolved project's push_all_issues (mirrors v2 viewset).
+                common["push_to_jira"] = _resolve_push_to_jira(payload, target_engagement)
                 result = import_scan(
                     engagement=target_engagement,
                     close_old_findings=False if payload.close_old_findings is None else payload.close_old_findings,
@@ -185,6 +210,7 @@ def build_import_router(*, auth=NOT_SET) -> Router:
                 )
             elif payload.mode == "reimport" and payload.test is not None:
                 target_test = _resolve_test_for_reimport(request, payload.test)
+                common["push_to_jira"] = _resolve_push_to_jira(payload, target_test)
                 result = reimport_scan(
                     test=target_test,
                     close_old_findings=True if payload.close_old_findings is None else payload.close_old_findings,
@@ -192,7 +218,8 @@ def build_import_router(*, auth=NOT_SET) -> Router:
                 )
             else:
                 # mode == "auto", or reimport without an explicit test id -> resolve/auto-create.
-                _check_auto_permission(request, payload)
+                jira_driver = _check_auto_permission(request, payload)
+                common["push_to_jira"] = _resolve_push_to_jira(payload, jira_driver)
                 result = auto_import_scan(
                     engagement=get_object_or_none(Engagement, pk=payload.engagement) if payload.engagement else None,
                     product_name=payload.asset_name,
