@@ -4,6 +4,7 @@ import dateutil
 from django.conf import settings
 from django.core.files.base import ContentFile
 
+from dojo.finding.cwe import cwe_number
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
@@ -44,6 +45,12 @@ class GenericJSONParser:
             if "vulnerability_ids" in item:
                 unsaved_vulnerability_ids = item["vulnerability_ids"]
                 del item["vulnerability_ids"]
+            # remove cwes from the dictionary (multiple CWEs per finding).
+            # "cwes" is not a Finding field, so it is popped like vulnerability_ids.
+            unsaved_cwes = None
+            if "cwes" in item:
+                unsaved_cwes = item["cwes"]
+                del item["cwes"]
             # check for required keys
             required = {"title", "severity", "description"}
 
@@ -156,6 +163,19 @@ class GenericJSONParser:
                             file_path=file_path,
                         ),
                     )
+                if file_path:
+                    line = item.get("line")
+                    source_line = item.get("sast_source_line")
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=file_path,
+                            line=int(line) if line is not None and str(line).isdigit() else None,
+                            source_object=item.get("sast_source_object") or "",
+                            sink_object=item.get("sast_sink_object") or "",
+                            source_file_path=item.get("sast_source_file_path") or "",
+                            source_line=int(source_line) if source_line is not None and str(source_line).isdigit() else None,
+                        ),
+                    )
             if unsaved_files:
                 for unsaved_file in unsaved_files:
                     data = base64.b64decode(unsaved_file.get("data"))
@@ -178,5 +198,12 @@ class GenericJSONParser:
                     finding.unsaved_vulnerability_ids = list(
                         unsaved_vulnerability_ids,
                     )
+            # multiple CWEs: keep the primary on finding.cwe (only if not already
+            # supplied via "cwe") and persist the full set via unsaved_cwes. The
+            # import pipeline normalizes/deduplicates through finding_cwe_labels().
+            if unsaved_cwes:
+                if not finding.cwe:
+                    finding.cwe = cwe_number(unsaved_cwes[0])
+                finding.unsaved_cwes = unsaved_cwes
             test_internal.findings.append(finding)
         return test_internal

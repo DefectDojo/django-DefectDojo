@@ -4,8 +4,10 @@ import logging
 
 from dateutil import parser
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.utils import add_language
 
 logger = logging.getLogger(__name__)
@@ -233,6 +235,10 @@ class CheckmarxParser:
                 static_finding=True,
                 nb_occurences=1,
             )
+            if settings.V3_FEATURE_LOCATIONS and sinkFilename:
+                find.unsaved_locations.append(
+                    LocationData.code(file_path=sinkFilename),
+                )
             dupes[aggregateKeys] = find
             # a list containing the vuln_id_from_tool values. They are
             # formatted once we have analysed all the findings
@@ -360,6 +366,17 @@ class CheckmarxParser:
                 sast_source_file_path=sourceFilename,
                 vuln_id_from_tool=queryId,
             )
+            if settings.V3_FEATURE_LOCATIONS and sinkFilename:
+                find.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=sinkFilename,
+                        line=sinkLineNumber,
+                        source_object=sourceObject,
+                        sink_object=sinkObject,
+                        source_file_path=sourceFilename,
+                        source_line=sourceLineNumber,
+                    ),
+                )
         dupes[aggregateKeys] = find
 
     # Return filename, lineNumber and object (function/parameter...) for a
@@ -478,6 +495,10 @@ class CheckmarxParser:
                                 last_node = vulnerability["nodes"][-1]
                                 finding.file_path = last_node.get("fileName")
                                 finding.line = last_node.get("line")
+                                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                                    finding.unsaved_locations.append(
+                                        LocationData.code(file_path=finding.file_path, line=finding.line),
+                                    )
                             finding.unsaved_tags = [result_type]
                             findings.append(finding)
             if result_type == "sca" and results.get(result_type) is not None:
@@ -553,6 +574,10 @@ class CheckmarxParser:
                         else:
                             finding.unique_id_from_tool = str(
                                 vulnerability.get("similarityId"),
+                            )
+                        if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                            finding.unsaved_locations.append(
+                                LocationData.code(file_path=finding.file_path, line=finding.line),
                             )
                         finding.unsaved_tags = [result_type, name]
                         findings.append(finding)

@@ -16,6 +16,7 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_is_superuser_or_global_owner,
 )
+from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.location.models import Location
 from dojo.models import (
@@ -401,6 +402,15 @@ class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasEngagementFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
+    }
+
+
 class UserHasEngagementNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": "view",
@@ -459,6 +469,15 @@ class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasFindingFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -775,6 +794,15 @@ class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasTestFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 

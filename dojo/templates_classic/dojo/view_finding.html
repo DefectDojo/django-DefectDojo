@@ -441,9 +441,10 @@
         </div>
     </div>
 
+    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
     {% with finding|additional_vulnerability_ids as additional_vulnerability_ids %}
     {% if additional_vulnerability_ids %}
-    <div class="panel panel-default">
+    <div class="panel panel-default" style="flex: 1 1 0; min-width: 280px;">
         <table id="additional_finding_references" class="table-striped table table-condensed table-hover centered">
             <tr>
                 <th>Additional Vulnerability Ids</th>
@@ -464,7 +465,28 @@
         </table>
     </div>
     {% endif %}
-    {% endwith %}</td>
+    {% endwith %}
+    {% with finding.cwes|slice:"1:" as additional_cwes %}
+    {% if additional_cwes %}
+    <div class="panel panel-default" style="flex: 1 1 0; min-width: 280px;">
+        <table id="additional_finding_cwes" class="table-striped table table-condensed table-hover centered">
+            <tr>
+                <th>Additional CWEs</th>
+            </tr>
+            <tr>
+                <td class="text-right">
+                    {% for cwe in additional_cwes %}
+                        <a target="_blank" href="{{ cwe|cut:"CWE-"|cwe_url }}">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> {{ cwe }}</a>
+                        {% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+    {% endwith %}
+    </div></td>
 
     {% if finding.static_finding or finding.line > 0 %}
         {% if finding.sast_source_object or finding.sast_sink_object or finding.sast_source_file_path or finding.sast_source_line > 0 %}
