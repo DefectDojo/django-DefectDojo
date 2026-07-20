@@ -123,7 +123,7 @@ def build_locations_router(
         def serialize_row(obj: object) -> dict:
             return serialize_list_row(obj, fplan, expand_tree)
 
-        envelope = paginate(request, count_qs=filtered, page_qs=page_qs, serialize=serialize_row)
+        envelope = paginate(request, count_qs=filtered, page_qs=page_qs, serialize=serialize_row, filter_spec=filter_spec)
         return json_response(envelope)
 
     @router.get("/locations/{int:location_id}", response=detail_schema, url_name="locations_detail")

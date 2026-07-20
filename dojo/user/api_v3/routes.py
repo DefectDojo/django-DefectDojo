@@ -166,7 +166,7 @@ def build_users_router(
         def serialize_row(obj: object) -> dict:
             return serialize_list_row(obj, fplan, expand_tree)
 
-        envelope = paginate(request, count_qs=filtered, page_qs=page_qs, serialize=serialize_row)
+        envelope = paginate(request, count_qs=filtered, page_qs=page_qs, serialize=serialize_row, filter_spec=filter_spec)
         include_meta = apply_includes(request, filtered, allowed=set())
         if include_meta:
             envelope.setdefault("meta", {}).update(include_meta)

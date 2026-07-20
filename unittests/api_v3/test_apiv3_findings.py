@@ -250,8 +250,13 @@ class TestApiV3FindingsPagination(ApiV3TestCase):
         body = self.get_json("findings", data={"limit": 2, "offset": 2})
         self.assertIsNotNone(body["previous"])
 
-    def test_cursor_pagination_reserved_400(self):
-        self.get_json("findings", data={"pagination": "cursor"}, expected=400)
+    def test_cursor_mode_smoke(self):
+        # Cursor mode is implemented (see test_apiv3_cursor for the full contract): count/previous
+        # are null and the envelope shape is otherwise unchanged.
+        body = self.get_json("findings", data={"pagination": "cursor", "limit": 2})
+        self.assertIsNone(body["count"])
+        self.assertIsNone(body["previous"])
+        self.assertLessEqual(len(body["results"]), 2)
 
     def test_bad_limit_400(self):
         self.get_json("findings", data={"limit": "-1"}, expected=400)
