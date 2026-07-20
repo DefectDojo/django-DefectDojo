@@ -50,6 +50,7 @@ class ImportForm(Schema):
     test_title: str | None = None
     auto_create_context: bool = False
     close_old_findings: bool | None = None
+    close_old_findings_product_scope: bool = False
     do_not_reactivate: bool = False
     minimum_severity: str = "Info"
     active: bool | None = None
@@ -171,6 +172,7 @@ def build_import_router(*, auth=NOT_SET) -> Router:
             "environment": payload.environment,
             "auto_create_context": payload.auto_create_context,
             "do_not_reactivate": payload.do_not_reactivate,
+            "close_old_findings_product_scope": payload.close_old_findings_product_scope,
         }
 
         try:
