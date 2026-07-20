@@ -6,7 +6,7 @@ audience: pro
 weight: 12
 slug: custom-dashboards-llm
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Automating Customizable Dashboards with the REST API and an LLM is a DefectDojo Pro feature, currently in beta. Beta features are available to DefectDojo Pro Cloud subscriptions — contact DefectDojo support or your customer success advocate to enable it for your instance.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Automating Customizable Dashboards with the REST API and an LLM is a DefectDojo Pro feature. It is off by default — a superuser can turn on Customizable Dashboards from **Settings > Feature Flags** on both Cloud and On-Premise instances.</span>
 
 DefectDojo Pro's Customizable Dashboards are fully driven by the REST API — and the layouts surface was designed with AI agents in mind. That means you can hand the whole job to an LLM: paste one self-contained prompt into Claude, ChatGPT, or any other capable model, describe the dashboards you want, and it will interrogate your tenant's live widget catalog, propose layouts, emit a runnable Python script, create the layouts, verify them, and optionally set your default.
 
@@ -22,7 +22,7 @@ This guide pairs with the [Dashboards API guide](../custom-dashboards-api/), whi
 export DD_IMPORTER_DOJO_API_TOKEN=<paste-token-here>
 ```
 
-2. **Confirm the beta is enabled.** Customizable Dashboards must be enabled for your instance — contact DefectDojo support or your customer success advocate — otherwise every API call returns `403`.
+2. **Confirm the feature is on.** Customizable Dashboards must be turned on for your instance from **Settings > Feature Flags** — otherwise every API call returns `403`.
 
 3. **Decide your dashboards.** The LLM will ask what you want. Common choices:
 
