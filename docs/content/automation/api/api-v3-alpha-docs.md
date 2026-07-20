@@ -79,6 +79,48 @@ Every list returns the same closed envelope — and nothing else:
 `limit` defaults to `25`, max `250`; `offset` ≥ 0. **Treat `next`/`previous` as opaque URLs** — do
 not construct them yourself.
 
+### Cursor (keyset) pagination
+
+For export/sync consumers, opt into forward-only keyset pagination with `?pagination=cursor` on any
+top-level list endpoint (findings, assets, organizations, engagements, tests, users, locations). The
+envelope is unchanged, with two differences:
+
+- `count` is always `null` (cursor mode never counts — that is the point: no `COUNT` query, so cost
+  is constant per page regardless of collection size).
+- `previous` is always `null` — cursor mode is **forward-only** (GitLab-style). Walk a collection by
+  following `next` until it is `null`; there is no backward cursor.
+
+`next` is the same URL carrying an opaque, signed `cursor=` token. **Treat it as opaque** — do not
+decode or construct it. Cursors are tamper-proof; a modified, corrupt, or ordering-mismatched cursor
+returns `400 application/problem+json` (pagination error type).
+
+Sorting is restricted to **keyset-safe orderings** — `id`, `created`, `updated` (each with an
+optional `-` prefix for descending), whichever a resource declares. Every ordering has a
+deterministic `id` tiebreaker appended automatically. The default (no `o=`) is `id` ascending. A
+resource without `created`/`updated` columns permits `id` only. Any other `o=` value (or more than
+one field) returns `400`:
+
+| Resource | Keyset-safe orderings (each ± direction) |
+|---|---|
+| findings, assets, organizations, engagements, tests | `id`, `created`, `updated` |
+| users, locations | `id` |
+
+```jsonc
+// GET /api/v3-alpha/findings?pagination=cursor&limit=25&o=-updated&severity=High
+{
+  "count": null,
+  "next": "https://.../api/v3-alpha/findings?limit=25&o=-updated&severity=High&pagination=cursor&cursor=eyJ...",
+  "previous": null,
+  "results": [ /* slim objects */ ]
+}
+```
+
+Filters, `q=`, `fields=`, `expand=`, and `include=counts` all compose with cursor mode exactly as
+with offset mode (`include=counts` still fills `meta.counts` even though `count` is `null`).
+**Caveat:** the cursor encodes only the ordering and position, **not** your filters — changing a
+filter (or the ordering) partway through a walk invalidates the position and yields undefined
+results for the rest of the walk. Start a fresh walk if you change any filter.
+
 ### Refs
 
 Every relation renders by default as a closed ref:
@@ -242,9 +284,8 @@ deliberate** gaps — several exist so the alpha stayed additive and reviewable:
   reactivation, `last_reviewed` stamping, finding-group push, GitHub sync, and JIRA link/unlink.
 - **No bulk or workflow actions yet.** No bulk operations, no workflow actions
   (`close`/`request_review`/`mark_duplicate`), no aggregation/chart endpoints, no saved views, no
-  CSV export, no delete-impact preview. Cursor pagination is reserved in the grammar (it returns
-  `400 "not yet available"`) but not implemented. These are recorded as explicit post-alpha work
-  items in the plan's backlog.
+  CSV export, no delete-impact preview. These are recorded as explicit post-alpha work items in the
+  plan's backlog.
 
 ## Platform limitations (not v3 gaps)
 

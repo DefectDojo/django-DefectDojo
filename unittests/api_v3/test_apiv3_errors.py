@@ -74,9 +74,16 @@ class TestApiV3ErrorContract(ApiV3TestCase):
     def test_non_integer_limit_is_problem(self):
         self._assert_problem("findings", status=400, type_suffix="pagination", data={"limit": "abc"})
 
-    def test_cursor_pagination_reserved_is_problem(self):
+    def test_unknown_pagination_mode_is_problem(self):
         self._assert_problem(
-            "findings", status=400, type_suffix="pagination", data={"pagination": "cursor"},
+            "findings", status=400, type_suffix="pagination", data={"pagination": "bogus"},
+        )
+
+    def test_cursor_non_keyset_ordering_is_problem(self):
+        # Cursor mode is implemented; a non-keyset-safe ordering is a pagination problem.
+        self._assert_problem(
+            "findings", status=400, type_suffix="pagination",
+            data={"pagination": "cursor", "o": "title"},
         )
 
     # --- 401 / 404 -------------------------------------------------------------------------

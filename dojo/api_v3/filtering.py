@@ -35,8 +35,9 @@ if TYPE_CHECKING:
     from django.db.models import QuerySet
     from django.http import HttpRequest
 
-# Query params owned by the kernel; never treated as filter fields.
-RESERVED_PARAMS = frozenset({"limit", "offset", "pagination", "expand", "fields", "include", "o", "q"})
+# Query params owned by the kernel; never treated as filter fields. ``cursor`` carries the opaque
+# keyset token in cursor pagination mode (D4/§4.3).
+RESERVED_PARAMS = frozenset({"limit", "offset", "pagination", "cursor", "expand", "fields", "include", "o", "q"})
 
 # Severity rank: Critical is the most severe (rank 0) ... Info the least (rank 4). Mirrors v2's
 # numerical_severity (S0..S4) and Finding.Meta.ordering.
