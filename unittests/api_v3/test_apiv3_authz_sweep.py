@@ -176,6 +176,10 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   note="existing but unauthorized test -> Finding_Add gate -> 403"),
             Probe("PATCH", "/findings/{finding_id}", self.v3_url(f"findings/{f}"), 404,
                   payload={"severity": "Low"}, note="finding invisible to zero-perm queryset -> 404"),
+            Probe("PUT", "/findings/{finding_id}", self.v3_url(f"findings/{f}"), 404,
+                  payload={"title": "authz sweep", "severity": "High", "description": "x",
+                           "active": True, "verified": False},
+                  note="full replace: finding invisible to zero-perm queryset -> 404 before edit gate"),
             Probe("DELETE", "/findings/{finding_id}", self.v3_url(f"findings/{f}"), 404),
             Probe("GET", "/findings/{finding_id}/locations", self.v3_url(f"findings/{f}/locations"), 404),
         ]
@@ -190,6 +194,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   note="no global add permission -> 403"),
             Probe("PATCH", "/organizations/{organization_id}", self.v3_url(f"organizations/{o}"), 404,
                   payload={"name": "x"}),
+            Probe("PUT", "/organizations/{organization_id}", self.v3_url(f"organizations/{o}"), 404,
+                  payload={"name": "x"}, note="full replace: organization invisible -> 404"),
             Probe("DELETE", "/organizations/{organization_id}", self.v3_url(f"organizations/{o}"), 404),
         ]
 
@@ -201,6 +207,9 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   payload={"name": "authz sweep asset", "description": "x", "organization": o},
                   note="existing but unauthorized organization -> Product_Type_Add_Product gate -> 403"),
             Probe("PATCH", "/assets/{asset_id}", self.v3_url(f"assets/{a}"), 404, payload={"name": "x"}),
+            Probe("PUT", "/assets/{asset_id}", self.v3_url(f"assets/{a}"), 404,
+                  payload={"name": "x", "description": "y", "organization": o},
+                  note="full replace: asset invisible -> 404 before edit gate"),
             Probe("DELETE", "/assets/{asset_id}", self.v3_url(f"assets/{a}"), 404),
             Probe("GET", "/assets/{asset_id}/locations", self.v3_url(f"assets/{a}/locations"), 404),
         ]
@@ -215,6 +224,9 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   note="existing but unauthorized asset -> Engagement_Add gate -> 403"),
             Probe("PATCH", "/engagements/{engagement_id}", self.v3_url(f"engagements/{e}"), 404,
                   payload={"name": "x"}),
+            Probe("PUT", "/engagements/{engagement_id}", self.v3_url(f"engagements/{e}"), 404,
+                  payload={"asset": a, "target_start": "2026-01-01", "target_end": "2026-01-02"},
+                  note="full replace: engagement invisible -> 404 before edit gate"),
             Probe("DELETE", "/engagements/{engagement_id}", self.v3_url(f"engagements/{e}"), 404),
         ]
         p += self._sub_probes("engagements", e, notes=True, files=True, tags=True)
@@ -228,6 +240,10 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                            "target_start": "2026-01-01T00:00:00Z", "target_end": "2026-01-02T00:00:00Z"},
                   note="existing but unauthorized engagement -> Test_Add gate -> 403"),
             Probe("PATCH", "/tests/{test_id}", self.v3_url(f"tests/{t}"), 404, payload={"title": "x"}),
+            Probe("PUT", "/tests/{test_id}", self.v3_url(f"tests/{t}"), 404,
+                  payload={"test_type": tt, "target_start": "2026-01-01T00:00:00Z",
+                           "target_end": "2026-01-02T00:00:00Z"},
+                  note="full replace: test invisible -> 404 before edit gate"),
             Probe("DELETE", "/tests/{test_id}", self.v3_url(f"tests/{t}"), 404),
         ]
         p += self._sub_probes("tests", t, notes=True, files=True, tags=True)
@@ -243,6 +259,9 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   note="no auth.add_user configuration permission -> 403"),
             Probe("PATCH", "/users/{user_id}", self.v3_url(f"users/{admin_id}"), 404,
                   payload={"first_name": "x"}, note="admin invisible to zero-perm self-scope -> 404"),
+            Probe("PUT", "/users/{user_id}", self.v3_url(f"users/{admin_id}"), 404,
+                  payload={"username": "authz_sweep_put", "email": "authzput@example.com"},
+                  note="full replace: admin invisible to zero-perm self-scope -> 404"),
             Probe("DELETE", "/users/{user_id}", self.v3_url(f"users/{admin_id}"), 404),
         ]
 

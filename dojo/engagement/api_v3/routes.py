@@ -55,6 +55,7 @@ from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.api_v3.schemas import (
     EngagementDetail,
+    EngagementReplace,
     EngagementSlim,
     EngagementUpdate,
     EngagementWrite,
@@ -265,6 +266,41 @@ def build_engagements_router(
         _apply_scalars(instance, data)
         if tags is not _UNSET:
             instance.tags = tags if tags is not None else []
+        try:
+            instance.save()
+        except DjangoValidationError as exc:
+            raise _validation_from_django(exc) from exc
+        return json_response(serialize(instance, detail_schema, {}))
+
+    @router.put("/engagements/{int:engagement_id}", response=detail_schema, url_name="engagements_replace")
+    def replace_engagement(request: HttpRequest, engagement_id: int, payload: EngagementReplace):
+        # Full replace (PUT). Validates against the create-shaped EngagementReplace (required
+        # asset/target_start/target_end, extra="forbid") and applies payload.dict() WITHOUT
+        # exclude_unset, so omitted optionals reset to their schema defaults (§4.11). Permission
+        # ladder identical to PATCH: authorized-view resolve (404) then object Edit (403); the
+        # required asset is re-authorized only when it actually changes (mirrors PATCH).
+        instance = _base_queryset(request, queryset_hook).filter(pk=engagement_id).first()
+        if instance is None:
+            msg = f"Engagement {engagement_id} not found"
+            raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
+        if not user_has_permission(request.user, instance, Permissions.Engagement_Edit):
+            raise PermissionDenied  # 403: visible but not editable
+
+        data = payload.dict()
+        tags = data.pop("tags")
+        new_product_id = data.pop("asset")
+        if new_product_id != instance.product_id:
+            new_product = get_object_or_none(Product, pk=new_product_id)
+            if new_product is None:
+                msg = f"Asset {new_product_id} not found"
+                raise not_found_problem(msg)
+            if not user_has_permission(request.user, new_product, Permissions.Engagement_Add):
+                raise PermissionDenied
+            instance.product = new_product
+
+        _validate_dates(data.get("target_start"), data.get("target_end"))
+        _apply_scalars(instance, data)
+        instance.tags = tags if tags is not None else []
         try:
             instance.save()
         except DjangoValidationError as exc:

@@ -91,6 +91,13 @@ The relation key tells you the type, so refs carry no `type` field — **except*
 add `"type": "<location_type>"`. On writes you reference a relation by its **integer id**
 (`"test": 9`); on reads you get a ref back. This asymmetry is intentional.
 
+Two update verbs are offered on every writable resource (findings, assets, organizations,
+engagements, tests, users; locations stay read-only). **`PATCH`** is a partial update — only the
+fields you send change. **`PUT`** is a full replace: it validates against the same required fields
+as create and resets any omitted optional field back to its default, mirroring v2's
+`update(partial=False)`. Both reject unknown fields (`400`) and share the same permission ladder. An
+immutable parent (a finding's `test`, a test's `engagement`) is never reassignable on either verb.
+
 ### `?expand=`, `?fields=`, `?include=`
 
 | Param | Does | Example |
@@ -143,7 +150,7 @@ This table doubles as the rename documentation (D11): `product_type` → `organi
 
 | Object | v2 | v3 (alpha) | Notes |
 |---|---|---|---|
-| Organization (v2 "product type") | `/api/v2/product_types/` | `/api/v3-alpha/organizations` | **Renamed** (D11); CRUD (PATCH-only partial update) |
+| Organization (v2 "product type") | `/api/v2/product_types/` | `/api/v3-alpha/organizations` | **Renamed** (D11); CRUD (`PATCH` partial + `PUT` full replace) |
 | Asset (v2 "product") | `/api/v2/products/` | `/api/v3-alpha/assets` | **Renamed** (D11); CRUD |
 | Engagement | `/api/v2/engagements/` | `/api/v3-alpha/engagements` | CRUD |
 | Test | `/api/v2/tests/` | `/api/v3-alpha/tests` | CRUD |

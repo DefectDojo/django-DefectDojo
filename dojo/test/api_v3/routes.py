@@ -64,6 +64,7 @@ from dojo.models import (
 )
 from dojo.test.api_v3.schemas import (
     TestDetail,
+    TestReplace,
     TestSlim,
     TestUpdate,
     TestWrite,
@@ -270,6 +271,31 @@ def build_tests_router(
         _apply_relations_and_scalars(request, instance, data)
         if tags is not _UNSET:
             instance.tags = tags if tags is not None else []
+        try:
+            instance.save()
+        except DjangoValidationError as exc:
+            raise _validation_from_django(exc) from exc
+        return json_response(serialize(instance, detail_schema, {}))
+
+    @router.put("/tests/{int:test_id}", response=detail_schema, url_name="tests_replace")
+    def replace_test(request: HttpRequest, test_id: int, payload: TestReplace):
+        # Full replace (PUT). Validates against the create-shaped TestReplace (required
+        # test_type/target_start/target_end, extra="forbid") and applies payload.dict() WITHOUT
+        # exclude_unset, so omitted optionals reset to their schema defaults (§4.11). ``engagement``
+        # is not in the replace schema -- it is editable=False and never reassigned on update, so
+        # PUT mirrors PATCH exactly (§12). Permission ladder identical to PATCH: authorized-view
+        # resolve (404) then object Edit (403); a supplied api_scan_configuration is view-gated.
+        instance = _base_queryset(request, queryset_hook).filter(pk=test_id).first()
+        if instance is None:
+            msg = f"Test {test_id} not found"
+            raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
+        if not user_has_permission(request.user, instance, Permissions.Test_Edit):
+            raise PermissionDenied  # 403: visible but not editable
+
+        data = payload.dict()
+        tags = data.pop("tags")
+        _apply_relations_and_scalars(request, instance, data)
+        instance.tags = tags if tags is not None else []
         try:
             instance.save()
         except DjangoValidationError as exc:

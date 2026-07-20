@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime
+from unittest import mock
 
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -202,6 +203,80 @@ class TestApiV3TestsWrite(ApiV3TestCase):
         response = self.client.delete(self.v3_url(f"tests/{test.id}"))
         self.assertEqual(204, response.status_code)
         self.assertFalse(Test.objects.filter(pk=test.id).exists())
+
+
+class TestApiV3TestsReplace(ApiV3TestCase):
+
+    """PUT full-replace: TestReplace (required test_type/target_start/target_end, no engagement)."""
+
+    def _make_test(self, **kwargs):
+        engagement = Engagement.objects.first()
+        test_type = Test_Type.objects.first()
+        defaults = {
+            "engagement": engagement, "test_type": test_type,
+            "target_start": datetime.datetime(2024, 1, 1, tzinfo=datetime.UTC),
+            "target_end": datetime.datetime(2024, 1, 2, tzinfo=datetime.UTC),
+        }
+        defaults.update(kwargs)
+        return Test.objects.create(**defaults), test_type
+
+    def _base_payload(self, test_type):
+        return {
+            "test_type": test_type.id,
+            "target_start": "2024-01-01T00:00:00Z",
+            "target_end": "2024-01-02T00:00:00Z",
+        }
+
+    def test_put_full_replace_resets_omitted_optionals(self):
+        test, test_type = self._make_test(title="original title", version="9.9")
+        # PUT without title / version -> both reset to their schema defaults (None).
+        response = self.client.put(
+            self.v3_url(f"tests/{test.id}"), self._base_payload(test_type), format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        test.refresh_from_db()
+        self.assertIsNone(test.title)
+        self.assertIsNone(test.version)
+
+    def test_put_does_not_reassign_engagement(self):
+        # engagement is editable=False -> not in TestReplace; PUT never touches it (mirrors PATCH).
+        test, test_type = self._make_test()
+        original_engagement_id = test.engagement_id
+        response = self.client.put(
+            self.v3_url(f"tests/{test.id}"), self._base_payload(test_type), format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        test.refresh_from_db()
+        self.assertEqual(original_engagement_id, test.engagement_id)
+
+    def test_put_engagement_field_is_400(self):
+        # Supplying engagement (immutable) is an unknown field on the replace schema -> 400.
+        test, test_type = self._make_test()
+        payload = self._base_payload(test_type)
+        payload["engagement"] = test.engagement_id
+        response = self.client.put(self.v3_url(f"tests/{test.id}"), payload, format="json")
+        self.assertEqual(400, response.status_code)
+
+    def test_put_missing_required_is_400(self):
+        test, _ = self._make_test()
+        response = self.client.put(self.v3_url(f"tests/{test.id}"), {"title": "no test_type"}, format="json")
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("application/problem+json", response["Content-Type"])
+
+    def test_put_unauthorized_is_404(self):
+        test, test_type = self._make_test()
+        limited = User.objects.create_user(username="v3_test_put_limited", password="x")  # noqa: S106
+        client = self.token_client(user=limited)
+        response = client.put(self.v3_url(f"tests/{test.id}"), self._base_payload(test_type), format="json")
+        self.assertEqual(404, response.status_code)
+
+    def test_put_visible_but_not_editable_is_403(self):
+        test, test_type = self._make_test()
+        with mock.patch("dojo.test.api_v3.routes.user_has_permission", return_value=False):
+            response = self.client.put(
+                self.v3_url(f"tests/{test.id}"), self._base_payload(test_type), format="json",
+            )
+        self.assertEqual(403, response.status_code, response.content[:300])
 
 
 class TestApiV3TestsRbac(ApiV3TestCase):

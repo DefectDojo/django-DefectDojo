@@ -48,6 +48,7 @@ __all__ = [
     "EngagementSlim",
     "EnvironmentSlim",
     "FindingDetail",
+    "FindingReplace",
     "FindingSlim",
     "FindingUpdate",
     "FindingWrite",
@@ -243,6 +244,57 @@ class FindingUpdate(Schema):
     out_of_scope: bool | None = None
     risk_accepted: bool | None = None
     is_mitigated: bool | None = None
+    mitigation: str | None = None
+    impact: str | None = None
+    steps_to_reproduce: str | None = None
+    severity_justification: str | None = None
+    references: str | None = None
+    file_path: str | None = None
+    line: int | None = None
+    mitigated: datetime.datetime | None = None
+    mitigated_by: int | None = None
+    reporter: int | None = None
+    found_by: list[int] | None = None
+    vulnerability_ids: list[str] | None = None
+    tags: list[str] | None = None
+    push_to_jira: bool = False
+
+
+class FindingReplace(Schema):
+
+    """
+    Full-replace payload (PUT). A dedicated Replace schema is required because ``FindingWrite``
+    cannot serve full-replace semantics (§12):
+
+    - ``test`` is dropped -- it is ``editable=False`` on the model and not writable on update
+      (mirrors PATCH / v2's ``FindingSerializer`` which treats it read-only); so PUT, like PATCH,
+      never reassigns the parent test.
+    - the non-null status booleans default to their **model defaults** (not ``None``): a full
+      replace applies ``payload.dict()`` without ``exclude_unset``, so an omitted optional is reset
+      to the schema default -- and ``false_p``/``duplicate``/``out_of_scope``/``risk_accepted``/
+      ``is_mitigated`` are ``NOT NULL`` columns, so resetting them to ``None`` (``FindingWrite``'s
+      create-appropriate default, which the create path drops) would violate the constraint.
+      ``active``/``verified`` stay required (create-shaped).
+
+    Required, strict (``extra="forbid"``) and applied without ``exclude_unset`` by the route so
+    omitted optionals reset to the defaults below. All side-effect/status-invariant validation still
+    lives in the service (``dojo/finding/services.py`` ``update_finding``, D7/I6).
+    """
+
+    model_config = {"extra": "forbid"}
+
+    title: str
+    severity: str
+    description: str
+    active: bool
+    verified: bool
+    date: datetime.date | None = None
+    cwe: int | None = None
+    false_p: bool = False
+    duplicate: bool = False
+    out_of_scope: bool = False
+    risk_accepted: bool = False
+    is_mitigated: bool = False
     mitigation: str | None = None
     impact: str | None = None
     steps_to_reproduce: str | None = None

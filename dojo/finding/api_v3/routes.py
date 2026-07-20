@@ -50,7 +50,13 @@ from dojo.api_v3.include import apply_includes
 from dojo.api_v3.pagination import paginate
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
-from dojo.finding.api_v3.schemas import FindingDetail, FindingSlim, FindingUpdate, FindingWrite
+from dojo.finding.api_v3.schemas import (
+    FindingDetail,
+    FindingReplace,
+    FindingSlim,
+    FindingUpdate,
+    FindingWrite,
+)
 from dojo.finding.queries import get_authorized_findings
 from dojo.finding.services import create_finding, delete_finding, update_finding
 from dojo.jira import services as jira_services
@@ -238,6 +244,37 @@ def build_findings_router(
             raise PermissionDenied  # 403: visible but not editable
 
         changes = payload.dict(exclude_unset=True)
+        push_to_jira = changes.pop("push_to_jira", False)
+        vulnerability_ids = changes.pop("vulnerability_ids", None)
+        # Mirror FindingViewSet.perform_update: OR push_to_jira with the project's push_all_issues.
+        jira_project = jira_services.get_project(finding)
+        if get_system_setting("enable_jira") and jira_project:
+            push_to_jira = push_to_jira or jira_project.push_all_issues
+
+        update_finding(
+            finding, changes=changes, user=request.user,
+            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids,
+        )
+        obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
+        return json_response(serialize(obj, detail_schema, {}))
+
+    @router.put("/findings/{int:finding_id}", response=detail_schema, url_name="findings_replace")
+    def replace_finding_route(request: HttpRequest, finding_id: int, payload: FindingReplace):
+        # Full replace (PUT). Validates against the create-shaped FindingReplace (required fields,
+        # extra="forbid") and applies payload.dict() WITHOUT exclude_unset, so omitted optionals
+        # reset to their schema defaults -- a true full replace, mirroring v2's update(partial=False)
+        # (§4.11). ``test`` is not in the replace schema (editable=False; never reassigned on update,
+        # like PATCH). Goes through the service exactly like PATCH (full changes dict), so JIRA /
+        # risk-acceptance / vuln-id side-effects flow through dojo/finding/services.py (I6). Permission
+        # ladder identical to PATCH: authorized-view resolve (404) then object Edit (403).
+        finding = _base_queryset(request, queryset_hook).filter(pk=finding_id).first()
+        if finding is None:
+            msg = f"Finding {finding_id} not found"
+            raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
+        if not user_has_permission(request.user, finding, Permissions.Finding_Edit):
+            raise PermissionDenied  # 403: visible but not editable
+
+        changes = payload.dict()
         push_to_jira = changes.pop("push_to_jira", False)
         vulnerability_ids = changes.pop("vulnerability_ids", None)
         # Mirror FindingViewSet.perform_update: OR push_to_jira with the project's push_all_issues.

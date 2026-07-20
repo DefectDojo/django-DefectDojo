@@ -185,6 +185,88 @@ class TestApiV3FindingUpdate(ApiV3TestCase):
         self.assertEqual(400, response.status_code)
 
 
+class TestApiV3FindingReplace(ApiV3TestCase):
+
+    """PUT full-replace: validates FindingReplace, resets omitted optionals, flows through the service."""
+
+    def setUp(self):
+        super().setUp()
+        self.finding = Finding.objects.filter(risk_accepted=False, is_mitigated=False).first()
+
+    def _put(self, **overrides):
+        payload = {
+            "title": "v3 put finding",
+            "severity": "High",
+            "description": "replaced via put",
+            "active": True,
+            "verified": False,
+        }
+        payload.update(overrides)
+        return self.client.put(self.v3_url(f"findings/{self.finding.id}"), payload, format="json")
+
+    def test_put_full_replace_resets_omitted_optionals(self):
+        # Set an optional via PATCH, then PUT without it -> it resets to the schema default.
+        self.client.patch(
+            self.v3_url(f"findings/{self.finding.id}"), {"impact": "temporary impact"}, format="json",
+        )
+        self.finding.refresh_from_db()
+        self.assertEqual("temporary impact", self.finding.impact)
+        response = self._put()
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.finding.refresh_from_db()
+        self.assertIsNone(self.finding.impact)  # omitted from PUT -> reset to default (None)
+        self.assertEqual("V3 Put Finding", self.finding.title)  # title-cased on save
+
+    def test_put_non_null_boolean_resets_to_model_default(self):
+        # A non-null status bool set via PATCH resets to its model default (False), not None (§12).
+        self.client.patch(
+            self.v3_url(f"findings/{self.finding.id}"), {"out_of_scope": True}, format="json",
+        )
+        self.finding.refresh_from_db()
+        self.assertTrue(self.finding.out_of_scope)
+        self.assertEqual(200, self._put().status_code)
+        self.finding.refresh_from_db()
+        self.assertFalse(self.finding.out_of_scope)
+
+    def test_put_missing_required_is_400(self):
+        response = self.client.put(
+            self.v3_url(f"findings/{self.finding.id}"),
+            {"title": "x", "description": "y", "active": True, "verified": False},  # no severity
+            format="json",
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("application/problem+json", response["Content-Type"])
+
+    def test_put_unknown_field_is_400(self):
+        # `test` is not writable on replace (editable=False) -> rejected as unknown (extra=forbid).
+        response = self._put(test=self.finding.test_id)
+        self.assertEqual(400, response.status_code)
+
+    def test_put_side_effects_flow_through_service_jira(self):
+        with patch(_KEEP_IN_SYNC, return_value=True), patch(_PUSH, return_value=(True, "ok")) as push:
+            response = self._put()
+        self.assertEqual(200, response.status_code, response.content[:500])
+        push.assert_called_once()
+        self.assertTrue(push.call_args.kwargs.get("force_sync"))
+
+    def test_put_unauthorized_is_404(self):
+        limited = User.objects.create_user(username="v3_put_limited", password="x")  # noqa: S106
+        client = self.token_client(user=limited)
+        response = client.put(
+            self.v3_url(f"findings/{self.finding.id}"),
+            {"title": "x", "severity": "High", "description": "y", "active": True, "verified": False},
+            format="json",
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_put_visible_but_not_editable_is_403(self):
+        # OS legacy authz can't express view-but-not-edit; exercise the 403 code path by failing the
+        # edit permission check while the object stays visible to the admin (§12, OS5 pattern).
+        with patch("dojo.finding.api_v3.routes.user_has_permission", return_value=False):
+            response = self._put()
+        self.assertEqual(403, response.status_code, response.content[:300])
+
+
 class TestApiV3FindingDelete(ApiV3TestCase):
 
     def test_delete(self):

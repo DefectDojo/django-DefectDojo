@@ -149,6 +149,73 @@ class TestApiV3UsersWrite(ApiV3TestCase):
         self.assertTrue(Dojo_User.objects.filter(pk=self.admin.id).exists())
 
 
+class TestApiV3UsersReplace(ApiV3TestCase):
+
+    """PUT full-replace: reuses the create-shaped UserWrite; password never settable via update."""
+
+    def test_put_full_replace_resets_omitted_optionals(self):
+        user = User.objects.create_user(username="v3_put_user", password=_PASSWORD, first_name="Original")
+        # PUT without first_name -> resets to its schema default ("").
+        response = self.client.put(
+            self.v3_url(f"users/{user.id}"),
+            {"username": "v3_put_user", "email": "put@example.com"},
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        body = response.json()
+        self.assertEqual("put@example.com", body["email"])
+        self.assertEqual("", body["first_name"])   # omitted from PUT -> reset to default ("")
+        self.assertTrue(body["is_active"])          # default True
+        user.refresh_from_db()
+        self.assertEqual("", user.first_name)
+
+    def test_put_password_is_rejected(self):
+        user = User.objects.create_user(username="v3_put_pw", password=_PASSWORD)
+        response = self.client.put(
+            self.v3_url(f"users/{user.id}"),
+            {"username": "v3_put_pw", "email": "pw@example.com", "password": _PASSWORD},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("application/problem+json", response["Content-Type"])
+
+    def test_put_missing_required_email_is_400(self):
+        user = User.objects.create_user(username="v3_put_noemail", password=_PASSWORD)
+        response = self.client.put(
+            self.v3_url(f"users/{user.id}"), {"username": "v3_put_noemail"}, format="json",
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_put_unknown_field_is_400(self):
+        user = User.objects.create_user(username="v3_put_extra", password=_PASSWORD)
+        response = self.client.put(
+            self.v3_url(f"users/{user.id}"),
+            {"username": "v3_put_extra", "email": "e@example.com", "bogus": 1},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_put_unauthorized_is_404(self):
+        # A plain user's self-only queryset hides the admin -> 404 before the write gate.
+        limited = User.objects.create_user(username="v3_put_u_limited", password=_PASSWORD)
+        client = self.token_client(user=limited)
+        response = client.put(
+            self.v3_url(f"users/{self.admin.id}"),
+            {"username": "admin", "email": "a@example.com"}, format="json",
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_put_visible_but_not_editable_is_403(self):
+        # A plain user can see their own record (404 never fires) but lacks auth.change_user -> 403.
+        limited = User.objects.create_user(username="v3_put_u_self", password=_PASSWORD)
+        client = self.token_client(user=limited)
+        response = client.put(
+            self.v3_url(f"users/{limited.id}"),
+            {"username": "v3_put_u_self", "email": "self@example.com"}, format="json",
+        )
+        self.assertEqual(403, response.status_code, response.content[:300])
+
+
 class TestApiV3UsersRbac(ApiV3TestCase):
 
     def setUp(self):

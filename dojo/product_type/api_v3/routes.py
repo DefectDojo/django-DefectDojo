@@ -203,6 +203,26 @@ def build_organizations_router(
             raise _validation_from_django(exc) from exc
         return json_response(serialize(instance, detail_schema, {}))
 
+    @router.put("/organizations/{int:organization_id}", response=detail_schema, url_name="organizations_replace")
+    def replace_organization(request: HttpRequest, organization_id: int, payload: OrganizationWrite):
+        # Full replace (PUT). Validates against the create-shaped OrganizationWrite (required
+        # fields, extra="forbid") and applies payload.dict() WITHOUT exclude_unset, so omitted
+        # optionals reset to their schema defaults (§4.11). Permission ladder is identical to PATCH:
+        # authorized-view resolve (404) then object Edit permission (403).
+        instance = _base_queryset(request, queryset_hook).filter(pk=organization_id).first()
+        if instance is None:
+            msg = f"Organization {organization_id} not found"
+            raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
+        if not user_has_permission(request.user, instance, Permissions.Product_Type_Edit):
+            raise PermissionDenied  # 403: visible but not editable
+        for key, value in payload.dict().items():
+            setattr(instance, key, value)
+        try:
+            instance.save()
+        except DjangoValidationError as exc:
+            raise _validation_from_django(exc) from exc
+        return json_response(serialize(instance, detail_schema, {}))
+
     @router.delete("/organizations/{int:organization_id}", url_name="organizations_delete")
     def delete_organization(request: HttpRequest, organization_id: int):
         instance = _base_queryset(request, queryset_hook).filter(pk=organization_id).first()
