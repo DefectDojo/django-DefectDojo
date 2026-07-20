@@ -7,13 +7,22 @@ aliases:
 ---
 **Availability:** Integrations is currently in **Beta** and is only available for **Cloud-hosted** DefectDojo Pro instances. On-premise deployments do not yet have the required infrastructure to support Integrations. If you are an on-premise customer interested in this feature, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for updates on availability.
 
+**Enabling Integrations:** On a Cloud instance, a superuser can turn Integrations on from **Settings > Feature Flags**, where it is listed as **Downstream Connections**. See [Feature Flags](/admin/feature_flags/pro__feature_flags/). On an on-premise instance it is shown as **Unavailable on This Deployment**.
+
 DefectDojo Pro's Integrations let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 
 Supported Integrations:
-- [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
-- [GitHub](/issue_tracking/pro_integration/integrations/#github)
-- [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
-- [ServiceNow](/issue_tracking/pro_integration/integrations/#servicenow)
+- Azure Devops
+- Bitbucket
+- Freshservice
+- GitHub
+- GitLab Boards
+- Jira
+- PagerDuty
+- ServiceDesk Plus
+- ServiceNow
+- Shortcut
+- Zendesk
 
 ## Opening the Integrations page
 
@@ -68,10 +77,17 @@ Project Integrations will have varying requirements for how DefectDojo will need
 
 For the complete list of requirements, please open the vendor specific pages below:
 
-- [Azure Devops](/issue_tracking/pro_integration/integrations/#azure-devops-boards)
-- [GitHub](/issue_tracking/pro_integration/integrations/#github)
-- [GitLab Boards](/issue_tracking/pro_integration/integrations/#gitlab)
-- ServiceNow (Coming Soon)
+- [Azure Devops](/issue_tracking/pro_integration/integrations_toolreference/#azure-devops-boards)
+- [Bitbucket](/issue_tracking/pro_integration/integrations_toolreference/#bitbucket)
+- [Freshservice](/issue_tracking/pro_integration/integrations_toolreference/#freshservice)
+- [GitHub](/issue_tracking/pro_integration/integrations_toolreference/#github)
+- [GitLab Boards](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)
+- [Jira](/issue_tracking/pro_integration/integrations_toolreference/#jira)
+- [PagerDuty](/issue_tracking/pro_integration/integrations_toolreference/#pagerduty)
+- [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)
+- [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)
+- [Shortcut](/issue_tracking/pro_integration/integrations_toolreference/#shortcut)
+- [Zendesk](/issue_tracking/pro_integration/integrations_toolreference/#zendesk)
 
 ## Error Handling and Debugging
 

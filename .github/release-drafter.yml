@@ -6,50 +6,65 @@ branches:
 
 categories:
   - title: '💣 Breaking changes'
-    labels:
-      - 'Breaking Changes'
+    when:
+      labels:
+        - 'Breaking Changes'
   - title: '🚩 Changes to `settings.dist.py` / `local_settings.py`'
-    labels:
-      - 'settings_changes'
+    when:
+      labels:
+        - 'settings_changes'
   - title: '🚩 Database migration'
-    labels:
-      - 'New Migration'
+    when:
+      labels:
+        - 'New Migration'
   - title: '🚩 Requires hash code recomputation'
-    labels:
-      - 'hashcode-update-needed'
+    when:
+      labels:
+        - 'hashcode-update-needed'
   - title: '🚩 Security'
-    labels:
-      - 'security'
+    when:
+      labels:
+        - 'security'
   - title: '🚀 New importers'
-    labels:
-      - 'Import Scans'
+    when:
+      labels:
+        - 'Import Scans'
   - title: '🚀 General features and enhancements'
-    labels:
-      - 'feature'
-      - 'enhancement'
-      - 'performance'
+    when:
+      labels:
+        - 'feature'
+        - 'enhancement'
+        - 'performance'
   - title: '🚀 API features and enhancements'
-    label: 'apiv2'
+    when:
+      label: 'apiv2'
   - title: '🐛 Bug Fixes'
-    labels:
-      - 'fix'
-      - 'bugfix'
-      - 'bug'
+    when:
+      labels:
+        - 'fix'
+        - 'bugfix'
+        - 'bug'
   - title: 📝 Documentation updates
-    label: 'documentation'
+    when:
+      label: 'documentation'
   - title: '🖌 Updates in UI'
-    label: 'ui'
+    when:
+      label: 'ui'
   - title: '🗣 Updates in localization'
-    label: 'localization'
+    when:
+      label: 'localization'
   - title: '🔧 Improved code quality with linters'
-    label: 'lint'
+    when:
+      label: 'lint'
   - title: '⚙️ Improvemets of GitHub Actions'
-    label: 'gha'
+    when:
+      label: 'gha'
   - title: '🧰 Maintenance'
     collapse-after: 3
-    labels:
-      - 'dependencies'
-      - 'maintenance'
+    when:
+      labels:
+        - 'dependencies'
+        - 'maintenance'
 exclude-labels:
   - 'skip-changelog'
 

@@ -93,6 +93,68 @@ class CloseFindingViewInstanceTest(TestCase):
         self.assertIn(response.status_code, [200, 302])
 
 
+@override_settings(DD_EDITABLE_MITIGATED_DATA=False)
+class CloseFindingViewMitigatedDataDisabledTest(TestCase):
+
+    """
+    When DD_EDITABLE_MITIGATED_DATA is disabled (the default), the Close Finding
+    form must not expose the mitigated/mitigated_by fields, and any mitigated value
+    supplied in the payload must be ignored so the finding is closed with the
+    current date rather than a backdated one.
+    """
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="tester-mitigated-disabled",
+            password="pass",  # noqa: S106
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.client.force_login(self.user)
+        self.product_type = Product_Type.objects.create(name="Disabled Product Type")
+        self.product = Product.objects.create(name="Disabled Product", description="test", prod_type=self.product_type)
+        self.engagement = Engagement.objects.create(
+            name="Disabled Engagement",
+            product=self.product,
+            target_start=now(),
+            target_end=now(),
+        )
+        self.test_type = Test_Type.objects.create(name="Disabled Unit Test Type")
+        self.test = Test.objects.create(
+            engagement=self.engagement,
+            test_type=self.test_type,
+            title="Test for Finding",
+            target_start=now(),
+            target_end=now(),
+        )
+        self.finding = Finding.objects.create(
+            title="Close Finding Disabled Test",
+            active=True,
+            test=self.test,
+            reporter=self.user,
+        )
+        self.url = reverse("close_finding", args=[self.finding.id])
+
+    def test_close_form_hides_mitigated_fields(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        form = response.context["form"]
+        self.assertNotIn("mitigated", form.fields)
+        self.assertNotIn("mitigated_by", form.fields)
+
+    def test_backdated_mitigated_is_ignored(self):
+        response = self.client.post(
+            self.url,
+            {"entry": "Closing this finding", "mitigated": "2020-01-01"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.finding.refresh_from_db()
+        self.assertTrue(self.finding.is_mitigated)
+        self.assertIsNotNone(self.finding.mitigated)
+        # the backdated value must be ignored: mitigation date is "now", not 2020
+        self.assertEqual(self.finding.mitigated.year, now().year)
+
+
 class TestSystemSettingsMiddlewareIntegration(DojoTestCase):
 
     """Integration tests for DojoSytemSettingsMiddleware using RequestFactory."""
