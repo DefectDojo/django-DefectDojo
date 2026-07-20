@@ -28,6 +28,7 @@ from django.http import HttpResponse
 from ninja import Router, Schema
 from ninja.constants import NOT_SET
 
+from dojo.api_v3.csv_export import stream_csv_export
 from dojo.api_v3.errors import json_response, not_found_problem
 from dojo.api_v3.expand import (
     allowed_field_names,
@@ -191,6 +192,24 @@ def build_findings_router(
             envelope.setdefault("meta", {}).update(include_meta)
 
         return json_response(envelope)
+
+    # ``export.csv`` is registered as a literal path; the ``{int:finding_id}`` detail route's int
+    # converter cannot match "export.csv", so the two never collide regardless of registration order.
+    @router.get("/findings/export.csv", url_name="findings_export_csv")
+    def export_findings(request: HttpRequest):
+        # Same filter contract as the list (filters, o=, q=, fields= incl. detail opt-up); no
+        # pagination/expand/include (rejected in the kernel). Streams the whole filtered set (§4.15).
+        filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
+        fields = parse_fields(request.GET.get("fields"), allowed_field_names(detail_schema))
+        fplan = plan_list_fields(schema, detail_schema, fields)
+        page_qs = (
+            filtered.select_related(*schema.SELECT_RELATED, *fplan.select_related)
+            .prefetch_related(*schema.PREFETCH_RELATED)
+            .annotate(locations_count=Count("locations", distinct=True))
+        )
+        if fplan.defer:
+            page_qs = page_qs.defer(*fplan.defer)
+        return stream_csv_export(request, resource="findings", count_qs=filtered, page_qs=page_qs, plan=fplan)
 
     @router.get("/findings/{int:finding_id}", response=detail_schema, url_name="findings_detail")
     def get_finding(request: HttpRequest, finding_id: int):

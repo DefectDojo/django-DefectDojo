@@ -268,6 +268,36 @@ Authorization for a sub-resource is inherited from its parent object.
 More worked request/response pairs live in [`api_v3_examples.md`](https://github.com/DefectDojo/django-DefectDojo/blob/dev/api_v3_examples.md)
 at the repository root.
 
+## CSV export
+
+Every top-level list endpoint has a CSV projection at `GET /<resource>/export.csv` (findings, assets,
+organizations, engagements, tests, users, locations — `locations` keeps its superuser gate):
+
+```
+GET /api/v3-alpha/findings/export.csv?severity=High&o=-date&fields=id,title,impact
+```
+
+- **Same filter contract as the list.** `export.csv` takes the identical filters, `o=` ordering,
+  `q=` free-text search, and `?fields=` (including the detail opt-up) as `GET /<resource>`. It has
+  **no pagination**: the response is the whole filtered, authorized set. `expand`, `include`,
+  `limit`, `offset`, `pagination`, and `cursor` are not applicable and return `400`
+  `application/problem+json`.
+- **Streamed attachment.** The response is `Content-Type: text/csv; charset=utf-8` with
+  `Content-Disposition: attachment; filename="<resource>-export.csv"`, streamed row-by-row so memory
+  and query count stay bounded regardless of the number of rows.
+- **Row cap.** If the filtered set exceeds `DD_API_V3_EXPORT_MAX_ROWS` (default 100 000) the request
+  returns `400` asking you to narrow the filter — the export is **never silently truncated**.
+- **Column flattening.** The columns are the JSON row's fields (in schema order, restricted to your
+  `?fields=` selection):
+  - a `{id, name}` ref becomes two columns `<key>_id` and `<key>_name` (a location ref adds
+    `<key>_type`);
+  - `tags` becomes a single semicolon-joined column;
+  - datetimes are ISO-8601 `Z`, dates `YYYY-MM-DD`, booleans lowercase `true`/`false`, and `null`
+    renders as an empty cell.
+  A zero-row export still returns the header row.
+- **Spreadsheet-injection hardening.** Any cell whose text starts with `=`, `+`, `-`, `@`, or a tab
+  is prefixed with a single quote so spreadsheet software does not evaluate it as a formula.
+
 ## Known alpha gaps
 
 The alpha delivers the contract and the seven read/write surfaces above. These are **known,
@@ -284,8 +314,8 @@ deliberate** gaps — several exist so the alpha stayed additive and reviewable:
   reactivation, `last_reviewed` stamping, finding-group push, GitHub sync, and JIRA link/unlink.
 - **No bulk or workflow actions yet.** No bulk operations, no workflow actions
   (`close`/`request_review`/`mark_duplicate`), no aggregation/chart endpoints, no saved views, no
-  CSV export, no delete-impact preview. These are recorded as explicit post-alpha work items in the
-  plan's backlog.
+  XLSX export (CSV export **is** available — see above), no delete-impact preview. These are recorded
+  as explicit post-alpha work items in the plan's backlog.
 
 ## Platform limitations (not v3 gaps)
 

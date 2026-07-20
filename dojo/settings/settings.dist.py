@@ -293,6 +293,10 @@ env = environ.FileAwareEnv(
     DD_API_V3_COUNT_CAP=(int, 10000),
     # API v3 (alpha) ?expand= guard: maximum number of expanded relation nodes across all paths. See §4.6.
     DD_API_V3_EXPAND_BUDGET=(int, 10),
+    # API v3 (alpha) CSV export row cap: the whole filtered set is streamed as CSV; if the filtered
+    # count exceeds this cap the request is a 400 telling the client to narrow the filter (never a
+    # silent truncation). See §4.15.
+    DD_API_V3_EXPORT_MAX_ROWS=(int, 100000),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
     # Shared cache backend (django.core.cache). When set, Django uses RedisCache
@@ -697,6 +701,8 @@ API_V3_STATUS = "alpha"
 # Count/expand tuning (§4.3, §4.6); settings-overridable per the plan.
 API_V3_COUNT_CAP = env("DD_API_V3_COUNT_CAP")
 API_V3_EXPAND_BUDGET = env("DD_API_V3_EXPAND_BUDGET")
+# CSV export row cap (§4.15); settings-overridable per the plan.
+API_V3_EXPORT_MAX_ROWS = env("DD_API_V3_EXPORT_MAX_ROWS")
 # List pagination bounds (§4.3).
 API_V3_PAGE_LIMIT_DEFAULT = 25
 API_V3_PAGE_LIMIT_MAX = 250

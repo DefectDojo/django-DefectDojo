@@ -36,6 +36,7 @@ from django.http import HttpResponse
 from ninja import Router, Schema
 from ninja.constants import NOT_SET
 
+from dojo.api_v3.csv_export import stream_csv_export
 from dojo.api_v3.errors import json_response, not_found_problem, validation_problem
 from dojo.api_v3.expand import (
     allowed_field_names,
@@ -199,6 +200,18 @@ def build_assets_router(
         if include_meta:
             envelope.setdefault("meta", {}).update(include_meta)
         return json_response(envelope)
+
+    # Literal ``export.csv`` cannot match the ``{int:asset_id}`` detail route (int converter), so no
+    # collision. Same filter contract as the list; whole filtered set streamed as CSV (§4.15).
+    @router.get("/assets/export.csv", url_name="assets_export_csv")
+    def export_assets(request: HttpRequest):
+        filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
+        fields = parse_fields(request.GET.get("fields"), allowed_field_names(detail_schema))
+        fplan = plan_list_fields(schema, detail_schema, fields)
+        page_qs = filtered.select_related(*schema.SELECT_RELATED, *fplan.select_related).prefetch_related(*schema.PREFETCH_RELATED)
+        if fplan.defer:
+            page_qs = page_qs.defer(*fplan.defer)
+        return stream_csv_export(request, resource="assets", count_qs=filtered, page_qs=page_qs, plan=fplan)
 
     @router.get("/assets/{int:asset_id}", response=detail_schema, url_name="assets_detail")
     def get_asset(request: HttpRequest, asset_id: int):

@@ -36,6 +36,8 @@ Because the whole thing is registry-driven and gated for completeness, any futur
 """
 from __future__ import annotations
 
+import csv
+import io
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -182,6 +184,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   note="full replace: finding invisible to zero-perm queryset -> 404 before edit gate"),
             Probe("DELETE", "/findings/{finding_id}", self.v3_url(f"findings/{f}"), 404),
             Probe("GET", "/findings/{finding_id}/locations", self.v3_url(f"findings/{f}/locations"), 404),
+            Probe("GET", "/findings/export.csv", self.v3_url("findings/export.csv"), 200, list_kind="csv_empty",
+                  note="CSV export: zero-perm -> header-only CSV over the RBAC-scoped empty queryset"),
         ]
         p += self._sub_probes("findings", f, notes=True, files=True, tags=True)
 
@@ -197,6 +201,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
             Probe("PUT", "/organizations/{organization_id}", self.v3_url(f"organizations/{o}"), 404,
                   payload={"name": "x"}, note="full replace: organization invisible -> 404"),
             Probe("DELETE", "/organizations/{organization_id}", self.v3_url(f"organizations/{o}"), 404),
+            Probe("GET", "/organizations/export.csv", self.v3_url("organizations/export.csv"), 200,
+                  list_kind="csv_empty", note="CSV export: zero-perm -> header-only CSV (RBAC-scoped empty)"),
         ]
 
         # ---- assets (product) ----------------------------------------------------------------
@@ -212,6 +218,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   note="full replace: asset invisible -> 404 before edit gate"),
             Probe("DELETE", "/assets/{asset_id}", self.v3_url(f"assets/{a}"), 404),
             Probe("GET", "/assets/{asset_id}/locations", self.v3_url(f"assets/{a}/locations"), 404),
+            Probe("GET", "/assets/export.csv", self.v3_url("assets/export.csv"), 200, list_kind="csv_empty",
+                  note="CSV export: zero-perm -> header-only CSV (RBAC-scoped empty)"),
         ]
         p += self._sub_probes("assets", a, notes=False, files=False, tags=True)
 
@@ -228,6 +236,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   payload={"asset": a, "target_start": "2026-01-01", "target_end": "2026-01-02"},
                   note="full replace: engagement invisible -> 404 before edit gate"),
             Probe("DELETE", "/engagements/{engagement_id}", self.v3_url(f"engagements/{e}"), 404),
+            Probe("GET", "/engagements/export.csv", self.v3_url("engagements/export.csv"), 200,
+                  list_kind="csv_empty", note="CSV export: zero-perm -> header-only CSV (RBAC-scoped empty)"),
         ]
         p += self._sub_probes("engagements", e, notes=True, files=True, tags=True)
 
@@ -245,6 +255,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                            "target_end": "2026-01-02T00:00:00Z"},
                   note="full replace: test invisible -> 404 before edit gate"),
             Probe("DELETE", "/tests/{test_id}", self.v3_url(f"tests/{t}"), 404),
+            Probe("GET", "/tests/export.csv", self.v3_url("tests/export.csv"), 200, list_kind="csv_empty",
+                  note="CSV export: zero-perm -> header-only CSV (RBAC-scoped empty)"),
         ]
         p += self._sub_probes("tests", t, notes=True, files=True, tags=True)
 
@@ -263,6 +275,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   payload={"username": "authz_sweep_put", "email": "authzput@example.com"},
                   note="full replace: admin invisible to zero-perm self-scope -> 404"),
             Probe("DELETE", "/users/{user_id}", self.v3_url(f"users/{admin_id}"), 404),
+            Probe("GET", "/users/export.csv", self.v3_url("users/export.csv"), 200, list_kind="csv_users_self",
+                  note="CSV export: self-visibility scope -> exactly the caller's own record, no other (§12 OS3a)"),
         ]
 
         # ---- locations (superuser-gated: 403 before any object lookup) -----------------------
@@ -271,6 +285,8 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
                   note="v2 LocationViewSet is IsSuperUser -> mirrored 403 for non-superusers (§12 OS4)"),
             Probe("GET", "/locations/{location_id}", self.v3_url("locations/1"), 403,
                   note="superuser gate fires before the id lookup"),
+            Probe("GET", "/locations/export.csv", self.v3_url("locations/export.csv"), 403,
+                  note="CSV export inherits the /locations superuser gate -> 403 before streaming (§12 OS4)"),
         ]
 
         # ---- consolidated import -------------------------------------------------------------
@@ -290,9 +306,35 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
             return fn(probe.url, probe.payload, format=probe.fmt)
         return fn(probe.url)
 
+    @staticmethod
+    def _read_csv(response) -> list[list[str]]:
+        """Consume a streaming CSV export response into a list of rows (header first)."""
+        content = b"".join(response.streaming_content).decode("utf-8")
+        return list(csv.reader(io.StringIO(content)))
+
     def _assert_zero_list(self, probe: Probe, response) -> None:
-        body = response.json()
         label = f"{probe.method} {probe.path}"
+        if probe.list_kind in {"csv_empty", "csv_users_self"}:
+            # CSV export projection of the deny-by-default invariant: a zero-perm user gets a valid
+            # CSV whose data body is empty (header only) -- except /users, the documented
+            # self-visibility scope, where the export contains exactly the caller's own record and no
+            # other (identical filter contract + RBAC queryset as the /users list, §12 OS3a).
+            rows = self._read_csv(response)
+            self.assertGreaterEqual(len(rows), 1, f"{label}: a CSV export must always emit a header row")
+            header, data_rows = rows[0], rows[1:]
+            self.assertIn("id", header, f"{label}: CSV header must include the id column")
+            if probe.list_kind == "csv_empty":
+                self.assertEqual([], data_rows, f"{label}: zero-perm CSV export must be header-only (no data rows)")
+                return
+            self.assertEqual(
+                1, len(data_rows), f"{label}: users CSV export must return exactly the caller's own record",
+            )
+            self.assertEqual(
+                str(self.zero.id), data_rows[0][header.index("id")],
+                f"{label}: users CSV export leaked a record other than the caller's own",
+            )
+            return
+        body = response.json()
         if probe.list_kind == "users_self":
             # The one documented deviation: a zero-perm user sees exactly their own record and no
             # other user's data. Anything else (count 0, or a foreign row) would be a regression.

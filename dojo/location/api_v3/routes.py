@@ -32,6 +32,7 @@ from django.core.exceptions import PermissionDenied
 from ninja import Router
 from ninja.constants import NOT_SET
 
+from dojo.api_v3.csv_export import stream_csv_export
 from dojo.api_v3.errors import json_response, not_found_problem
 from dojo.api_v3.expand import (
     allowed_field_names,
@@ -125,6 +126,19 @@ def build_locations_router(
 
         envelope = paginate(request, count_qs=filtered, page_qs=page_qs, serialize=serialize_row, filter_spec=filter_spec)
         return json_response(envelope)
+
+    # Literal ``export.csv`` cannot match the ``{int:location_id}`` detail route (int converter), so
+    # no collision. ``_base_queryset`` enforces the superuser gate (403 for non-superusers) exactly
+    # like the list/detail routes before any streaming begins (§12 OS4); whole filtered set as CSV.
+    @router.get("/locations/export.csv", url_name="locations_export_csv")
+    def export_locations(request: HttpRequest):
+        filtered = apply_filters(request, _base_queryset(request), filter_spec)
+        fields = parse_fields(request.GET.get("fields"), allowed_field_names(detail_schema))
+        fplan = plan_list_fields(schema, detail_schema, fields)
+        page_qs = filtered.select_related(*schema.SELECT_RELATED, *fplan.select_related).prefetch_related(*schema.PREFETCH_RELATED)
+        if fplan.defer:
+            page_qs = page_qs.defer(*fplan.defer)
+        return stream_csv_export(request, resource="locations", count_qs=filtered, page_qs=page_qs, plan=fplan)
 
     @router.get("/locations/{int:location_id}", response=detail_schema, url_name="locations_detail")
     def get_location(request: HttpRequest, location_id: int):
