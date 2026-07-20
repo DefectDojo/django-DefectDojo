@@ -12,7 +12,6 @@ Per D11 the auto-create form fields speak the new domain language on the wire: `
 ``product_type_name`` context keys, and to the ``dojo/importers/services.py`` facade's kwargs of the
 same internal names -- those are not part of the v3 wire surface). See §12.
 
-Background processing is reserved (grammar only): ``background=true`` returns 400 in alpha.
 """
 from __future__ import annotations
 
@@ -60,7 +59,6 @@ class ImportForm(Schema):
     version: str | None = None
     environment: str = "Development"
     tags: str | None = None
-    background: bool = False
 
 
 def _split_tags(tags: str | None) -> list[str] | None:
@@ -155,11 +153,6 @@ def build_import_router(*, auth=NOT_SET) -> Router:
         payload: ImportForm = Form(...),  # noqa: B008 -- ninja's declarative param default
         file: UploadedFile | None = File(None),  # noqa: B008 -- ninja's declarative param default
     ):
-        if payload.background:
-            raise ProblemDetail(
-                status=400, error_type="import", title="Background import not available",
-                detail="background processing is not yet available",
-            )
         if payload.mode not in {"auto", "import", "reimport"}:
             raise validation_problem({"mode": ["must be one of auto, import, reimport"]})
 

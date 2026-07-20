@@ -235,9 +235,9 @@ deliberate** gaps — several exist so the alpha stayed additive and reviewable:
   reactivation, `last_reviewed` stamping, finding-group push, GitHub sync, and JIRA link/unlink.
 - **No bulk or workflow actions yet.** No bulk operations, no workflow actions
   (`close`/`request_review`/`mark_duplicate`), no aggregation/chart endpoints, no saved views, no
-  CSV export, no delete-impact preview. Cursor pagination and background-import jobs are reserved in
-  the grammar (they return `400 "not yet available"`) but not implemented. These are recorded as
-  explicit post-alpha work items in the plan's backlog.
+  CSV export, no delete-impact preview. Cursor pagination is reserved in the grammar (it returns
+  `400 "not yet available"`) but not implemented. These are recorded as explicit post-alpha work
+  items in the plan's backlog.
 
 ## Platform limitations (not v3 gaps)
 
