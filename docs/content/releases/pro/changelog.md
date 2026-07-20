@@ -12,6 +12,15 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## July 2026: v3.1
 
+### July 15, 2026: v3.1.101
+
+* **(Findings)** Consolidated the bulk-edit actions in the findings table into a single surface, and added bulk "replace tag" and bulk review actions.
+* **(Search)** Retired the legacy Watson search backend in Pro in favor of the native Postgres global search introduced in v3.1.100. Watson indexing can now be toggled with `DD_WATSON_SEARCH_ENABLED`.
+* **(Performance)** Full-table pagination counts on large API list endpoints can now be cached behind an opt-in flag, speeding up paginated list requests on big instances.
+* **(SSO)** Groups created through SSO now default to the Reader role.
+* **(Jira)** Fixed the "Connect with Jira" OAuth flow being blocked by hidden-field validation.
+* **(Reports)** Chart blocks in report PDFs no longer capture mid-animation, so exported charts render fully drawn.
+
 ### July 13, 2026: v3.1.100
 
 * **(Connectors)** Added a large batch of new Connectors. New findings connectors: CrowdStrike Falcon, Microsoft Defender Vulnerability Management, Microsoft Defender for Cloud, Veracode, Qualys, Rapid7 InsightVM, GitHub Advanced Security, HackerOne, Contrast, Google Cloud Security Command Center, Shodan, Wazuh, Cloudflare, Censys, Docker Scout, and Have I Been Pwned. New asset connectors: GitLab, Atlassian JSM Assets, Bitbucket Cloud, Azure DevOps, Backstage, and Group-IB ASM. Added a GitGuardian secrets connector.
