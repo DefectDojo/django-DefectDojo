@@ -218,6 +218,7 @@ class TrivyParser:
                 namespace = resource.get("Namespace")
                 kind = resource.get("Kind")
                 name = resource.get("Name")
+                resource_name = ""
                 if namespace:
                     resource_name = f"{namespace} / "
                 if kind:

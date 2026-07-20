@@ -180,6 +180,26 @@ Number  Content
             self.assertIsNone(finding.component_version)
             self.assertEqual("default / Deployment / redis-follower", finding.service)
 
+    def test_kubernetes_cluster_scoped_resources(self):
+        """Resources whose first entry is cluster-scoped (no Namespace) must parse without UnboundLocalError"""
+        with sample_path("kubernetes_cluster_scoped_resources.json").open(encoding="utf-8") as test_file:
+            parser = TrivyParser()
+            findings = parser.get_findings(test_file, Test())
+            self.assertEqual(len(findings), 3)
+            finding = findings[0]
+            self.assertEqual("KSV113 - Manage namespace secrets", finding.title)
+            self.assertEqual("Medium", finding.severity)
+            self.assertEqual("ClusterRole / system:controller:bootstrap-signer", finding.service)
+            finding = findings[1]
+            self.assertEqual("KSV001 - Process can elevate its own privileges", finding.title)
+            self.assertEqual("default / Deployment / redis-follower", finding.service)
+            # a cluster-scoped resource following a namespaced one must not
+            # inherit the previous resource's namespace/kind/name
+            finding = findings[2]
+            self.assertEqual("KSV111 - User with admin access", finding.title)
+            self.assertEqual("Low", finding.severity)
+            self.assertEqual("ClusterRoleBinding / cluster-admin", finding.service)
+
     def test_license_scheme(self):
         with sample_path("license_scheme.json").open(encoding="utf-8") as test_file:
             parser = TrivyParser()

@@ -1,0 +1,132 @@
+{
+ "ClusterName": "kind-voc-lab",
+ "Resources": [
+  {
+   "Kind": "ClusterRole",
+   "Name": "system:controller:bootstrap-signer",
+   "Results": [
+    {
+     "Target": "ClusterRole/system:controller:bootstrap-signer",
+     "Class": "config",
+     "Type": "rbac",
+     "MisconfSummary": {
+      "Successes": 0,
+      "Failures": 1,
+      "Exceptions": 0
+     },
+     "Misconfigurations": [
+      {
+       "Type": "Kubernetes Security Check",
+       "ID": "KSV113",
+       "Title": "Manage namespace secrets",
+       "Description": "Check whether role permits managing namespace secrets",
+       "Message": "ClusterRole 'system:controller:bootstrap-signer' shouldn't have access to manage secrets in namespace 'kube-system'",
+       "Namespace": "builtin.kubernetes.KSV113",
+       "Query": "data.builtin.kubernetes.KSV113.deny",
+       "Resolution": "Manage namespace secrets are not allowed. Remove resource 'secrets' from role",
+       "Severity": "MEDIUM",
+       "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv113",
+       "References": [
+        "https://kubernetes.io/docs/concepts/security/rbac-good-practices/",
+        "https://avd.aquasec.com/misconfig/ksv113"
+       ],
+       "Status": "FAIL",
+       "Layer": {},
+       "CauseMetadata": {
+        "Provider": "Kubernetes",
+        "Service": "general",
+        "StartLine": 1,
+        "EndLine": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Namespace": "default",
+   "Kind": "Deployment",
+   "Name": "redis-follower",
+   "Results": [
+    {
+     "Target": "Deployment/redis-follower",
+     "Class": "config",
+     "Type": "kubernetes",
+     "MisconfSummary": {
+      "Successes": 23,
+      "Failures": 1,
+      "Exceptions": 0
+     },
+     "Misconfigurations": [
+      {
+       "Type": "Kubernetes Security Check",
+       "ID": "KSV001",
+       "Title": "Process can elevate its own privileges",
+       "Description": "A program inside the container can elevate its own privileges and run as root, which might give the program control over the container and node.",
+       "Message": "Container 'follower' of Deployment 'redis-follower' should set 'securityContext.allowPrivilegeEscalation' to false",
+       "Namespace": "builtin.kubernetes.KSV001",
+       "Query": "data.builtin.kubernetes.KSV001.deny",
+       "Resolution": "Set 'set containers[].securityContext.allowPrivilegeEscalation' to 'false'.",
+       "Severity": "MEDIUM",
+       "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv001",
+       "References": [
+        "https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted",
+        "https://avd.aquasec.com/misconfig/ksv001"
+       ],
+       "Status": "FAIL",
+       "Layer": {},
+       "CauseMetadata": {
+        "Provider": "Kubernetes",
+        "Service": "general",
+        "StartLine": 132,
+        "EndLine": 143
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "Kind": "ClusterRoleBinding",
+   "Name": "cluster-admin",
+   "Results": [
+    {
+     "Target": "ClusterRoleBinding/cluster-admin",
+     "Class": "config",
+     "Type": "rbac",
+     "MisconfSummary": {
+      "Successes": 0,
+      "Failures": 1,
+      "Exceptions": 0
+     },
+     "Misconfigurations": [
+      {
+       "Type": "Kubernetes Security Check",
+       "ID": "KSV111",
+       "Title": "User with admin access",
+       "Description": "ClusterRoleBindings with cluster-admin role is being used",
+       "Message": "ClusterRoleBinding 'cluster-admin' should not bind to role 'cluster-admin'",
+       "Namespace": "builtin.kubernetes.KSV111",
+       "Query": "data.builtin.kubernetes.KSV111.deny",
+       "Resolution": "Create a role which gives less access to the user",
+       "Severity": "LOW",
+       "PrimaryURL": "https://avd.aquasec.com/misconfig/ksv111",
+       "References": [
+        "https://kubernetes.io/docs/concepts/security/rbac-good-practices/",
+        "https://avd.aquasec.com/misconfig/ksv111"
+       ],
+       "Status": "FAIL",
+       "Layer": {},
+       "CauseMetadata": {
+        "Provider": "Kubernetes",
+        "Service": "general",
+        "StartLine": 1,
+        "EndLine": 1
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
