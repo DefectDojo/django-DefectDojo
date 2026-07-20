@@ -106,7 +106,7 @@ A Generated Report moves through these statuses as it is built:
 | Completed | The report is ready to download. |
 | Failed | The report could not be generated. |
 
-> **🔑 Important:** Reporting must be enabled on your instance, and viewing respects DefectDojo's role-based access control (RBAC) — users only ever see data they are authorized to view, even inside a report.
+> **🔑 Important:** Reporting is on by default. A superuser can turn it on or off from **Settings > Feature Flags** (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)). Viewing respects DefectDojo's role-based access control (RBAC) — users only ever see data they are authorized to view, even inside a report.
 
 You can build this in the UI (below) or automate it with the [API](../report-builder-api/).
 
