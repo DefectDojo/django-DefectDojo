@@ -716,3 +716,17 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
 
             finding = findings[1]
             self.assertEqual("Test finding without fix_version", finding.title)
+
+    def test_parse_json_with_cve_and_vulnerability_ids(self):
+        with (get_unit_tests_scans_path("generic") / "generic_cve_and_vulnerability_ids.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, Test())
+            self.validate_locations(findings)
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(3, len(finding.unsaved_vulnerability_ids))
+            self.assertEqual("CVE-2020-36234", finding.unsaved_vulnerability_ids[0])
+            self.assertEqual("GHSA-5mrr-rgp6-x4gr", finding.unsaved_vulnerability_ids[1])
+            self.assertEqual("OSV-2021-1234", finding.unsaved_vulnerability_ids[2])
+            for vid in finding.unsaved_vulnerability_ids:
+                self.assertIsInstance(vid, str)
