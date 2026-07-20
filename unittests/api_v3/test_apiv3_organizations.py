@@ -1,6 +1,8 @@
 """Organization CRUD + RBAC + contract tests for API v3 (OS3a; D11 wire rename product_type -> organization)."""
 from __future__ import annotations
 
+from unittest import mock
+
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
@@ -126,6 +128,56 @@ class TestApiV3OrganizationsWrite(ApiV3TestCase):
         response = self.client.delete(self.v3_url(f"organizations/{pt.id}"))
         self.assertEqual(204, response.status_code)
         self.assertFalse(Product_Type.objects.filter(pk=pt.id).exists())
+
+
+class TestApiV3OrganizationsReplace(ApiV3TestCase):
+
+    """PUT full-replace: reuses the create-shaped OrganizationWrite; omitted optionals reset."""
+
+    def test_put_full_replace_resets_omitted_optionals(self):
+        pt = Product_Type.objects.create(name="v3 put org", description="old", critical_product=True)
+        # PUT without description / critical_product -> both reset to their schema defaults.
+        response = self.client.put(
+            self.v3_url(f"organizations/{pt.id}"), {"name": "v3 put org renamed"}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        body = response.json()
+        self.assertEqual("v3 put org renamed", body["name"])
+        self.assertIsNone(body["description"])       # reset to default (None)
+        self.assertFalse(body["critical_product"])   # reset to default (False)
+        pt.refresh_from_db()
+        self.assertIsNone(pt.description)
+        self.assertFalse(pt.critical_product)
+
+    def test_put_missing_required_name_is_400(self):
+        pt = Product_Type.objects.create(name="v3 put org missing")
+        response = self.client.put(
+            self.v3_url(f"organizations/{pt.id}"), {"description": "no name"}, format="json",
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("application/problem+json", response["Content-Type"])
+
+    def test_put_unknown_field_is_400(self):
+        pt = Product_Type.objects.create(name="v3 put org unknown")
+        response = self.client.put(
+            self.v3_url(f"organizations/{pt.id}"), {"name": "x", "bogus": 1}, format="json",
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_put_unauthorized_is_404(self):
+        limited = User.objects.create_user(username="v3_org_put_limited", password="x")  # noqa: S106
+        pt = Product_Type.objects.first()
+        client = self.token_client(user=limited)
+        response = client.put(self.v3_url(f"organizations/{pt.id}"), {"name": "x"}, format="json")
+        self.assertEqual(404, response.status_code)
+
+    def test_put_visible_but_not_editable_is_403(self):
+        # OS legacy authz can't express view-but-not-edit; fail the edit check while the object stays
+        # visible to the admin (§12, OS5 pattern).
+        pt = Product_Type.objects.first()
+        with mock.patch("dojo.product_type.api_v3.routes.user_has_permission", return_value=False):
+            response = self.client.put(self.v3_url(f"organizations/{pt.id}"), {"name": "x"}, format="json")
+        self.assertEqual(403, response.status_code, response.content[:300])
 
 
 class TestApiV3OrganizationsRbac(ApiV3TestCase):

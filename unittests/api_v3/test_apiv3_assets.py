@@ -1,6 +1,8 @@
 """Asset CRUD + RBAC + contract tests for API v3 (OS3a; D11 wire rename product -> asset)."""
 from __future__ import annotations
 
+from unittest import mock
+
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
@@ -156,6 +158,79 @@ class TestApiV3AssetsWrite(ApiV3TestCase):
         response = self.client.delete(self.v3_url(f"assets/{product.id}"))
         self.assertEqual(204, response.status_code)
         self.assertFalse(Product.objects.filter(pk=product.id).exists())
+
+
+class TestApiV3AssetsReplace(ApiV3TestCase):
+
+    """PUT full-replace: AssetReplace (required name/description/organization); omitted optionals reset."""
+
+    def _make_asset(self, **kwargs):
+        pt = Product_Type.objects.first()
+        defaults = {"name": "v3 put asset", "description": "old", "prod_type": pt, "sla_configuration_id": 1}
+        defaults.update(kwargs)
+        return Product.objects.create(**defaults), pt
+
+    def test_put_full_replace_resets_omitted_optionals(self):
+        product, pt = self._make_asset(lifecycle="production", external_audience=True)
+        # PUT without lifecycle / external_audience -> nullable resets to None, non-null bool to False.
+        response = self.client.put(
+            self.v3_url(f"assets/{product.id}"),
+            {"name": "v3 put asset renamed", "description": "replaced", "organization": pt.id},
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        product.refresh_from_db()
+        self.assertEqual("v3 put asset renamed", product.name)
+        self.assertIsNone(product.lifecycle)            # nullable -> reset to None
+        self.assertFalse(product.external_audience)     # NOT NULL bool -> reset to model default False
+
+    def test_put_reassign_organization(self):
+        product, _ = self._make_asset()
+        other = Product_Type.objects.create(name="v3 put asset other org")
+        response = self.client.put(
+            self.v3_url(f"assets/{product.id}"),
+            {"name": product.name, "description": "d", "organization": other.id},
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        product.refresh_from_db()
+        self.assertEqual(other.id, product.prod_type_id)
+
+    def test_put_missing_required_is_400(self):
+        product, _ = self._make_asset()
+        response = self.client.put(
+            self.v3_url(f"assets/{product.id}"), {"name": "no org or description"}, format="json",
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("application/problem+json", response["Content-Type"])
+
+    def test_put_unknown_field_is_400(self):
+        product, pt = self._make_asset()
+        response = self.client.put(
+            self.v3_url(f"assets/{product.id}"),
+            {"name": "x", "description": "y", "organization": pt.id, "bogus": 1},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_put_unauthorized_is_404(self):
+        product, pt = self._make_asset()
+        limited = User.objects.create_user(username="v3_asset_put_limited", password="x")  # noqa: S106
+        client = self.token_client(user=limited)
+        response = client.put(
+            self.v3_url(f"assets/{product.id}"),
+            {"name": "x", "description": "y", "organization": pt.id}, format="json",
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_put_visible_but_not_editable_is_403(self):
+        product, pt = self._make_asset()
+        with mock.patch("dojo.product.api_v3.routes.user_has_permission", return_value=False):
+            response = self.client.put(
+                self.v3_url(f"assets/{product.id}"),
+                {"name": "x", "description": "y", "organization": pt.id}, format="json",
+            )
+        self.assertEqual(403, response.status_code, response.content[:300])
 
 
 class TestApiV3AssetsRbac(ApiV3TestCase):

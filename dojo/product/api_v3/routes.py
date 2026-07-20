@@ -60,6 +60,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Dojo_User, Endpoint, Product, Product_Type, SLA_Configuration
 from dojo.product.api_v3.schemas import (
     AssetDetail,
+    AssetReplace,
     AssetSlim,
     AssetUpdate,
     AssetWrite,
@@ -261,6 +262,40 @@ def build_assets_router(
         _apply_optional_relations_and_scalars(instance, data)
         if tags is not _UNSET:
             instance.tags = tags if tags is not None else []
+        try:
+            instance.save()
+        except DjangoValidationError as exc:
+            raise _validation_from_django(exc) from exc
+        return json_response(serialize(instance, detail_schema, {}))
+
+    @router.put("/assets/{int:asset_id}", response=detail_schema, url_name="assets_replace")
+    def replace_asset(request: HttpRequest, asset_id: int, payload: AssetReplace):
+        # Full replace (PUT). Validates against the create-shaped AssetReplace (required
+        # name/description/organization, extra="forbid") and applies payload.dict() WITHOUT
+        # exclude_unset, so omitted optionals reset to their schema defaults (§4.11). Permission
+        # ladder identical to PATCH: authorized-view resolve (404) then object Edit (403); the
+        # required organization is re-authorized only when it actually changes (mirrors PATCH).
+        instance = _base_queryset(request, queryset_hook).filter(pk=asset_id).first()
+        if instance is None:
+            msg = f"Asset {asset_id} not found"
+            raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
+        if not user_has_permission(request.user, instance, Permissions.Product_Edit):
+            raise PermissionDenied  # 403: visible but not editable
+
+        data = payload.dict()
+        tags = data.pop("tags")
+        new_org_id = data.pop("organization")
+        if new_org_id != instance.prod_type_id:
+            new_pt = get_object_or_none(Product_Type, pk=new_org_id)
+            if new_pt is None:
+                msg = f"Organization {new_org_id} not found"
+                raise not_found_problem(msg)
+            if not user_has_permission(request.user, new_pt, Permissions.Product_Type_Add_Product):
+                raise PermissionDenied
+            instance.prod_type = new_pt
+
+        _apply_optional_relations_and_scalars(instance, data)
+        instance.tags = tags if tags is not None else []
         try:
             instance.save()
         except DjangoValidationError as exc:

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime
+from unittest import mock
 
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
@@ -219,6 +220,91 @@ class TestApiV3EngagementsWrite(ApiV3TestCase):
         response = self.client.delete(self.v3_url(f"engagements/{eng.id}"))
         self.assertEqual(204, response.status_code)
         self.assertFalse(Engagement.objects.filter(pk=eng.id).exists())
+
+
+class TestApiV3EngagementsReplace(ApiV3TestCase):
+
+    """PUT full-replace: EngagementReplace (required asset/target_start/target_end); optionals reset."""
+
+    def _make_engagement(self, **kwargs):
+        product = Product.objects.first()
+        defaults = {
+            "name": "v3 put engagement", "product": product,
+            "target_start": datetime.date(2024, 1, 1), "target_end": datetime.date(2024, 2, 1),
+        }
+        defaults.update(kwargs)
+        return Engagement.objects.create(**defaults), product
+
+    def test_put_full_replace_resets_omitted_optionals(self):
+        eng, product = self._make_engagement(description="old", threat_model=False)
+        # PUT without description / threat_model -> nullable resets to None, non-null bool to model
+        # default True.
+        response = self.client.put(
+            self.v3_url(f"engagements/{eng.id}"),
+            {"asset": product.id, "target_start": "2024-01-01", "target_end": "2024-02-01"},
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        eng.refresh_from_db()
+        self.assertIsNone(eng.description)     # nullable -> reset to None
+        self.assertTrue(eng.threat_model)      # NOT NULL bool -> reset to model default True
+
+    def test_put_reassign_asset(self):
+        eng, _ = self._make_engagement()
+        other = Product.objects.exclude(pk=eng.product_id).first()
+        response = self.client.put(
+            self.v3_url(f"engagements/{eng.id}"),
+            {"asset": other.id, "target_start": "2024-01-01", "target_end": "2024-02-01"},
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        eng.refresh_from_db()
+        self.assertEqual(other.id, eng.product_id)
+
+    def test_put_target_start_after_end_is_400(self):
+        eng, product = self._make_engagement()
+        response = self.client.put(
+            self.v3_url(f"engagements/{eng.id}"),
+            {"asset": product.id, "target_start": "2024-02-01", "target_end": "2024-01-01"},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_put_missing_required_is_400(self):
+        eng, _ = self._make_engagement()
+        response = self.client.put(self.v3_url(f"engagements/{eng.id}"), {"name": "no asset"}, format="json")
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("application/problem+json", response["Content-Type"])
+
+    def test_put_unknown_field_is_400(self):
+        eng, product = self._make_engagement()
+        response = self.client.put(
+            self.v3_url(f"engagements/{eng.id}"),
+            {"asset": product.id, "target_start": "2024-01-01", "target_end": "2024-02-01", "bogus": 1},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code)
+
+    def test_put_unauthorized_is_404(self):
+        eng, product = self._make_engagement()
+        limited = User.objects.create_user(username="v3_eng_put_limited", password="x")  # noqa: S106
+        client = self.token_client(user=limited)
+        response = client.put(
+            self.v3_url(f"engagements/{eng.id}"),
+            {"asset": product.id, "target_start": "2024-01-01", "target_end": "2024-02-01"},
+            format="json",
+        )
+        self.assertEqual(404, response.status_code)
+
+    def test_put_visible_but_not_editable_is_403(self):
+        eng, product = self._make_engagement()
+        with mock.patch("dojo.engagement.api_v3.routes.user_has_permission", return_value=False):
+            response = self.client.put(
+                self.v3_url(f"engagements/{eng.id}"),
+                {"asset": product.id, "target_start": "2024-01-01", "target_end": "2024-02-01"},
+                format="json",
+            )
+        self.assertEqual(403, response.status_code, response.content[:300])
 
 
 class TestApiV3EngagementsRbac(ApiV3TestCase):

@@ -219,6 +219,32 @@ def build_users_router(
         instance.save()
         return json_response(serialize(instance, detail_schema, {}))
 
+    @router.put("/users/{int:user_id}", response=detail_schema, url_name="users_replace")
+    def replace_user(request: HttpRequest, user_id: int, payload: UserWrite):
+        # Full replace (PUT). Validates against the create-shaped UserWrite (username/email
+        # required, extra="forbid") and applies payload.dict() WITHOUT exclude_unset, so omitted
+        # optionals reset to their schema defaults (first_name/last_name -> "", is_active -> True,
+        # is_staff/is_superuser -> False; all model defaults). UserWrite serves full-replace as-is:
+        # its non-null booleans already default to the model defaults. The UserSerializer-ported
+        # guards are kept identical to PATCH: resolve via the authorized queryset first (404),
+        # require auth.change_user, reject any password set via update, enforce the superuser/staff
+        # gating. Password is never settable via update (mirrors PATCH), so a supplied password is a
+        # 400 -- a full replace simply omits it.
+        instance = _base_queryset(request, queryset_hook).filter(pk=user_id).first()
+        if instance is None:
+            msg = f"User {user_id} not found"
+            raise not_found_problem(msg)  # 404: unknown or unauthorized-to-view
+        _require_config_permission(request, "auth.change_user")
+        data = payload.dict()
+        password = data.pop("password", None)
+        if password is not None:
+            raise validation_problem({"password": ["Update of password though API is not allowed"]})
+        _enforce_superuser_staff_rules(request, current=instance, data=data)
+        for key, value in data.items():
+            setattr(instance, key, value)
+        instance.save()
+        return json_response(serialize(instance, detail_schema, {}))
+
     @router.delete("/users/{int:user_id}", url_name="users_delete")
     def delete_user(request: HttpRequest, user_id: int):
         instance = _base_queryset(request, queryset_hook).filter(pk=user_id).first()

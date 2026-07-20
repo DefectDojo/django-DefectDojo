@@ -140,3 +140,37 @@ class AssetUpdate(Schema):
     external_audience: bool | None = None
     internet_accessible: bool | None = None
     tags: list[str] | None = None
+
+
+class AssetReplace(Schema):
+
+    """
+    Full-replace payload (PUT). ``name``/``description``/``organization`` required (create-shaped);
+    ``organization`` is required and reassignment is re-authorized when it changes (mirrors PATCH).
+
+    A dedicated Replace schema is required because ``AssetWrite`` cannot serve full-replace semantics
+    (§12): a full replace applies ``payload.dict()`` without ``exclude_unset``, so an omitted
+    optional resets to the schema default -- and ``external_audience``/``internet_accessible`` are
+    ``NOT NULL`` boolean columns, so ``AssetWrite``'s create-appropriate ``None`` default (which the
+    create path drops) would violate the constraint on an existing row. They default to their model
+    default ``False`` here. The nullable scalar fields reset to ``None``; ``sla_configuration`` (a
+    non-null FK with a model default) is left unchanged when omitted (the route helper only reassigns
+    it when a non-null id is supplied).
+    """
+
+    model_config = {"extra": "forbid"}
+
+    name: str
+    description: str
+    organization: int
+    business_criticality: str | None = None
+    platform: str | None = None
+    lifecycle: str | None = None
+    origin: str | None = None
+    asset_manager: int | None = None
+    technical_contact: int | None = None
+    team_manager: int | None = None
+    sla_configuration: int | None = None
+    external_audience: bool = False
+    internet_accessible: bool = False
+    tags: list[str] | None = None

@@ -174,3 +174,35 @@ class TestUpdate(Schema):
     branch_tag: str | None = None
     api_scan_configuration: int | None = None
     tags: list[str] | None = None
+
+
+class TestReplace(Schema):
+
+    """
+    Full-replace payload (PUT). A dedicated Replace schema is required because ``TestWrite`` cannot
+    serve full-replace semantics: ``engagement`` is ``editable=False`` on the model and therefore
+    **not** writable on update (mirrors PATCH / v2's ``TestSerializer`` which treats it read-only),
+    yet ``TestWrite`` requires it. So PUT, like PATCH, never reassigns the parent engagement (§12).
+
+    ``test_type``/``target_start``/``target_end`` stay required (create-shaped); the rest are
+    optional and reset to ``None`` when omitted (all are nullable columns -- there is no non-null
+    default field in the writable subset). Applied without ``exclude_unset`` by the route.
+    """
+
+    model_config = {"extra": "forbid"}
+
+    test_type: int
+    target_start: datetime
+    target_end: datetime
+    title: str | None = None
+    description: str | None = None
+    scan_type: str | None = None
+    lead: int | None = None
+    percent_complete: int | None = None
+    environment: int | None = None
+    version: str | None = None
+    build_id: str | None = None
+    commit_hash: str | None = None
+    branch_tag: str | None = None
+    api_scan_configuration: int | None = None
+    tags: list[str] | None = None

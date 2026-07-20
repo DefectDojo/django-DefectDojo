@@ -157,3 +157,49 @@ class EngagementUpdate(Schema):
     source_code_management_uri: str | None = None
     deduplication_on_engagement: bool | None = None
     tags: list[str] | None = None
+
+
+class EngagementReplace(Schema):
+
+    """
+    Full-replace payload (PUT). ``asset``/``target_start``/``target_end`` required (create-shaped);
+    ``asset`` is required and reassignment is re-authorized when it changes (mirrors PATCH).
+
+    A dedicated Replace schema is required because ``EngagementWrite`` cannot serve full-replace
+    semantics (§12): a full replace applies ``payload.dict()`` without ``exclude_unset``, so an
+    omitted optional resets to the schema default -- and ``threat_model``/``api_test``/``pen_test``/
+    ``check_list``/``deduplication_on_engagement`` are ``NOT NULL`` boolean columns, so
+    ``EngagementWrite``'s create-appropriate ``None`` default (dropped by the create path) would
+    violate the constraint on an existing row. They default to their model defaults here
+    (``True`` for the four coverage flags, ``False`` for ``deduplication_on_engagement``).
+    ``status``/``engagement_type`` are ``null=True`` but ``blank=False`` with model defaults, and
+    ``Engagement.save()`` runs ``full_clean``, so they likewise default to their model defaults
+    (``"Not Started"``/``"Interactive"``) rather than ``None``. The remaining nullable scalar fields
+    reset to ``None`` when omitted.
+    """
+
+    model_config = {"extra": "forbid"}
+
+    asset: int
+    target_start: date
+    target_end: date
+    name: str | None = None
+    description: str | None = None
+    version: str | None = None
+    first_contacted: date | None = None
+    lead: int | None = None
+    reason: str | None = None
+    tracker: str | None = None
+    test_strategy: str | None = None
+    threat_model: bool = True
+    api_test: bool = True
+    pen_test: bool = True
+    check_list: bool = True
+    status: str = "Not Started"
+    engagement_type: str = "Interactive"
+    build_id: str | None = None
+    commit_hash: str | None = None
+    branch_tag: str | None = None
+    source_code_management_uri: str | None = None
+    deduplication_on_engagement: bool = False
+    tags: list[str] | None = None
