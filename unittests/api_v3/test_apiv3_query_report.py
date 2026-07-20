@@ -120,6 +120,16 @@ class TestApiV3QueryReport(ApiV3TestCase):
             "/tests/{test_id}": self.v3_url(f"tests/{Test.objects.first().pk}"),
             "/locations": self.v3_url(f"locations?{limit}"),
             "/locations/{location_id}": self.v3_url(f"locations/{Location.objects.order_by('pk').first().pk}"),
+            # CSV export endpoints (§4.15): streamed responses -- capture_request captures the
+            # synchronous work (auth + capped-count) without consuming the streamed body. The
+            # per-row query independence is pinned by the dedicated assertNumQueries test.
+            "/findings/export.csv": self.v3_url("findings/export.csv"),
+            "/assets/export.csv": self.v3_url("assets/export.csv"),
+            "/organizations/export.csv": self.v3_url("organizations/export.csv"),
+            "/engagements/export.csv": self.v3_url("engagements/export.csv"),
+            "/tests/export.csv": self.v3_url("tests/export.csv"),
+            "/users/export.csv": self.v3_url("users/export.csv"),
+            "/locations/export.csv": self.v3_url("locations/export.csv"),
             "/findings/{finding_id}/locations": self.v3_url(f"findings/{self._loc_finding.pk}/locations?{limit}"),  # noqa: RUF027
             "/assets/{asset_id}/locations": self.v3_url(f"assets/{self._loc_product.pk}/locations?{limit}"),
             # OS5 notes / files / tags sub-resources (finding/engagement/test; tags also on asset).
