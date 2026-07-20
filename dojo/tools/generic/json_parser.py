@@ -188,13 +188,15 @@ class GenericJSONParser:
             if finding.cve:
                 finding.unsaved_vulnerability_ids = [finding.cve]
             if unsaved_vulnerability_ids:
+                if isinstance(unsaved_vulnerability_ids, str):
+                    unsaved_vulnerability_ids = [unsaved_vulnerability_ids]
                 if finding.unsaved_vulnerability_ids:
-                    finding.unsaved_vulnerability_ids.append(
+                    finding.unsaved_vulnerability_ids.extend(
                         unsaved_vulnerability_ids,
                     )
                 else:
-                    finding.unsaved_vulnerability_ids = (
-                        unsaved_vulnerability_ids
+                    finding.unsaved_vulnerability_ids = list(
+                        unsaved_vulnerability_ids,
                     )
             # multiple CWEs: keep the primary on finding.cwe (only if not already
             # supplied via "cwe") and persist the full set via unsaved_cwes. The

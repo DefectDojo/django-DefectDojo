@@ -6,7 +6,7 @@ audience: pro
 weight: 11
 slug: custom-dashboards-api
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Customizable Dashboards REST API (layouts, widget catalog, and widget data) is a DefectDojo Pro feature, currently in beta. Beta features are available to DefectDojo Pro Cloud subscriptions — contact DefectDojo support or your customer success advocate to enable it for your instance.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Customizable Dashboards REST API (layouts, widget catalog, and widget data) is a DefectDojo Pro feature. It is off by default — a superuser can turn on Customizable Dashboards from **Settings > Feature Flags** on both Cloud and On-Premise instances.</span>
 
 The Customizable Dashboards REST API lets you build the same dashboards you assemble by hand in the [Dashboards UI](../custom-dashboards/) — entirely from code. You can discover the widget catalog, create and update layouts, set your default, share layouts with your team, and even render a widget's data on demand without re-implementing DefectDojo's filtering. The layouts surface was designed as the primary entry point for AI agents building dashboards, so the request shapes are deliberately introspectable.
 
@@ -45,7 +45,7 @@ curl -s \
   "https://[YOUR-INSTANCE].cloud.defectdojo.com/api/v2/dashboards/widget_catalog/"
 ```
 
-> **🔑 Important:** The entire Dashboards API is part of the beta. Until it is enabled for your instance, every endpoint returns `403 Dashboard V2 is not enabled.` — see [Enabling the beta](../custom-dashboards/#enabling-the-beta).
+> **🔑 Important:** The entire Dashboards API depends on the Customizable Dashboards feature. Until it is turned on, every endpoint returns `403 Dashboard V2 is not enabled.` — see [Enabling Customizable Dashboards](../custom-dashboards/#enabling-customizable-dashboards).
 
 > **⚠️ Security Notice:** Your API token grants full access to your DefectDojo data. Never paste it into a chat, screenshot, ticket, or committed file. Read it from an environment variable, rotate it if it is ever exposed, and scope tokens to service accounts where possible.
 

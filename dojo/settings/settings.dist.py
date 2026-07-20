@@ -212,7 +212,10 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
-    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
+    # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
+    # because backdating a mitigation can distort SLA-compliance metrics. Changing this
+    # value requires a service restart to take effect.
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),

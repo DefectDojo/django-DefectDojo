@@ -281,6 +281,22 @@ You will need a Cloudflare **API token** (not the legacy Global API Key). Create
 
 DefectDojo auto-discovers the accounts and zones the token can access — no account ID is required. Only open (active, non-dismissed) insights are imported, so insights you resolve or dismiss in Cloudflare are automatically mitigated in DefectDojo on the next sync.
 
+## **Cobalt.io**
+
+The Cobalt.io connector uses the Cobalt.io API (v2) to pull pentest findings from your Cobalt.io organization. DefectDojo discovers every organization your API token can access and creates a separate Record for each **asset** (the unit Cobalt pentests).
+
+#### Prerequisites
+
+You will need a Cobalt.io **personal API token**. We recommend creating a dedicated service account for DefectDojo to clearly distinguish automated activity from manual team actions. Generate a token from **Settings \> API Tokens** in the Cobalt.io UI. Organization tokens are discovered automatically \- you do not need to supply them.
+
+#### Connector Mappings
+
+1. Enter the Cobalt.io API base URL in the **Location** field: `https://api.cobalt.io` (or your regional host, for example `https://api.us.cobalt.io`).
+2. Enter your **personal API token** in the **Secret** field.
+3. Optionally, enter an **Organization Token** to pin the sync to a single organization. When left blank, DefectDojo syncs every organization the personal API token can access.
+
+DefectDojo maps each Cobalt.io **asset** as a separate Record. Findings are imported for each mapped asset, with their Cobalt.io state (for example `valid_fix`, `wont_fix`, `invalid`) driving the finding status in DefectDojo.
+
 ## **Contrast**
 
 The Contrast connector uses the Contrast Assess REST API to import application vulnerabilities. DefectDojo discovers the applications in your Contrast organization and creates a Record for each one.
@@ -361,6 +377,45 @@ Create the token from your Docker account settings under **Personal access token
 DefectDojo creates a separate Record for each Docker Scout stream, and imports one finding per severity for the vulnerabilities Docker Scout counts in that stream, plus a finding for each image that fails your Docker Scout policy. Docker Scout's metrics API reports aggregate counts rather than individual CVEs, so these findings summarize the posture of a stream. Open the stream in Docker Scout for per-image and per-CVE detail.
 
 See the [Docker Scout documentation](https://docs.docker.com/scout/) for more information.
+
+## **Endor Labs**
+
+The Endor Labs connector uses the Endor Labs REST API to sync an entire Endor Labs **namespace**. DefectDojo discovers each Endor **project** as a Record and imports that project's findings, carrying Endor's **reachability** verdict so you can prioritize vulnerabilities whose affected code is actually reachable.
+
+#### Prerequisites
+
+You will need an Endor Labs **API key** (a key identifier plus its secret) and the **namespace** you want to sync. Create the key in the Endor Labs platform under **Settings \> Access \> API Keys**; the key needs read access to the projects and findings in that namespace.
+
+The connector authenticates by exchanging the API key and secret for a short-lived bearer token — the secret is used only for that exchange and is never stored in cleartext.
+
+#### Connector Mappings
+
+1. Enter `https://api.endorlabs.com` in the **Location** field. If your tenant is hosted in a different region, use that region's API base URL instead.
+2. Enter the Endor Labs **Namespace** to sync (for example `your-org` or `your-org.team`).
+3. Enter the **API Key** identifier.
+4. Enter the **API Secret** paired with the key.
+5. Optionally set **Traverse Child Namespaces** to `true` to also import findings from child namespaces of the configured namespace.
+6. Optionally set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity are not imported.
+
+DefectDojo creates a Record for each Endor Labs project in the namespace and imports its findings, mapping Endor severity levels to DefectDojo severities, the CVE/GHSA identifiers and CVSS score of each vulnerability, and Endor's reachability tags. The reachability verdict (for example *Reachable — vulnerable function is called* or *Unreachable*) is surfaced as the finding's Impact and as a tag.
+
+For more information, see the **[Endor Labs REST API documentation](https://docs.endorlabs.com/rest-api/)**.
+
+## **Edgescan**
+
+The Edgescan connector uses the Edgescan REST API to import open vulnerabilities across your whole Edgescan account. DefectDojo enumerates every Edgescan **asset** and creates a Record for each one, then imports that asset's open vulnerabilities as findings — there is no per\-asset configuration.
+
+#### Prerequisites
+
+You will need an Edgescan API token. Create one from your Edgescan account under **Account settings \> API tokens**: enter a label, click **Create**, and copy the generated token (it is shown only once). We recommend a dedicated account for the Connector so automated activity is easy to distinguish.
+
+#### Connector Mappings
+
+1. Enter your Edgescan URL in the **Location** field — `https://live.edgescan.com` for the standard hosted platform, or your tenant's host if different.
+2. Enter your Edgescan API token in the **Secret** field. It is sent as the `X-API-TOKEN` header.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Edgescan asset becomes a Record, and each open vulnerability on that asset is imported as a finding. Severity is mapped from Edgescan's numeric scale (1–5) to DefectDojo's Info–Critical, and CVE references, the CWE, and a CVSS v3 vector are included where Edgescan provides them.
 
 ## **GitGuardian**
 
@@ -642,6 +697,41 @@ Unlike the device\-based Microsoft Defender connector, no API permissions or adm
 
 Each enabled Azure subscription becomes a Record. Findings are read through Azure Resource Graph, so they surface promptly once Defender for Cloud has scanned your resources — but the scans themselves run on Microsoft's schedule: container\-registry images are usually scanned within an hour of being pushed, while a VM's first agentless vulnerability scan can take several hours. A newly enabled subscription will legitimately Sync zero findings until its resources have been scanned.
 
+## **Nuclei (ProjectDiscovery Cloud)**
+
+The Nuclei connector uses the ProjectDiscovery Cloud Platform (PDCP) REST API to pull [nuclei](https://github.com/projectdiscovery/nuclei) scan results from your PDCP account. DefectDojo discovers every scan in the account and creates a separate Record for each **scan**.
+
+#### Prerequisites
+
+You will need a ProjectDiscovery Cloud **API key**. We recommend creating a dedicated service account for DefectDojo to clearly distinguish automated activity from manual team actions. Generate a key from **Settings \> API Key** in the ProjectDiscovery Cloud UI ([cloud.projectdiscovery.io](https://cloud.projectdiscovery.io)). Results reach PDCP either from hosted scans or from the nuclei CLI run with `-dashboard`.
+
+#### Connector Mappings
+
+1. Enter the PDCP API base URL in the **Location** field: `https://api.projectdiscovery.io`.
+2. Enter your **API key** in the **Secret** field.
+3. Optionally, enter a **Team ID** to scope the sync to a team workspace (found under **Settings \> Team**). When left blank, DefectDojo syncs your personal workspace.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+DefectDojo maps each PDCP **scan** as a separate Record and imports that scan's findings across every severity, including informational.
+
+## **OpenVAS / Greenbone**
+
+The OpenVAS / Greenbone connector imports **network vulnerability findings** from a Greenbone (Greenbone Community Edition or Greenbone Enterprise) instance. It talks to `gvmd` over **GMP (Greenbone Management Protocol)** — an XML protocol over a TLS socket, not HTTP — and syncs the whole instance: it enumerates scan **tasks** and creates a DefectDojo product for each, importing the results of each task's latest report.
+
+#### Prerequisites
+
+A Greenbone **GMP user** (username + password) and network access to gvmd's GMP TLS port (default **9390**). The Greenbone Community Edition compose stack fronts gvmd via a unix socket, so to reach it from a networked connector you either run the connector where it can reach the socket or expose the GMP TLS port (for example a `socat` TLS bridge to `gvmd.sock`).
+
+#### Connector Mappings
+
+1. Enter the gvmd host in the **Location** field (host or `host:port`).
+2. Enter the GMP **Username** and **Password**.
+3. Optionally set the **GMP Port** (defaults to 9390).
+4. For gvmd's default self\-signed certificate, either provide a **CA Certificate (PEM)** to verify against, or set **Skip TLS Verification** to `true`.
+5. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Greenbone task becomes a Record. Findings come from the task's latest finished report — one per `<result>`. Severity is taken from the result's threat level (Greenbone's `Log`/`Debug` informational levels map to Info), with the numeric CVSS score recorded; CVE references become vulnerability ids, the NVT solution becomes the mitigation, and each result's host/port becomes an endpoint.
+
 ## Probely
 
 This connector uses the Probely REST API to fetch data.
@@ -653,6 +743,24 @@ This connector uses the Probely REST API to fetch data.
 
 You can find an API key under the User \> API Keys menu in Probely.  
 See [Probely documentation](https://help.probely.com/en/articles/8592281-how-to-generate-an-api-key) for more info.
+
+## Prowler
+
+The Prowler connector uses the **Prowler App** REST API to import cloud security posture (CSPM) findings from a self-hosted Prowler App instance. DefectDojo discovers each Prowler **provider** (cloud account) as a Record and imports the **FAIL** findings of that provider's latest completed scan.
+
+#### Prerequisites
+
+You will need a running, self-hosted **Prowler App** instance and either a user email + password (for JWT authentication) or a Prowler App **API key**. Findings only appear once you have connected a cloud account (AWS, GCP, Azure, Kubernetes, ...) in Prowler App and run a scan.
+
+#### Connector Mappings
+
+1. Enter your Prowler App URL in the **Location** field (for example `https://prowler.your-company.com`).
+2. For JWT authentication, enter the Prowler App user **Email** and **Password**. Alternatively, leave those blank and enter a Prowler App **API Key**. If both are provided, the email/password (JWT) is used.
+3. Optionally set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity are not imported.
+
+DefectDojo creates a Record for each Prowler provider and imports the FAIL findings of its latest completed scan, mapping Prowler severities to DefectDojo severities, the affected cloud resource (ARN/resource id) as the component, and the check's remediation and risk into the finding. Muted findings are skipped. Cloud account, region, and service are attached as tags.
+
+For more information, see the **[Prowler App API documentation](https://api.prowler.com/api/v1/docs)**.
 
 ## Qualys
 
@@ -670,6 +778,26 @@ A Qualys user account with **VMDR API access**, and your subscription's **API se
 4. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each Qualys host becomes a Record. Detections Qualys has marked **Fixed** are excluded, so reimport closes remediated findings.
+
+## **Rapid7 InsightAppSec**
+
+The Rapid7 InsightAppSec connector imports **DAST vulnerability findings** from the InsightAppSec cloud platform, enriched with attack\-module metadata (for example *SQL Injection*), CVSS scores, and the evidence collected by the scan. DefectDojo creates a Record for each InsightAppSec **app**.
+
+**Please note:** this Connector is distinct from the **Rapid7 InsightVM** connector below — InsightAppSec is Rapid7's cloud DAST product on the Insight platform, while InsightVM findings come from your own Security Console.
+
+#### Prerequisites
+
+An Insight platform account with InsightAppSec, and a platform **API key**: in the [Rapid7 Insight platform](https://insight.rapid7.com), open the settings (gear) menu \> **API Keys** and generate a **User Key** (any role) or an **Organization Key** (platform admins). Copy the key when it is shown — it is displayed only once.
+
+You also need your platform **region**, visible in your Insight URL (for example `us`, `us2`, `us3`, `eu`, `ca`, `au`, or `ap`).
+
+#### Connector Mappings
+
+1. Enter your regional API endpoint in the **Location** field — for example `https://us.api.insight.rapid7.com` (replace `us` with your region).
+2. Enter the Insight platform API key in the **API Key** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each InsightAppSec app becomes a Record. Only **open** vulnerabilities (Unreviewed or Verified) are imported — findings Rapid7 has marked Remediated, a False Positive, Ignored, or Duplicate are excluded, so reimport closes them in DefectDojo. Severities map directly (`SAFE` and `INFORMATIONAL` import as Info).
 
 ## **Rapid7 InsightVM**
 

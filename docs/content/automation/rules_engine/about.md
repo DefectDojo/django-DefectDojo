@@ -12,6 +12,10 @@ DefectDojo's Rules Engine allows you to build custom workflows and bulk actions 
 
 Rules Engine can only be accessed through the [Pro UI](/get_started/about/ui_pro_vs_os/).
 
+## Enabling Rules Engine
+
+Rules Engine is in Beta and is off by default. A superuser can turn it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+
 Currently, Rules can only be created for Findings, however more object types will be supported in the future.
 
 Rules can be triggered manually from the **All Rules** page, or scheduled to run automatically on a recurring schedule.  When a rule is triggered, it will be applied to all existing Findings that match the filter conditions set.

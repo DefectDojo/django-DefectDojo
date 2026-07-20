@@ -956,6 +956,11 @@ class CloseFindingForm(forms.ModelForm):
             self.fields["mitigated_by"].queryset = get_authorized_users("edit")
             self.fields["mitigated"].initial = self.instance.mitigated
             self.fields["mitigated_by"].initial = self.instance.mitigated_by
+        else:
+            # mitigated data is not editable: hide the fields so users are not
+            # presented with inputs whose values would be silently ignored
+            del self.fields["mitigated"]
+            del self.fields["mitigated_by"]
         if disclaimer := get_system_setting("disclaimer_notes"):
             self.disclaimer = disclaimer.strip()
 
