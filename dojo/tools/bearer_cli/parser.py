@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class BearerCLIParser:
@@ -49,6 +52,16 @@ class BearerCLIParser:
                     # the fingerprint is not constant over time, but because it's not used for dedupe it's safe and useful to set it
                     unique_id_from_tool=bearerfinding["fingerprint"],
                 )
+                if settings.V3_FEATURE_LOCATIONS and bearerfinding["filename"]:
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=bearerfinding["filename"],
+                            line=bearerfinding["line_number"],
+                            snippet=bearerfinding.get("snippet", bearerfinding.get("code_extract")) or "",
+                            source_file_path=bearerfinding["filename"],
+                            source_line=bearerfinding["source"]["start"],
+                        ),
+                    )
                 if bearerfinding["cwe_ids"]:
                     finding.unsaved_cwes = bearerfinding["cwe_ids"]
 

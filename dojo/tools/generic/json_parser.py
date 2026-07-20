@@ -163,6 +163,19 @@ class GenericJSONParser:
                             file_path=file_path,
                         ),
                     )
+                if file_path:
+                    line = item.get("line")
+                    source_line = item.get("sast_source_line")
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=file_path,
+                            line=int(line) if line is not None and str(line).isdigit() else None,
+                            source_object=item.get("sast_source_object") or "",
+                            sink_object=item.get("sast_sink_object") or "",
+                            source_file_path=item.get("sast_source_file_path") or "",
+                            source_line=int(source_line) if source_line is not None and str(source_line).isdigit() else None,
+                        ),
+                    )
             if unsaved_files:
                 for unsaved_file in unsaved_files:
                     data = base64.b64decode(unsaved_file.get("data"))
