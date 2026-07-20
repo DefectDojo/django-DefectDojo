@@ -663,13 +663,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             if candidates_by_hash is None or unsaved_finding.hash_code is None:
                 return []
             matches = candidates_by_hash.get(unsaved_finding.hash_code, [])
-            return sorted(matches, key=deduplication_ordering_key)
+            return sorted(matches, key=lambda f: f.id)
 
         if self.deduplication_algorithm == "unique_id_from_tool":
             if candidates_by_uid is None or unsaved_finding.unique_id_from_tool is None:
                 return []
             matches = candidates_by_uid.get(unsaved_finding.unique_id_from_tool, [])
-            return sorted(matches, key=deduplication_ordering_key)
+            return sorted(matches, key=lambda f: f.id)
 
         if self.deduplication_algorithm == "unique_id_from_tool_or_hash_code":
             if candidates_by_hash is None and candidates_by_uid is None:
@@ -692,14 +692,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     matches_by_id[match.id] = match
 
             matches = list(matches_by_id.values())
-            return sorted(matches, key=deduplication_ordering_key)
+            return sorted(matches, key=lambda f: f.id)
 
         if self.deduplication_algorithm == "legacy":
             if candidates_by_key is None or not unsaved_finding.title:
                 return []
             key = (unsaved_finding.title.lower(), unsaved_finding.severity)
             matches = candidates_by_key.get(key, [])
-            return sorted(matches, key=deduplication_ordering_key)
+            return sorted(matches, key=lambda f: f.id)
 
         logger.error(f'Internal error: unexpected deduplication_algorithm: "{self.deduplication_algorithm}"')
         return []

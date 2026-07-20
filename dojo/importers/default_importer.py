@@ -7,6 +7,7 @@ from django.urls import reverse
 
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding import helper as finding_helper
+from dojo.finding.deduplication import deduplication_ordering_key
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
@@ -203,54 +204,66 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         logger.debug("starting import of %i parsed findings.", len(parsed_findings) if parsed_findings else 0)
         group_names_to_findings_dict = {}
 
-        # Pre-sanitize and filter by minimum severity
+        # Pre-sanitize and filter by minimum severity. Findings are also fully
+        # prepared here (fields/overrides/hash_code) so they can be sorted by a
+        # stable content key below.
         cleaned_findings = []
         for raw_finding in parsed_findings or []:
             sanitized = self.sanitize_severity(raw_finding)
             if Finding.SEVERITIES[sanitized.severity] > Finding.SEVERITIES[self.minimum_severity]:
                 logger.debug("skipping finding due to minimum severity filter (finding=%s severity=%s min=%s)", sanitized.title, sanitized.severity, self.minimum_severity)
                 continue
-            cleaned_findings.append(sanitized)
-
-        for idx, unsaved_finding in enumerate(cleaned_findings):
-            is_final_finding = idx == len(cleaned_findings) - 1
-
             # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
             # Finding.mitigated is DateTimeField and it requires timezone
-            if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
-                unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
+            if sanitized.mitigated and not sanitized.mitigated.tzinfo:
+                sanitized.mitigated = sanitized.mitigated.replace(tzinfo=self.now.tzinfo)
             # Set some explicit fields on the finding
-            unsaved_finding.test = self.test
-            unsaved_finding.reporter = self.user
-            unsaved_finding.last_reviewed_by = self.user
-            unsaved_finding.last_reviewed = self.now
-            logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", unsaved_finding.unique_id_from_tool, unsaved_finding.hash_code, unsaved_finding.active, unsaved_finding.verified)
-            # indicates an override. Otherwise, do not change the value of unsaved_finding.active
+            sanitized.test = self.test
+            sanitized.reporter = self.user
+            sanitized.last_reviewed_by = self.user
+            sanitized.last_reviewed = self.now
+            logger.debug("process_parsed_finding: unique_id_from_tool: %s, hash_code: %s, active from report: %s, verified from report: %s", sanitized.unique_id_from_tool, sanitized.hash_code, sanitized.active, sanitized.verified)
+            # indicates an override. Otherwise, do not change the value of sanitized.active
             if self.active is not None:
-                unsaved_finding.active = self.active
+                sanitized.active = self.active
             # indicates an override. Otherwise, do not change the value of verified
             if self.verified is not None:
-                unsaved_finding.verified = self.verified
+                sanitized.verified = self.verified
             # scan_date was provided, override value from parser
             if self.scan_date_override:
-                unsaved_finding.date = self.scan_date.date()
+                sanitized.date = self.scan_date.date()
             if self.service is not None:
-                unsaved_finding.service = self.service
+                sanitized.service = self.service
 
             # Parsers shouldn't use the tags field, and use unsaved_tags instead.
             # Merge any tags set by parser into unsaved_tags
-            tags_from_parser = unsaved_finding.tags if isinstance(unsaved_finding.tags, list) else []
-            unsaved_tags_from_parser = unsaved_finding.unsaved_tags if isinstance(unsaved_finding.unsaved_tags, list) else []
+            tags_from_parser = sanitized.tags if isinstance(sanitized.tags, list) else []
+            unsaved_tags_from_parser = sanitized.unsaved_tags if isinstance(sanitized.unsaved_tags, list) else []
             merged_tags = unsaved_tags_from_parser + tags_from_parser
             if merged_tags:
-                unsaved_finding.unsaved_tags = merged_tags
-            unsaved_finding.tags = None
-            finding = self.process_cve(unsaved_finding)
+                sanitized.unsaved_tags = merged_tags
+            sanitized.tags = None
+            prepared = self.process_cve(sanitized)
             # Calculate hash_code before saving based on unsaved_endpoints/unsaved_locations and unsaved_vulnerability_ids
-            finding.set_hash_code(True)
+            prepared.set_hash_code(True)
+            cleaned_findings.append(prepared)
 
-            # postprocessing will be done after processing related fields like locations, vulnerability ids, etc.
-            unsaved_finding.save_no_options()
+        # Create findings in stable content-key order so their ids follow content, not
+        # the scanner's export order. Deduplication picks the lowest id among findings
+        # that collide on the dedupe key, so this makes the surviving "original" for
+        # intra-report collisions reproducible across re-scans regardless of the order
+        # the scanner emitted its findings. Unsaved findings have no id, so the id
+        # tiebreak is inert here and byte-identical findings keep their relative
+        # (immaterial) order via Python's stable sort.
+        cleaned_findings.sort(key=deduplication_ordering_key)
+
+        for idx, finding in enumerate(cleaned_findings):
+            is_final_finding = idx == len(cleaned_findings) - 1
+
+            # Findings are already prepared (fields/overrides/hash_code) and globally
+            # sorted above. postprocessing will be done after processing related
+            # fields like locations, vulnerability ids, etc.
+            finding.save_no_options()
 
             # Determine how the finding should be grouped
             finding_will_be_grouped = self.process_finding_groups(
@@ -269,8 +282,8 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 findings_with_parser_tags.append((finding, [cleaned_tags]))
             # Process any files
             self.process_files(finding)
-            # Process vulnerability IDs
-            finding = self.store_vulnerability_ids(finding)
+            # Process vulnerability IDs (mutates the finding in place)
+            self.store_vulnerability_ids(finding)
             # Categorize this finding as a new one
             new_findings.append(finding)
             # all data is already saved on the finding, we only need to trigger post processing in batches
