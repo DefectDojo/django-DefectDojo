@@ -1,0 +1,31 @@
+[
+  {
+    "template": "http/cves/multi-cwe.yaml",
+    "template-id": "multi-cwe-template",
+    "info": {
+      "name": "Multiple CWE Example",
+      "author": [
+        "pdteam"
+      ],
+      "tags": [
+        "cve"
+      ],
+      "description": "Example nuclei finding classified with multiple CWEs.",
+      "severity": "high",
+      "classification": {
+        "cve-id": [
+          "CVE-2021-0001"
+        ],
+        "cwe-id": [
+          "cwe-79",
+          "cwe-89"
+        ]
+      }
+    },
+    "type": "http",
+    "host": "https://example.com",
+    "matched-at": "https://example.com/login",
+    "timestamp": "2023-11-06T14:48:31.591398+01:00",
+    "matcher-status": true
+  }
+]

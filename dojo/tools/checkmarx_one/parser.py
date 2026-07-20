@@ -6,6 +6,7 @@ from dateutil import parser
 from django.conf import settings
 
 from dojo.models import Finding, Test
+from dojo.tools.locations import LocationData
 
 
 class CheckmarxOneParser:
@@ -41,15 +42,17 @@ class CheckmarxOneParser:
         data: dict,
     ) -> list[Finding]:
         findings = []
-        cwe_store = data.get("vulnerabilityDetails", [])
+        # Reports filtered to a subset of scanners may contain the other
+        # sections as explicit nulls, so fall back to empty containers
+        cwe_store = data.get("vulnerabilityDetails") or []
         # SAST
-        if (results := data.get("scanResults", {}).get("resultsList")) is not None:
+        if (results := (data.get("scanResults") or {}).get("resultsList")) is not None:
             findings += self.parse_sast_vulnerabilities(test, results, cwe_store)
         # IaC
-        if (results := data.get("iacScanResults", {}).get("technology")) is not None:
+        if (results := (data.get("iacScanResults") or {}).get("technology")) is not None:
             findings += self.parse_iac_vulnerabilities(test, results, cwe_store)
         # SCA
-        if (results := data.get("scaScanResults", {}).get("packages")) is not None:
+        if (results := (data.get("scaScanResults") or {}).get("packages")) is not None:
             findings += self.parse_sca_vulnerabilities(test, results, cwe_store)
         return findings
 
@@ -100,6 +103,10 @@ class CheckmarxOneParser:
                     )
                     # Add at tag indicating what kind of finding this is
                     finding.unsaved_tags = ["iac"]
+                    if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                        finding.unsaved_locations.append(
+                            LocationData.code(file_path=finding.file_path),
+                        )
                     # Add the finding to the running list
                     findings.append(finding)
         return findings
@@ -188,6 +195,10 @@ class CheckmarxOneParser:
                     finding.description += f"\n---\n{node_snippet}"
                 # Add at tag indicating what kind of finding this is
                 finding.unsaved_tags = ["sast"]
+                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=finding.file_path, line=finding.line),
+                    )
                 # Add the finding to the running list
                 findings.append(finding)
         return findings
@@ -223,6 +234,14 @@ class CheckmarxOneParser:
                 dynamic_finding=False,
                 **self.determine_state(result),
             )
+            if settings.V3_FEATURE_LOCATIONS and locations_uri:
+                finding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=locations_uri,
+                        line=locations_startLine,
+                        end_line=locations_endLine,
+                    ),
+                )
             findings.append(finding)
         return findings
 
@@ -263,7 +282,7 @@ class CheckmarxOneParser:
         if description is None:
             description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
 
-        return Finding(
+        finding = Finding(
             description=description,
             title=description,
             file_path=file_path,
@@ -273,6 +292,11 @@ class CheckmarxOneParser:
             unique_id_from_tool=unique_id_from_tool,
             **self.determine_state(vulnerability),
         )
+        if settings.V3_FEATURE_LOCATIONS and file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(file_path=file_path),
+            )
+        return finding
 
     def get_results_kics(
         self,
@@ -285,7 +309,7 @@ class CheckmarxOneParser:
         if description is None:
             description = vulnerability.get("severity").title() + " " + vulnerability.get("data").get("queryName").replace("_", " ")
 
-        return Finding(
+        finding = Finding(
             title=description,
             description=description,
             severity=vulnerability.get("severity").title(),
@@ -295,6 +319,11 @@ class CheckmarxOneParser:
             unique_id_from_tool=unique_id_from_tool,
             **self.determine_state(vulnerability),
         )
+        if settings.V3_FEATURE_LOCATIONS and file_path:
+            finding.unsaved_locations.append(
+                LocationData.code(file_path=file_path),
+            )
+        return finding
 
     def get_results_sca(
         self,

@@ -23,6 +23,12 @@ services:
       DD_CELERY_BROKER_URL: 'sqla+sqlite:///dojo.celerydb.sqlite'
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
       DD_V3_FEATURE_LOCATIONS: ${DD_V3_FEATURE_LOCATIONS:-False}
+      # No Redis/valkey in unit tests -> default django cache is LocMemCache.
+      DD_CACHE_URL: ''
+      # In-process singleton cache (dojo/caching.py) stays ON: a singleton is read
+      # once per request/test (deterministic assertNumQueries), reset per request
+      # (middleware) and per test (dojo_test_case setUp).
+      DD_SETTINGS_CACHE_L1_TTL: '30'
   celerybeat: !reset
   celeryworker: !reset
   initializer: !reset

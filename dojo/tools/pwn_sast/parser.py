@@ -1,7 +1,10 @@
 import hashlib
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class PWNSASTParser:
@@ -119,6 +122,11 @@ class PWNSASTParser:
                             finding.fix_available = True
                         else:
                             finding.fix_available = False
+                        if settings.V3_FEATURE_LOCATIONS and offending_file:
+                            line_number = int(line_no) if line_no is not None and str(line_no).isdigit() else None
+                            finding.unsaved_locations.append(
+                                LocationData.code(file_path=offending_file, line=line_number, snippet=contents or ""),
+                            )
                         findings[unique_finding_key] = finding
 
             return list(findings.values())

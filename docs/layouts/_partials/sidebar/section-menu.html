@@ -1,4 +1,4 @@
-{{- /* section-menu.html with version toggle */ -}}
+{{- /* section-menu.html with edition (Open Source / Pro) toggle */ -}}
 
 {{- $sidebar := printf "sidebar_%s" .Section -}}
 {{- $nodes := slice -}}
@@ -12,13 +12,12 @@
 {{- end }}
 {{- end }}
 
-<!-- Version selector dropdown -->
-<nav class="docs-version-toggle mb-3">
-  <label for="version-select" class="form-label version-label">DefectDojo Version</label>
-  <select id="version-select" name="version" class="form-select" aria-label="Select documentation version">
-    <option value="opensource">DefectDojo Open Source</option>
-    <option value="pro">DefectDojo Pro</option>
-  </select>
+<!-- Edition segmented control: custom.js wires clicks, persistence, and reveal -->
+<nav class="docs-version-toggle" aria-label="DefectDojo Version">
+  <div class="dd-version-seg" role="radiogroup" aria-label="Select documentation version">
+    <button type="button" role="radio" aria-checked="true" data-version-value="opensource">Open Source</button>
+    <button type="button" role="radio" aria-checked="false" data-version-value="pro">Pro</button>
+  </div>
 </nav>
 
 <div class="version-menu-wrapper">

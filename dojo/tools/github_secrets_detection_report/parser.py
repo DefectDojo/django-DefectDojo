@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GithubSecretsDetectionReportParser:
@@ -136,6 +139,14 @@ class GithubSecretsDetectionReportParser:
             if first_location:
                 finding.file_path = first_location.get("path")
                 finding.line = first_location.get("start_line")
+                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=finding.file_path,
+                            line=finding.line,
+                            end_line=first_location.get("end_line"),
+                        ),
+                    )
 
             # Set external URL
             if html_url:

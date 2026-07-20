@@ -50,6 +50,7 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         findings_to_remove = set(existing_findings) - set(new_findings)
         findings_to_add = Finding.objects.filter(id__in=[x.id for x in findings_to_add])
         findings_to_remove = Finding.objects.filter(id__in=[x.id for x in findings_to_remove])
+        old_expiration_date = self.instance.expiration_date
         # Make the update in the database
         instance = super().update(instance, validated_data)
         user = getattr(self.context.get("request", None), "user", None)
@@ -58,6 +59,9 @@ class RiskAcceptanceSerializer(serializers.ModelSerializer):
         # Remove the ones that were not present in the payload
         for finding in findings_to_remove:
             ra_helper.remove_finding_from_risk_acceptance(user, instance, finding)
+
+        if instance.expiration_date != old_expiration_date:
+            ra_helper.reinstate(instance, old_expiration_date)
 
         # Handle orphaned risk acceptances: link to engagement if it now has findings
         # This is fine as Pro has its own model + relationshop to track links with engagements.

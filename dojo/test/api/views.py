@@ -8,7 +8,7 @@ from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
-from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate
+from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
 from dojo.models import (
     FileUpload,
@@ -110,14 +110,13 @@ class TestsViewSet(
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, test, options)
-        report = api_v2_serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, test, options)
 
     @extend_schema(
         methods=["GET"],
@@ -194,7 +193,7 @@ class TestsViewSet(
         responses={status.HTTP_201_CREATED: api_v2_serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestFilePermission),
     )
     def files(self, request, pk=None):
         test = self.get_object()
@@ -233,7 +232,7 @@ class TestsViewSet(
         detail=True,
         methods=["get"],
         url_path=r"files/download/(?P<file_id>\d+)",
-        permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
+        permission_classes=(IsAuthenticated, permissions.UserHasTestFilePermission),
     )
     def download_file(self, request, file_id, pk=None):
         test = self.get_object()
