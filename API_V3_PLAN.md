@@ -456,6 +456,21 @@ schema/route surface (matching-policy read fields, `configuration_permissions`, 
 `authorized_users` member-management) that exceeds the <30-min trivial-port bar and is already
 tracked as a §6 backlog checkbox — so nothing was implemented here (conservative, §10.2).
 
+**⚠ v2-sunset prerequisites (do NOT delete these v2 test files without doing the step first):**
+
+1. **`test_jira_import_and_pushing_api.py` is the ONLY consumer of the JIRA VCR cassettes.**
+   Cassettes are not self-executing — deleting this suite silently orphans the sole coverage of
+   the shared JIRA *engine* behaviors (issue transitions on mitigation/reactivation, `keep_sync`
+   reimport flows, `enforce_verified_status` gating). The v3 JIRA tests deliberately cover only
+   dispatch/plumbing at the service boundary and inherit engine coverage from this suite.
+   *Before removal:* record v3-keyed cassettes (or an equivalent live-JIRA integration harness)
+   for the engine scenarios — naturally paired with the post-alpha workflow-actions work, which
+   makes those transitions v3-endpoint-observable.
+2. **`test_import_reimport.py` is imported by the v3 corpus shim.** `unittests/api_v3/
+   import_corpus_shim.py` subclasses `ImportReimportMixin` from it (the anti-fork design).
+   *Before removal:* relocate the mixin to a shared module (e.g. `unittests/import_corpus_mixin.py`)
+   so the v3 corpus keeps running verbatim.
+
 ## 10. Implementer instructions (read before writing code)
 
 1. **Never modify v2** (serializers, viewsets, urls, prefetch) or any existing test. v3 is additive. The only shared-file edits allowed: `dojo/urls.py` (mount), `requirements.txt`, settings (new constants `COUNT_CAP`, `EXPAND_BUDGET`).
