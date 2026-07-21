@@ -21,6 +21,7 @@ Supported Integrations:
 - PagerDuty
 - ServiceDesk Plus
 - ServiceNow
+- ServiceNow SecOps / Vulnerability Response
 - Shortcut
 - Zendesk
 
@@ -86,6 +87,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [PagerDuty](/issue_tracking/pro_integration/integrations_toolreference/#pagerduty)
 - [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)
 - [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)
+- [ServiceNow SecOps / Vulnerability Response](/issue_tracking/pro_integration/integrations_toolreference/#servicenow-secops)
 - [Shortcut](/issue_tracking/pro_integration/integrations_toolreference/#shortcut)
 - [Zendesk](/issue_tracking/pro_integration/integrations_toolreference/#zendesk)
 
