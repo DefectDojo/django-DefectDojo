@@ -18,11 +18,13 @@ from rest_framework import serializers
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError as RestFrameworkValidationError
 
+from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.importers.base_importer import BaseImporter
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.location.models import Location
+from dojo.location.queries import get_authorized_locations
 from dojo.models import (
     DEDUPLICATION_EXECUTION_MODE_CHOICES,
     IMPORT_ACTIONS,
@@ -514,13 +516,19 @@ class CommonImportScanSerializer(serializers.Serializer):
     # TODO: Delete this after the move to Locations
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Scope endpoint_to_add to the locations/endpoints the requesting user is authorized for.
+        user = getattr(self.context.get("request"), "user", None)
         if not settings.V3_FEATURE_LOCATIONS:
             # TODO: why do we allow only existing endpoints?
             self.fields["endpoint_to_add"] = serializers.PrimaryKeyRelatedField(
-                queryset=Endpoint.objects.all(),
+                queryset=get_authorized_endpoints("view", user=user) if user else Endpoint.objects.none(),
                 required=False,
                 default=None,
                 help_text="Enter the ID of an Endpoint that is associated with the target Product. New Findings will be added to that Endpoint.",
+            )
+        else:
+            self.fields["endpoint_to_add"].queryset = (
+                get_authorized_locations("view", user=user) if user else Location.objects.none()
             )
 
     def get_importer(
