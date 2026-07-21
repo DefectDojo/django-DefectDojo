@@ -217,8 +217,16 @@ if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH
 # whole /api/v3-alpha/ tree is absent. The prefix and version live in settings (single source).
 if getattr(settings, "V3_FEATURE_LOCATIONS", False):
     from dojo.api_v3.api import api_v3
+    from dojo.api_v3.reference_docs import scalar_reference
 
     api_v2_urls += [
+        # Scalar reference (CDN + SRI, §12) must be registered BEFORE the NinjaAPI catch-all
+        # prefix so /reference is not swallowed by the API's 404 handling.
+        re_path(
+            r"^{}{}/reference$".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
+            scalar_reference,
+            name="api_v3_reference",
+        ),
         re_path(
             r"^{}{}/".format(get_system_setting("url_prefix"), settings.API_V3_URL_PREFIX),
             api_v3.urls,
