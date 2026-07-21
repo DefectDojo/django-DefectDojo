@@ -179,10 +179,25 @@
                                     {% endif %}
                                     <li>
                                         <a href="{% url 'swagger-ui_oa3' %}" target="_blank">
-                                            <i class="fa-solid fa-book fa-fw" title="OpenAPI v3 Docs"></i>
-                                            {% trans "API v2 OpenAPI3 Docs" %}
+                                            <i class="fa-solid fa-book fa-fw" title="API v2 Docs"></i>
+                                            {% trans "API v2 Docs" %}
                                         </a>
                                     </li>
+                                    {% if V3_FEATURE_LOCATIONS %}
+                                        {# v3 mounts conditionally on this flag (D5) — an unguarded url tag would break every page when it is off #}
+                                        <li>
+                                            <a href="{% url 'api_v3:openapi-view' %}" target="_blank">
+                                                <i class="fa-solid fa-book fa-fw" title="Open API v3 alpha Docs (Swagger)"></i>
+                                                {% trans "Open API v3 alpha Docs (Swagger)" %}
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="{% url 'api_v3_reference' %}" target="_blank">
+                                                <i class="fa-solid fa-book fa-fw" title="Open API v3 alpha Docs (Scalar)"></i>
+                                                {% trans "Open API v3 alpha Docs (Scalar)" %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
                                     <li>
                                         <a href="{{ DOCUMENTATION_URL }}" target="_blank">
                                             <i class="fa-solid fa-circle-question fa-fw"></i>
