@@ -5,7 +5,7 @@ from django.contrib.auth.models import Permission
 from django.db import connection
 from django.test.utils import CaptureQueriesContext
 
-from dojo.models import Dojo_User, User
+from dojo.models import Dojo_User, Product, Product_Type, User
 
 from .base import ApiV3TestCase
 
@@ -272,3 +272,90 @@ class TestApiV3UsersRbac(ApiV3TestCase):
         response = client.delete(self.v3_url(f"users/{other.id}"))
         # Self-only queryset -> `other` is invisible -> 404 (never reaches the delete perm check).
         self.assertEqual(404, response.status_code, response.content[:300])
+
+
+class TestApiV3UsersIdentityFieldAuthz(ApiV3TestCase):
+
+    """
+    Parity with PR #15191: a non-superuser delegate holding the user-management configuration
+    permissions (``view_user`` + ``change_user``) may reach the write path for another visible
+    account, but must NOT be able to change that account's identity fields (``email``/``username``)
+    -- changing another user's email enables account takeover via the password-reset flow. The
+    delegate can still edit their OWN identity, and superusers remain unrestricted. The
+    ``configuration_permissions`` field itself is intentionally out of the v3 write surface (§12
+    OS3a), so only the identity-field half of PR #15191 has a v3 attack surface.
+    """
+
+    def setUp(self):
+        super().setUp()
+        # Non-superuser delegate: holds view_user (so co-member accounts are visible via the RBAC
+        # queryset) + change_user (so the update route is reachable), nothing more.
+        self.delegate = User.objects.create_user(username="v3_identity_delegate", password=_PASSWORD)
+        self.delegate.user_permissions.add(
+            Permission.objects.get(codename="view_user", content_type__app_label="auth", content_type__model="user"),
+            Permission.objects.get(codename="change_user", content_type__app_label="auth", content_type__model="user"),
+        )
+        self.target = User.objects.create_user(
+            username="v3_identity_target", email="target@example.com", password=_PASSWORD,
+        )
+        # The view_user-scoped queryset returns co-members of the caller's authorized products
+        # (plus superusers) -- make delegate and target co-members of one product so the delegate
+        # can both see itself and resolve `target` (otherwise both are 404 before the write gate).
+        product_type = Product_Type.objects.create(name="v3_identity_pt")
+        product = Product.objects.create(name="v3_identity_prod", description="d", prod_type=product_type)
+        product.authorized_users.add(self.delegate.pk, self.target.pk)
+        self.delegate_client = self.token_client(user=self.delegate)
+
+    def test_delegate_cannot_change_another_users_email(self):
+        response = self.delegate_client.patch(
+            self.v3_url(f"users/{self.target.id}"), {"email": "attacker@evil.example"}, format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:500])
+        self.assertEqual("application/problem+json", response["Content-Type"])
+        self.target.refresh_from_db()
+        self.assertEqual("target@example.com", self.target.email)
+
+    def test_delegate_cannot_change_another_users_username(self):
+        response = self.delegate_client.patch(
+            self.v3_url(f"users/{self.target.id}"), {"username": "hijacked"}, format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:500])
+        self.target.refresh_from_db()
+        self.assertEqual("v3_identity_target", self.target.username)
+
+    def test_delegate_cannot_change_another_users_email_via_put(self):
+        response = self.delegate_client.put(
+            self.v3_url(f"users/{self.target.id}"),
+            {"username": "v3_identity_target", "email": "attacker@evil.example"}, format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:500])
+        self.target.refresh_from_db()
+        self.assertEqual("target@example.com", self.target.email)
+
+    def test_delegate_put_unchanged_identity_is_allowed(self):
+        # A PUT that re-sends the target's current identity is not a change -> not blocked by the
+        # identity guard (it fails/passes on other grounds, but never 400s on identity).
+        response = self.delegate_client.put(
+            self.v3_url(f"users/{self.target.id}"),
+            {"username": "v3_identity_target", "email": "target@example.com"}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.target.refresh_from_db()
+        self.assertEqual("target@example.com", self.target.email)
+
+    def test_delegate_can_change_own_email(self):
+        response = self.delegate_client.patch(
+            self.v3_url(f"users/{self.delegate.id}"), {"email": "mynew@example.com"}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.delegate.refresh_from_db()
+        self.assertEqual("mynew@example.com", self.delegate.email)
+
+    def test_superuser_can_change_another_users_email(self):
+        # Positive control: the admin (superuser, default client) is unrestricted.
+        response = self.client.patch(
+            self.v3_url(f"users/{self.target.id}"), {"email": "changed@example.com"}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.target.refresh_from_db()
+        self.assertEqual("changed@example.com", self.target.email)
