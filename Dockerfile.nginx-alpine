@@ -5,7 +5,7 @@
 # Dockerfile.django-alpine to use the caching mechanism of Docker.
 
 # Ref: https://devguide.python.org/#branchstatus
-FROM python:3.14.5-alpine3.22@sha256:6b91e66ab2a880ce9ca5a1b91c70f45963ff71ff68268df056336e1a657d5efd AS base
+FROM python:3.14.6-alpine3.23@sha256:b165067c5afc37fa5608a3c05609cc3d51aafd808a30fbfd822ee594fef55ad4 AS base
 FROM base AS build
 WORKDIR /app
 RUN \
@@ -15,7 +15,7 @@ RUN \
     gcc \
     build-base \
     bind-tools \
-    postgresql16-client \
+    postgresql18-client \
     xmlsec \
     git \
     util-linux \
