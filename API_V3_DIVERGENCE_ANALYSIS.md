@@ -180,14 +180,19 @@ are surfaced here.
 - **Impact:** **medium.** `last_reviewed` feeds "stale finding" / review-age reporting. A finding
   edited through the UI is marked reviewed; the identical edit through the API is not. Review-age
   metrics therefore depend on which channel a team happens to use.
-- **Proposed canonical:** **needs a product decision — do not silently adopt either side.** The UI's
-  "any edit counts as a review" is defensible for a human at a form, but stamping `last_reviewed` on an
-  automated bulk field write (e.g. a tag sync) is arguably wrong. The right convergence is probably to
-  stamp on *substantive review actions* (status changes, verification) rather than on every attribute
-  write — but that is a behaviour change for the UI too and should be decided deliberately.
-- **Fix plan:** leave the service as-is for alpha. Raise the "when does an edit count as a review?"
-  question with the team; whatever is decided, implement it once in the service so both channels agree.
-  Whichever way it lands is a behavioural change for at least one channel — release note. (See also D19:
+- **Canonical — DECIDED (architect, 2026-07-21): NO — API field-writes do NOT stamp `last_reviewed`.**
+  The v3 service's current behaviour (no stamping on create/update field-writes) is canonical, not
+  provisional. Rationale: automated/bulk field writes (tag syncs, integrations) are not reviews, and
+  an API cannot distinguish a human edit from automation. `last_reviewed` stamping remains an
+  *explicit-action* concern: note creation already stamps it (v2-parity note side-effects), and future
+  workflow actions (`request_review`, `close`, verification transitions) are the natural stamping
+  points.
+- **Fix plan (updated):** v3 service — no change needed. CONV2: when the UI edit flow migrates onto
+  the service, the UI's "every form edit stamps" behaviour must NOT be baked into the shared
+  field-write path; if the team wants to preserve it for interactive edits, the UI layer stamps
+  explicitly (or passes an explicit opt-in flag) — the shared service stays stamp-free on field
+  writes. Dropping the UI stamping entirely would be a UI behaviour change — release note at CONV2
+  time. (See also D19:
   note creation stamps `last_reviewed` from the note date, which is a separate, already-agreed rule.)
 
 ### D8 — Auto-mitigation side-effects on deactivation (`process_mitigated_data`)

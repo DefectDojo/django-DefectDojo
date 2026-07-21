@@ -37,9 +37,15 @@ What v3 gives you over v2:
 ### Interactive docs
 
 - Interactive API reference (Swagger UI): **`/api/v3-alpha/docs`**
+- Modern API reference (Scalar): **`/api/v3-alpha/reference`**
 - OpenAPI schema: **`/api/v3-alpha/openapi.json`** (`info.version = 3.0.0-alpha`)
 
 The "try it out" flow works with your logged-in session, or paste a token (see below).
+
+The Scalar page loads its UI from the jsDelivr CDN with a **version-pinned URL and a Subresource
+Integrity hash** — the browser refuses to run the bundle if the CDN ever serves different bytes,
+and nothing is vendored into DefectDojo. Consequence: on air-gapped deployments the Scalar page
+cannot load; Swagger UI at `/docs` serves its assets locally and always works.
 
 ## Authentication
 
