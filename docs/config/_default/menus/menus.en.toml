@@ -24,6 +24,42 @@
   weight = 14
 
 [[main]]
+  name = "Sensei"
+  # Sensei is Pro-only. Default to the Open Source "Pro feature" page; custom.js
+  # swaps this tab to the full guide (/sensei/about_sensei/) when Pro is selected.
+  url = "/sensei/os__sensei/"
+  weight = 14
+
+# Left-hand section sidebar for the Sensei chapter (the chapter is flat, so the
+# Doks subsection-based sidebar has nothing to render without this menu).
+# Entries are audience-filtered by the version toggle: the opensource page shows
+# in the OS view, the pro pages show in the Pro view.
+[[sidebar_sensei]]
+  name = "Sensei"
+  pageRef = "/sensei/OS__sensei"
+  weight = 0
+
+[[sidebar_sensei]]
+  name = "About Sensei"
+  pageRef = "/sensei/about_sensei"
+  weight = 1
+
+[[sidebar_sensei]]
+  name = "Set Up Sensei"
+  pageRef = "/sensei/setup_sensei"
+  weight = 2
+
+[[sidebar_sensei]]
+  name = "Fixing Findings with Sensei"
+  pageRef = "/sensei/fixing_findings"
+  weight = 3
+
+[[sidebar_sensei]]
+  name = "Sensei Reference"
+  pageRef = "/sensei/sensei_reference"
+  weight = 4
+
+[[main]]
   name = "Admin"
   url = "/admin/admin_intro/intro/"
   weight = 16
