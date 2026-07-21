@@ -12,6 +12,19 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## July 2026: v3.1
 
+### July 20, 2026: v3.1.200
+
+* **(Connectors)** Added another large batch of Connectors. New findings connectors: Rapid7 InsightAppSec, Cobalt.io PtaaS, Sonatype IQ (Nexus Lifecycle), Acunetix 360, Mend (WhiteSource), Bugcrowd, Black Duck, Edgescan, Sysdig Secure, Coverity Connect, Harbor, OpenVAS / Greenbone, Nuclei / ProjectDiscovery Cloud, Endor Labs, Prowler, Kubescape / ARMO, Quay + Clair, Intruder.io, and YesWeHack. Added a ServiceNow CMDB asset connector. You can now request a new connector directly from the cloud UI, and CrowdStrike Spotlight now derives its severity floor from structured sync filters.
+* **(Integrations)** Added a Linear integrator for pushing findings to Linear.
+* **(Feature Flags)** Redesigned feature flags into a two-tier, metadata-driven system with a dedicated Feature Flags admin page.
+* **(Findings)** Similar Findings now only surfaces genuinely similar findings, the CVSS and EPSS columns now expose numeric filter operators, and several broken findings-table column filters were fixed.
+* **(UI)** Metric colors in the Vue UI are now configurable per instance.
+* **(SSO)** Added a configurable OIDC username claim and hardened SSO user creation.
+* **(Performance)** Authorized-finding queries now filter by a literal product-id list, and the paginated count-cache refill is now single-flighted to avoid redundant recounts on busy instances.
+* **(Import)** The generic parser no longer produces a nested list when a finding has both a CVE and vulnerability IDs, and the Import/ReImport forms no longer touch the database at import time.
+* **(Settings)** Added `DD_EDITABLE_MITIGATED_DATA` to control whether mitigation data is editable, and ignored close-finding fields are now hidden.
+* **(Bug Fixes)** Connector backend config refresh now encodes datetimes correctly
+
 ### July 15, 2026: v3.1.101
 
 * **(Findings)** Consolidated the bulk-edit actions in the findings table into a single surface, and added bulk "replace tag" and bulk review actions.
