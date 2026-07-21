@@ -26,6 +26,7 @@ as a test module; it only holds the reusable mixin.
 from __future__ import annotations
 
 from pathlib import Path
+from unittest import skipUnless
 
 from django.conf import settings
 
@@ -37,6 +38,12 @@ def _bool_str(value: object) -> str:
     return "true" if bool(value) else "false"
 
 
+@skipUnless(
+    settings.V3_FEATURE_LOCATIONS,
+    "API v3 import endpoint is mounted only when V3_FEATURE_LOCATIONS is enabled (D5); the CI "
+    "unit-test matrix runs a flag-off leg where /api/v3-alpha/ does not exist. Guarding the shim "
+    "skips every corpus test that mixes it in (they hit POST /api/v3-alpha/import).",
+)
 class ApiV3ImportShim:
 
     """
