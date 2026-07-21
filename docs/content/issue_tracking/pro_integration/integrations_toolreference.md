@@ -406,6 +406,8 @@ This maps to the ServiceNow Impact field.
 - **False Positive Mapping**: `Resolved`
 - **Risk Accepted Mapping**: `Resolved`
 
+Each mapping accepts a standard state label (`New`, `In Progress`, `On Hold`, `Resolved`, `Closed`, `Cancelled`) or a numeric state value. On instances with customized Incident states — or when targeting a table other than `incident` — use the numeric **state value** from your instance's choice list; a numeric value outside the standard set is sent to ServiceNow exactly as configured. The built-in Resolution-code default only accompanies the standard resolved/closed states, so pair custom state values with the close and resolution field mappings below.
+
 ### Close and resolution fields
 
 Some ServiceNow instances enforce a Data Policy that makes fields such as the **Resolution code** (`close_code`) mandatory whenever an Incident moves to a resolved or closed state. If DefectDojo closes an Incident without them, ServiceNow rejects the write with an HTTP 403 *"Data Policy Exception"* and the reason is recorded in the integration's Errors view.
