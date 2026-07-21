@@ -132,6 +132,28 @@ def _enforce_superuser_staff_rules(request: HttpRequest, *, current: Dojo_User |
         raise validation_problem({"is_staff": ["Only superusers are allowed to add or edit staff users."]})
 
 
+def _enforce_identity_field_rules(request: HttpRequest, *, current: Dojo_User | None, data: dict) -> None:
+    """
+    Port ``UserSerializer.validate()`` identity-field gating (§12 OS3a; PR #15191 parity).
+
+    A non-superuser may not change **another** account's identity fields (``email``/``username``).
+    Changing another user's email would enable account takeover via the email-based password-reset
+    flow, so the identity fields join ``is_superuser``/``is_staff`` under superuser-only control.
+    Editing one's own identity stays allowed, and superusers are unrestricted. On create there is no
+    existing account whose identity could be hijacked (``current is None``), so the rule is a no-op
+    there and applies to updates (PATCH/PUT) only.
+    """
+    if bool(getattr(request.user, "is_superuser", False)):
+        return
+    if current is None or request.user.pk == current.pk:
+        return
+    for field in ("email", "username"):
+        if field in data and data[field] != getattr(current, field):
+            raise validation_problem(
+                {field: [f"Only superusers are allowed to change another user's {field}."]},
+            )
+
+
 def _validate_password_or_400(password: str) -> None:
     try:
         validate_password(password)
@@ -228,6 +250,7 @@ def build_users_router(
         if "password" in data:
             raise validation_problem({"password": ["Update of password though API is not allowed"]})
         _enforce_superuser_staff_rules(request, current=instance, data=data)
+        _enforce_identity_field_rules(request, current=instance, data=data)
         for key, value in data.items():
             setattr(instance, key, value)
         instance.save()
@@ -254,6 +277,7 @@ def build_users_router(
         if password is not None:
             raise validation_problem({"password": ["Update of password though API is not allowed"]})
         _enforce_superuser_staff_rules(request, current=instance, data=data)
+        _enforce_identity_field_rules(request, current=instance, data=data)
         for key, value in data.items():
             setattr(instance, key, value)
         instance.save()
