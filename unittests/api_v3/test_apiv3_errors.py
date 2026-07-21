@@ -30,8 +30,8 @@ class TestApiV3ErrorContract(ApiV3TestCase):
         self.assertEqual(status, body["status"])
         self.assertIn("title", body)
         self.assertTrue(
-            body["type"].endswith("/errors/" + type_suffix),
-            f"expected type .../errors/{type_suffix}, got {body['type']}",
+            body["type"].endswith("#error-" + type_suffix),
+            f"expected type ...#error-{type_suffix}, got {body['type']}",
         )
         return body
 
