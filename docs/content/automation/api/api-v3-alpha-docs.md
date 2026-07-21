@@ -182,7 +182,7 @@ Unknown filter params, unknown `?fields=`, and unknown/over-budget `?expand=` al
 ### Errors
 
 ```jsonc
-{ "type": "https://docs.defectdojo.com/api/v3/errors/validation",
+{ "type": "https://docs.defectdojo.com/en/api/api-v3-alpha-docs/#error-validation",
   "title": "Validation failed", "status": 400,
   "detail": "2 fields failed validation",
   "fields": { "severity": ["Not a valid choice."], "date": ["Required."] } }

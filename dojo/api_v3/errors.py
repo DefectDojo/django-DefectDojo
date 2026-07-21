@@ -26,7 +26,11 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-_ERROR_TYPE_BASE = "https://docs.defectdojo.com/api/v3/errors/"
+# Problem-type identifiers (RFC 9457 §3.1.1). Distinct per problem type via a fragment on the v3
+# alpha docs page. The base is the page's committed front-matter alias (``/en/api/api-v3-alpha-docs``),
+# so the URL is guaranteed to resolve in the built docs site — the in-app-docs link check
+# (validate_docs_build.yml) requires every docs.defectdojo.com URL under dojo/ to exist.
+_ERROR_TYPE_BASE = "https://docs.defectdojo.com/en/api/api-v3-alpha-docs/#error-"
 
 
 class V3JSONEncoder(DjangoJSONEncoder):
