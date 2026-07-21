@@ -7,12 +7,19 @@ regression (a broken schema silently breaks client codegen and the interactive d
 """
 from __future__ import annotations
 
+from unittest import skipUnless
+
 from django.conf import settings
 from django.test import SimpleTestCase
 
 from dojo.api_v3.api import api_v3
 
 
+@skipUnless(
+    settings.V3_FEATURE_LOCATIONS,
+    "api_v3.get_openapi_schema() resolves the mounted namespace, which does not exist when "
+    "V3_FEATURE_LOCATIONS is off (D5); the CI unit-test matrix runs a flag-off leg.",
+)
 class TestApiV3OpenApi(SimpleTestCase):
 
     @classmethod

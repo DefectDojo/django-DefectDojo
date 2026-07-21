@@ -9,6 +9,7 @@ reserved for kernel-internal unit tests only.
 from __future__ import annotations
 
 import json
+from unittest import skipUnless
 
 from django.conf import settings
 from rest_framework.authtoken.models import Token
@@ -19,6 +20,13 @@ from dojo.utils import get_system_setting
 from unittests.dojo_test_case import DojoAPITestCase
 
 
+@skipUnless(
+    settings.V3_FEATURE_LOCATIONS,
+    "API v3 is mounted only when V3_FEATURE_LOCATIONS is enabled (D5); with the flag off the "
+    "endpoints do not exist, so these contract tests are not applicable. The CI unit-test matrix "
+    "runs a flag-off leg, hence the guard. Flag-independent kernel unit tests (OpenAPI render, "
+    "static authz tripwire, expand cycle guard) use SimpleTestCase directly and still run.",
+)
 class ApiV3TestCase(DojoAPITestCase):
 
     """Shared helpers: v3 URL prefix, token + session/CSRF clients, JSON assertions."""
