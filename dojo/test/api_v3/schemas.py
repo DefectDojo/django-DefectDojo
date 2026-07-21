@@ -119,7 +119,31 @@ TestSlim.EXPANDABLE = {
 
 class TestDetail(TestSlim):
 
-    """Slim + the documented heavier read fields (§4.5). Retrieve returns detail; list returns slim."""
+    """
+    Slim + the documented heavier read fields (§4.5). Retrieve returns detail; list returns slim.
+
+    ``deduplication_algorithm`` / ``hash_code_fields`` expose the effective finding-matching policy
+    for this test as **read-only, computed** fields (they surface which dedupe/reimport algorithm and
+    hashcode fields matching uses, resolved from the per-scanner settings, without a user reading
+    ``settings.dist.py``). They reuse the v2 helper verbatim -- the ``Test.deduplication_algorithm`` /
+    ``Test.hash_code_fields`` model properties (``dojo/test/models.py``), the same lookup the v2
+    ``TestSerializer`` reads -- so the lookup logic is never duplicated. They are computed from
+    ``test_type`` (already ``select_related`` in ``TestSlim.SELECT_RELATED``) and ``scan_type`` (a
+    concrete column), so no extra query is issued on a detail fetch. They are **not** on any write
+    schema (``TestWrite``/``TestUpdate``/``TestReplace``, all ``extra="forbid"``), so any attempt to
+    write them is rejected with a 400 -- a deliberate hardening over v2, which silently ignores writes
+    to them (§12).
+
+    ``DETAIL_FIELD_COLUMNS``: on a LIST, ``scan_type`` is deferred by default (Part B). When either
+    computed field is requested via ``?fields=`` on a list, the kernel un-defers ``scan_type`` (the
+    column the resolvers read) so the query count stays constant -- ``test_type`` is already joined by
+    the slim base (§4.7 / §12 fields-opt-up).
+    """
+
+    DETAIL_FIELD_COLUMNS: ClassVar[dict[str, tuple[str, ...]]] = {
+        "deduplication_algorithm": ("scan_type",),
+        "hash_code_fields": ("scan_type",),
+    }
 
     description: str | None
     scan_type: str | None
@@ -127,6 +151,18 @@ class TestDetail(TestSlim):
     build_id: str | None
     commit_hash: str | None
     branch_tag: str | None
+    deduplication_algorithm: str
+    hash_code_fields: list[str] | None
+
+    @staticmethod
+    def resolve_deduplication_algorithm(obj) -> str:
+        # Reuse the v2 model property (dojo/test/models.py) -- never duplicate the settings lookup.
+        return obj.deduplication_algorithm
+
+    @staticmethod
+    def resolve_hash_code_fields(obj) -> list[str] | None:
+        # Reuse the v2 model property (dojo/test/models.py) -- never duplicate the settings lookup.
+        return obj.hash_code_fields
 
 
 class TestWrite(Schema):
