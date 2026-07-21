@@ -39,6 +39,12 @@ See our [Rules Engine Guide](/automation/rules_engine/about) for more info.
 
 ![image](images/rules_engine_4.png)
 
+### Sensei
+
+DefectDojo Pro's **Sensei** (BETA) is an AI-powered scan-and-fix capability: connect a repository through a GitHub App and Sensei scans it, imports the findings, and opens pull requests that remediate them — with a preview-first workflow, so nothing runs (and no LLM cost is incurred) until you approve.
+
+See our [Sensei Guide](/sensei/about_sensei/) for more info.
+
 ### Pro Dashboards and Reporting
 
 Generate [instant reports and metrics](/get_started/about/ui_pro_vs_os/#new-dashboards) to share the security posture of your apps and repos, evaluate your security tools and analyze your team's performance in addressing security issues.
