@@ -357,6 +357,7 @@ layer and the closed contract, so all are additive:
       writes, v3 self-profile endpoint, filter vocabularies for the location-edge sub-resources
       (PUT full replace was pulled forward out of this bundle and shipped — §12, 2026-07-20)
 - [x] **Accept a `cwes` list on finding writes** — DONE: finding create/update/replace now accept a `cwes` list (flat `list[int]`, primary-first) symmetric with the read shape and parallel to `vulnerability_ids` (§12, 2026-07-21).
+- [ ] **Ref-registry completeness guard test** — a serialization audit (2026-07-21) confirmed every `Ref`/collection field on every read schema has a resolver and every fall-through field is a plain scalar (no manager/model/tagulous object reaches Pydantic). The one latent soft-spot: `ref_label()` (`dojo/api_v3/refs.py`) falls back to `str(obj)` for a model **not** in `_LABELERS`, so a future `Ref` to an unregistered model would silently emit a repr-ish label instead of failing. Add a test that walks every `Ref`-typed field across all schemas and asserts its target model is registered in `_LABELERS` — converting the silent mislabel into a caught failure (same self-extending spirit as the query/authz sweeps).
 - **Port the v2 endpoint-level test corpora to v3** (architect-requested). Priority order:
       - [x] **(1) the import/reimport corpus** (`test_import_reimport.py`'s mixin, `test_apiv2_scan_import_options.py`,
         `test_importers_closeold.py`) — DONE via the dual-endpoint adapter `unittests/api_v3/import_corpus_shim.py`
