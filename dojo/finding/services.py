@@ -55,7 +55,7 @@ _UNSET = object()
 
 # Scalar Finding fields consumed via **kwargs on create; relations/side-effect keys are handled
 # explicitly (popped) before this set is applied.
-_SPECIAL_KEYS = frozenset({"reporter", "mitigated_by", "found_by", "tags", "vulnerability_ids", "push_to_jira", "test"})
+_SPECIAL_KEYS = frozenset({"reporter", "mitigated_by", "found_by", "tags", "vulnerability_ids", "cwes", "push_to_jira", "test"})
 
 
 # --- shared validation (ported from FindingSerializer.validate / FindingCreateSerializer.validate) --
@@ -137,11 +137,17 @@ def _resolve_test_types(ids: list[int]) -> list[Test_Type]:
 # --- public service API (I6) ------------------------------------------------------------------
 
 def create_finding(*, test: Test, data: dict, user, push_to_jira: bool = False,
-                   vulnerability_ids: list[str] | None = None) -> Finding:
+                   vulnerability_ids: list[str] | None = None,
+                   cwes: list[int] | None = None) -> Finding:
     """
     Create a finding under ``test``. Ports ``FindingCreateSerializer.create``/``validate``:
     reporter defaulting, status invariants, vulnerability-id + CWE persistence, found_by, JIRA push,
     and the ``finding_added`` notification.
+
+    ``cwes`` is a flat ``list[int]`` symmetric with the read shape and parallel to
+    ``vulnerability_ids`` (§12): an explicit scalar ``cwe`` wins as the primary; when only ``cwes``
+    is supplied its first entry is mirrored into ``cwe`` before save (so the primary persists, like
+    ``cve``). The persisted ``Finding_CWE`` rows are the primary first then the rest (``save_cwes``).
     """
     data = {k: v for k, v in data.items() if k not in _SPECIAL_KEYS or k in {"reporter", "mitigated_by", "found_by", "tags"}}
 
@@ -169,6 +175,11 @@ def create_finding(*, test: Test, data: dict, user, push_to_jira: bool = False,
     # is persisted (save_vulnerability_ids below only sets it in memory).
     if vulnerability_ids:
         scalars["cve"] = vulnerability_ids[0]
+    # CWE list precedence (mirror vulnerability_ids -> cve): an explicit scalar `cwe` is the primary;
+    # when only `cwes` is supplied, mirror its first entry into `cwe` before the initial save so the
+    # primary persists. `"cwe" not in scalars` means the scalar was omitted/None on this create.
+    if cwes and "cwe" not in scalars:
+        scalars["cwe"] = cwes[0]
     new_finding = Finding(test=test, reporter=reporter, **scalars)
     if mitigated_by is not None:
         new_finding.mitigated_by = mitigated_by
@@ -180,7 +191,11 @@ def create_finding(*, test: Test, data: dict, user, push_to_jira: bool = False,
         new_finding.found_by.set(_resolve_test_types(found_by_ids))
     if vulnerability_ids:
         save_vulnerability_ids(new_finding, vulnerability_ids)
-    # Create always persists the primary Finding.cwe as a Finding_CWE row (mirror serializer).
+    # Create always persists the primary Finding.cwe as a Finding_CWE row (mirror serializer); when a
+    # `cwes` list is supplied, save_cwes persists the full set (primary first, then the rest). `cwes`
+    # values are plain ints -- finding_cwe_labels/cwe_label accept ints and canonicalize to CWE-<n>.
+    if cwes is not None:
+        new_finding.unsaved_cwes = cwes
     save_cwes(new_finding)
     if tags is not None:
         new_finding.tags = tags
@@ -202,12 +217,20 @@ def create_finding(*, test: Test, data: dict, user, push_to_jira: bool = False,
 
 
 def update_finding(finding: Finding, *, changes: dict, user, push_to_jira: bool = False,
-                   vulnerability_ids: list[str] | None = None) -> Finding:
+                   vulnerability_ids: list[str] | None = None,
+                   cwes: list[int] | None = None) -> Finding:
     """
     Update ``finding`` from a partial ``changes`` dict. Ports ``FindingSerializer.update``/
     ``validate``: mitigated-edit rules, status invariants (PATCH defaults from the instance),
     risk-acceptance processing, vulnerability-id + CWE persistence, found_by set/clear, reporter,
     and the synchronous JIRA push (force_sync, raising on failure) + keep-in-sync.
+
+    ``cwes`` (flat ``list[int]``, §12): a supplied list drives the ``Finding_CWE`` rows (primary
+    first, then the rest); an explicit scalar ``cwe`` in the same request stays the primary, else the
+    first list entry is mirrored into ``cwe`` before save. Omitting ``cwes`` (``None``) leaves the
+    rows untouched except the existing scalar-``cwe``-change resync (no-reset-on-omit, symmetric with
+    ``vulnerability_ids``/``reporter``); an explicit ``cwes: []`` clears the extra rows, resyncing to
+    just the scalar-derived primary.
     """
     changes = dict(changes)
 
@@ -235,6 +258,10 @@ def update_finding(finding: Finding, *, changes: dict, user, push_to_jira: bool 
     found_by_ids = changes.pop("found_by", _UNSET)
     tags = changes.pop("tags", _UNSET)
     cwe_provided = "cwe" in changes
+    # Only a non-None scalar `cwe` counts as "explicitly supplied" for the list-vs-scalar precedence.
+    # A `None` (including PUT's reset-to-default, where `cwe` is always present in the full-replace
+    # change set) is not an explicit primary, so a `cwes` list still mirrors its first entry.
+    cwe_explicit = cwe_provided and changes.get("cwe") is not None
 
     # Persist vuln ids first so model save computes the hash including them (mirror serializer).
     if vulnerability_ids:
@@ -248,11 +275,21 @@ def update_finding(finding: Finding, *, changes: dict, user, push_to_jira: bool 
 
     for key, value in changes.items():
         setattr(finding, key, value)
+    # CWE list precedence (mirror vulnerability_ids -> cve): mirror the first list entry into the
+    # scalar `cwe` before save so the primary persists, unless an explicit non-None scalar was
+    # supplied in this request (in which case that scalar stays the primary).
+    if cwes and not cwe_explicit:
+        finding.cwe = cwes[0]
     finding.save()
 
-    # v3 exposes a scalar `cwe` (not the v2 nested `cwes` list), so resync the Finding_CWE rows
-    # whenever `cwe` is updated -- keeps Finding.cwe and its Finding_CWE rows consistent (§12).
-    if cwe_provided:
+    # Resync the Finding_CWE rows (§12). An explicit `cwes` list wins: it drives the rows (primary
+    # first, then the rest); an explicit empty list clears the extras and resyncs to the primary.
+    # Otherwise a scalar-only `cwe` change resyncs the rows to just the scalar-derived primary
+    # (existing behavior); omitting both leaves the rows untouched.
+    if cwes is not None:
+        finding.unsaved_cwes = cwes
+        save_cwes(finding)
+    elif cwe_provided:
         save_cwes(finding)
 
     if tags is not _UNSET:
