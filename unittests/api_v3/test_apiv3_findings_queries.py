@@ -11,7 +11,7 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
-from dojo.models import Finding, Test
+from dojo.models import Finding, Finding_CWE, Test, Vulnerability_Id
 
 from .base import ApiV3TestCase
 
@@ -84,6 +84,36 @@ class TestApiV3FindingsQueryCount(ApiV3TestCase):
         self.assertEqual(
             queries_10, queries_100,
             f"opt-up query count must not grow with row count: {queries_10} vs {queries_100}",
+        )
+
+    def test_query_count_constant_with_vuln_ids_and_cwes(self):
+        """
+        The vulnerability_id_set / finding_cwe_set prefetches are fixed IN-batches, not per-row.
+
+        Attaching a vuln-id + CWE row to every finding would surface a per-row query (COUNT/SELECT
+        per finding) if these fields were resolved lazily; the count must stay row-independent.
+        """
+        test = Test.objects.first()
+
+        def _attach_identity_rows() -> None:
+            for finding in Finding.objects.all():
+                Vulnerability_Id.objects.get_or_create(
+                    finding=finding, vulnerability_id=f"CVE-2020-{finding.id}",
+                )
+                Finding_CWE.objects.get_or_create(finding=finding, cwe="CWE-79")
+
+        self._bulk_create_findings(10, test)
+        _attach_identity_rows()
+        queries_10 = self._query_count({"limit": 250})
+
+        self._bulk_create_findings(90, test)
+        _attach_identity_rows()
+        queries_100 = self._query_count({"limit": 250})
+
+        self.assertGreaterEqual(self.get_json("findings", data={"limit": 250})["count"], 100)
+        self.assertEqual(
+            queries_10, queries_100,
+            f"vuln-id/cwe prefetch query count must not grow with row count: {queries_10} vs {queries_100}",
         )
 
     def test_default_list_query_count_unchanged_by_defer(self):

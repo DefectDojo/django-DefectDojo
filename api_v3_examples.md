@@ -2,7 +2,7 @@
 
 > **Auto-generated, do not hand-edit.** Every request/response below was captured by `unittests/api_v3/test_apiv3_examples.py` (`DD_API_V3_EXAMPLES=1`, CI-excluded) making **real** in-process requests against the test fixture. Tokens are redacted; long lists are truncated to ~3 rows. Regenerate with the command in that file's docstring.
 
-Captured: 2026-07-20T19:26:55.505452+00:00
+Captured: 2026-07-21T08:53:02.375408+00:00
 
 ## Conventions (see `API_V3_PLAN.md` §4)
 
@@ -43,6 +43,8 @@ Authorization: Token <your-api-token>
   "is_mitigated": false,
   "date": "2020-05-21",
   "cwe": null,
+  "cwes": [],
+  "vulnerability_ids": [],
   "test": {
     "id": 3,
     "name": "ZAP Scan"
@@ -110,6 +112,8 @@ Authorization: Token <your-api-token>
   "is_mitigated": false,
   "date": "2020-05-21",
   "cwe": null,
+  "cwes": [],
+  "vulnerability_ids": [],
   "test": {
     "id": 3,
     "name": null,
@@ -258,8 +262,10 @@ Authorization: Token <your-api-token>
       "risk_accepted": false,
       "out_of_scope": false,
       "is_mitigated": false,
-      "date": "2026-07-20",
+      "date": "2026-07-21",
       "cwe": 0,
+      "cwes": [],
+      "vulnerability_ids": [],
       "test": {
         "id": 3,
         "name": "ZAP Scan"
@@ -282,8 +288,8 @@ Authorization: Token <your-api-token>
       },
       "locations_count": 0,
       "tags": [],
-      "created": "2026-07-20T19:26:55.152Z",
-      "updated": "2026-07-20T19:26:55.152Z"
+      "created": "2026-07-21T08:53:01.740Z",
+      "updated": "2026-07-21T08:53:01.740Z"
     },
     {
       "id": 235,
@@ -296,8 +302,10 @@ Authorization: Token <your-api-token>
       "risk_accepted": false,
       "out_of_scope": false,
       "is_mitigated": false,
-      "date": "2026-07-20",
+      "date": "2026-07-21",
       "cwe": 0,
+      "cwes": [],
+      "vulnerability_ids": [],
       "test": {
         "id": 3,
         "name": "ZAP Scan"
@@ -320,8 +328,8 @@ Authorization: Token <your-api-token>
       },
       "locations_count": 0,
       "tags": [],
-      "created": "2026-07-20T19:26:55.152Z",
-      "updated": "2026-07-20T19:26:55.152Z"
+      "created": "2026-07-21T08:53:01.740Z",
+      "updated": "2026-07-21T08:53:01.740Z"
     }
   ]
 }
@@ -362,6 +370,8 @@ Authorization: Token <your-api-token>
       "is_mitigated": false,
       "date": "2020-05-21",
       "cwe": null,
+      "cwes": [],
+      "vulnerability_ids": [],
       "test": {
         "id": 3,
         "name": "ZAP Scan"
@@ -400,6 +410,8 @@ Authorization: Token <your-api-token>
       "is_mitigated": false,
       "date": "2021-01-01",
       "cwe": null,
+      "cwes": [],
+      "vulnerability_ids": [],
       "test": {
         "id": 3,
         "name": "ZAP Scan"
@@ -508,8 +520,8 @@ Content-Type: application/json
   },
   "private": false,
   "edited": false,
-  "created": "2026-07-20T19:26:55.268Z",
-  "updated": "2026-07-20T19:26:55.268Z"
+  "created": "2026-07-21T08:53:02.035Z",
+  "updated": "2026-07-21T08:53:02.035Z"
 }
 ```
 
@@ -544,8 +556,8 @@ Authorization: Token <your-api-token>
       },
       "private": false,
       "edited": false,
-      "created": "2026-07-20T19:26:55.268Z",
-      "updated": "2026-07-20T19:26:55.268Z"
+      "created": "2026-07-21T08:53:02.035Z",
+      "updated": "2026-07-21T08:53:02.035Z"
     }
   ]
 }
@@ -641,8 +653,10 @@ Content-Type: application/json
   "risk_accepted": false,
   "out_of_scope": false,
   "is_mitigated": false,
-  "date": "2026-07-20",
+  "date": "2026-07-21",
   "cwe": 0,
+  "cwes": [],
+  "vulnerability_ids": [],
   "test": {
     "id": 3,
     "name": "ZAP Scan"
@@ -665,8 +679,8 @@ Content-Type: application/json
   },
   "locations_count": 0,
   "tags": [],
-  "created": "2026-07-20T19:26:55.312Z",
-  "updated": "2026-07-20T19:26:55.340Z",
+  "created": "2026-07-21T08:53:02.103Z",
+  "updated": "2026-07-21T08:53:02.138Z",
   "description": "before patch",
   "mitigation": null,
   "impact": null,
@@ -865,8 +879,8 @@ Content-Type: application/json
     "example",
     "pci"
   ],
-  "created": "2026-07-20T19:26:55.477Z",
-  "updated": "2026-07-20T19:26:55.477Z",
+  "created": "2026-07-21T08:53:02.334Z",
+  "updated": "2026-07-21T08:53:02.334Z",
   "business_criticality": null,
   "platform": null,
   "origin": null,
@@ -913,8 +927,8 @@ Content-Type: application/json
     "example",
     "pci"
   ],
-  "created": "2026-07-20T19:26:55.477Z",
-  "updated": "2026-07-20T19:26:55.500Z",
+  "created": "2026-07-21T08:53:02.334Z",
+  "updated": "2026-07-21T08:53:02.368Z",
   "business_criticality": null,
   "platform": null,
   "origin": null,
@@ -925,4 +939,3 @@ Content-Type: application/json
   "team_manager": null
 }
 ```
-

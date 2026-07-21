@@ -6,14 +6,14 @@ from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
 
 from dojo.location.models import Location, LocationFindingReference
-from dojo.models import Finding, User
+from dojo.models import Finding, Finding_CWE, User, Vulnerability_Id
 
 from .base import ApiV3TestCase
 
 _SLIM_KEYS = {
     "id", "title", "severity", "active", "verified", "false_p", "duplicate", "risk_accepted",
-    "out_of_scope", "is_mitigated", "date", "cwe", "test", "engagement", "asset",
-    "organization", "reporter", "locations_count", "tags", "created", "updated",
+    "out_of_scope", "is_mitigated", "date", "cwe", "cwes", "vulnerability_ids", "test", "engagement",
+    "asset", "organization", "reporter", "locations_count", "tags", "created", "updated",
 }
 
 
@@ -169,6 +169,20 @@ class TestApiV3FindingsDefer(ApiV3TestCase):
         # Other heavy detail columns stay deferred ("un-defers exactly impact").
         self.assertNotIn('"dojo_finding"."mitigation"', sql)
         self.assertNotIn('"dojo_finding"."description"', sql)
+
+    def test_relation_slim_fields_are_never_deferred(self):
+        # vulnerability_ids/cwes are resolver-backed relations (not concrete own-model columns), so
+        # the defer planner -- which only defers detail-only concrete columns -- can never defer them
+        # (plan_list_fields uses model._meta.concrete_fields, which excludes them automatically).
+        from dojo.api_v3.expand import plan_list_fields  # noqa: PLC0415 -- kernel unit assertion
+        from dojo.finding.api_v3.schemas import FindingDetail, FindingSlim  # noqa: PLC0415
+        plan = plan_list_fields(FindingSlim, FindingDetail, requested=None)
+        self.assertNotIn("vulnerability_ids", plan.defer)
+        self.assertNotIn("cwes", plan.defer)
+        # They are slim fields, so the default list always includes them (never deferred away).
+        row = self.get_json("findings")["results"][0]
+        self.assertIn("vulnerability_ids", row)
+        self.assertIn("cwes", row)
 
 
 class TestApiV3FindingsFilters(ApiV3TestCase):
@@ -333,6 +347,72 @@ class TestApiV3FindingsLocationsExpand(ApiV3TestCase):
         ])
         second = query_count()
         self.assertEqual(first, second, f"expand=locations query count grew: {first} -> {second}")
+
+
+class TestApiV3FindingsVulnIdsAndCwes(ApiV3TestCase):
+
+    """`vulnerability_ids` (flat strings) and `cwes` (flat ints) render on list AND detail (§4.5)."""
+
+    def _make_finding_with_identity_rows(self) -> Finding:
+        test = Finding.objects.first().test
+        finding = Finding.objects.create(
+            title="vuln+cwe render", severity="High", numerical_severity="S1", description="x",
+            test=test, reporter=self.admin, active=True, verified=False, cwe=79,
+        )
+        # Two vuln ids: the first is the one mirrored into `cve` (storage order is preserved).
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="GHSA-aaaa-bbbb-cccc")
+        # Two CWE rows stored as canonical "CWE-<n>" strings (the primary cwe=79 is one of them,
+        # mirroring what save_cwes persists).
+        Finding_CWE.objects.create(finding=finding, cwe="CWE-79")
+        Finding_CWE.objects.create(finding=finding, cwe="CWE-89")
+        return finding
+
+    def test_list_renders_both_lists(self):
+        finding = self._make_finding_with_identity_rows()
+        row = next(
+            r for r in self.get_json("findings", data={"id__in": str(finding.id)})["results"]
+            if r["id"] == finding.id
+        )
+        self.assertEqual(["CVE-2020-1234", "GHSA-aaaa-bbbb-cccc"], row["vulnerability_ids"])
+        self.assertEqual([79, 89], row["cwes"])
+
+    def test_detail_renders_both_lists(self):
+        finding = self._make_finding_with_identity_rows()
+        detail = self.get_json(f"findings/{finding.id}")
+        self.assertEqual(["CVE-2020-1234", "GHSA-aaaa-bbbb-cccc"], detail["vulnerability_ids"])
+        self.assertEqual([79, 89], detail["cwes"])
+
+    def test_empty_lists_not_null_when_none(self):
+        test = Finding.objects.first().test
+        finding = Finding.objects.create(
+            title="no vuln no cwe", severity="Low", numerical_severity="S3", description="x",
+            test=test, reporter=self.admin, active=True, verified=False, cwe=0,
+        )
+        row = next(
+            r for r in self.get_json("findings", data={"id__in": str(finding.id)})["results"]
+            if r["id"] == finding.id
+        )
+        # Empty lists (not null) when the finding has no vuln-id / CWE rows.
+        self.assertEqual([], row["vulnerability_ids"])
+        self.assertEqual([], row["cwes"])
+        detail = self.get_json(f"findings/{finding.id}")
+        self.assertEqual([], detail["vulnerability_ids"])
+        self.assertEqual([], detail["cwes"])
+
+    def test_fields_accepts_the_new_slim_names(self):
+        # ?fields= naturally accepts the new slim field names (they are slim fields, not relations
+        # requiring opt-up); requesting exactly them projects to exactly them.
+        finding = self._make_finding_with_identity_rows()
+        row = next(
+            r for r in self.get_json(
+                "findings", data={"id__in": str(finding.id), "fields": "id,cwes,vulnerability_ids"},
+            )["results"]
+            if r["id"] == finding.id
+        )
+        self.assertEqual({"id", "cwes", "vulnerability_ids"}, set(row))
+        self.assertEqual(["CVE-2020-1234", "GHSA-aaaa-bbbb-cccc"], row["vulnerability_ids"])
+        self.assertEqual([79, 89], row["cwes"])
 
 
 class TestApiV3FindingsRbac(ApiV3TestCase):
