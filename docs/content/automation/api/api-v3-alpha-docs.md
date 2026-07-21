@@ -42,10 +42,10 @@ What v3 gives you over v2:
 
 The "try it out" flow works with your logged-in session, or paste a token (see below).
 
-The Scalar page loads its UI from the jsDelivr CDN with a **version-pinned URL and a Subresource
-Integrity hash** — the browser refuses to run the bundle if the CDN ever serves different bytes,
-and nothing is vendored into DefectDojo. Consequence: on air-gapped deployments the Scalar page
-cannot load; Swagger UI at `/docs` serves its assets locally and always works.
+The Scalar page serves its UI **from DefectDojo's own static files** — the bundle is installed at
+image-build time by the existing frontend dependency step (exact version pin, lockfile-verified
+integrity) and nothing is fetched from a CDN at runtime. It therefore works on air-gapped
+deployments, exactly like Swagger UI at `/docs`.
 
 ## Authentication
 
