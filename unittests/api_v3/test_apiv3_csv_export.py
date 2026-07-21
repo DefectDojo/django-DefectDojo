@@ -20,7 +20,17 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from dojo.api_v3.csv_export import _harden  # noqa: PLC2701 -- focused kernel unit test of the injection guard
-from dojo.models import Dojo_User, Engagement, Finding, Product, Product_Type, Test, Test_Type
+from dojo.models import (
+    Dojo_User,
+    Engagement,
+    Finding,
+    Finding_CWE,
+    Product,
+    Product_Type,
+    Test,
+    Test_Type,
+    Vulnerability_Id,
+)
 
 from .base import ApiV3TestCase
 
@@ -28,7 +38,7 @@ from .base import ApiV3TestCase
 # out into id/name pairs and tags as one joined column (§4.15).
 _FINDING_DEFAULT_COLUMNS = [
     "id", "title", "severity", "active", "verified", "false_p", "duplicate", "risk_accepted",
-    "out_of_scope", "is_mitigated", "date", "cwe",
+    "out_of_scope", "is_mitigated", "date", "cwe", "cwes", "vulnerability_ids",
     "test_id", "test_name", "engagement_id", "engagement_name", "asset_id", "asset_name",
     "organization_id", "organization_name", "reporter_id", "reporter_name",
     "locations_count", "tags", "created", "updated",
@@ -87,6 +97,17 @@ class TestApiV3CsvExportHappyPath(_CsvExportTestCase):
         self.assertEqual(finding.test.title or str(finding.test.test_type), row["test_name"])
         # Tags joined with ';' (tagulous force-lowercases; order preserved).
         self.assertEqual("alpha;beta", row["tags"])
+
+    def test_vulnerability_ids_and_cwes_columns_render_semicolon_joined(self):
+        finding = Finding.objects.first()
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
+        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="GHSA-aaaa-bbbb-cccc")
+        Finding_CWE.objects.create(finding=finding, cwe="CWE-79")
+        Finding_CWE.objects.create(finding=finding, cwe="CWE-89")
+        row = self._by_id(self._rows(self._get("findings/export.csv")))[str(finding.id)]
+        # List fields flatten to one semicolon-joined column each (§4.15).
+        self.assertEqual("CVE-2020-1234;GHSA-aaaa-bbbb-cccc", row["vulnerability_ids"])
+        self.assertEqual("79;89", row["cwes"])
 
     def test_datetime_columns_are_iso_z(self):
         finding = Finding.objects.first()

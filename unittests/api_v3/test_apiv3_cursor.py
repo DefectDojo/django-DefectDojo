@@ -192,9 +192,11 @@ class TestApiV3CursorQueryCost(ApiV3TestCase):
 
     """Cursor mode issues a constant number of queries per page -- one fewer than offset (no COUNT)."""
 
-    # Offset mode is 5 queries (capped count + rows + tags/expand prefetches); cursor drops the
-    # count query -> exactly 4, constant per page regardless of row/page count.
-    EXPECTED_CURSOR_QUERIES = 4
+    # Offset mode is 7 queries (capped count + rows + tags/vulnerability_id_set/finding_cwe_set
+    # prefetches); cursor drops the count query -> exactly 6, constant per page regardless of
+    # row/page count. (Was 4; +2 for the FindingSlim vulnerability_ids/cwes prefetches added
+    # alongside tags -- fixed in-batch prefetches, not per-row.)
+    EXPECTED_CURSOR_QUERIES = 6
 
     def setUp(self):
         super().setUp()

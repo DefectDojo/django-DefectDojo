@@ -37,6 +37,7 @@ from dojo.api_v3.refs import Ref, to_location_ref, to_ref
 # Canonical parent slims live in their own resource modules; re-exported here so the finding
 # expand targets (below) and the resource endpoints serialize through the same schema (I4, §12).
 from dojo.engagement.api_v3.schemas import EngagementSlim
+from dojo.finding.cwe import cwe_number
 from dojo.models import Finding
 from dojo.product.api_v3.schemas import AssetSlim
 from dojo.product_type.api_v3.schemas import OrganizationSlim
@@ -63,7 +64,7 @@ class FindingSlim(Schema):
     django_model: ClassVar = Finding
     # Base relation paths the finding resolvers read; applied by the route regardless of expand.
     SELECT_RELATED: ClassVar[tuple] = ("test__test_type", "test__engagement__product__prod_type", "reporter")
-    PREFETCH_RELATED: ClassVar[tuple] = ("tags",)
+    PREFETCH_RELATED: ClassVar[tuple] = ("tags", "vulnerability_id_set", "finding_cwe_set")
     EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
 
     id: int
@@ -78,6 +79,8 @@ class FindingSlim(Schema):
     is_mitigated: bool
     date: datetime.date | None
     cwe: int | None
+    cwes: list[int]
+    vulnerability_ids: list[str]
     test: Ref
     engagement: Ref
     asset: Ref
@@ -115,6 +118,21 @@ class FindingSlim(Schema):
     @staticmethod
     def resolve_tags(obj) -> list[str]:
         return [t.name for t in obj.tags.all()]
+
+    @staticmethod
+    def resolve_vulnerability_ids(obj) -> list[str]:
+        # Flat strings in storage order (first = the id mirrored into ``cve``); symmetric with what
+        # ``FindingWrite`` accepts, NOT v2's object list. Reads the prefetched ``vulnerability_id_set``
+        # reverse relation (default related_name; v2 uses the same source) -- no per-row query.
+        return [v.vulnerability_id for v in obj.vulnerability_id_set.all()]
+
+    @staticmethod
+    def resolve_cwes(obj) -> list[int]:
+        # ``Finding_CWE`` rows store canonical ``CWE-<n>`` strings and ``save_cwes`` persists the
+        # primary ``Finding.cwe`` as a row too, so the primary is already in the set. Expose the
+        # numeric part (``cwe_number`` parses ``CWE-<n>`` -> n) for consistency with the scalar
+        # ``cwe: int``. Reads the prefetched ``finding_cwe_set`` reverse relation -- no per-row query.
+        return [n for n in (cwe_number(row.cwe) for row in obj.finding_cwe_set.all()) if n is not None]
 
 
 def _finding_location_edges(finding) -> list[dict]:
