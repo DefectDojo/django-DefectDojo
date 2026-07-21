@@ -253,9 +253,10 @@ def plan_list_fields(slim_schema: type, detail_schema: type, requested: set[str]
     plan (Part A opt-up + Part B defer). ``requested`` is the already-parsed/validated ``?fields=``
     set (``id`` included) or ``None`` for the default (no ``?fields=``) request.
 
-    - ``defer`` = detail-only concrete own-model columns **minus** the requested fields. On a default
-      list this defers every heavy detail column (they are never serialized by the slim shape); a
-      ``?fields=impact`` request un-defers exactly ``impact``.
+    - ``defer`` = detail-only concrete own-model columns **minus** the requested fields **minus** the
+      concrete columns a requested *computed* detail field reads (``DETAIL_FIELD_COLUMNS``). On a
+      default list this defers every heavy detail column (they are never serialized by the slim
+      shape); a ``?fields=impact`` request un-defers exactly ``impact``.
     - ``detail_extra`` = the requested detail-only fields (spliced onto the slim row).
     - ``select_related`` = the fixed joins the requested detail-only *relation* refs need, declared by
       the detail schema's ``DETAIL_SELECT_RELATED`` (so D11 wire↔model naming and reverse-O2O joins
@@ -269,7 +270,18 @@ def plan_list_fields(slim_schema: type, detail_schema: type, requested: set[str]
 
     requested_set = set(requested) if requested is not None else set()
     detail_extra = tuple(sorted(requested_set & detail_only))
-    defer = tuple(sorted(defer_candidates - requested_set))
+
+    # A requested *computed* (non-concrete) detail field's resolver may read concrete own-model
+    # columns that would otherwise be deferred (e.g. ``Test.deduplication_algorithm`` reads the
+    # deferred ``scan_type`` column). A schema declares those dependencies in ``DETAIL_FIELD_COLUMNS``
+    # so requesting such a field un-defers exactly the columns its resolver needs -- keeping the LIST
+    # query count constant (no per-row lazy column load). Analogous to ``DETAIL_SELECT_RELATED`` but
+    # for own columns a resolver reads rather than relation joins.
+    detail_field_columns: dict[str, tuple[str, ...]] = getattr(detail_schema, "DETAIL_FIELD_COLUMNS", {})
+    undefer: set[str] = set()
+    for name in detail_extra:
+        undefer.update(detail_field_columns.get(name, ()))
+    defer = tuple(sorted(defer_candidates - requested_set - undefer))
 
     detail_select_related: dict[str, tuple[str, ...]] = getattr(detail_schema, "DETAIL_SELECT_RELATED", {})
     select_related: set[str] = set()
