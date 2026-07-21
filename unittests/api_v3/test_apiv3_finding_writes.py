@@ -65,6 +65,36 @@ class TestApiV3FindingCreate(ApiV3TestCase):
         self.assertEqual(79, created.cwe)
         self.assertTrue(Finding_CWE.objects.filter(finding=created, cwe="CWE-79").exists())
 
+    def test_create_with_cwes_list_mirrors_primary_and_persists_rows(self):
+        # `cwes` only (no scalar `cwe`): the first entry becomes the primary (mirrored into `cwe`,
+        # like vulnerability_ids[0]->cve); rows are persisted primary-first and read back symmetric.
+        payload = _finding_payload(self.test.id, cwes=[89, 79])
+        response = self.client.post(self.v3_url("findings"), payload, format="json")
+        self.assertEqual(201, response.status_code, response.content[:500])
+        body = response.json()
+        created = Finding.objects.get(pk=body["id"])
+        self.assertEqual(89, created.cwe)  # first list entry mirrored into the scalar primary
+        self.assertEqual(
+            {"CWE-89", "CWE-79"},
+            set(Finding_CWE.objects.filter(finding=created).values_list("cwe", flat=True)),
+        )
+        self.assertEqual([89, 79], body["cwes"])  # read-back symmetry: primary first, then the rest
+
+    def test_create_scalar_and_cwes_scalar_wins_primary(self):
+        # Both scalar `cwe` and `cwes`: the explicit scalar is the primary; the list supplies the
+        # rest of the rows (primary first on read-back).
+        payload = _finding_payload(self.test.id, cwe=79, cwes=[89, 100])
+        response = self.client.post(self.v3_url("findings"), payload, format="json")
+        self.assertEqual(201, response.status_code, response.content[:500])
+        body = response.json()
+        created = Finding.objects.get(pk=body["id"])
+        self.assertEqual(79, created.cwe)  # explicit scalar stays primary
+        self.assertEqual([79, 89, 100], body["cwes"])  # primary first, then the list
+        self.assertEqual(
+            {"CWE-79", "CWE-89", "CWE-100"},
+            set(Finding_CWE.objects.filter(finding=created).values_list("cwe", flat=True)),
+        )
+
     def test_create_duplicate_active_invariant_is_400(self):
         payload = _finding_payload(self.test.id, active=True, duplicate=True)
         response = self.client.post(self.v3_url("findings"), payload, format="json")
@@ -113,6 +143,16 @@ class TestApiV3FindingUpdate(ApiV3TestCase):
         self.assertEqual("CVE-2019-9999", self.finding.cve)
         self.assertTrue(Vulnerability_Id.objects.filter(finding=self.finding, vulnerability_id="CVE-2019-9999").exists())
 
+    def _seed_cwe_rows(self, primary: int, extras: list[int]) -> None:
+        self.finding.cwe = primary
+        self.finding.save()
+        Finding_CWE.objects.filter(finding=self.finding).delete()
+        for n in [primary, *extras]:
+            Finding_CWE.objects.create(finding=self.finding, cwe=f"CWE-{n}")
+
+    def _cwe_rows(self) -> set[str]:
+        return set(Finding_CWE.objects.filter(finding=self.finding).values_list("cwe", flat=True))
+
     def test_update_cwe_resyncs_finding_cwe(self):
         response = self.client.patch(
             self.v3_url(f"findings/{self.finding.id}"), {"cwe": 89}, format="json",
@@ -121,6 +161,66 @@ class TestApiV3FindingUpdate(ApiV3TestCase):
         self.finding.refresh_from_db()
         self.assertEqual(89, self.finding.cwe)
         self.assertTrue(Finding_CWE.objects.filter(finding=self.finding, cwe="CWE-89").exists())
+
+    def test_update_cwes_list_replaces_rows(self):
+        # A `cwes` list drives the rows: old rows replaced, first entry mirrored into the scalar
+        # primary (no explicit scalar in the request), read-back symmetric.
+        self._seed_cwe_rows(11, [22, 33])
+        response = self.client.patch(
+            self.v3_url(f"findings/{self.finding.id}"), {"cwes": [79, 89]}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.finding.refresh_from_db()
+        self.assertEqual(79, self.finding.cwe)  # first list entry mirrored (no scalar supplied)
+        self.assertEqual({"CWE-79", "CWE-89"}, self._cwe_rows())  # old rows replaced
+        self.assertEqual([79, 89], response.json()["cwes"])  # read-back symmetry
+
+    def test_update_scalar_cwe_only_still_resyncs_to_primary(self):
+        # Existing behavior unchanged: a scalar-only `cwe` change resyncs the rows to just that
+        # primary, wiping any extra rows (documented §12 OS3b divergence).
+        self._seed_cwe_rows(11, [22, 33])
+        response = self.client.patch(
+            self.v3_url(f"findings/{self.finding.id}"), {"cwe": 89}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.finding.refresh_from_db()
+        self.assertEqual(89, self.finding.cwe)
+        self.assertEqual({"CWE-89"}, self._cwe_rows())  # extras wiped by the scalar resync
+
+    def test_update_cwes_empty_clears_extras_keeps_primary(self):
+        # An explicit empty list clears the extra rows and resyncs to just the scalar-derived primary
+        # (an explicit empty is a statement, unlike omission).
+        self._seed_cwe_rows(11, [22, 33])
+        response = self.client.patch(
+            self.v3_url(f"findings/{self.finding.id}"), {"cwes": []}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.finding.refresh_from_db()
+        self.assertEqual(11, self.finding.cwe)  # scalar untouched
+        self.assertEqual({"CWE-11"}, self._cwe_rows())  # extras cleared, primary retained
+
+    def test_update_omitting_cwe_and_cwes_leaves_rows_untouched(self):
+        # Omitting BOTH `cwe` and `cwes` leaves the rows exactly as they were (no-reset-on-omit,
+        # symmetric with vulnerability_ids/reporter).
+        self._seed_cwe_rows(11, [22, 33])
+        response = self.client.patch(
+            self.v3_url(f"findings/{self.finding.id}"), {"severity": "Low"}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.assertEqual({"CWE-11", "CWE-22", "CWE-33"}, self._cwe_rows())
+
+    def test_update_scalar_and_cwes_scalar_wins_primary(self):
+        # Both supplied on PATCH: the explicit scalar stays primary, the list drives the extra rows
+        # (list wins over the scalar-only resync -- save_cwes runs once).
+        self._seed_cwe_rows(11, [])
+        response = self.client.patch(
+            self.v3_url(f"findings/{self.finding.id}"), {"cwe": 79, "cwes": [89, 100]}, format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.finding.refresh_from_db()
+        self.assertEqual(79, self.finding.cwe)
+        self.assertEqual([79, 89, 100], response.json()["cwes"])
+        self.assertEqual({"CWE-79", "CWE-89", "CWE-100"}, self._cwe_rows())
 
     def test_update_duplicate_active_invariant_is_400(self):
         self.finding.active = True
@@ -227,6 +327,33 @@ class TestApiV3FindingReplace(ApiV3TestCase):
         self.assertEqual(200, self._put().status_code)
         self.finding.refresh_from_db()
         self.assertFalse(self.finding.out_of_scope)
+
+    def _cwe_rows(self) -> set[str]:
+        return set(Finding_CWE.objects.filter(finding=self.finding).values_list("cwe", flat=True))
+
+    def test_put_with_cwes_persists_rows_primary_first(self):
+        # PUT accepts a `cwes` list: first entry mirrored into the scalar primary (no explicit scalar
+        # in the payload), rows persisted primary-first, read-back symmetric.
+        response = self._put(cwes=[89, 79])
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.finding.refresh_from_db()
+        self.assertEqual(89, self.finding.cwe)
+        self.assertEqual({"CWE-89", "CWE-79"}, self._cwe_rows())
+        self.assertEqual([89, 79], response.json()["cwes"])
+
+    def test_put_omitting_cwes_follows_scalar_resync(self):
+        # Omitting `cwes` on PUT does not run the list-driven replacement (no-reset-on-omit); the rows
+        # follow the existing scalar-`cwe` resync. Here PUT supplies scalar cwe=55 and no list, so the
+        # rows become just {CWE-55} -- the seeded extras are gone via the scalar resync of the full
+        # replace, not because the omitted `cwes` cleared them (§12).
+        Finding_CWE.objects.filter(finding=self.finding).delete()
+        Finding_CWE.objects.create(finding=self.finding, cwe="CWE-11")
+        Finding_CWE.objects.create(finding=self.finding, cwe="CWE-22")
+        response = self._put(cwe=55)
+        self.assertEqual(200, response.status_code, response.content[:500])
+        self.finding.refresh_from_db()
+        self.assertEqual(55, self.finding.cwe)
+        self.assertEqual({"CWE-55"}, self._cwe_rows())
 
     def test_put_missing_required_is_400(self):
         response = self.client.put(

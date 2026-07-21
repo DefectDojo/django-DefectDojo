@@ -209,8 +209,11 @@ class FindingWrite(Schema):
     Create payload (POST /findings). ``test``/``title``/``severity``/``description``/``active``/
     ``verified`` required (mirrors ``FindingCreateSerializer``: ``active``/``verified`` carry
     ``extra_kwargs required=True``). ``vulnerability_ids`` is a flat ``list[str]`` (§4.11); the
-    service persists them and mirrors the first into the ``cve`` field. ``found_by`` references
-    ``Test_Type`` ids; ``reporter``/``mitigated_by`` reference user ids.
+    service persists them and mirrors the first into the ``cve`` field. ``cwes`` is a flat
+    ``list[int]`` (plain CWE numbers, e.g. ``79``), symmetric with ``FindingSlim.cwes`` and parallel
+    to ``vulnerability_ids``: an explicit scalar ``cwe`` wins as the primary when both are supplied;
+    when only ``cwes`` is supplied its first entry is mirrored into ``cwe`` (§12). ``found_by``
+    references ``Test_Type`` ids; ``reporter``/``mitigated_by`` reference user ids.
     """
 
     model_config = {"extra": "forbid"}
@@ -240,6 +243,7 @@ class FindingWrite(Schema):
     reporter: int | None = None
     found_by: list[int] | None = None
     vulnerability_ids: list[str] | None = None
+    cwes: list[int] | None = None
     tags: list[str] | None = None
     push_to_jira: bool = False
 
@@ -274,6 +278,7 @@ class FindingUpdate(Schema):
     reporter: int | None = None
     found_by: list[int] | None = None
     vulnerability_ids: list[str] | None = None
+    cwes: list[int] | None = None
     tags: list[str] | None = None
     push_to_jira: bool = False
 
@@ -297,6 +302,11 @@ class FindingReplace(Schema):
     Required, strict (``extra="forbid"``) and applied without ``exclude_unset`` by the route so
     omitted optionals reset to the defaults below. All side-effect/status-invariant validation still
     lives in the service (``dojo/finding/services.py`` ``update_finding``, D7/I6).
+
+    ``vulnerability_ids``/``cwes`` default to ``None`` and the service treats ``None`` as "not
+    supplied" (rows left untouched) -- so on a PUT that omits them the reset-to-``None`` is a no-op,
+    NOT a reset to empty. This is the documented no-reset-on-omit deviation for the identity-row
+    fields, symmetric with ``reporter`` (§12); an explicit ``cwes: []`` clears the extra rows.
     """
 
     model_config = {"extra": "forbid"}
@@ -325,5 +335,6 @@ class FindingReplace(Schema):
     reporter: int | None = None
     found_by: list[int] | None = None
     vulnerability_ids: list[str] | None = None
+    cwes: list[int] | None = None
     tags: list[str] | None = None
     push_to_jira: bool = False

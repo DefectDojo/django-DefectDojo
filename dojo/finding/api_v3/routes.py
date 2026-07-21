@@ -238,6 +238,7 @@ def build_findings_router(
         test_id = data.pop("test")
         push_to_jira = data.pop("push_to_jira")
         vulnerability_ids = data.pop("vulnerability_ids")
+        cwes = data.pop("cwes")
         # Mirror UserHasFindingPermission -> check_post_permission(request, Test, "test", "add"):
         # 404 if the test doesn't exist, 403 if the user can't add findings to it.
         test = get_object_or_none(Test, pk=test_id)
@@ -248,7 +249,7 @@ def build_findings_router(
             raise PermissionDenied
         finding = create_finding(
             test=test, data=data, user=request.user,
-            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids,
+            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
         )
         obj = _detail_object(request, queryset_hook, detail_schema, finding.pk) or finding
         return json_response(serialize(obj, detail_schema, {}), status=201)
@@ -265,6 +266,7 @@ def build_findings_router(
         changes = payload.dict(exclude_unset=True)
         push_to_jira = changes.pop("push_to_jira", False)
         vulnerability_ids = changes.pop("vulnerability_ids", None)
+        cwes = changes.pop("cwes", None)
         # Mirror FindingViewSet.perform_update: OR push_to_jira with the project's push_all_issues.
         jira_project = jira_services.get_project(finding)
         if get_system_setting("enable_jira") and jira_project:
@@ -272,7 +274,7 @@ def build_findings_router(
 
         update_finding(
             finding, changes=changes, user=request.user,
-            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids,
+            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
         )
         obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
         return json_response(serialize(obj, detail_schema, {}))
@@ -296,6 +298,7 @@ def build_findings_router(
         changes = payload.dict()
         push_to_jira = changes.pop("push_to_jira", False)
         vulnerability_ids = changes.pop("vulnerability_ids", None)
+        cwes = changes.pop("cwes", None)
         # Mirror FindingViewSet.perform_update: OR push_to_jira with the project's push_all_issues.
         jira_project = jira_services.get_project(finding)
         if get_system_setting("enable_jira") and jira_project:
@@ -303,7 +306,7 @@ def build_findings_router(
 
         update_finding(
             finding, changes=changes, user=request.user,
-            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids,
+            push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
         )
         obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
         return json_response(serialize(obj, detail_schema, {}))
