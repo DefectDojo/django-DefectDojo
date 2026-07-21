@@ -429,8 +429,11 @@ For example, to satisfy a mandatory Resolution code:
 Notes:
 
 - Field Name is the ServiceNow column name — `close_code`, `close_notes`, or a custom `u_...` field.
+- Transition mappings fire when the record's state actually changes: a Finding that is already closed when first pushed, an update that closes or reopens the record, and the forced close when a ticket link is deleted. They are not re-sent on routine updates of an unchanged record, so journal fields such as `work_notes` receive one entry per transition.
 - Reference fields such as `assignment_group` and `assigned_to` expect a **sys_id**, not a display name.
+- Values that parse as JSON are sent typed: `true`, `42`, `[...]`, `{...}` — and `null`, which clears the field. To send such text as a literal string, wrap it in double quotes (e.g. `"null"`).
 - `short_description`, `description`, `state`, `impact`, `urgency`, and `priority` are owned by the description template and the severity/status mappings, so they cannot be set through a custom field mapping.
+- On tables other than `incident`, state values that match the standard Incident set (`1`, `2`, `3`, `6`, `7`, `8`) are still interpreted with Incident semantics — including the automatic Resolution code default on `6`/`7`/`8`. Prefer state values outside that range on custom tables, or supply the close fields explicitly as above.
 
 ## Shortcut
 
