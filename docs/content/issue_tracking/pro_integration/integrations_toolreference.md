@@ -286,6 +286,49 @@ By default Jira issues use DefectDojo's built-in title and body. To customize th
 - **Token lifecycle (OAuth):** DefectDojo owns the whole flow — it performs the authorization-code exchange, stores the access and refresh tokens, and refreshes on demand before a push, persisting the new refresh token each time (Atlassian rotates it on every refresh).
 - **Credential storage:** all connection credentials (passwords, tokens, client secrets, OAuth tokens) are encrypted at rest and are never returned through the API — editing a connection shows a "leave blank to keep" placeholder for stored secrets.
 
+## Linear
+
+The Linear integration allows you to push DefectDojo Findings as [Linear](https://linear.app/) Issues. Issues are created in a Team in your Linear workspace.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to `https://api.linear.app/graphql`.
+- **API Key** should be set to a Linear personal API key. Keys can be generated in Linear under Settings, then Security & access, then [API](https://linear.app/settings/account/security). The key is sent to Linear's GraphQL API in the `Authorization` header.
+
+### Issue Tracker Mapping
+
+- **Team (Group) ID** should be set to the ID of the Linear Team that Issues will be created for. You can list your Teams and their IDs by calling the Linear GraphQL API:
+
+```
+curl -H "Authorization: {{API_KEY}}" -H "Content-Type: application/json" \
+  -d '{"query":"{ teams { nodes { id name key } } }"}' https://api.linear.app/graphql
+```
+
+### Severity Mapping Details
+
+A Linear Issue carries a numeric **priority** rather than a severity field. Each DefectDojo severity maps to a Linear priority, where `1` is Urgent and `4` is Low:
+
+- **Severity Field Name**: `Priority`
+- **Info Mapping**: `4`
+- **Low Mapping**: `4`
+- **Medium Mapping**: `3`
+- **High Mapping**: `2`
+- **Critical Mapping**: `1`
+
+### Status Mapping Details
+
+Each status value must be set to the ID of a Workflow State in your Linear Team. Workflow State IDs are unique to each workspace, so there are no default values. You can list the Workflow States and their IDs by calling the Linear GraphQL API:
+
+```
+curl -H "Authorization: {{API_KEY}}" -H "Content-Type: application/json" \
+  -d '{"query":"{ workflowStates { nodes { id name type team { key } } } }"}' https://api.linear.app/graphql
+```
+
+- **Status Field Name**: `Workflow State ID`
+- **Active Mapping**: the ID of a started or unstarted state, for example `Todo` or `In Progress`.
+- **Closed Mapping**: the ID of a completed state, for example `Done`. When a Finding is deleted in DefectDojo, its Issue is moved to this state.
+
 ## PagerDuty
 
 The PagerDuty Integration allows you to push DefectDojo Findings and Finding Groups as PagerDuty Incidents, opened on a PagerDuty Service of your choice.
