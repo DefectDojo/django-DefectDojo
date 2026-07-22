@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
@@ -1066,10 +1067,8 @@ class TestImporterUtils(DojoAPITestCase):
         finding.reporter = self.testuser
         finding.save()
 
-        # Add some vulnerability IDs
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-5678")
-        finding.cve = "CVE-2020-1234"
+        # Add some vulnerability IDs via the dual-write seam (legacy rows + entity references)
+        save_vulnerability_ids(finding, ["CVE-2020-1234", "CVE-2020-5678"])
         finding.save()
 
         # Verify initial state
@@ -1102,10 +1101,8 @@ class TestImporterUtils(DojoAPITestCase):
         finding.reporter = self.testuser
         finding.save()
 
-        # Add initial vulnerability IDs
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-5678")
-        finding.cve = "CVE-2020-1234"
+        # Add initial vulnerability IDs via the dual-write seam (legacy rows + entity references)
+        save_vulnerability_ids(finding, ["CVE-2020-1234", "CVE-2020-5678"])
         finding.save()
 
         # Verify initial state

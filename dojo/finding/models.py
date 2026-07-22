@@ -705,9 +705,13 @@ class Finding(BaseModel):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
-        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util)
-        for vulnerability_id in self.vulnerability_id_set.all():
-            Vulnerability_Id.objects.create(finding=copy, vulnerability_id=vulnerability_id.vulnerability_id)
+        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util).
+        # Route vulnerability ids through the dual-write seam so the copy gets legacy rows AND
+        # entity references (copy.cve was already carried over by copy_model_util).
+        from dojo.vulnerability_id.manager import persist_for_finding  # noqa: PLC0415 -- avoid import cycle
+        vulnerability_id_strings = [row.vulnerability_id for row in self.vulnerability_id_set.all()]
+        if vulnerability_id_strings:
+            persist_for_finding(copy, vulnerability_id_strings, delete_existing=False)
         for finding_cwe in self.finding_cwe_set.all():
             Finding_CWE.objects.create(finding=copy, cwe=finding_cwe.cwe)
 
@@ -838,12 +842,18 @@ class Finding(BaseModel):
 
         def _get_saved_vulnerability_ids(finding) -> str:
             if finding.id is not None:
-                # Use the reverse relation (vulnerability_id_set) rather than a fresh
-                # Vulnerability_Id.objects.filter(...) so prefetch_related("vulnerability_id_set")
-                # is honored — avoids an N+1 (COUNT + SELECT per finding) during dedupe/hashcode.
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.vulnerability_id_set.all()]
+                from dojo.vulnerability_id.queries import use_entity_reads  # noqa: PLC0415
+                if use_entity_reads():
+                    # Entity store: the prefetch-honoring reverse relation (vulnerability_references
+                    # + select_related("vulnerability")) so Prefetch is honored — no N+1 in dedupe.
+                    vulnerability_id_str_list = [ref.vulnerability.vulnerability_id for ref in finding.vulnerability_references.all()]
+                else:
+                    # Use the reverse relation (vulnerability_id_set) rather than a fresh
+                    # Vulnerability_Id.objects.filter(...) so prefetch_related("vulnerability_id_set")
+                    # is honored — avoids an N+1 (COUNT + SELECT per finding) during dedupe/hashcode.
+                    vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.vulnerability_id_set.all()]
                 deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(len(vulnerability_id_str_list)))
-                # sort vulnerability_ids strings
+                # sort vulnerability_ids strings (no dedupe — byte parity with the legacy store)
                 return "".join(sorted(vulnerability_id_str_list))
             return ""
 
@@ -1383,9 +1393,14 @@ class Finding(BaseModel):
 
     @cached_property
     def vulnerability_ids(self):
+        from dojo.vulnerability_id.queries import use_entity_reads  # noqa: PLC0415
         # Get vulnerability ids from database and convert to list of strings
-        vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
+        if use_entity_reads():
+            # Entity store: reverse relation is ordered by FindingVulnerabilityReference.Meta.ordering.
+            vulnerability_ids = [ref.vulnerability.vulnerability_id for ref in self.vulnerability_references.all()]
+        else:
+            vulnerability_ids_model = self.vulnerability_id_set.all()
+            vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
 
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until

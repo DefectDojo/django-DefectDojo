@@ -121,6 +121,7 @@ from dojo.utils import (
     reopen_external_issue,
     update_external_issue,
 )
+from dojo.vulnerability_id.queries import vulnerability_id_prefetch
 
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
@@ -168,7 +169,7 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related("notes")
         prefetched_findings = prefetched_findings.prefetch_related("tags")
         prefetched_findings = prefetched_findings.prefetch_related(
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
     else:
         logger.debug("unable to prefetch because query was already executed")

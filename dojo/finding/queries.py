@@ -20,6 +20,7 @@ from dojo.models import (
     Vulnerability_Id,
 )
 from dojo.request_cache import cache_for_request_or_task
+from dojo.vulnerability_id.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
             "status_finding",
             "finding_group_set",
             "finding_group_set__jira_issue",  # Include both variants
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
         base_status = LocationFindingReference.objects.prefetch_related("location__url").all()
         prefetched_findings = prefetched_findings.annotate(
@@ -147,7 +148,7 @@ def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=Tr
             "status_finding",
             "finding_group_set",
             "finding_group_set__jira_issue",  # Include both variants
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
         base_status = Endpoint_Status.objects.prefetch_related("endpoint")
         status = Case(

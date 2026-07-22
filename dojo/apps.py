@@ -113,6 +113,10 @@ def register_watson_models(app_config):
     watson.register(app_config.get_model("Location"))
     watson.register(app_config.get_model("Engagement"), fields=get_model_fields_with_extra(app_config.get_model("Engagement"), ("id", "product__name")), store=("product__name", ))
     watson.register(app_config.get_model("App_Analysis"))
+    # Watson stays on the legacy Vulnerability_Id table (unconditionally dual-written), so global
+    # search keeps working identically in both flag states with no buildwatson reindex. Moving the
+    # watson index (and the classic search view) to FindingVulnerabilityReference is a legacy-drop
+    # phase concern, not this reads-only flag flip.
     watson.register(app_config.get_model("Vulnerability_Id"), store=("finding__test__engagement__product__name", ))
 
     # YourModel = app_config.get_model("YourModel")
