@@ -177,6 +177,24 @@ class UserSerializer(serializers.ModelSerializer):
                 msg = "Only superusers are allowed to change configuration permissions."
                 raise ValidationError(msg)
 
+        # Identity fields (username/email) determine who an account is and drive
+        # the email-based password-reset flow. A non-superuser holding user-management
+        # permissions must not be able to change the identity of *another* account:
+        # changing a victim's email and then triggering a password reset is an
+        # account-takeover vector. Users may still edit their own identity fields,
+        # and superusers retain full control. Mirrors the is_superuser / is_staff /
+        # configuration_permissions guards above.
+        request_user = self.context["request"].user
+        if (
+            self.instance is not None
+            and not request_user.is_superuser
+            and self.instance.pk != request_user.pk
+        ):
+            for identity_field in ("username", "email"):
+                if identity_field in data and data[identity_field] != getattr(self.instance, identity_field):
+                    msg = "Only superusers are allowed to change the username or email of another user."
+                    raise ValidationError(msg)
+
         if self.context["request"].method in {"PATCH", "PUT"} and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
