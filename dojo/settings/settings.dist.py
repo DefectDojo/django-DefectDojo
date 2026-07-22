@@ -288,6 +288,10 @@ env = environ.FileAwareEnv(
     DD_REQUESTS_TIMEOUT=(int, 30),
     # Dictates if v3 functionality will be enabled (on by default as of 3.0.0; set to False to revert to the legacy Endpoint model)
     DD_V3_FEATURE_LOCATIONS=(bool, True),
+    # Dictates if findings read their vulnerability ids from the normalized VulnerabilityId entity/reference tables
+    # (on by default; set to False to read from the legacy Vulnerability_Id table). Writes are always dual, so the flag
+    # only selects the READ store and is reversible in both directions with zero data drift.
+    DD_V3_FEATURE_VULNERABILITY_IDS=(bool, True),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
     # Shared cache backend (django.core.cache). When set, Django uses RedisCache
@@ -679,6 +683,7 @@ SHOW_A11Y_REQUIRED_FIELDS_NOTICE = env("DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE")
 
 # V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
+V3_FEATURE_VULNERABILITY_IDS = env("DD_V3_FEATURE_VULNERABILITY_IDS")
 
 
 # ------------------------------------------------------------------------------

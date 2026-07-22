@@ -110,6 +110,14 @@ from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.url.models import URL
+from dojo.vulnerability_id.models import (
+    FindingVulnerabilityReference,
+    VulnerabilityId,
+)
+from dojo.vulnerability_id.queries import (
+    get_authorized_finding_vulnerability_references,
+    get_authorized_vulnerability_id_entities,
+)
 
 ########
 # Models backed by ViewSets (api_v2.views) from which we can derive the required permission check.
@@ -216,6 +224,8 @@ for model in (
 for model, helper in (
     (Finding_Group, get_authorized_finding_groups),
     (Vulnerability_Id, get_authorized_vulnerability_ids),
+    (VulnerabilityId, get_authorized_vulnerability_id_entities),
+    (FindingVulnerabilityReference, get_authorized_finding_vulnerability_references),
 ):
     register(model, discard_user(helper), "view")
 

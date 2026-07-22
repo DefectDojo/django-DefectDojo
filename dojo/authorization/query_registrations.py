@@ -41,6 +41,7 @@ from dojo.models import (
     Vulnerability_Id,
 )
 from dojo.request_cache import cache_for_request_or_task
+from dojo.vulnerability_id.models import FindingVulnerabilityReference, VulnerabilityId
 
 
 def _resolve_user(user):
@@ -416,6 +417,33 @@ def _get_authorized_vulnerability_ids(permission, queryset=None, user=None):
 
 register_auth_filter("finding.get_authorized_vulnerability_ids", _get_authorized_vulnerability_ids)
 register_auth_filter("finding.get_authorized_vulnerability_ids_for_queryset", _get_authorized_vulnerability_ids)
+
+
+def _get_authorized_vulnerability_id_entities(permission, queryset=None, user=None):
+    user = _resolve_user(user)
+    qs = queryset if queryset is not None else VulnerabilityId.objects.all()
+    if user is None or getattr(user, "is_anonymous", False):
+        return qs.none()
+    if _is_unrestricted(user, permission_to_action(permission)):
+        return qs
+    # An entity links to findings across many products; distinct() collapses the join fan-out.
+    return qs.filter(
+        finding_references__finding__test__engagement__product__id__in=_authorized_product_ids(user),
+    ).distinct()
+
+
+def _get_authorized_finding_vulnerability_references(permission, queryset=None, user=None):
+    user = _resolve_user(user)
+    qs = queryset if queryset is not None else FindingVulnerabilityReference.objects.all()
+    if user is None or getattr(user, "is_anonymous", False):
+        return qs.none()
+    if _is_unrestricted(user, permission_to_action(permission)):
+        return qs
+    return qs.filter(finding__test__engagement__product__id__in=_authorized_product_ids(user))
+
+
+register_auth_filter("vulnerability_id.get_authorized_entities", _get_authorized_vulnerability_id_entities)
+register_auth_filter("vulnerability_id.get_authorized_references", _get_authorized_finding_vulnerability_references)
 
 
 # ---------------------------------------------------------------------------
