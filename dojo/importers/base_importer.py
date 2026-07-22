@@ -13,7 +13,6 @@ from django.utils.timezone import make_aware
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.finding.cwe import finding_cwe_labels
-from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
@@ -36,13 +35,13 @@ from dojo.models import (
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
+from dojo.vulnerability_id.manager import VulnerabilityIdManager
 
 logger = logging.getLogger(__name__)
 
@@ -83,8 +82,9 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
-        self.pending_vulnerability_ids: list[Vulnerability_Id] = []
-        self.pending_vuln_id_deletes: list[int] = []
+        # Unconditional dual-write seam: buffers legacy Vulnerability_Id rows AND the new
+        # entity/reference rows, flushed together at the batch boundary.
+        self.vulnerability_id_manager = VulnerabilityIdManager()
         self.pending_cwes: list[Finding_CWE] = []
         self.pending_cwe_deletes: list[int] = []
         self.pending_burp_rr: list[BurpRawRequestResponse] = []
@@ -897,10 +897,7 @@ class BaseImporter(ImporterOptions):
         self.sanitize_vulnerability_ids(finding)
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
-        self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
-            for vid in vulnerability_ids_to_process
-        ])
+        self.vulnerability_id_manager.record(finding, vulnerability_ids_to_process)
         if vulnerability_ids_to_process:
             finding.cve = vulnerability_ids_to_process[0]
         else:
@@ -929,13 +926,10 @@ class BaseImporter(ImporterOptions):
         self.pending_cwes.extend([Finding_CWE(finding=finding, cwe=cwe) for cwe in new_cwes])
 
     def flush_vulnerability_ids(self) -> None:
-        """Delete stale and bulk-insert accumulated Vulnerability_Id / Finding_CWE objects, then clear buffers."""
-        if self.pending_vuln_id_deletes:
-            Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
-            self.pending_vuln_id_deletes.clear()
-        if self.pending_vulnerability_ids:
-            Vulnerability_Id.objects.bulk_create(self.pending_vulnerability_ids, batch_size=1000)
-            self.pending_vulnerability_ids.clear()
+        """Flush the dual-write vulnerability-id buffers, then the Finding_CWE buffers, and clear."""
+        # Legacy Vulnerability_Id rows + entity/reference rows, in one transaction.
+        self.vulnerability_id_manager.flush()
+        # CWE buffers ride the same flush boundary as before (not owned by the manager).
         if self.pending_cwe_deletes:
             Finding_CWE.objects.filter(finding_id__in=self.pending_cwe_deletes).delete()
             self.pending_cwe_deletes.clear()

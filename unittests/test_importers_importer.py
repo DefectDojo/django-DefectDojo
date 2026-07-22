@@ -1171,11 +1171,12 @@ class TestImporterUtils(DojoAPITestCase):
         reimporter.reconcile_vulnerability_ids(finding_b)
         reimporter.reconcile_vulnerability_ids(finding_c)
 
-        # pending_vuln_id_deletes only contains changed findings, not finding_c
-        self.assertIn(finding_a.id, reimporter.pending_vuln_id_deletes)
-        self.assertIn(finding_b.id, reimporter.pending_vuln_id_deletes)
-        self.assertNotIn(finding_c.id, reimporter.pending_vuln_id_deletes)
-        self.assertEqual(2, len(reimporter.pending_vulnerability_ids))
+        # pending_deletes only contains changed findings, not finding_c
+        manager = reimporter.vulnerability_id_manager
+        self.assertIn(finding_a.id, manager.pending_deletes)
+        self.assertIn(finding_b.id, manager.pending_deletes)
+        self.assertNotIn(finding_c.id, manager.pending_deletes)
+        self.assertEqual(2, sum(len(ids) for _, ids in manager.pending))
 
         # Old IDs still in DB (not yet deleted)
         self.assertEqual(1, Vulnerability_Id.objects.filter(finding=finding_a).count())
@@ -1184,8 +1185,8 @@ class TestImporterUtils(DojoAPITestCase):
         reimporter.flush_vulnerability_ids()
 
         # Buffers cleared
-        self.assertEqual([], reimporter.pending_vuln_id_deletes)
-        self.assertEqual([], reimporter.pending_vulnerability_ids)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending_deletes)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending)
 
         # finding_a: old deleted, new inserted
         vuln_ids_a = list(Vulnerability_Id.objects.filter(finding=finding_a).values_list("vulnerability_id", flat=True))
@@ -1218,8 +1219,8 @@ class TestImporterUtils(DojoAPITestCase):
         finding.unsaved_vulnerability_ids = ["CVE-2020-1234"]
         reimporter.reconcile_vulnerability_ids(finding)
 
-        self.assertEqual([], reimporter.pending_vuln_id_deletes)
-        self.assertEqual([], reimporter.pending_vulnerability_ids)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending_deletes)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending)
 
         finding.delete()
 
