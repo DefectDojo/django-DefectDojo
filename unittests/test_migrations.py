@@ -8,6 +8,7 @@ from django_test_migrations.contrib.unittest_case import MigratorTestCase
 
 from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.models import (
+    Development_Environment,
     Engagement,
     Finding,
     FindingVulnerabilityReference,
@@ -198,12 +199,17 @@ class TestVulnerabilityIdBackfill(TestCase):
     def setUpTestData(cls):
         now = timezone.now()
         prod_type = Product_Type.objects.create(name="vulnid-pt")
-        product = Product.objects.create(prod_type=prod_type, name="vulnid-prod")
+        # description / scan_type / environment are required under full model validation
+        # (base save full_clean when V3_FEATURE_LOCATIONS is on — the CI "(true)" matrix leg).
+        product = Product.objects.create(prod_type=prod_type, name="vulnid-prod", description="vuln-id backfill test")
         engagement = Engagement.objects.create(product=product, target_start=now, target_end=now)
         test_type = Test_Type.objects.create(name="vulnid-tt")
+        environment = Development_Environment.objects.get_or_create(name="Development")[0]
         test = Test.objects.create(
             engagement=engagement,
             test_type=test_type,
+            scan_type="vulnid-tt",
+            environment=environment,
             target_start=now,
             target_end=now,
         )
