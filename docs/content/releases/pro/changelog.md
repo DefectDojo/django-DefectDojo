@@ -12,6 +12,17 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## July 2026: v3.1
 
+### July 22, 2026: v3.1.202
+
+* **(Connectors)** Registered the Intigriti bug bounty connector and the runZero asset connector in the Pro UI. The Qualys connector now sizes its request timeout for large detection exports.
+* **(Integrations)** Integrator assignments now support per-assignment push filters, so you can limit what gets pushed by minimum severity and active-only status. 
+* **(Sensei)** Added a cloud dispatch guard, retroactive re-staging of auto-fixes, and a per-row actions menu. Fixed the "Configure Product" button clipping in the findings list.
+* **(Findings)** Request Review is now gated on `Finding_View` instead of `Finding_Edit`.
+* **(Pro UI)** Export options now prefill from the active table preference, the AI menu was flattened into top-level Sensei, Model Settings, and MCP links, and the PSIRT menu link now opens in a new tab.
+* **(Import)** Scan-import cleanup now streams files and fails loudly on error.
+* **(Performance)** Dashboard count tiles no longer time out on large finding buckets.
+* **(Bug Fixes)** Cleared default ordering in count subqueries
+
 ### July 20, 2026: v3.1.200
 
 * **(Connectors)** Added another large batch of Connectors. New findings connectors: Rapid7 InsightAppSec, Cobalt.io PtaaS, Sonatype IQ (Nexus Lifecycle), Acunetix 360, Mend (WhiteSource), Bugcrowd, Black Duck, Edgescan, Sysdig Secure, Coverity Connect, Harbor, OpenVAS / Greenbone, Nuclei / ProjectDiscovery Cloud, Endor Labs, Prowler, Kubescape / ARMO, Quay + Clair, Intruder.io, and YesWeHack. Added a ServiceNow CMDB asset connector. You can now request a new connector directly from the cloud UI, and CrowdStrike Spotlight now derives its severity floor from structured sync filters.
