@@ -31,14 +31,18 @@ class MigrateEndpointsToLocationsTest(TestCase):
         return endpoint
 
     def test_endpoint_tags_are_copied_in_deduplicated_batches(self):
-        # The first two legacy endpoints intentionally resolve to one Location.
-        # The batch accumulator must not create or count that relationship twice.
+        # Four legacy Endpoints resolve to one Location. With batches of three,
+        # at least one batch contains that Location more than once regardless of
+        # database row order, so this exercises in-batch deduplication without
+        # relying on an implicit queryset order.
         # Seed the Product tag before enabling propagation so setup does not
         # dispatch an unrelated asynchronous inheritance task.
         self.product.tags.add("product-inherited")
         self.product.enable_product_tag_inheritance = True
         self.product.save(update_fields=["enable_product_tag_inheritance"])
         self._make_endpoint("shared.example.com", ["shared", "secondary"])
+        self._make_endpoint("shared.example.com", ["shared"])
+        self._make_endpoint("shared.example.com", ["shared"])
         self._make_endpoint("shared.example.com", ["shared"])
         self._make_endpoint("unique.example.com", ["shared"])
 
@@ -48,14 +52,16 @@ class MigrateEndpointsToLocationsTest(TestCase):
         ) as bulk_add:
             call_command(
                 "migrate_endpoints_to_locations",
-                batch_size=2,
+                batch_size=3,
                 progress_every=100,
                 stdout=StringIO(),
             )
 
         self.assertEqual(bulk_add.call_count, 2)
-        first_mapping = bulk_add.call_args_list[0].args[0]
-        self.assertEqual(len(first_mapping["shared"]), 1)
+        shared_locations_written = sum(
+            len(call.args[0]["shared"]) for call in bulk_add.call_args_list
+        )
+        self.assertEqual(shared_locations_written, 3)
 
         shared_location = URL.objects.get(host="shared.example.com").location
         unique_location = URL.objects.get(host="unique.example.com").location
@@ -86,7 +92,7 @@ class MigrateEndpointsToLocationsTest(TestCase):
         # remain unchanged on a second pass.
         call_command(
             "migrate_endpoints_to_locations",
-            batch_size=2,
+            batch_size=3,
             progress_every=100,
             stdout=StringIO(),
         )
