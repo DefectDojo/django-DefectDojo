@@ -597,9 +597,13 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Multiple-CWEs feature: +2 import / +2 reimport-no-change (Finding_CWE
     # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
     # existing Finding_CWE rows for each changed finding).
-    EXPECTED_ZAP_IMPORT_V2 = 294
-    EXPECTED_ZAP_IMPORT_V3 = 318
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 79
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 161
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 190
+    # Vulnerability_Id entity dual-write (unconditional): +2 import / +12
+    # reimport-no-change / +6 reimport-with-new queries (VulnerabilityId entity +
+    # FindingVulnerabilityReference bulk writes alongside the legacy rows; batched,
+    # not per-finding).
+    EXPECTED_ZAP_IMPORT_V2 = 296
+    EXPECTED_ZAP_IMPORT_V3 = 320
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 91
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 103
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 167
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 196
