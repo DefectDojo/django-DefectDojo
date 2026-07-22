@@ -24,10 +24,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@fontsource-variable/work-sans@^5.1":
-  version "5.2.8"
-  resolved "https://registry.yarnpkg.com/@fontsource-variable/work-sans/-/work-sans-5.2.8.tgz#ac91b1b0b7d8e2d2f862537e7de8451d49548279"
-  integrity sha512-8uWtTt0/B5NxGie9xUVD5y5Ch4Q+Hy7kFYKtUpwYbzSAgJEoaMxT8rMnfnK7zfAYSLC8GnGO1/tXrFtKIYYQVQ==
+"@fontsource-variable/work-sans@^5.3":
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/work-sans/-/work-sans-5.3.0.tgz#14d99be2bca1f6354674f9b4dcc37f2dd4e98953"
+  integrity sha512-le8h/OIIuhm5Z7TdvuMw0yKg2gaCZUiMec8zaumsVVjzeJRBPEF0bQI/MkaZDHCVzZDvZoP/O2LiGOSfDLSbaw==
 
 "@jridgewell/gen-mapping@^0.3.5":
   version "0.3.13"
