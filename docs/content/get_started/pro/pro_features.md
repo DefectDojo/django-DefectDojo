@@ -22,7 +22,7 @@ See our [Pro UI Guide](/get_started/about/ui_pro_vs_os/) for more information.
 
 ### Assets/Organizations
 
-DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/assets_organizations/) for details.
+DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/asset_hierarchy/) for details.
 
 ![image](images/asset_hierarchy_diagram.png)
 
@@ -38,6 +38,12 @@ DefectDojo Pro's Rules Engine allows you to script automated bulk actions and bu
 See our [Rules Engine Guide](/automation/rules_engine/about) for more info.
 
 ![image](images/rules_engine_4.png)
+
+### Sensei
+
+DefectDojo Pro's **Sensei** (BETA) is an AI-powered scan-and-fix capability: connect a repository through a GitHub App and Sensei scans it, imports the findings, and opens pull requests that remediate them — with a preview-first workflow, so nothing runs (and no LLM cost is incurred) until you approve.
+
+See our [Sensei Guide](/sensei/about_sensei/) for more info.
 
 ### Pro Dashboards and Reporting
 
@@ -103,6 +109,12 @@ If you’re using an unsupported/customized scanning tool, or just wish that Def
 See our [Universal Parser Guide](/import_data/pro/specialized_import/universal_parser//) for more information.
 
 ![image](images/universal_parser_3.png)
+
+## Managing optional features
+
+Many of the capabilities above are optional and ship behind a feature flag, so you can adopt them when you are ready. A superuser can turn most of them on and off directly from **Settings > Feature Flags**, without contacting support.
+
+See the [Feature Flags](/admin/feature_flags/pro__feature_flags/) guide for how to enable a feature, and for why a feature might be locked or unavailable on your installation type.
 
 ## Support
 

@@ -70,8 +70,8 @@ jobs:
           description: No special instructions.
           ---
           There are no special instructions for upgrading to $minorv.x. Check the [Release Notes](https://github.com/DefectDojo/django-DefectDojo/releases/tag/$patchv) for the contents of the release.
-          " > docs/content/en/open_source/upgrading/$minorv.md
-          git add docs/content/en/open_source/upgrading/$minorv.md
+          " > docs/content/releases/os_upgrading/$minorv.md
+          git add docs/content/releases/os_upgrading/$minorv.md
         if: endsWith(inputs.release_number_new, '.0') && endsWith(inputs.release_number_dev, '.0-dev')
 
       - name: Update values in HELM chart

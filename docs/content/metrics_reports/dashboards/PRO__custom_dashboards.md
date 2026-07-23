@@ -9,7 +9,7 @@ aliases:
   - /en/customize_dojo/dashboards/about_custom_dashboard_tiles
   - /metrics_reports/dashboards/about_custom_dashboard_tiles
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Customizable Dashboards (layouts, widgets, and the widget catalog) are a DefectDojo Pro feature, currently in beta. Beta features are available to DefectDojo Pro Cloud subscriptions — contact DefectDojo support or your customer success advocate to enable it for your instance.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Customizable Dashboards (layouts, widgets, and the widget catalog) are a DefectDojo Pro feature. They are off by default — a superuser can turn them on from **Settings > Feature Flags** on both Cloud and On-Premise instances.</span>
 
 DefectDojo Pro Customizable Dashboards let each user assemble their own home page out of **widgets** — counts, charts, leaderboards, feeds, and notes — arranged on a drag-and-drop grid. Instead of a single fixed dashboard for everyone, you build the **layouts** that matter to you: an executive overview, a triage queue, a remediation-velocity board, a scanner-effectiveness view. You can keep layouts private, publish them to your whole team, set one as your default landing page, and clone any layout (yours or a shared template) as a starting point.
 
@@ -23,13 +23,13 @@ DefectDojo Pro replaces that fixed page with **per-user customizable dashboards*
 
 > **💡 Tip:** In DefectDojo Pro, **Assets** were formerly called **Products** and **Organizations** were formerly **Product Types**. The UI uses the new wording, but some underlying widget settings still use the legacy names — for example, most widgets take a `model` of `finding`, `product`, `engagement`, or `test`. Where this matters, it is called out below.
 
-## Enabling the beta
+## Enabling Customizable Dashboards
 
-Customizable Dashboards are off by default while in beta. Beta features are enabled per instance for DefectDojo Pro Cloud subscriptions — contact DefectDojo support ([support@defectdojo.com](mailto:support@defectdojo.com)) or your customer success advocate to turn on Customizable Dashboards for your instance.
+Customizable Dashboards are off by default. A superuser can turn them on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
 
 Once it is enabled, the **🏠 Home** page shows your customizable dashboard and the [Dashboards REST API](../custom-dashboards-api/) becomes available.
 
-> **🔑 Important:** While the flag is off, the home page keeps the previous dashboard and every `/api/v2/dashboards/` endpoint returns `403 Dashboard V2 is not enabled.` Enabling the flag does **not** change anyone's data access — every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
+> **🔑 Important:** While the feature is off, the home page keeps the previous dashboard and every `/api/v2/dashboards/` endpoint returns `403 Dashboard V2 is not enabled.` Turning it on does **not** change anyone's data access — every widget still respects DefectDojo's role-based access control, so each user only ever sees the Findings, Assets, and other records they are authorized to view.
 
 ## Core concepts
 

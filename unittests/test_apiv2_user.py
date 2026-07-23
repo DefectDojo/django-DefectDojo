@@ -314,6 +314,134 @@ class UserTest(APITestCase):
         self.assertEqual(r.status_code, 200, r.content[:1000])
         self.assertTrue(User.objects.get(id=user_id).is_staff)
 
+    def test_non_superuser_cannot_grant_configuration_permissions_via_api(self):
+        """
+        Only superusers may assign configuration permissions. A non-superuser,
+        even one holding the delegated change_user permission, must not be able
+        to grant configuration permissions to their own account or to another
+        user, whether on update or at create time. Configuration permissions
+        are privilege-bearing (managing users, groups, tool configurations, and
+        so on), so assigning them is a superuser-only action.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-mgr",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-cfgperm-mgr")
+        # Delegated user-manager: may change and create users, nothing more.
+        mgr.user_permissions.add(
+            Permission.objects.get(codename="change_user"),
+            Permission.objects.get(codename="add_user"),
+        )
+        delete_user = Permission.objects.get(codename="delete_user")
+        add_group = Permission.objects.get(codename="add_group")
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-cfgperm-mgr",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        # Self-escalation: granting themselves additional configuration
+        # permissions must be rejected.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "configuration_permissions": [delete_user.id, add_group.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertIn(
+            "Only superusers are allowed to change configuration permissions.",
+            r.content.decode("utf-8"),
+        )
+        self.assertFalse(User.objects.get(id=mgr.id).has_perm("auth.delete_user"))
+        self.assertFalse(User.objects.get(id=mgr.id).has_perm("auth.add_group"))
+
+        # Target-escalation: granting configuration permissions to another user
+        # must be rejected.
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-target",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        target_id = r.json()["id"]
+
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), target_id), {
+            "configuration_permissions": [delete_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertFalse(User.objects.get(id=target_id).has_perm("auth.delete_user"))
+
+        # Create-time escalation must also be rejected.
+        r = mgr_client.post(reverse("user-list"), {
+            "username": "api-cfgperm-on-create",
+            "email": "admin@dojo.com",
+            "password": password,
+            "configuration_permissions": [delete_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertFalse(User.objects.filter(username="api-cfgperm-on-create").exists())
+
+    def test_non_superuser_can_resend_unchanged_configuration_permissions(self):
+        """
+        Negative control: the guard only fires when configuration permissions
+        actually change, so a delegated user-manager can still PATCH their own
+        account (including re-sending the configuration permissions they already
+        hold) without being blocked.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-mgr2",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-cfgperm-mgr2")
+        change_user = Permission.objects.get(codename="change_user")
+        mgr.user_permissions.add(change_user)
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-cfgperm-mgr2",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        # Re-sending the same configuration permission the user already holds is
+        # a no-op and must be allowed.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "configuration_permissions": [change_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+        # Editing an unrelated field is likewise unaffected.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "first_name": "Renamed",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+    def test_superuser_can_set_configuration_permissions_via_api(self):
+        """Positive control: a superuser may still assign configuration permissions."""
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-cfgperm-grantable",
+            "email": "admin@dojo.com",
+            "password": "testTEST1234!@#$",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        user_id = r.json()["id"]
+        delete_user = Permission.objects.get(codename="delete_user")
+
+        r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
+            "configuration_permissions": [delete_user.id],
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertTrue(User.objects.get(id=user_id).has_perm("auth.delete_user"))
+
     def test_user_reset_api_token_denies_global_owner_legacy(self):
         """
         Legacy: Global_Role(role=Owner) is inert. Resetting another

@@ -68,7 +68,7 @@ The list of supported fields in JSON format:
 - under_review: Bool
 - is_mitigated: Bool
 - thread_id: String
-- mitigated: Bool
+- mitigated: Date
 - numerical_severity: Int
 - param: String
 - payload: String
