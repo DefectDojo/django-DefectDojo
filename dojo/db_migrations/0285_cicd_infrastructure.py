@@ -54,7 +54,7 @@ def migrate_tool_configs_to_cicd_infrastructure(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0275_usercontactinfo_user_state_details"),
+        ("dojo", "0284_backfill_finding_cwe"),
     ]
 
     operations = [
