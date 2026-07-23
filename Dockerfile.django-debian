@@ -43,6 +43,15 @@ RUN \
   apt-get -y upgrade && \
   # ugly fix to install postgresql-client without errors
   mkdir -p /usr/share/man/man1 /usr/share/man/man7 && \
+  # ca-certificates + curl are needed to fetch the PostgreSQL APT (PGDG) signing key
+  apt-get -y install --no-install-recommends ca-certificates curl && \
+  # Debian trixie only ships postgresql-client-17, but the bundled PostgreSQL
+  # server is 18. pg_dump refuses to dump a server newer than itself, which
+  # breaks `manage.py dbbackup`, so pull the matching v18 client from PGDG.
+  install -d /usr/share/postgresql-common/pgdg && \
+  curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc && \
+  echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt trixie-pgdg main" > /etc/apt/sources.list.d/pgdg.list && \
+  apt-get -y update && \
   apt-get -y install --no-install-recommends \
     # libopenjp2-7 libjpeg62 are required by the pillow package
     libopenjp2-7 \
@@ -52,8 +61,9 @@ RUN \
     git \
     uuid-runtime \
     libpq-dev \
-    # only required for the dbshell (used by the initializer job)
-    postgresql-client \
+    # only required for the dbshell (used by the initializer job) and dbbackup;
+    # must match the server major version (18) for pg_dump to work
+    postgresql-client-18 \
     # libcurl4-openssl-dev is required for installing pycurl python package
     libcurl4-openssl-dev \
     && \
