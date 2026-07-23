@@ -737,6 +737,142 @@ class TestDuplicationLogic(DojoTestCase):
         self.assertEqual(original_scan1.line, original_scan2.line)
         self.assertEqual(original_scan1.title, original_scan2.title)
 
+    # ------------------------------------------------------------------
+    # Black-box behavior guards for the import/reimport dedupe baseline.
+    #
+    # These drive ONLY the public reimport API (DefaultReImporter.process_scan
+    # with force_sync so post-processing runs inline) and assert ONLY on observable
+    # Finding state (which finding survives as the active original). They import no
+    # deduplication internals and make no claim about HOW the behavior is achieved,
+    # so they keep protecting the user-visible contract even if the import/reimport
+    # machinery is rewritten. If a rewrite regresses the baseline, these go red.
+    # ------------------------------------------------------------------
+
+    def _reimport_fortify_repro(self, fpr_filename, engagement_name):
+        """
+        Reimport one Fortify repro .fpr through the real reimporter into its own
+        isolated engagement and return every Finding in the resulting test
+        (ordered by id). Uses force_sync so deduplication has completed by the
+        time process_scan returns; no dedupe internals are touched.
+        """
+        product_type, _ = Product_Type.objects.get_or_create(name="Fortify UID Repro PT")
+        product, _ = Product.objects.get_or_create(
+            name="Fortify UID Repro Product",
+            defaults={"description": "Fortify UID dedupe repro", "prod_type": product_type},
+        )
+        engagement = Engagement.objects.create(
+            name=engagement_name,
+            product=product,
+            target_start=timezone.now().date(),
+            target_end=timezone.now().date(),
+            deduplication_on_engagement=True,  # isolate each scan's dedupe scope
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="Fortify Scan")
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=test_type,
+            scan_type="Fortify Scan",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        admin = User.objects.get(username="admin")
+        with (get_unit_tests_scans_path("fortify") / fpr_filename).open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=test,
+                user=admin,
+                lead=admin,
+                scan_date=None,
+                minimum_severity="Info",
+                active=True,
+                verified=True,
+                force_sync=True,
+                scan_type="Fortify Scan",
+            )
+            reimporter.process_scan(scan)
+        return test, list(Finding.objects.filter(test=test).order_by("id"))
+
+    def _assert_single_surviving_original(self, findings):
+        """
+        The colliding pair must resolve to exactly one active, non-duplicate finding.
+
+        We assert on the observable survivor (active and not a duplicate) rather than
+        the total row count: whether the loser is collapsed away during reimport
+        matching or kept as an inactive duplicate row is an implementation detail, but
+        either way the user must see exactly one active original.
+        """
+        originals = [f for f in findings if f.active and not f.duplicate]
+        self.assertEqual(
+            len(originals), 1,
+            f"expected exactly one active original, got {[(f.id, f.active, f.duplicate, f.line) for f in findings]}",
+        )
+        return originals[0]
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL})
+    def test_reimport_surviving_original_is_export_order_independent_uid(self):
+        # BASELINE: two scans contain the same pair of findings (shared
+        # unique_id_from_tool, different content) in opposite document order.
+        # After reimport, the finding that survives as the active original must be
+        # the SAME content regardless of the scanner's export order. This is the
+        # customer-reported contract; pre-fix the surviving finding flips with order.
+        _, findings1 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uid-behavior-1")
+        _, findings2 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan2.fpr", "fortify-uid-behavior-2")
+        original1 = self._assert_single_surviving_original(findings1)
+        original2 = self._assert_single_surviving_original(findings2)
+
+        self.assertEqual(original1.unique_id_from_tool, original2.unique_id_from_tool)
+        self.assertEqual(
+            (original1.title, original1.line, original1.hash_code),
+            (original2.title, original2.line, original2.hash_code),
+            "surviving original differs between scan orders — dedupe is export-order dependent",
+        )
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE})
+    def test_reimport_surviving_original_is_export_order_independent_uid_or_hash(self):
+        # BASELINE (combined algorithm): same repro under unique_id_from_tool_or_hash_code.
+        # The pair collides through the shared unique_id_from_tool (their content, and
+        # thus hash_code, differ), so this exercises the combined UID/hash matching path.
+        # The surviving active original must still be content-stable across scan orders.
+        _, findings1 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uidhash-behavior-1")
+        _, findings2 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan2.fpr", "fortify-uidhash-behavior-2")
+        original1 = self._assert_single_surviving_original(findings1)
+        original2 = self._assert_single_surviving_original(findings2)
+
+        self.assertEqual(original1.unique_id_from_tool, original2.unique_id_from_tool)
+        self.assertEqual(
+            (original1.title, original1.line, original1.hash_code),
+            (original2.title, original2.line, original2.hash_code),
+            "surviving original differs between scan orders under uid_or_hash",
+        )
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL})
+    def test_reimport_same_report_twice_keeps_the_same_surviving_original(self):
+        # BASELINE (re-scan stability): re-scanning the same content must not flip the
+        # original/duplicate assignment. Reimport the repro once, note the surviving
+        # active original, then reimport the SAME file again into the same test and
+        # assert the surviving original is unchanged (same finding id and content, still
+        # exactly one active original). No new duplicate chain is spun up on re-scan.
+        test, findings = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uid-rescan")
+        original_first = self._assert_single_surviving_original(findings)
+
+        admin = User.objects.get(username="admin")
+        with (get_unit_tests_scans_path("fortify") / "fortify_dedupe_uid_repro_scan1.fpr").open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=test, user=admin, lead=admin, scan_date=None, minimum_severity="Info",
+                active=True, verified=True, force_sync=True, scan_type="Fortify Scan",
+            )
+            reimporter.process_scan(scan)
+
+        findings_after = list(Finding.objects.filter(test=test).order_by("id"))
+        original_after = self._assert_single_surviving_original(findings_after)
+        self.assertEqual(
+            original_after.id, original_first.id,
+            "re-scanning the same report flipped which finding is the surviving original",
+        )
+        self.assertEqual(
+            (original_after.title, original_after.line, original_after.hash_code),
+            (original_first.title, original_first.line, original_first.hash_code),
+        )
+
     def test_identical_except_title_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different title (and reset status)
         # expect: NOT marked as duplicate as title is part of hash_code calculation
