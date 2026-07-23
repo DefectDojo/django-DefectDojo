@@ -15,6 +15,7 @@ from rest_framework.fields import DictField
 import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission
 from dojo.celery_dispatch import dojo_dispatch_task
+from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.finding.helper import (
     save_endpoints_template,
     save_vulnerability_ids,
@@ -24,6 +25,7 @@ from dojo.finding.models import BurpRawRequestResponse
 from dojo.jira import services as jira_services
 from dojo.jira.api.serializers import JIRAIssueSerializer
 from dojo.location.models import LocationFindingReference
+from dojo.location.queries import get_authorized_location_finding_reference
 from dojo.models import (
     SEVERITIES,
     Development_Environment,
@@ -349,9 +351,19 @@ class FindingSerializer(serializers.ModelSerializer):
     # TODO: Delete this after the move to Locations
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Scope the endpoints field to the references the requesting user is authorized
+        # for, mirroring the scoping the finding UI form already applies.
+        user = getattr(self.context.get("request"), "user", None)
         if not settings.V3_FEATURE_LOCATIONS:
             self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
-                many=True, required=False, queryset=Endpoint.objects.all(),
+                many=True, required=False,
+                queryset=get_authorized_endpoints("view", user=user) if user else Endpoint.objects.none(),
+            )
+        else:
+            self.fields["endpoints"] = serializers.PrimaryKeyRelatedField(
+                source="locations", many=True, required=False,
+                queryset=get_authorized_location_finding_reference("view", user=user)
+                if user else LocationFindingReference.objects.none(),
             )
 
     def get_accepted_risks(self, obj):

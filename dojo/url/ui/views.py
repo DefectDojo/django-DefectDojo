@@ -14,6 +14,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_meta_import
 from dojo.forms import (
     DeleteEndpointForm,
@@ -24,6 +25,7 @@ from dojo.location.models import Location, LocationFindingReference, LocationPro
 from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
+from dojo.product.queries import get_authorized_products
 from dojo.reports.ui.views import generate_report
 from dojo.url.filters import URLFilter
 from dojo.url.models import URL
@@ -536,13 +538,26 @@ def endpoint_bulk_update_all(request, product_id=None):
                     f"Skipped mitigation of {skipped_location_count} locations because you are not authorized.",
                 )
 
+            # Scope the reference updates to the acting product (or, on the all-products
+            # route, the products the user may edit); get_authorized_locations above scopes
+            # only the Location rows, not their references.
+            if product_id is not None:
+                reference_products = Product.objects.filter(id=product_id)
+            else:
+                reference_products = get_authorized_products(Permissions.Product_Edit, request.user)
             # Bulk update the status of related FindingLocationStatus and ProductLocationStatus objects to 'Mitigated'
-            finding_update_counts = LocationFindingReference.objects.filter(location__in=locations).update(
+            finding_update_counts = LocationFindingReference.objects.filter(
+                location__in=locations,
+                finding__test__engagement__product__in=reference_products,
+            ).update(
                 status=FindingLocationStatus.Mitigated,
                 auditor=request.user,
                 audit_time=timezone.now(),
             )
-            product_update_counts = LocationProductReference.objects.filter(location__in=locations).update(
+            product_update_counts = LocationProductReference.objects.filter(
+                location__in=locations,
+                product__in=reference_products,
+            ).update(
                 status=ProductLocationStatus.Mitigated,
             )
             # Total number of updated statuses for reporting
