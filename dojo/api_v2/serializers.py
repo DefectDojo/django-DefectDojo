@@ -518,6 +518,12 @@ class CommonImportScanSerializer(serializers.Serializer):
         super().__init__(*args, **kwargs)
         # Scope endpoint_to_add to the locations/endpoints the requesting user is authorized for.
         user = getattr(self.context.get("request"), "user", None)
+        # An unauthenticated user (e.g. AnonymousUser during OpenAPI schema
+        # generation, where the request has no real user) is truthy but cannot
+        # be authorization-scoped; treat it as no user so the field falls back to
+        # an empty queryset instead of raising on the AnonymousUser instance.
+        if user is not None and not user.is_authenticated:
+            user = None
         if not settings.V3_FEATURE_LOCATIONS:
             # TODO: why do we allow only existing endpoints?
             self.fields["endpoint_to_add"] = serializers.PrimaryKeyRelatedField(
