@@ -34,6 +34,7 @@ We currently support Connectors for the following tools, with more on the way:
 * **Checkmarx ONE**
 * **Dependency-Track**
 * **Group-IB ASM**
+* **Intruder** (cloud vulnerability scanner: pulls targets, issues, and occurrences)
 * **IriusRisk**
 * **JFrog Xray**
 * **Kubescape** (Kubernetes posture: reads the Kubescape operator's in-cluster results)
