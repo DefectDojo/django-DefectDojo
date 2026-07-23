@@ -26,7 +26,7 @@ Most Connectors import **findings** from a security tool. **Asset Connectors** w
 * **Discover** and **Sync** both reconcile the asset list. New assets appear as `NEW` Records; once mapped (automatically, if auto-mapping is enabled), DefectDojo creates the Product and groups it under a Product Type derived from the tool — for example, the GitLab namespace or the Azure DevOps project.
 * If an asset is later removed upstream (for example, a repository is deleted), its mapped Record is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
 
-Azure DevOps, Bitbucket, GitHub, GitLab, and Jira Service Management Assets are Asset Connectors. All other Connectors listed below import findings.
+Azure DevOps, Bitbucket, GitHub, GitLab, Jira Service Management Assets, and ServiceNow CMDB are Asset Connectors. All other Connectors listed below import findings.
 
 # **Supported Connectors**
 
@@ -207,6 +207,22 @@ Only Bitbucket Cloud (bitbucket.org) is supported. Bitbucket Server reached end 
 4. Enter one or more workspace slugs (comma-separated) in the **Workspace Slugs** field. This field is required: Bitbucket's scoped API tokens cannot list workspaces automatically, so DefectDojo needs to be told which workspaces to read.
 
 Each repository becomes a Record named after the repository, grouped by its Bitbucket **project**.
+
+## **Bugcrowd**
+
+The Bugcrowd connector uses the Bugcrowd REST API to import submissions from your bug bounty and vulnerability disclosure programs. DefectDojo discovers the programs your API token can access and creates a Record for each one, importing that program's submissions as findings.
+
+#### Prerequisites
+
+You will need a Bugcrowd **API token** with access to the programs you want to import. We recommend creating a dedicated service account for DefectDojo so automated activity is easy to distinguish from manual team actions. Generate the token in Bugcrowd under **Organization settings \> API credentials**; read access to submissions, programs, and targets is sufficient.
+
+#### Connector Mappings
+
+1. Enter `https://api.bugcrowd.com` in the **Location** field.
+2. Enter your Bugcrowd API token in the **Secret** field. It is sent as an `Authorization: Token` header.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Bugcrowd **program** becomes a Record, and its submissions are imported as findings with the Bugcrowd severity preserved. Duplicate submissions are excluded, so reimport does not create repeated findings for the same issue.
 
 ## **BurpSuite**
 
@@ -878,6 +894,21 @@ Enter `https://semgrep.dev/api/v1/` in the **Location** field.
 "Settings" in the left navbar \> Tokens \> Create new token ([https://semgrep.dev/orgs/\-/settings/tokens](https://semgrep.dev/orgs/-/settings/tokens))
 
 See [Semgrep documentation](https://semgrep.dev/docs/semgrep-cloud-platform/semgrep-api/#tag__badge-list) for more info.
+
+## **ServiceNow CMDB**
+
+The ServiceNow CMDB connector is an **Asset Connector**: instead of importing findings, it reads Configuration Items (CIs) from your ServiceNow Configuration Management Database and creates a DefectDojo Asset for each CI, grouped into Organizations by CI class. No findings are imported.
+
+#### Prerequisites
+
+You will need a ServiceNow instance and an account that can read the CMDB tables over the ServiceNow Table API. We recommend a dedicated, read-only service account for DefectDojo. The account needs read access to the `cmdb_ci` tables you want to import.
+
+#### Connector Mappings
+
+1. Enter your ServiceNow instance URL in the **Location** field: `https://{your-instance}.service-now.com`.
+2. Select or create a ServiceNow **Tool Configuration** holding the instance credentials (the ServiceNow username and password).
+
+Each Configuration Item becomes a Record named after the CI, grouped by its **CI class** (for example, application, server, or business service). Discovery and Sync reconcile the CI list: new CIs appear as `NEW` Records, and a CI removed from the CMDB is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
 
 ## **Shodan**
 
