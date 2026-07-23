@@ -988,8 +988,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # while vulnerability_ids do not, and vice versa).
         self.reconcile_cwes(finding)
 
-        # Use prefetched data directly without triggering queries
-        existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
+        # Read the existing ids through the flag seam (entity references when the flag is on, legacy
+        # rows when off) instead of the legacy relation directly, so reconcile keeps working after
+        # the legacy Vulnerability_Id store is retired. The prefetch is seam-matched upstream (the
+        # reimport finding query uses vulnerability_id_prefetch()), so this stays a no-query read.
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
+
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed

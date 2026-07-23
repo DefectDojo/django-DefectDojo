@@ -9,7 +9,7 @@ from django.db.models.query_utils import Q
 
 from dojo.celery import app
 from dojo.models import Endpoint_Status, Finding, System_Settings
-from dojo.vulnerability_id.queries import vulnerability_id_prefetch
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

@@ -41,7 +41,7 @@ from dojo.models import (
     Vulnerability_Id,
 )
 from dojo.request_cache import cache_for_request_or_task
-from dojo.vulnerability_id.models import FindingVulnerabilityReference, VulnerabilityId
+from dojo.vulnerability.models import FindingVulnerabilityReference, Vulnerability
 
 
 def _resolve_user(user):
@@ -421,7 +421,7 @@ register_auth_filter("finding.get_authorized_vulnerability_ids_for_queryset", _g
 
 def _get_authorized_vulnerability_id_entities(permission, queryset=None, user=None):
     user = _resolve_user(user)
-    qs = queryset if queryset is not None else VulnerabilityId.objects.all()
+    qs = queryset if queryset is not None else Vulnerability.objects.all()
     if user is None or getattr(user, "is_anonymous", False):
         return qs.none()
     if _is_unrestricted(user, permission_to_action(permission)):

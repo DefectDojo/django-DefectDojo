@@ -20,7 +20,7 @@ from dojo.utils import (
     get_system_setting,
     mass_model_updater,
 )
-from dojo.vulnerability_id.queries import vulnerability_id_prefetch
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

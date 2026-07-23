@@ -55,7 +55,7 @@ from dojo.utils import (
     get_object_or_none,
     to_str_typed,
 )
-from dojo.vulnerability_id.manager import persist_for_finding
+from dojo.vulnerability.manager import persist_for_finding
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")

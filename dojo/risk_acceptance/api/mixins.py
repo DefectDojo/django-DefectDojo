@@ -14,7 +14,7 @@ from dojo.authorization.api_permissions import UserHasRiskAcceptanceRelatedObjec
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.models import Engagement, Risk_Acceptance, User
 from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
-from dojo.vulnerability_id.queries import finding_ids_with_vulnerability_ids
+from dojo.vulnerability.queries import finding_ids_with_vulnerability_ids
 
 AcceptedRisk = NamedTuple("AcceptedRisk", (("vulnerability_id", str), ("justification", str), ("accepted_by", str)))
 

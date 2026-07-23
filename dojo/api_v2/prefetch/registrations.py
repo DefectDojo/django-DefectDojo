@@ -110,11 +110,11 @@ from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.url.models import URL
-from dojo.vulnerability_id.models import (
+from dojo.vulnerability.models import (
     FindingVulnerabilityReference,
-    VulnerabilityId,
+    Vulnerability,
 )
-from dojo.vulnerability_id.queries import (
+from dojo.vulnerability.queries import (
     get_authorized_finding_vulnerability_references,
     get_authorized_vulnerability_id_entities,
 )
@@ -224,7 +224,7 @@ for model in (
 for model, helper in (
     (Finding_Group, get_authorized_finding_groups),
     (Vulnerability_Id, get_authorized_vulnerability_ids),
-    (VulnerabilityId, get_authorized_vulnerability_id_entities),
+    (Vulnerability, get_authorized_vulnerability_id_entities),
     (FindingVulnerabilityReference, get_authorized_finding_vulnerability_references),
 ):
     register(model, discard_user(helper), "view")

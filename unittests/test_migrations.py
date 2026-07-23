@@ -16,10 +16,10 @@ from dojo.models import (
     Product_Type,
     Test,
     Test_Type,
+    Vulnerability,
     Vulnerability_Id,
-    VulnerabilityId,
 )
-from dojo.vulnerability_id.backfill import run_backfill
+from dojo.vulnerability.backfill import run_backfill
 
 
 @skip("Outdated - this class was testing some version of migration; it is not needed anymore")
@@ -54,8 +54,8 @@ class TestOptiEndpointStatus(MigratorTestCase):
         self.finding = Finding.objects.create(test_id=self.test.pk, reporter_id=user).pk
         self.endpoint = Endpoint.objects.create(host="foo.bar", product_id=self.product.pk).pk
         self.endpoint_status = Endpoint_Status.objects.create(
-                finding_id=self.finding,
-                endpoint_id=self.endpoint,
+            finding_id=self.finding,
+            endpoint_id=self.endpoint,
         ).pk
         Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status),
@@ -182,11 +182,12 @@ class TestOptiEndpointStatus(MigratorTestCase):
 class TestVulnerabilityIdBackfill(TestCase):
 
     """
-    dojo.vulnerability_id.backfill.run_backfill (the routine migration 0286 delegates to) turns
-    legacy dojo_vulnerability_id rows + dojo_finding.cve into VulnerabilityId entities and ordered
+    dojo.vulnerability.backfill.run_backfill (the routine migration 0286 delegates to) turns
+    legacy dojo_vulnerability_id rows + dojo_finding.cve into Vulnerability entities and ordered
     FindingVulnerabilityReference rows (order 0 == cve). Covers ordered ids, cve-drift (cve is not
-    the lowest-PK row), case-variant ids (2 distinct entities), cve-only findings (no legacy rows),
-    null-cve findings, and an idempotent re-run.
+    the lowest-PK row), case-variant ids (2 distinct entities), cve-only findings (no legacy rows =>
+    NO reference, so the reference set mirrors the legacy row set and the hash stays byte-identical;
+    the cve remains an orphan registry entity), null-cve findings, and an idempotent re-run.
 
     A plain TestCase rather than MigratorTestCase: django_test_migrations replays the full squashed
     migration chain from a wiped schema in setUp, which is unusable in this codebase (the replay
@@ -247,7 +248,8 @@ class TestVulnerabilityIdBackfill(TestCase):
         for vid in ("CVE-C1", "cve-c1"):
             add_legacy(cls.finding_c, vid)
 
-        # D: cve-only — cve set, NO legacy rows => step-4 order-0 ref to the cve entity.
+        # D: cve-only — cve set, NO legacy rows => NO reference (mirror the empty legacy row set for
+        # hash parity); CVE-D1 still becomes an orphan registry entity via step 2.
         cls.finding_d = make_finding("D", "CVE-D1")
 
         # E: legacy rows but NULL cve => order by PK, no cve-only ref.
@@ -265,21 +267,27 @@ class TestVulnerabilityIdBackfill(TestCase):
         run_backfill()
 
         expected_entities = {
-            "CVE-A1", "CVE-A2", "CVE-A3",
-            "CVE-B1", "CVE-B2", "CVE-B3",
-            "CVE-C1", "cve-c1",
+            "CVE-A1",
+            "CVE-A2",
+            "CVE-A3",
+            "CVE-B1",
+            "CVE-B2",
+            "CVE-B3",
+            "CVE-C1",
+            "cve-c1",
             "CVE-D1",
-            "CVE-E1", "CVE-E2",
+            "CVE-E1",
+            "CVE-E2",
         }
 
         with self.subTest("entity extraction (exact-cased, case-variant = 2 entities)"):
             self.assertEqual(
-                set(VulnerabilityId.objects.values_list("vulnerability_id", flat=True)),
+                set(Vulnerability.objects.values_list("vulnerability_id", flat=True)),
                 expected_entities,
             )
 
         with self.subTest("entity type carried / stamped from prefix"):
-            for entity in VulnerabilityId.objects.all():
+            for entity in Vulnerability.objects.all():
                 self.assertEqual(
                     entity.vulnerability_id_type,
                     resolve_vulnerability_id_type(entity.vulnerability_id),
@@ -294,26 +302,30 @@ class TestVulnerabilityIdBackfill(TestCase):
         with self.subTest("C: case-variant ids both referenced, exact cve at order 0"):
             self.assertEqual(self._order_map(self.finding_c), {0: "CVE-C1", 1: "cve-c1"})
 
-        with self.subTest("D: cve-only finding gets an order-0 reference"):
-            self.assertEqual(self._order_map(self.finding_d), {0: "CVE-D1"})
+        with self.subTest("D: cve-only finding gets NO reference (parity: mirrors empty legacy set)"):
+            self.assertEqual(self._order_map(self.finding_d), {})
+            # The cve is still catalogued as an orphan registry entity (never referenced).
+            cve_d = Vulnerability.objects.get(vulnerability_id="CVE-D1")
+            self.assertFalse(cve_d.finding_references.exists())
 
         with self.subTest("E: null-cve finding ordered by PK, no cve-only ref"):
             self.assertEqual(self._order_map(self.finding_e), {0: "CVE-E1", 1: "CVE-E2"})
 
-        with self.subTest("pair sets: every legacy pair is in the new store; extras are cve-only"):
+        with self.subTest("pair sets: the reference set EXACTLY mirrors the legacy row set"):
             legacy_pairs = set(Vulnerability_Id.objects.values_list("finding_id", "vulnerability_id"))
             new_pairs = {
                 (ref.finding_id, ref.vulnerability.vulnerability_id)
                 for ref in FindingVulnerabilityReference.objects.all()
             }
-            self.assertTrue(legacy_pairs.issubset(new_pairs))
-            self.assertEqual(new_pairs - legacy_pairs, {(self.finding_d.id, "CVE-D1")})
+            # No fabricated (cve-only) references: the two stores hold identical (finding, id) pairs,
+            # which is exactly what keeps get_vulnerability_ids() byte-identical across the flag.
+            self.assertEqual(new_pairs, legacy_pairs)
 
         with self.subTest("idempotency: re-running the backfill changes nothing"):
-            entities_before = VulnerabilityId.objects.count()
+            entities_before = Vulnerability.objects.count()
             refs_before = FindingVulnerabilityReference.objects.count()
             counts = run_backfill()
-            self.assertEqual(VulnerabilityId.objects.count(), entities_before)
+            self.assertEqual(Vulnerability.objects.count(), entities_before)
             self.assertEqual(FindingVulnerabilityReference.objects.count(), refs_before)
             self.assertEqual(
                 counts,
@@ -322,6 +334,5 @@ class TestVulnerabilityIdBackfill(TestCase):
                     "entities_from_cve": 0,
                     "types_stamped": 0,
                     "references_from_legacy": 0,
-                    "references_from_cve_only": 0,
                 },
             )

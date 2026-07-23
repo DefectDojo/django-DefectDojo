@@ -288,7 +288,7 @@ env = environ.FileAwareEnv(
     DD_REQUESTS_TIMEOUT=(int, 30),
     # Dictates if v3 functionality will be enabled (on by default as of 3.0.0; set to False to revert to the legacy Endpoint model)
     DD_V3_FEATURE_LOCATIONS=(bool, True),
-    # Dictates if findings read their vulnerability ids from the normalized VulnerabilityId entity/reference tables
+    # Dictates if findings read their vulnerability ids from the normalized Vulnerability entity/reference tables
     # (on by default; set to False to read from the legacy Vulnerability_Id table). Writes are always dual, so the flag
     # only selects the READ store and is reversible in both directions with zero data drift.
     DD_V3_FEATURE_VULNERABILITY_IDS=(bool, True),

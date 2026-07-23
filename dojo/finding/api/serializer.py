@@ -323,7 +323,7 @@ class VulnerabilityIdsField(serializers.Field):
         return instance
 
     def to_representation(self, finding):
-        from dojo.vulnerability_id.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- flag seam
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- flag seam
         return [{"vulnerability_id": value} for value in finding_vulnerability_id_strings(finding)]
 
     def to_internal_value(self, data):

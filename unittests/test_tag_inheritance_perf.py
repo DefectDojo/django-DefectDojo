@@ -598,7 +598,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
     # existing Finding_CWE rows for each changed finding).
     # Vulnerability_Id entity dual-write (unconditional): +2 import / +12
-    # reimport-no-change / +6 reimport-with-new queries (VulnerabilityId entity +
+    # reimport-no-change / +6 reimport-with-new queries (Vulnerability entity +
     # FindingVulnerabilityReference bulk writes alongside the legacy rows; batched,
     # not per-finding).
     EXPECTED_ZAP_IMPORT_V2 = 296

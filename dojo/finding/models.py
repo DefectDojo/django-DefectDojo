@@ -707,9 +707,13 @@ class Finding(BaseModel):
         copy.tags.set(old_tags)
         # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util).
         # Route vulnerability ids through the dual-write seam so the copy gets legacy rows AND
-        # entity references (copy.cve was already carried over by copy_model_util).
-        from dojo.vulnerability_id.manager import persist_for_finding  # noqa: PLC0415 -- avoid import cycle
-        vulnerability_id_strings = [row.vulnerability_id for row in self.vulnerability_id_set.all()]
+        # entity references (copy.cve was already carried over by copy_model_util). Read the SOURCE
+        # ids through the flag seam too (not the legacy relation directly), so copy() keeps working
+        # after the legacy Vulnerability_Id store is retired.
+        from dojo.vulnerability.manager import persist_for_finding  # noqa: PLC0415 -- avoid import cycle
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415
+
+        vulnerability_id_strings = finding_vulnerability_id_strings(self)
         if vulnerability_id_strings:
             persist_for_finding(copy, vulnerability_id_strings, delete_existing=False)
         for finding_cwe in self.finding_cwe_set.all():
@@ -842,7 +846,7 @@ class Finding(BaseModel):
 
         def _get_saved_vulnerability_ids(finding) -> str:
             if finding.id is not None:
-                from dojo.vulnerability_id.queries import use_entity_reads  # noqa: PLC0415
+                from dojo.vulnerability.queries import use_entity_reads  # noqa: PLC0415
                 if use_entity_reads():
                     # Entity store: the prefetch-honoring reverse relation (vulnerability_references
                     # + select_related("vulnerability")) so Prefetch is honored — no N+1 in dedupe.
@@ -1393,7 +1397,7 @@ class Finding(BaseModel):
 
     @cached_property
     def vulnerability_ids(self):
-        from dojo.vulnerability_id.queries import use_entity_reads  # noqa: PLC0415
+        from dojo.vulnerability.queries import use_entity_reads  # noqa: PLC0415
         # Get vulnerability ids from database and convert to list of strings
         if use_entity_reads():
             # Entity store: reverse relation is ordered by FindingVulnerabilityReference.Meta.ordering.

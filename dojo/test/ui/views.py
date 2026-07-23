@@ -82,7 +82,7 @@ from dojo.utils import (
     process_tag_notifications,
     redirect_to_return_url_or_else,
 )
-from dojo.vulnerability_id.queries import vulnerability_id_prefetch
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger("dojo")

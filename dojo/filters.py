@@ -55,7 +55,7 @@ from dojo.models import (
 )
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import get_system_setting, is_finding_groups_enabled, truncate_timezone_aware
-from dojo.vulnerability_id.queries import finding_ids_with_vulnerability_ids
+from dojo.vulnerability.queries import finding_ids_with_vulnerability_ids
 
 logger = logging.getLogger(__name__)
 

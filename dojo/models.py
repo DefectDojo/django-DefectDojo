@@ -407,9 +407,9 @@ from dojo.finding.models import (  # noqa: E402 -- re-export; class-body FKs bel
     Finding_Template,
     Vulnerability_Id,  # noqa: F401 -- re-export
 )
-from dojo.vulnerability_id.models import (  # noqa: E402 -- re-export; FKs reference dojo.Finding / dojo.VulnerabilityId by string
+from dojo.vulnerability.models import (  # noqa: E402 -- re-export; FKs reference dojo.Finding / dojo.Vulnerability by string
     FindingVulnerabilityReference,  # noqa: F401 -- re-export
-    VulnerabilityId,  # noqa: F401 -- re-export
+    Vulnerability,  # noqa: F401 -- re-export
 )
 
 

@@ -20,7 +20,7 @@ from dojo.models import (
     Vulnerability_Id,
 )
 from dojo.request_cache import cache_for_request_or_task
-from dojo.vulnerability_id.queries import vulnerability_id_prefetch
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 
