@@ -333,3 +333,20 @@ class FortifyFPRParser:
         if snippet and snippet.start_line:
             return snippet.start_line
         return vulnerability.source_location_line
+
+
+class FortifyFPRParserV2(FortifyFPRParser):
+
+    """
+    FPR parser for the "Fortify Scan v2" scan type.
+
+    Stores the line Fortify reports for the vulnerability itself (the SourceLocation
+    "line" attribute) instead of the snippet StartLine used by the v1 parser, which
+    includes leading context lines and does not point at the finding. Kept as a
+    separate scan type so hashcodes of existing "Fortify Scan" findings are unaffected.
+    """
+
+    def compute_line(self, vulnerability, snippet) -> str:
+        if vulnerability.source_location_line:
+            return vulnerability.source_location_line
+        return super().compute_line(vulnerability, snippet)
