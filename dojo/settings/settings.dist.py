@@ -96,6 +96,16 @@ env = environ.FileAwareEnv(
     DD_CELERY_BROKER_PARAMS=(str, ""),
     DD_CELERY_BROKER_TRANSPORT_OPTIONS=(str, ""),
     DD_CELERY_TASK_IGNORE_RESULT=(bool, True),
+    # Max seconds the 'async_wait' deduplication execution mode will wait for
+    # background deduplication/post-processing to finish before responding anyway.
+    DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT=(int, 60),
+    # Test-only: artificial delay (seconds) injected at the start of
+    # post_process_findings_batch so integration tests can deterministically
+    # observe that 'async_wait' blocks on deduplication while 'async' does not.
+    # Must stay 0 in production. The _FILTER (a finding-title prefix) scopes the
+    # delay to a single test's findings so unrelated dedupe tests are not slowed.
+    DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY=(int, 0),
+    DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER=(str, ""),
     DD_CELERY_RESULT_BACKEND=(str, "django-db"),
     DD_CELERY_RESULT_EXPIRES=(int, 86400),
     DD_CELERY_BEAT_SCHEDULE_FILENAME=(str, root("dojo.celery.beat.db")),
@@ -115,6 +125,13 @@ env = environ.FileAwareEnv(
     DD_TAG_BULK_ADD_BATCH_SIZE=(int, 1000),
     # Tagulous slug truncate unique setting. Set to -1 to use tagulous internal default (5)
     DD_TAGULOUS_SLUG_TRUNCATE_UNIQUE=(int, -1),
+    # Master switch for django-watson. When True (default) the post-save/pre-delete
+    # search indexers are registered on 9 models (write-amplification on every save,
+    # Finding imports especially) and the legacy /simple_search page (watson's only
+    # reader) is served. When False, nothing is registered, /simple_search returns
+    # 410 Gone, and installwatson is skipped. Pro ships this False: its native
+    # Postgres search (pro/search/) fully replaces watson.
+    DD_WATSON_SEARCH_ENABLED=(bool, True),
     # Batch size for async watson search-index update tasks. Also doubles as
     # the per-request intermediate-flush threshold: once the in-memory watson
     # context reaches this many pending objects mid-request,
@@ -195,7 +212,10 @@ env = environ.FileAwareEnv(
     # we limit the amount of duplicates that can be deleted in a single run of that job
     # to prevent overlapping runs of that job from occurrring
     DD_DUPE_DELETE_MAX_PER_RUN=(int, 200),
-    # when enabled 'mitigated date' and 'mitigated by' of a finding become editable
+    # When enabled, superusers can edit a finding's 'mitigated date' and 'mitigated by'
+    # fields (e.g. backdate a mitigation) from both the UI and the API. Off by default
+    # because backdating a mitigation can distort SLA-compliance metrics. Changing this
+    # value requires a service restart to take effect.
     DD_EDITABLE_MITIGATED_DATA=(bool, False),
     # new feature that tracks history across multiple reimports for the same test
     DD_TRACK_IMPORT_HISTORY=(bool, True),
@@ -270,6 +290,15 @@ env = environ.FileAwareEnv(
     DD_V3_FEATURE_LOCATIONS=(bool, True),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
+    # Shared cache backend (django.core.cache). When set, Django uses RedisCache
+    # (e.g. redis://valkey:6379/1); when empty it falls back to LocMemCache. Used
+    # by general framework caching; the singleton settings cache (dojo/caching.py)
+    # is in-process only and does not read or write this backend.
+    DD_CACHE_URL=(str, ""),
+    # In-process (L1) read-through cache for global singleton getters (see
+    # dojo/caching.py). Per-thread freshness budget in seconds; -1 disables it.
+    # Reset every request/task, so each request/task reads the singleton once.
+    DD_SETTINGS_CACHE_L1_TTL=(int, 30),
     # Notification env-vars (SLA notify, alert refresh/counter/cap, system-level trump). Defined in dojo.notifications.settings.
     **NOTIFICATIONS_ENV_DEFAULTS,
 )
@@ -317,6 +346,20 @@ ALLOWED_HOSTS = tuple(env.list("DD_ALLOWED_HOSTS", default=["localhost", "127.0.
 
 # Raises django's ImproperlyConfigured exception if SECRET_KEY not in os.environ
 SECRET_KEY = env("DD_SECRET_KEY")
+
+# Default cache backend (django.core.cache). Redis when DD_CACHE_URL is set,
+# else per-process LocMemCache. General framework caching only; the singleton
+# settings cache (dojo/caching.py) is in-process and does not use this backend.
+if env("DD_CACHE_URL"):
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": env("DD_CACHE_URL"),
+        },
+    }
+
+# In-process singleton cache (dojo/caching.py)
+SETTINGS_CACHE_L1_TTL = env("DD_SETTINGS_CACHE_L1_TTL")
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -763,6 +806,9 @@ TEMPLATES = [
 INSTALLED_APPS = (
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    # Registers the postgres-specific lookups and index expressions
+    # (trigram word similarity, tsvector search) used by global search.
+    "django.contrib.postgres",
     "django.contrib.sessions",
     "django.contrib.sites",
     "django.contrib.messages",
@@ -796,7 +842,7 @@ INSTALLED_APPS = (
 DJANGO_MIDDLEWARE_CLASSES = [
     "django.middleware.common.CommonMiddleware",
     "dojo.middleware.APITrailingSlashMiddleware",
-    "dojo.middleware.DojoSytemSettingsMiddleware",
+    "dojo.middleware.DojoSettingsManagerMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -835,6 +881,15 @@ if env("DD_WHITENOISE"):
     ]
     MIDDLEWARE += WHITE_NOISE
 
+# django-watson master switch (see DD_WATSON_SEARCH_ENABLED above). Pro ships this
+# off because its native Postgres search replaces watson; disabling strips the app
+# and its request-scoped indexing middleware so no post-save index writes happen
+# and installwatson is never needed.
+WATSON_SEARCH_ENABLED = env("DD_WATSON_SEARCH_ENABLED")
+if not WATSON_SEARCH_ENABLED:
+    INSTALLED_APPS = tuple(app for app in INSTALLED_APPS if app != "watson")
+    MIDDLEWARE = [m for m in MIDDLEWARE if m != "dojo.middleware.AsyncSearchContextMiddleware"]
+
 EMAIL_CONFIG = env.email_url(
     "DD_EMAIL_URL", default="smtp://user@:password@localhost:25")
 
@@ -864,6 +919,9 @@ CELERY_BROKER_URL = env("DD_CELERY_BROKER_URL") \
     params=env("DD_CELERY_BROKER_PARAMS"),
 )
 CELERY_TASK_IGNORE_RESULT = env("DD_CELERY_TASK_IGNORE_RESULT")
+DEDUPLICATION_ASYNC_WAIT_TIMEOUT = env("DD_DEDUPLICATION_ASYNC_WAIT_TIMEOUT")
+DEDUPLICATION_BATCH_PROCESS_TEST_DELAY = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY")
+DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER = env("DD_DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER")
 CELERY_RESULT_BACKEND = env("DD_CELERY_RESULT_BACKEND")
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_RESULT_EXPIRES = env("DD_CELERY_RESULT_EXPIRES")
@@ -888,6 +946,16 @@ CELERY_IMPORTS = ("dojo.tools.tool_issue_updater", )
 # Watson async index update settings
 WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE = env("DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE")
 WATSON_INDEX_PREFETCH_ENABLED = env("DD_WATSON_INDEX_PREFETCH_ENABLED")
+
+# Context managers wrapped around every Celery task by PluggableContextTask (see
+# dojo/celery.py). watson_search_context_for_task opens a watson search_context so bulk
+# finding saves that happen inside a worker task (which serves no HTTP request, so
+# AsyncSearchContextMiddleware never runs) accumulate and drain in batched async index
+# updates instead of indexing one finding at a time. Extend this list downstream (e.g. Pro)
+# rather than replacing it, so this batching stays wired.
+CELERY_TASK_CONTEXT_MANAGERS = [
+    "dojo.middleware.watson_search_context_for_task",
+]
 
 # Celery beat scheduled tasks
 CELERY_BEAT_SCHEDULE = {
@@ -1051,6 +1119,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # probe's occurrences) and shifts as the occurrence set changes, so dedupe on the stable identity: probe-derived
     # title + target model.
     "Garak Scan": ["title", "component_name"],
+    # promptfoo findings have no file_path/line; description holds the (per-run) attack input
+    # and model output and is unstable across runs, and severity is an aggregate that shifts
+    # with the set of failed attempts. Dedupe on the stable identity: plugin-derived title +
+    # target model.
+    "Promptfoo Scan": ["title", "component_name"],
     "SpotBugs Scan": ["cwe", "severity", "file_path", "line"],
     "JFrog Xray Unified Scan": ["vulnerability_ids", "file_path", "component_name", "component_version"],
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
@@ -1201,7 +1274,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
 # List of fields that are known to be usable in hash_code computation)
 # 'endpoints' is a pseudo field that uses the endpoints (for dynamic scanners). If `V3_FEATURE_LOCATIONS` is True, Dojo uses locations (URLs) instead.
 # 'unique_id_from_tool' is often not needed here as it can be used directly in the dedupe algorithm, but it's also possible to use it for hashing
-HASHCODE_ALLOWED_FIELDS = ["title", "cwe", "vulnerability_ids", "line", "file_path", "payload", "component_name", "component_version", "description", "endpoints", "unique_id_from_tool", "severity", "vuln_id_from_tool", "mitigation"]
+HASHCODE_ALLOWED_FIELDS = ["title", "cwe", "cwes", "vulnerability_ids", "line", "file_path", "payload", "component_name", "component_version", "description", "endpoints", "unique_id_from_tool", "severity", "vuln_id_from_tool", "mitigation"]
 
 # Adding fields to the hash_code calculation regardless of the previous settings
 HASH_CODE_FIELDS_ALWAYS = ["service"]
@@ -1304,6 +1377,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Snyk Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab Dependency Scanning Report": DEDUPE_ALGO_HASH_CODE,
     "Garak Scan": DEDUPE_ALGO_HASH_CODE,
+    "Promptfoo Scan": DEDUPE_ALGO_HASH_CODE,
     "GitLab SAST Report": DEDUPE_ALGO_HASH_CODE,
     "Govulncheck Scanner": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Govulncheck Scanner V2": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,

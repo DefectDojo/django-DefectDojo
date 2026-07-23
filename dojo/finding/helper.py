@@ -2,7 +2,7 @@ import logging
 from contextlib import suppress
 from datetime import datetime
 from itertools import batched
-from time import strftime
+from time import sleep, strftime
 
 from django.conf import settings
 from django.db import transaction
@@ -19,6 +19,7 @@ import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
+from dojo.finding.cwe import finding_cwe_labels
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
     do_dedupe_finding_task_internal,
@@ -26,6 +27,7 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
@@ -36,6 +38,7 @@ from dojo.models import (
     Engagement,
     FileUpload,
     Finding,
+    Finding_CWE,
     Finding_Group,
     JIRA_Instance,
     Notes,
@@ -68,6 +71,7 @@ NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 UNDER_REVIEW_QUERY = Q(under_review=True)
+DELETE_JIRA_SYNC_UNSET = object()
 
 
 # this signal is triggered just before a finding is getting saved
@@ -470,6 +474,20 @@ def post_process_findings_batch(
     force_sync=False,
     **kwargs,
 ):
+    # Test-only hook: when DEDUPLICATION_BATCH_PROCESS_TEST_DELAY > 0 (set only in
+    # the integration-test stack) block this batch so the async_wait integration
+    # test can deterministically distinguish 'async_wait' (which joins on this
+    # task) from 'async' (which does not). Default 0 -> no effect in production.
+    # DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER (a finding-title prefix) scopes
+    # the delay to that one test's findings so unrelated dedupe tests are not slowed.
+    if (test_delay := settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY) > 0:
+        delay_filter = settings.DEDUPLICATION_BATCH_PROCESS_TEST_DELAY_FILTER
+        if not delay_filter or Finding.objects.filter(id__in=finding_ids, title__istartswith=delay_filter).exists():
+            logger.warning(
+                "post_process_findings_batch: TEST-ONLY delay of %ss for %d finding(s) (filter=%r)",
+                test_delay, len(finding_ids) if finding_ids else 0, delay_filter,
+            )
+            sleep(test_delay)
 
     logger.debug(
         f"post_process_findings_batch called: finding_ids_count={len(finding_ids) if finding_ids else 0}, "
@@ -539,7 +557,7 @@ def finding_pre_delete(sender, instance, **kwargs):
     delete_related_files(instance)
 
 
-def finding_delete(instance, **kwargs):
+def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     logger.debug("finding delete, instance: %s", instance.id)
 
     # the idea is that the engagement/test pre delete already prepared all the duplicates inside
@@ -557,14 +575,30 @@ def finding_delete(instance, **kwargs):
         # but django still calls delete() in this case
         return
 
+    jira_sync_requested = push_to_jira is None or isinstance(push_to_jira, bool)
+    jira_issue_reassigned = False
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
         if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
             duplicate_cluster.order_by("-id").delete()
         else:
-            reconfigure_duplicate_cluster(instance, duplicate_cluster)
+            new_original = reconfigure_duplicate_cluster(instance, duplicate_cluster)
+            if jira_sync_requested:
+                jira_issue_reassigned = _reassign_jira_issue_to_new_original(
+                    instance,
+                    new_original,
+                    push_to_jira=push_to_jira,
+                )
     else:
         logger.debug("no duplicate cluster found for finding: %d, so no need to reconfigure", instance.id)
+
+    if (
+        jira_sync_requested
+        and not jira_issue_reassigned
+        and instance.has_jira_issue
+        and jira_services.is_delete_sync_allowed(instance, push_to_jira=push_to_jira)
+    ):
+        jira_services.close_issue_for_deleted_finding(instance, push_to_jira=push_to_jira)
 
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
@@ -579,6 +613,37 @@ def finding_post_delete(sender, instance, **kwargs):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
 
 
+def _reassign_jira_issue_to_new_original(deleted_finding, new_original, *, push_to_jira=None):
+    if (
+        not new_original
+        or new_original.has_jira_issue
+        or not jira_services.is_delete_sync_allowed(deleted_finding, push_to_jira=push_to_jira)
+    ):
+        return False
+
+    jira_issue = jira_services.get_issue(deleted_finding)
+    if not jira_issue:
+        return False
+
+    jira_instance = jira_services.get_instance(deleted_finding)
+    if not jira_instance:
+        return False
+
+    jira_id = jira_issue.jira_id
+    jira_instance_id = jira_instance.id
+    comment = (
+        f"DefectDojo finding {deleted_finding.id} was deleted. "
+        f"This Jira issue was reassigned to finding {new_original.id}."
+    )
+    jira_services.reassign_issue_to_finding(jira_issue, new_original)
+    jira_services.add_simple_comment_async(
+        jira_id,
+        jira_instance_id,
+        comment,
+    )
+    return True
+
+
 # can't use model to id here due to the queryset
 # @dojo_async_task
 # @app.task
@@ -586,12 +651,12 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
     # only look for a new original if there is one outside this test
     if original is None or cluster_outside is None or len(cluster_outside) == 0:
-        return
+        return None
 
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
         # Don't delete here — the caller (async_delete_crawl_task or finding_delete)
         # handles deletion of outside-scope duplicates efficiently via bulk_delete_findings.
-        return
+        return None
     logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
     # set new original to first finding in cluster (ordered by id)
     new_original = cluster_outside.order_by("id").first()
@@ -610,6 +675,8 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
         # Re-point remaining duplicates to the new original in a single query
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
+        return new_original
+    return None
 
 
 def prepare_duplicates_for_delete(obj, *, preview_only=False):
@@ -1004,7 +1071,7 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
         Vulnerability_Id.objects.filter(finding=finding).delete()
 
     Vulnerability_Id.objects.bulk_create([
-        Vulnerability_Id(finding=finding, vulnerability_id=vid)
+        Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
         for vid in vulnerability_ids
     ])
 
@@ -1013,6 +1080,24 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
         finding.cve = vulnerability_ids[0]
     else:
         finding.cve = None
+
+
+def save_cwes(finding, *, delete_existing: bool = True):
+    """
+    Persist the finding's CWEs as Finding_CWE rows.
+
+    The primary Finding.cwe plus any parser-supplied unsaved_cwes, stored as canonical CWE-<n>
+    strings. CWE is a weakness class, kept separate from vulnerability ids.
+    """
+    cwe_values = finding_cwe_labels(finding.cwe, getattr(finding, "unsaved_cwes", None))
+
+    if delete_existing:
+        Finding_CWE.objects.filter(finding=finding).delete()
+
+    Finding_CWE.objects.bulk_create(
+        [Finding_CWE(finding=finding, cwe=cwe) for cwe in cwe_values],
+        ignore_conflicts=True,
+    )
 
 
 def save_vulnerability_ids_template(finding_template, vulnerability_ids):

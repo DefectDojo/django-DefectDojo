@@ -105,13 +105,17 @@ class GitlabContainerScanParser:
 
             # Add component fields if not empty
             unsaved_vulnerability_ids = []
+            unsaved_cwes = []
             for identifier in identifiers:
                 cve = self._get_identifier_cve(identifier)
                 if cve:
                     unsaved_vulnerability_ids.append(cve)
                 cwe = self._get_identifier_cwe(identifier)
                 if cwe:
-                    finding.cwe = cwe
+                    unsaved_cwes.append(cwe)
+            if unsaved_cwes:
+                finding.cwe = unsaved_cwes[0]
+                finding.unsaved_cwes = unsaved_cwes
             if unsaved_vulnerability_ids:
                 finding.unsaved_vulnerability_ids = unsaved_vulnerability_ids
 

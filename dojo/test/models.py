@@ -2,6 +2,8 @@ import logging
 from contextlib import suppress
 
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.db import models
 from django.db.models import Count, Q
 from django.urls import reverse
@@ -81,6 +83,13 @@ class Test(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["engagement", "test_type"]),
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("title", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_test_fts_gin",
+            ),
+            GinIndex(fields=["title"], opclasses=["gin_trgm_ops"], name="dojo_test_title_trgm"),
         ]
 
     def __init__(self, *args, **kwargs):

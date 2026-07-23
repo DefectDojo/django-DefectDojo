@@ -39,6 +39,16 @@ DefectDojo Pro offers the following deduplication methods for same-tool deduplic
 #### Hash Code
 Uses a combination of selected fields to generate a unique hash. When selected, a third dropdown will appear showing the fields being used to calculate the hash.
 
+##### Content Fingerprint
+
+**Content Fingerprint** is a selectable hash field (available in all three configuration areas) that provides a *location-invariant* identity for static-analysis findings. It is derived from the vulnerable code snippet a tool includes in the finding — normalized so that indentation, line-number annotations, and formatting differences do not change it. Two findings about the same vulnerable code hash identically even when the code moved to a different line or file.
+
+Content Fingerprint is computed for tools that include a code snippet in the finding description — including **Bandit**, **Gosec**, **Brakeman**, **Checkmarx One**, and any tool whose description carries a fenced code block or SARIF snippet.
+
+> **Before selecting Content Fingerprint as a hash field**, populate fingerprints for existing findings by running `./manage.py backfill_fingerprints`. Findings imported after the feature is present get fingerprints automatically, but pre-existing findings have none — selecting the field without backfilling makes existing and incoming findings hash differently, splitting every match until the backfill runs.
+
+Content Fingerprint pairs well with **CWE** for tools that embed file paths or line numbers inside their titles, where other identity fields change every time the code moves. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#choosing-hash-fields-for-tracked-tools).
+
 #### Unique ID From Tool
 Leverages the security tool's own internal identifier for findings, ensuring perfect deduplication when the scanner provides reliable unique IDs.
 
@@ -49,6 +59,36 @@ Attempts to use the tool's unique ID first, then falls back to the hash code if 
 
 #### Global Component
 Matches findings by component name and version across **all Products** in the instance, rather than within a single Product or Engagement. Intended for SCA tools where the same vulnerable dependency appears in many Products. This algorithm is off by default and must be enabled by DefectDojo Support. See [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/) for details.
+
+#### Global Vulnerability ID
+Matches findings by their **vulnerability IDs** (CVE, GHSA, …) across **all Products** in the instance, rather than within a single Product or Engagement. Intended for tools that report the same CVE across many Products. Off by default and enabled by DefectDojo Support.
+
+> **Two tools on the same instance-wide algorithm become mutual deduplication candidates.** When two *different* tools are both configured with an instance-wide algorithm (Global Component, or Global Vulnerability ID), their findings share a constant grouping hash, so a finding from either tool is considered for deduplication against the other on that shared dimension (component, or vulnerability ID). This is the intended cross-tool behavior — enable it only when you want those tools to dedupe together.
+
+### Set-based Hash Code Fields (Vulnerability IDs and CWEs)
+
+Two finding attributes hold a *set* of values rather than a single value: vulnerability IDs (CVE, GHSA, …) and CWEs. When using the **Hash Code** algorithm (Same Tool or Cross Tool), you can add the following fields to **Hash Code Fields** to control how those sets are compared:
+
+| Field | Findings are duplicates when… |
+|-------|-------------------------------|
+| `vulnerability_ids` | they have the **exact same set** of vulnerability IDs |
+| `vulnerability_ids_partial` | they share **at least one** vulnerability ID |
+| `vulnerability_ids_subset` | one finding's vulnerability IDs are a **subset** of the other's |
+| `cwes` | they have the **exact same set** of CWEs |
+| `cwes_partial` | they share **at least one** CWE |
+| `cwes_subset` | one finding's CWEs are a **subset** of the other's |
+
+The `_partial` and `_subset` fields are compared per finding pair rather than folded into the hash: the remaining Hash Code Fields group the candidate findings, and the set comparison then narrows that group. (Exact matching — `vulnerability_ids` and `cwes` — is folded into the hash directly.)
+
+**Empty values.** If a finding has no vulnerability IDs (or no CWEs) for the configured matcher:
+
+- If Hash Code Fields also include an ordinary field (for example `title`), that field carries the identity — the set matcher is skipped for the pair and the findings can still match on the rest of the hash.
+- If a set matcher is the **only** field, a finding with no values does not match anything: with nothing else to identify it, an empty set is not treated as matching every other finding.
+
+**Configuration rules** (enforced when you save settings):
+
+- A vulnerability IDs field (`vulnerability_ids`, `vulnerability_ids_partial`, or `vulnerability_ids_subset`) may be used on its own — a CVE or GHSA identifies a specific vulnerability instance.
+- CWE fields (`cwes`, `cwes_partial`, `cwes_subset`) may **not** be the only criteria. A CWE is a weakness *class*, not a specific instance, so matching on CWE alone would merge unrelated findings. Pair a CWE matcher with an identifying field such as `title` or `file_path`.
 
 ## Cross Tool Deduplication
 
@@ -88,6 +128,14 @@ The following algorithm options are available for Reimport Deduplication:
 
 Reimport can completely discard Findings before they are recorded, so Reimport Deduplication settings should be adjusted with caution.
 
+### Track Findings as Locations Change
+
+When a tool's Reimport Deduplication algorithm is **Hash Code**, an additional toggle appears: **Track findings as locations change**. With it enabled, a finding whose location moved between reimports — a line shift or file rename, a URL move, or a dependency version bump — is treated as the *same* finding, even if the tool re-scored its severity. One finding is maintained in place and its location history is preserved, instead of the old finding closing and an identical new one being created.
+
+The toggle is off by default and applies only to the Hash Code reimport algorithm (tools with a reliable Unique ID From Tool already track movement through their stable IDs). Enabling it automatically re-hashes the tool's existing findings in the background so historical data participates immediately.
+
+See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/) for how the matching works, what is preserved, and guidance for enabling it on large instances.
+
 ## Running Deduplication Retroactively on Existing Data
 
 A common situation when first turning on Deduplication Tuning is having a large backlog of Findings that were imported *before* the dedup configuration changed.  In DefectDojo Pro, you do not need to run a separate command to dedupe this historical data — **changing the Deduplication Settings for a tool automatically triggers a background re-hash of all existing Findings associated with that test type**.
@@ -102,6 +150,8 @@ If you make several configuration changes in quick succession, each one queues i
 
 > **Note for self-hosted Pro:** The background job runs in the Celery worker pool.  If you have starved or backlogged workers, the re-hash can take longer than expected — check worker health if results don't appear within the timeframe you would expect for your instance size.
 
+> **Feature flags do not gate an existing configuration.** A tool's saved Deduplication Settings stay in effect for as long as they are configured; turning off a related feature flag does **not** retroactively revert that tool to default deduplication. To change or stop a tool's deduplication behavior, update its Deduplication Settings directly (which also queues the background re-hash described above).
+
 ## Deduplication Best Practices
 
 For optimal results with Deduplication Tuning:
@@ -112,6 +162,8 @@ For optimal results with Deduplication Tuning:
 - **Use Hash Code for cross-tool deduplication**: When enabling cross-tool deduplication, select fields that reliably identify the same finding across different tools (such as vulnerability name, location, and severity).  **IMPORTANT** Each tool enabled for cross-tool deduplication **MUST** have the same fields selected.
 - **Keep cross-tool sources in the same Asset**: Cross-Tool Deduplication is Asset-scoped.  Findings split across separate Assets will not dedupe even with matching hash fields.  See [Cross-Tool Deduplication is Scoped to a Single Asset](#cross-tool-deduplication-is-scoped-to-a-single-asset) above.
 - **Avoid overly broad deduplication**: Cross-tool deduplication with too few hash fields may result in false duplicates
+- **Backfill before selecting Content Fingerprint**: run `./manage.py backfill_fingerprints` first, then select the field — the triggered re-hash then has fingerprints to work with. See [Content Fingerprint](#content-fingerprint) above.
+- **Enable location tracking between scan runs**: the toggle's automatic re-hash covers the tool's whole backlog; on large instances let it finish before the next scheduled reimport. See [Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/#enabling-on-existing-data-upgrades).
 
 By tuning deduplication settings to your specific tools, you can significantly reduce duplicate noise.
 

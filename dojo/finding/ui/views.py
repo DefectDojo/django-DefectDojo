@@ -76,6 +76,7 @@ from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
     Dojo_User,
+    Endpoint,
     Endpoint_Status,
     Engagement,
     FileAccessToken,
@@ -939,6 +940,7 @@ class EditFinding(View):
             self.process_burp_request_response(new_finding, context)
             # Save the vulnerability IDs
             finding_helper.save_vulnerability_ids(new_finding, context["form"].cleaned_data["vulnerability_ids"].split())
+            finding_helper.save_cwes(new_finding)
             # Add a success message
             messages.add_message(
                 request,
@@ -1086,7 +1088,7 @@ class DeleteFinding(View):
     def process_form(self, request: HttpRequest, finding: Finding, context: dict):
         if context["form"].is_valid():
             product = finding.test.engagement.product
-            finding.delete()
+            finding.delete(push_to_jira=context["form"].cleaned_data.get("push_to_jira"))
             # Update the grade of the product async
             dojo_dispatch_task(calculate_grade, product.id)
             # Add a message to the request that the finding was successfully deleted
@@ -1748,7 +1750,8 @@ def mktemplate(request, fid):
 
         # Copy endpoints if they exist
         if finding.endpoints.exists():
-            endpoint_urls = [str(ep) for ep in finding.endpoints.all()]
+            with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+                endpoint_urls = [str(ep) for ep in finding.endpoints.all()]
             finding_helper.save_endpoints_template(template, endpoint_urls)
 
         messages.add_message(
@@ -2334,9 +2337,10 @@ def merge_finding_product(request, pid):
 
                         # if checked merge the endpoints
                         if form.cleaned_data["add_endpoints"]:
-                            finding_to_merge_into.endpoints.add(
-                                *finding.endpoints.all(),
-                            )
+                            with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
+                                finding_to_merge_into.endpoints.add(
+                                    *finding.endpoints.all(),
+                                )
 
                         # if checked merge the tags
                         if form.cleaned_data["tag_finding"]:
@@ -2475,8 +2479,9 @@ def _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_fi
         skipped_find_count = total_find_count - finds.count()
         deleted_find_count = finds.count()
 
+        push_to_jira = form.cleaned_data.get("push_to_jira")
         for find in finds:
-            find.delete()
+            find.delete(push_to_jira=push_to_jira)
 
         if skipped_find_count > 0:
             add_error_message_to_response(

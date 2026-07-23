@@ -1,5 +1,7 @@
 from decimal import Decimal
 
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVector
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.functions import Upper
@@ -130,6 +132,13 @@ class Product(BaseModel):
             # (WHERE UPPER(name) = UPPER(%s)) used when filtering findings by
             # product name; the plain unique btree on name can't (Sentry DJANGO-D2M).
             models.Index(Upper("name"), name="dojo_product_upper_name_idx"),
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("name", weight="A", config="english")
+                + SearchVector("description", weight="B", config="english"),
+                name="dojo_product_fts_gin",
+            ),
+            GinIndex(fields=["name"], opclasses=["gin_trgm_ops"], name="dojo_product_name_trgm"),
         ]
 
     def __str__(self):

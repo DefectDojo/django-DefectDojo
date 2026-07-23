@@ -16,6 +16,7 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_is_superuser_or_global_owner,
 )
+from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.location.models import Location
 from dojo.models import (
@@ -402,6 +403,15 @@ class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasEngagementFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
+    }
+
+
 class UserHasEngagementNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": "view",
@@ -460,6 +470,15 @@ class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasFindingFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -776,6 +795,15 @@ class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasTestFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -1264,11 +1292,21 @@ class UserHasConfigurationPermissionSuperuser(
 
 class LocationFindingReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the finding the reference is attached to and
+        # the location it points at. Authorizing only the finding would let a
+        # user attach a location they cannot otherwise see to their own finding.
         return check_post_permission(
             request,
             Finding,
             "finding",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -1283,16 +1321,29 @@ class LocationFindingReferencePermission(permissions.BasePermission):
             and check_update_permission(
                 request, obj, "edit", "finding",
             )
+            and check_update_permission(
+                request, obj, "view", "location",
+            )
         )
 
 
 class LocationProductReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the product the reference is attached to and
+        # the location it points at. Authorizing only the product would let a
+        # user attach a location they cannot otherwise see to their own product.
         return check_post_permission(
             request,
             Product,
             "product",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
@@ -1306,5 +1357,8 @@ class LocationProductReferencePermission(permissions.BasePermission):
             )
             and check_update_permission(
                 request, obj, "edit", "product",
+            )
+            and check_update_permission(
+                request, obj, "view", "location",
             )
         )

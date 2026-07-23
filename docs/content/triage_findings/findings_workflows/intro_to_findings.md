@@ -32,11 +32,11 @@ The Finding Page contains various components. Each will be populated by the Impo
 ​
 2. **Finding Overview:** This section contains five separate pages of relevant information for the Finding: Description, Mitigation, Impact, References and Notes. These fields can be populated automatically based on the incoming vulnerability data, or they can be edited by a DefectDojo user to provide additional context.  
 ​  
-​**\- Description** is a more detailed summary and explanation of the Finding in question.  
-​**\- Mitigation** is a suggested method for mitigating the Finding so that it is no longer present in your system.  
-​**\- Impact** describes the impact of the vulnerability on your security posture. This page might hold descriptive text, or it may include a [CVSS Vector String](https://qualysguard.qualys.com/qwebhelp/fo_portal/setup/cvss_vector_strings.htm), which is a shorthand way to communicate the vulnerability’s overall exploitability and with the consequences of an exploitation to your organization. Impact is closely related to a Finding’s Severity field.  
-​**\- References** will list any links or additional information relevant to this Finding if included.  
-​**\- Notes** is a page where you can record any other relevant information to this Finding. Notes are ‘DefectDojo\-only’ metadata, and they are not created at the time of import. Use this field to track your mitigation progress or to add more specific detail to the Finding.  
+- ​**Description** is a more detailed summary and explanation of the Finding in question.  
+- ​**Mitigation** is a suggested method for mitigating the Finding so that it is no longer present in your system.  
+- ​**Impact** describes the impact of the vulnerability on your security posture. This page might hold descriptive text, or it may include a [CVSS Vector String](https://qualysguard.qualys.com/qwebhelp/fo_portal/setup/cvss_vector_strings.htm), which is a shorthand way to communicate the vulnerability’s overall exploitability and with the consequences of an exploitation to your organization. Impact is closely related to a Finding’s Severity field.  
+- ​**References** will list any links or additional information relevant to this Finding if included.  
+- ​**Notes** is a page where you can record any other relevant information to this Finding. Notes are ‘DefectDojo\-only’ metadata, and they are not created at the time of import. Use this field to track your mitigation progress or to add more specific detail to the Finding.  
 ​
 3. **Additional Details:** This section lists other details related to this Finding, if relevant:
 
@@ -45,7 +45,7 @@ The Finding Page contains various components. Each will be populated by the Impo
 	* Steps To Reproduce the vulnerability
 	* Severity Justification where you can record a more detailed explanation of the severity or impact of the Finding.  
 	​  
-	​
+
 4. **Metadata: This section contains filterable metadata related to the Finding:**
 
 

@@ -48,6 +48,7 @@ The list of supported fields in JSON format:
 - date: Date
 - cwe: Int
 - cve: String
+- vulnerability_ids: List of Strings
 - epss_score: Float
 - epss_percentile: Float
 - cvssv3: String
@@ -120,6 +121,7 @@ The list of supported fields in JSON format:
             "kev_date": "2024-05-01",
             "file_path": "src/first.cpp",
             "line": 13,
+            "vulnerability_ids": ["GHSA-5mrr-rgp6-x4gr", "OSV-2021-1234"],
             "endpoints": [
                 {
                     "host": "exemple.com"
@@ -225,6 +227,8 @@ Example:
     ]
 }
 ```
+
+The resulting Test Type name is derived from the `type` field: when `type` is omitted (or equals the scan type) the Test Type is `Generic Findings Import`; when `type` is provided it becomes `{type} Scan (Generic Findings Import)` (for the example above, `My custom Test type Scan (Generic Findings Import)`). A `type` that already ends with the `(Generic Findings Import)` suffix is used verbatim, so the suffix is never doubled.
 
 ### Sample Scan Data
 

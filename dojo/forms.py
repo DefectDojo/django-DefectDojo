@@ -324,15 +324,18 @@ class ImportScanForm(forms.Form):
         initial=False,
     )
 
-    if is_finding_groups_enabled():
-        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text="Choose an option to automatically group new findings by the chosen option.")
-        create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
-
     def __init__(self, *args, **kwargs):
         environment = kwargs.pop("environment", None)
         endpoints = kwargs.pop("endpoints", None)
         api_scan_configuration = kwargs.pop("api_scan_configuration", None)
         super().__init__(*args, **kwargs)
+        # Finding-group fields depend on a DB-backed system setting. Add them here
+        # rather than in the class body so that importing this module never issues
+        # a query (which triggers Django's "database access during app
+        # initialization" warning when the module is imported at startup).
+        if is_finding_groups_enabled():
+            self.fields["group_by"] = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text="Choose an option to automatically group new findings by the chosen option.")
+            self.fields["create_finding_groups_for_all_findings"] = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
         self.fields["active"].initial = self.active_verified_choices[0]
         self.fields["verified"].initial = self.active_verified_choices[0]
         if environment:
@@ -448,15 +451,18 @@ class ReImportScanForm(forms.Form):
         initial=False,
     )
 
-    if is_finding_groups_enabled():
-        group_by = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text="Choose an option to automatically group new findings by the chosen option")
-        create_finding_groups_for_all_findings = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
-
     def __init__(self, *args, test=None, **kwargs):
         endpoints = kwargs.pop("endpoints", None)
         api_scan_configuration = kwargs.pop("api_scan_configuration", None)
         api_scan_configuration_queryset = kwargs.pop("api_scan_configuration_queryset", None)
         super().__init__(*args, **kwargs)
+        # Finding-group fields depend on a DB-backed system setting. Add them here
+        # rather than in the class body so that importing this module never issues
+        # a query (which triggers Django's "database access during app
+        # initialization" warning when the module is imported at startup).
+        if is_finding_groups_enabled():
+            self.fields["group_by"] = forms.ChoiceField(required=False, choices=Finding_Group.GROUP_BY_OPTIONS, help_text="Choose an option to automatically group new findings by the chosen option")
+            self.fields["create_finding_groups_for_all_findings"] = forms.BooleanField(help_text="If unchecked, finding groups will only be created when there is more than one grouped finding", required=False, initial=True)
         self.fields["active"].initial = self.active_verified_choices[0]
         self.fields["verified"].initial = self.active_verified_choices[0]
         self.scan_type = None
@@ -572,6 +578,7 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
 
 
 ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=["title", "file"], can_delete=True, formset=BaseManageFileFormSet)
+AddOnlyManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=["title", "file"], can_delete=False, formset=BaseManageFileFormSet)
 
 
 # Risk acceptance forms live in dojo/risk_acceptance/ui/forms.py. Re-exported here for

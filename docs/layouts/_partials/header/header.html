@@ -12,12 +12,19 @@
   <div class="header-bar"></div>
   {{ end -}}
 
-  <header class="navbar navbar-expand-lg">
+  <header class="dd-header navbar navbar-expand-lg navbar-dark">
     {{ with site.Params.doks.containerBreakpoint -}}
     <div class="container-{{ . }}">
       {{ else -}}
       <div class="container">
         {{ end -}}
+
+        <!-- Brand (mobile) — the full brand block lives inside the offcanvas on desktop -->
+        <a href="/" class="d-flex d-lg-none align-items-center text-decoration-none me-auto">
+          <img src="/svgs/logo-lightmode.svg" class="logo-lightmode" alt="DefectDojo" width="132" />
+          <img src="/svgs/logo-darkmode.svg" class="logo-darkmode" alt="DefectDojo" width="132" />
+          <span class="dd-wordmark ms-2">| docs</span>
+        </a>
 
         <!-- FlexSearch mobile -->
         {{ partial "main/showFlexSearch" . }}
@@ -145,10 +152,10 @@
               <a href="/" class="d-flex align-items-center text-decoration-none">
                 <img src="/svgs/logo-lightmode.svg" class="logo-lightmode" alt="DefectDojo" width="184" />
                 <img src="/svgs/logo-darkmode.svg" class="logo-darkmode" alt="DefectDojo" width="184" />
-                <span class="ms-2 text-bs-body fw-bold">| docs</span>
+                <span class="dd-wordmark ms-2">| docs</span>
               </a>
               {{ if $releaseName }}
-              <a href="/releases/pro/changelog/" class="badge rounded-pill text-bg-primary fw-normal text-decoration-none ms-2 d-none d-lg-inline-flex">{{ $releaseName | htmlEscape }} | changelog</a>
+              <a href="/releases/pro/changelog/" class="dd-release-chip ms-2 d-none d-lg-inline-flex">{{ $releaseName | htmlEscape }} | changelog</a>
               {{ end }}
             </div>
 

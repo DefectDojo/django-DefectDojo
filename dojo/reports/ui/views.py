@@ -71,6 +71,8 @@ def report_url_resolver(request):
     try:
         url_resolver = request.META["HTTP_X_FORWARDED_PROTO"] + "://" + request.META["HTTP_X_FORWARDED_FOR"]
     except:
+        if "HTTP_HOST" not in request.META:
+            return request.build_absolute_uri("/").rstrip("/")
         hostname = request.META["HTTP_HOST"]
         port_index = hostname.find(":")
         if port_index != -1:
@@ -846,8 +848,11 @@ class CSVExportView(View):
         findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
+        return self.build_response(findings)
+
+    def build_response(self, findings, filename="findings.csv"):
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=findings.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         writer = csv.writer(response)
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
@@ -917,8 +922,12 @@ class CSVExportView(View):
                 fields.append(finding.test.engagement.product.name)
 
                 endpoint_value = ""
-                for endpoint in finding.endpoints.all():
-                    endpoint_value += f"{endpoint}; "
+                if settings.V3_FEATURE_LOCATIONS:
+                    for location_ref in finding.locations.all():
+                        endpoint_value += f"{location_ref.location}; "
+                else:
+                    for endpoint in finding.endpoints.all():
+                        endpoint_value += f"{endpoint}; "
                 endpoint_value = endpoint_value.removesuffix("; ")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
@@ -983,6 +992,9 @@ class ExcelExportView(View):
         findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
+        return self.build_response(findings)
+
+    def build_response(self, findings, filename="findings.xlsx"):
         workbook = Workbook()
         workbook.iso_dates = True
         worksheet = workbook.active
@@ -1082,8 +1094,12 @@ class ExcelExportView(View):
                 col_num += 1
 
                 endpoint_value = ""
-                for endpoint in finding.endpoints.all():
-                    endpoint_value += f"{endpoint}; \n"
+                if settings.V3_FEATURE_LOCATIONS:
+                    for location_ref in finding.locations.all():
+                        endpoint_value += f"{location_ref.location}; \n"
+                else:
+                    for endpoint in finding.endpoints.all():
+                        endpoint_value += f"{endpoint}; \n"
                 endpoint_value = endpoint_value.removesuffix("; \n")
                 if len(endpoint_value) > EXCEL_CHAR_LIMIT:
                     endpoint_value = endpoint_value[:EXCEL_CHAR_LIMIT - 3] + "..."
@@ -1140,5 +1156,5 @@ class ExcelExportView(View):
             content=stream,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = "attachment; filename=findings.xlsx"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         return response

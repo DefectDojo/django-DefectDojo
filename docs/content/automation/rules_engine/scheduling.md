@@ -8,6 +8,8 @@ audience: pro
 
 Rules can be scheduled to run automatically rather than triggered manually each time.  A scheduled rule will execute against all Findings that match its filter conditions at the configured time.
 
+Scheduling is off by default. A superuser can turn on the **Scheduling Service** from **Settings > Feature Flags**, on both Cloud and On-Premise instances (see [Feature Flags](/admin/feature_flags/pro__feature_flags/)); the **Schedule Rule** option appears once it is enabled.
+
 The user setting up the schedule must have the **Change Scheduling Service Schedule** configuration permission.
 
 ## Schedule Types

@@ -948,6 +948,10 @@ class ImportScanResultsView(View):
             "create_finding_groups_for_all_findings": form.cleaned_data.get("create_finding_groups_for_all_findings", None),
             "environment": self.get_development_environment(environment_name=form.cleaned_data.get("environment")),
         })
+        # Honor the user's profile deduplication_execution_mode for UI imports. The API resolves
+        # this in the serializer; the UI has no per-import selector, so fall back to the profile
+        # (or block_execution) instead of silently defaulting to async.
+        context["deduplication_execution_mode"] = Dojo_User.resolve_deduplication_execution_mode(request.user)
         # Create the engagement if necessary
         self.create_engagement(context)
         # close_old_findings_product_scope is a modifier of close_old_findings.

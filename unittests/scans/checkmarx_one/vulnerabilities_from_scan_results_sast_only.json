@@ -1,0 +1,110 @@
+{
+    "reportCreationDate": "2026-06-30T10:15:00.000000Z",
+    "reportType": "scan",
+    "reportHeader": {
+        "reportName": "improved-scan-report",
+        "projectName": "sast-only-project",
+        "branchName": "main"
+    },
+    "scanResults": {
+        "totalResults": 2,
+        "resultsList": [
+            {
+                "queryName": "Reflected_XSS",
+                "queryId": 9349880549689768000,
+                "description": "The method embeds untrusted data in generated output, enabling an attacker to inject malicious code into the generated web-page.",
+                "vulnerabilitiesTotal": 1,
+                "queryPath": "Kotlin/Kotlin_High_Risk/Reflected_XSS",
+                "cweId": 79,
+                "categories": [
+                    {
+                        "name": "OWASP Top 10 2021",
+                        "subCategories": [
+                            "A3-Injection"
+                        ]
+                    }
+                ],
+                "vulnerabilities": [
+                    {
+                        "similarityId": 134962663,
+                        "status": "Recurrent",
+                        "state": "To Verify",
+                        "severity": "High",
+                        "foundDate": "2026-06-16T14:39:59Z",
+                        "firstFoundDate": "2026-03-18T20:51:25Z",
+                        "sourceFileName": "/src/main/kotlin/api/CustomerController.kt",
+                        "destinationFileName": "/src/main/kotlin/domain/entity/Customer.kt",
+                        "sourceLine": 69,
+                        "destinationLine": 484,
+                        "nodes": [
+                            {
+                                "fileName": "/src/main/kotlin/api/CustomerController.kt",
+                                "method": "putCustomer",
+                                "line": 69,
+                                "code": "@RequestBody s: S"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "queryName": "Deprecated_API",
+                "queryId": 9349880549689768001,
+                "description": "The application references code elements that have been declared as deprecated.",
+                "vulnerabilitiesTotal": 1,
+                "queryPath": "Go/Go_Low_Visibility/Deprecated_API",
+                "cweId": 477,
+                "categories": [
+                    {
+                        "name": "OWASP ASVS",
+                        "subCategories": [
+                            "V01 Architecture, Design and Threat Modeling"
+                        ]
+                    }
+                ],
+                "vulnerabilities": [
+                    {
+                        "similarityId": 872206556,
+                        "status": "New",
+                        "state": "To Verify",
+                        "severity": "Low",
+                        "foundDate": "2026-06-16T14:39:59Z",
+                        "firstFoundDate": "2026-06-16T14:39:59Z",
+                        "sourceFileName": "/scripts/export/e.go",
+                        "destinationFileName": "/scripts/export/e.go",
+                        "sourceLine": 9,
+                        "destinationLine": 9,
+                        "nodes": [
+                            {
+                                "fileName": "/scripts/export/e.go",
+                                "method": "main",
+                                "line": 9,
+                                "code": "ioutil.ReadFile(path)"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "iacScanResults": null,
+    "scaScanResults": null,
+    "containerScanResults": null,
+    "apiSecScanResults": null,
+    "vulnerabilityDetails": [
+        {
+            "vulnerabilityName": "Reflected_XSS",
+            "risk": "A successful XSS exploit would allow an attacker to rewrite web pages and insert malicious scripts.",
+            "cause": "The application creates web pages that include untrusted data without proper encoding.",
+            "generalRecommendations": "Fully encode all dynamic data before embedding it in output.",
+            "cweId": 79
+        },
+        {
+            "vulnerabilityName": "Deprecated_API",
+            "risk": "Referencing deprecated modules can expose the application to known vulnerabilities.",
+            "cause": "The application references code elements that have been declared as deprecated.",
+            "generalRecommendations": "Always prefer to use the most updated versions of libraries and packages.",
+            "cweId": 477
+        }
+    ]
+}

@@ -10,7 +10,61 @@ Here are the release notes for **DefectDojo Pro (Cloud Version)**. These release
 
 For Open Source release notes, please see the [Releases page on GitHub](https://github.com/DefectDojo/django-DefectDojo/releases), or alternatively consult the Open Source [upgrade notes](/releases/os_upgrading/upgrading_guide/).
 
-## June 2026: v3.0
+## July 2026: v3.1
+
+### July 15, 2026: v3.1.101
+
+* **(Findings)** Consolidated the bulk-edit actions in the findings table into a single surface, and added bulk "replace tag" and bulk review actions.
+* **(Search)** Retired the legacy Watson search backend in Pro in favor of the native Postgres global search introduced in v3.1.100. Watson indexing can now be toggled with `DD_WATSON_SEARCH_ENABLED`.
+* **(Performance)** Full-table pagination counts on large API list endpoints can now be cached behind an opt-in flag, speeding up paginated list requests on big instances.
+* **(SSO)** Groups created through SSO now default to the Reader role.
+* **(Jira)** Fixed the "Connect with Jira" OAuth flow being blocked by hidden-field validation.
+* **(Reports)** Chart blocks in report PDFs no longer capture mid-animation, so exported charts render fully drawn.
+
+### July 13, 2026: v3.1.100
+
+* **(Connectors)** Added a large batch of new Connectors. New findings connectors: CrowdStrike Falcon, Microsoft Defender Vulnerability Management, Microsoft Defender for Cloud, Veracode, Qualys, Rapid7 InsightVM, GitHub Advanced Security, HackerOne, Contrast, Google Cloud Security Command Center, Shodan, Wazuh, Cloudflare, Censys, Docker Scout, and Have I Been Pwned. New asset connectors: GitLab, Atlassian JSM Assets, Bitbucket Cloud, Azure DevOps, Backstage, and Group-IB ASM. Added a GitGuardian secrets connector.
+* **(Integrations)** Added new outbound integrators for Jira (Cloud and Data Center, with per-transition custom fields, ticket templates, and a test-render path), PagerDuty, Shortcut, and Bitbucket Cloud. Jira integrations now support setting fields on close/reopen transitions and Jira Cloud OAuth.
+* **(Search)** Added cross-model global search backed by native Postgres full-text search and trigram indexes, so you can search across findings and related objects from one place.
+* **(Findings)** Added a public API endpoint for merging findings, and "Not X" negation options on the finding status filter.
+* **(Notes)** You can now @mention users in notes with autocomplete; mentioned users receive a notification.
+* **(Users)** Added bulk API-token and password resets from the users list.
+* **(Sensei)** Added candidate triage directly in the findings table
+* **(Pro UI)** Reworked the big-table toolbar menu. Long unbroken names now wrap instead of being clipped, table scrollbars stay visible on hover, and in-page navigation refreshes data in place instead of triggering a full-page reload. Added a classic-UI deprecation banner with one-click opt-in to the Pro UI. The test page now shows the effective deduplication matching policy.
+* **(Authorization)** Tightened authorization on product reassignment, V3 location routes, location-reference writes, and questionnaire relink routes.
+* **(Performance)** `close_old_findings` now fetches only the columns it needs, and uWSGI workers and Celery prefork children are recycled by memory to keep long-running instances healthy.
+* **(Import)** Fixed reimport so it dispatches post-processing with the correct per-finding `push_to_jira` value, stopped dynamic Test Type names from doubling the `(scan_type)` suffix, and made risk-acceptance findings reinstate correctly when the expiration date is updated via the API.
+* **(Tools)** Checkmarx One parser now handles explicit null scanner sections in filtered reports, and the CSV universal parser no longer strips backticks from imported values.
+* **(Bug Fixes)** After deleting the object you were viewing, the Pro UI now lands on its parent context instead of erroring; a background sub-fetch 404 no longer ejects authorized users to the 404 page; the global loader no longer gets stuck open in bulk menus; and audit-log history context is now JSON-safe before Celery dispatch.
+
+### July 7, 2026: v3.1.0
+
+* **(Insights)** Added export functionality and per-metric descriptions to Insights charts.
+* **(Connectors)** Added Connectors filtering\
+* **(Prioritization)** Added a per-user Products/Assets count column to the prioritization engine.
+* **(Import)** Import and reimport can now wait for deduplication to finish before returning. Reimport title hashing now applies the full titlecase transform for multi-line titles.
+* **(Jira)** Project settings now support multiple components. Issue status is now read from `statusCategory` instead of the resolution field.
+* **(Reports)** PDF reports now show vulnerability IDs.
+* **(Security)** Tool Configuration credentials are now encrypted with AES-256-GCM.
+* **(Pro UI)** Breadcrumbs are now deterministic and derived from the object hierarchy.
+* **(Locations)** Legacy endpoint access in Make Template and Merge Findings is now guarded behind the Locations feature flag, and the finding Asset-tag (AND) filter uses the v3 Asset vocabulary.
+* **(UI)** Finding Groups now fold under Findings in the sidebar; filter category accordions and collapse panels animate smoothly; right-aligned dropdown menus no longer overflow off the page edge; new-UI styling uses brand/design tokens instead of hardcoded colors; and a global required-fields notice was added for WCAG H90 compliance. The open source message banner can now be disabled and dismissed.
+* **(Tools)** Added an Alert Logic CSV parser and a Garak (NVIDIA LLM vulnerability scanner) parser. The GitHub Vulnerability parser now sets `fix_available`; Dependency-Track FPF findings now include `analysis.detail` in the description; the Trivy parser no longer crashes on legacy reports missing the `Class` field; govulncheck now rejects SARIF reports with a clear error pointing to the SARIF scan type; and JFrog Xray impact paths are now deterministic.
+* **(Performance)** Faster imports and deduplication: batched `Vulnerability_Id` and `BurpRawRequestResponse` inserts, skip-unchanged-row and `VALUES` fast-write dedup paths, batched prefetching of Pro relations, Watson search index prefetch with async indexing, a new `sla_expiration_date` index for the global finding list, a case-insensitive product-name index, and a fix for finding-group Jira push N+1 queries.
+
+### June 29, 2026: v3.0.200
+
+* **(Reports)** Added a Graph block type to the Pro Report Builder, letting you embed Insights chart-catalog visualizations directly in reports.
+* **(Pro UI)** Dashboard V2 can now be exported as a branded, paginated PDF.
+* **(Pro UI)** Number columns now support multi-value "In List" / "Not In List" filtering.
+* **(Findings)** KEV and EPSS data is now aggregated across all CVEs on a Finding.
+* **(Custom Enrichment)** Added a dedicated error page for EPSS/KEV connectivity failures, and default KEV/EPSS URLs now persist in tuner settings across upgrades.
+* **(Import)** Reimport no longer closes and recreates Findings whose titles exceed 511 characters.
+* **(SSO)** The SAML configuration form now clarifies which fields are conditionally required.
+* **(Permissions)** The Engagement Testing Lead selector now resolves product-scoped users, and authorized-users handling has been improved.
+* **(Performance)** Heavy dashboard metric aggregations can now be cached behind `DD_METRICS_CACHE_ENABLED`.
+* **(Tools)** Xygeni parser no longer deduplicates distinct SAST/Secrets findings in the same file (now keyed on `uniqueHash`). SARIF parser now unwraps BlackDuck nested fingerprint values.
+* **(Tags)** User-set tags are now preserved when creating a Finding under product tag inheritance.
 
 ### June 22, 2026: v3.0.100
 
