@@ -4168,3 +4168,35 @@ class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class OpenAPISchemaGenerationTest(DojoAPITestCase):
+
+    """
+    Render the full OpenAPI v3 schema and gate that generation is error-free.
+
+    drf-spectacular does not raise when it fails to introspect a view or
+    serializer -- it logs an error and drops the operation from the schema, so a
+    broken endpoint (e.g. a serializer whose field querysets raise for the
+    unauthenticated request used at schema time) silently ships incomplete API
+    docs and can trip downstream postprocessing. Fail the build if schema
+    generation produces any error.
+    """
+
+    def test_schema_generation_produces_no_errors(self):
+        GENERATOR_STATS.reset()
+        generator = spectacular_settings.DEFAULT_GENERATOR_CLASS()
+        schema = generator.get_schema(request=None, public=True)
+
+        # Structurally valid per the OpenAPI 3 spec ...
+        validate_schema(schema)
+
+        # ... and generated without drf-spectacular logging any error (a logged
+        # error means an operation was silently dropped from the schema).
+        errors = list(GENERATOR_STATS._error_cache)
+        self.assertEqual(
+            errors,
+            [],
+            f"OpenAPI schema generation produced {len(errors)} error(s):\n"
+            + "\n".join(str(error) for error in errors),
+        )
