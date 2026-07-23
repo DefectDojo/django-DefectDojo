@@ -452,6 +452,24 @@ You will need an Edgescan API token. Create one from your Edgescan account under
 
 Each Edgescan asset becomes a Record, and each open vulnerability on that asset is imported as a finding. Severity is mapped from Edgescan's numeric scale (1–5) to DefectDojo's Info–Critical, and CVE references, the CWE, and a CVSS v3 vector are included where Edgescan provides them.
 
+## **Escape**
+
+The Escape connector uses the [Escape](https://escape.tech) API to import **API\-security (DAST) findings**. DefectDojo enumerates every organization the token can access and every application within each, creates a Record for each application that has a scan, and imports that application's latest scan issues as findings — there is no per\-application configuration.
+
+#### Prerequisites
+
+You will need an Escape **API key**, created in the Escape app under **Settings → API keys**. The key is sent in the `Authorization: Key` header and is never logged.
+
+#### Connector Mappings
+
+1. Leave the **Location** field blank to use `https://public.escape.tech/v2`, or enter your Escape API host explicitly.
+2. Enter the Escape API key in the **Secret** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+DefectDojo maps each **application** to a Record and each scan **issue** to a finding: the severity comes from Escape's rating (Critical/High/Medium/Low), the CWE is carried over, the OWASP category and HTTP method become tags, the affected URL becomes the endpoint, and the remediation guidance is included. Findings are recorded as dynamic findings and de\-duplicated on Escape's issue id.
+
+See the [Escape API documentation](https://docs.escape.tech/) for more information.
+
 ## **GitGuardian**
 
 The GitGuardian connector uses the GitGuardian REST API to import **secret incidents** — exposed credentials GitGuardian has detected across your monitored sources. DefectDojo creates a Record for each monitored source (repository or perimeter) that currently has open incidents, and imports each open incident as a finding.
