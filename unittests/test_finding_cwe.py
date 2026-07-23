@@ -108,12 +108,22 @@ class TestFindingCwesAPI(DojoAPITestCase):
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         self.client.force_login(self.get_test_admin())
 
+    def _base_create_payload(self):
+        # Reuse finding id=2 as a template; drop the identity/derived CWE fields so each test
+        # supplies exactly the cwe/cwes it is exercising.
+        payload = self.get_finding_api(2)
+        del payload["id"]
+        payload.pop("cve", None)
+        payload.pop("cwe", None)
+        payload.pop("cwes", None)
+        return payload
+
+    def _stored_cwes(self, finding_id):
+        return set(Finding_CWE.objects.filter(finding_id=finding_id).values_list("cwe", flat=True))
+
     def test_finding_create_with_cwes(self):
         # cwes mirror vulnerability_ids: nested [{"cwe": "CWE-79"}], first is the primary Finding.cwe
-        finding_details = self.get_finding_api(2)
-        del finding_details["id"]
-        finding_details.pop("cve", None)
-        finding_details.pop("cwe", None)
+        finding_details = self._base_create_payload()
         new_cwes = [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]
         finding_details["cwes"] = new_cwes
         response = self.post_new_finding_api(finding_details)
@@ -123,6 +133,89 @@ class TestFindingCwesAPI(DojoAPITestCase):
         # primary cwe (legacy int) set from the first entry; both stored as canonical Finding_CWE rows
         self.assertEqual(79, finding.cwe)
         self.assertEqual({"CWE-79", "CWE-89"}, set(finding.finding_cwe_set.values_list("cwe", flat=True)))
+
+    def test_finding_create_precedence_explicit_scalar_wins(self):
+        # When BOTH a scalar `cwe` and a `cwes` list are supplied, the explicit scalar stays the
+        # primary; the cwes entries become the extras (mirrors vulnerability_ids precedence).
+        finding_details = self._base_create_payload()
+        finding_details["cwe"] = 22
+        finding_details["cwes"] = [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]
+        response = self.post_new_finding_api(finding_details)
+        finding = Finding.objects.get(id=response.get("id"))
+        self.assertEqual(22, finding.cwe)
+        self.assertEqual({"CWE-22", "CWE-79", "CWE-89"}, self._stored_cwes(finding.id))
+        # primary-first ordering guaranteed by the model property / save_cwes
+        self.assertEqual("CWE-22", finding.cwes[0])
+
+    def test_finding_create_cwes_only_first_becomes_primary(self):
+        # No scalar cwe supplied -> the first cwes entry becomes the primary and is mirrored.
+        finding_details = self._base_create_payload()
+        finding_details["cwes"] = [{"cwe": "CWE-89"}, {"cwe": "CWE-22"}]
+        response = self.post_new_finding_api(finding_details)
+        finding = Finding.objects.get(id=response.get("id"))
+        self.assertEqual(89, finding.cwe)
+        self.assertEqual({"CWE-89", "CWE-22"}, self._stored_cwes(finding.id))
+        self.assertEqual("CWE-89", finding.cwes[0])
+
+    def test_finding_update_replaces_cwes(self):
+        finding_details = self._base_create_payload()
+        finding_details["cwes"] = [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]
+        finding_id = self.post_new_finding_api(finding_details).get("id")
+        # PATCH with a new set replaces the rows entirely (delete-then-recreate via save_cwes).
+        self.patch_finding_api(finding_id, {"cwes": [{"cwe": "CWE-22"}, {"cwe": "CWE-352"}]})
+        finding = Finding.objects.get(id=finding_id)
+        self.assertEqual(22, finding.cwe)
+        self.assertEqual({"CWE-22", "CWE-352"}, self._stored_cwes(finding_id))
+
+    def test_finding_update_precedence_explicit_scalar_wins(self):
+        finding_details = self._base_create_payload()
+        finding_details["cwes"] = [{"cwe": "CWE-79"}]
+        finding_id = self.post_new_finding_api(finding_details).get("id")
+        # Both scalar + list on the same PATCH: explicit scalar stays primary.
+        self.patch_finding_api(finding_id, {"cwe": 22, "cwes": [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]})
+        finding = Finding.objects.get(id=finding_id)
+        self.assertEqual(22, finding.cwe)
+        self.assertEqual({"CWE-22", "CWE-79", "CWE-89"}, self._stored_cwes(finding_id))
+        self.assertEqual("CWE-22", finding.cwes[0])
+
+    def test_finding_update_omission_leaves_cwes_untouched(self):
+        finding_details = self._base_create_payload()
+        finding_details["cwes"] = [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]
+        finding_id = self.post_new_finding_api(finding_details).get("id")
+        # A PATCH that omits cwes must not touch the Finding_CWE rows.
+        self.patch_finding_api(finding_id, {"title": "cwes untouched by this patch"})
+        self.assertEqual({"CWE-79", "CWE-89"}, self._stored_cwes(finding_id))
+
+    def test_finding_update_explicit_empty_clears(self):
+        finding_details = self._base_create_payload()
+        finding_details["cwes"] = [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]
+        finding_id = self.post_new_finding_api(finding_details).get("id")
+        # Explicit [] clears the rows; with no scalar supplied the primary resets to unset (0).
+        self.patch_finding_api(finding_id, {"cwes": []})
+        finding = Finding.objects.get(id=finding_id)
+        self.assertEqual(set(), self._stored_cwes(finding_id))
+        self.assertEqual(0, finding.cwe)
+
+    def test_finding_update_explicit_empty_with_scalar_keeps_primary(self):
+        finding_details = self._base_create_payload()
+        finding_details["cwes"] = [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]
+        finding_id = self.post_new_finding_api(finding_details).get("id")
+        # Explicit [] with an explicit scalar clears the extras but keeps the scalar-derived primary.
+        self.patch_finding_api(finding_id, {"cwe": 79, "cwes": []})
+        finding = Finding.objects.get(id=finding_id)
+        self.assertEqual(79, finding.cwe)
+        self.assertEqual({"CWE-79"}, self._stored_cwes(finding_id))
+
+    def test_finding_cwes_read_back_shape_is_object_list(self):
+        # Wire-shape stability: cwes reads back as a list of {"cwe": "CWE-<n>"} objects, never a
+        # flat list of ints. This is the contract v2 must preserve.
+        finding_details = self._base_create_payload()
+        finding_details["cwes"] = [{"cwe": "CWE-79"}, {"cwe": "CWE-89"}]
+        finding_id = self.post_new_finding_api(finding_details).get("id")
+        cwes = self.get_finding_api(finding_id)["cwes"]
+        self.assertTrue(all(isinstance(entry, dict) and set(entry.keys()) == {"cwe"} for entry in cwes))
+        self.assertTrue(all(entry["cwe"].startswith("CWE-") for entry in cwes))
+        self.assertEqual({"CWE-79", "CWE-89"}, {entry["cwe"] for entry in cwes})
 
 
 @versioned_fixtures

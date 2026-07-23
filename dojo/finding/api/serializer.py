@@ -447,12 +447,20 @@ class FindingSerializer(serializers.ModelSerializer):
             logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
 
-        # CWEs (mirror vulnerability_ids): the first entry is the primary Finding.cwe; the rest
-        # become Finding_CWE rows via save_cwes() below.
+        # CWEs (mirror vulnerability_ids): the primary Finding.cwe plus extra Finding_CWE rows
+        # persisted via save_cwes() below. Precedence: an explicit scalar `cwe` in the request
+        # stays the primary and every `cwes` entry is treated as an extra (save_cwes dedupes the
+        # overlap); otherwise the first `cwes` entry becomes the primary and is mirrored into the
+        # scalar, with the remainder kept as the extras.
         parsed_cwes = None
+        cwe_extras = []
         if (cwes := validated_data.pop("finding_cwe_set", None)) is not None:
             parsed_cwes = [entry["cwe"] for entry in cwes]
-            validated_data["cwe"] = cwe_number(parsed_cwes[0]) if parsed_cwes else 0
+            if "cwe" in getattr(self, "initial_data", {}):
+                cwe_extras = parsed_cwes
+            else:
+                validated_data["cwe"] = cwe_number(parsed_cwes[0]) if parsed_cwes else 0
+                cwe_extras = parsed_cwes[1:]
 
         # Save the reporter on the finding
         if reporter_id := validated_data.get("reporter"):
@@ -487,7 +495,7 @@ class FindingSerializer(serializers.ModelSerializer):
         # unconditionally would wipe a finding's extra Finding_CWE rows on any partial PATCH that
         # omits the field (mirrors the guarded vulnerability-id path above).
         if parsed_cwes is not None:
-            instance.unsaved_cwes = parsed_cwes[1:]
+            instance.unsaved_cwes = cwe_extras
             save_cwes(instance)
 
         if settings.V3_FEATURE_LOCATIONS and locations is not None:
@@ -649,11 +657,19 @@ class FindingCreateSerializer(serializers.ModelSerializer):
             validated_data["cve"] = parsed_vulnerability_ids[0]
             # validated_data["unsaved_vulnerability_ids"] = parsed_vulnerability_ids
 
-        # CWEs (mirror vulnerability_ids): first entry is the primary cwe, the rest are extras.
+        # CWEs (mirror vulnerability_ids): the primary cwe plus extras. Precedence: an explicit
+        # scalar `cwe` in the request stays the primary and every `cwes` entry is treated as an
+        # extra (save_cwes dedupes the overlap); otherwise the first `cwes` entry becomes the
+        # primary and is mirrored into the scalar, with the remainder kept as the extras.
         parsed_cwes = None
+        cwe_extras = []
         if (cwes := validated_data.pop("finding_cwe_set", None)) is not None:
             parsed_cwes = [entry["cwe"] for entry in cwes]
-            validated_data["cwe"] = cwe_number(parsed_cwes[0]) if parsed_cwes else 0
+            if "cwe" in getattr(self, "initial_data", {}):
+                cwe_extras = parsed_cwes
+            else:
+                validated_data["cwe"] = cwe_number(parsed_cwes[0]) if parsed_cwes else 0
+                cwe_extras = parsed_cwes[1:]
 
         # super.create() doesn't accept unsaved_vulnerability_ids or dedupe_option=False, so call save directly.
         new_finding = Finding(**validated_data)
@@ -672,7 +688,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         if parsed_vulnerability_ids:
             save_vulnerability_ids(new_finding, parsed_vulnerability_ids)
         if parsed_cwes is not None:
-            new_finding.unsaved_cwes = parsed_cwes[1:]
+            new_finding.unsaved_cwes = cwe_extras
         save_cwes(new_finding)
 
         if push_to_jira:
