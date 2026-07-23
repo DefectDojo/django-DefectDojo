@@ -36,6 +36,7 @@ We currently support Connectors for the following tools, with more on the way:
 * **Group-IB ASM**
 * **IriusRisk**
 * **JFrog Xray**
+* **Kubescape** (Kubernetes posture: reads the Kubescape operator's in-cluster results)
 * **Probely**
 * **Semgrep**
 * **SonarQube**
