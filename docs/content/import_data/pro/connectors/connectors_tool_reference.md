@@ -328,6 +328,23 @@ DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
 3. Enter your tenant location in the **Location** field. This URL is formatted as follows:  
 ​`https://<your-region>.ast.checkmarx.net/` . Your Region can be found at the beginning of your Checkmarx URL when using the Checkmarx app. **<https://ast.checkmarx.net>** is the primary US server (which has no region prefix).
 
+#### **Branch handling**
+
+By default, each sync imports the findings of a project's **single most recent completed scan, regardless of branch**. If your CI scans many branches, whichever branch happened to scan last "wins" that sync: findings that only exist on other branches are not imported, and the sync's close-old reconciliation can churn findings open and closed as different branches take turns being the latest scan.
+
+Two optional fields control this behavior:
+
+- **Branch**: pins every project to one branch name — only scans of that branch are imported. This is a single global value for the whole connector, so it fits fleets where every project uses the same long-lived branch (e.g. `main`).
+- **Track Scanned Branches**: when enabled, each sync finds every branch with a completed scan in the project's recent scan history and imports **the latest completed scan of each branch**, one reimport per branch. Each branch's findings live in their own engagement on the mapped asset, named "\<default engagement\> \- \<branch\>", so closing stale findings is scoped per branch: a fix merged to one branch can never close another branch's findings. The project's primary branch (as reported by Checkmarx) is imported first, so re-occurrences of the same finding on other branches deduplicate against the primary branch's original.
+
+Notes on **Track Scanned Branches**:
+
+- The toggle is **off by default**; existing connector configurations are unaffected until you enable it.
+- When both fields are set, only the pinned **Branch** is tracked.
+- A branch that stops being scanned (merged or deleted) stops receiving updates: its engagement remains visible with its last-known findings, which you can review and close in bulk.
+- Turning the toggle off later is safe: per-branch engagements simply stop receiving imports and the default engagement resumes on the next sync.
+- Connectors reconcile state on the sync schedule. Branch tracking makes each sync complete across branches; it does not make data real-time between syncs.
+
 ## **Cloudflare**
 
 The Cloudflare connector imports **Security Center insights** — security posture issues Cloudflare surfaces about your account and zones, such as a missing DMARC record, DNSSEC not being enabled, or a certificate problem. DefectDojo creates a Record for each zone (domain) that has open insights, plus an account-level Record for insights that are not tied to a specific zone.
