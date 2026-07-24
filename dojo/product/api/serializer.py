@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
+from dojo.github.models import GITHUB_Conf, GITHUB_PKey
 from dojo.models import DojoMeta, Product, Product_API_Scan_Configuration
 
 
@@ -19,6 +20,13 @@ class ProductAPIScanConfigurationSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
+    github_project = serializers.CharField(allow_blank=True, max_length=200, required=False, write_only=True)
+    github_configuration = serializers.PrimaryKeyRelatedField(
+        allow_null=True,
+        queryset=GITHUB_Conf.objects.all(),
+        required=False,
+        write_only=True,
+    )
 
     business_criticality = serializers.ChoiceField(choices=Product.BUSINESS_CRITICALITY_CHOICES, allow_blank=True, allow_null=True, required=False)
     platform = serializers.ChoiceField(choices=Product.PLATFORM_CHOICES, allow_blank=True, allow_null=True, required=False)
@@ -42,6 +50,18 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = super().get_fields()
         fields["tags"] = TagListSerializerField(required=False)
         return fields
+
+    def create(self, validated_data):
+        github_project = validated_data.pop("github_project", "")
+        github_configuration = validated_data.pop("github_configuration", None)
+        product = super().create(validated_data)
+        if github_project or github_configuration:
+            GITHUB_PKey.objects.create(
+                product=product,
+                git_project=github_project,
+                git_conf=github_configuration,
+            )
+        return product
 
     def validate(self, data):
         async_updating = getattr(self.instance, "async_updating", None)
