@@ -37,7 +37,6 @@ from dojo.endpoint.queries import (
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import (
     get_authorized_findings,
-    get_authorized_vulnerability_ids,
 )
 from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.github.models import GITHUB_Issue, GITHUB_PKey
@@ -94,7 +93,6 @@ from dojo.models import (
     Tool_Product_Settings,
     Tool_Type,
     UserContactInfo,
-    Vulnerability_Id,
 )
 from dojo.notifications.models import Notification_Webhooks, Notifications
 from dojo.product.queries import (
@@ -223,7 +221,6 @@ for model in (
 # Models where we can simply fall back to a `get_authorized_*` method to check auth
 for model, helper in (
     (Finding_Group, get_authorized_finding_groups),
-    (Vulnerability_Id, get_authorized_vulnerability_ids),
     (Vulnerability, get_authorized_vulnerability_id_entities),
     (FindingVulnerabilityReference, get_authorized_finding_vulnerability_references),
 ):

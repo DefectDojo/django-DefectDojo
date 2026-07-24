@@ -13,7 +13,7 @@ from watson import search as watson
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.ui.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids, prefetch_for_findings
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
 from dojo.location.queries import get_authorized_locations, prefetch_for_locations
@@ -139,7 +139,9 @@ def simple_search(request):
                 authorized_endpoints = get_authorized_endpoints("view")
             authorized_finding_templates = Finding_Template.objects.all()
             authorized_app_analysis = get_authorized_app_analysis("view")
-            authorized_vulnerability_ids = get_authorized_vulnerability_ids("view")
+            # Legacy watson-backed vuln-id search is retired (this view returns 410); the entity
+            # store has no classic-search reader. Vue global search covers vulnerability ids.
+            authorized_vulnerability_ids = []
 
             # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 

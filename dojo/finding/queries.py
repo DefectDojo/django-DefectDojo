@@ -17,7 +17,6 @@ from dojo.models import (
     Endpoint_Status,
     Finding,
     Test_Import_Finding_Action,
-    Vulnerability_Id,
 )
 from dojo.request_cache import cache_for_request_or_task
 from dojo.vulnerability.queries import vulnerability_id_prefetch
@@ -39,22 +38,6 @@ def get_authorized_findings_for_queryset(permission, queryset, user=None):
     if impl:
         return impl(permission, queryset, user=user)
     return Finding.objects.all().order_by("id") if queryset is None else queryset
-
-
-# Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request_or_task
-def get_authorized_vulnerability_ids(permission, user=None):
-    impl = get_auth_filter("finding.get_authorized_vulnerability_ids")
-    if impl:
-        return impl(permission, user=user)
-    return Vulnerability_Id.objects.all()
-
-
-def get_authorized_vulnerability_ids_for_queryset(permission, queryset, user=None):
-    impl = get_auth_filter("finding.get_authorized_vulnerability_ids_for_queryset")
-    if impl:
-        return impl(permission, queryset, user=user)
-    return queryset
 
 
 def prefetch_for_findings(findings, prefetch_type="all", *, exclude_untouched=True):

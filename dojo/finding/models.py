@@ -25,7 +25,6 @@ from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
 from dojo.finding.cwe import cwe_label, finding_cwe_labels
-from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and
@@ -846,18 +845,11 @@ class Finding(BaseModel):
 
         def _get_saved_vulnerability_ids(finding) -> str:
             if finding.id is not None:
-                from dojo.vulnerability.queries import use_entity_reads  # noqa: PLC0415
-                if use_entity_reads():
-                    # Entity store: the prefetch-honoring reverse relation (vulnerability_references
-                    # + select_related("vulnerability")) so Prefetch is honored — no N+1 in dedupe.
-                    vulnerability_id_str_list = [ref.vulnerability.vulnerability_id for ref in finding.vulnerability_references.all()]
-                else:
-                    # Use the reverse relation (vulnerability_id_set) rather than a fresh
-                    # Vulnerability_Id.objects.filter(...) so prefetch_related("vulnerability_id_set")
-                    # is honored — avoids an N+1 (COUNT + SELECT per finding) during dedupe/hashcode.
-                    vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.vulnerability_id_set.all()]
+                # Entity store: the prefetch-honoring reverse relation (vulnerability_references
+                # + select_related("vulnerability")) so Prefetch is honored — no N+1 in dedupe.
+                vulnerability_id_str_list = [ref.vulnerability.vulnerability_id for ref in finding.vulnerability_references.all()]
                 deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(len(vulnerability_id_str_list)))
-                # sort vulnerability_ids strings (no dedupe — byte parity with the legacy store)
+                # sort vulnerability_ids strings (no dedupe — ordering is irrelevant to the hash)
                 return "".join(sorted(vulnerability_id_str_list))
             return ""
 
@@ -1397,14 +1389,9 @@ class Finding(BaseModel):
 
     @cached_property
     def vulnerability_ids(self):
-        from dojo.vulnerability.queries import use_entity_reads  # noqa: PLC0415
-        # Get vulnerability ids from database and convert to list of strings
-        if use_entity_reads():
-            # Entity store: reverse relation is ordered by FindingVulnerabilityReference.Meta.ordering.
-            vulnerability_ids = [ref.vulnerability.vulnerability_id for ref in self.vulnerability_references.all()]
-        else:
-            vulnerability_ids_model = self.vulnerability_id_set.all()
-            vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
+        # Get vulnerability ids from database and convert to list of strings.
+        # Entity store: reverse relation is ordered by FindingVulnerabilityReference.Meta.ordering.
+        vulnerability_ids = [ref.vulnerability.vulnerability_id for ref in self.vulnerability_references.all()]
 
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
@@ -1452,39 +1439,9 @@ class Finding(BaseModel):
                 deduplicationLogger.debug("Hash_code computed for finding: %s: %s", finding_id, self.hash_code)
 
 
-class Vulnerability_Id(models.Model):
-    finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
-    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
-    # Autodetected from the id prefix (CVE, GHSA, ...); NULL when there is no non-numeric
-    # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
-    vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
-        ]
-        indexes = [
-            # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
-            # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
-            models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
-            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
-            GinIndex(
-                SearchVector("vulnerability_id", weight="A", config="english"),
-                name="dojo_vulnerability_id_fts_gin",
-            ),
-            GinIndex(fields=["vulnerability_id"], opclasses=["gin_trgm_ops"], name="dojo_vuln_id_trgm"),
-        ]
-
-    def __str__(self):
-        return self.vulnerability_id
-
-    def save(self, *args, **kwargs):
-        # bulk_create paths set the type at construction; this covers save()/get_or_create.
-        self.vulnerability_id_type = resolve_vulnerability_id_type(self.vulnerability_id)
-        super().save(*args, **kwargs)
-
-    def get_absolute_url(self):
-        return reverse("view_finding", args=[str(self.finding.id)])
+# The legacy Vulnerability_Id model was removed in the entity-only cutover; vulnerability ids now
+# live in the Vulnerability entity + FindingVulnerabilityReference through-table (dojo/vulnerability/).
+# The dojo_vulnerability_id table is dropped by migration 0287.
 
 
 class Finding_CWE(models.Model):

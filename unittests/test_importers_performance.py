@@ -40,12 +40,12 @@ from dojo.models import (
     Endpoint_Status,
     Engagement,
     Finding,
+    FindingVulnerabilityReference,
     Product,
     Product_Type,
     Test,
     User,
     UserContactInfo,
-    Vulnerability_Id,
 )
 from dojo.tools.stackhawk.parser import StackHawkParser
 
@@ -77,7 +77,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
         # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
         # By warming up the cache here, these queries are executed before we start counting queries
-        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test, Vulnerability_Id]:
+        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test, FindingVulnerabilityReference]:
             ContentType.objects.get_for_model(model)
 
     @contextmanager

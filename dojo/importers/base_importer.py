@@ -82,8 +82,8 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
-        # Unconditional dual-write seam: buffers legacy Vulnerability_Id rows AND the new
-        # entity/reference rows, flushed together at the batch boundary.
+        # Write seam: buffers the Vulnerability entity + FindingVulnerabilityReference rows,
+        # flushed at the batch boundary.
         self.vulnerability_id_manager = VulnerabilityIdManager()
         self.pending_cwes: list[Finding_CWE] = []
         self.pending_cwe_deletes: list[int] = []
@@ -891,7 +891,7 @@ class BaseImporter(ImporterOptions):
         finding: Finding,
     ) -> Finding:
         """
-        Accumulate Vulnerability_Id objects for bulk insert at the batch boundary.
+        Accumulate a finding's vulnerability-id references for bulk insert at the batch boundary.
         Call flush_vulnerability_ids() to persist.
         """
         self.sanitize_vulnerability_ids(finding)
@@ -926,8 +926,8 @@ class BaseImporter(ImporterOptions):
         self.pending_cwes.extend([Finding_CWE(finding=finding, cwe=cwe) for cwe in new_cwes])
 
     def flush_vulnerability_ids(self) -> None:
-        """Flush the dual-write vulnerability-id buffers, then the Finding_CWE buffers, and clear."""
-        # Legacy Vulnerability_Id rows + entity/reference rows, in one transaction.
+        """Flush the vulnerability-id buffers, then the Finding_CWE buffers, and clear."""
+        # Vulnerability entity + FindingVulnerabilityReference rows, in one transaction.
         self.vulnerability_id_manager.flush()
         # CWE buffers ride the same flush boundary as before (not owned by the manager).
         if self.pending_cwe_deletes:

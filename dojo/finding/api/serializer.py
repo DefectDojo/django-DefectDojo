@@ -43,7 +43,7 @@ from dojo.models import (
     Test,
     Test_Type,
     User,
-    Vulnerability_Id,
+    Vulnerability,
 )
 from dojo.notifications.helper import async_create_notification
 from dojo.user.queries import get_authorized_users
@@ -297,7 +297,9 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
 
 class VulnerabilityIdSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Vulnerability_Id
+        # Schema-only (OpenAPI) shape for VulnerabilityIdsField; points at the Vulnerability entity,
+        # which carries the same ``vulnerability_id`` string column.
+        model = Vulnerability
         fields = ["vulnerability_id"]
 
 
