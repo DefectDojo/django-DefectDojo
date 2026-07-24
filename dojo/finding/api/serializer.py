@@ -309,10 +309,10 @@ class VulnerabilityIdsField(serializers.Field):
     """
     Wire-frozen v2 vulnerability_ids field.
 
-    Reads ``[{"vulnerability_id": str}]`` from the flag-appropriate store (legacy rows or the
-    entity references) — byte-identical either way because writes are dual. Accepts the same
-    object list (tolerating bare strings) on write and hands the parsed strings to create/update
-    under ``parsed_vulnerability_ids``, which funnel to save_vulnerability_ids (unchanged path).
+    Reads ``[{"vulnerability_id": str}]`` from the finding's entity references (ordered,
+    primary/cve first). Accepts the same object list (tolerating bare strings) on write and hands
+    the parsed strings to create/update under ``parsed_vulnerability_ids``, which funnel to
+    save_vulnerability_ids (unchanged path).
     """
 
     def __init__(self, **kwargs):
@@ -325,7 +325,7 @@ class VulnerabilityIdsField(serializers.Field):
         return instance
 
     def to_representation(self, finding):
-        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- flag seam
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
         return [{"vulnerability_id": value} for value in finding_vulnerability_id_strings(finding)]
 
     def to_internal_value(self, data):

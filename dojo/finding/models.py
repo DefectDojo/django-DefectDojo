@@ -705,10 +705,9 @@ class Finding(BaseModel):
         # Assign any tags
         copy.tags.set(old_tags)
         # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util).
-        # Route vulnerability ids through the dual-write seam so the copy gets legacy rows AND
-        # entity references (copy.cve was already carried over by copy_model_util). Read the SOURCE
-        # ids through the flag seam too (not the legacy relation directly), so copy() keeps working
-        # after the legacy Vulnerability_Id store is retired.
+        # Write the copy's ids through the entity write seam (copy.cve was already carried over by
+        # copy_model_util), and read the SOURCE ids through the entity read helper (not a legacy
+        # relation).
         from dojo.vulnerability.manager import persist_for_finding  # noqa: PLC0415 -- avoid import cycle
         from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415
 
