@@ -10,7 +10,12 @@ from rest_framework.response import Response
 import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2 import serializers as api_v2_serializers
-from dojo.api_v2.views import DeprecationNoticeMixin, PrefetchDojoModelViewSet, report_generate_response, schema_with_prefetch
+from dojo.api_v2.views import (
+    DeprecationNoticeMixin,
+    PrefetchDojoModelViewSet,
+    report_generate_response,
+    schema_with_prefetch,
+)
 from dojo.authorization import api_permissions as permissions
 from dojo.models import Endpoint, Product, Product_API_Scan_Configuration
 from dojo.product.api.filters import ApiProductFilter
