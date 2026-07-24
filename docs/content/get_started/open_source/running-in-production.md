@@ -63,6 +63,9 @@ Based on your resource settings, you can tweak:
     (default 4)
 -   `DD_UWSGI_NUM_OF_THREADS` for the number of threads in these
     processes. (default 4)
+-   `DD_UWSGI_HTTP` for the HTTP bind address used by Kubernetes
+    liveness probes. (default `0.0.0.0:8081`; use `[::]:8081` on
+    IPv6-only / dual-stack clusters)
 
 For example, you may have 4 processes with 6 threads each, yielding 24
 concurrent connections.
