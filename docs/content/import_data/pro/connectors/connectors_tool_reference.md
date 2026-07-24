@@ -762,6 +762,24 @@ Unlike the device\-based Microsoft Defender connector, no API permissions or adm
 
 Each enabled Azure subscription becomes a Record. Findings are read through Azure Resource Graph, so they surface promptly once Defender for Cloud has scanned your resources — but the scans themselves run on Microsoft's schedule: container\-registry images are usually scanned within an hour of being pushed, while a VM's first agentless vulnerability scan can take several hours. A newly enabled subscription will legitimately Sync zero findings until its resources have been scanned.
 
+## **MobSF**
+
+The MobSF connector uses the [Mobile Security Framework (MobSF)](https://github.com/MobSF/Mobile-Security-Framework-MobSF) REST API to import mobile application (APK/IPA) static-analysis results. DefectDojo discovers every app that has been scanned on your MobSF instance and creates a Record for each one, then imports that app's static-analysis findings.
+
+#### Prerequisites
+
+You will need your MobSF **REST API key**. Find it on the MobSF home page under **API** (also shown in the MobSF docs as the `Authorization` value). The key is sent on every request and is never logged.
+
+#### Connector Mappings
+
+1. Enter your MobSF base URL in the **Location** field (for example `https://mobsf.example.com`).
+2. In the **Secret** field, enter the MobSF REST API key.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+DefectDojo maps each scanned **app** to a Record and imports its findings from the MobSF JSON report across several sections — application permissions, code analysis, the signing certificate, the Android manifest, Android API usage and binary analysis. Each finding is tagged with **CWE 919** (mobile), and its severity comes from MobSF's own rating (high, warning, info, secure/good) — a *dangerous* permission is treated as High. Findings are recorded as static findings and de-duplicated on the scan, section, title, severity and file path.
+
+See the [MobSF REST API documentation](https://mobsf.github.io/docs/#/rest_api) for more information.
+
 ## **Nuclei (ProjectDiscovery Cloud)**
 
 The Nuclei connector uses the ProjectDiscovery Cloud Platform (PDCP) REST API to pull [nuclei](https://github.com/projectdiscovery/nuclei) scan results from your PDCP account. DefectDojo discovers every scan in the account and creates a separate Record for each **scan**.
