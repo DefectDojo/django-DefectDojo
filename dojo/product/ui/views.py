@@ -29,6 +29,7 @@ import dojo.finding.helper as finding_helper
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.components.sql_group_concat import Sql_GroupConcat
+from dojo.decorators import deprecated_view
 from dojo.engagement.ui.filters import (
     EngagementFilter,
     EngagementFilterWithoutObjectLookups,
@@ -1704,6 +1705,7 @@ def delete_product_authorized_user(request, pid, user_id):
     return HttpResponseRedirect(reverse("view_product", args=(pid,)))
 
 
+@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
 def add_api_scan_configuration(request, pid):
     product = get_object_or_404(Product, id=pid)
     if request.method == "POST":
@@ -1747,6 +1749,7 @@ def add_api_scan_configuration(request, pid):
                    })
 
 
+@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
 def view_api_scan_configurations(request, pid):
     product_api_scan_configurations = Product_API_Scan_Configuration.objects.filter(product=pid)
 
@@ -1760,6 +1763,7 @@ def view_api_scan_configurations(request, pid):
                   })
 
 
+@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
 def edit_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
@@ -1805,6 +1809,7 @@ def edit_api_scan_configuration(request, pid, pascid):
                   })
 
 
+@deprecated_view("API Scan Configuration", removal_version="3.5.0", removal_date="November 2026")
 def delete_api_scan_configuration(request, pid, pascid):
     product_api_scan_configuration = get_object_or_404(Product_API_Scan_Configuration, id=pascid)
 
