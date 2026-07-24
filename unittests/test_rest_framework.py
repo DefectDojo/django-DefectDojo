@@ -2677,6 +2677,15 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
@@ -2700,6 +2709,15 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
 
 
 @versioned_fixtures
@@ -2818,6 +2836,17 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0. The DeprecationNoticeMixin
+        # must run in finalize_response, which only happens if it precedes the base
+        # viewset in the MRO (see dojo/api_v2/views.py:DeprecationNoticeMixin).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class ToolProductSettingsTest(BaseClass.BaseClassTest):
@@ -2863,6 +2892,15 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
 
 
 @versioned_fixtures
