@@ -25,6 +25,7 @@ from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
 from dojo.finding.cwe import cwe_label, finding_cwe_labels
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and
@@ -1438,9 +1439,44 @@ class Finding(BaseModel):
                 deduplicationLogger.debug("Hash_code computed for finding: %s: %s", finding_id, self.hash_code)
 
 
-# The legacy Vulnerability_Id model was removed in the entity-only cutover; vulnerability ids now
-# live in the Vulnerability entity + FindingVulnerabilityReference through-table (dojo/vulnerability/).
-# The dojo_vulnerability_id table is dropped by migration 0287.
+# Legacy vulnerability-id store. As of the entity-only cutover, vulnerability ids live in the
+# Vulnerability entity + FindingVulnerabilityReference through-table (dojo/vulnerability/), and this
+# model is NO LONGER READ OR WRITTEN by any code path. It (and its dojo_vulnerability_id table) are
+# intentionally RETAINED for a transition period as a frozen pre-cutover snapshot, and removed
+# together in a future release. Do not add new usages.
+class Vulnerability_Id(models.Model):
+    finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
+    vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    # Autodetected from the id prefix (CVE, GHSA, ...); NULL when there is no non-numeric
+    # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
+    vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
+        ]
+        indexes = [
+            # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
+            # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
+            models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
+            # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
+            GinIndex(
+                SearchVector("vulnerability_id", weight="A", config="english"),
+                name="dojo_vulnerability_id_fts_gin",
+            ),
+            GinIndex(fields=["vulnerability_id"], opclasses=["gin_trgm_ops"], name="dojo_vuln_id_trgm"),
+        ]
+
+    def __str__(self):
+        return self.vulnerability_id
+
+    def save(self, *args, **kwargs):
+        # bulk_create paths set the type at construction; this covers save()/get_or_create.
+        self.vulnerability_id_type = resolve_vulnerability_id_type(self.vulnerability_id)
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("view_finding", args=[str(self.finding.id)])
 
 
 class Finding_CWE(models.Model):
