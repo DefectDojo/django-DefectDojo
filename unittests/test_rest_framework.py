@@ -2516,6 +2516,7 @@ class JiraIssuesTest(BaseClass.BaseClassTest):
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
 
+@versioned_fixtures
 class JiraIssueProjectScopingTest(DojoAPITestCase):
 
     """
