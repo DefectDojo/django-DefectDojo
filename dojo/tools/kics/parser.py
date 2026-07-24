@@ -10,6 +10,7 @@ class KICSParser:
 
     # table to match KICS severity to DefectDojo severity
     SEVERITY = {
+        "CRITICAL": "Critical",
         "HIGH": "High",
         "MEDIUM": "Medium",
         "LOW": "Low",
