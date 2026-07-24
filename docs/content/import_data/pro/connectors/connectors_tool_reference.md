@@ -488,6 +488,30 @@ You will need a GitGuardian API key. We recommend a **Service Account token** (r
 
 Only **open** incidents (status `TRIGGERED` or `ASSIGNED`) are imported; incidents you resolve or ignore in GitGuardian are automatically mitigated in DefectDojo on the next sync. A confirmed-live secret (validity *valid*) is imported as a verified finding.
 
+## **GitHub**
+
+The GitHub connector is an **Asset Connector**: it enumerates the repositories your token can access and creates a DefectDojo Asset for each one, grouped into Organizations by GitHub owner (organization or user). No findings are imported.
+
+**Please note:** this connector imports your repository **inventory** only. To import GitHub security alerts — code scanning, Dependabot, and secret scanning — as findings, use the separate **GitHub Advanced Security** connector below. The two are independent and can be run together.
+
+#### Prerequisites
+
+The connector authenticates with a GitHub **personal access token** and reads only repository **metadata** (name, description, URL, and owner) — it does not access your code, issues, or security alerts. It imports every repository the token's account owns, collaborates on, or is an organization member of, so confirm the token's account can see the repositories you want to mirror. We recommend a dedicated service account.
+
+The token only needs read-only access to repository metadata:
+
+- A *fine-grained* token needs **Repository permissions → Metadata: Read-only**, granted to the repositories (or the whole organization) you want to import.
+- A *classic* token needs the **`repo`** scope to include private repositories (use **`public_repo`** if you only need public ones), plus **`read:org`** so organization-owned repositories resolve.
+
+Only GitHub.com (including GitHub Enterprise Cloud) is supported. GitHub Enterprise **Server** is not supported by this connector at this time.
+
+#### Connector Mappings
+
+1. Enter `https://api.github.com` in the **Location** field.
+2. Enter the personal access token in the **Secret** field.
+
+No organization or repository list needs to be entered — DefectDojo imports every repository the token can see. Each repository becomes a Record named after the repository, grouped by its GitHub **owner** (organization or user). If a repository is later deleted, or the token loses access to it, its mapped Record is flagged `MISSING` on the next Sync rather than removed — DefectDojo never silently deletes a Product.
+
 ## **GitHub Advanced Security**
 
 The GitHub Advanced Security connector imports **code scanning**, **Dependabot**, and **secret scanning** alerts from GitHub, as three separate finding types (`GitHub:CodeScanning`, `GitHub:Dependabot`, and `GitHub:SecretScanning`). DefectDojo discovers every non\-archived repository in the configured organization and creates a Record for each one.
