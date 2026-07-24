@@ -144,6 +144,11 @@ class CycloneDXJSONParser:
                 # Check for mitigation
                 analysis = vulnerability.get("analysis")
                 if analysis:
+                    # Preserve the raw VEX analysis block on the finding so downstream
+                    # consumers can round-trip state/justification/response/detail. This
+                    # is an inert in-memory attribute; the mapping below is all the OSS
+                    # importer itself does with it.
+                    finding.unsaved_vex = analysis
                     state = analysis.get("state")
                     if state:
                         if state in {"resolved", "resolved_with_pedigree", "not_affected"}:
