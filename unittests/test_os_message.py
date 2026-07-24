@@ -48,7 +48,7 @@ class TestParseOsMessage(SimpleTestCase):
         text = "# Read the **release notes** at [link](https://example.com)\n"
         result = os_message.parse_os_message(text)
         self.assertIn("<strong>release notes</strong>", result["message"])
-        self.assertIn('<a href="https://example.com">link</a>', result["message"])
+        self.assertIn('<a href="https://example.com" rel="noopener noreferrer">link</a>', result["message"])
         self.assertIsNone(result["expanded_html"])
 
     def test_headline_strips_disallowed_html(self):

@@ -351,8 +351,8 @@ class TestSonarqubeImporterRuleDetailsSanitization(DojoTestCase):
         )
 
         self.assertIn("<h1>Heading</h1>", rule_details)
-        self.assertIn('<a href="https://example.com">safe</a>', rule_details)
-        self.assertIn("<a>unsafe</a>", rule_details)
+        self.assertIn('<a href="https://example.com" rel="noopener noreferrer">safe</a>', rule_details)
+        self.assertIn('<a rel="noopener noreferrer">unsafe</a>', rule_details)
         self.assertNotIn("<script", rule_details)
         self.assertNotIn("alert('boom')", rule_details)
         self.assertNotIn("javascript:", rule_details)
@@ -370,8 +370,8 @@ class TestSonarqubeImporterRuleDetailsSanitization(DojoTestCase):
         )
 
         self.assertIn("<h2>References</h2>", rule_details)
-        self.assertIn('<a href="https://owasp.org">OWASP</a>', rule_details)
-        self.assertIn("<a>unsafe</a>", rule_details)
+        self.assertIn('<a href="https://owasp.org" rel="noopener noreferrer">OWASP</a>', rule_details)
+        self.assertIn('<a rel="noopener noreferrer">unsafe</a>', rule_details)
         self.assertNotIn("<style", rule_details)
         self.assertNotIn("display: none", rule_details)
         self.assertNotIn("javascript:", rule_details)

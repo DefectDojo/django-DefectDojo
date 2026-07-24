@@ -2,9 +2,9 @@ import logging
 import re
 import textwrap
 
-import bleach
 import html2text
 import markdown
+import nh3
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from lxml import etree
@@ -441,12 +441,11 @@ class SonarQubeApiImporter:
             description,
             flags=re.DOTALL | re.IGNORECASE,
         )
-        return bleach.clean(
+        return nh3.clean(
             sanitized_description,
-            tags=SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_TAGS,
-            attributes=SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_ATTRIBUTES,
-            protocols=SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_PROTOCOLS,
-            strip=True,
+            tags=set(SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_TAGS),
+            attributes={k: set(v) for k, v in SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_ATTRIBUTES.items()},
+            url_schemes=set(SonarQubeApiImporter.ALLOWED_RULE_DESCRIPTION_PROTOCOLS),
         )
 
     @staticmethod

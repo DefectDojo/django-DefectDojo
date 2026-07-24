@@ -1,8 +1,8 @@
 import hashlib
 import logging
 
-import bleach
 import markdown
+import nh3
 import requests
 from django.conf import settings
 from django.core.cache import cache
@@ -81,11 +81,10 @@ def parse_os_message(text):
 
     headline_source = headline_source[:100]
     headline_rendered = markdown.markdown(headline_source)
-    headline_cleaned = bleach.clean(
+    headline_cleaned = nh3.clean(
         headline_rendered,
-        tags=INLINE_TAGS,
-        attributes=INLINE_ATTRS,
-        strip=True,
+        tags=set(INLINE_TAGS),
+        attributes={k: set(v) for k, v in INLINE_ATTRS.items()},
     )
     headline_html = _strip_outer_p(headline_cleaned)
 
@@ -104,11 +103,10 @@ def parse_os_message(text):
                 expanded_source,
                 extensions=["extra", "fenced_code", "nl2br"],
             )
-            expanded_html = bleach.clean(
+            expanded_html = nh3.clean(
                 expanded_rendered,
-                tags=BLOCK_TAGS,
-                attributes=BLOCK_ATTRS,
-                strip=True,
+                tags=set(BLOCK_TAGS),
+                attributes={k: set(v) for k, v in BLOCK_ATTRS.items()},
             )
 
     return {"message": headline_html, "expanded_html": expanded_html}
