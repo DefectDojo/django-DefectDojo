@@ -442,6 +442,180 @@ class UserTest(APITestCase):
         self.assertEqual(r.status_code, 200, r.content[:1000])
         self.assertTrue(User.objects.get(id=user_id).has_perm("auth.delete_user"))
 
+    def test_non_superuser_cannot_change_other_user_email_via_api(self):
+        """
+        A delegated user-manager (auth.change_user) must not be able to
+        change the email address of an account other than their own. This
+        mirrors the is_staff and configuration-permission guards: changing
+        another user's email is a superuser-only action.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-email-mgr",
+            "email": "mgr@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-email-mgr")
+        mgr.user_permissions.add(
+            Permission.objects.get(codename="change_user"),
+            Permission.objects.get(codename="view_user"),
+        )
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-email-mgr",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-email-target",
+            "email": "target-real@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        target_id = r.json()["id"]
+
+        # Repointing another account's email must be rejected, and the stored
+        # value must be unchanged.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), target_id), {
+            "email": "someone-else@dojo.com",
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertIn(
+            "Only superusers are allowed to change the email of another user.",
+            r.content.decode("utf-8"),
+        )
+        self.assertEqual(User.objects.get(id=target_id).email, "target-real@dojo.com")
+
+    def test_non_superuser_can_change_own_email_via_api(self):
+        """
+        Negative control for the identity-field guard: it only fires when a
+        non-superuser changes another account's email or username, so a
+        delegated user-manager can still update their own, and re-sending an
+        unchanged email on another user stays allowed.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-email-mgr2",
+            "email": "mgr2-old@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-email-mgr2")
+        mgr.user_permissions.add(Permission.objects.get(codename="change_user"))
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-email-mgr2",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        # Changing own email is allowed.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "email": "mgr2-new@dojo.com",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(User.objects.get(id=mgr.id).email, "mgr2-new@dojo.com")
+
+        # Changing own username is likewise allowed.
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), mgr.id), {
+            "username": "api-email-mgr2-renamed",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(User.objects.get(id=mgr.id).username, "api-email-mgr2-renamed")
+
+        # Re-sending another user's current email (no change) is a no-op.
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-email-target2",
+            "email": "target2@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        target_id = r.json()["id"]
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), target_id), {
+            "email": "target2@dojo.com",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+    def test_superuser_can_change_other_user_email_via_api(self):
+        """Positive control: a superuser may still change another user's email."""
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-email-super-target",
+            "email": "before@dojo.com",
+            "password": "testTEST1234!@#$",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        user_id = r.json()["id"]
+
+        r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
+            "email": "after@dojo.com",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(User.objects.get(id=user_id).email, "after@dojo.com")
+
+    def test_non_superuser_cannot_change_other_user_username_via_api(self):
+        """
+        Username is an identity field too: a delegated user-manager
+        (auth.change_user) must not be able to change the username of an
+        account other than their own.
+        """
+        password = "testTEST1234!@#$"
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-uname-mgr",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        mgr = User.objects.get(username="api-uname-mgr")
+        mgr.user_permissions.add(Permission.objects.get(codename="change_user"))
+
+        token_resp = self.client.post(reverse("api-token-auth"), {
+            "username": "api-uname-mgr",
+            "password": password,
+        }, format="json")
+        self.assertEqual(token_resp.status_code, 200, token_resp.content[:1000])
+        mgr_client = APIClient()
+        mgr_client.credentials(HTTP_AUTHORIZATION="Token " + token_resp.json()["token"])
+
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-uname-target",
+            "email": "admin@dojo.com",
+            "password": password,
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        target_id = r.json()["id"]
+
+        r = mgr_client.patch("{}{}/".format(reverse("user-list"), target_id), {
+            "username": "api-uname-target-renamed",
+        }, format="json")
+        self.assertEqual(r.status_code, 400, r.content[:1000])
+        self.assertIn(
+            "Only superusers are allowed to change the username of another user.",
+            r.content.decode("utf-8"),
+        )
+        self.assertEqual(User.objects.get(id=target_id).username, "api-uname-target")
+
+    def test_superuser_can_change_other_user_username_via_api(self):
+        """Positive control: a superuser may still change another user's username."""
+        r = self.client.post(reverse("user-list"), {
+            "username": "api-uname-super-target",
+            "email": "admin@dojo.com",
+            "password": "testTEST1234!@#$",
+        }, format="json")
+        self.assertEqual(r.status_code, 201, r.content[:1000])
+        user_id = r.json()["id"]
+
+        r = self.client.patch("{}{}/".format(reverse("user-list"), user_id), {
+            "username": "api-uname-super-target-renamed",
+        }, format="json")
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(User.objects.get(id=user_id).username, "api-uname-super-target-renamed")
+
     def test_user_reset_api_token_denies_global_owner_legacy(self):
         """
         Legacy: Global_Role(role=Owner) is inert. Resetting another
