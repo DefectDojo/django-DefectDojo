@@ -40,6 +40,7 @@ from dojo.finding.api.serializer import (
     BurpRawRequestResponseSerializer,
     FindingCloseSerializer,
     FindingCreateSerializer,
+    FindingLifecycleEventSerializer,
     FindingMetaSerializer,
     FindingNoteSerializer,
     FindingSerializer,
@@ -60,6 +61,7 @@ from dojo.models import (
     DojoMeta,
     FileUpload,
     Finding,
+    Finding_Lifecycle_Event,
     Finding_Template,
     NoteHistory,
     Notes,
@@ -293,6 +295,25 @@ class FindingViewSet(
         request=api_v2_serializers.TagSerializer,
         responses={status.HTTP_201_CREATED: api_v2_serializers.TagSerializer},
     )
+    @extend_schema(
+        methods=["GET"],
+        responses={
+            status.HTTP_200_OK: FindingLifecycleEventSerializer(many=True),
+        },
+    )
+    @action(detail=True, methods=["get"], url_path="lifecycle_events", permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
+    def lifecycle_events(self, request, pk=None):
+        """
+        The finding's provenance timeline: created by which import, closed why,
+        marked duplicate of what, pushed to JIRA as which key.
+        """
+        finding = self.get_object()
+        events = (
+            Finding_Lifecycle_Event.objects.filter(finding_id=finding.id)
+            .order_by("-created", "-id")[:500]
+        )
+        return Response(FindingLifecycleEventSerializer(events, many=True).data)
+
     @action(detail=True, methods=["get", "post"], permission_classes=(IsAuthenticated, permissions.UserHasFindingRelatedObjectPermission))
     def tags(self, request, pk=None):
         finding = self.get_object()

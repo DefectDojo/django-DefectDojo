@@ -402,6 +402,7 @@ from dojo.finding.models import (  # noqa: E402 -- re-export; class-body FKs bel
     BurpRawRequestResponse,  # noqa: F401 -- re-export
     Finding,
     Finding_Group,  # noqa: F401 -- re-export
+    Finding_Lifecycle_Event,  # noqa: F401 -- re-export
     Finding_Template,
     Vulnerability_Id,  # noqa: F401 -- re-export
 )
