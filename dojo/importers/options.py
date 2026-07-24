@@ -65,6 +65,7 @@ class ImporterOptions:
         self.close_old_findings_toggle: bool = self.validate_close_old_findings(*args, **kwargs)
         self.close_old_findings_product_scope: bool = self.validate_close_old_findings_product_scope(*args, **kwargs)
         self.do_not_reactivate: bool = self.validate_do_not_reactivate(*args, **kwargs)
+        self.defer_product_grading: bool = self.validate_defer_product_grading(*args, **kwargs)
         self.commit_hash: str = self.validate_commit_hash(*args, **kwargs)
         self.create_finding_groups_for_all_findings: bool = self.validate_create_finding_groups_for_all_findings(*args, **kwargs)
         self.endpoints_to_add: list[Endpoint] | list[AbstractLocation] | None = self.validate_endpoints_to_add(*args, **kwargs)
@@ -343,6 +344,23 @@ class ImporterOptions:
     ) -> bool:
         return self.validate(
             "do_not_reactivate",
+            expected_types=[bool],
+            required=False,
+            default=False,
+            **kwargs,
+        )
+
+    def validate_defer_product_grading(
+        self,
+        *args: list,
+        **kwargs: dict,
+    ) -> bool:
+        # Defer per-batch/end/close-old product grade dispatches so callers (e.g. a large
+        # chunked reimport) can grade once at the end instead of once per dedupe batch.
+        # Caveat: all-or-nothing -- when True the caller MUST run perform_product_grading()
+        # itself after the import; nothing re-grades automatically, so a stale grade goes unnoticed.
+        return self.validate(
+            "defer_product_grading",
             expected_types=[bool],
             required=False,
             default=False,
