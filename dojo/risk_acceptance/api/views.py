@@ -15,6 +15,7 @@ from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.views import PrefetchDojoModelViewSet
 from dojo.authorization import api_permissions as permissions
 from dojo.models import NoteHistory, Notes, Risk_Acceptance
+from dojo.notes.helper import notes_prefetch
 from dojo.risk_acceptance.api.filters import ApiRiskAcceptanceFilter
 from dojo.risk_acceptance.api.serializer import (
     RiskAcceptanceProofSerializer,
@@ -51,7 +52,7 @@ class RiskAcceptanceViewSet(
         return (
             get_authorized_risk_acceptances("edit")
             .prefetch_related(
-                "notes", "engagement_set", "owner", "accepted_findings",
+                notes_prefetch(), "engagement_set", "owner", "accepted_findings",
             )
             .distinct()
         )
