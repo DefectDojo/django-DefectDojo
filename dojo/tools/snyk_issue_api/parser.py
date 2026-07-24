@@ -82,13 +82,14 @@ class SnykIssueApiParser:
         line = None  # Always None for SCA
         component_name = None
         component_version = None
-        reachable = False   # SCA only
+        reachability_values = []   # SCA only, raw values as reported by Snyk
         impact_locations = []
 
         for coordinate in coordinates:
             if not is_type_code:
-                if coordinate.get("reachability") != "not-applicable":
-                    reachable = True
+                reachability = coordinate.get("reachability")
+                if reachability:
+                    reachability_values.append(reachability)
 
             for representation in coordinate.get("representations", []):
                 if not is_type_code:
@@ -119,7 +120,7 @@ class SnykIssueApiParser:
                         if region:
                             line = start.get("line")
 
-        return file_path, line, component_name, component_version, reachable, impact_locations
+        return file_path, line, component_name, component_version, reachability_values, impact_locations
 
     def get_exploit_details(self, exploit_details):
         if exploit_details:
@@ -222,7 +223,7 @@ class SnykIssueApiParser:
 
         is_out_of_scope = False  # attributes.get("is_out_of_scope", False)
 
-        file_path, line, component_name, component_version, reachable, impact_locations = self.extract_coordinate_data(issue_type == "code", attributes.get("coordinates", []))
+        file_path, line, component_name, component_version, reachability_values, impact_locations = self.extract_coordinate_data(issue_type == "code", attributes.get("coordinates", []))
 
         # Locations (Code only)
         if impact_locations:
@@ -238,7 +239,12 @@ class SnykIssueApiParser:
                 "",
             ])
 
-        impact_details.append(f"Reachable: {'Yes' if reachable else 'No'}")
+        # Render the raw reachability values Snyk reported instead of a derived
+        # boolean: the previous "Reachable: Yes/No" counted "no-path-found" (Snyk
+        # affirmatively found NO path to the vulnerable code) and even a missing
+        # value as "Yes". When Snyk reports nothing, say nothing.
+        if reachability_values:
+            impact_details.append("Reachability: " + ", ".join(sorted(set(reachability_values))))
 
         # Create finding
         finding = Finding(
