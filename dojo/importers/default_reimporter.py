@@ -941,6 +941,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         unsaved_finding.reporter = self.user
         unsaved_finding.last_reviewed = self.now
         unsaved_finding.last_reviewed_by = self.user
+        # New findings from a reimport start PENDING; post_process_findings_batch
+        # stamps the terminal state. Matched findings are re-stamped on batch
+        # completion without ever re-entering PENDING (no dashboard flicker).
+        unsaved_finding.processing_status = Finding.ProcessingStatus.PENDING
         # indicates an override. Otherwise, do not change the value of unsaved_finding.active
         if self.active is not None:
             unsaved_finding.active = self.active

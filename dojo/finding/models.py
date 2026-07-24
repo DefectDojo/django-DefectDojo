@@ -283,6 +283,32 @@ class Finding(BaseModel):
                                      on_delete=models.RESTRICT,
                                      verbose_name=_("Mitigated By"),
                                      help_text=_("Documents who has marked this flaw as fixed."))
+
+    class ProcessingStatus(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        PROCESSED = "processed", _("Processed")
+        FAILED = "failed", _("Failed")
+
+    # Post-import processing lifecycle (deduplication, rules, integrations).
+    # Importers create findings as PENDING; the post-processing batch task stamps
+    # PROCESSED on completion or FAILED on error. Findings created outside the
+    # import pipeline (manual entry, API) default to PROCESSED.
+    processing_status = models.CharField(max_length=10,
+                                         choices=ProcessingStatus.choices,
+                                         default=ProcessingStatus.PROCESSED,
+                                         editable=False,
+                                         verbose_name=_("Processing Status"),
+                                         help_text=_("State of post-import processing (deduplication, rules, integrations) for this finding."))
+    processed_at = models.DateTimeField(null=True,
+                                        blank=True,
+                                        editable=False,
+                                        verbose_name=_("Processed At"),
+                                        help_text=_("When post-import processing last completed for this finding."))
+    processing_error = models.TextField(blank=True,
+                                        default="",
+                                        editable=False,
+                                        verbose_name=_("Processing Error"),
+                                        help_text=_("Why post-import processing failed for this finding (e.g. the JIRA push error). Empty unless processing_status is failed."))
     reporter = models.ForeignKey("dojo.Dojo_User",
                                  editable=False,
                                  default=1,
@@ -478,6 +504,11 @@ class Finding(BaseModel):
             models.Index(fields=["title"]),
             models.Index(fields=["hash_code"]),
             models.Index(fields=["unique_id_from_tool"]),
+            # Partial index: the PENDING working set is small and hot; PROCESSED
+            # rows (the vast majority) never enter the index.
+            models.Index(fields=["processing_status"],
+                         name="finding_procstatus_pending",
+                         condition=models.Q(processing_status="pending")),
             # models.Index(fields=['file_path']), # can't add index because the field has max length 4000.
             models.Index(fields=["line"]),
             models.Index(fields=["component_name"]),
