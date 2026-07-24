@@ -123,7 +123,7 @@ class TestApiV3CursorTamper(ApiV3TestCase):
         self.assertEqual(400, response.status_code, response.content[:300])
         self.assertEqual("application/problem+json", response["Content-Type"])
         body = json.loads(response.content)
-        self.assertTrue(body["type"].endswith("/errors/pagination"), body["type"])
+        self.assertTrue(body["type"].endswith("#error-pagination"), body["type"])
         return body
 
     def test_garbage_cursor_is_400(self):

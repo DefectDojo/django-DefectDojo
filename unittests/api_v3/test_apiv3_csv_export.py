@@ -175,7 +175,7 @@ class TestApiV3CsvExportFilterContract(_CsvExportTestCase):
 
     def test_unknown_field_is_400(self):
         problem = self._problem(self._get("findings/export.csv", fields="id,not_a_field"))
-        self.assertTrue(problem["type"].endswith("/fields"))
+        self.assertTrue(problem["type"].endswith("#error-fields"))
 
 
 class TestApiV3CsvExportReservedParams(_CsvExportTestCase):
@@ -183,22 +183,22 @@ class TestApiV3CsvExportReservedParams(_CsvExportTestCase):
     """expand/include/limit/offset/pagination/cursor are not applicable to an export -> 400."""
 
     def test_expand_is_400(self):
-        self.assertTrue(self._problem(self._get("findings/export.csv", expand="test"))["type"].endswith("/export"))
+        self.assertTrue(self._problem(self._get("findings/export.csv", expand="test"))["type"].endswith("#error-export"))
 
     def test_include_is_400(self):
-        self.assertTrue(self._problem(self._get("findings/export.csv", include="counts"))["type"].endswith("/export"))
+        self.assertTrue(self._problem(self._get("findings/export.csv", include="counts"))["type"].endswith("#error-export"))
 
     def test_limit_is_400(self):
-        self.assertTrue(self._problem(self._get("findings/export.csv", limit="5"))["type"].endswith("/export"))
+        self.assertTrue(self._problem(self._get("findings/export.csv", limit="5"))["type"].endswith("#error-export"))
 
     def test_offset_is_400(self):
-        self.assertTrue(self._problem(self._get("findings/export.csv", offset="0"))["type"].endswith("/export"))
+        self.assertTrue(self._problem(self._get("findings/export.csv", offset="0"))["type"].endswith("#error-export"))
 
     def test_pagination_mode_is_400(self):
-        self.assertTrue(self._problem(self._get("findings/export.csv", pagination="cursor"))["type"].endswith("/export"))
+        self.assertTrue(self._problem(self._get("findings/export.csv", pagination="cursor"))["type"].endswith("#error-export"))
 
     def test_cursor_is_400(self):
-        self.assertTrue(self._problem(self._get("findings/export.csv", cursor="abc"))["type"].endswith("/export"))
+        self.assertTrue(self._problem(self._get("findings/export.csv", cursor="abc"))["type"].endswith("#error-export"))
 
 
 class TestApiV3CsvExportCap(_CsvExportTestCase):
@@ -209,7 +209,7 @@ class TestApiV3CsvExportCap(_CsvExportTestCase):
         self.assertGreater(self.get_json("findings", data={"limit": 250})["count"], 2)
         problem = self._problem(self._get("findings/export.csv"))
         self.assertEqual(400, problem["status"])
-        self.assertTrue(problem["type"].endswith("/export"))
+        self.assertTrue(problem["type"].endswith("#error-export"))
         self.assertIn("cap", problem["detail"].lower())
 
     @override_settings(API_V3_EXPORT_MAX_ROWS=100000)
