@@ -1,25 +1,36 @@
 ---
 title: "Set Up Sensei"
-description: "Connect a GitHub App or GitLab, and onboard a repository for hosted scanning"
+description: "Connect GitHub, GitLab, Bitbucket, or Azure DevOps, and onboard a repository for hosted scanning"
 draft: false
 audience: pro
 weight: 2
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature and is currently in BETA.</span>
 
-Setting up Sensei has two parts: **connect a source-control provider** (a **GitHub App**, or **GitLab** with an access token), then **onboard the repositories** you want to scan. You need a global **Maintainer** or **Owner** role to do this.
+Setting up Sensei has two parts: **connect a source-control provider**, then **onboard the repositories** you want to scan. You need a global **Maintainer** or **Owner** role to do this. Sensei supports:
 
-Onboarding, configuration, scanning, and fixing are the same for both providers; only the initial connection differs. This page covers [connecting a GitHub App](#connect-a-github-app) and [connecting GitLab](#connect-gitlab); the [Select repositories](#select-repositories) step onward is shared.
+- **GitHub** — a GitHub App (github.com or **GitHub Enterprise Server**).
+- **GitLab** — an access token (gitlab.com or self-managed).
+- **Bitbucket** — Cloud or Server/Data Center, via OAuth (recommended), an Atlassian API token, or an access token.
+- **Azure DevOps** — a Personal Access Token.
+
+Onboarding, configuration, scanning, and fixing are the same for every provider; only the initial connection differs. This page covers [connecting a GitHub App](#connect-a-github-app), [GitHub Enterprise Server](#connect-github-enterprise-server), [GitLab](#connect-gitlab), [Bitbucket](#connect-bitbucket), and [Azure DevOps](#connect-azure-devops); the [Select repositories](#select-repositories) step onward is shared.
 
 ## Connections
 
-A **connection** is one configured source-control identity (a GitHub App installation group). You onboard repositories from a connection, and manage or disconnect it, from the **Connections** page (the **Connections** button on the Sensei hub).
+A **connection** is one configured source-control identity — a GitHub App installation group, a GitLab token, a Bitbucket workspace, or an Azure DevOps organization. You onboard repositories from a connection, and manage or disconnect it, from the **Connections** page (the **Connections** button on the Sensei hub).
 
 ![Sensei Connections](images/connections.png)
 
-The table lists each connection's provider, label, identity, number of installs, number of onboarded repos, and creation date. Use the row actions to manage the app on GitHub, add repositories from that connection, or disconnect it.
+The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, or disconnect it.
 
 > **⚠️ Disconnecting is destructive:** disconnecting a connection removes it **and every repository onboarded through it**. This cannot be undone.
+
+## Choose a source-control provider
+
+From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page) to open **Set Up Sensei**, then pick your source-control provider — **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
+
+![Choose a source-control provider](images/setup_providers.png)
 
 ## Connect a GitHub App
 
@@ -89,6 +100,101 @@ Leave SSL verification enabled, click **Add webhook**, then use **Test → Push 
 After connecting, click **Choose projects** and continue with [Select repositories](#select-repositories); onboarding, configuration, and scanning work the same as GitHub.
 
 > **GitLab equivalents:** where this guide says *pull request*, GitLab uses a **merge request**; the pull-request **status check** is posted as a GitLab **commit status** on the merge request's head commit.
+
+## Connect GitHub Enterprise Server
+
+Sensei works with **GitHub Enterprise Server (GHES)** using the same GitHub App model as github.com — only the host differs. Because the App-manifest auto-create flow is github.com-only, on GHES you **create the App manually** on your enterprise host and then enter its credentials plus the host in DefectDojo.
+
+### Step 1: Create the App on your GHES host
+
+On your GitHub Enterprise Server instance, go to **Settings → Developer settings → GitHub Apps → New GitHub App** and create an App with the same permissions Sensei uses on github.com: read for actions, issues, and metadata, and read/write for checks, code, pull requests, secrets, and workflows. Point its webhook at `https://<your-defectdojo-host>/sensei/webhooks`. Generate and download a **private key**, and note the **App ID** (and the OAuth **Client ID/Secret** if you set them).
+
+### Step 2: Connect manually
+
+In **Set Up Sensei** with **GitHub** selected, click **Set up manually instead** and fill in:
+
+- **App ID** and **Private Key (PEM)** from Step 1 (plus Client ID/Secret and Webhook Secret if configured).
+- **GitHub Enterprise host:** your instance host, for example `https://github.example.com`. DefectDojo derives the API (`/api/v3`) and web origins from it. Leave blank for github.com.
+
+Click **Save App credentials**. DefectDojo validates them against your enterprise host, then install the App and continue with [Select repositories](#select-repositories).
+
+> **🔑 Tip:** The host must be reachable from DefectDojo (and DefectDojo reachable from GHES for webhooks). Internal-only hosts are fine as long as both can reach each other on your network.
+
+## Connect Bitbucket
+
+Sensei supports **Bitbucket Cloud** (`bitbucket.org`) and **Bitbucket Server / Data Center** (self-hosted). Three non-deprecated auth methods are offered; **OAuth is recommended**.
+
+From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page), then select **Bitbucket** and your **deployment** (Cloud or Server/Data Center) and **authentication** type.
+
+### Step 1: Create the credential
+
+**OAuth (recommended)** — in Bitbucket, open **Workspace settings → OAuth consumers → Add consumer**:
+
+- **Callback URL:** the one shown on the Set Up Sensei page (`https://<your-defectdojo-host>/sensei/bitbucket/oauth/callback`).
+- **Permissions:** **Account: Read**, **Repositories: Read + Write**, **Pull requests: Read + Write** (add **Webhooks: Read + Write** if you'll manage webhooks via the API).
+
+Save it, then copy the consumer's **Key** (Client ID) and **Secret**.
+
+**API token** — create an Atlassian **API token** at `id.atlassian.com` (Account settings → Security → API tokens). Use it with your **Atlassian account email**.
+
+**Access token** — create a repository or workspace **Access Token** in Bitbucket and use it as a bearer credential.
+
+### Step 2: Connect
+
+Back in **Set Up Sensei** with **Bitbucket** selected:
+
+- **OAuth:** paste the **Client ID** and **Client Secret**, then click **Connect with Bitbucket**. Approve the consent screen; DefectDojo stores the resulting tokens encrypted and refreshes them automatically.
+- **API token / Access token:** enter your **Workspace** (Cloud), your **email** (API-token auth only), and the **token**. For Server/Data Center, enter your host **Base URL**.
+
+DefectDojo validates the credential and can then list repositories, open pull requests, and run scans.
+
+### Step 3: Add the webhook
+
+Add a webhook to **each** Bitbucket repository (**Repository settings → Webhooks → Add webhook**):
+
+- **URL:** the webhook URL shown on the Set Up Sensei page (`https://<your-defectdojo-host>/sensei/bitbucket/webhooks`).
+- **Secret:** the webhook secret shown on the page (used for HMAC-SHA256 `X-Hub-Signature` verification).
+- **Triggers:** **Repository push**, **Pull request** (created, updated, merged, declined), and **Pull request comment created** (for `/fix` comments).
+
+After connecting, click **Choose repositories** and continue with [Select repositories](#select-repositories).
+
+> **Bitbucket specifics:** repositories are addressed as `workspace/repo` (Cloud) or `PROJECTKEY/repo` (Server). The pull-request **status check** is posted as a Bitbucket **build status** on the head commit. OAuth is the recommended method because it is user-context (no workspace/username quirks) and refreshes automatically; app passwords are deprecated and not supported.
+
+## Connect Azure DevOps
+
+Sensei supports **Azure DevOps Repos** using a **Personal Access Token (PAT)**. Repositories live in an **organization → project → repository** hierarchy.
+
+From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page), then select **Azure DevOps**.
+
+### Step 1: Create a PAT
+
+In Azure DevOps, open **User settings → Personal access tokens → New Token**:
+
+- **Organization:** the organization whose repositories you want to scan.
+- **Scopes:** **Code (Read, Write, & Manage)** — covers cloning, pushing fix branches, and opening pull requests.
+
+Create the token and copy it (Azure DevOps shows it only once).
+
+### Step 2: Connect
+
+Back in **Set Up Sensei** with **Azure DevOps** selected, fill in:
+
+- **Base URL:** `https://dev.azure.com`, or your Azure DevOps **Server** collection URL.
+- **Organization:** your organization name.
+- **Personal Access Token:** the token from Step 1.
+
+Click **Connect**. DefectDojo validates the PAT against `…/_apis/projects`, stores it encrypted, and can then list repositories, open pull requests, and run scans.
+
+### Step 3: Add the service hook
+
+Azure DevOps authenticates its **Service Hooks** with HTTP Basic, and uses **one subscription per event type**. In **Project settings → Service hooks → Create subscription → Web Hooks**, create a subscription for each of **Code pushed**, **Pull request created**, **Pull request updated**, and **Pull request merged**, all with:
+
+- **URL:** the webhook URL shown on the Set Up Sensei page (`https://<your-defectdojo-host>/sensei/azure/webhooks`).
+- **Basic authentication username / password:** the values shown on the page.
+
+After connecting, click **Choose repositories** and continue with [Select repositories](#select-repositories).
+
+> **Azure DevOps specifics:** repositories are addressed as `project/repo` (the organization is stored on the connection). The pull-request **status check** is posted as a Git **commit status** on the head commit.
 
 ## Select repositories
 
