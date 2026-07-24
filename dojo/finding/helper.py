@@ -1063,7 +1063,7 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
     vulnerability_ids = sanitize_vulnerability_ids(vulnerability_ids)
 
-    # Unconditional dual-write of both stores (legacy Vulnerability_Id rows + entity references).
+    # Persist the Vulnerability entity + FindingVulnerabilityReference rows.
     # Callers can set delete_existing=False when they know there are no existing IDs
     # to avoid an unnecessary delete query (e.g., for new findings).
     persist_for_finding(finding, vulnerability_ids, delete_existing=delete_existing)

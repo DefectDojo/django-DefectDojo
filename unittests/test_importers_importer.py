@@ -1155,6 +1155,13 @@ class TestImporterUtils(DojoAPITestCase):
         save_vulnerability_ids(finding_c, ["CVE-C-SAME"])
         finding_c.save()
 
+        # Reload from the DB so reconcile reads existing ids from committed rows. Production loads
+        # reimport candidates via a query (with vulnerability_id_prefetch); a hand-built instance
+        # can carry an empty reverse-relation cache that would make an unchanged finding look changed.
+        finding_a = Finding.objects.get(pk=finding_a.pk)
+        finding_b = Finding.objects.get(pk=finding_b.pk)
+        finding_c = Finding.objects.get(pk=finding_c.pk)
+
         finding_a.unsaved_vulnerability_ids = ["CVE-A-NEW"]
         finding_b.unsaved_vulnerability_ids = ["CVE-B-NEW"]
         finding_c.unsaved_vulnerability_ids = ["CVE-C-SAME"]
@@ -1208,6 +1215,8 @@ class TestImporterUtils(DojoAPITestCase):
         save_vulnerability_ids(finding, ["CVE-2020-1234"])
         finding.save()
 
+        # Reload so reconcile reads existing ids from committed rows (see cross-batch test).
+        finding = Finding.objects.get(pk=finding.pk)
         finding.unsaved_vulnerability_ids = ["CVE-2020-1234"]
         reimporter.reconcile_vulnerability_ids(finding)
 

@@ -598,14 +598,12 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
     # existing Finding_CWE rows for each changed finding).
     # Vulnerability id writes (entity-only cutover): only the Vulnerability entity +
-    # FindingVulnerabilityReference bulk writes remain (batched, not per-finding). The
-    # legacy Vulnerability_Id dual-write was removed, so these counts drop by the legacy
-    # delete+bulk_insert per flush. NOTE: recalibrate the constants below under OSS CI
-    # (watson enabled) — they cannot be measured in the Pro test env, which force-disables
-    # watson so this fixture-backed test does not run there.
+    # FindingVulnerabilityReference bulk writes remain (batched, not per-finding). Removing the
+    # legacy Vulnerability_Id dual-write drops the reimport counts by its delete+bulk_insert:
+    # -12 reimport-no-change, -6 reimport-with-new. Import counts are unchanged.
     EXPECTED_ZAP_IMPORT_V2 = 296
     EXPECTED_ZAP_IMPORT_V3 = 320
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 91
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 103
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 167
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 196
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 79
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 161
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 190
