@@ -52,10 +52,10 @@ from dojo.models import (
     Product,
     Product_Type,
     Test,
-    Vulnerability_Id,
 )
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.utils import get_system_setting, is_finding_groups_enabled, truncate_timezone_aware
+from dojo.vulnerability.queries import finding_ids_with_vulnerability_ids
 
 logger = logging.getLogger(__name__)
 
@@ -73,17 +73,11 @@ def custom_filter(queryset, name, value):
 
 def custom_vulnerability_id_filter(queryset, name, value):
     values = value.split(",")
-    ids = Vulnerability_Id.objects \
-        .filter(vulnerability_id__in=values) \
-        .values_list("finding_id", flat=True)
-    return queryset.filter(id__in=ids)
+    return queryset.filter(id__in=finding_ids_with_vulnerability_ids(values, lookup="in"))
 
 
 def vulnerability_id_filter(queryset, name, value):
-    ids = Vulnerability_Id.objects \
-        .filter(vulnerability_id=value) \
-        .values_list("finding_id", flat=True)
-    return queryset.filter(id__in=ids)
+    return queryset.filter(id__in=finding_ids_with_vulnerability_ids(value, lookup="exact"))
 
 
 class NumberInFilter(filters.BaseInFilter, filters.NumberFilter):

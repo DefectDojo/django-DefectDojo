@@ -43,7 +43,7 @@ from dojo.models import (
     Test,
     Test_Type,
     User,
-    Vulnerability_Id,
+    Vulnerability,
 )
 from dojo.notifications.helper import async_create_notification
 from dojo.user.queries import get_authorized_users
@@ -297,8 +297,55 @@ class FindingRelatedFieldsSerializer(serializers.Serializer):
 
 class VulnerabilityIdSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Vulnerability_Id
+        # Schema-only (OpenAPI) shape for VulnerabilityIdsField; points at the Vulnerability entity,
+        # which carries the same ``vulnerability_id`` string column.
+        model = Vulnerability
         fields = ["vulnerability_id"]
+
+
+@extend_schema_field(VulnerabilityIdSerializer(many=True))
+class VulnerabilityIdsField(serializers.Field):
+
+    """
+    Wire-frozen v2 vulnerability_ids field.
+
+    Reads ``[{"vulnerability_id": str}]`` from the finding's entity references (ordered,
+    primary/cve first). Accepts the same object list (tolerating bare strings) on write and hands
+    the parsed strings to create/update under ``parsed_vulnerability_ids``, which funnel to
+    save_vulnerability_ids (unchanged path).
+    """
+
+    def __init__(self, **kwargs):
+        kwargs["source"] = "*"
+        kwargs.setdefault("required", False)
+        super().__init__(**kwargs)
+
+    def get_attribute(self, instance):
+        # source="*" -> to_representation receives the whole Finding.
+        return instance
+
+    def to_representation(self, finding):
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
+        return [{"vulnerability_id": value} for value in finding_vulnerability_id_strings(finding)]
+
+    def to_internal_value(self, data):
+        if not isinstance(data, list):
+            msg = "Expected a list of vulnerability ids."
+            raise serializers.ValidationError(msg)
+        parsed = []
+        for item in data:
+            if isinstance(item, dict):
+                if "vulnerability_id" not in item:
+                    msg = 'Each vulnerability id object requires a "vulnerability_id" key.'
+                    raise serializers.ValidationError(msg)
+                parsed.append(item["vulnerability_id"])
+            elif isinstance(item, str):
+                parsed.append(item)
+            else:
+                msg = 'Each vulnerability id must be a string or {"vulnerability_id": "..."}.'
+                raise serializers.ValidationError(msg)
+        # source="*" merges this dict into validated_data; create/update pop the key.
+        return {"parsed_vulnerability_ids": parsed}
 
 
 @extend_schema_field(serializers.CharField())
@@ -345,9 +392,7 @@ class FindingSerializer(serializers.ModelSerializer):
     finding_groups = FindingGroupSerializer(
         source="finding_group_set", many=True, read_only=True,
     )
-    vulnerability_ids = VulnerabilityIdSerializer(
-        source="vulnerability_id_set", many=True, required=False,
-    )
+    vulnerability_ids = VulnerabilityIdsField(required=False)
     cwes = FindingCweSerializer(
         source="finding_cwe_set", many=True, required=False,
     )
@@ -439,12 +484,10 @@ class FindingSerializer(serializers.ModelSerializer):
         # push_all_issues already checked in api views.py
         push_to_jira = validated_data.pop("push_to_jira")
 
-        # Save vulnerability ids and pop them
-        parsed_vulnerability_ids = []
-        if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
-            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
-            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
-            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
+        # Save vulnerability ids and pop them (VulnerabilityIdsField parsed them to strings)
+        parsed_vulnerability_ids = validated_data.pop("parsed_vulnerability_ids", None) or []
+        if parsed_vulnerability_ids:
+            logger.debug("SETTING CVE FROM VULNERABILITY_IDS: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
 
         # CWEs (mirror vulnerability_ids): the primary Finding.cwe plus extra Finding_CWE rows
@@ -611,9 +654,7 @@ class FindingCreateSerializer(serializers.ModelSerializer):
     )
     url = serializers.CharField(allow_null=True, default=None)
     push_to_jira = serializers.BooleanField(default=False)
-    vulnerability_ids = VulnerabilityIdSerializer(
-        source="vulnerability_id_set", many=True, required=False,
-    )
+    vulnerability_ids = VulnerabilityIdsField(required=False)
     cwes = FindingCweSerializer(
         source="finding_cwe_set", many=True, required=False,
     )
@@ -647,15 +688,12 @@ class FindingCreateSerializer(serializers.ModelSerializer):
         notes = validated_data.pop("notes", None)
         found_by = validated_data.pop("found_by", None)
         reviewers = validated_data.pop("reviewers", None)
-        # Process the vulnerability IDs specially
-        parsed_vulnerability_ids = []
-        if (vulnerability_ids := validated_data.pop("vulnerability_id_set", None)):
-            logger.debug("VULNERABILITY_ID_SET: %s", vulnerability_ids)
-            parsed_vulnerability_ids.extend(vulnerability_id["vulnerability_id"] for vulnerability_id in vulnerability_ids)
-            logger.debug("PARSED_VULNERABILITY_IDST: %s", parsed_vulnerability_ids)
-            logger.debug("SETTING CVE FROM VULNERABILITY_ID_SET: %s", parsed_vulnerability_ids[0])
+        # Process the vulnerability IDs specially (VulnerabilityIdsField parsed them to strings)
+        parsed_vulnerability_ids = validated_data.pop("parsed_vulnerability_ids", None) or []
+        if parsed_vulnerability_ids:
+            logger.debug("PARSED_VULNERABILITY_IDS: %s", parsed_vulnerability_ids)
+            logger.debug("SETTING CVE FROM VULNERABILITY_IDS: %s", parsed_vulnerability_ids[0])
             validated_data["cve"] = parsed_vulnerability_ids[0]
-            # validated_data["unsaved_vulnerability_ids"] = parsed_vulnerability_ids
 
         # CWEs (mirror vulnerability_ids): the primary cwe plus extras. Precedence: an explicit
         # scalar `cwe` in the request stays the primary and every `cwes` entry is treated as an

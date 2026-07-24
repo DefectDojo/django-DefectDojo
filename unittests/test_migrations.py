@@ -38,8 +38,8 @@ class TestOptiEndpointStatus(MigratorTestCase):
         self.finding = Finding.objects.create(test_id=self.test.pk, reporter_id=user).pk
         self.endpoint = Endpoint.objects.create(host="foo.bar", product_id=self.product.pk).pk
         self.endpoint_status = Endpoint_Status.objects.create(
-                finding_id=self.finding,
-                endpoint_id=self.endpoint,
+            finding_id=self.finding,
+            endpoint_id=self.endpoint,
         ).pk
         Endpoint.objects.get(id=self.endpoint).endpoint_status.add(
             Endpoint_Status.objects.get(id=self.endpoint_status),

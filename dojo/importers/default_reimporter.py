@@ -13,7 +13,6 @@ from dojo.finding.deduplication import (
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
-from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
@@ -25,7 +24,6 @@ from dojo.models import (
     Notes,
     Test,
     Test_Import,
-    Vulnerability_Id,
 )
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tags.inheritance import apply_inherited_tags_for_findings
@@ -990,8 +988,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # while vulnerability_ids do not, and vice versa).
         self.reconcile_cwes(finding)
 
-        # Use prefetched data directly without triggering queries
-        existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
+        # Read the existing ids through the entity read helper (not a legacy relation). The prefetch
+        # is matched upstream (the reimport finding query uses vulnerability_id_prefetch()), so this
+        # stays a no-query read.
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
+
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed
@@ -1002,12 +1004,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             return finding
 
-        # Accumulate delete + insert for batch flush
-        self.pending_vuln_id_deletes.append(finding.id)
-        self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
-            for vid in vulnerability_ids_to_process
-        ])
+        # Accumulate delete + insert for batch flush (entity references).
+        self.vulnerability_id_manager.record_reconcile(finding, vulnerability_ids_to_process)
         if vulnerability_ids_to_process:
             finding.cve = vulnerability_ids_to_process[0]
         else:

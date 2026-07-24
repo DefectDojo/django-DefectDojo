@@ -22,10 +22,10 @@ from dojo.authorization.models import (
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.queries import get_authorized_endpoint_status, get_authorized_endpoints
 from dojo.engagement.queries import get_authorized_engagements
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.finding.queries import (
     get_authorized_findings,
     get_authorized_findings_for_queryset,
-    get_authorized_vulnerability_ids,
 )
 from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.location.models import LocationFindingReference, LocationProductReference
@@ -42,16 +42,17 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Group,
+    FindingVulnerabilityReference,
     Product,
     Product_Type,
     Test,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.test.queries import get_authorized_tests
 from dojo.url.models import URL
+from dojo.vulnerability.queries import get_authorized_finding_vulnerability_references
 
 from .dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
@@ -238,14 +239,19 @@ class AuthorizationQueriesTestBase(DojoTestCase):
             },
         )
 
-        # Create vulnerability IDs
-        cls.vuln_id_1, _ = Vulnerability_Id.objects.get_or_create(
+        # Create vulnerability IDs (entity + ordered reference rows) and grab the
+        # reference objects used later in the authorized-queryset assertions.
+        save_vulnerability_ids(cls.finding_1, ["CVE-2024-0001"])
+        cls.finding_1.save()
+        cls.vuln_id_1 = FindingVulnerabilityReference.objects.get(
             finding=cls.finding_1,
-            vulnerability_id="CVE-2024-0001",
+            vulnerability__vulnerability_id="CVE-2024-0001",
         )
-        cls.vuln_id_2, _ = Vulnerability_Id.objects.get_or_create(
+        save_vulnerability_ids(cls.finding_2, ["CVE-2024-0002"])
+        cls.finding_2.save()
+        cls.vuln_id_2 = FindingVulnerabilityReference.objects.get(
             finding=cls.finding_2,
-            vulnerability_id="CVE-2024-0002",
+            vulnerability__vulnerability_id="CVE-2024-0002",
         )
 
         if settings.V3_FEATURE_LOCATIONS:
@@ -363,23 +369,25 @@ class TestGetAuthorizedFindings(AuthorizationQueriesTestBase):
 
 class TestGetAuthorizedVulnerabilityIds(AuthorizationQueriesTestBase):
 
-    """Tests for get_authorized_vulnerability_ids()"""
+    """Tests for get_authorized_finding_vulnerability_references()"""
 
     def test_superuser_gets_all_vulnerability_ids(self):
-        """Superuser should get all vulnerability IDs"""
-        vuln_ids = get_authorized_vulnerability_ids(Permissions.Finding_View, user=self.superuser)
+        """Superuser should get all vulnerability id references"""
+        vuln_ids = get_authorized_finding_vulnerability_references(Permissions.Finding_View, user=self.superuser)
         self.assertIn(self.vuln_id_1, vuln_ids)
         self.assertIn(self.vuln_id_2, vuln_ids)
 
     def test_user_no_permissions_gets_empty(self):
-        """User with no permissions should not get test vulnerability IDs"""
-        vuln_ids = get_authorized_vulnerability_ids(Permissions.Finding_View, user=self.user_no_perms)
+        """User with no permissions should not get test vulnerability id references"""
+        vuln_ids = get_authorized_finding_vulnerability_references(Permissions.Finding_View, user=self.user_no_perms)
         self.assertNotIn(self.vuln_id_1, vuln_ids)
         self.assertNotIn(self.vuln_id_2, vuln_ids)
 
     def test_user_product_member_gets_product_vulnerability_ids(self):
-        """User with product membership should get only that product's vulnerability IDs"""
-        vuln_ids = get_authorized_vulnerability_ids(Permissions.Finding_View, user=self.user_product_member)
+        """User with product membership should get only that product's vulnerability id references"""
+        vuln_ids = get_authorized_finding_vulnerability_references(
+            Permissions.Finding_View, user=self.user_product_member,
+        )
         self.assertIn(self.vuln_id_1, vuln_ids)
         self.assertNotIn(self.vuln_id_2, vuln_ids)
 

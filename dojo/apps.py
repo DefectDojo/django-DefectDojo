@@ -113,7 +113,8 @@ def register_watson_models(app_config):
     watson.register(app_config.get_model("Location"))
     watson.register(app_config.get_model("Engagement"), fields=get_model_fields_with_extra(app_config.get_model("Engagement"), ("id", "product__name")), store=("product__name", ))
     watson.register(app_config.get_model("App_Analysis"))
-    watson.register(app_config.get_model("Vulnerability_Id"), store=("finding__test__engagement__product__name", ))
+    # The legacy Vulnerability_Id table was retired (entity-only cutover); the classic watson-backed
+    # vuln-id search is gone. The Vue global search covers vulnerability ids via the entity store.
 
     # YourModel = app_config.get_model("YourModel")
     # watson.register(YourModel)

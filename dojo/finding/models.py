@@ -705,9 +705,16 @@ class Finding(BaseModel):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
-        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util)
-        for vulnerability_id in self.vulnerability_id_set.all():
-            Vulnerability_Id.objects.create(finding=copy, vulnerability_id=vulnerability_id.vulnerability_id)
+        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util).
+        # Write the copy's ids through the entity write seam (copy.cve was already carried over by
+        # copy_model_util), and read the SOURCE ids through the entity read helper (not a legacy
+        # relation).
+        from dojo.vulnerability.manager import persist_for_finding  # noqa: PLC0415 -- avoid import cycle
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415
+
+        vulnerability_id_strings = finding_vulnerability_id_strings(self)
+        if vulnerability_id_strings:
+            persist_for_finding(copy, vulnerability_id_strings, delete_existing=False)
         for finding_cwe in self.finding_cwe_set.all():
             Finding_CWE.objects.create(finding=copy, cwe=finding_cwe.cwe)
 
@@ -838,12 +845,11 @@ class Finding(BaseModel):
 
         def _get_saved_vulnerability_ids(finding) -> str:
             if finding.id is not None:
-                # Use the reverse relation (vulnerability_id_set) rather than a fresh
-                # Vulnerability_Id.objects.filter(...) so prefetch_related("vulnerability_id_set")
-                # is honored — avoids an N+1 (COUNT + SELECT per finding) during dedupe/hashcode.
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.vulnerability_id_set.all()]
+                # Entity store: the prefetch-honoring reverse relation (vulnerability_references
+                # + select_related("vulnerability")) so Prefetch is honored — no N+1 in dedupe.
+                vulnerability_id_str_list = [ref.vulnerability.vulnerability_id for ref in finding.vulnerability_references.all()]
                 deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(len(vulnerability_id_str_list)))
-                # sort vulnerability_ids strings
+                # sort vulnerability_ids strings (no dedupe — ordering is irrelevant to the hash)
                 return "".join(sorted(vulnerability_id_str_list))
             return ""
 
@@ -1383,9 +1389,9 @@ class Finding(BaseModel):
 
     @cached_property
     def vulnerability_ids(self):
-        # Get vulnerability ids from database and convert to list of strings
-        vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
+        # Get vulnerability ids from database and convert to list of strings.
+        # Entity store: reverse relation is ordered by FindingVulnerabilityReference.Meta.ordering.
+        vulnerability_ids = [ref.vulnerability.vulnerability_id for ref in self.vulnerability_references.all()]
 
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
@@ -1433,6 +1439,11 @@ class Finding(BaseModel):
                 deduplicationLogger.debug("Hash_code computed for finding: %s: %s", finding_id, self.hash_code)
 
 
+# Legacy vulnerability-id store. As of the entity-only cutover, vulnerability ids live in the
+# Vulnerability entity + FindingVulnerabilityReference through-table (dojo/vulnerability/), and this
+# model is NO LONGER READ OR WRITTEN by any code path. It (and its dojo_vulnerability_id table) are
+# intentionally RETAINED for a transition period as a frozen pre-cutover snapshot, and removed
+# together in a future release. Do not add new usages.
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)

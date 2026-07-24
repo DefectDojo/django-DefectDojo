@@ -1,4 +1,3 @@
-import itertools
 import logging
 import re
 import shlex
@@ -13,7 +12,7 @@ from watson import search as watson
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.ui.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.finding.queries import get_authorized_findings, get_authorized_vulnerability_ids, prefetch_for_findings
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
 from dojo.location.queries import get_authorized_locations, prefetch_for_locations
@@ -114,8 +113,6 @@ def simple_search(request):
                           "not-tag" in operators or "not-test-tag" in operators or "not-engagement-tag" in operators or "not-product-tag" in operators or \
                           "not-tags" in operators or "not-test-tags" in operators or "not-engagement-tags" in operators or "not-product-tags" in operators
 
-            search_vulnerability_ids = "vulnerability_id" in operators or not operators
-
             search_finding_id = "id" in operators
             search_findings = "finding" in operators or search_finding_id or search_tags or not operators
 
@@ -139,7 +136,8 @@ def simple_search(request):
                 authorized_endpoints = get_authorized_endpoints("view")
             authorized_finding_templates = Finding_Template.objects.all()
             authorized_app_analysis = get_authorized_app_analysis("view")
-            authorized_vulnerability_ids = get_authorized_vulnerability_ids("view")
+            # The legacy Vulnerability_Id watson index was removed (entity-only cutover), so classic
+            # search no longer has a vulnerability-id lane. The Vue global search covers vuln ids.
 
             # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
 
@@ -149,7 +147,6 @@ def simple_search(request):
             products = authorized_products
             endpoints = authorized_endpoints
             app_analysis = authorized_app_analysis
-            vulnerability_ids = authorized_vulnerability_ids
 
             findings_filter = None
             title_words = None
@@ -328,26 +325,13 @@ def simple_search(request):
             else:
                 app_analysis = None
 
-            if search_vulnerability_ids:
-                logger.debug("searching vulnerability_ids")
-
-                vulnerability_ids = authorized_vulnerability_ids
-                vulnerability_ids = apply_vulnerability_id_filter(vulnerability_ids, operators)
-                if keywords_query:
-                    watson_results = watson.filter(vulnerability_ids, keywords_query)
-                    vulnerability_ids = vulnerability_ids.filter(id__in=[watson.id for watson in watson_results])
-                vulnerability_ids = vulnerability_ids.prefetch_related("finding__test__engagement__product", "finding__test__engagement__product__tags")
-                vulnerability_ids = vulnerability_ids[:max_results]
-            else:
-                vulnerability_ids = None
-
             if keywords_query:
                 logger.debug("searching generic")
                 logger.debug("going generic with: %s", keywords_query)
                 generic = watson.search(keywords_query, models=(
                     authorized_findings, authorized_tests, authorized_engagements,
                     authorized_products, authorized_endpoints,
-                    authorized_finding_templates, authorized_vulnerability_ids, authorized_app_analysis)) \
+                    authorized_finding_templates, authorized_app_analysis)) \
                     .prefetch_related("object")[:max_results]
             else:
                 generic = None
@@ -533,24 +517,6 @@ def apply_endpoint_filter(qs, operators):
             qs = qs.filter(locations__location__url__host__contains=",".join(operators["endpoint"]))
         else:
             qs = qs.filter(endpoints__host__contains=",".join(operators["endpoint"]))
-
-    return qs
-
-
-def apply_vulnerability_id_filter(qs, operators):
-    if "vulnerability_id" in operators:
-        value = operators["vulnerability_id"]
-
-        # possible value:
-        # ['CVE-2020-6754]
-        # ['CVE-2020-6754,CVE-2018-7489']
-        # or when entered multiple times:
-        # ['CVE-2020-6754,CVE-2018-7489', 'CVE-2020-1234']
-
-        # so flatten like mad:
-        vulnerability_ids = list(itertools.chain.from_iterable([vulnerability_id.split(",") for vulnerability_id in value]))
-        logger.debug("vulnerability_id filter: %s", vulnerability_ids)
-        qs = qs.filter(Q(vulnerability_id__in=vulnerability_ids))
 
     return qs
 

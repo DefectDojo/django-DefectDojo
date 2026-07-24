@@ -1,6 +1,7 @@
 from django.template import engines
 from django.utils.timezone import now
 
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.models import (
     Engagement,
     Finding,
@@ -9,7 +10,6 @@ from dojo.models import (
     Test,
     Test_Type,
     User,
-    Vulnerability_Id,
 )
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 
@@ -176,7 +176,9 @@ class TestPdfReportTextWrapping(DojoTestCase):
     def test_report_finding_table_includes_vulnerability_ids(self):
         """Finding PDF reports should show vulnerability IDs in the finding table."""
         finding = self._create_finding()
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2026-12345")
+        # Dual-write (legacy row + entity reference) so the report's flag-appropriate
+        # read resolves whether V3_FEATURE_VULNERABILITY_IDS is on (default) or off.
+        save_vulnerability_ids(finding, ["CVE-2026-12345"])
 
         html = self._render_finding_report(Finding.objects.filter(pk=finding.pk))
 

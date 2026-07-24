@@ -9,6 +9,7 @@ from dojo.authorization.models import (
     Role,
 )
 from dojo.authorization.roles_permissions import Roles
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.models import (
     Dojo_User,
     Engagement,
@@ -19,7 +20,6 @@ from dojo.models import (
     Test,
     Test_Type,
     User,
-    Vulnerability_Id,
 )
 
 
@@ -61,24 +61,24 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         Finding.objects.bulk_create(
             create_finding(cls.test_a, cls.user, f"CVE-1999-{i}") for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_a):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
         Finding.objects.bulk_create(
             create_finding(cls.test_b, cls.user, f"CVE-1999-{i}") for i in range(51, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_b):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
         Finding.objects.bulk_create(
             create_finding(cls.test_c, cls.user, f"CVE-1999-{i}") for i in range(52, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_c):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
 
         Finding.objects.bulk_create(
             create_finding(cls.test_d, cls.user, f"CVE-2000-{i}") for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_d):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
         Finding.objects.bulk_create(
             create_finding(cls.test_e, cls.user, f"CVE-1999-{i}") for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_e):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
 
     def setUp(self) -> None:
         self.client = APIClient()
@@ -204,13 +204,13 @@ class TestBulkRiskAcceptanceRbac(APITestCase):
         Finding.objects.bulk_create(
             create_finding(cls.test_enabled, cls.writer, f"CVE-2024-{i}") for i in range(10))
         for f in Finding.objects.filter(test=cls.test_enabled):
-            Vulnerability_Id.objects.get_or_create(finding=f, vulnerability_id=f.cve)
+            save_vulnerability_ids(f, [f.cve])
 
         # Findings on the disabled product
         Finding.objects.bulk_create(
             create_finding(cls.test_disabled, cls.writer, f"CVE-2024-{i + 100}") for i in range(5))
         for f in Finding.objects.filter(test=cls.test_disabled):
-            Vulnerability_Id.objects.get_or_create(finding=f, vulnerability_id=f.cve)
+            save_vulnerability_ids(f, [f.cve])
 
     def _client_for(self, token):
         client = APIClient()
