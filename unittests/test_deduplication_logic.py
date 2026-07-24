@@ -7,10 +7,19 @@ from unittest import skip
 from crum import impersonate
 from django.conf import settings
 from django.core import serializers
+from django.test import override_settings
 from django.utils import timezone
 
-from dojo.finding.deduplication import build_candidate_scope_queryset, set_duplicate
+from dojo.finding.deduplication import (
+    _is_candidate_older,  # noqa: PLC2701 -- the antisymmetry regression test targets this helper directly
+    build_candidate_scope_queryset,
+    dedupe_batch_of_findings,
+    deduplication_ordering_key,
+    get_finding_models_for_deduplication,
+    set_duplicate,
+)
 from dojo.importers.default_importer import DefaultImporter
+from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     Development_Environment,
     Endpoint,
@@ -18,10 +27,12 @@ from dojo.models import (
     Engagement,
     Finding,
     Product,
+    Product_Type,
     System_Settings,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
+    Test_Type,
     User,
     copy_model_util,
 )
@@ -534,6 +545,333 @@ class TestDuplicationLogic(DojoTestCase):
 
         # reset for further tests
         settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def _make_finding_in_test(self, template_id, title, hash_code):
+        """
+        Create a saved, active finding cloned from template_id with a forced hash_code.
+
+        The hash_code is written directly to the DB (bypassing save()'s recompute) so we
+        can make two findings with different content collide on the deduplication key.
+        """
+        new, _ = self.copy_and_reset_finding(find_id=template_id)
+        new.title = title
+        new.save(dedupe_option=False)
+        Finding.objects.filter(id=new.id).update(hash_code=hash_code)
+        new.refresh_from_db()
+        return new
+
+    def test_dedupe_batch_winner_is_lowest_id_and_rerun_is_stable(self):
+        # Batch deduplication itself must always keep the LOWEST id as the original.
+        # Content-stable winner selection for one report is achieved by the importers
+        # creating findings in deduplication_ordering_key order (see the Fortify
+        # order-independence test below), NOT by re-picking winners inside dedupe.
+        # This keeps the "older" relation globally antisymmetric across concurrent
+        # dedupe batches and keeps re-running dedupe (e.g. the `dedupe` management
+        # command) from flipping established originals on pre-existing data.
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = []
+        try:
+            shared_hash = "lowest_id_rerun_stability_test"
+            # Created in REVERSE content order: "zzz" first (lower id), "aaa" second
+            # (higher id) — simulating pre-existing data created before this upgrade.
+            finding_z = self._make_finding_in_test(2, "zzz order flip finding", shared_hash)
+            finding_a = self._make_finding_in_test(2, "aaa order flip finding", shared_hash)
+            self.assertLess(finding_z.id, finding_a.id)
+            self.assertEqual(finding_z.test_id, finding_a.test_id)
+
+            batch = get_finding_models_for_deduplication([finding_z.id, finding_a.id])
+            dedupe_batch_of_findings(batch)
+
+            finding_a.refresh_from_db()
+            finding_z.refresh_from_db()
+            # The lower-id "zzz" stays the original even though "aaa" sorts first by content.
+            self.assert_finding(finding_z, duplicate=False)
+            self.assert_finding(finding_a, duplicate=True, duplicate_finding_id=finding_z.id)
+
+            # Re-running dedupe over the same findings (the `dedupe` management command
+            # scenario) must not flip the established original.
+            dedupe_batch_of_findings(get_finding_models_for_deduplication([finding_z.id, finding_a.id]))
+            finding_a.refresh_from_db()
+            finding_z.refresh_from_db()
+            self.assert_finding(finding_z, duplicate=False)
+            self.assert_finding(finding_a, duplicate=True, duplicate_finding_id=finding_z.id)
+        finally:
+            settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def test_is_candidate_older_is_antisymmetric(self):
+        # For any pair of saved findings, at most one direction may be "older" —
+        # dedupe batches run concurrently (and the `dedupe` command re-processes
+        # pre-existing findings), so a symmetric or context-dependent answer could
+        # mark two findings as duplicates of each other.
+        from types import SimpleNamespace  # noqa: PLC0415
+
+        def mk(fid, title):
+            return SimpleNamespace(pk=fid, id=fid, hash_code="SAMEHASH", unique_id_from_tool=None,
+                                   file_path=None, line=None, title=title)
+
+        # Content key order ("aaa" < "zzz") deliberately opposes id order.
+        older_by_id = mk(100, "zzz content")
+        newer_by_id = mk(1200, "aaa content")
+        self.assertFalse(
+            _is_candidate_older(older_by_id, newer_by_id) and _is_candidate_older(newer_by_id, older_by_id),
+            "both directions claim the other finding is older — mutual set_duplicate would corrupt data",
+        )
+        self.assertTrue(_is_candidate_older(newer_by_id, older_by_id))
+        self.assertFalse(_is_candidate_older(older_by_id, newer_by_id))
+
+    def test_dedupe_batch_pre_existing_finding_stays_original(self):
+        # Backward-compat guard: a finding that already existed before this import
+        # batch must remain the original regardless of the new finding's content key.
+        dedupe_algo_endpoint_fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
+        settings.DEDUPE_ALGO_ENDPOINT_FIELDS = []
+        try:
+            shared_hash = "content_stable_hash_preexisting_test"
+            # Pre-existing finding has a content key that sorts AFTER the new one.
+            pre_existing = self._make_finding_in_test(2, "zzz pre-existing", shared_hash)
+            # Dedupe the pre-existing finding alone first (simulates an earlier import).
+            dedupe_batch_of_findings(get_finding_models_for_deduplication([pre_existing.id]))
+
+            new_finding = self._make_finding_in_test(2, "aaa newer import", shared_hash)
+            self.assertLess(pre_existing.id, new_finding.id)
+
+            # New batch contains only the new finding; pre-existing is a DB candidate.
+            dedupe_batch_of_findings(get_finding_models_for_deduplication([new_finding.id]))
+
+            pre_existing.refresh_from_db()
+            new_finding.refresh_from_db()
+            # Pre-existing stays original even though "aaa" would sort before "zzz".
+            self.assert_finding(pre_existing, duplicate=False)
+            self.assert_finding(new_finding, duplicate=True, duplicate_finding_id=pre_existing.id)
+        finally:
+            settings.DEDUPE_ALGO_ENDPOINT_FIELDS = dedupe_algo_endpoint_fields
+
+    def test_deduplication_ordering_key_is_order_independent(self):
+        # The ordering key must be a pure function of finding content (+ id tiebreak),
+        # so sorting a set of findings yields the same result regardless of input order.
+        f_a = Finding.objects.get(id=2)
+        f_b = Finding.objects.get(id=3)
+        forward = sorted([f_a, f_b], key=deduplication_ordering_key)
+        backward = sorted([f_b, f_a], key=deduplication_ordering_key)
+        self.assertEqual([f.id for f in forward], [f.id for f in backward])
+
+    def _dedupe_fortify_repro_scan(self, fpr_filename, engagement_name):
+        """
+        Reimport one corrected Fortify repro .fpr into its own (isolated)
+        engagement under a shared product via the real reimporter (so findings
+        are created in stable content-key order), using unique_id_from_tool
+        deduplication, and return the single surviving non-duplicate finding.
+
+        The customer-reported flip is a reimport phenomenon: the surviving
+        "original" among findings that collide on the dedupe key changed with
+        the scanner's export order between re-scans. The two fixtures contain
+        the same pair of findings - which share a unique_id_from_tool but have
+        different content (different rule/title/line) - in opposite document
+        order.
+        """
+        product_type, _ = Product_Type.objects.get_or_create(name="Fortify UID Repro PT")
+        product, _ = Product.objects.get_or_create(
+            name="Fortify UID Repro Product",
+            defaults={"description": "Fortify UID dedupe repro", "prod_type": product_type},
+        )
+        engagement = Engagement.objects.create(
+            name=engagement_name,
+            product=product,
+            target_start=timezone.now().date(),
+            target_end=timezone.now().date(),
+            deduplication_on_engagement=True,  # isolate each scan's dedupe scope
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="Fortify Scan")
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=test_type,
+            scan_type="Fortify Scan",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        admin = User.objects.get(username="admin")
+        with (get_unit_tests_scans_path("fortify") / fpr_filename).open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=test,
+                user=admin,
+                lead=admin,
+                scan_date=None,
+                minimum_severity="Info",
+                active=True,
+                verified=True,
+                force_sync=True,
+                scan_type="Fortify Scan",
+            )
+            reimporter.process_scan(scan)
+
+        # Deduplicate explicitly so the test does not depend on the async/eager
+        # configuration of reimport post-processing. Dedupe is idempotent, so this
+        # is safe even when post-processing already deduplicated the batch.
+        finding_ids = list(Finding.objects.filter(test=test).values_list("id", flat=True))
+        dedupe_batch_of_findings(get_finding_models_for_deduplication(finding_ids))
+
+        findings = list(Finding.objects.filter(test=test).order_by("id"))
+        # The reimporter must have created the findings in stable content-key order,
+        # i.e. id order equals deduplication_ordering_key order.
+        self.assertEqual(
+            [f.id for f in findings],
+            [f.id for f in sorted(findings, key=deduplication_ordering_key)],
+            "reimporter did not create findings in deduplication_ordering_key order",
+        )
+        non_duplicates = [f for f in findings if not f.duplicate]
+        # unique_id_from_tool dedupe collapses the shared-uid pair to one original
+        self.assertEqual(len(non_duplicates), 1, f"expected exactly one original, got {[(f.id, f.line) for f in findings]}")
+        return non_duplicates[0]
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL})
+    def test_fortify_same_uid_different_content_original_is_order_independent(self):
+        # Corrected Fortify import-order repro. Two findings share unique_id_from_tool
+        # but differ in content, provided in opposite order across two .fpr files.
+        # Under unique_id_from_tool dedupe the surviving "original" must be the same
+        # (content-canonical) finding regardless of the scanner's export order.
+        # Pre-fix this flips (lowest-id / first-in-file wins); with the fix it is stable.
+        original_scan1 = self._dedupe_fortify_repro_scan("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uid-repro-scan1")
+        original_scan2 = self._dedupe_fortify_repro_scan("fortify_dedupe_uid_repro_scan2.fpr", "fortify-uid-repro-scan2")
+
+        self.assertEqual(original_scan1.unique_id_from_tool, original_scan2.unique_id_from_tool)
+        # The same content survives regardless of file order (line/title stable).
+        self.assertEqual(original_scan1.line, original_scan2.line)
+        self.assertEqual(original_scan1.title, original_scan2.title)
+
+    # ------------------------------------------------------------------
+    # Black-box behavior guards for the import/reimport dedupe baseline.
+    #
+    # These drive ONLY the public reimport API (DefaultReImporter.process_scan
+    # with force_sync so post-processing runs inline) and assert ONLY on observable
+    # Finding state (which finding survives as the active original). They import no
+    # deduplication internals and make no claim about HOW the behavior is achieved,
+    # so they keep protecting the user-visible contract even if the import/reimport
+    # machinery is rewritten. If a rewrite regresses the baseline, these go red.
+    # ------------------------------------------------------------------
+
+    def _reimport_fortify_repro(self, fpr_filename, engagement_name):
+        """
+        Reimport one Fortify repro .fpr through the real reimporter into its own
+        isolated engagement and return every Finding in the resulting test
+        (ordered by id). Uses force_sync so deduplication has completed by the
+        time process_scan returns; no dedupe internals are touched.
+        """
+        product_type, _ = Product_Type.objects.get_or_create(name="Fortify UID Repro PT")
+        product, _ = Product.objects.get_or_create(
+            name="Fortify UID Repro Product",
+            defaults={"description": "Fortify UID dedupe repro", "prod_type": product_type},
+        )
+        engagement = Engagement.objects.create(
+            name=engagement_name,
+            product=product,
+            target_start=timezone.now().date(),
+            target_end=timezone.now().date(),
+            deduplication_on_engagement=True,  # isolate each scan's dedupe scope
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="Fortify Scan")
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=test_type,
+            scan_type="Fortify Scan",
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        admin = User.objects.get(username="admin")
+        with (get_unit_tests_scans_path("fortify") / fpr_filename).open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=test,
+                user=admin,
+                lead=admin,
+                scan_date=None,
+                minimum_severity="Info",
+                active=True,
+                verified=True,
+                force_sync=True,
+                scan_type="Fortify Scan",
+            )
+            reimporter.process_scan(scan)
+        return test, list(Finding.objects.filter(test=test).order_by("id"))
+
+    def _assert_single_surviving_original(self, findings):
+        """
+        The colliding pair must resolve to exactly one active, non-duplicate finding.
+
+        We assert on the observable survivor (active and not a duplicate) rather than
+        the total row count: whether the loser is collapsed away during reimport
+        matching or kept as an inactive duplicate row is an implementation detail, but
+        either way the user must see exactly one active original.
+        """
+        originals = [f for f in findings if f.active and not f.duplicate]
+        self.assertEqual(
+            len(originals), 1,
+            f"expected exactly one active original, got {[(f.id, f.active, f.duplicate, f.line) for f in findings]}",
+        )
+        return originals[0]
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL})
+    def test_reimport_surviving_original_is_export_order_independent_uid(self):
+        # BASELINE: two scans contain the same pair of findings (shared
+        # unique_id_from_tool, different content) in opposite document order.
+        # After reimport, the finding that survives as the active original must be
+        # the SAME content regardless of the scanner's export order. This is the
+        # customer-reported contract; pre-fix the surviving finding flips with order.
+        _, findings1 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uid-behavior-1")
+        _, findings2 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan2.fpr", "fortify-uid-behavior-2")
+        original1 = self._assert_single_surviving_original(findings1)
+        original2 = self._assert_single_surviving_original(findings2)
+
+        self.assertEqual(original1.unique_id_from_tool, original2.unique_id_from_tool)
+        self.assertEqual(
+            (original1.title, original1.line, original1.hash_code),
+            (original2.title, original2.line, original2.hash_code),
+            "surviving original differs between scan orders — dedupe is export-order dependent",
+        )
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE})
+    def test_reimport_surviving_original_is_export_order_independent_uid_or_hash(self):
+        # BASELINE (combined algorithm): same repro under unique_id_from_tool_or_hash_code.
+        # The pair collides through the shared unique_id_from_tool (their content, and
+        # thus hash_code, differ), so this exercises the combined UID/hash matching path.
+        # The surviving active original must still be content-stable across scan orders.
+        _, findings1 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uidhash-behavior-1")
+        _, findings2 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan2.fpr", "fortify-uidhash-behavior-2")
+        original1 = self._assert_single_surviving_original(findings1)
+        original2 = self._assert_single_surviving_original(findings2)
+
+        self.assertEqual(original1.unique_id_from_tool, original2.unique_id_from_tool)
+        self.assertEqual(
+            (original1.title, original1.line, original1.hash_code),
+            (original2.title, original2.line, original2.hash_code),
+            "surviving original differs between scan orders under uid_or_hash",
+        )
+
+    @override_settings(DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL})
+    def test_reimport_same_report_twice_keeps_the_same_surviving_original(self):
+        # BASELINE (re-scan stability): re-scanning the same content must not flip the
+        # original/duplicate assignment. Reimport the repro once, note the surviving
+        # active original, then reimport the SAME file again into the same test and
+        # assert the surviving original is unchanged (same finding id and content, still
+        # exactly one active original). No new duplicate chain is spun up on re-scan.
+        test, findings = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uid-rescan")
+        original_first = self._assert_single_surviving_original(findings)
+
+        admin = User.objects.get(username="admin")
+        with (get_unit_tests_scans_path("fortify") / "fortify_dedupe_uid_repro_scan1.fpr").open(encoding="utf-8") as scan:
+            reimporter = DefaultReImporter(
+                test=test, user=admin, lead=admin, scan_date=None, minimum_severity="Info",
+                active=True, verified=True, force_sync=True, scan_type="Fortify Scan",
+            )
+            reimporter.process_scan(scan)
+
+        findings_after = list(Finding.objects.filter(test=test).order_by("id"))
+        original_after = self._assert_single_surviving_original(findings_after)
+        self.assertEqual(
+            original_after.id, original_first.id,
+            "re-scanning the same report flipped which finding is the surviving original",
+        )
+        self.assertEqual(
+            (original_after.title, original_after.line, original_after.hash_code),
+            (original_first.title, original_first.line, original_first.hash_code),
+        )
 
     def test_identical_except_title_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different title (and reset status)
