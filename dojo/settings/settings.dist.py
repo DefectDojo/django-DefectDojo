@@ -288,6 +288,15 @@ env = environ.FileAwareEnv(
     DD_REQUESTS_TIMEOUT=(int, 30),
     # Dictates if v3 functionality will be enabled (on by default as of 3.0.0; set to False to revert to the legacy Endpoint model)
     DD_V3_FEATURE_LOCATIONS=(bool, True),
+    # API v3 (alpha) list pagination: threshold below which `count` is exact; above it the
+    # response reports the Postgres planner's row estimate (flagged count_exact=false). See §4.3.
+    DD_API_V3_COUNT_CAP=(int, 10000),
+    # API v3 (alpha) ?expand= guard: maximum number of expanded relation nodes across all paths. See §4.6.
+    DD_API_V3_EXPAND_BUDGET=(int, 10),
+    # API v3 (alpha) CSV export row cap: the whole filtered set is streamed as CSV; if the filtered
+    # count exceeds this cap the request is a 400 telling the client to narrow the filter (never a
+    # silent truncation). See §4.15.
+    DD_API_V3_EXPORT_MAX_ROWS=(int, 100000),
     # Dictates if v3 org/asset relabeling (+url routing) will be enabled (on by default as of 3.0.0; set to False to restore Product/Product Type labels and URLs)
     DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=(bool, True),
     # Shared cache backend (django.core.cache). When set, Django uses RedisCache
@@ -679,6 +688,27 @@ SHOW_A11Y_REQUIRED_FIELDS_NOTICE = env("DD_SHOW_A11Y_REQUIRED_FIELDS_NOTICE")
 
 # V3 Feature Flags
 V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
+
+# ------------------------------------------------------------------------------
+# API v3 (alpha)
+# ------------------------------------------------------------------------------
+# Logical name of the API is /api/v3/; during alpha the actual mount prefix carries the
+# instability marker (D1/§4.1). This is the single source of truth for the prefix and version
+# string -- do not hardcode them anywhere else.
+API_V3_URL_PREFIX = "api/v3-alpha"
+API_V3_VERSION = "3.0.0-alpha"
+API_V3_STATUS = "alpha"
+# Count/expand tuning (§4.3, §4.6); settings-overridable per the plan.
+API_V3_COUNT_CAP = env("DD_API_V3_COUNT_CAP")
+API_V3_EXPAND_BUDGET = env("DD_API_V3_EXPAND_BUDGET")
+# CSV export row cap (§4.15); settings-overridable per the plan.
+API_V3_EXPORT_MAX_ROWS = env("DD_API_V3_EXPORT_MAX_ROWS")
+# List pagination bounds (§4.3).
+API_V3_PAGE_LIMIT_DEFAULT = 25
+API_V3_PAGE_LIMIT_MAX = 250
+# v3 handles its own auth (token + session); exempt it from the UI login-redirect middleware
+# exactly as /api/v2/ is (so anonymous requests get a 401 problem+json, not a /login redirect).
+LOGIN_EXEMPT_URLS += (rf"^{URL_PREFIX}{API_V3_URL_PREFIX}/",)
 
 
 # ------------------------------------------------------------------------------
