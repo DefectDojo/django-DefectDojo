@@ -20,6 +20,7 @@ from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.location.models import Location
 from dojo.models import (
+    CICDInfrastructure,
     Development_Environment,
     Endpoint,
     Engagement,
@@ -1106,6 +1107,18 @@ class UserHasRegulationPermission(BaseDjangoModelPermission):
     # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L104
     # It looks like view permission was explicitly not supported, so I assume
     # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasCICDInfrastructurePermission(BaseDjangoModelPermission):
+    django_model = CICDInfrastructure
+    # Reads are open to any authenticated user (engagement views surface CICD
+    # references and need to render them). Writes require elevated privileges.
     request_method_permission_map = {
         "POST": "add",
         "PUT": "change",

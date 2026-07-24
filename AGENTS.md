@@ -54,6 +54,7 @@ Modules in various stages of reorganization:
 |--------|-----------|-------------|-----|------|--------|
 | **url** | In module | N/A | Done | Done | **Complete** |
 | **location** | In module | N/A | N/A | Done | **Complete** |
+| **cicd_infrastructure** | In module | N/A | Done | Done | **Complete** |
 | **product_type** | In module | N/A | Done | Done | **Complete** (#14970) |
 | **test** | In module | N/A | Done | Done | **Complete** (#14971) |
 | **engagement** | In module | In module | Done | Done | **Complete** (#14972) |

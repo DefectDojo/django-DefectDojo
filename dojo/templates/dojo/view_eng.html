@@ -891,32 +891,41 @@
                                         <td>{{ eng.branch_tag|notspecified }}</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Orchestration</strong></td>
-                                        <td>
-                                            {% if eng.orchestration_engine.id %}
-                                                <a href="{% url 'edit_tool_config' eng.orchestration_engine.id %}">{{ eng.orchestration_engine.name }}</a>
-                                            {% else %}
-                                                {{ eng.orchestration_engine.name|notspecified }}
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <td><strong>SCM Server</strong></td>
                                         <td>
-                                            {% if eng.source_code_management_server.id %}
-                                                <a href="{% url 'edit_tool_config' eng.source_code_management_server.id %}">{{ eng.source_code_management_server.name }}</a>
+                                            {% if eng.cicd_scm_server %}
+                                                <a href="{% url 'edit_cicd_infrastructure' eng.cicd_scm_server.id %}">{{ eng.cicd_scm_server.name }}</a>
+                                                {% if eng.cicd_scm_server.url %}
+                                                    <a target="_blank" href="{{ eng.cicd_scm_server.url }}" data-toggle="tooltip" title="{{ eng.cicd_scm_server.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                                {% endif %}
                                             {% else %}
-                                                {{ eng.source_code_management_server.name|notspecified }}
+                                                {{ eng.cicd_scm_server|notspecified }}
                                             {% endif %}
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><strong>Build Server</strong></td>
                                         <td>
-                                            {% if eng.build_server.id %}
-                                                <a href="{% url 'edit_tool_config' eng.build_server.id %}">{{ eng.build_server.name }}</a>
+                                            {% if eng.cicd_build_server %}
+                                                <a href="{% url 'edit_cicd_infrastructure' eng.cicd_build_server.id %}">{{ eng.cicd_build_server.name }}</a>
+                                                {% if eng.cicd_build_server.url %}
+                                                    <a target="_blank" href="{{ eng.cicd_build_server.url }}" data-toggle="tooltip" title="{{ eng.cicd_build_server.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                                {% endif %}
                                             {% else %}
-                                                {{ eng.build_server.name|notspecified }}
+                                                {{ eng.cicd_build_server|notspecified }}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Orchestration</strong></td>
+                                        <td>
+                                            {% if eng.cicd_orchestration_engine %}
+                                                <a href="{% url 'edit_cicd_infrastructure' eng.cicd_orchestration_engine.id %}">{{ eng.cicd_orchestration_engine.name }}</a>
+                                                {% if eng.cicd_orchestration_engine.url %}
+                                                    <a target="_blank" href="{{ eng.cicd_orchestration_engine.url }}" data-toggle="tooltip" title="{{ eng.cicd_orchestration_engine.url }}"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                                                {% endif %}
+                                            {% else %}
+                                                {{ eng.cicd_orchestration_engine|notspecified }}
                                             {% endif %}
                                         </td>
                                     </tr>
