@@ -63,6 +63,7 @@ from dojo.finding.ui.forms import (
     MergeFindings,
     ReviewFindingForm,
 )
+from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.forms import (
     GITHUBFindingForm,
     JIRAFindingForm,
@@ -81,7 +82,6 @@ from dojo.models import (
     Engagement,
     FileAccessToken,
     Finding,
-    Finding_Group,
     Finding_Template,
     GITHUB_Issue,
     GITHUB_PKey,
@@ -2707,7 +2707,12 @@ def _bulk_update_finding_groups(finds, form):
     if form.cleaned_data["finding_group_add"]:
         logger.debug("finding_group_add checked!")
         fgid = form.cleaned_data["add_to_finding_group_id"]
-        finding_group = Finding_Group.objects.get(id=fgid)
+        # Scope the target group to the ones the user may edit, the same way the
+        # submitted findings are scoped above. Without this a caller could pass a
+        # group id from a product they have no access to.
+        finding_group = get_object_or_404(
+            get_authorized_finding_groups("edit"), id=fgid,
+        )
         finding_group, added, skipped = finding_helper.add_to_finding_group(
             finding_group, finds,
         )
