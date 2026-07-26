@@ -1,3 +1,6 @@
+import io
+import json
+
 from dojo.models import Test
 from dojo.tools.kics.parser import KICSParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -10,6 +13,34 @@ class TestKICSParser(DojoTestCase):
             parser = KICSParser()
             findings = parser.get_findings(testfile, Test())
             self.assertEqual(0, len(findings))
+
+    def test_parse_critical_severity(self):
+        payload = {
+            "queries": [
+                {
+                    "query_name": "Critical IaC Issue",
+                    "query_url": "https://kics.io/",
+                    "severity": "CRITICAL",
+                    "platform": "Terraform",
+                    "category": "Access Control",
+                    "description": "Critical issue description.",
+                    "files": [
+                        {
+                            "file_name": "main.tf",
+                            "line": 7,
+                            "issue_type": "IncorrectValue",
+                            "expected_value": "secure value",
+                            "actual_value": "insecure value",
+                        },
+                    ],
+                },
+            ],
+        }
+        parser = KICSParser()
+        findings = parser.get_findings(io.StringIO(json.dumps(payload)), Test())
+
+        self.assertEqual(1, len(findings))
+        self.assertEqual("Critical", findings[0].severity)
 
     def test_parse_many_findings(self):
         with (get_unit_tests_scans_path("kics") / "many_findings.json").open(encoding="utf-8") as testfile:
