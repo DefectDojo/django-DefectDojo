@@ -32,6 +32,23 @@ class DependencyTrackParser:
             return "Informational"
         return None
 
+    def _derive_mitigation_from_affected_versions(self, dependency_track_finding):
+        affected_versions = dependency_track_finding["vulnerability"].get("affectedVersions")
+        if affected_versions is None or affected_versions == []:
+            return None
+        purl = dependency_track_finding.get("component", {}).get("purl")
+        if purl is None:
+            return None
+        clean_purl = purl.rsplit("@", 1)[0]
+        fixed_versions = [
+            entry.get("versionEndExcluding")
+            for entry in affected_versions
+            if entry.get("identityType") == "PURL" and entry.get("identity") == clean_purl
+        ]
+        if fixed_versions == []:
+            return None
+        return f"Upgrade to {fixed_versions[0]} or later"
+
     def _convert_dependency_track_finding_to_dojo_finding(self, dependency_track_finding, test):
         """
         Converts a Dependency Track finding to a DefectDojo finding
@@ -175,6 +192,7 @@ class DependencyTrackParser:
             test=test,
             cwe=cwe,
             description=vulnerability_description,
+            mitigation=self._derive_mitigation_from_affected_versions(dependency_track_finding),
             severity=vulnerability_severity,
             false_p=is_false_positive,
             component_name=component_name,

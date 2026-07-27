@@ -175,3 +175,10 @@ class TestDependencyTrackParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         self.assertIn("Audit Detail: Reviewed and confirmed vulnerable. Upgrade scheduled for next sprint.", findings[0].description)
+
+    def test_dependency_track_parser_finding_with_affected_versions(self):
+        with (get_unit_tests_scans_path("dependency_track") / "one_finding_with_affected_versions.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
