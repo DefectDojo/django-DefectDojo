@@ -18,7 +18,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0277_seed_deduplication_execution_mode"),
+        ("dojo", "0280_vulnerability_id_upper_index"),
     ]
 
     operations = [

@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0278_finding_processing_status"),
+        ("dojo", "0281_finding_processing_status"),
     ]
 
     operations = [
