@@ -205,6 +205,22 @@ With **Auto\-Map** enabled, a single Discover \+ Sync builds the complete Produc
 
 **A note on the reverse direction:** displaying DefectDojo findings and grades *inside* Backstage (on entity pages) is a natural follow\-on that would be built as a Backstage frontend plugin consuming the DefectDojo REST API — it is deliberately out of scope for this connector, which only pulls catalog data into DefectDojo.
 
+## **Black Duck**
+
+The Black Duck connector imports **software composition analysis (SCA)** findings from a Black Duck (Synopsys / Black Duck) Hub instance. DefectDojo discovers every project in the instance and creates a Record for each **project**; the findings for a project come from the vulnerable BOM components of its selected version.
+
+#### Prerequisites
+
+A Black Duck **API token** for a user that can see the projects you want to import. In Black Duck, open your user menu \> **My Access Tokens** \> **Create New Token**, grant it (at least) read access, and copy the token when it is shown — it is displayed only once. The connector exchanges this token for a short\-lived bearer on each sync; it is never stored in cleartext beyond the connector's secret field.
+
+#### Connector Mappings
+
+1. Enter your Black Duck hub URL in the **Location** field — for example `https://your-company.app.blackduck.com`.
+2. Enter the API token in the **Secret** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Black Duck project becomes a Record. By default the connector imports the project's **released** version (falling back to its first version); each vulnerable BOM component of that version becomes a finding, titled `{vulnerability} in {component}:{version}`.
+
 ## **Bitbucket**
 
 The Bitbucket connector is an **Asset Connector**: it enumerates the repositories in the Bitbucket Cloud workspaces you name and creates a DefectDojo Asset for each repository, grouped into Organizations by Bitbucket project. No findings are imported.
@@ -496,6 +512,30 @@ You will need a GitGuardian API key. We recommend a **Service Account token** (r
 
 Only **open** incidents (status `TRIGGERED` or `ASSIGNED`) are imported; incidents you resolve or ignore in GitGuardian are automatically mitigated in DefectDojo on the next sync. A confirmed-live secret (validity *valid*) is imported as a verified finding.
 
+## **GitHub**
+
+The GitHub connector is an **Asset Connector**: it enumerates the repositories your token can access and creates a DefectDojo Asset for each one, grouped into Organizations by GitHub owner (organization or user). No findings are imported.
+
+**Please note:** this connector imports your repository **inventory** only. To import GitHub security alerts — code scanning, Dependabot, and secret scanning — as findings, use the separate **GitHub Advanced Security** connector below. The two are independent and can be run together.
+
+#### Prerequisites
+
+The connector authenticates with a GitHub **personal access token** and reads only repository **metadata** (name, description, URL, and owner) — it does not access your code, issues, or security alerts. It imports every repository the token's account owns, collaborates on, or is an organization member of, so confirm the token's account can see the repositories you want to mirror. We recommend a dedicated service account.
+
+The token only needs read-only access to repository metadata:
+
+- A *fine-grained* token needs **Repository permissions → Metadata: Read-only**, granted to the repositories (or the whole organization) you want to import.
+- A *classic* token needs the **`repo`** scope to include private repositories (use **`public_repo`** if you only need public ones), plus **`read:org`** so organization-owned repositories resolve.
+
+Only GitHub.com (including GitHub Enterprise Cloud) is supported. GitHub Enterprise **Server** is not supported by this connector at this time.
+
+#### Connector Mappings
+
+1. Enter `https://api.github.com` in the **Location** field.
+2. Enter the personal access token in the **Secret** field.
+
+No organization or repository list needs to be entered — DefectDojo imports every repository the token can see. Each repository becomes a Record named after the repository, grouped by its GitHub **owner** (organization or user). If a repository is later deleted, or the token loses access to it, its mapped Record is flagged `MISSING` on the next Sync rather than removed — DefectDojo never silently deletes a Product.
+
 ## **GitHub Advanced Security**
 
 The GitHub Advanced Security connector imports **code scanning**, **Dependabot**, and **secret scanning** alerts from GitHub, as three separate finding types (`GitHub:CodeScanning`, `GitHub:Dependabot`, and `GitHub:SecretScanning`). DefectDojo discovers every non\-archived repository in the configured organization and creates a Record for each one.
@@ -715,7 +755,20 @@ Required token scopes for JFrog Xray:
 - **All Services**, as DefectDojo needs access to both access to both XRay and Artifactory services
 - **Manage Reports + Manage Resources** at a minimum.
 
-DefectDojo maps each Artifactory **repository** as a separate Record. On first Sync, DefectDojo generates a full historical vulnerability report; subsequent Syncs generate incremental (delta) reports covering new findings since the last Sync.
+By default, DefectDojo maps each Artifactory **repository** as a separate Record. Each Sync generates a complete vulnerability report per repository via Xray, so finding statuses in DefectDojo always reflect the current state of the repository.
+
+#### Artifact-Level Records
+
+Enabling the **Artifact-Level Records** toggle on the connection changes discovery to one level below the repository: every first-level entry under a repository root (for Docker repositories, each image; for generic repositories, each top-level file or folder) becomes its own Record. Each Sync still generates a single Xray report per repository — DefectDojo attributes each vulnerability to the artifacts it impacts, so the load on your JFrog instance does not increase.
+
+With Artifact-Level Records enabled:
+
+* Repositories remain as Records and become **parent assets**: they carry no findings themselves, but when the Asset Hierarchy feature is enabled, DefectDojo automatically relates each artifact asset to its repository asset with a `parent` relationship. Assets can then be filtered by parent/child, and findings roll up the hierarchy.
+* A vulnerability that impacts several artifacts is imported into each affected artifact's asset, so every asset shows the complete set of findings that affect it.
+* Hierarchy relationships created by the connector never overwrite relationships you created by hand. If an asset already has a parent you assigned, the connector leaves it alone.
+* The token additionally needs read access to the Artifactory storage API (included in the scopes above).
+
+**Switching an existing connection to Artifact-Level Records:** the toggle can be changed at any time. On the first Sync afterward, new artifact Records appear for mapping — enable **Auto Map** on the connection when flipping the toggle so findings move without a gap. The repository-level assets stop receiving findings and their previously imported findings are closed on their next Sync (the same findings are re-imported under the new artifact assets, with fresh status); notes and history on the old repository-level findings stay on the repository asset. Switching back reverses this: repository Records resume carrying findings (previously closed findings re-open as they re-match), and artifact Records are marked MISSING — their assets and findings are kept but stop updating, so you can archive them at your convenience.
 
 See the [JFrog Xray REST API documentation](https://jfrog.com/help/r/jfrog-rest-apis/xray-rest-apis) for more information.
 
@@ -832,6 +885,25 @@ Unlike the device\-based Microsoft Defender connector, no API permissions or adm
 5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each enabled Azure subscription becomes a Record. Findings are read through Azure Resource Graph, so they surface promptly once Defender for Cloud has scanned your resources — but the scans themselves run on Microsoft's schedule: container\-registry images are usually scanned within an hour of being pushed, while a VM's first agentless vulnerability scan can take several hours. A newly enabled subscription will legitimately Sync zero findings until its resources have been scanned.
+
+## **NeuVector**
+
+The NeuVector connector uses the [NeuVector](https://github.com/neuvector/neuvector) controller REST API to import container **image vulnerability scans**. DefectDojo discovers every image NeuVector has scanned and creates a Record for each, then imports that image's scan report as findings.
+
+#### Prerequisites
+
+You will need a NeuVector **username and password** for a controller account with permission to read scan results. The connector logs in with these credentials to obtain a session token; the password and token are never logged.
+
+#### Connector Mappings
+
+1. Enter your NeuVector controller URL in the **Location** field, including the REST API port — for example `https://neuvector.example.com:10443`.
+2. Enter the controller **Username** and **Password**.
+3. If your controller uses a self-signed certificate, set **Skip TLS Verification** to `true`.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+DefectDojo maps each scanned **image** to a Record and each **CVE** in its scan report to a finding. The severity comes from NeuVector's own rating, and the affected package and version, CVSSv3 score and vector, fix version (as mitigation) and reference link are carried over. Findings are de-duplicated on the image, CVE, package, version and severity.
+
+See the [NeuVector API documentation](https://open-docs.neuvector.com/automation/automation) for more information.
 
 ## **Nuclei (ProjectDiscovery Cloud)**
 

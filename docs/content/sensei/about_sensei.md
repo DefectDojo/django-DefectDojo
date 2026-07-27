@@ -7,9 +7,9 @@ weight: 1
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature and is currently in BETA.</span>
 
-**Sensei** is DefectDojo's AI-powered **scan-and-fix** capability for source code repositories. Connect a repository (through a **GitHub App** or a **GitLab** access token) and Sensei scans it, imports the results as DefectDojo findings, and then uses a large language model to **remediate those findings by opening pull/merge requests**, all without leaving DefectDojo.
+**Sensei** is DefectDojo's AI-powered **scan-and-fix** capability for source code repositories. Connect a repository (through a **GitHub App**, **GitLab**, **Bitbucket**, or **Azure DevOps**) and Sensei scans it, imports the results as DefectDojo findings, and then uses a large language model to **remediate those findings by opening pull/merge requests**, all without leaving DefectDojo.
 
-> **🔀 GitHub and GitLab:** Sensei supports both providers with the same scan-and-fix flow. On GitLab (gitlab.com or self-managed), a *pull request* is a **merge request** and the PR *status check* is a **commit status**. Connection differs by provider (see [Set up Sensei](/sensei/setup_sensei/)); everything after onboarding is identical.
+> **🔀 Multiple providers:** Sensei supports **GitHub** (github.com and GitHub Enterprise Server), **GitLab** (gitlab.com and self-managed), **Bitbucket** (Cloud and Server/Data Center), and **Azure DevOps**, all with the same scan-and-fix flow. Where this guide says *pull request*, GitLab uses a **merge request**; the PR *status check* is posted as a GitLab/Azure **commit status** or a Bitbucket **build status**. Connection differs by provider (see [Set up Sensei](/sensei/setup_sensei/)); everything after onboarding is identical.
 
 - **Scan-and-fix in one place:** repositories are scanned and remediated from the Sensei page and from your findings, using the same normalized, deduplicated finding data as the rest of DefectDojo.
 - **Preview-first:** Sensei stages fix *candidates* for review. Nothing is sent to an LLM and no pull request is opened until you approve, so there is no surprise cost or unexpected PR.
@@ -44,7 +44,7 @@ Sensei can remediate a finding in three ways:
 ## Requirements
 
 - A **DefectDojo Pro** license that includes the **Sensei** feature.
-- A connected source-control provider (see [Set up Sensei](/sensei/setup_sensei/)): either a **GitHub App** installed on the organization/account that owns the repositories, or a **GitLab** project/group access token (gitlab.com or self-managed).
+- A connected source-control provider (see [Set up Sensei](/sensei/setup_sensei/)): a **GitHub App** (github.com or Enterprise Server), a **GitLab** project/group access token (gitlab.com or self-managed), a **Bitbucket** connection (Cloud or Server/Data Center — OAuth, API token, or access token), or an **Azure DevOps** Personal Access Token.
 - To **configure** Sensei (connect apps, onboard repositories): a global **Maintainer** or **Owner** role.
 - To **trigger a fix** on a finding: at least **Writer** access to that finding's product.
 

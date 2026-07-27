@@ -26,11 +26,22 @@ Use the search box to filter the list by feature name or description.
 
 1. Find the feature in the list.
 2. Click its toggle.
-3. The change takes effect immediately. You do not need to restart anything, and other users pick the change up on their next page load.
+3. The change takes effect immediately. Other users pick the change up on their next page load.
 
 Some features show a confirmation dialog before the change is applied. This happens when enabling a feature that carries a warning (for example one that requires a restart or may affect existing data), or one that cannot be turned back off.
 
-Turning a feature off is normally just the reverse of turning it on. The exceptions are called out in the next section.
+Turning a feature off is normally just the reverse of turning it on. The exceptions are called out in [When a toggle is locked](#when-a-toggle-is-locked).
+
+### Organization / Asset Relabeling
+
+**Organization / Asset Relabeling** renames "Product Type" to "Organization" and "Product" to "Asset". It is on by default and toggles from this page like any other feature, but it is worth knowing which parts of DefectDojo it governs:
+
+* The **Pro UI** follows this toggle. The new labels appear on your next page load.
+* The **Classic UI** pages, their URLs, and generated reports take their naming from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting (also on by default), which is read when DefectDojo starts. This toggle does not change them, and restarting does not make it change them.
+
+The stored toggle was seeded from that deployment setting, so the two agree until you change one of them. If you turn relabeling off here and you also use the Classic UI, set `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=False` on your deployment and restart so both surfaces match. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), contact [DefectDojo Support](mailto:support@defectdojo.com) to have the deployment setting changed.
+
+The feature carries a **Restart Recommended** tag on the Feature Flags page for this reason: the naming used outside the Pro UI is fixed when the process starts. Relabeling is cosmetic either way. Database models, field names, and API endpoints are unchanged, so existing automation keeps working. See [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/).
 
 ## When a toggle is locked
 
@@ -58,7 +69,7 @@ Cloud instances also have access to features that are not offered on-premise. Se
 
 On [DefectDojo Pro (On-Premise)](/get_started/pro/onprem/), most features work exactly as they do on Cloud: open **Settings > Feature Flags** and toggle them.
 
-A small number of features are read from your deployment configuration instead — they change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them, for example `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`.
+A small number of features are read from your deployment configuration instead. They change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them, for example `DD_V3_FEATURE_LOCATIONS` for [Locations](/asset_modelling/locations/pro__locations_overview/).
 
 Because these features require a restart, and some of them cannot be reversed once enabled, check the feature's own documentation before changing one. Several are best enabled with help from [DefectDojo Support](mailto:support@defectdojo.com).
 
