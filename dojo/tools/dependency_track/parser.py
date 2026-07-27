@@ -1,8 +1,10 @@
+import contextlib
 import json
 import logging
 
 from dateutil import parser
 from django.conf import settings
+from packaging.version import InvalidVersion, Version
 
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
@@ -32,22 +34,58 @@ class DependencyTrackParser:
             return "Informational"
         return None
 
+    def _component_version_in_range(self, component_version, affected_range):
+        try:
+            version_start_including = affected_range.get("versionStartIncluding")
+            if version_start_including is not None and component_version < Version(version_start_including):
+                return False
+            version_start_excluding = affected_range.get("versionStartExcluding")
+            if version_start_excluding is not None and component_version <= Version(version_start_excluding):
+                return False
+            version_end_including = affected_range.get("versionEndIncluding")
+            if version_end_including is not None and component_version > Version(version_end_including):
+                return False
+            version_end_excluding = affected_range.get("versionEndExcluding")
+            if version_end_excluding is not None and component_version >= Version(version_end_excluding):
+                return False
+        except InvalidVersion:
+            return False
+        return True
+
     def _derive_mitigation_from_affected_versions(self, dependency_track_finding):
         affected_versions = dependency_track_finding["vulnerability"].get("affectedVersions")
         if affected_versions is None or affected_versions == []:
             return None
-        purl = dependency_track_finding.get("component", {}).get("purl")
+        component = dependency_track_finding.get("component", {})
+        purl = component.get("purl")
+        component_version = None
+        component_version_string = component.get("version")
+        if component_version_string is not None:
+            with contextlib.suppress(InvalidVersion):
+                component_version = Version(component_version_string)
         if purl is None:
             return None
         clean_purl = purl.rsplit("@", 1)[0]
-        fixed_versions = [
-            entry.get("versionEndExcluding")
+        filtered_affected_ranges = [
+            entry
             for entry in affected_versions
             if entry.get("identityType") == "PURL" and entry.get("identity") == clean_purl
         ]
-        if fixed_versions == []:
+        fixed_version = None
+        if filtered_affected_ranges is None or filtered_affected_ranges == []:
             return None
-        return f"Upgrade to {fixed_versions[0]} or later"
+        if len(filtered_affected_ranges) == 1:
+            fixed_version = filtered_affected_ranges[0].get("versionEndExcluding")
+        else:
+            for affected_range in filtered_affected_ranges:
+                if component_version is None:
+                    continue
+                if self._component_version_in_range(component_version, affected_range):
+                    fixed_version = affected_range.get("versionEndExcluding")
+                    break
+        if fixed_version is None:
+            return None
+        return f"Upgrade to {fixed_version} or later"
 
     def _convert_dependency_track_finding_to_dojo_finding(self, dependency_track_finding, test):
         """

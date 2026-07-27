@@ -182,3 +182,13 @@ class TestDependencyTrackParser(DojoTestCase):
             findings = parser.get_findings(testfile, Test())
         self.assertEqual(1, len(findings))
         self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_picks_range_containing_component_version(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_multiple_affected_ranges.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The installed version 2.14.1 falls in the [2.0.0, 2.15.0) range, so the fix is 2.15.0,
+        # not the 3.2.0 from the unrelated [3.0.0, 3.2.0) range.
+        self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
+        self.assertNotIn("3.2.0", findings[0].mitigation)
