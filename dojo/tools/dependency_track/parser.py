@@ -52,6 +52,15 @@ class DependencyTrackParser:
             return False
         return True
 
+    def _build_message(self, chosen_range):
+        version_end_excluding = chosen_range.get("versionEndExcluding")
+        if version_end_excluding is not None:
+            return f"Upgrade to {version_end_excluding} or later"
+        version_end_including = chosen_range.get("versionEndIncluding")
+        if version_end_including is not None:
+            return f"Upgrade to a version after {version_end_including}"
+        return None
+
     def _derive_mitigation_from_affected_versions(self, dependency_track_finding):
         affected_versions = dependency_track_finding["vulnerability"].get("affectedVersions")
         if affected_versions is None or affected_versions == []:
@@ -71,21 +80,21 @@ class DependencyTrackParser:
             for entry in affected_versions
             if entry.get("identityType") == "PURL" and entry.get("identity") == clean_purl
         ]
-        fixed_version = None
+        chosen_range = None
         if filtered_affected_ranges is None or filtered_affected_ranges == []:
             return None
         if len(filtered_affected_ranges) == 1:
-            fixed_version = filtered_affected_ranges[0].get("versionEndExcluding")
+            chosen_range = filtered_affected_ranges[0]
         else:
             for affected_range in filtered_affected_ranges:
                 if component_version is None:
                     continue
                 if self._component_version_in_range(component_version, affected_range):
-                    fixed_version = affected_range.get("versionEndExcluding")
+                    chosen_range = affected_range
                     break
-        if fixed_version is None:
+        if chosen_range is None:
             return None
-        return f"Upgrade to {fixed_version} or later"
+        return self._build_message(chosen_range)
 
     def _convert_dependency_track_finding_to_dojo_finding(self, dependency_track_finding, test):
         """

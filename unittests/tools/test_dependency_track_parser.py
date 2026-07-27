@@ -192,3 +192,12 @@ class TestDependencyTrackParser(DojoTestCase):
         # not the 3.2.0 from the unrelated [3.0.0, 3.2.0) range.
         self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
         self.assertNotIn("3.2.0", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_with_end_including_range(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_affected_range_end_including.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The range gives only versionEndIncluding (1.5.0 is the last affected version), so the exact
+        # fix cannot be named; the mitigation points at a version after it.
+        self.assertIn("Upgrade to a version after 1.5.0", findings[0].mitigation)
