@@ -18,6 +18,7 @@ Supported Integrations:
 - GitHub
 - GitLab Boards
 - Jira
+- Linear
 - PagerDuty
 - ServiceDesk Plus
 - ServiceNow
@@ -57,6 +58,19 @@ Findings can also be pushed automatically, with the **Issue Tracker Assignment**
 - **Automatically Update Existing Link**: When Findings or Finding Groups are **updated** in the assigned Product or Engagement, automatically push the object to the Issue Tracker if an existing link has already been created manually.
 - **Automatically Link New and Update Existing Link**: When Findings or Finding Groups are created **or** updated in the assigned Product or Engagement, automatically push the object to the Issue Tracker.
 
+#### Push Filters
+
+Each Issue Tracker Assignment can optionally narrow which Findings are pushed **automatically**:
+
+- **Minimum Severity**: only automatically create tickets for Findings at or above the selected severity. Leave it blank to include every severity.
+- **Active findings only**: only automatically create tickets for active Findings, skipping ones that are already mitigated, false positive, or risk accepted when the assignment first sees them.
+
+These filters apply to automatic **creation** only. Updates to a Finding that already has a linked ticket are always sent, so status changes (including closures) continue to propagate. A manual **Push to Integrators** always ignores the filters. Leaving both at their defaults preserves the original behavior of pushing every Finding.
+
+#### Assigning multiple Products
+
+An Issue Tracker Assignment targets a single Product or Engagement. To cover several assets, create one Assignment per Product (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
+
 ## Issue Tracker Ticket Representation
 
 Issue Tracker Tickets are represented by a series of icons under the "Integrator Tickets" column when viewing and listing
@@ -83,6 +97,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [GitHub](/issue_tracking/pro_integration/integrations_toolreference/#github)
 - [GitLab Boards](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)
 - [Jira](/issue_tracking/pro_integration/integrations_toolreference/#jira)
+- [Linear](/issue_tracking/pro_integration/integrations_toolreference/#linear)
 - [PagerDuty](/issue_tracking/pro_integration/integrations_toolreference/#pagerduty)
 - [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)
 - [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)

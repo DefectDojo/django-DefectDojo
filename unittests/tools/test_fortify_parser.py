@@ -1,6 +1,6 @@
 
 from dojo.models import Test
-from dojo.tools.fortify.parser import FortifyParser
+from dojo.tools.fortify.parser import FortifyParser, FortifyParserV2
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 
@@ -189,3 +189,65 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(13, finding.line)
+
+
+class TestFortifyV2Parser(DojoTestCase):
+
+    """
+    Regression: the v1 FPR parser stores the snippet context StartLine (Fortify's
+    reported line minus up to 3 context lines) instead of the reported SourceLocation
+    line, which breaks file_path + line deduplication against other tools. The
+    "Fortify Scan v2" scan type stores the reported line; v1 is intentionally left
+    unchanged so existing hashcodes are unaffected.
+    """
+
+    def test_fortify_v2_scan_type(self):
+        self.assertEqual(["Fortify Scan v2"], FortifyParserV2().get_scan_types())
+
+    def test_fortify_v2_fpr_uses_true_source_location_line(self):
+        with (get_unit_tests_scans_path("fortify") / "many_findings.fpr").open(encoding="utf-8") as testfile:
+            parser = FortifyParserV2()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(61, len(findings))
+            self.validate_locations(findings)
+            finding = findings[0]
+            # control: the description records Fortify's reported line verbatim
+            self.assertIn("**SourceLocationLine:** 222", finding.description)
+            # the stored line must match the reported line, not the snippet start (219)
+            self.assertEqual(
+                222, finding.line,
+                msg=f"expected line=222 (SourceLocationLine), stored line={finding.line}",
+            )
+            self.assertEqual("Cross-Site Request Forgery - category.html: 222 (114E5A67-3446-4DD5-B578-D0E6FDBB304E)", finding.title)
+
+    def test_fortify_v2_fpr_clamped_snippet(self):
+        with (get_unit_tests_scans_path("fortify") / "hello_world.fpr").open(encoding="utf-8") as testfile:
+            parser = FortifyParserV2()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(4, len(findings))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertIn("**SourceLocationLine:** 8", finding.description)
+                self.assertEqual(
+                    8, finding.line,
+                    msg=f"expected line=8 (SourceLocationLine), stored line={finding.line}",
+                )
+            with self.subTest(i=2):
+                # near the top of a file the snippet start clamps to 1, so the v1
+                # offset is not even constant: reported line 3, snippet start 1
+                finding = findings[2]
+                self.assertIn("**SourceLocationLine:** 3", finding.description)
+                self.assertEqual(
+                    3, finding.line,
+                    msg=f"expected line=3 (SourceLocationLine), stored line={finding.line}",
+                )
+
+    def test_fortify_v2_xml_unchanged_from_v1(self):
+        # the XML report path already uses the reported line in v1; v2 must match
+        with (get_unit_tests_scans_path("fortify") / "fortify_many_findings.xml").open(encoding="utf-8") as testfile:
+            parser = FortifyParserV2()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(324, len(findings))
+            finding = findings[0]
+            self.assertEqual("src/main/java/org/joychou/controller/XXE.java", finding.file_path)
+            self.assertEqual(81, finding.line)

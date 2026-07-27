@@ -5,6 +5,9 @@ toc_hide: true
 You can either import the findings in .xml or in .fpr file format. </br>
 If you import a .fpr file, the parser will look for the file 'audit.fvdl' and analyze it. An extracted example can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/fortify/audit.fvdl). The optional `audit.xml` is also parsed. All vulnerabilities marked with `suppressed="true"` will be marked as false positive.
 
+### Fortify Scan v2
+The `Fortify Scan v2` scan type behaves identically to `Fortify Scan` except for .fpr imports: findings store the line number Fortify reports for the vulnerability (the FVDL `SourceLocation` line) instead of the first line of the surrounding code snippet, which includes up to 3 leading context lines. Use `Fortify Scan v2` when deduplicating on file path + line number, especially across tools. The two scan types produce different hashcodes for .fpr findings, so keep using `Fortify Scan` on existing products if you want to preserve deduplication history.
+
 ### Sample Scan Data
 Sample Fortify scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/fortify).
 

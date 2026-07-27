@@ -33,7 +33,8 @@ DefectDojo Pro uses a role-based system with Members, Groups, and Global Roles. 
 * [Set a User's Permissions](./set_user_permissions/) — assigning Roles, Global Roles, and Configuration Permissions
 * [Share permissions: User Groups](./create_user_group/) — assigning permissions to many users at once
 * [Set Permissions in Pro](./pro_permissions_overhaul/) — Pro-specific UI for managing Members and Permissions
-* [Action permission charts](./user_permission_chart/) — full reference of every permission for every Role
+* [Action permission charts](./user_permission_chart/) — full reference of every permission for every built-in Role
+* [Custom RBAC Roles](./pro__custom_rbac_roles/) — build your own roles by choosing individual permissions
 * [Single Sign-On](/admin/sso/) — SAML and OAuth setup for Pro
 
 ## Migrating between editions
