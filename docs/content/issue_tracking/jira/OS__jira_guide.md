@@ -256,7 +256,7 @@ Your Jira Webhook is located on the System Settings form under **Jira Integratio
 
 Note that you do not need to create a Secret within Jira to use this webhook. The Secret is built into DefectDojo's URL, so simply adding the complete URL to the Jira Webhook form is sufficient.
 
-DefectDojo's Jira Webhook only accepts requests from the Jira API.
+Incoming webhook requests are authenticated by the secret in that URL, so treat the full URL as a credential and keep it private.
 
 #### Testing the Webhook
 
