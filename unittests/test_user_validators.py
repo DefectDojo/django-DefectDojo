@@ -34,7 +34,7 @@ class TestUserValidators(DojoTestCase):
         uppercase_character_required=False,
         non_common_password_required=False,
     ):
-        self.system_settings = System_Settings.objects.get()
+        self.system_settings = System_Settings.objects.get(no_cache=True)
         self.system_settings.minimum_password_length = minimum_password_length
         self.system_settings.maximum_password_length = maximum_password_length
         self.system_settings.number_character_required = number_character_required

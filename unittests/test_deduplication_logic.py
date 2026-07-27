@@ -1894,7 +1894,7 @@ class TestDuplicationLogic(DojoTestCase):
         return test_new, eng_new
 
     def enable_dedupe(self, *, enable=True):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.enable_deduplication = enable
         system_settings.save()
 

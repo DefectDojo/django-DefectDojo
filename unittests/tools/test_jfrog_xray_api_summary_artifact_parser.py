@@ -62,6 +62,18 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2021-42385", finding.unsaved_vulnerability_ids[0])
 
+    def test_parse_file_with_multi_cwe(self):
+        testfile = (
+            get_unit_tests_scans_path("jfrog_xray_api_summary_artifact") / "multi_cwe_fabricated.json").open(encoding="utf-8",
+        )
+        parser = JFrogXrayApiSummaryArtifactParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual(787, finding.cwe)
+        self.assertEqual([787, 119], finding.unsaved_cwes)
+
     def test_parse_file_with_malformed_cvssv3_score(self):
         testfile = (
             get_unit_tests_scans_path("jfrog_xray_api_summary_artifact") / "malformed_cvssv3.json").open(encoding="utf-8",

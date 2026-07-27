@@ -159,6 +159,12 @@ def is_keep_in_sync_with_jira(obj: Finding | Finding_Group, prefetched_jira_inst
     return False
 
 
+def is_delete_sync_allowed(finding, push_to_jira=None):
+    if push_to_jira is not None:
+        return is_push_to_jira(finding, push_to_jira_parameter=push_to_jira)
+    return bool(is_keep_in_sync_with_jira(finding) or is_push_all_issues(finding))
+
+
 # checks if a finding can be pushed to JIRA
 # optionally provides a form with the new data for the finding
 # any finding that already has a JIRA issue can be pushed again to JIRA
@@ -1286,6 +1292,86 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False, jira_pro
     return updated
 
 
+def close_jira_issue_for_deleted_finding(finding, push_to_jira=None) -> tuple[bool | None, str]:
+    logger.debug("queueing linked Jira issue close for deleted finding %d", finding.id)
+
+    if not is_jira_enabled():
+        return False, "JIRA integration is not enabled."
+
+    if not finding.has_jira_issue:
+        return False, f"Finding {finding.id} has no linked JIRA issue."
+
+    if not is_delete_sync_allowed(finding, push_to_jira=push_to_jira):
+        return False, f"Finding {finding.id} is not configured to sync deleted findings to JIRA."
+
+    if not is_jira_configured_and_enabled(finding):
+        message = (
+            f"Finding {finding.id} cannot close its linked JIRA issue "
+            "because JIRA is not configured or enabled."
+        )
+        logger.debug(message)
+        return False, message
+
+    jira_issue = get_jira_issue(finding)
+    if not jira_issue:
+        return False, f"Finding {finding.id} has no local JIRA issue record."
+
+    jira_project = get_jira_project(jira_issue)
+    if not jira_project or not jira_project.jira_instance:
+        return False, f"Finding {finding.id} has no JIRA instance for its linked issue."
+
+    dojo_dispatch_task(
+        close_deleted_finding_jira_issue,
+        jira_issue.jira_id,
+        jira_project.jira_instance.id,
+        finding.id,
+    )
+    return True, f"Jira issue {jira_issue.jira_key} close queued."
+
+
+@app.task
+def close_deleted_finding_jira_issue(jira_id, jira_instance_id, finding_id, **_kwargs) -> tuple[bool | None, str]:
+    jira_instance = get_object_or_none(JIRA_Instance, id=jira_instance_id)
+    if not jira_instance:
+        message = f"JIRA instance {jira_instance_id} is not available for issue {jira_id}."
+        logger.warning(message)
+        return False, message
+
+    try:
+        JIRAError.log_to_tempfile = False
+        jira = get_jira_connection(jira_instance)
+        if not jira:
+            message = f"JIRA connection could not be established for issue {jira_id}."
+            logger.warning(message)
+            return False, message
+        issue = jira.issue(jira_id)
+    except Exception as e:
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
+        logger.exception(message)
+        return False, message
+
+    if not issue_from_jira_is_active(issue):
+        logger.debug("Jira issue %s is already resolved", jira_id)
+        return False, f"Jira issue {jira_id} is already resolved."
+
+    updated = jira_transition(jira, issue, jira_instance.close_status_key)
+    if updated:
+        jira.add_comment(
+            jira_id,
+            f"DefectDojo finding {finding_id} was deleted. This Jira issue was closed automatically.",
+        )
+        return True, f"Jira issue {jira_id} closed successfully."
+
+    return updated, f"Jira issue {jira_id} was not closed."
+
+
+def reassign_jira_issue_to_finding(jira_issue, finding):
+    jira_issue.finding = finding
+    jira_issue.finding_group = None
+    jira_issue.engagement = None
+    jira_issue.save(update_fields=["finding", "finding_group", "engagement"])
+
+
 # gets the metadata for the provided issue type in the provided jira project
 def get_issuetype_fields(
         jira,
@@ -1675,6 +1761,26 @@ def add_simple_jira_comment(jira_instance, jira_issue, comment):
         jira.add_comment(
             jira_issue.jira_id, comment,
         )
+    except Exception as e:
+        log_jira_generic_alert("Jira Add Comment Error", str(e))
+        return False
+    return True
+
+
+def add_simple_jira_comment_async(jira_id, jira_instance_id, comment):
+    return dojo_dispatch_task(add_simple_jira_comment_by_id, jira_id, jira_instance_id, comment)
+
+
+@app.task
+def add_simple_jira_comment_by_id(jira_id, jira_instance_id, comment, **_kwargs):
+    jira_instance = get_object_or_none(JIRA_Instance, id=jira_instance_id)
+    if not jira_instance:
+        logger.warning("JIRA instance %s is not available for issue %s", jira_instance_id, jira_id)
+        return False
+
+    try:
+        jira = get_jira_connection(jira_instance)
+        jira.add_comment(jira_id, comment)
     except Exception as e:
         log_jira_generic_alert("Jira Add Comment Error", str(e))
         return False

@@ -47,6 +47,15 @@ def add_simple_comment(jira_instance, jira_issue, comment):
     return _get_helper().add_simple_jira_comment(jira_instance, jira_issue, comment)
 
 
+def add_simple_comment_async(jira_id, jira_instance_id, comment):
+    """
+    Add a simple text comment to a Jira issue from durable IDs.
+
+    Wraps: jira_helper.add_simple_jira_comment_async
+    """
+    return _get_helper().add_simple_jira_comment_async(jira_id, jira_instance_id, comment)
+
+
 def add_comment_internal(jira_issue_id, note_id, *, force_push=False, **kwargs):
     """
     Internal add comment by IDs.
@@ -135,6 +144,24 @@ def push_status(obj, jira_instance, jira, issue, *, save=False):
     Wraps: jira_helper.push_status_to_jira
     """
     return _get_helper().push_status_to_jira(obj, jira_instance, jira, issue, save=save)
+
+
+def close_issue_for_deleted_finding(finding, push_to_jira=None):
+    """
+    Close the linked Jira issue before a finding is deleted.
+
+    Wraps: jira_helper.close_jira_issue_for_deleted_finding
+    """
+    return _get_helper().close_jira_issue_for_deleted_finding(finding, push_to_jira=push_to_jira)
+
+
+def reassign_issue_to_finding(jira_issue, finding):
+    """
+    Reassign a local Jira issue record to another finding.
+
+    Wraps: jira_helper.reassign_jira_issue_to_finding
+    """
+    return _get_helper().reassign_jira_issue_to_finding(jira_issue, finding)
 
 
 def update_issue(obj, *args, **kwargs):
@@ -337,6 +364,15 @@ def is_keep_in_sync(obj, prefetched_jira_instance=None):
     Wraps: jira_helper.is_keep_in_sync_with_jira
     """
     return _get_helper().is_keep_in_sync_with_jira(obj, prefetched_jira_instance=prefetched_jira_instance)
+
+
+def is_delete_sync_allowed(finding, push_to_jira=None):
+    """
+    Check if deleting a finding should update its linked Jira issue.
+
+    Wraps: jira_helper.is_delete_sync_allowed
+    """
+    return _get_helper().is_delete_sync_allowed(finding, push_to_jira=push_to_jira)
 
 
 def is_push(instance, push_to_jira_parameter=None):

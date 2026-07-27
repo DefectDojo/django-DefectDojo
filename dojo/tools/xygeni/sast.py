@@ -1,7 +1,10 @@
 """Parse Xygeni SAST reports into DefectDojo Findings."""
 
+from django.conf import settings
+
 from dojo.models import Finding
-from dojo.tools.xygeni._common import map_severity, parse_cwe
+from dojo.tools.locations import LocationData
+from dojo.tools.xygeni._common import map_severity, parse_cwes
 
 
 def parse_sast(data, test):
@@ -25,6 +28,10 @@ def _build_finding(vuln, test):
     if code_flow_text:
         description_parts.append(code_flow_text)
 
+    primary_cwe, all_cwes = parse_cwes(
+        cwes=vuln.get("cwes"), cwe=vuln.get("cwe"), tags=vuln.get("tags"),
+    )
+
     finding = Finding(
         test=test,
         title=str(vuln.get("detector") or "Xygeni SAST finding"),
@@ -32,7 +39,7 @@ def _build_finding(vuln, test):
         severity=map_severity(vuln.get("severity")),
         file_path=file_path,
         line=line,
-        cwe=parse_cwe(cwes=vuln.get("cwes"), cwe=vuln.get("cwe"), tags=vuln.get("tags")),
+        cwe=primary_cwe,
         static_finding=True,
         dynamic_finding=False,
         # ``uniqueHash`` is Xygeni's identity for a finding across scans. For SAST it is
@@ -44,7 +51,22 @@ def _build_finding(vuln, test):
         vuln_id_from_tool=vuln.get("detector"),
     )
 
+    if all_cwes:
+        finding.unsaved_cwes = all_cwes
+
     _apply_code_flow_fields(finding, vuln.get("codeFlows") or [])
+
+    if settings.V3_FEATURE_LOCATIONS and file_path:
+        finding.unsaved_locations.append(
+            LocationData.code(
+                file_path=file_path,
+                line=line,
+                snippet=code or "",
+                source_object=finding.sast_source_object or "",
+                sink_object=finding.sast_sink_object or "",
+            ),
+        )
+
     return finding
 
 

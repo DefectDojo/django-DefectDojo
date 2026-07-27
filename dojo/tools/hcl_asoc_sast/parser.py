@@ -1,8 +1,10 @@
 from xml.dom import NamespaceErr
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class HCLASoCSASTParser:
@@ -146,6 +148,10 @@ class HCLASoCSASTParser:
                     dynamic_finding=False,
                     static_finding=True,
                 )
+                if settings.V3_FEATURE_LOCATIONS and location:
+                    prepared_finding.unsaved_locations.append(
+                        LocationData.code(file_path=location, line=line),
+                    )
                 findings.append(prepared_finding)
             return findings
         return findings

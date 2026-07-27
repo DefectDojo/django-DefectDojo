@@ -1,0 +1,46 @@
+{
+  "findings": [
+    {
+      "id": 1234567,
+      "match_based_id": "0f8c79a6f7e0ff2f908ff5bc366ae1548465069bae8892088051e1c3b4b12c6b8df37d5bcbb181eb868aa79f81f239d14bf2336d552786ab8ccdc7279adf07a6_1",
+      "repository": {
+        "name": "semgrep",
+        "url": "https://github.com/semgrep/semgrep"
+      },
+      "triage_state": "untriaged",
+      "state": "unresolved",
+      "status": "open",
+      "severity": "medium",
+      "confidence": "medium",
+      "categories": [
+        "security"
+      ],
+      "created_at": "2020-11-18T23:28:12.391807Z",
+      "rule_name": "typescript.react.security.audit.react-no-refs.react-no-refs",
+      "rule_message": "`ref` usage found.\n",
+      "location": {
+        "file_path": "frontend/src/corpComponents/Code.tsx",
+        "line": 120,
+        "column": 8,
+        "end_line": 124,
+        "end_column": 16
+      },
+      "rule": {
+        "name": "html.security.plaintext-http-link.plaintext-http-link",
+        "message": "This link points to a plaintext HTTP URL.",
+        "confidence": "high",
+        "category": "security",
+        "vulnerability_classes": [
+          "Mishandled Sensitive Information"
+        ],
+        "cwe_names": [
+          "CWE-319: Cleartext Transmission of Sensitive Information",
+          "CWE-311: Missing Encryption of Sensitive Data"
+        ],
+        "owasp_names": [
+          "A03:2017 - Sensitive Data Exposure"
+        ]
+      }
+    }
+  ]
+}

@@ -16,9 +16,11 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_is_superuser_or_global_owner,
 )
+from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.location.models import Location
 from dojo.models import (
+    CICDInfrastructure,
     Development_Environment,
     Endpoint,
     Engagement,
@@ -401,6 +403,15 @@ class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasEngagementFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
+    }
+
+
 class UserHasEngagementNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": "view",
@@ -459,6 +470,15 @@ class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasFindingFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -778,6 +798,15 @@ class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasTestFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
+    }
+
+
 class UserHasTestNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": "view",
@@ -1078,6 +1107,18 @@ class UserHasRegulationPermission(BaseDjangoModelPermission):
     # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L104
     # It looks like view permission was explicitly not supported, so I assume
     # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasCICDInfrastructurePermission(BaseDjangoModelPermission):
+    django_model = CICDInfrastructure
+    # Reads are open to any authenticated user (engagement views surface CICD
+    # references and need to render them). Writes require elevated privileges.
     request_method_permission_map = {
         "POST": "add",
         "PUT": "change",

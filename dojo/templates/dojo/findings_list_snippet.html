@@ -529,6 +529,12 @@
                                                                     {% csrf_token %}
                                                                     <input type="hidden" label="return_url" aria-label="return_url" name="return_url" value="{{ request.get_full_path }}"/>
                                                                     <input type="hidden" label="id" aria-label="id" name="id" value="{{ finding.id }}"/>
+                                                                    {% if system_settings.enable_jira and finding.has_jira_issue %}
+                                                                        <label class="small">
+                                                                            <input type="checkbox" name="push_to_jira" value="true"/>
+                                                                            {% trans "Push deletion to JIRA" %}
+                                                                        </label>
+                                                                    {% endif %}
                                                                 </form>
                                                                 <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#" role="button" aria-label="Delete finding {{ finding.id }}">
                                                                     <i class="fa-solid fa-trash"></i> {% trans "Delete" %}

@@ -252,7 +252,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
     def test_expiration_handler(self):
         ra1, ra2, ra3 = self.create_multiple_ras()
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.risk_acceptance_notify_before_expiration = 10
         system_settings.save()
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
