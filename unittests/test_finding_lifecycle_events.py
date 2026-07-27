@@ -9,6 +9,7 @@ from django.test import override_settings
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
 
+from dojo.finding.deduplication import set_duplicate
 from dojo.finding.lifecycle import purge_finding_lifecycle_events
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
@@ -164,7 +165,6 @@ class TestFindingLifecycleEvents(DojoAPITestCase):
 
     def test_rededupe_does_not_append_duplicate_marked_duplicate_event(self):
         """Re-running dedup on a finding that is already a duplicate of the same original records no new event."""
-        from dojo.finding.deduplication import set_duplicate
         system_settings = System_Settings.objects.get()
         system_settings.enable_deduplication = True
         system_settings.save()
