@@ -9,6 +9,7 @@ import requests
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
+from django.core.cache import cache
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -594,6 +595,52 @@ def get_jira_comments(finding):
     return None
 
 
+def _jira_config_failure_ttl():
+    """Seconds to remember a project/issue-type level Jira failure. 0 disables the behavior."""
+    return getattr(settings, "JIRA_CONFIG_FAILURE_CACHE_TTL", 300)
+
+
+def _jira_config_failure_cache_key(jira_instance, project_key, issuetype_name):
+    return f"jira_config_failure:{jira_instance.id}:{project_key}:{issuetype_name}"
+
+
+def note_jira_config_failure(jira_instance, project_key, issuetype_name, exception, message):
+    """
+    Remember that this Jira project / issue type is currently unusable.
+
+    A misconfiguration (project key renamed or archived, Create Issue permission revoked,
+    issue type dropped from the project's scheme) fails identically for every object in an
+    import. Without this, a single import repeats the same doomed metadata call, error log
+    and user notification once per finding - hundreds of times, for minutes, with no chance
+    of a different outcome.
+
+    Only failures that cannot resolve themselves inside the cache window are recorded, so a
+    timeout or a Jira-side 5xx still lets the next object retry normally. A status of None is
+    what DefectDojo itself raises when Jira returns no matching project or issue type.
+    """
+    ttl = _jira_config_failure_ttl()
+    if not ttl:
+        return
+
+    if exception is not None and getattr(exception, "status_code", None) not in {None, 400, 401, 403, 404}:
+        return
+
+    cache.set(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name), message, ttl)
+
+
+def get_jira_config_failure(jira_instance, project_key, issuetype_name):
+    """Return the remembered failure message for this Jira project / issue type, if any."""
+    if not _jira_config_failure_ttl():
+        return None
+
+    return cache.get(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name))
+
+
+def clear_jira_config_failure(jira_instance, project_key, issuetype_name):
+    """Forget a remembered failure, so a fixed configuration recovers immediately."""
+    cache.delete(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name))
+
+
 def log_jira_generic_alert(title, description):
     """Creates a notification for JIRA errors happening outside the scope of a specific (finding/group/epic) object"""
     create_notification(
@@ -936,6 +983,13 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_add_message(message, None, obj)
 
+    # An earlier object already proved this project / issue type is misconfigured. Skip quietly
+    # (the first failure was logged and notified) instead of repeating it for every object in
+    # the import; the retry happens once the remembered failure expires.
+    if remembered_failure := get_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type):
+        logger.debug("skipping jira push for %d: %s", obj.id, remembered_failure)
+        return False, remembered_failure
+
     obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         # Expected validation failures (not verified, not active, below threshold)
@@ -1003,6 +1057,7 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         return failure_to_add_message(message, e, obj)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        note_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type, e, message)
         return failure_to_add_message(message, e, obj)
     # Create a new issue in Jira with the fields set in the last step
     try:
@@ -1016,6 +1071,8 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         j_issue.save()
         jira.issue(new_issue.id)
         logger.info("Created the following jira issue for %d:%s", obj.id, to_str_typed(obj))
+        # The configuration works, so a previously remembered failure is stale.
+        clear_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type)
     except Exception as e:
         message = f"Failed to create jira issue with the following payload: {fields} - {e}"
         return failure_to_add_message(message, e, obj)
@@ -1101,6 +1158,11 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_update_message(message, None, obj)
 
+    # See add_jira_issue: skip quietly while this project / issue type is known-broken.
+    if remembered_failure := get_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type):
+        logger.debug("skipping jira update for %d: %s", obj.id, remembered_failure)
+        return False, remembered_failure
+
     j_issue = obj.jira_issue
     try:
         JIRAError.log_to_tempfile = False
@@ -1145,6 +1207,7 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
             issuetype_fields=issuetype_fields)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        note_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type, e, message)
         return failure_to_update_message(message, e, obj)
 
     # Update the status in jira FIRST, before applying the other field
