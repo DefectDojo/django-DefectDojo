@@ -1,6 +1,7 @@
 import logging
 
 from crum import impersonate
+from django.db import connection
 from django.test.utils import override_settings
 
 from dojo.finding.deduplication import set_duplicate
@@ -409,11 +410,13 @@ class TestDuplicationLoops(DojoTestCase):
 
     def test_delete_duplicate_excess_with_chained_reference(self):
         """
-        A surviving finding that points at an excess duplicate (a chained duplicate,
-        from past bugs or high parallel load) must not abort the whole run: the
-        duplicate_finding self-FK is ON DELETE DO_NOTHING, so without re-pointing the
-        survivor first, the delete raises IntegrityError and the task retries forever
-        without making progress. Regression test for that production failure loop.
+        A surviving finding that points at an excess duplicate (a chained duplicate, from past
+        bugs or high parallel load) must not be left dangling. The duplicate_finding self-FK is
+        ON DELETE DO_NOTHING, so without re-pointing the survivor first the delete leaves a
+        reference to a deleted row. Django defers FK checks to COMMIT, so in production that
+        surfaces as an IntegrityError that rolls the chunk back and makes the periodic task
+        retry the same finding forever; inside a TestCase transaction it surfaces as the
+        dangling reference and failed constraint check asserted below.
         """
         system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.delete_duplicates = True
@@ -436,14 +439,19 @@ class TestDuplicationLoops(DojoTestCase):
         finding_x.save()
 
         try:
-            # Without the re-pointing this raises IntegrityError: C is still
-            # referenced by X when the excess delete reaches it.
             _async_dupe_delete_impl()
 
             self.assertFalse(
                 Finding.objects.filter(id=self.finding_c.id).exists(),
                 "The excess duplicate (Finding C) should have been deleted despite the chained reference.",
             )
+            self.assertFalse(
+                Finding.objects.filter(duplicate_finding_id=self.finding_c.id).exists(),
+                "No finding may still reference the deleted duplicate.",
+            )
+            # The check Postgres would run at COMMIT in production, where a leftover
+            # reference is the IntegrityError that wedges the periodic task.
+            connection.check_constraints()
             self.assertTrue(
                 Finding.objects.filter(id=self.finding_b.id).exists(),
                 "The newest duplicate (Finding B) should still exist.",
