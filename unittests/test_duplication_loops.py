@@ -407,6 +407,59 @@ class TestDuplicationLoops(DojoTestCase):
         self.finding_a.refresh_from_db()
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
 
+    def test_delete_duplicate_excess_with_chained_reference(self):
+        """
+        A surviving finding that points at an excess duplicate (a chained duplicate,
+        from past bugs or high parallel load) must not abort the whole run: the
+        duplicate_finding self-FK is ON DELETE DO_NOTHING, so without re-pointing the
+        survivor first, the delete raises IntegrityError and the task retries forever
+        without making progress. Regression test for that production failure loop.
+        """
+        system_settings = System_Settings.objects.get(no_cache=True)
+        system_settings.delete_duplicates = True
+        system_settings.max_dupes = 1
+        system_settings.save()
+
+        self.finding_b.date = "2024-01-01"
+        self.finding_c.date = "2023-01-01"
+        set_duplicate(self.finding_b, self.finding_a)
+        set_duplicate(self.finding_c, self.finding_a)
+
+        # A fourth finding chained onto the excess duplicate C. set_duplicate would
+        # normalize the chain to the root, so wire the pathological state directly,
+        # the way it exists in the wild.
+        finding_x = copy_model_util(Finding.objects.get(id=4), exclude_fields=["duplicate_finding"])
+        finding_x.title = "X: " + finding_x.title
+        finding_x.hash_code = None
+        finding_x.duplicate = True
+        finding_x.duplicate_finding = self.finding_c
+        finding_x.save()
+
+        try:
+            # Without the re-pointing this raises IntegrityError: C is still
+            # referenced by X when the excess delete reaches it.
+            _async_dupe_delete_impl()
+
+            self.assertFalse(
+                Finding.objects.filter(id=self.finding_c.id).exists(),
+                "The excess duplicate (Finding C) should have been deleted despite the chained reference.",
+            )
+            self.assertTrue(
+                Finding.objects.filter(id=self.finding_b.id).exists(),
+                "The newest duplicate (Finding B) should still exist.",
+            )
+
+            finding_x.refresh_from_db()
+            self.assertEqual(
+                finding_x.duplicate_finding_id,
+                self.finding_a.id,
+                "The chained survivor should be re-pointed at the cluster's surviving root.",
+            )
+            self.assertTrue(finding_x.duplicate, "The chained survivor stays a duplicate, now of the root.")
+        finally:
+            if finding_x.id and Finding.objects.filter(id=finding_x.id).exists():
+                finding_x.delete()
+
     def test_delete_duplicate_order_same_date_tiebreak_by_id(self):
         """When duplicate findings share the same date, excess deletes use id as tie-break (oldest id first)."""
         system_settings = System_Settings.objects.get()
