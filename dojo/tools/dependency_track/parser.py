@@ -35,6 +35,11 @@ class DependencyTrackParser:
         return None
 
     def _component_version_in_range(self, component_version, affected_range):
+        bound_fields = ("versionStartIncluding", "versionStartExcluding", "versionEndIncluding", "versionEndExcluding")
+        if all(affected_range.get(field) is None for field in bound_fields):
+            # No range bounds (for example an exact-version entry): it describes no band,
+            # so it cannot be said to contain a version.
+            return False
         try:
             version_start_including = affected_range.get("versionStartIncluding")
             if version_start_including is not None and component_version < Version(version_start_including):
@@ -63,32 +68,33 @@ class DependencyTrackParser:
 
     def _derive_mitigation_from_affected_versions(self, dependency_track_finding):
         affected_versions = dependency_track_finding["vulnerability"].get("affectedVersions")
-        if affected_versions is None or affected_versions == []:
+        if not affected_versions:
             return None
         component = dependency_track_finding.get("component", {})
         purl = component.get("purl")
+        if purl is None:
+            return None
         component_version = None
         component_version_string = component.get("version")
         if component_version_string is not None:
             with contextlib.suppress(InvalidVersion):
                 component_version = Version(component_version_string)
-        if purl is None:
-            return None
         clean_purl = purl.rsplit("@", 1)[0]
         filtered_affected_ranges = [
             entry
             for entry in affected_versions
             if entry.get("identityType") == "PURL" and entry.get("identity") == clean_purl
         ]
-        chosen_range = None
-        if filtered_affected_ranges is None or filtered_affected_ranges == []:
+        if not filtered_affected_ranges:
             return None
-        if len(filtered_affected_ranges) == 1:
-            chosen_range = filtered_affected_ranges[0]
+        chosen_range = None
+        if component_version is None:
+            # Without a comparable version we cannot choose between ranges; only a lone
+            # range is unambiguous enough to act on.
+            if len(filtered_affected_ranges) == 1:
+                chosen_range = filtered_affected_ranges[0]
         else:
             for affected_range in filtered_affected_ranges:
-                if component_version is None:
-                    continue
                 if self._component_version_in_range(component_version, affected_range):
                     chosen_range = affected_range
                     break

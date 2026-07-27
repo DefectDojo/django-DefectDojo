@@ -201,3 +201,21 @@ class TestDependencyTrackParser(DojoTestCase):
         # The range gives only versionEndIncluding (1.5.0 is the last affected version), so the exact
         # fix cannot be named; the mitigation points at a version after it.
         self.assertIn("Upgrade to a version after 1.5.0", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_ignores_exact_version_entry(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_exact_and_range_versions.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The exact-version entry (1.0.0, no bounds) must not swallow the finding; the fix comes from
+        # the range [2.0.0, 2.15.0) that the installed 2.14.1 actually falls in.
+        self.assertIn("Upgrade to 2.15.0 or later", findings[0].mitigation)
+
+    def test_dependency_track_parser_finding_with_unparseable_component_version(self):
+        with (get_unit_tests_scans_path("dependency_track") / "finding_with_unparseable_component_version.json").open(encoding="utf-8") as testfile:
+            parser = DependencyTrackParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(1, len(findings))
+        # The component version does not parse, so no range can be compared; with a single affected
+        # range the fix is still unambiguous and is used as a fallback.
+        self.assertIn("Upgrade to 3.0.0 or later", findings[0].mitigation)
