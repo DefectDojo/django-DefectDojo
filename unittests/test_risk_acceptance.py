@@ -1,6 +1,7 @@
 import copy
 import datetime
 import logging
+from unittest.mock import patch
 
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q
@@ -299,3 +300,150 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # after handling no ra should be select for anything
         self.assertFalse(any(ra in to_warn for ra in [ra1, ra2, ra3]))
         self.assertFalse(any(ra in to_expire for ra in [ra1, ra2, ra3]))
+
+    def detach_from_engagements(self, ra):
+        """
+        Leave a risk acceptance without an engagement.
+
+        Not corrupt data: `RiskAcceptanceSerializer.create` only attaches an engagement when
+        the risk acceptance already has findings, and the Pro plugin tracks the association on
+        its own model rather than on `Engagement.risk_acceptance`.
+        """
+        for engagement in ra.engagement_set.all():
+            engagement.risk_acceptance.remove(ra)
+        ra.refresh_from_db()
+        self.assertIsNone(ra.engagement, msg="setup failed: risk acceptance is still attached to an engagement")
+
+    def notified_risk_acceptances(self, mock_create_notification):
+        return [call.kwargs.get("risk_acceptance") for call in mock_create_notification.call_args_list]
+
+    # Regression: expiration_handler aborted the entire run with
+    # "AttributeError: 'NoneType' object has no attribute 'product'" as soon as it reached a
+    # risk acceptance not attached to any engagement, so every remaining risk acceptance in the
+    # batch was left unhandled and the job failed again on every subsequent run.
+    def test_expiration_handler_warns_via_findings_when_engagement_link_is_missing(self):
+        ra1, ra2, ra3 = self.create_multiple_ras()
+        system_settings = System_Settings.objects.get()
+        system_settings.risk_acceptance_notify_before_expiration = 10
+        system_settings.save()
+        heads_up_days = system_settings.risk_acceptance_notify_before_expiration
+
+        # both are inside the heads-up window, ra1 (created first, so handled first) has no engagement
+        ra1.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
+        ra2.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
+        ra3.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days + 1)
+        ra1.save()
+        ra2.save()
+        ra3.save()
+        expected_engagement = ra1.accepted_findings.first().test.engagement
+        self.detach_from_engagements(ra1)
+
+        with patch("dojo.risk_acceptance.helper.create_notification") as mock_create_notification:
+            ra_helper.expiration_handler()
+
+        ra1.refresh_from_db()
+        ra2.refresh_from_db()
+
+        # the missing link is recovered from the accepted findings rather than dropping the notification
+        notified = self.notified_risk_acceptances(mock_create_notification)
+        self.assertIn(ra1, notified, msg=f"risk acceptance with findings but no engagement was not notified about, got {notified}")
+        self.assertIn(ra2, notified, msg=f"expected a notification for the attached risk acceptance, got {notified}")
+
+        ra1_call = next(c for c in mock_create_notification.call_args_list if c.kwargs.get("risk_acceptance") == ra1)
+        self.assertEqual(
+            ra1_call.kwargs.get("engagement"), expected_engagement,
+            msg=f"expected engagement={expected_engagement}, notified with {ra1_call.kwargs.get('engagement')}",
+        )
+        self.assertEqual(
+            ra1_call.kwargs.get("product"), expected_engagement.product,
+            msg=f"expected product={expected_engagement.product}, notified with {ra1_call.kwargs.get('product')}",
+        )
+
+        self.assertIsNotNone(ra1.expiration_date_warned, msg="risk acceptance with no engagement link was never warned")
+        self.assertIsNotNone(ra2.expiration_date_warned, msg="attached risk acceptance was never warned")
+
+    # Regression: the shape produced by the Pro standalone "New Risk Acceptance" page, which
+    # pre-fills an expiration date and posts no findings, so the risk acceptance is selected by
+    # the heads-up query while having neither an engagement nor anything to derive one from.
+    def test_expiration_handler_skips_risk_acceptance_with_no_engagement_and_no_findings(self):
+        ra1, ra2, ra3 = self.create_multiple_ras()
+        system_settings = System_Settings.objects.get()
+        system_settings.risk_acceptance_notify_before_expiration = 10
+        system_settings.save()
+        heads_up_days = system_settings.risk_acceptance_notify_before_expiration
+
+        for ra in (ra1, ra2, ra3):
+            ra.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days + 1)
+            ra.save()
+
+        empty_ra = Risk_Acceptance.objects.create(
+            name="Accept: no findings, no engagement",
+            owner=self.get_test_admin(),
+            expiration_date=datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1),
+        )
+        attached_ra = ra1
+        attached_ra.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
+        attached_ra.save()
+        self.assertIsNone(empty_ra.engagement, msg="setup failed: expected no engagement")
+        self.assertFalse(empty_ra.accepted_findings.exists(), msg="setup failed: expected no accepted findings")
+        self.assertIn(
+            empty_ra, ra_helper.get_almost_expired_risk_acceptances_to_handle(heads_up_days=heads_up_days),
+            msg="setup failed: the empty risk acceptance is not selected by the heads-up query",
+        )
+
+        with patch("dojo.risk_acceptance.helper.create_notification") as mock_create_notification:
+            ra_helper.expiration_handler()
+
+        empty_ra.refresh_from_db()
+        attached_ra.refresh_from_db()
+
+        # nothing to name a product with, so no notification - but the job must not die over it
+        notified = self.notified_risk_acceptances(mock_create_notification)
+        self.assertNotIn(empty_ra, notified, msg="a risk acceptance with no findings has no product to notify about")
+        self.assertIn(attached_ra, notified, msg=f"the rest of the batch was abandoned, notified: {notified}")
+
+        self.assertIsNotNone(
+            empty_ra.expiration_date_warned,
+            msg="empty risk acceptance stays unwarned and is re-selected, failing the job again on every run",
+        )
+        self.assertIsNotNone(attached_ra.expiration_date_warned, msg="attached risk acceptance was never warned")
+
+    # Regression: same root cause, on the expiry half of the job.
+    def test_expiration_handler_expires_risk_acceptance_without_engagement_link(self):
+        ra1, ra2, ra3 = self.create_multiple_ras()
+        system_settings = System_Settings.objects.get()
+        system_settings.risk_acceptance_notify_before_expiration = 10
+        system_settings.save()
+        heads_up_days = system_settings.risk_acceptance_notify_before_expiration
+
+        # ra3 is past its expiration date and has no engagement, ra1 is only due a heads-up
+        ra1.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days - 1)
+        ra2.expiration_date = datetime.datetime.now(datetime.UTC) + relativedelta(days=heads_up_days + 1)
+        ra3.expiration_date = datetime.datetime.now(datetime.UTC) - relativedelta(days=5)
+        ra1.save()
+        ra2.save()
+        ra3.save()
+        findings = list(ra3.accepted_findings.all())
+        expected_engagement = ra3.accepted_findings.first().test.engagement
+        self.detach_from_engagements(ra3)
+
+        with patch("dojo.risk_acceptance.helper.create_notification") as mock_create_notification:
+            ra_helper.expiration_handler()
+
+        ra1.refresh_from_db()
+        ra3.refresh_from_db()
+
+        # the expiry happens and the notification still goes out, addressed via the findings
+        self.assertIsNotNone(ra3.expiration_date_handled, msg="risk acceptance with no engagement link was never expired")
+        self.assert_all_active_not_risk_accepted(findings)
+
+        notified = self.notified_risk_acceptances(mock_create_notification)
+        self.assertIn(ra3, notified, msg=f"expired risk acceptance with findings was not notified about, got {notified}")
+        ra3_call = next(c for c in mock_create_notification.call_args_list if c.kwargs.get("risk_acceptance") == ra3)
+        self.assertEqual(
+            ra3_call.kwargs.get("engagement"), expected_engagement,
+            msg=f"expected engagement={expected_engagement}, notified with {ra3_call.kwargs.get('engagement')}",
+        )
+
+        # the rest of the batch is still processed instead of being abandoned mid-run
+        self.assertIsNotNone(ra1.expiration_date_warned, msg="the run stopped at the risk acceptance with no engagement link")

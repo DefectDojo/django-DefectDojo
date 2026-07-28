@@ -26,7 +26,7 @@ Most Connectors import **findings** from a security tool. **Asset Connectors** w
 * **Discover** and **Sync** both reconcile the asset list. New assets appear as `NEW` Records; once mapped (automatically, if auto-mapping is enabled), DefectDojo creates the Product and groups it under a Product Type derived from the tool — for example, the GitLab namespace or the Azure DevOps project.
 * If an asset is later removed upstream (for example, a repository is deleted), its mapped Record is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
 
-Azure DevOps, Bitbucket, GitHub, GitLab, Jira Service Management Assets, and ServiceNow CMDB are Asset Connectors. All other Connectors listed below import findings.
+Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Assets, and ServiceNow CMDB are Asset Connectors. runZero is primarily an Asset Connector but can optionally import vulnerabilities as findings. All other Connectors listed below import findings.
 
 # **Supported Connectors**
 
@@ -243,6 +243,18 @@ Only Bitbucket Cloud (bitbucket.org) is supported. Bitbucket Server reached end 
 
 Each repository becomes a Record named after the repository, grouped by its Bitbucket **project**.
 
+## **Black Duck**
+
+The Black Duck connector uses the Black Duck API to import findings from your Black Duck server. DefectDojo creates a Record for each Black Duck **project**.
+
+#### Connector Mappings
+
+1. Enter your Black Duck server base URL in the **Location** field.
+2. Enter a valid **API token** in the **Secret** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+This connector is distinct from the file-based Black Duck parsers — its findings use the dedicated **Black Duck - Connectors Import** scan type.
+
 ## **Bugcrowd**
 
 The Bugcrowd connector uses the Bugcrowd REST API to import submissions from your bug bounty and vulnerability disclosure programs. DefectDojo discovers the programs your API token can access and creates a Record for each one, importing that program's submissions as findings.
@@ -371,6 +383,18 @@ You will need four values from Contrast. We recommend creating a dedicated servi
 6. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each Contrast application becomes a Record, and its vulnerabilities are imported as findings.
+
+## **Coverity**
+
+The Coverity connector imports findings from a **Coverity Connect** server. DefectDojo creates a Record for each Coverity **project**.
+
+#### Connector Mappings
+
+1. Enter your Coverity Connect server URL in the **Location** field.
+2. Enter the Coverity Connect **username** in the **Username** field.
+3. Enter the user's password or authentication key in the **Secret** field.
+4. Optionally, set a **View Name** to select which saved issues view the connector reads. Leave blank to use the default, **Outstanding Issues**.
+5. Optionally, set **Import All Issue Kinds** to `true` to widen the import beyond the default Security and Quality (`RESOURCE_LEAK`) issue filter.
 
 ## **CrowdStrike Falcon**
 
@@ -623,6 +647,21 @@ The connector uses HackerOne's **customer** API, which requires an **organizatio
 
 Each program becomes a Record, and its reports are imported as findings with the HackerOne severity rating preserved.
 
+## **Harbor**
+
+The Harbor connector imports **container image vulnerability findings** from your Harbor registry. DefectDojo creates a Record for each Harbor **project**.
+
+#### Prerequisites
+
+A Harbor user or **robot account** with pull/read access to the projects you want to import.
+
+#### Connector Mappings
+
+1. Enter your Harbor instance base URL in the **Location** field.
+2. Enter the Harbor username in the **Username** field. For a robot account, enter the name exactly as Harbor shows it — `robot$<name>` by default (the robot prefix is configurable per instance).
+3. Enter the password for the user, or the robot account secret, in the **Password** field.
+4. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
 ## **Have I Been Pwned**
 
 The Have I Been Pwned (HIBP) connector uses the HIBP REST API to report which accounts on your organization's own domains have appeared in known data breaches. DefectDojo discovers each domain you have verified with HIBP and imports one finding per breach affecting that domain.
@@ -642,6 +681,22 @@ You must also **verify at least one domain** on your HIBP account before any bre
 DefectDojo creates a separate Record for each domain you have verified with HIBP, and imports one finding per breach affecting accounts on that domain. Each finding's severity reflects the kind of data the breach exposed, and its description lists the affected accounts on your domain so your team can act on them.
 
 See the [Have I Been Pwned API documentation](https://haveibeenpwned.com/API/v3) for more information.
+
+## **Intigriti**
+
+The Intigriti connector uses the Intigriti company API to import submissions as findings. DefectDojo creates a Record for each **program**.
+
+#### Prerequisites
+
+You will need an Intigriti **company API access token**, generated under **Company Settings > API**. Read access to submissions is sufficient. We recommend a dedicated service account so automated activity is easy to distinguish from manual team actions.
+
+#### Connector Mappings
+
+1. Enter the Intigriti API base URL in the **Location** field.
+2. Enter your company API access token in the **API Token** field. It is sent as a Bearer token.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each Intigriti program becomes a Record, and its submissions are imported as findings.
 
 ## **Intruder**
 
@@ -751,6 +806,22 @@ The Kubescape connector reads Kubernetes posture (misconfiguration) results prod
 3. Each namespace with posture results is discovered as a Record; map the ones you want to import to DefectDojo Products.
 
 Findings are derived per failed control: the control name and workload identify the Finding, severity comes from the control's score factor, the control ID becomes the vulnerability ID, and each Finding links to its control reference at `https://hub.armosec.io/docs/`.
+
+## **Mend**
+
+The Mend connector (formerly **WhiteSource**) uses the Mend API to import security findings from your Mend organization. DefectDojo creates a Record for each Mend **project**.
+
+#### Prerequisites
+
+You will need a Mend (service) user with a **User Key** (a personal access token) and your Mend **Organization UUID**. We recommend a dedicated service account so automated activity is easy to distinguish from manual team actions. Find the Organization UUID in the Mend App under **Administration > Organization UUID**.
+
+#### Connector Mappings
+
+1. Enter your Mend API URL in the **Location** field. This URL is **region-specific** — use the API base URL for the region your Mend organization is hosted in.
+2. Enter the login email of the Mend user in the **Email** field.
+3. Enter your Mend **Organization UUID** in the **Organization UUID** field.
+4. Enter the Mend **User Key** in the **User Key** field.
+5. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 ## **Microsoft Defender**
 
@@ -1164,3 +1235,19 @@ Using the Wiz connector requires you to create a service account: see the [Wiz d
 
 1. Enter your Wiz Client ID in the Client ID field.
 2. Enter the Wiz Client Secret in the Secret field.
+
+## **YesWeHack**
+
+The YesWeHack connector uses the YesWeHack API to import bug bounty reports as findings. DefectDojo creates a Record for each **program**.
+
+#### Prerequisites
+
+You will need a YesWeHack API token. We recommend a dedicated service account so automated activity is easy to distinguish from manual team actions.
+
+#### Connector Mappings
+
+1. Enter the YesWeHack API base URL in the **Location** field.
+2. Enter your API token in the **Secret** field.
+3. Optionally, set a **Minimum Severity** to limit which findings are imported.
+
+Each YesWeHack program becomes a Record, and its reports are imported as findings.
