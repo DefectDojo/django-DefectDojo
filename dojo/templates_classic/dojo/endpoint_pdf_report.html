@@ -287,7 +287,7 @@
     <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
     <script src="{{ host }}{% static "dojo/js/classic/metrics.js" %}"></script>
     <script type="text/javascript">
-        $(function () {
+        function renderReportCharts() {
             var data = {};
             var data_1 = [];
             var ticks = [];
@@ -348,8 +348,9 @@
                 [4, info],
             ];
             open_findings(d1, d2, d3, d4, d5, ticks);
-        });
+        }
 
+        {% if include_table_of_contents%}
         window.onload = function () {
             var toc = "";
             var level = 3;
@@ -419,7 +420,18 @@
             }
 
             document.getElementById("toc").innerHTML += toc;
+
+            // Render the summary charts AFTER the table-of-contents builder has
+            // rewritten #contents.innerHTML. Rendering earlier (on
+            // DOMContentLoaded) means this reassignment re-parses the subtree and
+            // discards the already-painted chart canvases, leaving blank charts.
+            renderReportCharts();
         };
+        {% else %}
+        $(function () {
+            renderReportCharts();
+        });
+        {% endif %}
 
     </script>
 {% endblock %}

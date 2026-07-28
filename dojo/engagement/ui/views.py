@@ -1604,8 +1604,8 @@ def get_excludes():
 
 
 def get_foreign_keys():
-    return ["build_server", "lead", "orchestration_engine", "preset", "product",
-        "report_type", "requester", "source_code_management_server"]
+    return ["cicd_build_server", "cicd_orchestration_engine", "cicd_scm_server",
+        "lead", "preset", "product", "report_type", "requester"]
 
 
 def csv_export(request):

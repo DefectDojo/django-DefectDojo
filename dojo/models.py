@@ -146,6 +146,7 @@ def get_current_datetime():
     return timezone.now()
 
 
+from dojo.cicd_infrastructure.models import CICDInfrastructure  # noqa: E402, F401 -- re-export
 from dojo.file_uploads.models import FileAccessToken, FileUpload  # noqa: E402, F401 -- re-export
 from dojo.note_type.models import Note_Type  # noqa: E402, F401 -- re-export
 from dojo.notes.models import (  # noqa: E402, F401 -- re-export; Notes used by Risk_Acceptance.notes M2M below
