@@ -11,12 +11,12 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.authorization.models import Product_Member, Role
-from dojo.models import DojoMeta, Dojo_User, Product, Product_Type
+from dojo.models import Dojo_User, DojoMeta, Product, Product_Type
 
 from .dojo_test_case import DojoTestCase
 from .test_permissions_audit import LegacyAuthMirrorMixin
 
-PASSWORD = "testTEST1234!@#$"  # noqa: S105
+PASSWORD = "testTEST1234!@#$"
 
 
 class TestMetadataCrossTenantAuthorization(LegacyAuthMirrorMixin, DojoTestCase):
