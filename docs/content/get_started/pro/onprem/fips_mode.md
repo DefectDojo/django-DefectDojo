@@ -144,7 +144,42 @@ orchestration workers, nginx and psirt:
 }
 ```
 
-### Fargate specifics
+### Three things ECS needs that Compose provides for free
+
+Docker Compose gives you a host filesystem to bind-mount from and DNS for
+container names. Fargate provides neither, and each gap prevents nginx from
+starting rather than degrading quietly.
+
+**1. TLS certificates must exist before nginx starts.** nginx validates every
+`ssl_certificate` at config load, and the on-prem configuration has no
+certificate-free path: port 8080 only issues a `301` to HTTPS, so the 8443 TLS
+listener is the functional one. Mount an **EFS** volume at `/etc/nginx/certs`
+containing `dojo.crt` / `dojo.key` and `nginx_int.crt` / `nginx_int.key`. Both
+pairs must be present even if you only use one listener.
+
+Alternatively set `USE_TLS=true`, which serves the upstream `nginx_TLS.conf` and
+lets `GENERATE_TLS_CERTIFICATE=true` have the entrypoint generate its own
+certificate. That configuration proxies every path to Django and does not serve
+the Vue UI from `/ui`, so it suits an API-only or strictly behind-ALB deployment.
+
+**2. `DD_MCP_HOST` must resolve.** nginx resolves `proxy_pass` hostnames at
+config load. The default `mcp-server` resolves under Compose (container name) and
+Helm (Service name), but `awsvpc` gives containers no DNS names of their own and
+rejects both `extraHosts` and `dnsSearchDomains`:
+
+```json
+{ "name": "DD_MCP_HOST", "value": "127.0.0.1" },
+{ "name": "DD_MCP_PORT", "value": "9142" }
+```
+
+Pointing it at loopback when the MCP server is not deployed makes `/mcp` answer
+`502` rather than preventing the whole web tier from starting.
+
+**3. The nginx configuration files come from the image.** The `-fips` nginx image
+bakes the on-prem configuration set in, so no mounts are needed. Compose overlays
+its own bind mounts, so Compose behaviour is unchanged.
+
+### Other Fargate specifics
 
 - **Persistent storage must be EFS.** Fargate cannot attach EBS, so the media
   directory (`/app/media`) needs an EFS volume if you retain uploaded scan files.
@@ -155,14 +190,22 @@ orchestration workers, nginx and psirt:
   correct option. If you split them into separate ECS services, point
   `DD_UWSGI_HOST` at a Cloud Map service-discovery name and open the security
   group on the uwsgi port.
+- **Do not override the uwsgi entrypoint.** Set
+  `DD_UWSGI_ENDPOINT=0.0.0.0:3031` and leave the image ENTRYPOINT in place;
+  uwsgi speaks the uwsgi protocol, which is what nginx expects. Replacing the
+  entrypoint with `uwsgi --http` skips the FIPS startup check along with it.
 - **The initializer is a one-shot task**, not a service. Run it with
   `aws ecs run-task` (or as a pre-deploy step) and let it exit; do not give it a
   desired count.
-- **TLS termination.** With an ALB in front, leave `USE_TLS=false` on nginx and
-  document the load balancer's own FIPS posture separately. To terminate TLS in
-  the container instead, set `USE_TLS=true` and mount certificates.
+- **`healthCheck.retries` cannot exceed 10.** Higher values are rejected when
+  the task definition is registered.
+- **Point the load balancer at 8443** with an HTTPS target group. The on-prem
+  configuration's 8080 listener only redirects to HTTPS, so targeting 8080 loops.
+  A self-signed certificate on the target is acceptable to an ALB.
+- **TLS termination.** If the ALB terminates TLS for clients, document the load
+  balancer's own FIPS posture separately in your SSP.
 - **Secrets** belong in Secrets Manager or SSM Parameter Store through the
-  `secrets` block, never in `environment`.
+  `secrets` block, never in `environment`. That includes `DD_LICENSE`.
 
 ### Retrieving evidence on ECS
 
@@ -245,7 +288,9 @@ Existing users are not locked out. Django re-hashes each password to PBKDF2 on t
 
 ### TLS cipher suites
 
-ChaCha20-Poly1305 is not FIPS-approved and is removed from the nginx cipher list. TLS 1.2 and TLS 1.3 remain available using AES-GCM suites. Clients that support only ChaCha20 will not be able to connect.
+ChaCha20-Poly1305 is not FIPS-approved and is removed from every nginx configuration that terminates TLS, and TLS 1.3 is pinned to `TLS_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256`. TLS 1.2 and TLS 1.3 remain available using AES-GCM suites. Clients that support only ChaCha20 will not be able to connect.
+
+The validated module would refuse ChaCha20 in any case; removing it from the configuration means the server never advertises a suite it cannot complete, which keeps the deployed configuration self-documenting for an assessor.
 
 ### Metrics basic authentication
 
