@@ -1354,6 +1354,7 @@ def defect_finding_review(request, fid):
     )
 
 
+@require_POST
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -1492,6 +1493,7 @@ def remediation_date(request, fid):
     )
 
 
+@require_POST
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1502,6 +1504,7 @@ def touch_finding(request, fid):
     )
 
 
+@require_POST
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1519,6 +1522,7 @@ def simple_risk_accept(request, fid):
     )
 
 
+@require_POST
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(request.user, finding)

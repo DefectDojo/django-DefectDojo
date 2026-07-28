@@ -85,14 +85,16 @@
                             <li>
                               </a>
                               {% if status == "open" or status == "paused" %}
-                              <a class="" href="{% url 'close_engagement' eng.id %}">
+                              <a class="" href="#" onclick="this.nextElementSibling.submit(); return false;">
                                 <i class="fa-solid fa-xmark"></i> Close
+                              </a>
+                              <form method="post" action="{% url 'close_engagement' eng.id %}">{% csrf_token %}</form>
                               {% else %}
-                              <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                              <a class="" href="#" onclick="this.nextElementSibling.submit(); return false;">
                                 <i class="fa-solid fa-rotate-left"></i> Reopen
                               </a>
+                              <form method="post" action="{% url 'reopen_engagement' eng.id %}">{% csrf_token %}</form>
                               {% endif %}
-                              </a>
                             </li>
                             <li class="divider"></li>
                             {% endif %}

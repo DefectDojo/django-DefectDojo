@@ -19,15 +19,17 @@
         <li role="separator" class="divider"></li>
         {% if risk_acceptance.is_expired %}
             <li role="presentation">
-                <a class="reinstate-risk_acceptance" href="{% url 'reinstate_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                <a class="reinstate-risk_acceptance" href="#" onclick="this.nextElementSibling.submit(); return false;">
                     <i class="fa-solid fa-backward-fast"></i> Reinstate
                 </a>
+                <form method="post" action="{% url 'reinstate_risk_acceptance' engagement.id risk_acceptance.id %}">{% csrf_token %}<input type="hidden" name="return_url" value="{{ request.get_full_path }}"></form>
             </li>
         {% else %}
             <li role="presentation">
-                <a class="expire-risk_acceptance" href="{% url 'expire_risk_acceptance' engagement.id risk_acceptance.id %}?return_url={{ request.get_full_path|urlencode }}">
+                <a class="expire-risk_acceptance" href="#" onclick="this.nextElementSibling.submit(); return false;">
                     <i class="fa-solid fa-forward-fast"></i> Expire Now
                 </a>
+                <form method="post" action="{% url 'expire_risk_acceptance' engagement.id risk_acceptance.id %}">{% csrf_token %}<input type="hidden" name="return_url" value="{{ request.get_full_path }}"></form>
             </li>
         {% endif %}
     {% endif %}
