@@ -18,20 +18,35 @@ logger = logging.getLogger(__name__)
 
 def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement | None:
     """
-    Return the engagement backing a risk acceptance, or None when it has none.
+    Return an engagement to address a risk acceptance's expiration notification to.
 
-    `Risk_Acceptance.engagement` is a property over a many-to-many that is used as a
-    one-to-many, so it is None for a risk acceptance no engagement points at. Expiration
-    notifications are addressed to the engagement's product and link to a per-engagement
-    URL, so there is nothing to send when the engagement is missing.
+    `Risk_Acceptance.engagement` is a property over `Engagement.risk_acceptance`, a
+    many-to-many used as a one-to-many. It is empty for a risk acceptance that was not
+    created from an engagement page, which is a supported state rather than corrupt data:
+    `RiskAcceptanceSerializer.create` only attaches an engagement when the risk acceptance
+    already has findings, `_accept_risks` and the SonarQube status sync never attach one at
+    all, and the Pro plugin tracks the association on its own model instead of this relation.
+
+    So fall back to the engagement of an accepted finding - the same derivation
+    `RiskAcceptanceSerializer` uses both to attach an engagement on create and to repair an
+    orphan on update. Only a risk acceptance with neither an engagement nor any findings has
+    nothing to notify about; the notification names a product and links to a per-engagement
+    URL, and neither can be produced from an empty risk acceptance.
     """
     engagement = risk_acceptance.engagement
-    if engagement is None:
-        logger.warning(
-            "risk acceptance %i:%s is not attached to an engagement, skipping its expiration notification",
-            risk_acceptance.id, risk_acceptance,
-        )
-    return engagement
+    if engagement is not None:
+        return engagement
+
+    # iterate rather than .first(), to reuse the accepted_findings prefetch
+    accepted_finding = next(iter(risk_acceptance.accepted_findings.all()), None)
+    if accepted_finding is not None:
+        return accepted_finding.test.engagement
+
+    logger.warning(
+        "risk acceptance %i:%s has no engagement and no findings, skipping its expiration notification",
+        risk_acceptance.id, risk_acceptance,
+    )
+    return None
 
 
 def expire_now(risk_acceptance):
