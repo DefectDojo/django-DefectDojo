@@ -7,7 +7,7 @@ weight: 1
 
 **Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives — whether that's a URL, a software dependency from an **SBOM**, or, in the future, a **cloud resource ID**, **container image**, or **code repository**.
 
-Locations are currently in **Beta** and will need to be enabled on your instance. To enable Locations on your instance, contact [support@defectdojo.com](mailto:support@defectdojo.com).
+Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Note that Locations cannot be turned back off once enabled.
 
 ## Why Replace Endpoints?
 
@@ -66,7 +66,7 @@ Existing parsers have been updated to emit Location data when the feature flag i
 | Endpoint → URL one-way migration command | Shipped |
 | Parser updates (URLs and dependencies) | Shipped for the major parsers |
 | SBOM upload (CycloneDX, SPDX v2/v3) | Shipped via `/api/v2/sbom-import/` |
-| Pro UI for Locations, URLs, Dependencies | Shipped (Beta) |
+| Pro UI for Locations, URLs, Dependencies | Shipped |
 | pURL search/filter | Shipped |
 | License tracking on dependencies | Partial (`license_expression` field) |
 | SWID Tag SBOM format | Not in MVP |
