@@ -39,13 +39,15 @@
                                     </li>
                                     <li role="presentation">
                                         {% if eng.active %}
-                                            <a class="" href="{% url 'close_engagement' eng.id %}">
+                                            <a class="" href="#" onclick="this.nextElementSibling.submit(); return false;">
                                             <i class="fa-solid fa-xmark"></i> Close Engagement
                                             </a>
+                                            <form method="post" action="{% url 'close_engagement' eng.id %}">{% csrf_token %}</form>
                                         {% else %}
-                                            <a class="" href="{% url 'reopen_engagement' eng.id %}">
+                                            <a class="" href="#" onclick="this.nextElementSibling.submit(); return false;">
                                             <i class="fa-solid fa-rotate-left"></i> Reopen Engagement
                                             </a>
+                                            <form method="post" action="{% url 'reopen_engagement' eng.id %}">{% csrf_token %}</form>
                                         {% endif %}
                                     </li>
                                 {% endif %}
