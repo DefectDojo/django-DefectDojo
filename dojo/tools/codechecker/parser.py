@@ -1,7 +1,10 @@
 import hashlib
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class CodeCheckerParser:
@@ -114,6 +117,10 @@ def get_item(vuln):
         static_finding=True,
         dynamic_finding=False,
     )
+    if settings.V3_FEATURE_LOCATIONS and file_path:
+        finding.unsaved_locations.append(
+            LocationData.code(file_path=file_path, line=line),
+        )
     finding.unsaved_tags = [vuln["analyzer_name"]]
     return finding
 

@@ -2,7 +2,7 @@ import crum
 
 from dojo.authorization.authorization import user_has_configuration_permission as configuration_permission
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
 
 
 def has_object_permission(obj, permission):
@@ -21,7 +21,7 @@ def has_configuration_permission(permission, request):
     return configuration_permission(user, permission)
 
 
-@cache_for_request
+@cache_for_request_or_task
 def get_user_permissions(user):
     return user.user_permissions.all()
 
@@ -31,7 +31,7 @@ def user_has_configuration_permission_without_group(user, codename):
     return any(permission.codename == codename for permission in permissions)
 
 
-@cache_for_request
+@cache_for_request_or_task
 def get_group_permissions(group):
     return group.permissions.all()
 

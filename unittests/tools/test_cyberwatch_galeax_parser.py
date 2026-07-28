@@ -48,6 +48,7 @@ class TestCyberwatchGaleaxParser(DojoTestCase):
             self.assertEqual(0.00044, finding.epss_score)
             self.assertEqual("Updated At: 2024-12-06T14:15:19.530+01:00", finding.references)
             self.assertEqual(787, finding.cwe)
+            self.assertEqual([787, "118", "664", "119"], finding.unsaved_cwes)
             self.assertEqual(1, len(self.get_unsaved_locations(finding)))
             # Validate locations
             locations = [e.host for e in self.get_unsaved_locations(finding)]

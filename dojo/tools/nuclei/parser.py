@@ -103,7 +103,8 @@ class NucleiParser:
                 if (
                     classification.get("cwe-id")
                 ):
-                    cwe = classification["cwe-id"][0]
+                    cwe_ids = classification["cwe-id"]
+                    cwe = cwe_ids[0]
                     try:
                         finding.cwe = int(cwe[4:])
                     except ValueError:
@@ -111,6 +112,8 @@ class NucleiParser:
                         ignore CWE if non-int
                         several older templates such as https://github.com/projectdiscovery/nuclei-templates/blob/6636c0d2dd540645cc3472822beb4b3819ff8322/http/cves/2004/CVE-2004-0519.yaml#L21
                         """
+                    if cwe_ids:
+                        finding.unsaved_cwes = cwe_ids
                 if classification.get("cvss-metrics"):
                     cvss_objects = cvss_parser.parse_cvss_from_text(
                         classification["cvss-metrics"],

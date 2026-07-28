@@ -9,6 +9,7 @@ import requests
 from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
+from django.core.cache import cache
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -157,6 +158,12 @@ def is_keep_in_sync_with_jira(obj: Finding | Finding_Group, prefetched_jira_inst
     if jira_issue_exists and (jira_instance := prefetched_jira_instance or get_jira_instance(obj)) is not None:
         return jira_instance.finding_jira_sync
     return False
+
+
+def is_delete_sync_allowed(finding, push_to_jira=None):
+    if push_to_jira is not None:
+        return is_push_to_jira(finding, push_to_jira_parameter=push_to_jira)
+    return bool(is_keep_in_sync_with_jira(finding) or is_push_all_issues(finding))
 
 
 # checks if a finding can be pushed to JIRA
@@ -588,6 +595,52 @@ def get_jira_comments(finding):
     return None
 
 
+def _jira_config_failure_ttl():
+    """Seconds to remember a project/issue-type level Jira failure. 0 disables the behavior."""
+    return getattr(settings, "JIRA_CONFIG_FAILURE_CACHE_TTL", 300)
+
+
+def _jira_config_failure_cache_key(jira_instance, project_key, issuetype_name):
+    return f"jira_config_failure:{jira_instance.id}:{project_key}:{issuetype_name}"
+
+
+def note_jira_config_failure(jira_instance, project_key, issuetype_name, exception, message):
+    """
+    Remember that this Jira project / issue type is currently unusable.
+
+    A misconfiguration (project key renamed or archived, Create Issue permission revoked,
+    issue type dropped from the project's scheme) fails identically for every object in an
+    import. Without this, a single import repeats the same doomed metadata call, error log
+    and user notification once per finding - hundreds of times, for minutes, with no chance
+    of a different outcome.
+
+    Only failures that cannot resolve themselves inside the cache window are recorded, so a
+    timeout or a Jira-side 5xx still lets the next object retry normally. A status of None is
+    what DefectDojo itself raises when Jira returns no matching project or issue type.
+    """
+    ttl = _jira_config_failure_ttl()
+    if not ttl:
+        return
+
+    if exception is not None and getattr(exception, "status_code", None) not in {None, 400, 401, 403, 404}:
+        return
+
+    cache.set(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name), message, ttl)
+
+
+def get_jira_config_failure(jira_instance, project_key, issuetype_name):
+    """Return the remembered failure message for this Jira project / issue type, if any."""
+    if not _jira_config_failure_ttl():
+        return None
+
+    return cache.get(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name))
+
+
+def clear_jira_config_failure(jira_instance, project_key, issuetype_name):
+    """Forget a remembered failure, so a fixed configuration recovers immediately."""
+    cache.delete(_jira_config_failure_cache_key(jira_instance, project_key, issuetype_name))
+
+
 def log_jira_generic_alert(title, description):
     """Creates a notification for JIRA errors happening outside the scope of a specific (finding/group/epic) object"""
     create_notification(
@@ -930,6 +983,13 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_add_message(message, None, obj)
 
+    # An earlier object already proved this project / issue type is misconfigured. Skip quietly
+    # (the first failure was logged and notified) instead of repeating it for every object in
+    # the import; the retry happens once the remembered failure expires.
+    if remembered_failure := get_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type):
+        logger.debug("skipping jira push for %d: %s", obj.id, remembered_failure)
+        return False, remembered_failure
+
     obj_can_be_pushed_to_jira, error_message, error_code = can_be_pushed_to_jira(obj)
     if not obj_can_be_pushed_to_jira:
         # Expected validation failures (not verified, not active, below threshold)
@@ -997,6 +1057,7 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         return failure_to_add_message(message, e, obj)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        note_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type, e, message)
         return failure_to_add_message(message, e, obj)
     # Create a new issue in Jira with the fields set in the last step
     try:
@@ -1010,6 +1071,8 @@ def add_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         j_issue.save()
         jira.issue(new_issue.id)
         logger.info("Created the following jira issue for %d:%s", obj.id, to_str_typed(obj))
+        # The configuration works, so a previously remembered failure is stale.
+        clear_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type)
     except Exception as e:
         message = f"Failed to create jira issue with the following payload: {fields} - {e}"
         return failure_to_add_message(message, e, obj)
@@ -1095,6 +1158,11 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
         message = f"Object {obj.id} cannot be pushed to JIRA as the JIRA instance has been deleted or is not available."
         return failure_to_update_message(message, None, obj)
 
+    # See add_jira_issue: skip quietly while this project / issue type is known-broken.
+    if remembered_failure := get_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type):
+        logger.debug("skipping jira update for %d: %s", obj.id, remembered_failure)
+        return False, remembered_failure
+
     j_issue = obj.jira_issue
     try:
         JIRAError.log_to_tempfile = False
@@ -1139,6 +1207,7 @@ def update_jira_issue(obj, *args, **kwargs) -> tuple[str, bool]:
             issuetype_fields=issuetype_fields)
     except Exception as e:
         message = f"Failed to fetch fields for {jira_instance.default_issue_type} under project {jira_project.project_key} - {e}"
+        note_jira_config_failure(jira_instance, jira_project.project_key, jira_instance.default_issue_type, e, message)
         return failure_to_update_message(message, e, obj)
 
     # Update the status in jira FIRST, before applying the other field
@@ -1284,6 +1353,86 @@ def push_status_to_jira(obj, jira_instance, jira, issue, *, save=False, jira_pro
         obj.jira_issue.jira_change = timezone.now()
         obj.jira_issue.save()
     return updated
+
+
+def close_jira_issue_for_deleted_finding(finding, push_to_jira=None) -> tuple[bool | None, str]:
+    logger.debug("queueing linked Jira issue close for deleted finding %d", finding.id)
+
+    if not is_jira_enabled():
+        return False, "JIRA integration is not enabled."
+
+    if not finding.has_jira_issue:
+        return False, f"Finding {finding.id} has no linked JIRA issue."
+
+    if not is_delete_sync_allowed(finding, push_to_jira=push_to_jira):
+        return False, f"Finding {finding.id} is not configured to sync deleted findings to JIRA."
+
+    if not is_jira_configured_and_enabled(finding):
+        message = (
+            f"Finding {finding.id} cannot close its linked JIRA issue "
+            "because JIRA is not configured or enabled."
+        )
+        logger.debug(message)
+        return False, message
+
+    jira_issue = get_jira_issue(finding)
+    if not jira_issue:
+        return False, f"Finding {finding.id} has no local JIRA issue record."
+
+    jira_project = get_jira_project(jira_issue)
+    if not jira_project or not jira_project.jira_instance:
+        return False, f"Finding {finding.id} has no JIRA instance for its linked issue."
+
+    dojo_dispatch_task(
+        close_deleted_finding_jira_issue,
+        jira_issue.jira_id,
+        jira_project.jira_instance.id,
+        finding.id,
+    )
+    return True, f"Jira issue {jira_issue.jira_key} close queued."
+
+
+@app.task
+def close_deleted_finding_jira_issue(jira_id, jira_instance_id, finding_id, **_kwargs) -> tuple[bool | None, str]:
+    jira_instance = get_object_or_none(JIRA_Instance, id=jira_instance_id)
+    if not jira_instance:
+        message = f"JIRA instance {jira_instance_id} is not available for issue {jira_id}."
+        logger.warning(message)
+        return False, message
+
+    try:
+        JIRAError.log_to_tempfile = False
+        jira = get_jira_connection(jira_instance)
+        if not jira:
+            message = f"JIRA connection could not be established for issue {jira_id}."
+            logger.warning(message)
+            return False, message
+        issue = jira.issue(jira_id)
+    except Exception as e:
+        message = f"The following jira instance could not be connected: {jira_instance} - {e}"
+        logger.exception(message)
+        return False, message
+
+    if not issue_from_jira_is_active(issue):
+        logger.debug("Jira issue %s is already resolved", jira_id)
+        return False, f"Jira issue {jira_id} is already resolved."
+
+    updated = jira_transition(jira, issue, jira_instance.close_status_key)
+    if updated:
+        jira.add_comment(
+            jira_id,
+            f"DefectDojo finding {finding_id} was deleted. This Jira issue was closed automatically.",
+        )
+        return True, f"Jira issue {jira_id} closed successfully."
+
+    return updated, f"Jira issue {jira_id} was not closed."
+
+
+def reassign_jira_issue_to_finding(jira_issue, finding):
+    jira_issue.finding = finding
+    jira_issue.finding_group = None
+    jira_issue.engagement = None
+    jira_issue.save(update_fields=["finding", "finding_group", "engagement"])
 
 
 # gets the metadata for the provided issue type in the provided jira project
@@ -1675,6 +1824,26 @@ def add_simple_jira_comment(jira_instance, jira_issue, comment):
         jira.add_comment(
             jira_issue.jira_id, comment,
         )
+    except Exception as e:
+        log_jira_generic_alert("Jira Add Comment Error", str(e))
+        return False
+    return True
+
+
+def add_simple_jira_comment_async(jira_id, jira_instance_id, comment):
+    return dojo_dispatch_task(add_simple_jira_comment_by_id, jira_id, jira_instance_id, comment)
+
+
+@app.task
+def add_simple_jira_comment_by_id(jira_id, jira_instance_id, comment, **_kwargs):
+    jira_instance = get_object_or_none(JIRA_Instance, id=jira_instance_id)
+    if not jira_instance:
+        logger.warning("JIRA instance %s is not available for issue %s", jira_instance_id, jira_id)
+        return False
+
+    try:
+        jira = get_jira_connection(jira_instance)
+        jira.add_comment(jira_id, comment)
     except Exception as e:
         log_jira_generic_alert("Jira Add Comment Error", str(e))
         return False

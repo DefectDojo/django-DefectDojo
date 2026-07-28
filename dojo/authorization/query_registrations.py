@@ -40,7 +40,7 @@ from dojo.models import (
     Tool_Product_Settings,
     Vulnerability_Id,
 )
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
 
 
 def _resolve_user(user):
@@ -81,7 +81,7 @@ def _authorized_product_type_ids(user):
     return Product_Type.objects.filter(authorized_users=user).values("id")
 
 
-@cache_for_request
+@cache_for_request_or_task
 def authorized_product_id_set(user_pk):
     """
     Frozen set of product ids the user can access via authorized_users
@@ -101,7 +101,7 @@ def authorized_product_id_set(user_pk):
     )
 
 
-@cache_for_request
+@cache_for_request_or_task
 def authorized_product_type_id_set(user_pk):
     """
     Frozen set of product_type ids the user is a direct member of via

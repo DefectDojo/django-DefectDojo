@@ -35,6 +35,8 @@ from dojo.asset.api.urls import add_asset_urls
 from dojo.asset.urls import urlpatterns as asset_urls
 from dojo.banner.ui.urls import urlpatterns as banner_urls
 from dojo.benchmark.ui.urls import urlpatterns as benchmark_urls
+from dojo.cicd_infrastructure.api.urls import add_cicd_infrastructure_urls
+from dojo.cicd_infrastructure.ui.urls import urlpatterns as cicd_infrastructure_urls
 from dojo.components.urls import urlpatterns as component_urls
 from dojo.development_environment.api.urls import add_development_environment_urls
 from dojo.development_environment.ui.urls import urlpatterns as dev_env_urls
@@ -153,6 +155,7 @@ else:
 v2_api.register(r"celery", CeleryViewSet, basename="celery")
 # V3
 add_asset_urls(v2_api)
+add_cicd_infrastructure_urls(v2_api)
 add_organization_urls(v2_api)
 
 ur = []
@@ -174,6 +177,7 @@ ur += github_urls
 ur += tool_type_urls
 ur += tool_config_urls
 ur += tool_product_urls
+ur += cicd_infrastructure_urls
 ur += sla_urls
 ur += system_settings_urls
 ur += notifications_urls

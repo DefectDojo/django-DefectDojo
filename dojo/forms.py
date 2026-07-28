@@ -578,6 +578,7 @@ class BaseManageFileFormSet(forms.BaseModelFormSet):
 
 
 ManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=["title", "file"], can_delete=True, formset=BaseManageFileFormSet)
+AddOnlyManageFileFormSet = modelformset_factory(FileUpload, extra=3, max_num=10, fields=["title", "file"], can_delete=False, formset=BaseManageFileFormSet)
 
 
 # Risk acceptance forms live in dojo/risk_acceptance/ui/forms.py. Re-exported here for
