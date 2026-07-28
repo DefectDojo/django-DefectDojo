@@ -51,10 +51,6 @@ A few things to know about this endpoint:
    - The same attribute may feed more than one field — for example an email claim used for both **Email** and **Username**. The reverse is not allowed: each DefectDojo field may be mapped from only one attribute.
    - A row with only one half filled in is rejected on save, and the offending cell is highlighted. Rows you add but never fill in are discarded rather than treated as errors.
 
-   > **Upgrading from an earlier release.** Previous versions used a single free-text field of the form `Email=email, UserName=username`. Existing mappings are converted automatically and appear as rows the first time you open the page — no action is required.
-   >
-   > If a mapping targets a field that is no longer offered in the dropdown (older releases accepted any field name, including flags such as `is_superuser`), it is preserved and shown as a *legacy* option so it keeps working. **Validate Config** reports these so you can decide whether to keep them. Granting the equivalent access through a group is safer: attribute values arrive from the IdP as strings with no conversion, so a boolean field becomes true for any non-empty value the IdP sends.
-
 8. **Remote SAML Metadata** — the URL where your SAML Identity Provider metadata is hosted.
 
 9. Check **Enable SAML** at the bottom of the form to activate SAML login. A **Login With SAML** button will appear on the DefectDojo login page.

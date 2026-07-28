@@ -47,8 +47,6 @@ Notes:
 - Claims are read from the ID token as well as the userinfo response, so a claim your provider releases in only one of the two still works.
 - If a mapped claim is missing or empty for a given user, that field keeps its standard value rather than being blanked.
 
-> **Replaces the Username Claim field.** Earlier releases had a single **Username Claim** input. It is now the row that targets **Username**, and existing values are converted automatically — an instance that had `upn` configured opens with an `upn` → **Username** row already in place.
-
 ## Group Mapping
 
 DefectDojo can mirror the groups your provider reports into DefectDojo groups on each login. Check **Enable Group Mapping** to reveal the settings.
