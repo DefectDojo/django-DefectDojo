@@ -15,7 +15,7 @@ For access to FIPS images, contact us at [hello@defectdojo.com](mailto:hello@def
 
 All cryptographic operations are performed by the **OpenSSL FIPS Provider 3.1.2**, which holds NIST CMVP certificate **[#4985](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/4985)** under FIPS 140-3. Go services use the **Go Cryptographic Module v1.0.0**, CMVP certificate **[#5247](https://csrc.nist.gov/projects/cryptographic-module-validation-program/certificate/5247)**.
 
-Because enforcement happens **inside the container**, FIPS mode does not require the host to run a FIPS-enabled kernel. That matters on managed container runtimes — AWS ECS/Fargate, for example — where the host operating system is not under your control.
+Because enforcement happens **inside the container**, FIPS mode does not require the host to run a FIPS-enabled kernel. That is what makes it workable on managed container runtimes such as **Amazon ECS with the Fargate launch type**, where the host operating system is not under your control.
 
 > **FIPS 140-3, not 140-2.** FIPS 140-3 supersedes 140-2 and satisfies a requirement written against it. All FIPS 140-2 certificates move to the CMVP Historical List on **21 September 2026** and stop supporting new deployments after that date, so new systems should be validated against a 140-3 module.
 
@@ -114,6 +114,71 @@ run non-validated cryptography.
 ```
 
 This is deliberate. A deployment where most services use validated cryptography and one or two quietly do not is worse than an obvious failure: it looks compliant, survives a casual inspection, and only surfaces during an assessment. If you have accepted that risk in writing, override it with `fips.validate: false`.
+
+## Enabling FIPS mode — Amazon ECS / Fargate
+
+Fargate is a launch type for ECS, not a separate service: you register ECS task
+definitions with `requiresCompatibilities: ["FARGATE"]` and `networkMode: awsvpc`.
+Reference task definitions ship in `deployment/ecs/` in the Pro distribution.
+
+Two changes against a working non-FIPS task definition:
+
+**1. Image tags** gain the `-fips` suffix:
+
+```
+<ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/defectdojo-pro-django:<VERSION>-fips
+<ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/defectdojo-pro-nginx:<VERSION>-fips
+```
+
+**2. `DD_FIPS_MODE`** in the `environment` block of every container running
+application code — uwsgi, celery worker, celery beat, the initializer, the
+orchestration workers, nginx and psirt:
+
+```json
+{
+  "name": "uwsgi",
+  "image": "<ACCOUNT>.dkr.ecr.<REGION>.amazonaws.com/defectdojo-pro-django:<VERSION>-fips",
+  "environment": [
+    { "name": "DD_FIPS_MODE", "value": "1" }
+  ]
+}
+```
+
+### Fargate specifics
+
+- **Persistent storage must be EFS.** Fargate cannot attach EBS, so the media
+  directory (`/app/media`) needs an EFS volume if you retain uploaded scan files.
+- **No privileged containers or host networking are required.** The images run
+  as a non-root user, and `awsvpc` gives each task its own network interface.
+- **nginx → uwsgi.** Containers in the *same* task share a network namespace, so
+  co-locating nginx with uwsgi lets nginx reach it on `127.0.0.1` — the simplest
+  correct option. If you split them into separate ECS services, point
+  `DD_UWSGI_HOST` at a Cloud Map service-discovery name and open the security
+  group on the uwsgi port.
+- **The initializer is a one-shot task**, not a service. Run it with
+  `aws ecs run-task` (or as a pre-deploy step) and let it exit; do not give it a
+  desired count.
+- **TLS termination.** With an ALB in front, leave `USE_TLS=false` on nginx and
+  document the load balancer's own FIPS posture separately. To terminate TLS in
+  the container instead, set `USE_TLS=true` and mount certificates.
+- **Secrets** belong in Secrets Manager or SSM Parameter Store through the
+  `secrets` block, never in `environment`.
+
+### Retrieving evidence on ECS
+
+The startup evidence block lands in the log group named by the container's
+`awslogs` configuration:
+
+```bash
+aws logs tail /ecs/<YOUR_LOG_GROUP> --filter-pattern FIPS
+```
+
+On demand inside a running task (requires `enableExecuteCommand` on the service):
+
+```bash
+aws ecs execute-command --cluster <CLUSTER> --task <TASK_ID> \
+  --container uwsgi --interactive --command "python3 /verify_fips.py"
+```
 
 ## Fail-closed startup
 
