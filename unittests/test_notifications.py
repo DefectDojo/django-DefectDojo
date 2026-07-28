@@ -1376,3 +1376,67 @@ class TestProcessTagNotifications(DojoTestCase):
             Alerts.objects.filter(user_id=mentioned).exists(),
             "an email-like token in prose (no whitespace before '@') must not notify",
         )
+
+
+@versioned_fixtures
+class TestReviewRequestedWebhookTemplate(DojoTestCase):
+    """The webhooks channel needs its own review_requested template.
+
+    ``NotificationManagerHelpers._create_notification_message`` renders
+    ``notifications/<channel>/<event>.tpl`` and, on TemplateDoesNotExist,
+    quietly falls back to ``other.tpl``. That fallback is a generic
+    description blob: a webhook subscriber reacting to review requests
+    would receive no finding id, no reviewers, and no requester, with
+    nothing in the payload to indicate the specific template was missing.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def _render(self, channel):
+        from dojo.notifications.helper import NotificationManagerHelpers
+
+        finding = Finding.objects.first()
+        requested_by = Dojo_User.objects.get(username="admin")
+        reviewer = Dojo_User.objects.create(username="wh-reviewer", first_name="Wanda", last_name="Reviewer")
+        return NotificationManagerHelpers()._create_notification_message(
+            event="review_requested",
+            user=requested_by,
+            notification_type=channel,
+            kwargs={
+                "finding": finding,
+                "requested_by": requested_by,
+                "reviewers": [reviewer],
+                "title": "Finding Review Requested",
+                "description": "admin has requested a review",
+                "url": reverse("view_finding", args=(finding.id,)),
+            },
+        ), finding, reviewer
+
+    def test_webhook_payload_carries_review_details(self):
+        rendered, finding, reviewer = self._render("webhooks")
+
+        # The event-specific fields are the whole point — other.tpl carries none of them.
+        self.assertIn("finding:", rendered)
+        self.assertIn(f"id: {finding.pk}", rendered)
+        self.assertIn("requested_by:", rendered)
+        self.assertIn("reviewers:", rendered)
+        self.assertIn(reviewer.username, rendered)
+
+    def test_webhook_payload_is_not_the_generic_fallback(self):
+        """Pin the fallback behaviour itself.
+
+        Rendering an event that genuinely has no webhook template gives the
+        generic shape; review_requested must not match it. Comparing against
+        a real fallback render keeps this honest if other.tpl changes.
+        """
+        from dojo.notifications.helper import NotificationManagerHelpers
+
+        rendered, _, _ = self._render("webhooks")
+        fallback = NotificationManagerHelpers()._create_notification_message(
+            event="event_with_no_template",
+            user=Dojo_User.objects.get(username="admin"),
+            notification_type="webhooks",
+            kwargs={"title": "Finding Review Requested", "description": "admin has requested a review"},
+        )
+        self.assertNotEqual(rendered.strip(), fallback.strip())
+        self.assertNotIn("finding:", fallback)
