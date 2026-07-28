@@ -73,6 +73,7 @@ from dojo.forms import (
 from dojo.jira import services as jira_services
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
+from dojo.location.utils import copy_location_references
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
@@ -2338,12 +2339,14 @@ def merge_finding_product(request, pid):
                         ):
                             finding_references = f"{finding_references}\n{finding.references}"
 
-                        # if checked merge the endpoints
+                        # if checked merge the endpoints and locations
                         if form.cleaned_data["add_endpoints"]:
                             with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
                                 finding_to_merge_into.endpoints.add(
                                     *finding.endpoints.all(),
                                 )
+                            if settings.V3_FEATURE_LOCATIONS:
+                                copy_location_references(finding, finding_to_merge_into)
 
                         # if checked merge the tags
                         if form.cleaned_data["tag_finding"]:
