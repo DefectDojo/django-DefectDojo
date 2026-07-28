@@ -73,7 +73,7 @@ Existing parsers have been updated to emit Location data when the feature flag i
 
 ## Where to Go Next
 
-- **Enable the feature** — turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/).
+- **Enable the feature** — contact [support@defectdojo.com](mailto:support@defectdojo.com) to turn Locations on for your instance.
 - **Migrate from Endpoints** — see [Migrating from Endpoints](../pro__migrating_from_endpoints) for what the migration preserves, and how the legacy Endpoint API behaves afterward.
 - **Day-to-day URL workflows** — see [Working with URLs](../pro__working_with_urls).
 - **SBOMs and dependencies** — see [Working with SBOMs](../pro__working_with_sboms).
