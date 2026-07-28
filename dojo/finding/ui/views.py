@@ -63,6 +63,7 @@ from dojo.finding.ui.forms import (
     MergeFindings,
     ReviewFindingForm,
 )
+from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.forms import (
     GITHUBFindingForm,
     JIRAFindingForm,
@@ -72,6 +73,7 @@ from dojo.forms import (
 from dojo.jira import services as jira_services
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
+from dojo.location.utils import copy_location_references
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
@@ -81,7 +83,6 @@ from dojo.models import (
     Engagement,
     FileAccessToken,
     Finding,
-    Finding_Group,
     Finding_Template,
     GITHUB_Issue,
     GITHUB_PKey,
@@ -1355,6 +1356,7 @@ def defect_finding_review(request, fid):
     )
 
 
+@require_POST
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -1493,6 +1495,7 @@ def remediation_date(request, fid):
     )
 
 
+@require_POST
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1503,6 +1506,7 @@ def touch_finding(request, fid):
     )
 
 
+@require_POST
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1520,6 +1524,7 @@ def simple_risk_accept(request, fid):
     )
 
 
+@require_POST
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(request.user, finding)
@@ -2335,12 +2340,14 @@ def merge_finding_product(request, pid):
                         ):
                             finding_references = f"{finding_references}\n{finding.references}"
 
-                        # if checked merge the endpoints
+                        # if checked merge the endpoints and locations
                         if form.cleaned_data["add_endpoints"]:
                             with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
                                 finding_to_merge_into.endpoints.add(
                                     *finding.endpoints.all(),
                                 )
+                            if settings.V3_FEATURE_LOCATIONS:
+                                copy_location_references(finding, finding_to_merge_into)
 
                         # if checked merge the tags
                         if form.cleaned_data["tag_finding"]:
@@ -2709,7 +2716,12 @@ def _bulk_update_finding_groups(finds, form):
     if form.cleaned_data["finding_group_add"]:
         logger.debug("finding_group_add checked!")
         fgid = form.cleaned_data["add_to_finding_group_id"]
-        finding_group = Finding_Group.objects.get(id=fgid)
+        # Scope the target group to the ones the user may edit, the same way the
+        # submitted findings are scoped above. Without this a caller could pass a
+        # group id from a product they have no access to.
+        finding_group = get_object_or_404(
+            get_authorized_finding_groups("edit"), id=fgid,
+        )
         finding_group, added, skipped = finding_helper.add_to_finding_group(
             finding_group, finds,
         )

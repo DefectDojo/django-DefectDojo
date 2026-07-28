@@ -64,6 +64,25 @@ The Finding Page contains various components. Each will be populated by the Impo
 	* **Found By:** This will list the scanner used to find this vulnerability.  
 	​
 
+## Notes and @mentions
+
+The **Notes** page on a Finding is where your team records context that isn't part of the imported scan data — mitigation progress, triage decisions, or any other commentary. Notes are DefectDojo-only metadata and are never created at import time.
+
+### Mentioning a user with @
+
+When you add a note, you can **@mention** another DefectDojo user to notify them. Type `@` immediately followed by their username (for example `@alice`) anywhere in the note. When you save the note, each mentioned user receives a **user-mentioned** notification that links back to the note.
+
+A few details worth knowing:
+
+* The `@` must be at the **start of the note or come right after a space**. This is deliberate — it stops email addresses written mid-sentence (like `alice@example.com`) from firing accidental mentions.
+* The name after `@` must match an **existing, active** DefectDojo username. Mentions of unknown or deactivated users are ignored.
+* A trailing period is ignored, so a mention that ends a sentence (`thanks @alice.`) still resolves.
+* You can mention more than one user in a single note.
+
+You can @mention users in notes on **Findings** and **Tests** from the UI, and in notes added to **Engagements** and **Risk Acceptances** through the API.
+
+The mention is delivered through the `user_mentioned` notification event. See [Notifications](/admin/notifications/about_notifications/) for how notifications are delivered and configured — in particular, `user_mentioned` is one of the events a system-level setting can still deliver even when a user has otherwise quieted their notifications (see [Specific overrides](/admin/notifications/about_notifications/#specific-overrides)).
+
 ## Example Finding Workflows
 
 How you work with Findings in DefectDojo depends on your team’s responsibilities within your organization. Here are some examples of these processes, and how DefectDojo can help:
