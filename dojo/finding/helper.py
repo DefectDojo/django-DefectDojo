@@ -819,6 +819,34 @@ def bulk_clear_finding_m2m(finding_qs):
         Notes.objects.filter(id__in=note_ids).delete()
 
 
+def _clear_dangling_duplicate_finding_refs(chunk_ids):
+    """
+    Unlink findings that point at this chunk via duplicate_finding but survive it.
+
+    Finding.duplicate_finding is a self-FK with on_delete=DO_NOTHING, so Django
+    performs no cleanup and Postgres enforces the constraint at COMMIT. The
+    cascade walker is called with skip_relations={Finding}, so nothing else
+    clears the pointer.
+
+    Ordering alone cannot prevent the violation: the referrer is frequently not
+    in the deletion set at all (transitive duplicate chains, or a caller that
+    deletes only part of a cluster - e.g. async_dupe_delete trimming excess
+    duplicates). This mirrors what prepare_duplicates_for_delete already does
+    for scope-based deletes, and is a no-op when that ran first.
+    """
+    unlinked = Finding.objects.filter(
+        duplicate_finding_id__in=chunk_ids,
+    ).exclude(
+        id__in=chunk_ids,
+    ).update(duplicate_finding=None, duplicate=False)
+    if unlinked:
+        logger.debug(
+            "bulk_delete_findings: unlinked %d surviving duplicate_finding references",
+            unlinked,
+        )
+    return unlinked
+
+
 def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=False):
     """
     Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
@@ -831,6 +859,9 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     When order_desc is True, findings are processed highest id first (matches
     finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
     duplicate chains delete children before parents.
+
+    Before each chunk is deleted, surviving findings that still point at it via
+    duplicate_finding are unlinked; see _clear_dangling_duplicate_finding_refs.
     """
     from dojo.signals import pre_bulk_delete_findings  # noqa: PLC0415 circular import
     from dojo.utils_cascade_delete import (  # noqa: PLC0415 circular import
@@ -851,6 +882,7 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     ):
         chunk_qs = Finding.objects.filter(id__in=chunk_ids)
         with transaction.atomic():
+            _clear_dangling_duplicate_finding_refs(chunk_ids)
             cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
             execute_delete_sql(chunk_qs)
         logger.info(
