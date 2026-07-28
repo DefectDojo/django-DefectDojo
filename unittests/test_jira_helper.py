@@ -2,6 +2,10 @@ import logging
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from django.core.cache import cache
+from django.test import override_settings
+from jira.exceptions import JIRAError
+
 import dojo.finding.helper as finding_helper
 import dojo.jira.helper as jira_helper
 from dojo.models import Finding, JIRA_Instance, JIRA_Issue, JIRA_Project, Test_Type
@@ -539,3 +543,85 @@ class JIRATransitionFieldsTest(TestCase):
 
         _args, kwargs = requests_post.call_args
         self.assertEqual({"transition": {"id": 41}}, kwargs["json"])
+
+
+class JIRAConfigFailureBreakerTest(TestCase):
+
+    """
+    A misconfigured Jira project (renamed key, revoked Create Issue permission, issue type
+    dropped from the scheme) fails identically for every object in an import. The remembered
+    failure lets the rest of the batch fail fast instead of repeating the same doomed metadata
+    call, error log and notification hundreds of times.
+    """
+
+    def setUp(self):
+        cache.clear()
+        self.jira_instance = Mock(id=7, default_issue_type="Task")
+
+    def tearDown(self):
+        cache.clear()
+
+    def _note(self, exception, message="broken"):
+        jira_helper.note_jira_config_failure(self.jira_instance, "DS", "Task", exception, message)
+
+    def _get(self):
+        return jira_helper.get_jira_config_failure(self.jira_instance, "DS", "Task")
+
+    def test_status_none_failure_is_remembered(self):
+        """A status of None is what DefectDojo raises when Jira returns no matching project."""
+        self._note(JIRAError("Project misconfigured or no permissions in Jira ?"), "no project DS")
+        self.assertEqual("no project DS", self._get())
+
+    def test_permission_and_not_found_failures_are_remembered(self):
+        for status_code in (400, 401, 403, 404):
+            with self.subTest(status_code=status_code):
+                cache.clear()
+                self._note(JIRAError("nope", status_code=status_code))
+                self.assertEqual("broken", self._get())
+
+    def test_transient_failure_is_not_remembered(self):
+        """A Jira-side 5xx or a timeout may well succeed for the next object, so do not skip it."""
+        self._note(JIRAError("server error", status_code=500))
+        self.assertIsNone(self._get())
+
+    def test_failure_is_scoped_to_project_and_issue_type(self):
+        self._note(JIRAError("no project"), "only DS/Task")
+        self.assertIsNone(jira_helper.get_jira_config_failure(self.jira_instance, "OTHER", "Task"))
+        self.assertIsNone(jira_helper.get_jira_config_failure(self.jira_instance, "DS", "Bug"))
+        self.assertIsNone(jira_helper.get_jira_config_failure(Mock(id=8), "DS", "Task"))
+
+    def test_clear_forgets_the_failure(self):
+        self._note(JIRAError("no project"))
+        jira_helper.clear_jira_config_failure(self.jira_instance, "DS", "Task")
+        self.assertIsNone(self._get())
+
+    @override_settings(JIRA_CONFIG_FAILURE_CACHE_TTL=0)
+    def test_ttl_of_zero_disables_the_behavior(self):
+        self._note(JIRAError("no project"))
+        self.assertIsNone(self._get())
+
+    @patch("dojo.jira.helper.get_jira_connection")
+    @patch("dojo.jira.helper.log_jira_alert")
+    @patch("dojo.jira.helper.get_jira_instance")
+    @patch("dojo.jira.helper.get_jira_project")
+    @patch("dojo.jira.helper.is_jira_configured_and_enabled", return_value=True)
+    @patch("dojo.jira.helper.is_jira_enabled", return_value=True)
+    def test_add_jira_issue_skips_without_calling_jira_or_notifying(
+        self,
+        is_jira_enabled,
+        is_jira_configured_and_enabled,
+        get_jira_project,
+        get_jira_instance,
+        log_jira_alert,
+        get_jira_connection,
+    ):
+        get_jira_project.return_value = Mock(project_key="DS")
+        get_jira_instance.return_value = self.jira_instance
+        self._note(JIRAError("no project DS"), "remembered: no project DS")
+
+        success, message = jira_helper.add_jira_issue(Mock(id=42))
+
+        self.assertFalse(success)
+        self.assertEqual("remembered: no project DS", message)
+        get_jira_connection.assert_not_called()
+        log_jira_alert.assert_not_called()
