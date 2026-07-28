@@ -31,10 +31,12 @@ Because enforcement happens **inside the container**, FIPS mode does not require
 | nginx | yes | OpenSSL FIPS Provider 3.1.2 |
 | PSIRT advisory engine | yes | OpenSSL FIPS Provider 3.1.2 |
 | Connectors, Integrators, ddorch, MCP server | yes | Go Cryptographic Module v1.0.0 |
-| **Sensei** | **no** | no FIPS variant available |
+| **Sensei** | **partial** | service binaries: Go Cryptographic Module v1.0.0. Bundled scanner toolchain: **not covered** |
 | **PostgreSQL / Redis (embedded)** | **no** | use external FIPS-compliant services |
 
-Sensei and the embedded datastores have no FIPS variant. In Kubernetes the chart refuses to render if you enable FIPS alongside them, rather than producing a deployment that is only partly validated (see [Guard rails](#guard-rails)).
+**Sensei is a partial case worth understanding.** Its own binaries are built against the validated Go module, so the job API's TLS and tokens are covered. The image also bundles a polyglot third-party scanner toolchain — Node (which ships its own OpenSSL), Rust (rustls), Python, Ruby, and third-party Go binaries we do not compile — and several of those fetch advisory databases over TLS using their own cryptography. That toolchain cannot be brought under a single validated module, so it is not covered and should not be represented as such to an assessor.
+
+The embedded PostgreSQL/Redis have no FIPS variant at all. In Kubernetes the chart refuses to render if you enable FIPS alongside Sensei or the embedded datastores, so the trade-off is an explicit decision rather than an assumption (see [Guard rails](#guard-rails)).
 
 ## Enabling FIPS mode — Docker Compose
 
@@ -83,18 +85,22 @@ helm upgrade --install dojopro charts/dojopro \
   --set fips.enabled=true
 ```
 
-Because Sensei and the embedded datastores have no FIPS variant, a FIPS install must also use external PostgreSQL and Redis, and leave Sensei disabled:
+Because the embedded datastores have no FIPS variant and Sensei is only partially covered, a FIPS install should use external PostgreSQL and Redis, and leave Sensei disabled unless you accept the caveat above:
 
 ```yaml
 fips:
   enabled: true
 sensei:
-  enabled: false
+  enabled: false          # partial coverage — see the table above
 postgresql:
   enabled: false          # use an external FIPS-compliant database
 redis:
   enabled: false          # use an external FIPS-compliant cache
 ```
+
+If you need Sensei in a FIPS environment, enable it deliberately with
+`fips.validate: false` and document the bundled scanner toolchain as
+non-validated in your system security plan.
 
 ### Guard rails
 
@@ -102,8 +108,9 @@ If `fips.enabled` is true while a component without a FIPS variant is also enabl
 
 ```
 Error: fips.enabled is true but these services have no FIPS image variant:
-sensei, redis (embedded). Disable them, or set fips.validate=false to accept
-that they run non-validated cryptography.
+sensei (service crypto validated; bundled scanner toolchain is not),
+redis (embedded). Disable them, or set fips.validate=false to accept that they
+run non-validated cryptography.
 ```
 
 This is deliberate. A deployment where most services use validated cryptography and one or two quietly do not is worse than an obvious failure: it looks compliant, survives a casual inspection, and only surfaces during an assessment. If you have accepted that risk in writing, override it with `fips.validate: false`.
