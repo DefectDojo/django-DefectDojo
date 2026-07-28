@@ -18,22 +18,45 @@ Fill in the form:
 1. **Endpoint** — the base URL of your OIDC provider. Do not include `/.well-known/openid-configuration`.
 2. **Client ID** — your OIDC client ID.
 3. **Client Secret** — your OIDC client secret.
-4. **Username Claim** *(optional)* — the OIDC claim whose value DefectDojo uses as the username when it creates a new user. Leave this blank to use the standard `preferred_username` claim.
+4. Optionally configure **Claim Mapping** and **Group Mapping** — see below.
 5. Check **Enable OIDC**.
 
 Submit the form. A **Log In With OIDC** button will appear on the DefectDojo login page.
 
-## Choosing the username claim
+Use **Validate Config** at any point to check the settings without saving them. It fetches the discovery document, verifies the signing keys and issuer, echoes the exact redirect URI to register at your provider, and cross-checks your claim and group mappings against the claims the provider advertises.
 
-DefectDojo reads the **Username Claim** when it **provisions a new user** through OIDC — the value of that claim becomes the user's DefectDojo username. Leave the field blank to use the standard `preferred_username` claim.
+## Claim Mapping
 
-This setting affects **new** usernames only. When a returning user logs in, DefectDojo matches them to their existing account by the provider's subject identifier and then by email address — not by this claim — so changing the Username Claim does not change how existing users are matched.
+Each row maps one **OIDC Claim** to the **DefectDojo Field** it should populate. Use **Add Claim Mapping** for additional rows and the bin icon to remove one.
 
-Override the default when:
+![image](images/sso_oidc_claim_mapping.png)
 
-- **Your provider doesn't emit `preferred_username`,** or emits it empty. Point DefectDojo at a claim your IdP actually populates.
-- **You want usernames in a specific form** — for example a corporate login name or a specific email claim. Set the Username Claim to the claim that carries the value you want new DefectDojo usernames to take.
+A field with no row keeps its standard claim, so this section is only needed when your provider names things differently. The standard claims are:
 
-If the configured claim is missing from a user's token, DefectDojo falls back to the user's **email address** as the username. If there is no email either, the login fails with an error rather than creating a blank username — so make sure the claim you choose (or the email claim) is always present for every user who logs in via OIDC.
+| DefectDojo Field | Standard claim |
+| --- | --- |
+| Username | `preferred_username` |
+| Email | `email` |
+| First Name | `given_name` |
+| Last Name | `family_name` |
 
-> **Note:** The Username Claim applies to the generic **OIDC** provider only. The bundled OAuth providers (Google, Azure AD, Okta, and so on) determine usernames on their own and are not affected by this setting.
+Notes:
+
+- An unconfigured instance opens with those four rows already filled in, so you can see what OIDC is doing before you change anything.
+- The same claim may feed more than one field. Each DefectDojo field may be mapped from only one claim.
+- Claims are read from the ID token as well as the userinfo response, so a claim your provider releases in only one of the two still works.
+- If a mapped claim is missing or empty for a given user, that field keeps its standard value rather than being blanked.
+
+## Group Mapping
+
+DefectDojo can mirror the groups your provider reports into DefectDojo groups on each login. Check **Enable Group Mapping** to reveal the settings.
+
+![image](images/sso_oidc_group_mapping.png)
+
+- **Group Claim Name** — the claim containing the user's groups. **Most providers do not emit one by default** and need a mapper configured explicitly; in Keycloak, for example, add a *Group Membership* mapper to the client. Note that a *User Realm Role* mapper sends realm **roles**, not groups.
+- **Group Limiter Regex Expression** — only groups matching this expression are mirrored. Use `.*` to allow all.
+- **Remove Stale Group Memberships** — when enabled, memberships in OIDC-provisioned groups the provider no longer reports are removed on the next login. Only groups created by OIDC are affected; groups you assigned by hand, and groups provisioned by another provider such as SAML, are never touched.
+
+Groups are created on first use and named exactly as the provider reports them. If your provider sends full group paths (Keycloak's *Group Membership* mapper does this when **Full group path** is enabled), the DefectDojo group is named `/Group A` rather than `Group A`. Turn that option off if you want the names to match groups arriving from another provider, otherwise you will end up with two DefectDojo groups for the same logical group.
+
+If group mapping appears to do nothing, run **Validate Config**: it reports whether the claim you named is one the provider advertises.

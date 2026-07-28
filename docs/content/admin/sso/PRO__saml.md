@@ -40,18 +40,16 @@ A few things to know about this endpoint:
 
 6. **Required Attributes** — specify the attributes DefectDojo requires from the SAML response.
 
-7. **Attribute Mapping** — map SAML attributes to DefectDojo user fields. Each mapping is written as `saml_attribute=dojo_field`, and multiple mappings are separated by commas. The left side is the attribute name from the SAML response; the right side is the DefectDojo user field.
+7. **Attribute Mapping** — map the attributes your IdP sends to the DefectDojo user fields they should populate. Each row pairs one **SAML Attribute** with one **DefectDojo Field**; use **Add Attribute Mapping** for additional rows and the bin icon to remove one.
 
-   Multiple attributes (typical case):
+   ![image](images/sso_saml_attribute_mapping.png)
 
-   ```
-   Email=email, UserName=username, Firstname=first_name, Lastname=last_name
-   ```
-
-   - Whitespace around the comma is ignored.
-   - The right-hand side must be a field on the DefectDojo `User` model — most commonly `email`, `username`, `first_name`, `last_name`.
-   - The left-hand side must match the attribute name your IdP actually emits. Some IdPs (e.g. Entra ID / Azure AD) send fully qualified claim URIs like `http://schemas.microsoft.com/identity/claims/emailaddress` instead of friendly names. If you are unsure what your IdP is sending, enable **Enable SAML Debugging** (see [Troubleshooting](#troubleshooting)) and inspect the assertion in the logs.
-   - At minimum, you should map the attribute that corresponds to `username`, since DefectDojo looks up users by username when matching SAML logins to existing accounts.
+   - **SAML Attribute** is free text and must match the attribute name your IdP actually emits. Some IdPs (e.g. Entra ID / Azure AD) send fully qualified claim URIs such as `http://schemas.microsoft.com/identity/claims/emailaddress` rather than friendly names. If you are not sure what your IdP sends, enable **Enable SAML Debugging** (see [Troubleshooting](#troubleshooting)) and inspect the assertion in the logs.
+   - **DefectDojo Field** is chosen from a list: **Username**, **First Name**, **Last Name** and **Email**.
+   - At minimum, map the attribute that corresponds to **Username**. DefectDojo looks users up by username when matching SAML logins to existing accounts.
+   - Mapping an attribute to **Email** is strongly recommended: DefectDojo uses the email address for notifications, and to match an incoming login to an existing account by email.
+   - The same attribute may feed more than one field — for example an email claim used for both **Email** and **Username**. The reverse is not allowed: each DefectDojo field may be mapped from only one attribute.
+   - A row with only one half filled in is rejected on save, and the offending cell is highlighted. Rows you add but never fill in are discarded rather than treated as errors.
 
 8. **Remote SAML Metadata** — the URL where your SAML Identity Provider metadata is hosted.
 
