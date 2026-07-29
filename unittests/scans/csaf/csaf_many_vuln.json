@@ -1,0 +1,171 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "2.0",
+    "title": "Example Corp advisory covering several products",
+    "publisher": {
+      "category": "vendor",
+      "name": "Example Corp",
+      "namespace": "https://example.com"
+    },
+    "tracking": {
+      "id": "EXAMPLE-2026-0002",
+      "status": "final",
+      "version": "1",
+      "initial_release_date": "2026-07-29T00:00:00Z",
+      "current_release_date": "2026-07-29T00:00:00Z",
+      "revision_history": [
+        {
+          "number": "1",
+          "date": "2026-07-29T00:00:00Z",
+          "summary": "Initial release"
+        }
+      ],
+      "generator": {
+        "engine": {
+          "name": "hand-authored for DefectDojo parser tests"
+        }
+      }
+    }
+  },
+  "product_tree": {
+    "branches": [
+      {
+        "category": "vendor",
+        "name": "Example Corp",
+        "branches": [
+          {
+            "category": "product_name",
+            "name": "Generic App",
+            "branches": [
+              {
+                "category": "product_version",
+                "name": "1.0.0",
+                "product": {
+                  "product_id": "CSAFPID-0001",
+                  "name": "Generic App 1.0.0"
+                }
+              },
+              {
+                "category": "product_version",
+                "name": "1.0.1",
+                "product": {
+                  "product_id": "CSAFPID-0002",
+                  "name": "Generic App 1.0.1"
+                }
+              },
+              {
+                "category": "product_version",
+                "name": "2.0.0",
+                "product": {
+                  "product_id": "CSAFPID-0003",
+                  "name": "Generic App 2.0.0"
+                }
+              }
+            ]
+          },
+          {
+            "category": "product_name",
+            "name": "Generic Library",
+            "branches": [
+              {
+                "category": "product_version",
+                "name": "3.4.5",
+                "product": {
+                  "product_id": "CSAFPID-0004",
+                  "name": "Generic Library 3.4.5"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "category": "default_component_of",
+        "product_reference": "CSAFPID-0004",
+        "relates_to_product_reference": "CSAFPID-0001",
+        "full_product_name": {
+          "product_id": "CSAFPID-0005",
+          "name": "Generic Library 3.4.5 as a component of Generic App 1.0.0"
+        }
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cve": "CVE-2026-10002",
+      "title": "Denial of service via unbounded allocation",
+      "notes": [
+        {
+          "category": "description",
+          "text": "A crafted payload causes excessive memory use."
+        }
+      ],
+      "product_status": {
+        "known_affected": [
+          "CSAFPID-0001"
+        ],
+        "known_not_affected": [
+          "CSAFPID-0003"
+        ],
+        "fixed": [
+          "CSAFPID-0002"
+        ],
+        "under_investigation": [
+          "CSAFPID-0004"
+        ]
+      },
+      "scores": [
+        {
+          "products": [
+            "CSAFPID-0001"
+          ],
+          "cvss_v3": {
+            "version": "3.1",
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+            "baseScore": 7.5,
+            "baseSeverity": "HIGH"
+          }
+        }
+      ],
+      "remediations": [
+        {
+          "category": "vendor_fix",
+          "details": "Upgrade to Generic App 1.0.1.",
+          "product_ids": [
+            "CSAFPID-0001"
+          ]
+        },
+        {
+          "category": "workaround",
+          "details": "Limit request body size at the proxy.",
+          "product_ids": [
+            "CSAFPID-0001"
+          ]
+        }
+      ]
+    },
+    {
+      "ids": [
+        {
+          "system_name": "Example Corp Advisory",
+          "text": "EXAMPLE-2026-0002-B"
+        }
+      ],
+      "title": "Information disclosure in the component relationship",
+      "notes": [
+        {
+          "category": "description",
+          "text": "Debug output may include request headers."
+        }
+      ],
+      "product_status": {
+        "known_affected": [
+          "CSAFPID-0005"
+        ]
+      }
+    }
+  ]
+}
