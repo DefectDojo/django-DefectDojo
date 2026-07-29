@@ -98,6 +98,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("1B87289954501EF8FD3861819DD98C27", finding.unique_id_from_tool)
                 self.assertEqual("public/category.html", finding.file_path)
                 self.assertEqual(219, finding.line)
+                self.assertEqual(352, finding.cwe)
             with self.subTest(i=1):
                 finding = findings[50]
                 self.assertEqual("Insecure Transport - footer.html: 104 (C72A3E77-8324-4FF9-B958-74FCDDF39D17)", finding.title)
@@ -105,6 +106,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("D739B2E51B127BDFA4FE07B5A7662A45", finding.unique_id_from_tool)
                 self.assertEqual("public/footer.html", finding.file_path)
                 self.assertEqual(104, finding.line)
+                self.assertEqual(297, finding.cwe)
 
     def test_fortify_hello_world_fpr_findings(self):
         with (get_unit_tests_scans_path("fortify") / "hello_world.fpr").open(encoding="utf-8") as testfile:
@@ -122,6 +124,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(5, finding.line)
+                self.assertEqual(615, finding.cwe)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Password Management - HelloWorld.java: 13 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
@@ -129,6 +132,8 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(13, finding.line)
+                # altcategoryCWE lists two ids ("CWE ID 259,CWE ID 798"); we keep the first
+                self.assertEqual(259, finding.cwe)
 
     def test_fortify_webinspect_4_2_many_findings(self):
         with (get_unit_tests_scans_path("fortify") / "webinspect_4_2_many_findings.xml").open(encoding="utf-8") as testfile:
@@ -182,6 +187,9 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("A5338E223E737FF81F8A806C50A05969", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(5, finding.line)
+                # No rule/metainfo for this finding, so no CWE can be resolved
+                # and the finding keeps the model default of 0
+                self.assertEqual(0, finding.cwe)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Password Management - HelloWorld.java: 13 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
@@ -189,6 +197,7 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("D3166922519EDD92D132761602EB71B4", finding.unique_id_from_tool)
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(13, finding.line)
+                self.assertEqual(259, finding.cwe)
 
 
 class TestFortifyV2Parser(DojoTestCase):

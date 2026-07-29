@@ -6,6 +6,7 @@ from django.utils.timezone import is_naive, now
 from dojo.finding.helper import close_finding
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
+    Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -73,6 +74,40 @@ class TestFindingModelMixin:
             duplicate=False,
         )
         self.assertFalse(is_naive(self.finding.mitigated))
+
+    def test_close_finding_clears_open_review(self):
+        """
+        Closing must end an in-flight peer review, not just unflag it.
+
+        ``under_review`` was already cleared here, but the reviewers M2M and
+        ``review_requested_by`` were left behind. That combination is
+        unreachable in the UI — "Clear Review" is gated on ``under_review`` —
+        so the review could never be closed out, and anything listing findings
+        by reviewer kept showing the finding as outstanding work.
+        """
+        # Dojo_User, not User: Finding.reviewers targets dojo.Dojo_User, and
+        # ``.set()`` with a plain User raises "Field 'id' expected a number".
+        reviewer = Dojo_User.objects.create(username="close-finding-reviewer")
+        self.finding.under_review = True
+        self.finding.review_requested_by = self.user
+        self.finding.save()
+        self.finding.reviewers.set([reviewer])
+
+        close_finding(
+            finding=self.finding,
+            user=self.user,
+            is_mitigated=True,
+            mitigated=None,
+            mitigated_by=None,
+            false_p=False,
+            out_of_scope=False,
+            duplicate=False,
+        )
+
+        self.finding.refresh_from_db()
+        self.assertFalse(self.finding.under_review)
+        self.assertIsNone(self.finding.review_requested_by)
+        self.assertEqual(list(self.finding.reviewers.all()), [])
 
     def test_get_sast_source_file_path_with_link_no_file_path(self):
         finding = Finding()
