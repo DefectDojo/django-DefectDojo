@@ -225,11 +225,12 @@ def _get_authorized_dojo_meta(permission):
         return DojoMeta.objects.none()
     if _is_unrestricted(user, permission_to_action(permission)):
         return DojoMeta.objects.all()
+    # _authorized_product_ids already includes products reachable via product-type
+    # membership, so the product / finding / endpoint clauses below cover product-type
+    # authorization on their own.
     authorized_products = _authorized_product_ids(user)
-    authorized_product_types = _authorized_product_type_ids(user)
     return DojoMeta.objects.filter(
         Q(product__id__in=authorized_products)
-        | Q(product_type__id__in=authorized_product_types)
         | Q(finding__test__engagement__product__id__in=authorized_products)
         | Q(endpoint__product__id__in=authorized_products),
     )

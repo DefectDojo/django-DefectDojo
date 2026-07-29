@@ -88,9 +88,10 @@
                             {% endif %}
                             {% if finding|has_object_permission:"edit" %}
                                 <li role="presentation">
-                                    <a href="{% url 'touch_finding' finding.id %}">
+                                    <a href="#" onclick="this.nextElementSibling.submit(); return false;">
                                         <i class="fa-solid fa-clock"></i> Touch Finding
                                     </a>
+                                    <form method="post" action="{% url 'touch_finding' finding.id %}">{% csrf_token %}</form>
                                 </li>
                             {% endif %}
                             <li role="separator" class="divider"></li>
@@ -121,9 +122,10 @@
                                 <li role="separator" class="divider"></li>
                                 {% if finding.mitigated %}
                                     <li role="presentation">
-                                        <a href="{% url 'reopen_finding' finding.id %}">
+                                        <a href="#" onclick="this.nextElementSibling.submit(); return false;">
                                             <i class="fa-solid fa-bug"></i> Open Finding
                                         </a>
+                                        <form method="post" action="{% url 'reopen_finding' finding.id %}">{% csrf_token %}</form>
                                     </li>
                                 {% else %}
                                 {% if not finding.verified %}
@@ -143,17 +145,19 @@
                             {% if finding|has_object_permission:"edit" %}
                                 {% if finding.risk_accepted %}
                                     <li role="presentation">
-                                    <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                    <a href="#" onclick="this.nextElementSibling.submit(); return false;">
                                         <i class="fa-solid fa-circle-exclamation"></i> Unaccept Risk
                                     </a>
+                                    <form method="post" action="{% url 'risk_unaccept_finding' finding.id %}">{% csrf_token %}<input type="hidden" name="return_url" value="{{ request.get_full_path }}"></form>
                                     </li>
                                 {% else %}
                                     {% if not finding.duplicate %}
                                         {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
                                             <li role="presentation">
-                                                <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}">
+                                                <a href="#" onclick="this.nextElementSibling.submit(); return false;">
                                                     <i class="fa-solid fa-circle-exclamation"></i> Accept Risk
                                                 </a>
+                                                <form method="post" action="{% url 'simple_risk_accept_finding' finding.id %}">{% csrf_token %}<input type="hidden" name="return_url" value="{{ request.get_full_path }}"></form>
                                             </li>
                                         {% endif %}
                                         {% if finding.test.engagement.product.enable_full_risk_acceptance %}

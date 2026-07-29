@@ -72,6 +72,7 @@ from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
     Development_Environment,
+    Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -2587,6 +2588,69 @@ class JiraIssuesTest(BaseClass.BaseClassTest):
 
 
 @versioned_fixtures
+class JiraIssueProjectScopingTest(DojoAPITestCase):
+
+    """
+    The jira project on a jira finding mapping is writable, so a caller may only
+    reference a project they are allowed to edit. A member of one product must
+    not be able to attach or repoint a mapping to another product's project.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        pt_a = self.create_product_type("scoping-pt-a")
+        pt_b = self.create_product_type("scoping-pt-b")
+        self.product_a = self.create_product("scoping-prod-a", prod_type=pt_a)
+        self.product_b = self.create_product("scoping-prod-b", prod_type=pt_b)
+
+        self.user = Dojo_User.objects.create(username="jira-scoping-user", is_staff=False, is_superuser=False)
+        self.product_a.authorized_users.add(self.user)
+
+        Test_Type.objects.get_or_create(name="scoping-tt")
+        engagement = self.create_engagement("scoping-eng", self.product_a)
+        test = self.create_test(engagement=engagement, scan_type="scoping-tt", title="scoping-test")
+        self.finding = Finding.objects.create(
+            title="scoping-finding", test=test, severity="Low",
+            numerical_severity="S3", reporter=self.user,
+        )
+
+        # jira_instance is nullable; the scoping check only needs the projects to exist.
+        self.project_a = JIRA_Project.objects.create(product=self.product_a, project_key="AAA")
+        self.project_b = JIRA_Project.objects.create(product=self.product_b, project_key="BBB")
+
+        token = Token.objects.create(user=self.user)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.url = reverse("jira_issue-list")
+
+    def test_create_rejects_unauthorized_jira_project(self):
+        before = JIRA_Issue.objects.count()
+        response = self.client.post(self.url, {
+            "jira_project": self.project_b.id, "jira_id": "1", "jira_key": "BBB-1",
+            "finding": self.finding.id,
+        }, format="json")
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:500])
+        self.assertEqual(before, JIRA_Issue.objects.count())
+
+    def test_create_allows_authorized_jira_project(self):
+        response = self.client.post(self.url, {
+            "jira_project": self.project_a.id, "jira_id": "1", "jira_key": "AAA-1",
+            "finding": self.finding.id,
+        }, format="json")
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.content[:500])
+        self.assertEqual(self.project_a.id, JIRA_Issue.objects.get(id=response.data["id"]).jira_project_id)
+
+    def test_update_rejects_unauthorized_jira_project(self):
+        issue = JIRA_Issue.objects.create(jira_project=self.project_a, jira_id="1", jira_key="AAA-1", finding=self.finding)
+        response = self.client.patch(f"{self.url}{issue.id}/", {"jira_project": self.project_b.id}, format="json")
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:500])
+        issue.refresh_from_db()
+        self.assertEqual(self.project_a.id, issue.jira_project_id)
+
+
+@versioned_fixtures
 class JiraProjectTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2677,6 +2741,15 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
@@ -2700,6 +2773,15 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
 
 
 @versioned_fixtures
@@ -2818,6 +2900,17 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0. The DeprecationNoticeMixin
+        # must run in finalize_response, which only happens if it precedes the base
+        # viewset in the MRO (see dojo/api_v2/views.py:DeprecationNoticeMixin).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class ToolProductSettingsTest(BaseClass.BaseClassTest):
@@ -2863,6 +2956,15 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
 
 
 @versioned_fixtures
@@ -4239,3 +4341,35 @@ class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class OpenAPISchemaGenerationTest(DojoAPITestCase):
+
+    """
+    Render the full OpenAPI v3 schema and gate that generation is error-free.
+
+    drf-spectacular does not raise when it fails to introspect a view or
+    serializer -- it logs an error and drops the operation from the schema, so a
+    broken endpoint (e.g. a serializer whose field querysets raise for the
+    unauthenticated request used at schema time) silently ships incomplete API
+    docs and can trip downstream postprocessing. Fail the build if schema
+    generation produces any error.
+    """
+
+    def test_schema_generation_produces_no_errors(self):
+        GENERATOR_STATS.reset()
+        generator = spectacular_settings.DEFAULT_GENERATOR_CLASS()
+        schema = generator.get_schema(request=None, public=True)
+
+        # Structurally valid per the OpenAPI 3 spec ...
+        validate_schema(schema)
+
+        # ... and generated without drf-spectacular logging any error (a logged
+        # error means an operation was silently dropped from the schema).
+        errors = list(GENERATOR_STATS._error_cache)
+        self.assertEqual(
+            errors,
+            [],
+            f"OpenAPI schema generation produced {len(errors)} error(s):\n"
+            + "\n".join(str(error) for error in errors),
+        )

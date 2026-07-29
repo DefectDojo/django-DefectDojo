@@ -286,6 +286,90 @@ By default Jira issues use DefectDojo's built-in title and body. To customize th
 - **Token lifecycle (OAuth):** DefectDojo owns the whole flow — it performs the authorization-code exchange, stores the access and refresh tokens, and refreshes on demand before a push, persisting the new refresh token each time (Atlassian rotates it on every refresh).
 - **Credential storage:** all connection credentials (passwords, tokens, client secrets, OAuth tokens) are encrypted at rest and are never returned through the API — editing a connection shows a "leave blank to keep" placeholder for stored secrets.
 
+## Linear
+
+The Linear integration allows you to push DefectDojo Findings as [Linear](https://linear.app/) Issues. Issues are created in a Team in your Linear workspace.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to `https://api.linear.app/graphql`.
+- **API Key** should be set to a Linear personal API key. Keys can be generated in Linear under Settings, then Security & access, then [API](https://linear.app/settings/account/security). The key is sent to Linear's GraphQL API in the `Authorization` header.
+
+### Issue Tracker Mapping
+
+- **Team (Group) ID** should be set to the ID of the Linear Team that Issues will be created for. You can list your Teams and their IDs by calling the Linear GraphQL API:
+
+```
+curl -H "Authorization: {{API_KEY}}" -H "Content-Type: application/json" \
+  -d '{"query":"{ teams { nodes { id name key } } }"}' https://api.linear.app/graphql
+```
+
+### Severity Mapping Details
+
+A Linear Issue carries a numeric **priority** rather than a severity field. Each DefectDojo severity maps to a Linear priority, where `1` is Urgent and `4` is Low:
+
+- **Severity Field Name**: `Priority`
+- **Info Mapping**: `4`
+- **Low Mapping**: `4`
+- **Medium Mapping**: `3`
+- **High Mapping**: `2`
+- **Critical Mapping**: `1`
+
+### Status Mapping Details
+
+Each status value must be set to the ID of a Workflow State in your Linear Team. Workflow State IDs are unique to each workspace, so there are no default values. You can list the Workflow States and their IDs by calling the Linear GraphQL API:
+
+```
+curl -H "Authorization: {{API_KEY}}" -H "Content-Type: application/json" \
+  -d '{"query":"{ workflowStates { nodes { id name type team { key } } } }"}' https://api.linear.app/graphql
+```
+
+- **Status Field Name**: `Workflow State ID`
+- **Active Mapping**: the ID of a started or unstarted state, for example `Todo` or `In Progress`.
+- **Closed Mapping**: the ID of a completed state, for example `Done`. When a Finding is deleted in DefectDojo, its Issue is moved to this state.
+
+## Opsgenie
+
+The Opsgenie Integration allows you to push DefectDojo Findings and Finding Groups as Opsgenie Alerts, optionally routed to an Opsgenie Team as a responder.
+
+### Instance Setup
+
+- **Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to `https://api.opsgenie.com`.  If your Opsgenie account is hosted in the EU service region, use `https://api.eu.opsgenie.com` instead.  If your alerts live in Jira Service Management Operations (Atlassian is folding Opsgenie into JSM), use `https://api.atlassian.com/jsm/ops/integration`.
+- **API Key** should be set to an Opsgenie **API integration** key.  An account administrator can create one in the Opsgenie web app under **Settings > Integrations**: add an integration of type **API** and give it *Create and Update Access* (and *Read Access* so DefectDojo can verify the connection).  Note that this is an integration key, not a personal API key - DefectDojo authenticates with `GenieKey` authorization, which only integration keys support.
+
+### Issue Tracker Mapping
+
+- **Team Name** *(optional)* should be the name of the Opsgenie Team to add as a responder on created alerts.  You can leave it empty: if the API integration key is team-scoped, alerts route to that team automatically, and otherwise your account's own routing rules decide the responders.
+
+### Severity Mapping Details
+
+Severities map to the Opsgenie alert **Priority** field, which uses Opsgenie's fixed `P1` (critical) through `P5` (informational) scale:
+
+- **Severity Field Name**: `Priority`
+- **Info Mapping**: `P5`
+- **Low Mapping**: `P4`
+- **Medium Mapping**: `P3`
+- **High Mapping**: `P2`
+- **Critical Mapping**: `P1`
+
+If a severity is mapped to an unrecognized value, the priority is omitted and Opsgenie applies its own default (`P3`).
+
+### Status Mapping Details
+
+Opsgenie alerts are `open` or `closed`, and an open alert can additionally be `acknowledged`:
+
+- **Status Field Name**: `Status`
+- **Active Mapping**: `open`
+- **Closed Mapping**: `closed`
+- **False Positive Mapping**: `closed`
+- **Risk Accepted Mapping**: `acknowledged`
+
+Note that `closed` is a final status in Opsgenie - a closed alert cannot be reopened, and its alias is released.  Unlike some other tools, Opsgenie does allow content edits after creation, so pushing an updated Finding syncs its message, description, and priority alongside the status.
+
+DefectDojo sets each alert's **alias** to a stable key derived from the Finding or Finding Group, and Opsgenie de-duplicates open alerts by alias - so re-pushing the same Finding updates the existing open alert instead of creating a duplicate.
+
 ## PagerDuty
 
 The PagerDuty Integration allows you to push DefectDojo Findings and Finding Groups as PagerDuty Incidents, opened on a PagerDuty Service of your choice.
@@ -332,13 +416,34 @@ The ServiceNow Integration allows you to push DefectDojo Findings as ServiceNow 
 
 ### Instance Setup
 
-Your ServiceNow instance will require you to obtain a Refresh Token, associated with the User or Service account that will push Incidents to ServiceNow.
+DefectDojo authenticates to ServiceNow over OAuth 2.0. How you create the OAuth credentials depends on your ServiceNow release — newer releases (Zurich and later) use a Client Credentials grant, while earlier releases use a refresh token.
 
-You'll need to start by creating an OAuth registration on your ServiceNow instance for DefectDojo:
+#### ServiceNow Zurich and later (client credentials)
 
-1. In the left-hand navigation bar, search for “Application Registry” and select it.
-2. Click “New”.
-3. Choose “Create an OAuth API endpoint for external clients”.
+Recent ServiceNow releases deprecated the classic "Create an OAuth API endpoint for external clients" option in favor of the **New Inbound Integration Experience**, which issues an OAuth **Client Credentials** grant bound to a service account:
+
+1. In the left-hand navigation bar, search for "Application Registry" and select it.
+2. Click **New**, then choose **New Inbound Integration Experience**.
+3. Select **New Integration → OAuth - Client credentials grant**.
+4. Set the **OAuth Application User** to the service account that will create Incidents. That account's roles determine what DefectDojo is allowed to write.
+5. Save the registration. ServiceNow auto-generates the **Client ID** and **Client Secret** (leave those fields blank when creating the registration).
+
+Then, in DefectDojo:
+
+- **Instance Label** should be the label that you want to use to identify this integration.
+- **Location** should be set to the URL for your ServiceNow server, for example `https://your-organization.service-now.com/`.
+- **Client ID** should be the Client ID from the OAuth registration.
+- **Client Secret** should be the Client Secret from the OAuth registration.
+
+Leave the Refresh Token, Username, and Password fields empty — DefectDojo requests a fresh client-credentials token for each sync.
+
+#### Earlier ServiceNow releases (refresh token)
+
+On releases that still offer the classic registration, obtain a Refresh Token associated with the User or Service account that will push Incidents to ServiceNow:
+
+1. In the left-hand navigation bar, search for "Application Registry" and select it.
+2. Click "New".
+3. Choose "Create an OAuth API endpoint for external clients".
 4. Fill in the required fields:
     * Name: Provide a meaningful name for your application (e.g., Vulnerability Integration Client).
     * (Optional) Adjust the Token Lifespan:
@@ -366,7 +471,7 @@ If your ServiceNow credentials are correct, and allow for admin level-access to 
 - **Location** should be set to the URL for your ServiceNow server, for example `https://your-organization.service-now.com/`.
 - **Refresh Token** is where the Refresh Token should be entered.
 - **Client ID** should be the Client ID set in the OAuth App Registration.
-- **Client ID** should be the Client Secret set in the OAuth App Registration.
+- **Client Secret** should be the Client Secret set in the OAuth App Registration.
 
 ### Severity Mapping Details
 
@@ -384,6 +489,35 @@ This maps to the ServiceNow Impact field.
 - **Closed Mapping**: `Closed`
 - **False Positive Mapping**: `Resolved`
 - **Risk Accepted Mapping**: `Resolved`
+
+Each mapping accepts a standard state label (`New`, `In Progress`, `On Hold`, `Resolved`, `Closed`, `Cancelled`) or a numeric state value. On instances with customized Incident states — or when targeting a table other than `incident` — use the numeric **state value** from your instance's choice list; a numeric value outside the standard set is sent to ServiceNow exactly as configured. The built-in Resolution-code default only accompanies the standard resolved/closed states, so pair custom state values with the close and resolution field mappings below.
+
+### Close and resolution fields
+
+Some ServiceNow instances enforce a Data Policy that makes fields such as the **Resolution code** (`close_code`) mandatory whenever an Incident moves to a resolved or closed state. If DefectDojo closes an Incident without them, ServiceNow rejects the write with an HTTP 403 *"Data Policy Exception"* and the reason is recorded in the integration's Errors view.
+
+Attach the required fields to the state change with **Custom Field Mappings**, setting **Apply On** to the disposition that should carry them:
+
+- **Transition to Closed** — sent when a Finding is mitigated / closed.
+- **Transition to False Positive** — sent when a Finding is marked a false positive.
+- **Transition to Risk Accepted** — sent when a Finding is risk accepted.
+
+For example, to satisfy a mandatory Resolution code:
+
+| Source | Field Name | Value | Apply On |
+|---|---|---|---|
+| Static | `close_code` | `Resolved by DefectDojo` | Transition to Closed |
+| Static | `close_notes` | `Reviewed by the security team` | Transition to Closed |
+| Static | `close_code` | `Not a defect` | Transition to False Positive |
+
+Notes:
+
+- Field Name is the ServiceNow column name — `close_code`, `close_notes`, or a custom `u_...` field.
+- Transition mappings fire when the record's state actually changes: a Finding that is already closed when first pushed, an update that closes or reopens the record, and the forced close when a ticket link is deleted. They are not re-sent on routine updates of an unchanged record, so journal fields such as `work_notes` receive one entry per transition.
+- Reference fields such as `assignment_group` and `assigned_to` expect a **sys_id**, not a display name.
+- Values that parse as JSON are sent typed: `true`, `42`, `[...]`, `{...}` — and `null`, which clears the field. To send such text as a literal string, wrap it in double quotes (e.g. `"null"`).
+- `short_description`, `description`, `state`, `impact`, `urgency`, and `priority` are owned by the description template and the severity/status mappings, so they cannot be set through a custom field mapping.
+- On tables other than `incident`, state values that match the standard Incident set (`1`, `2`, `3`, `6`, `7`, `8`) are still interpreted with Incident semantics — including the automatic Resolution code default on `6`/`7`/`8`. Prefer state values outside that range on custom tables, or supply the close fields explicitly as above.
 
 ## Shortcut
 

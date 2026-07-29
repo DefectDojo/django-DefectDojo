@@ -5,13 +5,14 @@ import time
 from collections import defaultdict
 
 from django.core.management.base import BaseCommand
-from django.db import connection
+from django.db import connection, transaction
 from django.db.models import Prefetch
 from django.utils import timezone
 
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Endpoint, Endpoint_Status, Product
+from dojo.tags.utils import bulk_add_tag_mapping
 from dojo.url.models import URL
 
 logger = logging.getLogger(__name__)
@@ -45,7 +46,7 @@ def _suspend_auto_now_add(model, field_name: str):
 PHASES = (
     "fetch_endpoint",   # iterator yields the next endpoint
     "url_create",       # URL.get_or_create_from_values + Location side-effect
-    "tags",             # endpoint tag copy onto the location
+    "tags",             # batched endpoint tag copy onto locations
     "meta",             # DojoMeta copy onto the location
     "finding_refs",     # LocationFindingReference creation per Endpoint_Status
     "product_refs",     # LocationProductReference creation
@@ -108,11 +109,11 @@ class Command(BaseCommand):
         The migration creates locations that may be linked to multiple products
         (via the endpoint's own product and via each finding's product). We
         collect every contributing product per location so the post-pass can
-        call ``LocationManager(product)._bulk_inherit_tags(locations)`` once
-        per product group — covering the case where a location is shared
-        across products with differing ``enable_product_tag_inheritance``
-        flags (the helper short-circuits via its own diff check on repeat
-        visits, so redundancy is safe).
+        call ``apply_inherited_tags_for_locations`` once per product group —
+        covering the case where a location is shared across products with
+        differing ``enable_product_tag_inheritance`` flags (the helper
+        short-circuits via its own diff check on repeat visits, so redundancy
+        is safe).
         """
         if product is None or product.id is None:
             return
@@ -121,6 +122,79 @@ class Command(BaseCommand):
         self.locations_by_product_id[product.id].add(location.id)
         self.product_obj_by_id.setdefault(product.id, product)
         self.location_obj_by_id.setdefault(location.id, location)
+
+    # -- Endpoint tag batching -----------------------------------------------
+
+    def _queue_location_tags(
+        self,
+        endpoint: Endpoint,
+        location: Location,
+        tag_names: set[str],
+    ) -> None:
+        """Queue endpoint tags for a batched write to their destination Location."""
+        if endpoint.id is None or location.id is None:
+            return
+        for tag_name in tag_names:
+            # Multiple legacy Endpoints may normalize to the same Location.
+            # Deduplicate by Location id so the through row and Tagulous count
+            # are each updated exactly once.
+            self.pending_tag_locations[tag_name][location.id] = location
+        self.pending_endpoint_tags[endpoint.id] = (location, tag_names)
+
+    def _record_endpoint_failure(self, endpoint_id: int | None, exc: Exception) -> None:
+        """Record an Endpoint once even if more than one migration phase fails."""
+        if endpoint_id in self.failed_endpoint_ids:
+            return
+        self.failed_endpoint_ids.add(endpoint_id)
+        self.failed_endpoints.append((endpoint_id, str(exc)))
+
+    def _flush_location_tags(self) -> None:
+        """Persist queued tags, retrying per Endpoint if the batch write fails."""
+        if not self.pending_tag_locations:
+            return
+
+        tag_to_locations = {
+            tag_name: list(locations_by_id.values())
+            for tag_name, locations_by_id in self.pending_tag_locations.items()
+        }
+        t = self._bench_start()
+        try:
+            try:
+                # bulk_add_tag_mapping creates tags, through rows, and updates
+                # Tagulous counters in separate steps. The outer transaction
+                # makes the complete batch atomic if any step fails.
+                with transaction.atomic():
+                    bulk_add_tag_mapping(tag_to_locations, batch_size=self.batch_size)
+            except Exception:
+                endpoint_ids = list(self.pending_endpoint_tags)
+                logger.exception(
+                    "Batched endpoint tag copy failed for %d tagged endpoint(s); "
+                    "first endpoint ids=%s; retrying one endpoint at a time",
+                    len(endpoint_ids),
+                    endpoint_ids[:10],
+                )
+
+                # Preserve the command's documented per-row resilience. This
+                # slower path runs only after a failed batch and isolates a bad
+                # Endpoint without discarding valid tag writes for its peers.
+                for endpoint_id, (location, tag_names) in self.pending_endpoint_tags.items():
+                    endpoint_mapping = {
+                        tag_name: [location]
+                        for tag_name in tag_names
+                    }
+                    try:
+                        with transaction.atomic():
+                            bulk_add_tag_mapping(endpoint_mapping, batch_size=self.batch_size)
+                    except Exception as exc:
+                        logger.exception(
+                            "Failed to copy tags for endpoint id=%s; continuing",
+                            endpoint_id,
+                        )
+                        self._record_endpoint_failure(endpoint_id, exc)
+        finally:
+            self._bench_end("tags", t)
+            self.pending_tag_locations.clear()
+            self.pending_endpoint_tags.clear()
 
     # -- Migration logic --------------------------------------------------
 
@@ -139,13 +213,12 @@ class Command(BaseCommand):
         )
         self._bench_end("url_create", t)
 
-        # Add the endpoint tags to the location tags. Read names from the
-        # prefetched `tags` manager and add them in a single splat call so we
-        # do one round-trip per endpoint instead of one per tag.
+        # Queue endpoint tags for one bulk write per migration batch instead
+        # of making Tagulous look up and attach tags once per endpoint.
         t = self._bench_start()
         tag_names = {tag.name for tag in endpoint.tags.all()}
         if tag_names:
-            url.location.tags.add(*tag_names)
+            self._queue_location_tags(endpoint, url.location, tag_names)
         self._bench_end("tags", t)
 
         # Add any metadata from the endpoint to the location.
@@ -330,22 +403,21 @@ class Command(BaseCommand):
 
     def _run_tag_inheritance(self) -> None:
         """
-        Drive `LocationManager._bulk_inherit_tags` once per contributing product.
+        Apply inherited tags once per contributing product.
 
-        Each `LocationManager` call is wrapped in its own try/except so a
+        Each product batch is wrapped in its own try/except so a
         failure on one product group doesn't prevent the rest from running —
-        same philosophy as the per-endpoint loop. Tag inheritance is a
-        purely additive post-pass; the underlying location/reference rows
-        are already committed by the main loop, so partial failure here
-        leaves a consistent (if incomplete-inheritance) state that a
-        targeted re-run can finish.
+        same philosophy as the per-endpoint loop. The underlying
+        location/reference rows are already committed by the main loop, so
+        partial failure here leaves a consistent (if incompletely reconciled)
+        inheritance state that a targeted re-run can finish.
         """
         if not self.locations_by_product_id:
             return
 
-        # Lazy import: dojo.importers.* pulls in a lot of modules and we
-        # don't want it loaded at management-command discovery time.
-        from dojo.importers.location_manager import LocationManager  # noqa: PLC0415
+        # Lazy import: the inheritance module imports the full model layer, so
+        # keep it out of management-command discovery.
+        from dojo.tags import inheritance as tag_inheritance  # noqa: PLC0415
 
         t0 = time.time()
         n_products = len(self.locations_by_product_id)
@@ -356,7 +428,10 @@ class Command(BaseCommand):
             product = self.product_obj_by_id[prod_id]
             locations = [self.location_obj_by_id[lid] for lid in loc_ids]
             try:
-                LocationManager(product)._bulk_inherit_tags(locations)
+                tag_inheritance.apply_inherited_tags_for_locations(
+                    locations,
+                    product=product,
+                )
             except Exception:
                 logger.exception(
                     "Tag inheritance pass failed for product id=%s "
@@ -391,16 +466,22 @@ class Command(BaseCommand):
         # `locations_by_product_id` maps product.id -> set of location.ids
         # contributed by that product (via endpoint.product OR finding.test.
         # engagement.product). We hold the Product/Location objects in
-        # parallel maps so the post-pass can hand them directly to
-        # `LocationManager(product)._bulk_inherit_tags(locations)` without
-        # extra DB lookups.
+        # parallel maps so the post-pass can hand them directly to the bulk
+        # inheritance helper.
         self.locations_by_product_id: dict[int, set[int]] = defaultdict(set)
         self.product_obj_by_id: dict[int, Product] = {}
         self.location_obj_by_id: dict[int, Location] = {}
 
+        # Endpoint tags are copied to Locations once per migration batch.
+        # The nested Location-id mapping prevents duplicate through rows and
+        # tag-count drift when multiple Endpoints normalize to one Location.
+        self.pending_tag_locations: dict[str, dict[int, Location]] = defaultdict(dict)
+        self.pending_endpoint_tags: dict[int, tuple[Location, set[str]]] = {}
+
         # Collected per-endpoint failures so a single bad row doesn't abort
         # a multi-hour migration. Each entry is (endpoint_id, exception_str).
         self.failed_endpoints: list[tuple[int | None, str]] = []
+        self.failed_endpoint_ids: set[int | None] = set()
 
         if self.query_count:
             connection.force_debug_cursor = True
@@ -473,8 +554,12 @@ class Command(BaseCommand):
                 except Exception as exc:
                     endpoint_id = getattr(endpoint, "id", None)
                     logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
-                    self.failed_endpoints.append((endpoint_id, str(exc)))
-                    continue
+                    self._record_endpoint_failure(endpoint_id, exc)
+
+                # Flush independently of per-endpoint success so a failing
+                # endpoint at a batch boundary cannot leave the queue growing.
+                if i % self.batch_size == 0:
+                    self._flush_location_tags()
 
                 # Progress report every --progress-every endpoints
                 if i % self.progress_every == 0:
@@ -486,6 +571,9 @@ class Command(BaseCommand):
                         connection.queries_log.clear()
                         queries_at_chunk_start = 0
                     self._log_progress(i, endpoint_count, run_t0, queries_in_chunk)
+
+            # Persist the final partial batch before reporting completion.
+            self._flush_location_tags()
 
             elapsed = time.time() - run_t0
             successful = i - len(self.failed_endpoints)
@@ -506,7 +594,7 @@ class Command(BaseCommand):
             # product or system-wide) the migrated Locations would otherwise
             # not pick up inherited product tags. We grouped (product,
             # location) pairs during the main loop and now drive
-            # `LocationManager._bulk_inherit_tags` once per contributing
+            # `apply_inherited_tags_for_locations` once per contributing
             # product. The helper rediscovers each location's full product
             # set via LocationProductReference/LocationFindingReference and
             # diff-checks before writing, so revisits of shared locations

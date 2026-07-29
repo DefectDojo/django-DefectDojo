@@ -20,9 +20,15 @@ See our [Pro UI Guide](/get_started/about/ui_pro_vs_os/) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
+### Global Search
+
+Find any Finding, Asset, Engagement, and more from a single search box in the topbar. DefectDojo Pro's global search spans your objects with fast, typo-tolerant Postgres full-text search.
+
+See our [Global Search Guide](/navigation/pro__global_search/) for more information.
+
 ### Assets/Organizations
 
-DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/assets_organizations/) for details.
+DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/asset_hierarchy/) for details.
 
 ![image](images/asset_hierarchy_diagram.png)
 
@@ -38,6 +44,12 @@ DefectDojo Pro's Rules Engine allows you to script automated bulk actions and bu
 See our [Rules Engine Guide](/automation/rules_engine/about) for more info.
 
 ![image](images/rules_engine_4.png)
+
+### Sensei
+
+DefectDojo Pro's **Sensei** (BETA) is an AI-powered scan-and-fix capability: connect a repository through a GitHub App and Sensei scans it, imports the findings, and opens pull requests that remediate them — with a preview-first workflow, so nothing runs (and no LLM cost is incurred) until you approve.
+
+See our [Sensei Guide](/sensei/about_sensei/) for more info.
 
 ### Pro Dashboards and Reporting
 

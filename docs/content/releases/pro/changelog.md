@@ -12,6 +12,47 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## July 2026: v3.1
 
+### July 27, 2026: v3.1.300
+
+* **(RBAC)** Added user-defined Custom Roles. You can now create your own roles with a granular permission set per object type, instead of being limited to the built-in roles.
+* **(Connectors)** Added another large batch of Connectors. New findings connectors: Fortify (SSC and FoD), HCL AppScan (ASoC and AppScan 360°), Datadog Cloud Security, MobSF, Deepfence ThreatMapper, NeuVector, Lacework / FortiCNAPP, Socket.dev, Bright Security, Aqua Security, Escape, Detectify, Fairwinds Insights, Wallarm, Vanta, NowSecure, FOSSA, Codacy, DeepSource, Beagle Security, Orca, AccuKnox, Halo Security, and Nightfall AI. Connector nomenclature is now unified as Upstream and Downstream Connectors, and you can request either type from the cloud UI.
+* **(Connectors)** JFrog Xray gained an artifact-level record mode, with connector-declared parents materialized as asset hierarchy edges. The new mode is on by default for new installations only, so existing installations keep their current record layout. Checkmarx One added opt-in per-branch sync via a `track_branches` toggle, which creates a separate engagement per tracked branch. Connector engagement names now include the asset name.
+* **(Connectors)** Connector syncs are more resilient on large data sets.
+* **(Sensei)** Added Bitbucket, Azure DevOps, and GitHub Enterprise connections, along with a Revert action and GitLab remediation support.
+* **(Authentication)** Login, logout, MFA, SSO, and password reset now run natively in the Pro UI rather than falling back to the classic UI. Added a generic LDAP authentication integration, configurable from the Tuner.
+* **(SSO)** Added self-serve SSO diagnostics and logs so you can troubleshoot a misconfigured provider without opening a support ticket.
+* **(Feature Flags)** Organization / Asset relabeling is now a database-driven feature flag. Feature flags are also readable through the v2 API and MCP, and the legacy feature flag table was retired.
+* **(Integrations)** The ServiceNow integrator now supports transition-time custom fields and `client_credentials` authentication, and surfaces integration errors in the UI.
+* **(Filters)** Date filters now resolve day boundaries in the viewing user's timezone, and the SLA filter options were reworked.
+* **(API)** Tightened validation and authorization across the user, product type, test, location, and endpoint reference endpoints. Configuration permission assignment is now restricted to superusers.
+* **(Performance)** Reimport matching now builds a run-scoped candidate index, global search splits matching into per-lane index-served queries, and vulnerability IDs gained a case-insensitive index.
+* **(Tools)** Added a Fortify parser V2 that prefers the true line number reported by the scanner. Fixed KICS severity mapping.
+* **(Bug Fixes)** Report summary charts now render after the table of contents is rebuilt; connector records are marked STALE when their owner is deleted through an async cascade; non-superusers can view the MCP page while MCP is enabled; a background sub-fetch failure no longer ejects you to the error page on secondary navigation; dropdown filters keep every character you type; an explicit scalar `cwe` stays primary when a `cwes` list is also supplied; API schema generation no longer scopes serializer querysets by `AnonymousUser`.
+
+### July 22, 2026: v3.1.202
+
+* **(Connectors)** Registered the Intigriti bug bounty connector and the runZero asset connector in the Pro UI. The Qualys connector now sizes its request timeout for large detection exports.
+* **(Integrations)** Integrator assignments now support per-assignment push filters, so you can limit what gets pushed by minimum severity and active-only status. 
+* **(Sensei)** Added a cloud dispatch guard, retroactive re-staging of auto-fixes, and a per-row actions menu. Fixed the "Configure Product" button clipping in the findings list.
+* **(Findings)** Request Review is now gated on `Finding_View` instead of `Finding_Edit`.
+* **(Pro UI)** Export options now prefill from the active table preference, the AI menu was flattened into top-level Sensei, Model Settings, and MCP links, and the PSIRT menu link now opens in a new tab.
+* **(Import)** Scan-import cleanup now streams files and fails loudly on error.
+* **(Performance)** Dashboard count tiles no longer time out on large finding buckets.
+* **(Bug Fixes)** Cleared default ordering in count subqueries
+
+### July 20, 2026: v3.1.200
+
+* **(Connectors)** Added another large batch of Connectors. New findings connectors: Rapid7 InsightAppSec, Cobalt.io PtaaS, Sonatype IQ (Nexus Lifecycle), Acunetix 360, Mend (WhiteSource), Bugcrowd, Black Duck, Edgescan, Sysdig Secure, Coverity Connect, Harbor, OpenVAS / Greenbone, Nuclei / ProjectDiscovery Cloud, Endor Labs, Prowler, Kubescape / ARMO, Quay + Clair, Intruder.io, and YesWeHack. Added a ServiceNow CMDB asset connector. You can now request a new connector directly from the cloud UI, and CrowdStrike Spotlight now derives its severity floor from structured sync filters.
+* **(Integrations)** Added a Linear integrator for pushing findings to Linear.
+* **(Feature Flags)** Redesigned feature flags into a two-tier, metadata-driven system with a dedicated Feature Flags admin page.
+* **(Findings)** Similar Findings now only surfaces genuinely similar findings, the CVSS and EPSS columns now expose numeric filter operators, and several broken findings-table column filters were fixed.
+* **(UI)** Metric colors in the Vue UI are now configurable per instance.
+* **(SSO)** Added a configurable OIDC username claim and hardened SSO user creation.
+* **(Performance)** Authorized-finding queries now filter by a literal product-id list, and the paginated count-cache refill is now single-flighted to avoid redundant recounts on busy instances.
+* **(Import)** The generic parser no longer produces a nested list when a finding has both a CVE and vulnerability IDs, and the Import/ReImport forms no longer touch the database at import time.
+* **(Settings)** Added `DD_EDITABLE_MITIGATED_DATA` to control whether mitigation data is editable, and ignored close-finding fields are now hidden.
+* **(Bug Fixes)** Connector backend config refresh now encodes datetimes correctly
+
 ### July 15, 2026: v3.1.101
 
 * **(Findings)** Consolidated the bulk-edit actions in the findings table into a single surface, and added bulk "replace tag" and bulk review actions.
@@ -322,7 +363,7 @@ No significant UX changes.
 
 #### Dec 8, 2025: v2.53.1
 
-* **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/assets_organizations/) for details, and information on opting in to the Beta.
+* **(Assets/Organizations)** Introduced overhaul to Products/Product Types, added the ability to create and diagram relationships between Assets.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/asset_hierarchy/) for details, and information on opting in to the Beta.
 * **(Findings)** Added new KEV fields for ransomware, exploits, and date handling.
 * **(Pro UI)** Added Table Preferences menu, allowing you to store preset lists of columns for each table.
 

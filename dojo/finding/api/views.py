@@ -69,6 +69,7 @@ from dojo.models import (
     NoteHistory,
     Notes,
 )
+from dojo.notes.helper import notes_prefetch
 from dojo.risk_acceptance import api as ra_api
 from dojo.utils import (
     generate_file_response,
@@ -192,7 +193,7 @@ class FindingViewSet(
                 "locations__location__url",
                 "reviewers",
                 "found_by",
-                "notes",
+                notes_prefetch(),
                 "risk_acceptance_set",
                 "test",
                 "tags",
@@ -216,7 +217,7 @@ class FindingViewSet(
                 "endpoints",
                 "reviewers",
                 "found_by",
-                "notes",
+                notes_prefetch(),
                 "risk_acceptance_set",
                 "test",
                 "tags",

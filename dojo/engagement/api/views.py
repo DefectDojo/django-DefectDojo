@@ -33,6 +33,7 @@ from dojo.models import (
     NoteHistory,
     Notes,
 )
+from dojo.notes.helper import notes_prefetch
 from dojo.product.queries import get_authorized_engagement_presets
 from dojo.risk_acceptance import api as ra_api
 from dojo.utils import (
@@ -77,7 +78,7 @@ class EngagementViewSet(
     def get_queryset(self):
         return (
             get_authorized_engagements("view")
-            .prefetch_related("notes", "risk_acceptance", "files")
+            .prefetch_related(notes_prefetch(), "risk_acceptance", "files")
             .distinct()
         )
 

@@ -155,6 +155,46 @@ class UserSerializer(serializers.ModelSerializer):
             msg = "Only superusers are allowed to add or edit staff users."
             raise ValidationError(msg)
 
+        # Configuration permissions are privilege-bearing: they grant the
+        # ability to manage users, groups, tool configurations, and so on.
+        # Only superusers may assign or change them, which keeps the set of
+        # grantable capabilities under superuser control and mirrors the
+        # is_staff / is_superuser guards above. The "configuration_permissions"
+        # field maps to the "user_permissions" source.
+        if "user_permissions" in data and not self.context["request"].user.is_superuser:
+            requested_permissions = set(data.get("user_permissions") or [])
+            if self.instance is not None:
+                allowed_configuration_permissions = set(
+                    self.fields["configuration_permissions"].child_relation.queryset.all(),
+                )
+                current_permissions = (
+                    set(self.instance.user_permissions.all())
+                    & allowed_configuration_permissions
+                )
+            else:
+                current_permissions = set()
+            if requested_permissions != current_permissions:
+                msg = "Only superusers are allowed to change configuration permissions."
+                raise ValidationError(msg)
+
+        # Identity fields (username/email) determine who an account is and drive
+        # the email-based password-reset flow. A non-superuser holding user-management
+        # permissions must not be able to change the identity of *another* account:
+        # changing a victim's email and then triggering a password reset is an
+        # account-takeover vector. Users may still edit their own identity fields,
+        # and superusers retain full control. Mirrors the is_superuser / is_staff /
+        # configuration_permissions guards above.
+        request_user = self.context["request"].user
+        if (
+            self.instance is not None
+            and not request_user.is_superuser
+            and self.instance.pk != request_user.pk
+        ):
+            for identity_field in ("username", "email"):
+                if identity_field in data and data[identity_field] != getattr(self.instance, identity_field):
+                    msg = "Only superusers are allowed to change the username or email of another user."
+                    raise ValidationError(msg)
+
         if self.context["request"].method in {"PATCH", "PUT"} and "password" in data:
             msg = "Update of password though API is not allowed"
             raise ValidationError(msg)
