@@ -62,7 +62,6 @@ def get_item(
     artifact_version,
     artifact_sha256,
 ):
-    cve = None
     cwe = None
     cvssv3 = None
     impact_path = ImpactPath("", "", "")
@@ -93,6 +92,10 @@ def get_item(
     if len(impact_paths) > 0:
         impact_path = decode_impact_path(impact_paths[0])
 
+    # unique_id_from_tool is this parser's stable identity and drives reimport matching (see
+    # DEDUPLICATION_ALGORITHM_PER_PARSER): it must depend only on values that identify the finding
+    # (artifact digest, impacted component, Xray issue id) and never on vendor-maintained prose such
+    # as the CVE description, which Xray rewrites as it refreshes its vulnerability database.
     result = hashlib.sha256()
     if "issue_id" in vulnerability:
         unique_id = str(
@@ -102,9 +105,11 @@ def get_item(
             + vulnerability["issue_id"],
         )
         vuln_id_from_tool = vulnerability["issue_id"]
-    elif cve:
-        unique_id = str(artifact_sha256 + impact_path.name + impact_path.version + cve)
     else:
+        # No issue id: fall back to the summary, which is the only other per-issue identifier the
+        # payload carries. (A `cve` branch used to sit here but was unreachable — the local was
+        # never assigned — and left vuln_id_from_tool unbound, so it would have raised had the
+        # condition ever become true.)
         unique_id = str(
             artifact_sha256
             + impact_path.name
@@ -134,7 +139,8 @@ def get_item(
         severity=severity,
         description=description,
         test=test,
-        file_path=impact_paths[0],
+        # An issue with no impact_path at all would otherwise IndexError and fail the whole import.
+        file_path=impact_paths[0] if len(impact_paths) > 0 else "",
         component_name=artifact_name,
         component_version=artifact_version,
         static_finding=True,
