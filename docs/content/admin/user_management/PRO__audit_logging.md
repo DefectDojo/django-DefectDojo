@@ -36,7 +36,7 @@ Audit Logs track a variety of actions, including, but not limited to:
 - Creation and editing of User profiles.
 - EPSS percentile updates. 
 
-The full list of changes and actions that are captured in Audit Logs can be found [here](../PRO__audit_log_index).
+The full list of changes and actions that are captured in Audit Logs can be found [here](../pro__audit_log_index/).
 
 ## Audit Logs Table 
 
