@@ -73,7 +73,7 @@ In the DefectDojo Pro UI you can narrow your own review-request notifications. O
 Two things to be clear about:
 
 * Choosing *Selected* and picking nothing means **none**, not all.
-* Narrowing suppresses the notification, **not the request**. You remain a requested reviewer and the request still appears in your [My Work](/metrics_reports/dashboards/PRO__my_work/) queue under **Awaiting My Review** — you simply are not messaged about it. This is deliberate: the queue is the durable record, notifications are the reminder.
+* Narrowing suppresses the notification, **not the request**. You remain a requested reviewer and the request still appears in your [My Work](/metrics_reports/dashboards/pro__my_work/) queue under **Awaiting My Review** — you simply are not messaged about it. This is deliberate: the queue is the durable record, notifications are the reminder.
 
 This narrowing also takes precedence over the system-level override described below, so a reviewer who has scoped themselves out is not notified even when `review_requested` is configured to trump personal preferences.
 

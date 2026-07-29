@@ -25,7 +25,7 @@ Everything is scoped by your permissions — My Work never shows you something y
 
 ## On a dashboard
 
-The same content is available as a **My Work** widget for [custom dashboards](../PRO__custom_dashboards/), so you can put your queue alongside other metrics. Add the widget and choose which queues to show and how many rows each should carry.
+The same content is available as a **My Work** widget for [custom dashboards](../pro__custom_dashboards/), so you can put your queue alongside other metrics. Add the widget and choose which queues to show and how many rows each should carry.
 
 There is also a ready-made **My Work** dashboard template under the **Personal** category, which pairs the widget with SLA burndown and recent activity.
 

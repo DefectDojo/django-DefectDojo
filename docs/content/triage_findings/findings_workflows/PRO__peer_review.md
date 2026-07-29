@@ -9,7 +9,7 @@ Peer review lets you ask someone to look at a Finding before it is closed out. I
 
 ## Requesting a review
 
-Open a Finding and choose **Request Review** from the Finding menu, or select several Findings in a list and use the [bulk editor](../PRO__bulk_edit_findings/).
+Open a Finding and choose **Request Review** from the Finding menu, or select several Findings in a list and use the [bulk editor](../pro__bulk_edit_findings/).
 
 You can request a review from named users and groups, or tick **Allow Eligible Reviewers** to ask everyone who is eligible on that asset.
 
@@ -20,7 +20,7 @@ Requesting a review sets the Finding to **Under Review** and notifies the review
 When a review has been requested from several people, any one of them can take it:
 
 * On the Finding, use **Claim Review** in the Finding menu, or the button in the review banner.
-* The Finding then shows who holds the review, on the Finding itself, as a **Claimed By** column in Finding lists, and in that person's [My Work](/metrics_reports/dashboards/PRO__my_work/) queue.
+* The Finding then shows who holds the review, on the Finding itself, as a **Claimed By** column in Finding lists, and in that person's [My Work](/metrics_reports/dashboards/pro__my_work/) queue.
 
 Once a review is claimed:
 
@@ -37,7 +37,7 @@ Claims look after themselves in a few situations you would otherwise have to cle
 
 Completed and released are recorded separately, so an abandoned review is distinguishable from a finished one.
 
-Claiming is controlled by the **Review Claiming** [feature flag](/admin/feature_flags/PRO__feature_flags/), which is on by default.
+Claiming is controlled by the **Review Claiming** [feature flag](/admin/feature_flags/pro__feature_flags/), which is on by default.
 
 ## Controlling who can be asked to review
 
@@ -62,10 +62,10 @@ Review asks someone to *look*. Assignment makes someone *responsible*, and it do
 * Assign from the Finding edit form, or to many Findings at once from the bulk editor.
 * In the bulk editor, assignees are **added** to whoever is already assigned. Tick **Replace existing assignees** to make your selection the complete list — which removes anyone not selected, including everyone if you select nobody.
 * Findings lists carry an **Assignees** column and an assignee filter, and reports can include an **Assignees** column.
-* Each person's assignments appear in their [My Work](/metrics_reports/dashboards/PRO__my_work/) queue.
+* Each person's assignments appear in their [My Work](/metrics_reports/dashboards/pro__my_work/) queue.
 
 You can only assign a Finding to somebody who can already see it. Assignment does not grant access.
 
 The [Rules Engine](/automation/rules_engine/) can set assignees automatically: choose **Set Users** and the **assignees** field.
 
-Assignment is controlled by the **Work Assignment** [feature flag](/admin/feature_flags/PRO__feature_flags/).
+Assignment is controlled by the **Work Assignment** [feature flag](/admin/feature_flags/pro__feature_flags/).
