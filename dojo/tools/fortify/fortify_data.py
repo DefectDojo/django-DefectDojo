@@ -59,3 +59,4 @@ class RuleData:
         self.confidentiality_impact: str = ""
         self.integrity_impact: str = ""
         self.remediation_effort: str = ""
+        self.cwe: int | None = None

@@ -134,6 +134,8 @@ class FortifyFPRParser:
             finding.mitigation = self.format_mitigation(vuln_data, snippet, description, rule)
             finding.severity = self.compute_severity(vuln_data, rule)
             finding.impact = self.format_impact(related_data, vuln_data)
+            if rule and rule.cwe:
+                finding.cwe = rule.cwe
 
             finding.file_path = vuln_data.source_location_path
             finding.line = int(self.compute_line(vuln_data, snippet))
@@ -229,8 +231,22 @@ class FortifyFPRParser:
             rule_data.confidentiality_impact = rule.findtext("Group[@name='ConfidentialityImpact']", None, self.namespaces)
             rule_data.integrity_impact = rule.findtext("Group[@name='IntegrityImpact']", None, self.namespaces)
             rule_data.remediation_effort = rule.findtext("Group[@name='Recommendations']", None, self.namespaces)
+            rule_data.cwe = self.parse_cwe(rule.findtext("Group[@name='altcategoryCWE']", None, self.namespaces))
             logger.debug(f"Rule Impact: {rule_data.impact}")
         return rule_data
+
+    def parse_cwe(self, cwe_value: str | None) -> int | None:
+        """
+        Extract the first CWE id from a Fortify `altcategoryCWE` group value.
+
+        Values look like "CWE ID 352", may list several ("CWE ID 259,CWE ID 798"),
+        may be prefixed with an index ("[17] CWE ID 200"), or be absent/"None".
+        Finding.cwe holds a single integer, so we keep the first id.
+        """
+        if not cwe_value:
+            return None
+        match = re.search(r"CWE ID (\d+)", cwe_value)
+        return int(match.group(1)) if match else None
 
     def format_title(self, vulnerability, snippet) -> str:
         # defaults for when there is no snippet (shouldn't happen, future improvement: parser might also parse ReplacementDefinitions and/or Context elements)

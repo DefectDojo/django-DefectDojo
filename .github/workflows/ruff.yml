@@ -2,6 +2,8 @@ name: Ruff Linter
 
 on:
   workflow_dispatch:
+  # called by unit-tests.yml as a gate: nothing else runs until ruff passes
+  workflow_call:
   push:
   pull_request:
 jobs:

@@ -1,4 +1,6 @@
 from django.contrib.auth.models import Permission
+from django.core.cache import cache
+from django.test import override_settings
 from django.urls import reverse
 from django.utils import timezone
 from rest_framework.authtoken.models import Token
@@ -57,6 +59,22 @@ class UserTest(APITestCase):
         }, format="json")
         self.assertEqual(r.status_code, 400, r.content[:1000])
         self.assertIn("Password must contain at least 1 digit, 0-9.", r.content.decode("utf-8"))
+
+    @override_settings(RATE_LIMITER_ENABLED=True, RATE_LIMITER_BLOCK=True, RATE_LIMITER_RATE="3/m")
+    def test_api_token_auth_is_rate_limited(self):
+        # Posted as JSON, like API clients do: that leaves request.POST empty.
+        cache.clear()
+        anon = APIClient()
+        url = reverse("api-token-auth")
+        creds = {"username": "ratelimit-probe", "password": "not-the-real-password"}
+
+        reached_auth_view = 0
+        for _ in range(8):
+            r = anon.post(url, creds, format="json")
+            if b"non_field_errors" in r.content:
+                reached_auth_view += 1
+
+        self.assertEqual(reached_auth_view, 3, "api-token-auth should honor the configured rate limit")
 
     def test_user_change_password(self):
         # some user
