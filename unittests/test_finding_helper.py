@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
 from dojo.finding.helper import save_vulnerability_ids, save_vulnerability_ids_template
-from dojo.models import Finding, Finding_Template, Test, Vulnerability_Id
+from dojo.models import Finding, Finding_Template, Test
 from unittests.dojo_test_case import DojoAPITestCase, DojoTestCase, versioned_fixtures
 
 logger = logging.getLogger(__name__)
@@ -218,22 +218,16 @@ class TestUpdateFindingStatusSignal(DojoTestCase):
 
 class TestSaveVulnerabilityIds(DojoTestCase):
 
-    @patch("dojo.finding.helper.Vulnerability_Id.objects.filter")
-    @patch("django.db.models.query.QuerySet.delete")
-    @patch("dojo.finding.helper.Vulnerability_Id.objects.bulk_create")
-    def test_save_vulnerability_ids(self, bulk_create_mock, delete_mock, filter_mock):
+    @patch("dojo.finding.helper.persist_for_finding")
+    def test_save_vulnerability_ids(self, persist_mock):
         finding = Finding()
         new_vulnerability_ids = ["REF-1", "REF-2", "REF-2"]
-        filter_mock.return_value = Vulnerability_Id.objects.none()
 
         save_vulnerability_ids(finding, new_vulnerability_ids)
 
-        filter_mock.assert_called_with(finding=finding)
-        delete_mock.assert_called_once()
-        bulk_create_mock.assert_called_once()
-        # Duplicates are removed: REF-1 and REF-2 only
-        created_objects = bulk_create_mock.call_args[0][0]
-        self.assertEqual(2, len(created_objects))
+        # Delegates the (dual) write to persist_for_finding with deduped/sanitized ids...
+        persist_mock.assert_called_once_with(finding, ["REF-1", "REF-2"], delete_existing=True)
+        # ...and keeps the cve sync (first id) in the helper.
         self.assertEqual("REF-1", finding.cve)
 
     @patch("dojo.models.Finding_Template.save")

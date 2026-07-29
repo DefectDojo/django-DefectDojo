@@ -20,13 +20,13 @@ from dojo.models import (
     Engagement,
     Finding,
     Finding_Template,
+    FindingVulnerabilityReference,
     Notes,
     Product,
     Product_Type,
     System_Settings,
     Test,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.test.ui import views as test_views
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
@@ -578,7 +578,7 @@ class TestAddFindingFromTemplate(DojoTestCase):
         self.assertEqual(finding.component_version, "1.0.0")
 
         # Verify vulnerability IDs were copied
-        vulnerability_ids = [vid.vulnerability_id for vid in Vulnerability_Id.objects.filter(finding=finding)]
+        vulnerability_ids = [ref.vulnerability.vulnerability_id for ref in FindingVulnerabilityReference.objects.filter(finding=finding)]
         self.assertIn("CVE-2023-1234", vulnerability_ids)
         self.assertIn("CVE-2023-5678", vulnerability_ids)
 

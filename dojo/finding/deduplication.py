@@ -9,6 +9,7 @@ from django.db.models.query_utils import Q
 
 from dojo.celery import app
 from dojo.models import Endpoint_Status, Finding, System_Settings
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -340,11 +341,11 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
         queryset = Finding.objects.filter(scope_q)
 
     if settings.V3_FEATURE_LOCATIONS:
-        prefetch_list = ["locations__location__url", "vulnerability_id_set", "finding_cwe_set", "found_by"]
+        prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
     else:
         # TODO: Delete this after the move to Locations
         # Base prefetches for both modes
-        prefetch_list = ["endpoints", "vulnerability_id_set", "finding_cwe_set", "found_by"]
+        prefetch_list = ["endpoints", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)

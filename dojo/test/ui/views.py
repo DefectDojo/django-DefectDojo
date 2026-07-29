@@ -82,6 +82,7 @@ from dojo.utils import (
     process_tag_notifications,
     redirect_to_return_url_or_else,
 )
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger("dojo")
@@ -172,7 +173,7 @@ class ViewTest(View):
             "jira_project": jira_services.get_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
-            "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
+            "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", vulnerability_id_prefetch(prefix="findings__")),
             "finding_group_by_options": Finding_Group.GROUP_BY_OPTIONS,
         }
         # Set the form using the context, and then update the context
