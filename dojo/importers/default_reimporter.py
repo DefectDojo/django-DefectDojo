@@ -1,7 +1,9 @@
+import contextlib
 import logging
 from itertools import batched
 
 from django.conf import settings
+from django.core.exceptions import EmptyResultSet
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 
@@ -278,25 +280,44 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         with tag_inheritance.suppress_tag_inheritance():
             return self._process_findings_internal(parsed_findings, **kwargs)
 
+    def get_original_findings(self):
+        """
+        Queryset of findings already in the test that "old finding" bookkeeping runs over.
+
+        Only findings with the same service value (or None) are candidates: even though the
+        service value is part of the hash_code calculation, closing must never touch findings
+        with a different service value.
+        https://github.com/DefectDojo/django-DefectDojo/issues/12754
+
+        This is intentionally a separate method (like get_reimport_match_candidates_for_batch)
+        so downstream editions can override it without copying the full process_findings()
+        implementation: _process_findings_internal materializes this queryset solely to compute
+        to_mitigate/untouched, so an importer that defers close-old bookkeeping to its own
+        sync-wide pass (e.g. Dojo Pro's batched chunk imports) can return Finding.objects.none()
+        to keep a batch's memory bounded by the batch instead of by the whole test.
+        """
+        if self.service is not None:
+            return self.test.finding_set.all().filter(service=self.service)
+        return self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+
     def _process_findings_internal(
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
-        # Only process findings with the same service value (or None)
-        # Even though the service values is used in the hash_code calculation,
-        # we need to make sure there are no side effects such as closing findings
-        # for findings with a different service value
-        # https://github.com/DefectDojo/django-DefectDojo/issues/12754
-        if self.service is not None:
-            original_findings = self.test.finding_set.all().filter(service=self.service)
-        else:
-            original_findings = self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+        original_findings = self.get_original_findings()
 
-        logger.debug(f"original_findings_qyer: {original_findings.query}")
+        if logger.isEnabledFor(logging.DEBUG):
+            # Guarded twice over: rendering .query raises EmptyResultSet for a none() queryset
+            # (a legitimate get_original_findings() override), and the original_items render
+            # builds (id, hash) tuples for every finding already in the test — millions on a
+            # large test — even when DEBUG logging is off, because f-strings always evaluate.
+            with contextlib.suppress(EmptyResultSet):
+                logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
-        logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
