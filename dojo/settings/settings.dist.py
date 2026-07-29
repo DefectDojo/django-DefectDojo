@@ -1144,6 +1144,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # Matching CycloneDX/SPDX means a VEX statement deduplicates onto the SBOM finding for the same
     # component and CVE, which is exactly how a suppression is meant to land.
     "OpenVEX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    # CSAF advisories are per (vulnerability, product), so the same three fields identify a finding.
+    "CSAF Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "SSLyze Scan (JSON)": ["title", "description"],
     "Harbor Vulnerability Scan": ["title", "mitigation"],
     "Rusty Hog Scan": ["file_path", "payload"],
@@ -1420,6 +1422,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "CycloneDX Scan": DEDUPE_ALGO_HASH_CODE,
     "SPDX Scan": DEDUPE_ALGO_HASH_CODE,
     "OpenVEX Scan": DEDUPE_ALGO_HASH_CODE,
+    "CSAF Scan": DEDUPE_ALGO_HASH_CODE,
     "SSLyze Scan (JSON)": DEDUPE_ALGO_HASH_CODE,
     "Harbor Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Rusty Hog Scan": DEDUPE_ALGO_HASH_CODE,
