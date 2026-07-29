@@ -1,7 +1,9 @@
+import contextlib
 import logging
 from itertools import batched
 
 from django.conf import settings
+from django.core.exceptions import EmptyResultSet
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 
@@ -306,11 +308,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
         original_findings = self.get_original_findings()
 
-        logger.debug(f"original_findings_qyer: {original_findings.query}")
+        if logger.isEnabledFor(logging.DEBUG):
+            # Guarded twice over: rendering .query raises EmptyResultSet for a none() queryset
+            # (a legitimate get_original_findings() override), and the original_items render
+            # builds (id, hash) tuples for every finding already in the test — millions on a
+            # large test — even when DEBUG logging is off, because f-strings always evaluate.
+            with contextlib.suppress(EmptyResultSet):
+                logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
         if logger.isEnabledFor(logging.DEBUG):
-            # Guarded: this renders (id, hash) for every finding already in the test, which on
-            # a large test is millions of tuples built even when DEBUG logging is off.
             logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
         self.new_items = []
         self.reactivated_items = []
