@@ -756,7 +756,14 @@ def jira_environment(obj):
     return ""
 
 
-def push_to_jira(obj, *args, **kwargs) -> tuple[str, bool]:
+def push_to_jira(obj, *args, **kwargs):
+    """
+    Push an object to Jira, in the foreground or via a Celery worker.
+
+    Returns a (success, message) tuple when the push ran in the foreground, and
+    an AsyncResult when it was queued -- callers must not assume either shape.
+    Pass force_sync=True if you need the tuple, or use interpret_push_result.
+    """
     if obj is None:
         msg = "Cannot push None to JIRA"
         raise ValueError(msg)
@@ -1847,6 +1854,25 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
     return not error, jform
 
 
+def interpret_push_result(result) -> tuple[bool, str | None]:
+    """
+    Normalise a push_to_jira return value into (success, message).
+
+    push_to_jira returns whatever dojo_dispatch_task returns, and that differs
+    per dispatch path: the task's own (success, message) tuple when it runs in
+    the foreground, but an AsyncResult when it is handed to a Celery worker.
+    A queued push has not reported a result yet, so treat it as success --
+    failures inside the worker surface as alerts, not as a return value.
+
+    Callers must not test the raw return value for truthiness: a populated
+    (False, message) tuple and an AsyncResult are both truthy, so a failed push
+    reads as a successful one.
+    """
+    if isinstance(result, tuple):
+        return result
+    return True, None
+
+
 # return True if no errors
 def process_jira_epic_form(request, engagement=None):
     if not get_system_setting("enable_jira"):
@@ -1869,7 +1895,9 @@ def process_jira_epic_form(request, engagement=None):
                 epic_priority = None
                 if jira_epic_form.cleaned_data.get("epic_priority"):
                     epic_priority = jira_epic_form.cleaned_data.get("epic_priority")
-                success, message = push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority)
+                success, message = interpret_push_result(
+                    push_to_jira(engagement, epic_name=epic_name, epic_priority=epic_priority),
+                )
                 if success:
                     logger.debug("Push to JIRA for Epic queued successfully")
                     messages.add_message(
