@@ -1352,6 +1352,12 @@ def close_finding(
     finding.out_of_scope = bool(out_of_scope)
     finding.duplicate = bool(duplicate)
     finding.under_review = False
+    # Closing ends any open peer review, so the requester/reviewer record has
+    # to go with it. Leaving them set strands the review: the finding no
+    # longer offers "Clear Review" (that action is gated on under_review), yet
+    # it still reports reviewers, so queue views built on the reviewers M2M
+    # keep surfacing work nobody can act on.
+    finding.review_requested_by = None
     finding.last_reviewed = mitigated_date
     finding.last_reviewed_by = user
 
@@ -1384,6 +1390,10 @@ def close_finding(
     close_external_issue(finding.id, "Closed by defectdojo", "github")
 
     _save_finding_with_jira_sync(finding, new_note=new_note)
+
+    # Cleared after the save: the M2M write hits the DB immediately, so doing
+    # it earlier would drop the reviewers even if the save above raised.
+    finding.reviewers.clear()
 
     # Notification
     create_notification(
