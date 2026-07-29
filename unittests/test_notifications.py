@@ -36,6 +36,7 @@ from dojo.models import (
 )
 from dojo.notifications.helper import (
     AlertNotificationManger,
+    NotificationManagerHelpers,
     WebhookNotificationManger,
     async_create_notification,
     create_notification,
@@ -1380,7 +1381,9 @@ class TestProcessTagNotifications(DojoTestCase):
 
 @versioned_fixtures
 class TestReviewRequestedWebhookTemplate(DojoTestCase):
-    """The webhooks channel needs its own review_requested template.
+
+    """
+    The webhooks channel needs its own review_requested template.
 
     ``NotificationManagerHelpers._create_notification_message`` renders
     ``notifications/<channel>/<event>.tpl`` and, on TemplateDoesNotExist,
@@ -1393,8 +1396,6 @@ class TestReviewRequestedWebhookTemplate(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
     def _render(self, channel):
-        from dojo.notifications.helper import NotificationManagerHelpers
-
         finding = Finding.objects.first()
         requested_by = Dojo_User.objects.get(username="admin")
         reviewer = Dojo_User.objects.create(username="wh-reviewer", first_name="Wanda", last_name="Reviewer")
@@ -1423,14 +1424,13 @@ class TestReviewRequestedWebhookTemplate(DojoTestCase):
         self.assertIn(reviewer.username, rendered)
 
     def test_webhook_payload_is_not_the_generic_fallback(self):
-        """Pin the fallback behaviour itself.
+        """
+        Pin the fallback behaviour itself.
 
         Rendering an event that genuinely has no webhook template gives the
         generic shape; review_requested must not match it. Comparing against
         a real fallback render keeps this honest if other.tpl changes.
         """
-        from dojo.notifications.helper import NotificationManagerHelpers
-
         rendered, _, _ = self._render("webhooks")
         fallback = NotificationManagerHelpers()._create_notification_message(
             event="event_with_no_template",

@@ -76,7 +76,8 @@ class TestFindingModelMixin:
         self.assertFalse(is_naive(self.finding.mitigated))
 
     def test_close_finding_clears_open_review(self):
-        """Closing must end an in-flight peer review, not just unflag it.
+        """
+        Closing must end an in-flight peer review, not just unflag it.
 
         ``under_review`` was already cleared here, but the reviewers M2M and
         ``review_requested_by`` were left behind. That combination is
