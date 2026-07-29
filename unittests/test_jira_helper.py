@@ -2,12 +2,14 @@ import logging
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from celery.result import AsyncResult
 from django.core.cache import cache
 from django.test import override_settings
 from jira.exceptions import JIRAError
 
 import dojo.finding.helper as finding_helper
 import dojo.jira.helper as jira_helper
+from dojo.jira import services as jira_services
 from dojo.models import Finding, JIRA_Instance, JIRA_Issue, JIRA_Project, Test_Type
 from unittests.dojo_test_case import DojoTestCase
 
@@ -339,6 +341,123 @@ class JIRADeleteCascadeTest(DojoTestCase):
             f"DefectDojo finding {finding_id} was deleted. This Jira issue was closed automatically.",
         )
         self.assertFalse(JIRA_Issue.objects.filter(jira_id="10001").exists())
+
+
+class JIRAEpicFormAsyncDispatchTest(TestCase):
+
+    """
+    Regression: saving an engagement with epic mapping enabled raised
+    "TypeError: cannot unpack non-iterable AsyncResult object" from
+    process_jira_epic_form.
+
+    push_to_jira returns whatever dojo_dispatch_task returns: the task's
+    (success, message) tuple when it runs in the foreground, but a Celery
+    AsyncResult when it is dispatched to a worker. process_jira_epic_form
+    unpacked the return value into two names unconditionally, so it only
+    worked on the foreground path -- which is why every existing test for
+    this view sets block_execution=True and never saw the failure.
+    """
+
+    def _form(self, *, push=True, epic_name=None, epic_priority=None):
+        form = Mock()
+        form.is_valid.return_value = True
+        form.cleaned_data = {
+            "push_to_jira": push,
+            "epic_name": epic_name,
+            "epic_priority": epic_priority,
+        }
+        return form
+
+    def _run(self, push_return):
+        """Drive process_jira_epic_form with push_to_jira returning push_return."""
+        form = self._form()
+        engagement = Mock(id=1, name="engagement")
+        with (
+            patch("dojo.jira.helper.get_system_setting", return_value=True),
+            patch("dojo.jira.helper.JIRAEngagementForm", return_value=form),
+            patch("dojo.jira.helper.get_jira_project", return_value=Mock()),
+            patch("dojo.jira.helper.messages") as messages,
+            patch("dojo.jira.helper.push_to_jira", return_value=push_return) as push,
+        ):
+            success, returned_form = jira_helper.process_jira_epic_form(
+                Mock(POST={}), engagement=engagement,
+            )
+        return success, returned_form, push, messages
+
+    def test_async_dispatch_returns_success_without_unpacking(self):
+        """The async path hands back an AsyncResult, which must not be unpacked."""
+        async_result = AsyncResult("11111111-2222-3333-4444-555555555555")
+
+        success, returned_form, push, messages = self._run(async_result)
+
+        self.assertTrue(
+            success,
+            msg=f"expected queued push to report success, got success={success}",
+        )
+        self.assertIsNotNone(returned_form)
+        push.assert_called_once()
+        _args, kwargs = messages.add_message.call_args
+        self.assertEqual("alert-success", kwargs["extra_tags"])
+
+    def test_sync_dispatch_success_tuple_is_still_honoured(self):
+        """Control: the foreground path returns (True, message) and still succeeds."""
+        success, returned_form, push, messages = self._run((True, "pushed"))
+
+        self.assertTrue(
+            success,
+            msg=f"expected foreground success tuple to report success, got success={success}",
+        )
+        self.assertIsNotNone(returned_form)
+        push.assert_called_once()
+        _args, kwargs = messages.add_message.call_args
+        self.assertEqual("alert-success", kwargs["extra_tags"])
+
+    def test_sync_dispatch_failure_tuple_still_surfaces_the_message(self):
+        """Control: a foreground failure must keep reporting the task's message."""
+        success, _returned_form, _push, messages = self._run((False, "jira exploded"))
+
+        self.assertFalse(
+            success,
+            msg=f"expected foreground failure tuple to report failure, got success={success}",
+        )
+        args, kwargs = messages.add_message.call_args
+        self.assertIn("jira exploded", args)
+        self.assertEqual("alert-danger", kwargs["extra_tags"])
+
+
+class JIRAPushResultInterpretationTest(TestCase):
+
+    """
+    Regression: callers tested a push_to_jira return value for truthiness to
+    decide whether the push worked. Both possible shapes -- a populated
+    (success, message) tuple and an AsyncResult -- are truthy, so a failed push
+    was reported to the user as a successful one and the failure branch was
+    unreachable.
+    """
+
+    def test_queued_push_is_success_with_no_message(self):
+        result = AsyncResult("11111111-2222-3333-4444-555555555555")
+        self.assertEqual((True, None), jira_helper.interpret_push_result(result))
+
+    def test_foreground_success_tuple_passes_through(self):
+        self.assertEqual((True, "ok"), jira_helper.interpret_push_result((True, "ok")))
+
+    def test_foreground_failure_tuple_reports_failure(self):
+        success, message = jira_helper.interpret_push_result((False, "jira exploded"))
+        self.assertFalse(
+            success,
+            msg=f"a (False, message) tuple must report failure, got success={success}",
+        )
+        self.assertEqual("jira exploded", message)
+
+    def test_push_succeeded_rejects_a_failure_tuple(self):
+        """The truthiness trap: bool((False, 'msg')) is True, push_succeeded must not be."""
+        self.assertTrue(bool((False, "jira exploded")))
+        self.assertFalse(jira_services.push_succeeded((False, "jira exploded")))
+
+    def test_push_succeeded_accepts_a_queued_push(self):
+        result = AsyncResult("11111111-2222-3333-4444-555555555555")
+        self.assertTrue(jira_services.push_succeeded(result))
 
 
 class JIRAComponentFieldTest(TestCase):
