@@ -96,7 +96,7 @@ branch, desc = sys.argv[1], sys.argv[2]
 print(json.dumps({"hookSpecificOutput": {
     "hookEventName": "SessionStart",
     "additionalContext": (
-        "Branch check: this checkout is on `" + branch + "`, which " + desc + ". "
+        "Branch check: this checkout is on branch " + branch + ", which " + desc + ". "
         "State the branch and its release line back to the user before editing files. "
         "If the task is a bug fix sitting on the minor line, say so and offer to move it onto bugfix first."
     ),
