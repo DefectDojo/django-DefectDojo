@@ -2,11 +2,12 @@ import contextlib
 import logging
 from itertools import batched
 
-import dojo.finding.helper as finding_helper
 from django.conf import settings
 from django.core.exceptions import EmptyResultSet
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
+
+import dojo.finding.helper as finding_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
     find_candidates_for_deduplication_hash,
