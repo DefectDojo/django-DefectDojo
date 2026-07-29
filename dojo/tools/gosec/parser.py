@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class GosecParser:
@@ -92,6 +95,15 @@ class GosecParser:
                     scanner_confidence=scanner_confidence,
                     static_finding=True,
                 )
+
+                if settings.V3_FEATURE_LOCATIONS and filename:
+                    find.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=filename,
+                            line=line,
+                            snippet=item["code"],
+                        ),
+                    )
 
                 dupes[dupe_key] = find
 

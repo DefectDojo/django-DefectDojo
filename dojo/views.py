@@ -10,8 +10,9 @@ from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.forms import ManageFileFormSet
+from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
+from dojo.forms import AddOnlyManageFileFormSet, ManageFileFormSet
 from dojo.models import (
     Engagement,
     FileUpload,
@@ -42,34 +43,39 @@ def custom_bad_request_view(request, exception=None):
 def manage_files(request, oid, obj_type):
     if obj_type == "Engagement":
         obj = get_object_or_404(Engagement, pk=oid)
-        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_engagement", "engagement_set")
     elif obj_type == "Test":
         obj = get_object_or_404(Test, pk=oid)
-        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_test", "test_set")
     elif obj_type == "Finding":
         obj = get_object_or_404(Finding, pk=oid)
-        user_has_permission_or_403(request.user, obj, "edit")
         obj_vars = ("view_finding", "finding_set")
     else:
         raise Http404
 
-    files_formset = ManageFileFormSet(queryset=obj.files.all())
+    has_file_add_permission = user_has_permission(request.user, obj, Permissions.Product_Tracking_Files_Add)
+    has_file_edit_permission = user_has_permission(request.user, obj, Permissions.Product_Tracking_Files_Edit)
+    if not (has_file_add_permission or has_file_edit_permission):
+        raise PermissionDenied
+
+    formset_class = ManageFileFormSet if has_file_edit_permission else AddOnlyManageFileFormSet
+    files_queryset = obj.files.all() if has_file_edit_permission else FileUpload.objects.none()
+    files_formset = formset_class(queryset=files_queryset)
     error = False
 
     if request.method == "POST":
-        files_formset = ManageFileFormSet(
-            request.POST, request.FILES, queryset=obj.files.all())
+        files_formset = formset_class(
+            request.POST, request.FILES, queryset=files_queryset)
         if files_formset.is_valid():
             # remove all from database and disk
 
             files_formset.save()
 
-            for o in files_formset.deleted_objects:
-                logger.debug("removing file: %s", o.file.name)
-                with suppress(FileNotFoundError):
-                    (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
+            for o in getattr(files_formset, "deleted_objects", []):
+                if has_file_edit_permission:
+                    logger.debug("removing file: %s", o.file.name)
+                    with suppress(FileNotFoundError):
+                        (Path(settings.MEDIA_ROOT) / o.file.name).unlink()
 
             for o in files_formset.new_objects:
                 logger.debug("adding file: %s", o.file.name)

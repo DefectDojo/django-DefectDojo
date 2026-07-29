@@ -369,6 +369,9 @@
                             {% if "dojo.view_tool_type"|has_configuration_permission:request %}
                                 <a href="{% url 'tool_type' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Tool Type" %}</a>
                             {% endif %}
+                            {% if "dojo.view_cicdinfrastructure"|has_configuration_permission:request %}
+                                <a href="{% url 'cicd_infrastructure' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "CI/CD Infrastructure" %}</a>
+                            {% endif %}
                         </div>
                     </div>
 

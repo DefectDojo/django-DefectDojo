@@ -2,8 +2,10 @@ import csv
 import io
 
 from dateutil import parser
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class CredScanParser:
@@ -57,6 +59,11 @@ class CredScanParser:
                 file_path=row["Source"],
                 line=row["Line"],
             )
+            if settings.V3_FEATURE_LOCATIONS and row["Source"]:
+                line = int(row["Line"]) if str(row["Line"]).isdigit() else None
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=row["Source"], line=line),
+                )
             # Update the finding date if it specified
             if "TimeofDiscovery" in row:
                 finding.date = parser.parse(

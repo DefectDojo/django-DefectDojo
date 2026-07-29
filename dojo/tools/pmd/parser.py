@@ -2,7 +2,10 @@ import csv
 import hashlib
 import io
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class PmdParser:
@@ -53,6 +56,13 @@ class PmdParser:
             finding.file_path = row["File"]
             finding.impact = "No impact provided"
             finding.mitigation = "No mitigation provided"
+
+            if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                line = row["Line"]
+                line = int(line) if line is not None and str(line).isdigit() else None
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=finding.file_path, line=line),
+                )
 
             key = hashlib.sha256(
                 f"{finding.title}|{finding.description}|{finding.file_path}|{finding.line}".encode(),

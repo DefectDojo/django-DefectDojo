@@ -338,6 +338,8 @@ class CyberwatchGaleaxParser:
             finding.unsaved_vulnerability_ids = [cve_code]
         if cwe_num is not None:
             finding.cwe = cwe_num
+            all_cwes = [cwe_num, *(additional_cwes or [])]
+            finding.unsaved_cwes = all_cwes
         if epss and epss != "N/A":
             try:
                 finding.epss_score = float(epss)

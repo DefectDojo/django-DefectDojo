@@ -29,6 +29,11 @@ def dummy_rule(self, *args, **kwargs):
         return json.load(json_file)
 
 
+def dummy_rule_multi_cwe(self, *args, **kwargs):
+    with (get_unit_tests_scans_path("api_sonarqube") / "rule_multi_cwe_fabricated.json").open(encoding="utf-8") as json_file:
+        return json.load(json_file)
+
+
 def dummy_hotspot_rule(self, *args, **kwargs):
     with (get_unit_tests_scans_path("api_sonarqube") / "hotspots" / "rule.json").open(encoding="utf-8") as json_file:
         return json.load(json_file)
@@ -62,3 +67,16 @@ class TestApiSonarQubeParser(DojoTestCase):
         parser = ApiSonarQubeParser()
         findings = parser.get_findings(None, self.test)
         self.assertEqual(2, len(findings))
+
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_project", dummy_product)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_rule", dummy_rule_multi_cwe)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_issues", dummy_issues)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.get_hotspot_rule", dummy_hotspot_rule)
+    @mock.patch("dojo.tools.api_sonarqube.api_client.SonarQubeAPI.find_hotspots", empty_list)
+    def test_get_findings_multi_cwe(self):
+        # A single SonarQube rule can reference multiple CWEs (e.g. in the "See" section);
+        # the first is the primary cwe and the full ordered list is kept in unsaved_cwes.
+        parser = ApiSonarQubeParser()
+        findings = parser.get_findings(None, self.test)
+        self.assertEqual(563, findings[0].cwe)
+        self.assertEqual([563, 570], findings[0].unsaved_cwes)

@@ -6,7 +6,7 @@ except ImportError:
 from dojo.models import (
     Dojo_User,
 )
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
 
 
 def get_authorized_users_for_product_type(users, product_type, permission):
@@ -24,7 +24,7 @@ def get_authorized_users_for_product_and_product_type(users, product, permission
 
 
 # Cached because it is a complex SQL query and it is called 3 times for the engagement lists in products
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_users(permission, user=None):
     impl = get_auth_filter("user.get_authorized_users")
     if impl:

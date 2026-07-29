@@ -1,4 +1,7 @@
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 TRIVY_SEVERITIES = {
     "CRITICAL": "Critical",
@@ -55,6 +58,10 @@ class TrivySecretsHandler:
                 service=service,
                 fix_available=True,
             )
+            if settings.V3_FEATURE_LOCATIONS and secret_target:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=secret_target),
+                )
             if resource_namespace:
                 finding.unsaved_tags = [resource_namespace]
             findings.append(finding)

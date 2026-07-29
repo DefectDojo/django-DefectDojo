@@ -28,3 +28,12 @@ class TestBearerParser(TestCase):
         findings = parser.get_findings(testfile, Test())
         testfile.close()
         self.assertEqual(4, len(findings))
+
+    def test_bearer_parser_with_multi_cwe_finding(self):
+        testfile = (get_unit_tests_scans_path("bearer_cli") / "bearer_cli_many_vul_multi_cwe_fabricated.json").open(encoding="utf-8")
+        parser = BearerCLIParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        # The multi-CWE vulnerability is the first entry in the file and therefore the first finding.
+        self.assertEqual("79", findings[0].cwe)
+        self.assertEqual(["79", "80"], findings[0].unsaved_cwes)

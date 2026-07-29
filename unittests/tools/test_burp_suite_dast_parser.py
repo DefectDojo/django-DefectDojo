@@ -18,12 +18,20 @@ class TestBurpSuiteDASTParser(DojoTestCase):
                 self.assertEqual("High", finding.severity)
                 self.assertTrue(finding.dynamic_finding)
                 self.assertEqual(942, finding.cwe)
+                self.assertEqual([942], finding.unsaved_cwes)
                 self.assertEqual("Cross-origin resource sharing: arbitrary origin trusted", finding.title)
                 self.assertIn("**Issue detail**:\nThe application implements an HTML5 cross-origin resource sharing (CORS) policy", finding.description)
                 self.assertIn("An HTML5 cross-origin resource sharing (CORS) policy controls", finding.impact)
                 self.assertIn("[Web Security Academy: Cross-origin resource sharing (CORS)](https://portswigger.net/web-security/cors)", finding.references)
                 self.assertEqual(1, len(self.get_unsaved_locations(finding)))
                 self.assertEqual("example.com", self.get_unsaved_locations(finding)[0].host)
+
+            with self.subTest(i=3):
+                # A single Burp Suite DAST issue can list multiple CWE classifications
+                finding = findings[3]
+                self.assertEqual("TLS certificate", finding.title)
+                self.assertEqual(295, finding.cwe)
+                self.assertEqual([295, 326, 327], finding.unsaved_cwes)
 
             with self.subTest(i=5):
                 finding = findings[5]

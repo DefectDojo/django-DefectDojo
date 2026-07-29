@@ -175,6 +175,16 @@ class VeracodeJSONParser:
         if module := finding_details.get("module"):
             finding.description += f"**Module**: {module}\n"
 
+        if settings.V3_FEATURE_LOCATIONS and (file_path := finding_details.get("file_path")):
+            function_object = finding_details.get("procedure")
+            finding.unsaved_locations.append(
+                LocationData.code(
+                    file_path=file_path,
+                    line=finding_details.get("file_line_number") or None,
+                    source_object=function_object if isinstance(function_object, str) else "",
+                ),
+            )
+
         return finding
 
     def add_dynamic_details(self, finding, finding_details, backup_title=None) -> Finding:

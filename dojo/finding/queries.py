@@ -19,13 +19,13 @@ from dojo.models import (
     Test_Import_Finding_Action,
     Vulnerability_Id,
 )
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
 
 logger = logging.getLogger(__name__)
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_findings(permission, user=None):
     impl = get_auth_filter("finding.get_authorized_findings")
     if impl:
@@ -41,7 +41,7 @@ def get_authorized_findings_for_queryset(permission, queryset, user=None):
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_vulnerability_ids(permission, user=None):
     impl = get_auth_filter("finding.get_authorized_vulnerability_ids")
     if impl:

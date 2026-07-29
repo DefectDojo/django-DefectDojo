@@ -1,7 +1,10 @@
 import hashlib
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class HuskyCIParser:
@@ -71,7 +74,7 @@ def get_item(item_node, test):
     if "securitytool" in item_node:
         description += "\nSecurity Tool: " + item_node.get("securitytool")
 
-    return Finding(
+    finding = Finding(
         title=item_node.get("title"),
         test=test,
         severity=item_node.get("severity"),
@@ -88,3 +91,13 @@ def get_item(item_node, test):
         dynamic_finding=False,
         impact="No impact provided",
     )
+
+    file_path = item_node.get("file")
+    if settings.V3_FEATURE_LOCATIONS and file_path:
+        line = item_node.get("line")
+        line = int(line) if line is not None and str(line).isdigit() else None
+        finding.unsaved_locations.append(
+            LocationData.code(file_path=file_path, line=line),
+        )
+
+    return finding
