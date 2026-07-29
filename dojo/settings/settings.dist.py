@@ -1138,6 +1138,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Rubocop Scan": ["vuln_id_from_tool", "file_path", "line"],
     "JFrog Xray Scan": ["title", "description", "component_name", "component_version"],
     "CycloneDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    # Matches CycloneDX: the same SBOM imported in either format must dedupe the same way.
+    "SPDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "SSLyze Scan (JSON)": ["title", "description"],
     "Harbor Vulnerability Scan": ["title", "mitigation"],
     "Rusty Hog Scan": ["file_path", "payload"],
@@ -1412,6 +1414,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Rubocop Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray Scan": DEDUPE_ALGO_HASH_CODE,
     "CycloneDX Scan": DEDUPE_ALGO_HASH_CODE,
+    "SPDX Scan": DEDUPE_ALGO_HASH_CODE,
     "SSLyze Scan (JSON)": DEDUPE_ALGO_HASH_CODE,
     "Harbor Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Rusty Hog Scan": DEDUPE_ALGO_HASH_CODE,
