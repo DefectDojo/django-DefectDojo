@@ -297,7 +297,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
-        logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("original_items: %s", [(item.id, item.hash_code) for item in self.original_items])
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
@@ -478,7 +479,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                                 finding_ids_batch,
                                 dedupe_option=True,
                                 rules_option=True,
-                                product_grading_option=True,
+                                # Callers may defer grading to a single end-of-import pass
+                                # (e.g. a large chunked reimport) to avoid one grade
+                                # recalculation per dedupe batch; default keeps per-batch grading.
+                                product_grading_option=not self.defer_product_grading,
                                 issue_updater_option=True,
                                 push_to_jira=push_to_jira_batch,
                                 jira_instance_id=getattr(self.jira_instance, "id", None),
@@ -505,8 +509,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         # Note: All chord batching is now handled within the loop above
 
-        # Synchronous tasks were already executed during processing, just calculate grade
-        perform_product_grading(self.test.engagement.product)
+        # Synchronous tasks were already executed during processing, just calculate grade.
+        # Callers may defer grading to a single end-of-import pass (see defer_product_grading).
+        if not self.defer_product_grading:
+            perform_product_grading(self.test.engagement.product)
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
@@ -595,7 +601,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 if self.push_to_jira or jira_services.is_keep_in_sync(finding_group, prefetched_jira_instance=self.jira_instance):
                     jira_services.push(finding_group)
         # Calculate grade once after all findings have been closed
-        if mitigated_findings:
+        if mitigated_findings and not self.defer_product_grading:
             perform_product_grading(self.test.engagement.product)
 
         return mitigated_findings

@@ -317,6 +317,31 @@ def _drain_search_context_to_async(objects, source):
         objects.discard(entry)
 
 
+# Thread-local kill-switch for the intermediate-flush hook (below). Bulk operations that run
+# under watson.skip_index_update() set this so the hook no-ops on their thread -- see
+# suppress_intermediate_flush().
+_intermediate_flush_state = local()
+
+
+@contextmanager
+def suppress_intermediate_flush():
+    """
+    Disable the watson intermediate-flush hook on the current thread.
+
+    watson.skip_index_update() only marks its context invalid at __exit__, so while a skip block
+    is still accumulating, the intermediate-flush hook can't tell it's a skip context and would
+    drain it -- dispatching async index tasks for objects meant to be discarded, defeating the
+    skip. Wrap a skip_index_update() block in this so the hook returns early (no accumulate, no
+    drain) and the skip actually holds. Thread-local, so it only affects the wrapping thread.
+    """
+    previous = getattr(_intermediate_flush_state, "suppressed", False)
+    _intermediate_flush_state.suppressed = True
+    try:
+        yield
+    finally:
+        _intermediate_flush_state.suppressed = previous
+
+
 @contextmanager
 def watson_search_context_for_task():
     """
@@ -377,6 +402,13 @@ def install_intermediate_flush_hook():
     original_add = search_context_manager.add_to_context  # bound method
 
     def add_to_context_with_flush(engine, obj):
+        # Bulk ops under skip_index_update() (e.g. a large chunked reimport) set this to make the
+        # hook a full no-op on this thread. skip_index_update() only invalidates its context at
+        # __exit__, so mid-accumulation the hook would otherwise drain (index) objects meant to be
+        # discarded -- defeating the skip. Returning before original_add means nothing is even
+        # accumulated, so the skip holds and the caller's own end-of-op reindex does the indexing.
+        if getattr(_intermediate_flush_state, "suppressed", False):
+            return
         original_add(engine, obj)
         threshold = getattr(settings, "WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE", 1000)
         if threshold <= 0 or not search_context_manager._stack:
