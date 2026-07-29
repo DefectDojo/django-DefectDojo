@@ -188,7 +188,8 @@ class TestFortifyParser(DojoTestCase):
                 self.assertEqual("src/main/java/hello/HelloWorld.java", finding.file_path)
                 self.assertEqual(5, finding.line)
                 # No rule/metainfo for this finding, so no CWE can be resolved
-                self.assertIsNone(finding.cwe)
+                # and the finding keeps the model default of 0
+                self.assertEqual(0, finding.cwe)
             with self.subTest(i=1):
                 finding = findings[1]
                 self.assertEqual("Password Management - HelloWorld.java: 13 (9C5BD1B5-C296-48d4-B5F5-5D2958661BC4)", finding.title)
