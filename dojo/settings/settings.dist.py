@@ -1140,6 +1140,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "CycloneDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     # Matches CycloneDX: the same SBOM imported in either format must dedupe the same way.
     "SPDX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    # OpenVEX statements are per (product, vulnerability), which is what these three fields capture.
+    # Matching CycloneDX/SPDX means a VEX statement deduplicates onto the SBOM finding for the same
+    # component and CVE, which is exactly how a suppression is meant to land.
+    "OpenVEX Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "SSLyze Scan (JSON)": ["title", "description"],
     "Harbor Vulnerability Scan": ["title", "mitigation"],
     "Rusty Hog Scan": ["file_path", "payload"],
@@ -1415,6 +1419,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "JFrog Xray Scan": DEDUPE_ALGO_HASH_CODE,
     "CycloneDX Scan": DEDUPE_ALGO_HASH_CODE,
     "SPDX Scan": DEDUPE_ALGO_HASH_CODE,
+    "OpenVEX Scan": DEDUPE_ALGO_HASH_CODE,
     "SSLyze Scan (JSON)": DEDUPE_ALGO_HASH_CODE,
     "Harbor Vulnerability Scan": DEDUPE_ALGO_HASH_CODE,
     "Rusty Hog Scan": DEDUPE_ALGO_HASH_CODE,
