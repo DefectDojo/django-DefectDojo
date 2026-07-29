@@ -2,6 +2,7 @@ import logging
 
 from django.core.exceptions import ValidationError
 from django.db.models.deletion import RestrictedError
+from django.db.utils import IntegrityError
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 from rest_framework.status import (
@@ -15,6 +16,46 @@ from dojo.models import System_Settings
 from dojo.product_announcements import ErrorPageProductAnnouncement
 
 logger = logging.getLogger(__name__)
+
+# SQLSTATE class 23505 = unique_violation. Checked on the driver exception Django
+# wraps, so detection does not depend on the wording of the message.
+UNIQUE_VIOLATION_SQLSTATE = "23505"
+
+# Fallback for drivers that expose no SQLSTATE, and for IntegrityErrors raised
+# without a wrapped cause.
+UNIQUE_VIOLATION_MESSAGE_MARKERS = (
+    "unique constraint",  # PostgreSQL
+    "duplicate entry",  # MySQL / MariaDB
+    "unique_violation",
+)
+
+# Deliberately generic: the driver message carries the constraint name, the table
+# name and the offending value, none of which belong in an API response body.
+UNIQUE_VIOLATION_RESPONSE_MESSAGE = (
+    "The request conflicts with an existing record because a unique field value "
+    "already exists. Retrieve or update the existing record instead of creating "
+    "a new one."
+)
+
+
+def _is_unique_violation(exc) -> bool:
+    """
+    Return True when ``exc`` is a database unique-constraint violation.
+
+    A unique violation means the caller asked for a record that is already
+    there — a conflict it can resolve — whereas every other IntegrityError
+    (foreign key, not-null, check constraint) points at a defect on our side
+    and must keep surfacing as a 500.
+    """
+    # Django wraps the driver exception; psycopg exposes SQLSTATE as `sqlstate`
+    # and psycopg2 as `pgcode`.
+    cause = exc.__cause__
+    for attribute in ("sqlstate", "pgcode"):
+        if getattr(cause, attribute, None) == UNIQUE_VIOLATION_SQLSTATE:
+            return True
+
+    text = str(exc).lower()
+    return any(marker in text for marker in UNIQUE_VIOLATION_MESSAGE_MARKERS)
 
 
 def custom_exception_handler(exc, context):
@@ -38,6 +79,26 @@ def custom_exception_handler(exc, context):
         response.data = {}
         response.data["message"] = str(exc)
         ErrorPageProductAnnouncement(response=response)
+    elif isinstance(exc, IntegrityError) and _is_unique_violation(exc):
+        # The row the caller wanted to create already exists. Serializers built
+        # from a unique model field do check first, but that SELECT and the
+        # INSERT are not atomic, so concurrent writers both pass validation and
+        # the loser lands here. That is a conflict the caller can act on, not a
+        # server fault, so answer 409 rather than letting it fall through to the
+        # generic 500 branch below.
+        # Logged at info, not error: this is an expected outcome of concurrent
+        # writers, and logging it as an error keeps it in error reporting where
+        # it reads as an outage.
+        logger.info(
+            "unique constraint violation on %s: %s",
+            (context or {}).get("request", "unknown request"),
+            exc,
+        )
+        response = Response()
+        response.status_code = HTTP_409_CONFLICT
+        # Matching the RestrictedError 409 above, no product announcement is
+        # attached to a conflict response.
+        response.data = {"message": UNIQUE_VIOLATION_RESPONSE_MESSAGE}
     elif response is None:
         if System_Settings.objects.get().api_expose_error_details:
             exception_message = str(exc.args[0])

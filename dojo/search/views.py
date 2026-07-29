@@ -17,8 +17,8 @@ from dojo.finding.queries import get_authorized_findings, get_authorized_vulnera
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups
 from dojo.forms import FindingBulkUpdateForm, SimpleSearchForm
 from dojo.location.queries import get_authorized_locations, prefetch_for_locations
-from dojo.models import Engagement, Finding, Finding_Template, Languages, Product, Test
-from dojo.product.queries import get_authorized_app_analysis, get_authorized_products
+from dojo.models import Engagement, Finding, Finding_Template, Product, Test
+from dojo.product.queries import get_authorized_app_analysis, get_authorized_languages, get_authorized_products
 from dojo.test.queries import get_authorized_tests
 from dojo.utils import add_breadcrumb, get_page_items, get_system_setting, get_words_for_field
 
@@ -139,6 +139,7 @@ def simple_search(request):
                 authorized_endpoints = get_authorized_endpoints("view")
             authorized_finding_templates = Finding_Template.objects.all()
             authorized_app_analysis = get_authorized_app_analysis("view")
+            authorized_languages = get_authorized_languages("view")
             authorized_vulnerability_ids = get_authorized_vulnerability_ids("view")
 
             # TODO: better get findings in their own query and match on id. that would allow filtering on additional fields such prod_id, etc.
@@ -313,7 +314,7 @@ def simple_search(request):
             if search_languages:
                 logger.debug("searching languages")
 
-                languages = Languages.objects.filter(language__language__icontains=keywords_query)
+                languages = authorized_languages.filter(language__language__icontains=keywords_query)
                 languages = languages.prefetch_related("product", "product__tags")
                 languages = languages[:max_results]
             else:

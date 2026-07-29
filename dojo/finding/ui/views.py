@@ -3283,7 +3283,7 @@ def push_to_jira(request, fid):
         # but cant't change too much now without having a test suite,
         # so leave as is for now with the addition warning message
         # to check alerts for background errors.
-        if jira_services.push(finding):
+        if jira_services.push_succeeded(jira_services.push(finding)):
             messages.add_message(
                 request,
                 messages.SUCCESS,
