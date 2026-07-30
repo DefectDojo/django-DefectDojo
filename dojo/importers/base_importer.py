@@ -626,6 +626,37 @@ class BaseImporter(ImporterOptions):
 
         return message
 
+    def verify_test_still_exists(self) -> None:
+        """
+        Refuse to write back a test that has been deleted since the import started.
+
+        The importers hold the test in memory for the whole run and persist the changes
+        collected on it at the end. Model.save() on an instance whose row has been deleted
+        in the meantime does not fail: the UPDATE matches nothing and Django falls through
+        to an INSERT, recreating the row that was just deleted. Deleting a product,
+        engagement or test while one of its scans is being processed is enough to reach
+        that, and the INSERT then either violates the foreign key to a parent the same
+        delete removed, or silently resurrects a test whose findings are gone.
+        """
+        if self.test.pk is not None and Test.objects.filter(pk=self.test.pk).exists():
+            return
+        msg = (
+            f"The test this scan is being imported into no longer exists "
+            f"(id {self.test.pk}): it was deleted while the scan was being processed"
+        )
+        raise Test.DoesNotExist(msg)
+
+    def save_test_and_engagement(self) -> None:
+        """
+        Persist the changes collected on the test and its engagement during the import.
+
+        The engagement needs no existence check of its own: the test row could not still be
+        there if the engagement it points at had been deleted.
+        """
+        self.verify_test_still_exists()
+        self.test.save()
+        self.test.engagement.save()
+
     def update_test_progress(
         self,
         percentage_value: int = 100,
@@ -635,6 +666,7 @@ class BaseImporter(ImporterOptions):
         and after location task, so this should only run after all the other ones are done.
         Its purpose is to update the percent completion of the test to 100 percent
         """
+        self.verify_test_still_exists()
         self.test.percent_complete = percentage_value
         self.test.save()
 

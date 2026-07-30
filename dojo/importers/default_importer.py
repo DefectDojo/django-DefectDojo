@@ -126,8 +126,7 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
         # Update the test meta
         self.update_test_meta()
         # Save the test and engagement for changes to take affect
-        self.test.save()
-        self.test.engagement.save()
+        self.save_test_and_engagement()
         # Create a test import history object to record the flags sent to the importer
         # This operation will return None if the user does not have the import history
         # feature enabled
