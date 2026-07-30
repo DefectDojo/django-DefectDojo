@@ -27,6 +27,7 @@ from dojo.models import (
     SEVERITIES,
     BurpRawRequestResponse,
     Endpoint,
+    Engagement,
     FileUpload,
     Finding,
     Test,
@@ -626,6 +627,44 @@ class BaseImporter(ImporterOptions):
 
         return message
 
+    def save_without_resurrecting(self, instance: Engagement | Test) -> None:
+        """
+        Persist an import target, refusing to re-create it if it was deleted mid-import.
+
+        Model.save() on an instance whose primary key is already set issues an UPDATE, and
+        Django falls back to an INSERT when that UPDATE matches no rows. The importer loads
+        its test and engagement at the start of a run that can take minutes, so a delete
+        landing mid-run turns a routine write-back into an INSERT that re-creates the
+        deleted row from the stale in-memory copy. That surfaced two ways:
+
+        - The parent went with it (an engagement delete cascades to its tests), so the
+          INSERT carried a dangling foreign key. Because Django declares its foreign keys
+          DEFERRABLE INITIALLY DEFERRED, the violation is only raised at COMMIT, well past
+          any handler that knew what the import was doing, and the caller got an opaque 500
+          naming a PostgreSQL constraint instead of the reason the import failed.
+        - The parent survived, so the INSERT succeeded and silently resurrected a row the
+          user had deleted, without the findings and history that were cascaded away with it.
+
+        Neither is a save the importer should be making: the target of the import is gone,
+        so the import cannot complete. Fail with a message that says exactly that.
+
+        The row is checked before the write rather than relying on save(force_update=True).
+        A forced update raises from inside the atomic block that Model.save_base opens
+        without a savepoint, which marks the whole surrounding transaction for rollback --
+        the caller's failure handling would then hit TransactionManagementError instead of
+        being able to record why the import failed. Costing one indexed primary-key lookup
+        keeps the transaction usable.
+        """
+        if instance.pk is not None and not type(instance)._base_manager.filter(pk=instance.pk).exists():
+            msg = (
+                f"The {instance._meta.verbose_name} this scan was being imported into "
+                f"(id {instance.pk}) was deleted while the scan was being processed, so "
+                f"the import could not be completed. Nothing was imported. Re-run the "
+                f"import against a {instance._meta.verbose_name} that still exists."
+            )
+            raise ValidationError(msg)
+        instance.save()
+
     def update_test_progress(
         self,
         percentage_value: int = 100,
@@ -636,7 +675,7 @@ class BaseImporter(ImporterOptions):
         Its purpose is to update the percent completion of the test to 100 percent
         """
         self.test.percent_complete = percentage_value
-        self.test.save()
+        self.save_without_resurrecting(self.test)
 
     def resolve_dynamic_test_type_name(self, raw_type: str | None) -> str:
         """
