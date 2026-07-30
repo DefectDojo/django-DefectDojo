@@ -625,7 +625,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         else:
             try:
                 environment = Development_Environment.objects.get(name=data.get("environment", "Development"))
-            except:
+            except Development_Environment.DoesNotExist:
                 msg = "Environment named " + data.get("environment", "Development") + " does not exist."
                 raise ValidationError(msg)
 
