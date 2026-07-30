@@ -1387,7 +1387,14 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "SpotBugs Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray Unified Scan": DEDUPE_ALGO_HASH_CODE,
     "JFrog Xray On Demand Binary Scan": DEDUPE_ALGO_HASH_CODE,
-    "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_HASH_CODE,
+    # The parser emits a stable unique_id_from_tool (sha256 over the artifact digest, the impacted
+    # component name/version and the Xray issue id), so match on that first and keep hash_code only
+    # as the fallback. Matching purely on hash_code made a finding's identity depend on its
+    # description, which for this parser embeds JFrog's own CVE prose — vendor-maintained text that
+    # changes whenever Xray refreshes its vulnerability database. When it changed, reimport could no
+    # longer find the existing finding and closed + recreated it (observed in the field: thousands of
+    # findings mitigated and re-created in one reimport of otherwise unchanged data).
+    "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,

@@ -9,11 +9,44 @@ from django.utils import timezone
 
 from dojo.celery import app
 from dojo.jira import services as jira_services
-from dojo.models import Dojo_User, Finding, Notes, Risk_Acceptance, System_Settings
+from dojo.models import Dojo_User, Engagement, Finding, Notes, Risk_Acceptance, System_Settings
 from dojo.notifications.helper import create_notification
 from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
+
+
+def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement | None:
+    """
+    Return an engagement to address a risk acceptance's expiration notification to.
+
+    `Risk_Acceptance.engagement` is a property over `Engagement.risk_acceptance`, a
+    many-to-many used as a one-to-many. It is empty for a risk acceptance that was not
+    created from an engagement page, which is a supported state rather than corrupt data:
+    `RiskAcceptanceSerializer.create` only attaches an engagement when the risk acceptance
+    already has findings, `_accept_risks` and the SonarQube status sync never attach one at
+    all, and the Pro plugin tracks the association on its own model instead of this relation.
+
+    So fall back to the engagement of an accepted finding - the same derivation
+    `RiskAcceptanceSerializer` uses both to attach an engagement on create and to repair an
+    orphan on update. Only a risk acceptance with neither an engagement nor any findings has
+    nothing to notify about; the notification names a product and links to a per-engagement
+    URL, and neither can be produced from an empty risk acceptance.
+    """
+    engagement = risk_acceptance.engagement
+    if engagement is not None:
+        return engagement
+
+    # iterate rather than .first(), to reuse the accepted_findings prefetch
+    accepted_finding = next(iter(risk_acceptance.accepted_findings.all()), None)
+    if accepted_finding is not None:
+        return accepted_finding.test.engagement
+
+    logger.warning(
+        "risk acceptance %i:%s has no engagement and no findings, skipping its expiration notification",
+        risk_acceptance.id, risk_acceptance,
+    )
+    return None
 
 
 def expire_now(risk_acceptance):
@@ -49,14 +82,19 @@ def expire_now(risk_acceptance):
     risk_acceptance.expiration_date_handled = timezone.now()
     risk_acceptance.save()
 
+    # the expiry above is the job here, the notification below is best effort
+    engagement = engagement_to_notify_about(risk_acceptance)
+    if engagement is None:
+        return
+
     accepted_findings = risk_acceptance.accepted_findings.all()
     title = "Risk acceptance with " + str(len(accepted_findings)) + " accepted findings has expired for " + \
-            str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
+            str(engagement.product) + ": " + str(engagement.name)
 
     create_notification(event="risk_acceptance_expiration", title=title, risk_acceptance=risk_acceptance, accepted_findings=accepted_findings,
-                         reactivated_findings=reactivated_findings, engagement=risk_acceptance.engagement,
-                         product=risk_acceptance.engagement.product,
-                         url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+                         reactivated_findings=reactivated_findings, engagement=engagement,
+                         product=engagement.product,
+                         url=reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)))
 
 
 def reinstate(risk_acceptance, old_expiration_date):
@@ -198,17 +236,21 @@ def expiration_handler(*args, **kwargs):
             for risk_acceptance in risk_acceptances:
                 logger.debug("notifying for risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
-                notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
-                    timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
-                    str(risk_acceptance.engagement.product) + ": " + str(risk_acceptance.engagement.name)
+                engagement = engagement_to_notify_about(risk_acceptance)
+                if engagement is not None:
+                    notification_title = "Risk acceptance with " + str(len(risk_acceptance.accepted_findings.all())) + " accepted findings will expire on " + \
+                        timezone.localtime(risk_acceptance.expiration_date).strftime("%b %d, %Y") + " for " + \
+                        str(engagement.product) + ": " + str(engagement.name)
 
-                create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
-                                    accepted_findings=risk_acceptance.accepted_findings.all(), engagement=risk_acceptance.engagement,
-                                    product=risk_acceptance.engagement.product,
-                                    url=reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)))
+                    create_notification(event="risk_acceptance_expiration", title=notification_title, risk_acceptance=risk_acceptance,
+                                        accepted_findings=risk_acceptance.accepted_findings.all(), engagement=engagement,
+                                        product=engagement.product,
+                                        url=reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)))
 
                 post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), expiration_warning_message_creator, heads_up_days)
 
+                # marked as warned either way, so a risk acceptance nobody can be notified about
+                # is not re-selected on every subsequent run
                 risk_acceptance.expiration_date_warned = timezone.now()
                 risk_acceptance.save()
 

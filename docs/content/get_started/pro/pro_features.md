@@ -20,6 +20,12 @@ See our [Pro UI Guide](/get_started/about/ui_pro_vs_os/) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
+### Global Search
+
+Find any Finding, Asset, Engagement, and more from a single search box in the topbar. DefectDojo Pro's global search spans your objects with fast, typo-tolerant Postgres full-text search.
+
+See our [Global Search Guide](/navigation/pro__global_search/) for more information.
+
 ### Assets/Organizations
 
 DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/asset_hierarchy/) for details.

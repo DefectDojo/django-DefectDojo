@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from dojo.api_v2.serializers import ProductMetaSerializer, TagListSerializerField
+from dojo.authorization.serializer_guards import AuthorizedUsersMemberGuardMixin
 from dojo.models import (
     Dojo_User,
     Product,
@@ -23,7 +24,7 @@ class AssetAPIScanConfigurationSerializer(serializers.ModelSerializer):
         exclude = ("product",)
 
 
-class AssetSerializer(serializers.ModelSerializer):
+class AssetSerializer(AuthorizedUsersMemberGuardMixin, serializers.ModelSerializer):
     findings_count = serializers.SerializerMethodField()
     findings_list = serializers.SerializerMethodField()
 

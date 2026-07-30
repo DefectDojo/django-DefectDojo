@@ -7,18 +7,19 @@ from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.importers.default_importer import DefaultImporter
 from dojo.importers.default_reimporter import DefaultReImporter
 from dojo.models import (
     Development_Environment,
     Engagement,
     Finding,
+    FindingVulnerabilityReference,
     Product,
     Product_Type,
     Test,
     Test_Type,
     User,
-    Vulnerability_Id,
 )
 from dojo.tools.gitlab_sast.parser import GitlabSastParser
 from dojo.tools.sarif.parser import SarifParser
@@ -1066,10 +1067,8 @@ class TestImporterUtils(DojoAPITestCase):
         finding.reporter = self.testuser
         finding.save()
 
-        # Add some vulnerability IDs
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-5678")
-        finding.cve = "CVE-2020-1234"
+        # Add some vulnerability IDs via the dual-write seam (legacy rows + entity references)
+        save_vulnerability_ids(finding, ["CVE-2020-1234", "CVE-2020-5678"])
         finding.save()
 
         # Verify initial state
@@ -1090,8 +1089,8 @@ class TestImporterUtils(DojoAPITestCase):
         # Verify IDs are cleared
         self.assertEqual(0, len(finding.vulnerability_ids))
         self.assertEqual(None, finding.cve)
-        # Verify no Vulnerability_Id objects exist for this finding
-        self.assertEqual(0, Vulnerability_Id.objects.filter(finding=finding).count())
+        # Verify no vulnerability id references exist for this finding
+        self.assertEqual(0, FindingVulnerabilityReference.objects.filter(finding=finding).count())
         finding.delete()
 
     def test_change_vulnerability_ids_on_reimport(self):
@@ -1102,10 +1101,8 @@ class TestImporterUtils(DojoAPITestCase):
         finding.reporter = self.testuser
         finding.save()
 
-        # Add initial vulnerability IDs
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-5678")
-        finding.cve = "CVE-2020-1234"
+        # Add initial vulnerability IDs via the dual-write seam (legacy rows + entity references)
+        save_vulnerability_ids(finding, ["CVE-2020-1234", "CVE-2020-5678"])
         finding.save()
 
         # Verify initial state
@@ -1131,8 +1128,8 @@ class TestImporterUtils(DojoAPITestCase):
         self.assertEqual("CVE-2021-9999", finding.vulnerability_ids[0])
         self.assertEqual("GHSA-xxxx-yyyy", finding.vulnerability_ids[1])
         self.assertEqual("CVE-2021-9999", finding.cve)
-        # Verify only new Vulnerability_Id objects exist
-        vuln_ids = list(Vulnerability_Id.objects.filter(finding=finding).values_list("vulnerability_id", flat=True))
+        # Verify only new vulnerability id references exist
+        vuln_ids = list(FindingVulnerabilityReference.objects.filter(finding=finding).values_list("vulnerability__vulnerability_id", flat=True))
         self.assertEqual(set(new_vulnerability_ids), set(vuln_ids))
         finding.delete()
 
@@ -1143,24 +1140,27 @@ class TestImporterUtils(DojoAPITestCase):
         # finding_a: IDs change (CVE-A → CVE-B)
         finding_a = Finding(test=self.test, reporter=self.testuser)
         finding_a.save()
-        Vulnerability_Id.objects.create(finding=finding_a, vulnerability_id="CVE-A-OLD")
-        finding_a.cve = "CVE-A-OLD"
+        save_vulnerability_ids(finding_a, ["CVE-A-OLD"])
         finding_a.save()
 
         # finding_b: IDs change (CVE-B1, CVE-B2 → CVE-B-NEW)
         finding_b = Finding(test=self.test, reporter=self.testuser)
         finding_b.save()
-        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B1")
-        Vulnerability_Id.objects.create(finding=finding_b, vulnerability_id="CVE-B2")
-        finding_b.cve = "CVE-B1"
+        save_vulnerability_ids(finding_b, ["CVE-B1", "CVE-B2"])
         finding_b.save()
 
         # finding_c: IDs unchanged — should not appear in delete/insert buffers
         finding_c = Finding(test=self.test, reporter=self.testuser)
         finding_c.save()
-        Vulnerability_Id.objects.create(finding=finding_c, vulnerability_id="CVE-C-SAME")
-        finding_c.cve = "CVE-C-SAME"
+        save_vulnerability_ids(finding_c, ["CVE-C-SAME"])
         finding_c.save()
+
+        # Reload from the DB so reconcile reads existing ids from committed rows. Production loads
+        # reimport candidates via a query (with vulnerability_id_prefetch); a hand-built instance
+        # can carry an empty reverse-relation cache that would make an unchanged finding look changed.
+        finding_a = Finding.objects.get(pk=finding_a.pk)
+        finding_b = Finding.objects.get(pk=finding_b.pk)
+        finding_c = Finding.objects.get(pk=finding_c.pk)
 
         finding_a.unsaved_vulnerability_ids = ["CVE-A-NEW"]
         finding_b.unsaved_vulnerability_ids = ["CVE-B-NEW"]
@@ -1171,34 +1171,35 @@ class TestImporterUtils(DojoAPITestCase):
         reimporter.reconcile_vulnerability_ids(finding_b)
         reimporter.reconcile_vulnerability_ids(finding_c)
 
-        # pending_vuln_id_deletes only contains changed findings, not finding_c
-        self.assertIn(finding_a.id, reimporter.pending_vuln_id_deletes)
-        self.assertIn(finding_b.id, reimporter.pending_vuln_id_deletes)
-        self.assertNotIn(finding_c.id, reimporter.pending_vuln_id_deletes)
-        self.assertEqual(2, len(reimporter.pending_vulnerability_ids))
+        # pending_deletes only contains changed findings, not finding_c
+        manager = reimporter.vulnerability_id_manager
+        self.assertIn(finding_a.id, manager.pending_deletes)
+        self.assertIn(finding_b.id, manager.pending_deletes)
+        self.assertNotIn(finding_c.id, manager.pending_deletes)
+        self.assertEqual(2, sum(len(ids) for _, ids in manager.pending))
 
         # Old IDs still in DB (not yet deleted)
-        self.assertEqual(1, Vulnerability_Id.objects.filter(finding=finding_a).count())
-        self.assertEqual(2, Vulnerability_Id.objects.filter(finding=finding_b).count())
+        self.assertEqual(1, FindingVulnerabilityReference.objects.filter(finding=finding_a).count())
+        self.assertEqual(2, FindingVulnerabilityReference.objects.filter(finding=finding_b).count())
 
         reimporter.flush_vulnerability_ids()
 
         # Buffers cleared
-        self.assertEqual([], reimporter.pending_vuln_id_deletes)
-        self.assertEqual([], reimporter.pending_vulnerability_ids)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending_deletes)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending)
 
         # finding_a: old deleted, new inserted
-        vuln_ids_a = list(Vulnerability_Id.objects.filter(finding=finding_a).values_list("vulnerability_id", flat=True))
+        vuln_ids_a = list(FindingVulnerabilityReference.objects.filter(finding=finding_a).values_list("vulnerability__vulnerability_id", flat=True))
         self.assertEqual(["CVE-A-NEW"], vuln_ids_a)
         self.assertEqual("CVE-A-NEW", finding_a.cve)
 
         # finding_b: both old deleted, new inserted
-        vuln_ids_b = list(Vulnerability_Id.objects.filter(finding=finding_b).values_list("vulnerability_id", flat=True))
+        vuln_ids_b = list(FindingVulnerabilityReference.objects.filter(finding=finding_b).values_list("vulnerability__vulnerability_id", flat=True))
         self.assertEqual(["CVE-B-NEW"], vuln_ids_b)
         self.assertEqual("CVE-B-NEW", finding_b.cve)
 
         # finding_c: unchanged — IDs untouched
-        vuln_ids_c = list(Vulnerability_Id.objects.filter(finding=finding_c).values_list("vulnerability_id", flat=True))
+        vuln_ids_c = list(FindingVulnerabilityReference.objects.filter(finding=finding_c).values_list("vulnerability__vulnerability_id", flat=True))
         self.assertEqual(["CVE-C-SAME"], vuln_ids_c)
 
         finding_a.delete()
@@ -1211,15 +1212,16 @@ class TestImporterUtils(DojoAPITestCase):
 
         finding = Finding(test=self.test, reporter=self.testuser)
         finding.save()
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
-        finding.cve = "CVE-2020-1234"
+        save_vulnerability_ids(finding, ["CVE-2020-1234"])
         finding.save()
 
+        # Reload so reconcile reads existing ids from committed rows (see cross-batch test).
+        finding = Finding.objects.get(pk=finding.pk)
         finding.unsaved_vulnerability_ids = ["CVE-2020-1234"]
         reimporter.reconcile_vulnerability_ids(finding)
 
-        self.assertEqual([], reimporter.pending_vuln_id_deletes)
-        self.assertEqual([], reimporter.pending_vulnerability_ids)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending_deletes)
+        self.assertEqual([], reimporter.vulnerability_id_manager.pending)
 
         finding.delete()
 

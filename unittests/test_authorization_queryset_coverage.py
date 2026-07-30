@@ -15,11 +15,9 @@ from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import (
     get_authorized_findings,
     get_authorized_findings_for_queryset,
-    get_authorized_vulnerability_ids,
-    get_authorized_vulnerability_ids_for_queryset,
 )
 from dojo.finding_group.queries import get_authorized_finding_groups
-from dojo.models import Dojo_User, Endpoint, Finding, Test, Vulnerability_Id
+from dojo.models import Dojo_User, Endpoint, Finding, Test
 from dojo.product.queries import (
     get_authorized_app_analysis,
     get_authorized_engagement_presets,
@@ -30,6 +28,7 @@ from dojo.product.queries import (
 from dojo.product_type.queries import get_authorized_product_types
 from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
+from dojo.vulnerability.queries import get_authorized_finding_vulnerability_references
 
 from .dojo_test_case import DojoTestCase, skip_unless_v2, versioned_fixtures
 
@@ -65,10 +64,7 @@ class TestAuthorizationQuerysetCoverage(DojoTestCase):
             ("findings_for_queryset",
              lambda: get_authorized_findings_for_queryset("view", Finding.objects.all()),
              "test__engagement__product__id"),
-            ("vulnerability_ids", lambda: get_authorized_vulnerability_ids("view"),
-             "finding__test__engagement__product__id"),
-            ("vulnerability_ids_for_queryset",
-             lambda: get_authorized_vulnerability_ids_for_queryset("view", Vulnerability_Id.objects.all()),
+            ("vulnerability_references", lambda: get_authorized_finding_vulnerability_references("view"),
              "finding__test__engagement__product__id"),
             ("app_analysis", lambda: get_authorized_app_analysis("view"), "product__id"),
             ("languages", lambda: get_authorized_languages("view"), "product__id"),

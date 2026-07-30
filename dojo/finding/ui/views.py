@@ -63,6 +63,7 @@ from dojo.finding.ui.forms import (
     MergeFindings,
     ReviewFindingForm,
 )
+from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.forms import (
     GITHUBFindingForm,
     JIRAFindingForm,
@@ -72,6 +73,7 @@ from dojo.forms import (
 from dojo.jira import services as jira_services
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
+from dojo.location.utils import copy_location_references
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
@@ -81,7 +83,6 @@ from dojo.models import (
     Engagement,
     FileAccessToken,
     Finding,
-    Finding_Group,
     Finding_Template,
     GITHUB_Issue,
     GITHUB_PKey,
@@ -121,6 +122,7 @@ from dojo.utils import (
     reopen_external_issue,
     update_external_issue,
 )
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
@@ -168,7 +170,7 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related("notes")
         prefetched_findings = prefetched_findings.prefetch_related("tags")
         prefetched_findings = prefetched_findings.prefetch_related(
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
     else:
         logger.debug("unable to prefetch because query was already executed")
@@ -1355,6 +1357,7 @@ def defect_finding_review(request, fid):
     )
 
 
+@require_POST
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -1364,6 +1367,11 @@ def reopen_finding(request, fid):
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     finding.under_review = False
+    # Same reasoning as close_finding: an open review does not survive the
+    # status change, so its requester/reviewers go with it. Reopening matters
+    # more than closing here — the finding comes back active, so stale
+    # reviewers would show up in reviewer-scoped queues as live work.
+    finding.review_requested_by = None
     if settings.V3_FEATURE_LOCATIONS:
         for ref in finding.locations.all():
             ref.set_status(FindingLocationStatus.Active, request.user, timezone.now())
@@ -1378,6 +1386,8 @@ def reopen_finding(request, fid):
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
     finding.save(dedupe_option=False, push_to_jira=False)
+    # After the save so a failed save doesn't leave the M2M already emptied.
+    finding.reviewers.clear()
     if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
         jira_services.push(finding)
 
@@ -1493,6 +1503,7 @@ def remediation_date(request, fid):
     )
 
 
+@require_POST
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1503,6 +1514,7 @@ def touch_finding(request, fid):
     )
 
 
+@require_POST
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1520,6 +1532,7 @@ def simple_risk_accept(request, fid):
     )
 
 
+@require_POST
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(request.user, finding)
@@ -2335,12 +2348,14 @@ def merge_finding_product(request, pid):
                         ):
                             finding_references = f"{finding_references}\n{finding.references}"
 
-                        # if checked merge the endpoints
+                        # if checked merge the endpoints and locations
                         if form.cleaned_data["add_endpoints"]:
                             with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
                                 finding_to_merge_into.endpoints.add(
                                     *finding.endpoints.all(),
                                 )
+                            if settings.V3_FEATURE_LOCATIONS:
+                                copy_location_references(finding, finding_to_merge_into)
 
                         # if checked merge the tags
                         if form.cleaned_data["tag_finding"]:
@@ -2709,7 +2724,12 @@ def _bulk_update_finding_groups(finds, form):
     if form.cleaned_data["finding_group_add"]:
         logger.debug("finding_group_add checked!")
         fgid = form.cleaned_data["add_to_finding_group_id"]
-        finding_group = Finding_Group.objects.get(id=fgid)
+        # Scope the target group to the ones the user may edit, the same way the
+        # submitted findings are scoped above. Without this a caller could pass a
+        # group id from a product they have no access to.
+        finding_group = get_object_or_404(
+            get_authorized_finding_groups("edit"), id=fgid,
+        )
         finding_group, added, skipped = finding_helper.add_to_finding_group(
             finding_group, finds,
         )
@@ -3273,7 +3293,7 @@ def push_to_jira(request, fid):
         # but cant't change too much now without having a test suite,
         # so leave as is for now with the addition warning message
         # to check alerts for background errors.
-        if jira_services.push(finding):
+        if jira_services.push_succeeded(jira_services.push(finding)):
             messages.add_message(
                 request,
                 messages.SUCCESS,
