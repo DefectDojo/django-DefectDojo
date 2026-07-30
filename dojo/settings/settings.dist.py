@@ -1258,6 +1258,9 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AWS Security Hub Scan": True,
     "Meterian Scan": True,
     "SARIF": True,
+    # These parsers subclass SarifParser, so they inherit its dedupe fields (which include cwe) and
+    # need the same null-CWE allowance: a SARIF rule is not obliged to carry a CWE.
+    "Flawfinder Scan": True,
     "Hadolint Dockerfile check": True,
     "Semgrep JSON Report": True,
     "Generic Findings Import": True,
@@ -1411,6 +1414,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Github Secrets Detection Report": DEDUPE_ALGO_HASH_CODE,
     "Cloudsploit Scan": DEDUPE_ALGO_HASH_CODE,
     "SARIF": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Flawfinder Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Azure Security Center Recommendations Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Hadolint Dockerfile check": DEDUPE_ALGO_HASH_CODE,
     "Semgrep JSON Report": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
