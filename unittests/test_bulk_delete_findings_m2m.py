@@ -193,3 +193,33 @@ class TestBulkDeleteFindingsM2M(DojoTestCase):
             "The orphaned Notes row should be deleted along with the finding.",
         )
         connection.check_constraints()
+
+    def test_note_shared_across_chunks(self):
+        """
+        A note attached to findings that land in different chunks is still resolved.
+
+        The first chunk deletes the shared Notes row, which cascades the second
+        finding's through row away before its own chunk is reached. Both findings must
+        still delete cleanly rather than tripping the constraint from the other side.
+        """
+        first = self._create_finding("M2M F7")
+        second = self._create_finding("M2M F8")
+        note = Notes.objects.create(entry="note shared by both findings", author=self.testuser)
+        first.notes.add(note)
+        second.notes.add(note)
+
+        bulk_delete_findings(
+            Finding.objects.filter(id__in=[first.id, second.id]),
+            chunk_size=1,
+        )
+
+        self.assertFalse(
+            Finding.objects.filter(id__in=[first.id, second.id]).exists(),
+            "Both findings should have been deleted.",
+        )
+        self.assertFalse(
+            Finding.notes.through.objects.filter(finding_id__in=[first.id, second.id]).exists(),
+            "No note through row may outlive the findings it pointed at.",
+        )
+        self.assertFalse(Notes.objects.filter(id=note.id).exists(), "The shared note should be gone.")
+        connection.check_constraints()
