@@ -1,4 +1,4 @@
-name: Release Drafter Valentijn
+name: Release Drafter (custom range)
 
 on:
   workflow_dispatch:
@@ -8,21 +8,29 @@ on:
           The version of the next release that is being created or updated.
           This will override any version calculated by the release-drafter.
         required: false
-      previous-version:
+      filter-by-range:
         description: |
-          The version (tag_name) of the previous release to use when calculating changsets. 
-          For bugfix releases this should be the latest patch release (i.e. 1.11.1) for normal/minor releases
-          this should be the latest minor release (i.e. 1.11.0)
-          This will override any version calculated by the release-drafter.
+          Semver range limiting which past releases may be picked as the previous release,
+          i.e. where the changeset starts. Evaluated per tag with node's semver.satisfies().
+          For a minor-to-minor changeset, pass the previous minor tag exactly, e.g. '3.1.0'.
+          For changes since the last patch of the previous minor, pass a range, e.g. '>=3.1.0 <3.2.0'.
+          Leave empty to start from the most recent release.
         required: false
+      dry-run:
+        description: |
+          Log what would be written instead of creating or updating the release draft.
+          Use this to confirm the changeset starts at the release you expect.
+        required: false
+        default: 'false'
 
 jobs:
   update_release_draft:
     runs-on: ubuntu-latest
     steps:
-      - uses: valentijnscholten/release-drafter@f587de96a420b4b7f767d7eb12817926f18cad69 # master  # TODO: not maintained anymore - missing part is maybe already solved in the upstream
+      - uses: release-drafter/release-drafter@4d75298e00d9e34c483e5ff8c68d0ea1c1940c1e # v7.5.1
         with:
-          version: ${{github.event.inputs.version}}  
-          previous-version: ${{github.event.inputs.previous-version}} 
+          version: ${{ github.event.inputs.version }}
+          filter-by-range: ${{ github.event.inputs['filter-by-range'] }}
+          dry-run: ${{ github.event.inputs['dry-run'] }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
