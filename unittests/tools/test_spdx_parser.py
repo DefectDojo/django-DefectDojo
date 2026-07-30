@@ -1,6 +1,6 @@
 from dojo.models import Finding, Test
 from dojo.tools.spdx.parser import SpdxParser
-from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
+from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v3
 
 
 class TestSpdxParser(DojoTestCase):
@@ -19,6 +19,7 @@ class TestSpdxParser(DojoTestCase):
         findings = self.parse("spdx_no_vuln.json")
         self.assertEqual(0, len(findings))
 
+    @skip_unless_v3
     def test_no_vuln_still_records_component_inventory(self):
         """
         SPDX must behave like CycloneDX: packages become dependency locations on the test, never findings.
@@ -133,6 +134,7 @@ class TestSpdxParser(DojoTestCase):
         with (get_unit_tests_scans_path("spdx") / "spdx_no_vuln.json").open(encoding="utf-8") as file:
             self.assertIn("cpe23Type", file.read())
 
+    @skip_unless_v3
     def test_checksums_become_location_hashes(self):
         test = Test()
         with (get_unit_tests_scans_path("spdx") / "spdx_many_vuln.json").open(encoding="utf-8") as file:

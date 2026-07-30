@@ -61,7 +61,7 @@ each finding gets its own product's score. An advisory with **no** score at all 
 Info — a published vendor advisory is not informational, and Info would hide it behind a
 minimum-severity setting.
 
-### Sample scan data
+### Sample Scan Data
 
 Sample CSAF files are available at
 [unittests/scans/csaf](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/csaf).

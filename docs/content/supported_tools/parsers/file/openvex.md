@@ -66,7 +66,7 @@ to read it would silently drop suppression statements — the worst failure mode
 both are supported. `aliases` on a v0.2.0 vulnerability object are imported alongside the primary
 identifier.
 
-### Sample scan data
+### Sample Scan Data
 
 Sample OpenVEX files are available at
 [unittests/scans/openvex](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/openvex).

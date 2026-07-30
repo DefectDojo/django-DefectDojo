@@ -56,7 +56,7 @@ report alongside the SBOM when you need scored findings.
 
 `NOASSERTION` and `NONE` are SPDX placeholders meaning "unknown" and are treated as absent throughout.
 
-### Sample scan data
+### Sample Scan Data
 
 Sample SPDX files are available at
 [unittests/scans/spdx](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/spdx).
