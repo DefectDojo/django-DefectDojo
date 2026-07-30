@@ -91,15 +91,16 @@ class TestReportLocationFindingScoping(DojoTestCase):
 
     def test_shared_location_is_a_single_row(self):
         """The premise: both products reference one deduplicated Location."""
-        assert {self.product_a.name, self.product_b.name} <= {
-            p.name for p in self.shared.all_related_products()
-        }
+        related = {p.name for p in self.shared.all_related_products()}
+        self.assertIn(self.product_a.name, related)
+        self.assertIn(self.product_b.name, related)
 
     def test_reader_does_not_receive_another_products_finding(self):
         with impersonate(self.alice):
             titles = {f.title for f in self._findings_in_report_for(self.alice)}
-        assert titles == {"Finding A"}, (
-            f"report leaked findings outside the user's products: {titles}"
+        self.assertEqual(
+            titles, {"Finding A"},
+            "report rendered findings outside the user's products",
         )
 
     def test_report_matches_direct_finding_authorization(self):
@@ -110,11 +111,14 @@ class TestReportLocationFindingScoping(DojoTestCase):
                 .values_list("id", flat=True),
             )
             rendered = {f.id for f in self._findings_in_report_for(self.alice)}
-        assert rendered <= allowed, f"unauthorized findings in report: {rendered - allowed}"
+        self.assertEqual(
+            rendered - allowed, set(),
+            "report rendered findings the user is not authorized to see",
+        )
 
     def test_superuser_still_sees_both(self):
         """The scoping must not break the legitimate case."""
         admin = User.objects.filter(is_superuser=True).first()
         with impersonate(admin):
             titles = {f.title for f in self._findings_in_report_for(admin)}
-        assert titles == {"Finding A", "Finding B"}
+        self.assertEqual(titles, {"Finding A", "Finding B"})
