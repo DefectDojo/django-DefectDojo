@@ -1699,6 +1699,7 @@ VULNERABILITY_URLS = {
     "AVD": "https://avd.aquasec.com/misconfig/",  # e.g. https://avd.aquasec.com/misconfig/avd-ksv-01010
     "AWS-": "https://aws.amazon.com/security/security-bulletins/",  # e.g. https://aws.amazon.com/security/security-bulletins/AWS-2025-001
     "BAM-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BAM-25498
+    "BELL-SA-": "https://docs.bell-sw.com/security/advisories/",  # e.g. https://docs.bell-sw.com/security/advisories/BELL-SA-2026-6
     "BSERV-": "https://jira.atlassian.com/browse/",  # e.g. https://jira.atlassian.com/browse/BSERV-19020
     "C-": "https://hub.armosec.io/docs/",  # e.g. https://hub.armosec.io/docs/c-0085
     "CAPEC": "https://capec.mitre.org/data/definitions/&&.html",  # e.g. https://capec.mitre.org/data/definitions/157.html

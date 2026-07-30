@@ -28,6 +28,7 @@ from dojo.models import (
     SEVERITIES,
     BurpRawRequestResponse,
     Endpoint,
+    Engagement,
     FileUpload,
     Finding,
     Finding_CWE,
@@ -631,6 +632,44 @@ class BaseImporter(ImporterOptions):
 
         return message
 
+    def save_without_resurrecting(self, instance: Engagement | Test) -> None:
+        """
+        Persist an import target, refusing to re-create it if it was deleted mid-import.
+
+        Model.save() on an instance whose primary key is already set issues an UPDATE, and
+        Django falls back to an INSERT when that UPDATE matches no rows. The importer loads
+        its test and engagement at the start of a run that can take minutes, so a delete
+        landing mid-run turns a routine write-back into an INSERT that re-creates the
+        deleted row from the stale in-memory copy. That surfaced two ways:
+
+        - The parent went with it (an engagement delete cascades to its tests), so the
+          INSERT carried a dangling foreign key. Because Django declares its foreign keys
+          DEFERRABLE INITIALLY DEFERRED, the violation is only raised at COMMIT, well past
+          any handler that knew what the import was doing, and the caller got an opaque 500
+          naming a PostgreSQL constraint instead of the reason the import failed.
+        - The parent survived, so the INSERT succeeded and silently resurrected a row the
+          user had deleted, without the findings and history that were cascaded away with it.
+
+        Neither is a save the importer should be making: the target of the import is gone,
+        so the import cannot complete. Fail with a message that says exactly that.
+
+        The row is checked before the write rather than relying on save(force_update=True).
+        A forced update raises from inside the atomic block that Model.save_base opens
+        without a savepoint, which marks the whole surrounding transaction for rollback --
+        the caller's failure handling would then hit TransactionManagementError instead of
+        being able to record why the import failed. Costing one indexed primary-key lookup
+        keeps the transaction usable.
+        """
+        if instance.pk is not None and not type(instance)._base_manager.filter(pk=instance.pk).exists():
+            msg = (
+                f"The {instance._meta.verbose_name} this scan was being imported into "
+                f"(id {instance.pk}) was deleted while the scan was being processed, so "
+                f"the import could not be completed. Nothing was imported. Re-run the "
+                f"import against a {instance._meta.verbose_name} that still exists."
+            )
+            raise ValidationError(msg)
+        instance.save()
+
     def update_test_progress(
         self,
         percentage_value: int = 100,
@@ -641,7 +680,7 @@ class BaseImporter(ImporterOptions):
         Its purpose is to update the percent completion of the test to 100 percent
         """
         self.test.percent_complete = percentage_value
-        self.test.save()
+        self.save_without_resurrecting(self.test)
 
     def resolve_dynamic_test_type_name(self, raw_type: str | None) -> str:
         """
@@ -843,9 +882,69 @@ class BaseImporter(ImporterOptions):
                 burpResponseBase64=base64.b64encode(unsaved_response.encode()),
             ))
 
+    def deleted_finding_ids(self, finding_ids: set[int]) -> set[int]:
+        """
+        Of the given buffered finding ids, the ones whose finding row is gone.
+
+        One indexed primary-key lookup for the whole set; see
+        drop_rows_for_deleted_findings() for why the buffers need this at all.
+        """
+        if not finding_ids:
+            return set()
+        live_finding_ids = set(
+            Finding.objects.filter(pk__in=finding_ids).values_list("pk", flat=True),
+        )
+        return finding_ids - live_finding_ids
+
+    def drop_rows_for_deleted_findings(self, rows: list, deleted_finding_ids: set[int] | None = None) -> list:
+        """
+        Return only the buffered child rows whose finding still exists.
+
+        Child rows are buffered while a batch of up to a thousand findings is processed
+        and inserted in bulk at the batch boundary, so a finding stays referenced by the
+        buffer for as long as the rest of its batch takes. A finding row can go away
+        inside that window: the excess-duplicate cleanup task deletes findings, and so
+        does a user deleting findings or a delete cascading from a test or engagement.
+        The buffered row then points at a primary key that is no longer in dojo_finding.
+
+        Because Django declares its foreign keys DEFERRABLE INITIALLY DEFERRED, that
+        insert does not fail where it is issued. PostgreSQL raises it at COMMIT, past
+        every handler that knew what the import was doing, so the whole import dies with
+        an IntegrityError naming a database constraint and takes the rest of the batch --
+        findings that were perfectly fine -- with it.
+
+        A finding that is gone has nothing to own these rows, so dropping just those rows
+        is the correct outcome, and it costs one indexed primary-key lookup per flush.
+        Rows whose finding id is not resolvable yet are left alone: bulk_create fills the
+        id in from the related object, and reporting on them is its job, not this guard's.
+
+        Callers that flush several buffers at one boundary resolve the deleted ids once and
+        pass them in, so the whole boundary still costs a single lookup.
+        """
+        finding_ids = {row.finding_id for row in rows if row.finding_id is not None}
+        if not finding_ids:
+            return rows
+        # Narrow a caller-supplied set to this buffer with a new set rather than in place:
+        # the caller reuses its set for the other buffers at the same flush boundary.
+        if deleted_finding_ids is None:
+            dropped_finding_ids = self.deleted_finding_ids(finding_ids)
+        else:
+            dropped_finding_ids = deleted_finding_ids & finding_ids
+        if not dropped_finding_ids:
+            return rows
+        logger.warning(
+            "skipping %s row(s) buffered for %s finding(s) deleted during the import: %s",
+            sum(1 for row in rows if row.finding_id in dropped_finding_ids),
+            len(dropped_finding_ids),
+            sorted(dropped_finding_ids),
+        )
+        return [row for row in rows if row.finding_id not in dropped_finding_ids]
+
     def flush_burp_request_response(self) -> None:
         if self.pending_burp_rr:
-            BurpRawRequestResponse.objects.bulk_create(self.pending_burp_rr, batch_size=1000)
+            rows = self.drop_rows_for_deleted_findings(self.pending_burp_rr)
+            if rows:
+                BurpRawRequestResponse.objects.bulk_create(rows, batch_size=1000)
             self.pending_burp_rr.clear()
 
     def process_locations(
@@ -927,6 +1026,19 @@ class BaseImporter(ImporterOptions):
 
     def flush_vulnerability_ids(self) -> None:
         """Flush the vulnerability-id buffers, then the Finding_CWE buffers, and clear."""
+        # Every buffer flushed at this boundary hangs off a finding that may have been
+        # deleted since it was buffered, so resolve the deleted ids once (one lookup for
+        # the whole boundary) and drop those rows -- see drop_rows_for_deleted_findings().
+        deleted_finding_ids = self.deleted_finding_ids(
+            {
+                finding.id
+                for finding, _ in self.vulnerability_id_manager.pending
+                if finding.id is not None
+            }
+            | {row.finding_id for row in self.pending_cwes if row.finding_id is not None},
+        )
+        if deleted_finding_ids:
+            self.vulnerability_id_manager.drop_findings(deleted_finding_ids)
         # Vulnerability entity + FindingVulnerabilityReference rows, in one transaction.
         self.vulnerability_id_manager.flush()
         # CWE buffers ride the same flush boundary as before (not owned by the manager).
@@ -934,7 +1046,9 @@ class BaseImporter(ImporterOptions):
             Finding_CWE.objects.filter(finding_id__in=self.pending_cwe_deletes).delete()
             self.pending_cwe_deletes.clear()
         if self.pending_cwes:
-            Finding_CWE.objects.bulk_create(self.pending_cwes, batch_size=1000, ignore_conflicts=True)
+            rows = self.drop_rows_for_deleted_findings(self.pending_cwes, deleted_finding_ids)
+            if rows:
+                Finding_CWE.objects.bulk_create(rows, batch_size=1000, ignore_conflicts=True)
             self.pending_cwes.clear()
 
     def process_files(

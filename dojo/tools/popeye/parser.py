@@ -22,7 +22,7 @@ class PopeyeParser:
         data = json.load(file)
 
         dupes = {}
-        for sanitizer in data["popeye"]["sanitizers"]:
+        for sanitizer in self._get_sanitizer_entries(data):
             issues = sanitizer.get("issues")
             if issues:
                 for issue_group, issue_list in issues.items():
@@ -73,6 +73,18 @@ class PopeyeParser:
                             if dupe_key not in dupes:
                                 dupes[dupe_key] = finding
         return list(dupes.values())
+
+    def _get_sanitizer_entries(self, data):
+        popeye_report = data["popeye"]
+        if "sanitizers" in popeye_report:
+            return popeye_report["sanitizers"]
+        return [
+            {
+                "sanitizer": section["linter"],
+                "issues": section.get("issues"),
+            }
+            for section in popeye_report.get("sections", [])
+        ]
 
     def get_popeye_level_string(self, level):
         if level == 1:
