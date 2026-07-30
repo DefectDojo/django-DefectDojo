@@ -607,15 +607,18 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # mid-import. One primary-key lookup per guarded save (test, engagement, and
     # the closing update_test_progress), so the cost is constant rather than
     # per-finding — which is why the delta is +3 on import and reimport alike.
-    # +1 on the paths that buffer child rows: the batch flush confirms the buffered
-    # findings still exist before inserting their vulnerability id references and CWE
-    # rows, instead of letting a finding deleted mid-batch turn the bulk insert into a
-    # dangling foreign key that PostgreSQL only rejects at COMMIT. One primary-key
-    # lookup per flush that has something to insert (shared by both buffers), which is
-    # why the no-change reimport (nothing buffered, so no lookup) is unchanged.
-    EXPECTED_ZAP_IMPORT_V2 = 300
-    EXPECTED_ZAP_IMPORT_V3 = 324
+    # +2 on the paths that buffer child rows: the batch flush confirms the buffered
+    # findings still exist before inserting their vulnerability id references, CWE rows
+    # and request/response rows, instead of letting a finding deleted mid-batch turn the
+    # bulk insert into a dangling foreign key that PostgreSQL only rejects at COMMIT.
+    # One primary-key lookup per flush method that has something to insert, and a ZAP
+    # batch boundary runs two of them: flush_vulnerability_ids() resolves the set once
+    # for the reference and CWE buffers it shares, then flush_burp_request_response()
+    # resolves its own for the request/response rows the ZAP parser attaches. The
+    # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
+    EXPECTED_ZAP_IMPORT_V2 = 301
+    EXPECTED_ZAP_IMPORT_V3 = 325
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 94
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 165
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 194
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 195
