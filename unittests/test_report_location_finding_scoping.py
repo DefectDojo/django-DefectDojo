@@ -26,15 +26,8 @@ from unittests.dojo_test_case import DojoTestCase, skip_unless_v3, versioned_fix
 class TestReportLocationFindingScoping(DojoTestCase):
 
     """
-    `prefetch_related_endpoints_for_report` attached findings to each Location from
-    the whole LocationFindingReference table. A Location is deduplicated across
-    products, so its own authorization check passes for any associated product the
-    user can see -- which meant a member of product A received the full body of
-    product B's findings in a rendered report, for every URL the two products
-    happened to share.
-
-    The prefetched references must be reduced to the requesting user's authorized
-    findings, matching what the direct finding routes enforce.
+    Two products sharing one deduplicated Location. Findings rendered into a report
+    must still be limited to the caller's own products.
     """
 
     fixtures = ["dojo_testdata.json"]
