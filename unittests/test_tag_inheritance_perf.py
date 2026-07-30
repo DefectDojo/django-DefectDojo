@@ -596,9 +596,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # mid-import. One primary-key lookup per guarded save (test, engagement, and
     # the closing update_test_progress), so the cost is constant rather than
     # per-finding — which is why the delta is +3 on import and reimport alike.
-    EXPECTED_ZAP_IMPORT_V2 = 290
-    EXPECTED_ZAP_IMPORT_V3 = 314
+    # +1 on the paths that buffer child rows: the batch flush confirms the buffered
+    # findings still exist before inserting their vulnerability ids, instead of letting
+    # a finding deleted mid-batch turn the bulk insert into a dangling foreign key that
+    # PostgreSQL only rejects at COMMIT. One primary-key lookup per flush that has
+    # something to insert, which is why the no-change reimport (nothing buffered, so no
+    # lookup) is unchanged.
+    EXPECTED_ZAP_IMPORT_V2 = 291
+    EXPECTED_ZAP_IMPORT_V3 = 315
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 77
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 89
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 151
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 180
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 152
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 181
