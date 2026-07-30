@@ -1,15 +1,8 @@
 """
-Regression tests for finding scoping in the endpoint and host views
-(``dojo/url/ui/views.py`` ``process_endpoint_view``).
+Regression tests for finding scoping in the endpoint and host views.
 
-A Location row is deduplicated globally and shared by every product that
-references it, and a Location is authorized if any one of those products is the
-caller's. Authorizing the Location therefore says nothing about whose findings
-are attached to it, so the views must scope the findings themselves.
-
-The views are called directly rather than through the test client so the
-assertions cover the view and its template, independent of any redirect
-middleware layered on top of the route.
+A Location is authorized if any one of the products referencing it is the
+caller's, so the views must scope the findings attached to it separately.
 """
 from crum import impersonate
 from django.contrib.messages.storage.fallback import FallbackStorage

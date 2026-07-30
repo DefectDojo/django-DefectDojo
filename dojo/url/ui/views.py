@@ -126,8 +126,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
     metadata = None
     status = "No relationships defined"
     # A Location is shared by every product that references it, so an authorized
-    # Location does not imply its findings are authorized. Scope them to the caller
-    # the same way the report and API paths do.
+    # Location does not imply its findings are authorized.
     base_findings = get_authorized_findings_for_queryset(
         Permissions.Finding_View,
         Finding.objects.only(
