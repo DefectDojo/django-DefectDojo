@@ -924,19 +924,21 @@ class BaseImporter(ImporterOptions):
         finding_ids = {row.finding_id for row in rows if row.finding_id is not None}
         if not finding_ids:
             return rows
+        # Narrow a caller-supplied set to this buffer with a new set rather than in place:
+        # the caller reuses its set for the other buffers at the same flush boundary.
         if deleted_finding_ids is None:
-            deleted_finding_ids = self.deleted_finding_ids(finding_ids)
+            dropped_finding_ids = self.deleted_finding_ids(finding_ids)
         else:
-            deleted_finding_ids = deleted_finding_ids & finding_ids
-        if not deleted_finding_ids:
+            dropped_finding_ids = deleted_finding_ids & finding_ids
+        if not dropped_finding_ids:
             return rows
         logger.warning(
             "skipping %s row(s) buffered for %s finding(s) deleted during the import: %s",
-            sum(1 for row in rows if row.finding_id in deleted_finding_ids),
-            len(deleted_finding_ids),
-            sorted(deleted_finding_ids),
+            sum(1 for row in rows if row.finding_id in dropped_finding_ids),
+            len(dropped_finding_ids),
+            sorted(dropped_finding_ids),
         )
-        return [row for row in rows if row.finding_id not in deleted_finding_ids]
+        return [row for row in rows if row.finding_id not in dropped_finding_ids]
 
     def flush_burp_request_response(self) -> None:
         if self.pending_burp_rr:
