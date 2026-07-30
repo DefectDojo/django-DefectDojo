@@ -873,6 +873,33 @@ class TestDuplicationLogic(DojoTestCase):
             (original_first.title, original_first.line, original_first.hash_code),
         )
 
+    @override_settings(
+        DEDUPLICATION_ALGORITHM_PER_PARSER={"Fortify Scan": settings.DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL},
+        IMPORT_REIMPORT_MATCH_BATCH_SIZE=1,
+        IMPORT_REIMPORT_DEDUPE_BATCH_SIZE=1,
+    )
+    def test_reimport_surviving_original_is_order_independent_across_batch_boundaries(self):
+        # BASELINE (batching): the content ordering has to be applied to the WHOLE
+        # report, before the reimporter's batching loop — not per batch. Batch size 1
+        # puts each colliding finding in its own batch, which is the configuration the
+        # other guards in this class cannot reach: the repro fixtures hold two findings,
+        # so at the default size (1000) they always share one batch and a per-batch sort
+        # is indistinguishable from a global one. Sorting inside the loop would make each
+        # batch sort only itself, creation order would fall back to document order, and
+        # the survivor would flip between the two fixtures again — for any report larger
+        # than IMPORT_REIMPORT_DEDUPE_BATCH_SIZE in production.
+        _, findings1 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan1.fpr", "fortify-uid-batched-1")
+        _, findings2 = self._reimport_fortify_repro("fortify_dedupe_uid_repro_scan2.fpr", "fortify-uid-batched-2")
+        original1 = self._assert_single_surviving_original(findings1)
+        original2 = self._assert_single_surviving_original(findings2)
+
+        self.assertEqual(original1.unique_id_from_tool, original2.unique_id_from_tool)
+        self.assertEqual(
+            (original1.title, original1.line, original1.hash_code),
+            (original2.title, original2.line, original2.hash_code),
+            "surviving original differs between scan orders when the report spans multiple batches",
+        )
+
     def test_identical_except_title_hash_code(self):
         # 4 is already a duplicate of 2, let's see what happens if we create an identical finding with different title (and reset status)
         # expect: NOT marked as duplicate as title is part of hash_code calculation
