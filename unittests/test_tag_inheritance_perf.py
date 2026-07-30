@@ -590,9 +590,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # the async watson indexer, executed inline under CELERY_TASK_ALWAYS_EAGER);
     # +5 reimport (no-change + with-new) queries from removal of
     # WATSON_ASYNC_INDEX_UPDATE_THRESHOLD making async dispatch unconditional.
-    EXPECTED_ZAP_IMPORT_V2 = 287
-    EXPECTED_ZAP_IMPORT_V3 = 311
+    # +1 on the paths that buffer child rows: the batch flush confirms the buffered
+    # findings still exist before inserting their vulnerability ids, instead of letting
+    # a finding deleted mid-batch turn the bulk insert into a dangling foreign key that
+    # PostgreSQL only rejects at COMMIT. One primary-key lookup per flush that has
+    # something to insert, which is why the no-change reimport (nothing buffered, so no
+    # lookup) is unchanged.
+    EXPECTED_ZAP_IMPORT_V2 = 288
+    EXPECTED_ZAP_IMPORT_V3 = 312
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 148
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 177
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 149
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 178

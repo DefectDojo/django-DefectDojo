@@ -838,9 +838,50 @@ class BaseImporter(ImporterOptions):
                 burpResponseBase64=base64.b64encode(unsaved_response.encode()),
             ))
 
+    def drop_rows_for_deleted_findings(self, rows: list) -> list:
+        """
+        Return only the buffered child rows whose finding still exists.
+
+        Child rows are buffered while a batch of up to a thousand findings is processed
+        and inserted in bulk at the batch boundary, so a finding stays referenced by the
+        buffer for as long as the rest of its batch takes. A finding row can go away
+        inside that window: the excess-duplicate cleanup task deletes findings, and so
+        does a user deleting findings or a delete cascading from a test or engagement.
+        The buffered row then points at a primary key that is no longer in dojo_finding.
+
+        Because Django declares its foreign keys DEFERRABLE INITIALLY DEFERRED, that
+        insert does not fail where it is issued. PostgreSQL raises it at COMMIT, past
+        every handler that knew what the import was doing, so the whole import dies with
+        an IntegrityError naming a database constraint and takes the rest of the batch --
+        findings that were perfectly fine -- with it.
+
+        A finding that is gone has nothing to own these rows, so dropping just those rows
+        is the correct outcome, and it costs one indexed primary-key lookup per flush.
+        Rows whose finding id is not resolvable yet are left alone: bulk_create fills the
+        id in from the related object, and reporting on them is its job, not this guard's.
+        """
+        finding_ids = {row.finding_id for row in rows if row.finding_id is not None}
+        if not finding_ids:
+            return rows
+        live_finding_ids = set(
+            Finding.objects.filter(pk__in=finding_ids).values_list("pk", flat=True),
+        )
+        deleted_finding_ids = finding_ids - live_finding_ids
+        if not deleted_finding_ids:
+            return rows
+        logger.warning(
+            "skipping %s row(s) buffered for %s finding(s) deleted during the import: %s",
+            sum(1 for row in rows if row.finding_id in deleted_finding_ids),
+            len(deleted_finding_ids),
+            sorted(deleted_finding_ids),
+        )
+        return [row for row in rows if row.finding_id not in deleted_finding_ids]
+
     def flush_burp_request_response(self) -> None:
         if self.pending_burp_rr:
-            BurpRawRequestResponse.objects.bulk_create(self.pending_burp_rr, batch_size=1000)
+            rows = self.drop_rows_for_deleted_findings(self.pending_burp_rr)
+            if rows:
+                BurpRawRequestResponse.objects.bulk_create(rows, batch_size=1000)
             self.pending_burp_rr.clear()
 
     def process_locations(
@@ -908,7 +949,9 @@ class BaseImporter(ImporterOptions):
             Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
             self.pending_vuln_id_deletes.clear()
         if self.pending_vulnerability_ids:
-            Vulnerability_Id.objects.bulk_create(self.pending_vulnerability_ids, batch_size=1000)
+            rows = self.drop_rows_for_deleted_findings(self.pending_vulnerability_ids)
+            if rows:
+                Vulnerability_Id.objects.bulk_create(rows, batch_size=1000)
             self.pending_vulnerability_ids.clear()
 
     def process_files(
