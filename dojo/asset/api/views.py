@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
@@ -8,7 +10,7 @@ from rest_framework.response import Response
 import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2.serializers import ReportGenerateOptionSerializer, ReportGenerateSerializer
-from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
+from dojo.api_v2.views import DeprecationNoticeMixin, PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
 from dojo.asset.api import serializers
 from dojo.asset.api.filters import (
     ApiAssetFilter,
@@ -27,10 +29,14 @@ from dojo.utils import async_delete, get_setting
 
 
 # Authorization: object-based
+# Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
 @extend_schema_view(**schema_with_prefetch())
 class AssetAPIScanConfigurationViewSet(
+    DeprecationNoticeMixin,
     PrefetchDojoModelViewSet,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 11, 1)
     serializer_class = serializers.AssetAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)

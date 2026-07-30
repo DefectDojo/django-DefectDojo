@@ -62,8 +62,8 @@ def get_item(
     artifact_version,
     artifact_sha256,
 ):
-    cve = None
     cwe = None
+    unsaved_cwes = []
     cvssv3 = None
     impact_path = ImpactPath("", "", "")
 
@@ -79,6 +79,7 @@ def get_item(
     if cves:
         if len(cves[0].get("cwe", [])) > 0:
             cwe = decode_cwe_number(cves[0].get("cwe", [])[0])
+            unsaved_cwes = [decode_cwe_number(value) for value in cves[0].get("cwe", [])]
         if "cvss_v3" in cves[0]:
             cvss_v3 = cves[0]["cvss_v3"]
             # Note: Xray sometimes takes over malformed cvss scores like `5.9` that can not be parsed.
@@ -93,6 +94,10 @@ def get_item(
     if len(impact_paths) > 0:
         impact_path = decode_impact_path(impact_paths[0])
 
+    # unique_id_from_tool is this parser's stable identity and drives reimport matching (see
+    # DEDUPLICATION_ALGORITHM_PER_PARSER): it must depend only on values that identify the finding
+    # (artifact digest, impacted component, Xray issue id) and never on vendor-maintained prose such
+    # as the CVE description, which Xray rewrites as it refreshes its vulnerability database.
     result = hashlib.sha256()
     if "issue_id" in vulnerability:
         unique_id = str(
@@ -102,9 +107,11 @@ def get_item(
             + vulnerability["issue_id"],
         )
         vuln_id_from_tool = vulnerability["issue_id"]
-    elif cve:
-        unique_id = str(artifact_sha256 + impact_path.name + impact_path.version + cve)
     else:
+        # No issue id: fall back to the summary, which is the only other per-issue identifier the
+        # payload carries. (A `cve` branch used to sit here but was unreachable — the local was
+        # never assigned — and left vuln_id_from_tool unbound, so it would have raised had the
+        # condition ever become true.)
         unique_id = str(
             artifact_sha256
             + impact_path.name
@@ -134,7 +141,8 @@ def get_item(
         severity=severity,
         description=description,
         test=test,
-        file_path=impact_paths[0],
+        # An issue with no impact_path at all would otherwise IndexError and fail the whole import.
+        file_path=impact_paths[0] if len(impact_paths) > 0 else "",
         component_name=artifact_name,
         component_version=artifact_version,
         static_finding=True,
@@ -152,6 +160,8 @@ def get_item(
         vulnerability_ids.append(vulnerability["issue_id"])
     if vulnerability_ids:
         finding.unsaved_vulnerability_ids = vulnerability_ids
+    if unsaved_cwes:
+        finding.unsaved_cwes = unsaved_cwes
 
     if settings.V3_FEATURE_LOCATIONS and (artifact_name or artifact_version or len(impact_paths) > 0):
         impact_path = impact_paths[0] if len(impact_paths) > 0 else ""

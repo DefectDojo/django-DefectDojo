@@ -1,7 +1,9 @@
+import contextlib
 import logging
 from itertools import batched
 
 from django.conf import settings
+from django.core.exceptions import EmptyResultSet
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 
@@ -24,7 +26,6 @@ from dojo.models import (
     Notes,
     Test,
     Test_Import,
-    Vulnerability_Id,
 )
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tags.inheritance import apply_inherited_tags_for_findings
@@ -278,25 +279,44 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         with tag_inheritance.suppress_tag_inheritance():
             return self._process_findings_internal(parsed_findings, **kwargs)
 
+    def get_original_findings(self):
+        """
+        Queryset of findings already in the test that "old finding" bookkeeping runs over.
+
+        Only findings with the same service value (or None) are candidates: even though the
+        service value is part of the hash_code calculation, closing must never touch findings
+        with a different service value.
+        https://github.com/DefectDojo/django-DefectDojo/issues/12754
+
+        This is intentionally a separate method (like get_reimport_match_candidates_for_batch)
+        so downstream editions can override it without copying the full process_findings()
+        implementation: _process_findings_internal materializes this queryset solely to compute
+        to_mitigate/untouched, so an importer that defers close-old bookkeeping to its own
+        sync-wide pass (e.g. Dojo Pro's batched chunk imports) can return Finding.objects.none()
+        to keep a batch's memory bounded by the batch instead of by the whole test.
+        """
+        if self.service is not None:
+            return self.test.finding_set.all().filter(service=self.service)
+        return self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+
     def _process_findings_internal(
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
-        # Only process findings with the same service value (or None)
-        # Even though the service values is used in the hash_code calculation,
-        # we need to make sure there are no side effects such as closing findings
-        # for findings with a different service value
-        # https://github.com/DefectDojo/django-DefectDojo/issues/12754
-        if self.service is not None:
-            original_findings = self.test.finding_set.all().filter(service=self.service)
-        else:
-            original_findings = self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+        original_findings = self.get_original_findings()
 
-        logger.debug(f"original_findings_qyer: {original_findings.query}")
+        if logger.isEnabledFor(logging.DEBUG):
+            # Guarded twice over: rendering .query raises EmptyResultSet for a none() queryset
+            # (a legitimate get_original_findings() override), and the original_items render
+            # builds (id, hash) tuples for every finding already in the test — millions on a
+            # large test — even when DEBUG logging is off, because f-strings always evaluate.
+            with contextlib.suppress(EmptyResultSet):
+                logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
-        logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
@@ -509,24 +529,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
-    def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> None:
+    def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> list[Finding]:
         """
         Refresh false_p, risk_accepted, and out_of_scope from the DB for each finding.
 
         These can change during reimport (e.g. false positive) while the in-memory instances
         are stale. Per-finding refresh_from_db in close_old_findings was added in
         https://github.com/DefectDojo/django-DefectDojo/pull/12291. A naive refresh per
-        finding issues one SELECT each; we batch one query per chunk of primary keys and fall
-        back to refresh_from_db only when needed.
+        finding issues one SELECT each; we batch one query per chunk of primary keys instead.
+
+        Returns only the findings that still exist in the database. A candidate collected
+        earlier in the reimport can be gone by the time we get here (a concurrent delete of
+        findings, for example): there is no row to refresh, and such a finding must not be
+        closed either, because saving it would re-insert the deleted row.
 
         This really should be fixed differently, but for now we at least optimize it to be done in bulk.
         """
-        findings_without_pk = [f for f in findings if f.pk is None]
+        # An unsaved finding has no row to refresh from and nothing to close.
         findings_with_pk = [f for f in findings if f.pk is not None]
 
-        for finding in findings_without_pk:
-            finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
-
+        surviving_findings: list[Finding] = []
         for chunk in batched(findings_with_pk, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
             ids = [f.pk for f in chunk]
             fresh_by_id = {
@@ -540,12 +562,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             }
             for finding in chunk:
                 row = fresh_by_id.get(finding.pk)
-                if row is not None:
-                    finding.false_p = row["false_p"]
-                    finding.risk_accepted = row["risk_accepted"]
-                    finding.out_of_scope = row["out_of_scope"]
-                else:
-                    finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
+                if row is None:
+                    # Deleted after the close old findings candidates were collected
+                    logger.debug("REIMPORT_SCAN: skipping finding %s, it no longer exists", finding.pk)
+                    continue
+                finding.false_p = row["false_p"]
+                finding.risk_accepted = row["risk_accepted"]
+                finding.out_of_scope = row["out_of_scope"]
+                surviving_findings.append(finding)
+
+        return surviving_findings
 
     def close_old_findings(
         self,
@@ -567,7 +593,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # are calculated based from the original values before the reimport, so
         # any updates made during reimport are discarded without first getting the
         # state of the finding as it stands at this moment (django-DefectDojo #12291).
-        self._sync_close_old_finding_status_fields(findings)
+        # This also drops any candidate whose row was deleted in the meantime.
+        findings = self._sync_close_old_finding_status_fields(findings)
         # Determine if pushing to jira or if the finding groups are enabled
         mitigated_findings = []
         for finding in findings:
@@ -985,8 +1012,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
-        # Use prefetched data directly without triggering queries
-        existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
+        # Reconcile CWEs independently of the vulnerability_ids early-exit below (CWEs may change
+        # while vulnerability_ids do not, and vice versa).
+        self.reconcile_cwes(finding)
+
+        # Read the existing ids through the entity read helper (not a legacy relation). The prefetch
+        # is matched upstream (the reimport finding query uses vulnerability_id_prefetch()), so this
+        # stays a no-query read.
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
+
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed
@@ -997,12 +1032,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             return finding
 
-        # Accumulate delete + insert for batch flush
-        self.pending_vuln_id_deletes.append(finding.id)
-        self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid)
-            for vid in vulnerability_ids_to_process
-        ])
+        # Accumulate delete + insert for batch flush (entity references).
+        self.vulnerability_id_manager.record_reconcile(finding, vulnerability_ids_to_process)
         if vulnerability_ids_to_process:
             finding.cve = vulnerability_ids_to_process[0]
         else:

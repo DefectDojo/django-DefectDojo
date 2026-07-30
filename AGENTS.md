@@ -1,5 +1,50 @@
 # DefectDojo Development Guide
 
+## Branch Check (do this before writing any code)
+
+Establish the current branch and its release line *before* editing files, and state
+both back to the user. This applies to every change, including one-line fixes.
+
+| Branch | Ships in | Base work here when |
+|--------|----------|---------------------|
+| `bugfix` | the next **patch** release (fastest timeline) | bug fixes, regressions, anything that should not wait |
+| `dev` | the next **minor** release | new features, refactors, schema/model changes |
+| `master` | already released | never, except an explicit release or backport task |
+
+```bash
+git branch --show-current
+# Which line was a topic branch cut from? Ancestry, not the branch name:
+for b in dev bugfix master; do
+  git merge-base --is-ancestor "origin/$b" HEAD 2>/dev/null && echo "contains origin/$b"
+done
+```
+
+Rules:
+
+- **A fix based on `dev` does not ship until the next minor release.** If the task is a
+  bug or regression and the branch is `dev` (or was cut from `dev`), say so before
+  starting and offer to move the work onto `bugfix`: `git switch -c <name> origin/bugfix`.
+  This is the most common way an urgent fix quietly misses the patch line.
+- **A feature based on `bugfix` inflates a patch release.** Same treatment in reverse:
+  point it out and offer `git switch -c <name> origin/dev`.
+- Judge a branch by what it was *cut from*, not by its name. A branch called
+  `fix/whatever` sitting on top of `dev` still ships with the minor release.
+- The PR base branch must match the line the work was cut from.
+
+### On `master`, stop and get explicit confirmation
+
+`.claude/hooks/branch-guard.sh` enforces this: it runs on `Write`/`Edit`/`NotebookEdit`
+and on `git commit`, and denies them while the checkout is on `master` (or a detached
+HEAD at `origin/master`). When it fires, do not retry and do not work around it. Tell the
+user the checkout is on `master`, ask them to confirm the change is genuinely intended
+for the released line (a release or backport task), and wait for the answer. On
+confirmation, run the `touch` command the hook prints; that command is deliberately not
+allowlisted, so approving its prompt *is* the confirmation. Without confirmation, move
+the work to `bugfix` first.
+
+The ack covers one session. A `SessionStart` hook reports the branch and its release line
+at startup so the branch is settled before the first edit.
+
 ## Project Overview
 
 DefectDojo is a Django application (`dojo` app) for vulnerability management. The codebase is undergoing a modular reorganization to move from monolithic files toward self-contained domain modules.
@@ -54,6 +99,7 @@ Modules in various stages of reorganization:
 |--------|-----------|-------------|-----|------|--------|
 | **url** | In module | N/A | Done | Done | **Complete** |
 | **location** | In module | N/A | N/A | Done | **Complete** |
+| **cicd_infrastructure** | In module | N/A | Done | Done | **Complete** |
 | **product_type** | In module | N/A | Done | Done | **Complete** (#14970) |
 | **test** | In module | N/A | Done | Done | **Complete** (#14971) |
 | **engagement** | In module | In module | Done | Done | **Complete** (#14972) |

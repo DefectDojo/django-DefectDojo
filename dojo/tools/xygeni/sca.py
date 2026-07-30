@@ -1,7 +1,7 @@
 """Parse Xygeni SCA (dependency-vulnerability) reports into DefectDojo Findings."""
 
 from dojo.models import Finding
-from dojo.tools.xygeni._common import map_severity, parse_cwe
+from dojo.tools.xygeni._common import map_severity, parse_cwes
 
 
 def parse_sca(data, test):
@@ -39,12 +39,14 @@ def _build_finding(dep, vuln, test):
     if cvss_score is None or cvss_score < 0:
         cvss_score = None
 
+    primary_cwe, all_cwes = parse_cwes(cwes=vuln.get("cwes"))
+
     finding = Finding(
         test=test,
         title=title,
         description=str(vuln.get("description") or ""),
         severity=map_severity(vuln.get("severity")),
-        cwe=parse_cwe(cwes=vuln.get("cwes")),
+        cwe=primary_cwe,
         cvssv3_score=cvss_score,
         mitigation=mitigation,
         references=references,
@@ -61,6 +63,9 @@ def _build_finding(dep, vuln, test):
 
     if vuln.get("cve"):
         finding.cve = vuln["cve"]
+
+    if all_cwes:
+        finding.unsaved_cwes = all_cwes
 
     finding.unsaved_vulnerability_ids = _collect_vulnerability_ids(vuln)
     return finding

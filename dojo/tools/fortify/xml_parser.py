@@ -141,19 +141,30 @@ class FortifyXMLParser:
                 issue["Category"], issue["FileName"], issue["LineStart"],
             )
             if title not in dupes:
-                items.append(
-                    Finding(
-                        title=title,
-                        severity=issue["Friority"],
-                        file_path=issue["FilePath"],
-                        line=int(issue["LineStart"]),
-                        static_finding=True,
-                        test=test,
-                        description=self.format_description(issue, cat_meta),
-                        mitigation=self.format_mitigation(issue, cat_meta),
-                        unique_id_from_tool=issue_key,
-                    ),
+                finding = Finding(
+                    title=title,
+                    severity=issue["Friority"],
+                    file_path=issue["FilePath"],
+                    line=int(issue["LineStart"]),
+                    static_finding=True,
+                    test=test,
+                    description=self.format_description(issue, cat_meta),
+                    mitigation=self.format_mitigation(issue, cat_meta),
+                    unique_id_from_tool=issue_key,
                 )
+                if settings.V3_FEATURE_LOCATIONS and issue["FilePath"]:
+                    source = issue.get("Source") or {}
+                    source_line = source.get("LineStart")
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=issue["FilePath"],
+                            line=int(issue["LineStart"]),
+                            snippet=issue["Snippet"] if issue["Snippet"] != "n/a" else "",
+                            source_file_path=source.get("FilePath") or "",
+                            source_line=int(source_line) if source_line and str(source_line).isdigit() else None,
+                        ),
+                    )
+                items.append(finding)
                 dupes.add(title)
         return items
 

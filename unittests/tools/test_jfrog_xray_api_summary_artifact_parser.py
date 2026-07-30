@@ -1,4 +1,6 @@
+import copy
 import hashlib
+import json
 
 from dojo.models import Test
 from dojo.tools.jfrog_xray_api_summary_artifact.parser import (
@@ -62,6 +64,18 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertEqual(1, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("CVE-2021-42385", finding.unsaved_vulnerability_ids[0])
 
+    def test_parse_file_with_multi_cwe(self):
+        testfile = (
+            get_unit_tests_scans_path("jfrog_xray_api_summary_artifact") / "multi_cwe_fabricated.json").open(encoding="utf-8",
+        )
+        parser = JFrogXrayApiSummaryArtifactParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual(787, finding.cwe)
+        self.assertEqual([787, 119], finding.unsaved_cwes)
+
     def test_parse_file_with_malformed_cvssv3_score(self):
         testfile = (
             get_unit_tests_scans_path("jfrog_xray_api_summary_artifact") / "malformed_cvssv3.json").open(encoding="utf-8",
@@ -75,3 +89,49 @@ class TestJFrogXrayApiSummaryArtifactParser(DojoTestCase):
         self.assertIsNone(finding.cvssv3)
         self.assertEqual(2, len(finding.unsaved_vulnerability_ids))
         self.assertEqual("XRAY-523195", finding.unsaved_vulnerability_ids[1])
+
+    def test_unique_id_is_stable_when_vendor_prose_changes(self):
+        """
+        The finding's identity must not move when Xray rewrites its CVE prose.
+
+        This parser's findings are matched on reimport by unique_id_from_tool (see
+        DEDUPLICATION_ALGORITHM_PER_PARSER). Xray refreshes the description text of an issue as
+        its vulnerability database is updated; when identity depended on that text, a reimport of
+        otherwise unchanged data closed every affected finding and created a replacement.
+        """
+        with (get_unit_tests_scans_path("jfrog_xray_api_summary_artifact") / "one_vuln.json").open(
+            encoding="utf-8",
+        ) as testfile:
+            original = json.load(testfile)
+
+        parser = JFrogXrayApiSummaryArtifactParser()
+        before = parser.get_items(copy.deepcopy(original), Test())[0]
+
+        rewritten = copy.deepcopy(original)
+        issue = rewritten["artifacts"][0]["issues"][0]
+        issue["description"] = "A substantially rewritten vendor description with new prose. " * 8
+
+        after = parser.get_items(rewritten, Test())[0]
+
+        self.assertNotEqual(before.description, after.description, "test premise: prose did change")
+        self.assertEqual(before.unique_id_from_tool, after.unique_id_from_tool)
+        self.assertEqual(before.vuln_id_from_tool, after.vuln_id_from_tool)
+
+    def test_issue_without_impact_path_does_not_break_the_import(self):
+        """
+        An issue carrying no impact_path must still parse.
+
+        It used to IndexError on file_path, which failed the entire report instead of the one
+        affected issue.
+        """
+        with (get_unit_tests_scans_path("jfrog_xray_api_summary_artifact") / "one_vuln.json").open(
+            encoding="utf-8",
+        ) as testfile:
+            tree = json.load(testfile)
+
+        tree["artifacts"][0]["issues"][0].pop("impact_path", None)
+
+        findings = JFrogXrayApiSummaryArtifactParser().get_items(tree, Test())
+        self.assertEqual(1, len(findings))
+        self.assertEqual("", findings[0].file_path)
+        self.assertTrue(findings[0].unique_id_from_tool)

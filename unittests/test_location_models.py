@@ -85,6 +85,29 @@ class TestURLModel(DojoTestCase):
         url = URL.from_value("tcp://foo.bar/")
         self.assertIsNone(url.port)
 
+    # Regression: network/infra-scanner endpoints using udp/snmp/ipp/icmp
+    # protocols were rejected by URL validation ("<proto> is not a supported
+    # protocol"), so migrate_endpoints_to_locations silently dropped them —
+    # ~65% of endpoints on infra-scan-heavy instances.
+    def test_scanner_protocols_supported(self):
+        for protocol, expected_port in (
+            ("udp", None),
+            ("icmp", None),
+            ("snmp", 161),
+            ("ipp", 631),
+        ):
+            url = URL(protocol=protocol, host="foo.bar")
+            url.full_clean()  # must not raise
+            self.assertEqual(
+                url.port, expected_port,
+                msg=f"expected default port {expected_port} for {protocol!r}, got {url.port!r}",
+            )
+
+    def test_unsupported_protocol_still_rejected(self):
+        # Control: a genuinely unknown protocol must still fail validation.
+        url = URL(protocol="definitelynotaprotocol", host="foo.bar")
+        self.assertRaises(ValidationError, url.full_clean)
+
     def test_spacial_char(self):
         url = URL.from_value("http://foo.bar/beforeSpace%20afterSpace")
         self.assertEqual(url.path, "beforeSpace%20afterSpace")

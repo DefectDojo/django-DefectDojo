@@ -3,8 +3,10 @@ __author__ = "jankuehl"
 import re
 
 from defusedxml import ElementTree
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class XanitizerParser:
@@ -73,6 +75,14 @@ class XanitizerParser:
             vulnerability_id = self.find_cve(description)
             if vulnerability_id:
                 dojofinding.unsaved_vulnerability_ids = [vulnerability_id]
+
+            if settings.V3_FEATURE_LOCATIONS and dojofinding.file_path:
+                dojofinding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=dojofinding.file_path,
+                        line=int(line) if line else None,
+                    ),
+                )
 
             items.append(dojofinding)
 

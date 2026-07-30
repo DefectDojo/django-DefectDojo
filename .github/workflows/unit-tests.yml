@@ -11,7 +11,13 @@ on:
       - hotfix/**
 
 jobs:
+  # hard gate: linting must pass before we spend any time building images or running tests
+  ruff:
+    uses: ./.github/workflows/ruff.yml
+    secrets: inherit
+
   build-docker-containers:
+    needs: ruff
     strategy:
         matrix:
           platform: ['linux/amd64', 'linux/arm64']

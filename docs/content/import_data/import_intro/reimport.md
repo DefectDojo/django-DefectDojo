@@ -106,6 +106,8 @@ Reimport decides whether an incoming item matches an existing Finding using **[R
 
 If you are seeing Reimport close old Findings and create new Findings when only a minor attribute changes (for example, a line number shift), tune **Reimport Deduplication** for that tool to use stable identifiers that ignore those attributes (such as Unique ID From Tool).
 
+**DefectDojo Pro** can solve this directly for tools without reliable unique IDs: enabling **[Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/)** makes Reimport recognize a Finding whose location moved — a line shift, file rename, URL move, or dependency version bump — as the *same* Finding, updating it in place and preserving its location history.
+
 ## Reimport via API - special note
 
 Note that the /reimport API endpoint can both **extend an existing Test** (apply the method in this article) **or create a new Test** with new data \- an initial call to `/import`, or setting up a Test in advance is not required.

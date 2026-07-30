@@ -120,7 +120,7 @@
                 elem.id = "req"
             }
 
-            if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids' && !$(elem).hasClass('select2-search__field')) {
+            if (elem.name != 'endpoints_to_add' && elem.name != 'vulnerability_ids' && elem.name != 'cwes' && !$(elem).hasClass('select2-search__field')) {
                 var mde = new EasyMDE({
                     spellChecker: false,
                     inputStyle: "contenteditable",

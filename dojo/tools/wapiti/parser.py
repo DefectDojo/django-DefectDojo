@@ -54,15 +54,21 @@ class WapitiParser:
             mitigation = vulnerability.findtext("solution")
             # manage references
             cwe = None
+            cwes = []
             references = []
             for reference in vulnerability.findall("references/reference"):
                 reference_title = reference.findtext("title")
                 if reference_title.startswith("CWE"):
-                    cwe = self.get_cwe(reference_title)
+                    ref_cwe = self.get_cwe(reference_title)
+                    if ref_cwe is not None:
+                        cwes.append(ref_cwe)
                 references.append(
                     f"* [{reference_title}]({reference.findtext('url')})",
                 )
             references = "\n".join(references)
+            # first CWE stays the primary; all are collected in cwes
+            if cwes:
+                cwe = cwes[0]
 
             for entry in vulnerability.findall("entries/entry"):
                 title = category + ": " + entry.findtext("info")
@@ -82,6 +88,8 @@ class WapitiParser:
                 )
                 if cwe:
                     finding.cwe = cwe
+                if cwes:
+                    finding.unsaved_cwes = cwes
 
                 if settings.V3_FEATURE_LOCATIONS:
                     finding.unsaved_locations = [LocationData.url(url=url)]

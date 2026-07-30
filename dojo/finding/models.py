@@ -25,6 +25,8 @@ from tagulous.models import TagField
 from titlecase import titlecase
 
 from dojo.base_models.base import BaseModel
+from dojo.finding.cwe import cwe_label, finding_cwe_labels
+from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 
 # get_current_date/tomorrow/copy_model_util are defined early in dojo.models, before the
 # re-export that loads this module — so this resolves despite the partial circular load, and
@@ -37,6 +39,7 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
+DELETE_JIRA_SYNC_UNSET = object()
 
 
 class Finding(BaseModel):
@@ -545,6 +548,9 @@ class Finding(BaseModel):
         self.unsaved_tags = None
         self.unsaved_files = None
         self.unsaved_vulnerability_ids = None
+        # Extra CWE numbers a parser wants to attach in addition to the primary self.cwe.
+        # Persisted as Finding_CWE rows (multiple CWEs per finding). None = none supplied.
+        self.unsaved_cwes = None
 
     def __str__(self):
         return self.title
@@ -700,13 +706,25 @@ class Finding(BaseModel):
         copy.found_by.set(old_found_by)
         # Assign any tags
         copy.tags.set(old_tags)
+        # Copy the vulnerability ids and CWEs (relation rows aren't copied by copy_model_util).
+        # Write the copy's ids through the entity write seam (copy.cve was already carried over by
+        # copy_model_util), and read the SOURCE ids through the entity read helper (not a legacy
+        # relation).
+        from dojo.vulnerability.manager import persist_for_finding  # noqa: PLC0415 -- avoid import cycle
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415
+
+        vulnerability_id_strings = finding_vulnerability_id_strings(self)
+        if vulnerability_id_strings:
+            persist_for_finding(copy, vulnerability_id_strings, delete_existing=False)
+        for finding_cwe in self.finding_cwe_set.all():
+            Finding_CWE.objects.create(finding=copy, cwe=finding_cwe.cwe)
 
         return copy
 
-    def delete(self, *args, product_grading_option=True, **kwargs):
+    def delete(self, *args, product_grading_option=True, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
         logger.debug("%d finding delete", self.id)
         from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
-        finding_helper.finding_delete(self)
+        finding_helper.finding_delete(self, push_to_jira=push_to_jira)
         super().delete(*args, **kwargs)
         if product_grading_option:
             from dojo.models import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
@@ -789,6 +807,11 @@ class Finding(BaseModel):
                 my_vulnerability_ids = self.get_vulnerability_ids()
                 fields_to_hash += my_vulnerability_ids
                 deduplicationLogger.debug(hashcodeField + " : " + my_vulnerability_ids)
+            elif hashcodeField == "cwes":
+                # For the CWE set (primary cwe + additional CWEs), need to compute the field
+                my_cwes = self.get_cwes()
+                fields_to_hash += my_cwes
+                deduplicationLogger.debug(hashcodeField + " : " + my_cwes)
             else:
                 # Generically use the finding attribute having the same name, converts to str in case it's integer
                 fields_to_hash += str(getattr(self, hashcodeField))
@@ -823,16 +846,37 @@ class Finding(BaseModel):
 
         def _get_saved_vulnerability_ids(finding) -> str:
             if finding.id is not None:
-                # Use the reverse relation (vulnerability_id_set) rather than a fresh
-                # Vulnerability_Id.objects.filter(...) so prefetch_related("vulnerability_id_set")
-                # is honored — avoids an N+1 (COUNT + SELECT per finding) during dedupe/hashcode.
-                vulnerability_id_str_list = [str(vulnerability_id) for vulnerability_id in finding.vulnerability_id_set.all()]
+                # Entity store: the prefetch-honoring reverse relation (vulnerability_references
+                # + select_related("vulnerability")) so Prefetch is honored — no N+1 in dedupe.
+                vulnerability_id_str_list = [ref.vulnerability.vulnerability_id for ref in finding.vulnerability_references.all()]
                 deduplicationLogger.debug("get_vulnerability_ids after the finding was saved. Vulnerability references count: " + str(len(vulnerability_id_str_list)))
-                # sort vulnerability_ids strings
+                # sort vulnerability_ids strings (no dedupe — ordering is irrelevant to the hash)
                 return "".join(sorted(vulnerability_id_str_list))
             return ""
 
         return _get_saved_vulnerability_ids(self) or _get_unsaved_vulnerability_ids(self)
+
+    # Get CWEs (canonical CWE-<n> labels) to use for hash_code computation.
+    # Mirrors get_vulnerability_ids: the saved path reads the reverse relation directly (never the
+    # cached `cwes` property, which could be stale if accessed before the rows were written), and
+    # falls back to the unsaved values before the finding is saved. save_cwes persists the primary
+    # self.cwe as a Finding_CWE row too, so finding_cwe_set already carries the full set.
+    def get_cwes(self):
+
+        def _get_unsaved_cwes(finding) -> str:
+            # primary self.cwe + any unsaved extra CWEs, canonical CWE-<n>, deduplicated
+            labels = finding_cwe_labels(finding.cwe, finding.unsaved_cwes)
+            return "".join(sorted(labels))
+
+        def _get_saved_cwes(finding) -> str:
+            if finding.id is not None:
+                # Use the reverse relation (finding_cwe_set) rather than the cached `cwes` property
+                # so prefetch is honored and a stale cached value can never corrupt the hash.
+                labels = [row.cwe for row in finding.finding_cwe_set.all()]
+                return "".join(sorted(labels))
+            return ""
+
+        return _get_saved_cwes(self) or _get_unsaved_cwes(self)
 
     # Get locations/endpoints to use for hash_code computation
     def get_locations(self):
@@ -871,9 +915,18 @@ class Finding(BaseModel):
                 from dojo.importers.location_manager import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
                     LocationManager,
                 )
+                from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
                 unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
+                # Only URL locations feed the "endpoints" hash ingredient — the
+                # saved path below filters to URL references, and hashing other
+                # location types here would make a finding's hash change between
+                # pre-save and post-save computation.
+                locations = sorted({
+                    location.get_location_value()
+                    for location in unsaved_locations
+                    if location.get_location_type() == URL.get_location_type()
+                })
                 # deduplicate (usually done upon saving finding) and sort locations
-                locations = sorted({location.get_location_value() for location in unsaved_locations})
                 return "".join(locations)
             # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
             # In this case, before saving the finding, both static_finding and dynamic_finding are True
@@ -1337,9 +1390,9 @@ class Finding(BaseModel):
 
     @cached_property
     def vulnerability_ids(self):
-        # Get vulnerability ids from database and convert to list of strings
-        vulnerability_ids_model = self.vulnerability_id_set.all()
-        vulnerability_ids = [vulnerability_id.vulnerability_id for vulnerability_id in vulnerability_ids_model]
+        # Get vulnerability ids from database and convert to list of strings.
+        # Entity store: reverse relation is ordered by FindingVulnerabilityReference.Meta.ordering.
+        vulnerability_ids = [ref.vulnerability.vulnerability_id for ref in self.vulnerability_references.all()]
 
         # Synchronize the cve field with the unsaved_vulnerability_ids
         # We do this to be as flexible as possible to handle the fields until
@@ -1353,6 +1406,19 @@ class Finding(BaseModel):
 
         # Remove duplicates
         return list(dict.fromkeys(vulnerability_ids))
+
+    @cached_property
+    def cwes(self):
+        # All CWEs for this finding in canonical CWE-<n> form: the additional Finding_CWE rows
+        # (already stored as CWE-<n> strings) with the primary self.cwe first, deduplicated.
+        # The single primary `cwe` field is merged in for backward compatibility, exactly as the
+        # `cve` field is merged into `vulnerability_ids`. We keep both fields to stay flexible
+        # until the single `cwe` field is not needed anymore and can be removed.
+        labels = [row.cwe for row in self.finding_cwe_set.all()]
+        primary = cwe_label(self.cwe)
+        if primary is not None:
+            labels.insert(0, primary)
+        return list(dict.fromkeys(label for label in labels if label))
 
     @property
     def violates_sla(self):
@@ -1374,12 +1440,26 @@ class Finding(BaseModel):
                 deduplicationLogger.debug("Hash_code computed for finding: %s: %s", finding_id, self.hash_code)
 
 
+# Legacy vulnerability-id store. As of the entity-only cutover, vulnerability ids live in the
+# Vulnerability entity + FindingVulnerabilityReference through-table (dojo/vulnerability/), and this
+# model is NO LONGER READ OR WRITTEN by any code path. It (and its dojo_vulnerability_id table) are
+# intentionally RETAINED for a transition period as a frozen pre-cutover snapshot, and removed
+# together in a future release. Do not add new usages.
 class Vulnerability_Id(models.Model):
     finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
     vulnerability_id = models.TextField(max_length=50, blank=False, null=False)
+    # Autodetected from the id prefix (CVE, GHSA, ...); NULL when there is no non-numeric
+    # prefix. Denormalized/indexed so type-scoped queries (e.g. GROUP BY type) stay cheap.
+    vulnerability_id_type = models.CharField(max_length=20, null=True, blank=True, editable=False, db_index=True)
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "vulnerability_id"], name="unique_finding_vulnerability_id"),
+        ]
         indexes = [
+            # Leading on vulnerability_id (the unique constraint's index leads on finding), for the
+            # vulnerability-id Explorer's GROUP BY vulnerability_id / lookups by exact id.
+            models.Index(fields=["vulnerability_id"], name="dojo_vuln_id_lookup_idx"),
             # Global search (pro/search/): weighted tsvector FTS + trigram fuzzy match.
             GinIndex(
                 SearchVector("vulnerability_id", weight="A", config="english"),
@@ -1399,6 +1479,34 @@ class Vulnerability_Id(models.Model):
 
     def __str__(self):
         return self.vulnerability_id
+
+    def save(self, *args, **kwargs):
+        # bulk_create paths set the type at construction; this covers save()/get_or_create.
+        self.vulnerability_id_type = resolve_vulnerability_id_type(self.vulnerability_id)
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("view_finding", args=[str(self.finding.id)])
+
+
+class Finding_CWE(models.Model):
+    # A CWE weakness associated with a finding. Separate from Vulnerability_Id because a CWE is a
+    # weakness class, not a vulnerability instance identifier — it must not participate in
+    # hash_code, vulnerability-id deduplication, or the cve field. Stored as the canonical
+    # ``CWE-<n>`` string (mirrors Vulnerability_Id.vulnerability_id). The primary CWE also stays on
+    # the legacy int Finding.cwe; this relation lets a finding carry multiple CWEs.
+    finding = models.ForeignKey("dojo.Finding", editable=False, on_delete=models.CASCADE)
+    # "CWE-<n>": 4 for the "CWE-" prefix + up to 7 digits (CWE-9999999) — far beyond the current
+    # max (~CWE-1428) yet tight. (Postgres varchar(n) is a length bound, not a storage cost.)
+    cwe = models.CharField(max_length=11, db_index=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=["finding", "cwe"], name="unique_finding_cwe"),
+        ]
+
+    def __str__(self):
+        return self.cwe
 
     def get_absolute_url(self):
         return reverse("view_finding", args=[str(self.finding.id)])

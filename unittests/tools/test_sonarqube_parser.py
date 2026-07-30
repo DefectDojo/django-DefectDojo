@@ -600,6 +600,19 @@ class TestSonarQubeParser(DojoTestCase):
         self.assertEqual("2023-10-16", item.date)
         my_file_handle.close()
 
+    def test_parse_json_file_from_api_with_multi_cwe_fabricated_copy(self):
+        # Fabricated copy: the first finding's message carries multiple CWE
+        # categories (CWE-120 + CWE-79); the primary CWE is the first (120).
+        my_file_handle, _product, _engagement, test = self.init(
+            get_unit_tests_scans_path("sonarqube") / "findings_over_api_multi_cwe_fabricated.json",
+        )
+        parser = SonarQubeParser()
+        findings = parser.get_findings(my_file_handle, test)
+        item = findings[0]
+        self.assertEqual("120", item.cwe)
+        self.assertEqual(["120", "79"], item.unsaved_cwes)
+        my_file_handle.close()
+
     def test_parse_json_file_from_api_with_multiple_findings_hotspots_json(self):
         my_file_handle, _product, _engagement, test = self.init(
             get_unit_tests_scans_path("sonarqube") / "findings_over_api_hotspots.json",
