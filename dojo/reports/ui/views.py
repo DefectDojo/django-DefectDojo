@@ -281,7 +281,7 @@ def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
     if settings.V3_FEATURE_LOCATIONS:
         endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active)
-        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), user=request.user)
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
@@ -292,7 +292,7 @@ def product_endpoint_report(request, pid):
                                             finding__out_of_scope=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             endpoints = endpoints.filter(finding__active=True)
-        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), product=product)
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), product=product, user=request.user)
         endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)

@@ -2,7 +2,8 @@
 from django.conf import settings
 from django.db.models import Prefetch, QuerySet
 
-from dojo.finding.queries import prefetch_for_findings
+from dojo.authorization.roles_permissions import Permissions
+from dojo.finding.queries import get_authorized_findings, prefetch_for_findings
 from dojo.location.models import LocationFindingReference
 from dojo.location.queries import annotate_location_counts_and_status
 from dojo.location.status import FindingLocationStatus
@@ -24,14 +25,23 @@ def prefetch_related_findings_for_report(findings: QuerySet) -> QuerySet:
     )
 
 
-def prefetch_related_endpoints_for_report(endpoints: QuerySet, product=None) -> QuerySet:
+def prefetch_related_endpoints_for_report(endpoints: QuerySet, product=None, user=None) -> QuerySet:
     if settings.V3_FEATURE_LOCATIONS:
+        # Reduce the prefetched references to the requesting user's product scope --
+        # a Location is deduplicated across products, so its own auth check passes for
+        # any associated product the user can see, but the findings hanging off it must
+        # still be limited to that scope. Same reduction generate_report() applies to
+        # its Location branch. user=None resolves to the current user, and to no
+        # findings at all when there is none, so this fails closed.
         return annotate_location_counts_and_status(
             endpoints.prefetch_related(
                 "tags",
                 Prefetch(
                     "findings",
-                    queryset=LocationFindingReference.objects.filter(status=FindingLocationStatus.Active)
+                    queryset=LocationFindingReference.objects.filter(
+                        status=FindingLocationStatus.Active,
+                        finding__in=get_authorized_findings(Permissions.Finding_View, user=user),
+                    )
                     .prefetch_related("finding")
                     .order_by("finding__numerical_severity"),
                     to_attr="_active_annotated_findings",
