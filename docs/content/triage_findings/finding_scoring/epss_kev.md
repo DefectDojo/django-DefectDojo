@@ -3,6 +3,8 @@ title: "EPSS / KEV"
 description: "How DefectDojo Pro enriches Findings with EPSS and CISA KEV data, when it syncs, and how it drives priority"
 audience: pro
 weight: 2
+aliases:
+ - /triage_findings/epss_kev/
 ---
 
 DefectDojo Pro automatically enriches your Findings with two external threat-intelligence sources — **EPSS** and **CISA KEV** — so that prioritization reflects how likely a vulnerability is to be exploited, not just its CVSS severity. Both sources match to Findings by **CVE**, refresh on a **daily schedule**, and feed directly into each Finding's computed **priority** score.
