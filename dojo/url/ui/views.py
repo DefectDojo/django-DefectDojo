@@ -16,6 +16,7 @@ from django.utils import timezone
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_meta_import
+from dojo.finding.queries import get_authorized_findings_for_queryset
 from dojo.forms import (
     DeleteEndpointForm,
     DojoMetaFormSet,
@@ -124,20 +125,27 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
     locations = None
     metadata = None
     status = "No relationships defined"
-    base_findings = Finding.objects.only(
-        "id",
-        "title",
-        "severity",
-        "epss_score",
-        "epss_percentile",
-        "date",
-        "found_by",
-        "active",
-        "out_of_scope",
-        "mitigated",
-        "false_p",
-        "duplicate",
-        "found_by",
+    # A Location is shared by every product that references it, so an authorized
+    # Location does not imply its findings are authorized. Scope them to the caller
+    # the same way the report and API paths do.
+    base_findings = get_authorized_findings_for_queryset(
+        Permissions.Finding_View,
+        Finding.objects.only(
+            "id",
+            "title",
+            "severity",
+            "epss_score",
+            "epss_percentile",
+            "date",
+            "found_by",
+            "active",
+            "out_of_scope",
+            "mitigated",
+            "false_p",
+            "duplicate",
+            "found_by",
+        ),
+        user=request.user,
     ).prefetch_related("locations__location", "found_by")
 
     if host_view:
