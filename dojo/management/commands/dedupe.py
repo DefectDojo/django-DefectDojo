@@ -20,6 +20,7 @@ from dojo.utils import (
     get_system_setting,
     mass_model_updater,
 )
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -97,10 +98,10 @@ class Command(BaseCommand):
                 "test", "test__engagement", "test__engagement__product", "test__test_type",
             ).prefetch_related(
                 "locations",
-                # vulnerability_id_set feeds hash_code computation for parsers whose
+                # vulnerability id store feeds hash_code computation for parsers whose
                 # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
                 # a per-finding query in get_vulnerability_ids().
-                "vulnerability_id_set",
+                vulnerability_id_prefetch(),
                 Prefetch(
                     "original_finding",
                     queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
@@ -113,10 +114,10 @@ class Command(BaseCommand):
                 "test", "test__engagement", "test__engagement__product", "test__test_type",
             ).prefetch_related(
                 "endpoints",
-                # vulnerability_id_set feeds hash_code computation for parsers whose
+                # vulnerability id store feeds hash_code computation for parsers whose
                 # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
                 # a per-finding query in get_vulnerability_ids().
-                "vulnerability_id_set",
+                vulnerability_id_prefetch(),
                 Prefetch(
                     "original_finding",
                     queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),

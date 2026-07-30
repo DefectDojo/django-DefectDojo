@@ -6,7 +6,6 @@ from dojo.finding.models import (
     Finding,
     Finding_Group,
     Finding_Template,
-    Vulnerability_Id,
 )
 
 
@@ -24,12 +23,6 @@ class FindingAdmin(admin.ModelAdmin):
 class FindingTemplateAdmin(admin.ModelAdmin):
 
     """Admin support for the Finding_Template model."""
-
-
-@admin.register(Vulnerability_Id)
-class VulnerabilityIdAdmin(admin.ModelAdmin):
-
-    """Admin support for the Vulnerability_Id model."""
 
 
 @admin.register(Finding_Group)

@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/branch-guard.sh\" session",
+            "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/branch-guard.sh\" edit",
+            "timeout": 15,
+            "statusMessage": "Checking release branch..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/branch-guard.sh\" commit",
+            "if": "Bash(git commit*)",
+            "timeout": 15,
+            "statusMessage": "Checking release branch..."
+          }
+        ]
+      }
+    ]
+  }
+}

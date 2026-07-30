@@ -27,7 +27,6 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
-from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
@@ -44,7 +43,6 @@ from dojo.models import (
     Notes,
     System_Settings,
     Test,
-    Vulnerability_Id,
 )
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
@@ -57,6 +55,7 @@ from dojo.utils import (
     get_object_or_none,
     to_str_typed,
 )
+from dojo.vulnerability.manager import persist_for_finding
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -1064,16 +1063,10 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
     vulnerability_ids = sanitize_vulnerability_ids(vulnerability_ids)
 
-    # Remove old vulnerability ids if requested
+    # Persist the Vulnerability entity + FindingVulnerabilityReference rows.
     # Callers can set delete_existing=False when they know there are no existing IDs
-    # to avoid an unnecessary delete query (e.g., for new findings)
-    if delete_existing:
-        Vulnerability_Id.objects.filter(finding=finding).delete()
-
-    Vulnerability_Id.objects.bulk_create([
-        Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
-        for vid in vulnerability_ids
-    ])
+    # to avoid an unnecessary delete query (e.g., for new findings).
+    persist_for_finding(finding, vulnerability_ids, delete_existing=delete_existing)
 
     # Set CVE
     if vulnerability_ids:
@@ -1359,6 +1352,12 @@ def close_finding(
     finding.out_of_scope = bool(out_of_scope)
     finding.duplicate = bool(duplicate)
     finding.under_review = False
+    # Closing ends any open peer review, so the requester/reviewer record has
+    # to go with it. Leaving them set strands the review: the finding no
+    # longer offers "Clear Review" (that action is gated on under_review), yet
+    # it still reports reviewers, so queue views built on the reviewers M2M
+    # keep surfacing work nobody can act on.
+    finding.review_requested_by = None
     finding.last_reviewed = mitigated_date
     finding.last_reviewed_by = user
 
@@ -1391,6 +1390,10 @@ def close_finding(
     close_external_issue(finding.id, "Closed by defectdojo", "github")
 
     _save_finding_with_jira_sync(finding, new_note=new_note)
+
+    # Cleared after the save: the M2M write hits the DB immediately, so doing
+    # it earlier would drop the reviewers even if the save above raised.
+    finding.reviewers.clear()
 
     # Notification
     create_notification(

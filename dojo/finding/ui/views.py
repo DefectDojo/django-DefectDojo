@@ -122,6 +122,7 @@ from dojo.utils import (
     reopen_external_issue,
     update_external_issue,
 )
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
@@ -169,7 +170,7 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related("notes")
         prefetched_findings = prefetched_findings.prefetch_related("tags")
         prefetched_findings = prefetched_findings.prefetch_related(
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
     else:
         logger.debug("unable to prefetch because query was already executed")
@@ -1366,6 +1367,11 @@ def reopen_finding(request, fid):
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     finding.under_review = False
+    # Same reasoning as close_finding: an open review does not survive the
+    # status change, so its requester/reviewers go with it. Reopening matters
+    # more than closing here — the finding comes back active, so stale
+    # reviewers would show up in reviewer-scoped queues as live work.
+    finding.review_requested_by = None
     if settings.V3_FEATURE_LOCATIONS:
         for ref in finding.locations.all():
             ref.set_status(FindingLocationStatus.Active, request.user, timezone.now())
@@ -1380,6 +1386,8 @@ def reopen_finding(request, fid):
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
     finding.save(dedupe_option=False, push_to_jira=False)
+    # After the save so a failed save doesn't leave the M2M already emptied.
+    finding.reviewers.clear()
     if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
         jira_services.push(finding)
 
@@ -3285,7 +3293,7 @@ def push_to_jira(request, fid):
         # but cant't change too much now without having a test suite,
         # so leave as is for now with the addition warning message
         # to check alerts for background errors.
-        if jira_services.push(finding):
+        if jira_services.push_succeeded(jira_services.push(finding)):
             messages.add_message(
                 request,
                 messages.SUCCESS,
