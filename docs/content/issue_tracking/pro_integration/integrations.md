@@ -119,3 +119,19 @@ These errors can be found by looking at the Issue Tracker Mappings & Assignments
 ![image](images/integrators_4.png)
 
 Clicking on the Total Errors entry will bring you to a page with more detailed descriptions of errors associated with this Integration.
+
+### Seeing every failure in one place
+
+The per-mapping error table covers one Integration. [Diagnostics](/admin/diagnostics/pro__diagnostics/) covers all of them, alongside every other integration attempt on the instance — upstream connectors, imports, Jira, SSO, and the rules engine — with the same filtering and sorting over all of it.
+
+Use it when the question is broader than one mapping:
+
+* an attempt that **never completed** rather than failed, which no error table reports, because nothing errored
+* whether a failure is specific to one integration or is happening across several at once
+* who or what set an attempt off, and against which configuration
+
+Credentials quoted in an error are removed before the row is stored, and the full technical detail is restricted to superusers.
+
+## Downstream Connectors page layout
+
+Integrations are listed in two sections, **Configured Connectors** and **Available Connectors**, each sorted alphabetically with a count of what is shown beside its heading. A tool can hold several configurations; each is its own tile, titled `<Tool> - <label>`, ordered by label. The **Request Downstream Connector** tile on DefectDojo Pro Cloud is not counted.

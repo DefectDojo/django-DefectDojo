@@ -92,6 +92,21 @@ Most Connectors import **findings**. A few are **Asset Connectors** that import 
 
 These Connectors provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 
+## Finding your way around the Connectors page
+
+Connectors are listed in two sections, each with a count beside its heading and each sorted alphabetically:
+
+* **Configured Connectors** — every connector configuration that exists on this instance. A tool can appear several times, once per configuration, and each tile is titled `<Tool> - <label>` so they can be told apart. Where several configurations share a tool, they are ordered by their label.
+* **Available Connectors** — every supported tool you have not configured yet.
+
+The count next to a heading is the number of connectors currently shown, so it follows the search box and the **Asset / Finding** type filter rather than always reporting the total. On DefectDojo Pro Cloud, the **Request Upstream Connector** tile is not a connector and is not counted.
+
+Both sections have their own search box, matching on the tool name.
+
+![The Connectors page, with a count beside each section heading](images/upstream_counts.png)
+
+The [Downstream Connectors](/issue_tracking/pro_integration/integrations/) and [Authorization Connectors](/admin/sso/pro__authorization_connectors/) pages are laid out the same way.
+
 ## Connectors Quick\-Start
 
 If you're using DefectDojo's **Auto\-Map** settings, you can have your first Connector up and running in no time.

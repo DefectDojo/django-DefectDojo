@@ -33,6 +33,10 @@ Single Sign-On is a **DefectDojo Pro** feature. As of DefectDojo 3.0, the SSO su
 
 If you're running open-source DefectDojo and want SSO, you'll need to switch to [DefectDojo Pro](https://defectdojo.com); the migration is covered in the [3.0 upgrade notes](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only). Existing user accounts and group memberships are preserved on upgrade. For access control on open-source DefectDojo, see the [Authorized Users](/admin/user_management/os__authorized_users/) page.
 
+## Seeing what is configured
+
+**[Authorization Connectors](/admin/sso/pro__authorization_connectors/)** lists every supported provider on one page — which are configured, which are enabled, and what protocol each speaks — and takes you straight to the settings form for any of them. Start there if you want to know the state of this instance rather than set up a specific provider.
+
 ## Supported SSO providers (DefectDojo Pro)
 
 DefectDojo Pro supports SAML and the following OAuth providers. Each guide walks through the provider-side setup and the corresponding configuration in the Pro **Enterprise Settings** UI.
@@ -46,6 +50,7 @@ DefectDojo Pro supports SAML and the following OAuth providers. Each guide walks
 * **[Okta](/admin/sso/pro__okta/)**
 * **[OIDC (OpenID Connect)](/admin/sso/pro__oidc/)**
 * **[SAML](/admin/sso/pro__saml/)**
+* **[LDAP](/admin/sso/pro__ldap/)**
 
 SSO configuration in DefectDojo Pro can only be performed by a **Superuser**.
 
