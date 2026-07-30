@@ -14,8 +14,8 @@ from dojo.models import (
     Product,
     Product_Type,
     User,
-    Vulnerability_Id,
 )
+from dojo.vulnerability.models import FindingVulnerabilityReference
 
 from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
@@ -43,9 +43,9 @@ class TestImportersDeletedFindingChildRows(DojoTestCase):
     Django declares its foreign keys DEFERRABLE INITIALLY DEFERRED, so that insert does
     not fail where it is issued: PostgreSQL raises it at COMMIT, past every handler that
     knew what the import was doing. The reported symptom is an import that dies with
-    'insert or update on table "dojo_vulnerability_id" violates foreign key constraint
-    ... Key (finding_id)=(...) is not present in table "dojo_finding"' and takes the rest
-    of the batch -- findings that were perfectly fine -- down with it.
+    'insert or update on table "dojo_findingvulnerabilityreference" violates foreign key
+    constraint ... Key (finding_id)=(...) is not present in table "dojo_finding"' and takes
+    the rest of the batch -- findings that were perfectly fine -- down with it.
 
     connection.check_constraints() below is the check PostgreSQL runs at COMMIT in
     production; the test transaction never commits, so the violation has to be asked for.
@@ -105,6 +105,15 @@ class TestImportersDeletedFindingChildRows(DojoTestCase):
             burpResponseBase64=base64.b64encode(RESPONSE),
         ))
 
+    def _written_vulnerability_ids(self, finding_pk):
+        """The vulnerability id strings actually persisted for `finding_pk`, in reference order."""
+        return [
+            ref.vulnerability.vulnerability_id
+            for ref in FindingVulnerabilityReference.objects.filter(
+                finding_id=finding_pk,
+            ).select_related("vulnerability").order_by("order")
+        ]
+
     def _buffered_request_response_count(self, finding):
         """
         Count only the pairs this test buffered.
@@ -129,16 +138,14 @@ class TestImportersDeletedFindingChildRows(DojoTestCase):
         importer.flush_vulnerability_ids()
         connection.check_constraints()
 
-        self.assertFalse(
-            Vulnerability_Id.objects.filter(finding_id=deleted_pk).exists(),
+        self.assertEqual(
+            [],
+            self._written_vulnerability_ids(deleted_pk),
             msg=f"no vulnerability id may be written for deleted finding {deleted_pk}",
         )
         self.assertEqual(
             ["CVE-2020-5678"],
-            [
-                row.vulnerability_id
-                for row in Vulnerability_Id.objects.filter(finding_id=surviving_finding.pk)
-            ],
+            self._written_vulnerability_ids(surviving_finding.pk),
             msg="the surviving finding's vulnerability id must still be written",
         )
 
@@ -154,7 +161,7 @@ class TestImportersDeletedFindingChildRows(DojoTestCase):
         for index, finding in enumerate(self.findings):
             self.assertEqual(
                 [f"CVE-2020-100{index}"],
-                [row.vulnerability_id for row in Vulnerability_Id.objects.filter(finding_id=finding.pk)],
+                self._written_vulnerability_ids(finding.pk),
                 msg=f"finding {finding.pk} lost its vulnerability id",
             )
 
@@ -167,12 +174,13 @@ class TestImportersDeletedFindingChildRows(DojoTestCase):
         Finding.objects.filter(pk=deleted_pk).delete()
 
         importer.flush_vulnerability_ids()
-        self.assertEqual([], importer.pending_vulnerability_ids)
+        self.assertEqual([], importer.vulnerability_id_manager.pending)
+        self.assertEqual([], importer.pending_cwes)
 
         # A second flush stands in for the next batch boundary of the same import.
         importer.flush_vulnerability_ids()
         connection.check_constraints()
-        self.assertFalse(Vulnerability_Id.objects.filter(finding_id=deleted_pk).exists())
+        self.assertEqual([], self._written_vulnerability_ids(deleted_pk))
 
     def test_reimport_reconcile_and_flush_survives_a_finding_deleted_mid_batch(self):
         """
@@ -196,16 +204,14 @@ class TestImportersDeletedFindingChildRows(DojoTestCase):
         reimporter.flush_vulnerability_ids()
         connection.check_constraints()
 
-        self.assertFalse(
-            Vulnerability_Id.objects.filter(finding_id=deleted_pk).exists(),
+        self.assertEqual(
+            [],
+            self._written_vulnerability_ids(deleted_pk),
             msg=f"no vulnerability id may be written for deleted finding {deleted_pk}",
         )
         self.assertEqual(
             ["CVE-2021-2222"],
-            [
-                row.vulnerability_id
-                for row in Vulnerability_Id.objects.filter(finding_id=surviving_finding.pk)
-            ],
+            self._written_vulnerability_ids(surviving_finding.pk),
             msg="the surviving finding's reconciled vulnerability id must still be written",
         )
 

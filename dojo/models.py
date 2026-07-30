@@ -146,6 +146,7 @@ def get_current_datetime():
     return timezone.now()
 
 
+from dojo.cicd_infrastructure.models import CICDInfrastructure  # noqa: E402, F401 -- re-export
 from dojo.file_uploads.models import FileAccessToken, FileUpload  # noqa: E402, F401 -- re-export
 from dojo.note_type.models import Note_Type  # noqa: E402, F401 -- re-export
 from dojo.notes.models import (  # noqa: E402, F401 -- re-export; Notes used by Risk_Acceptance.notes M2M below
@@ -401,9 +402,14 @@ from dojo.finding.models import (  # noqa: E402 -- re-export; class-body FKs bel
     CWE,  # noqa: F401 -- re-export
     BurpRawRequestResponse,  # noqa: F401 -- re-export
     Finding,
+    Finding_CWE,  # noqa: F401 -- re-export
     Finding_Group,  # noqa: F401 -- re-export
     Finding_Template,
-    Vulnerability_Id,  # noqa: F401 -- re-export
+    Vulnerability_Id,  # noqa: F401 -- re-export (legacy; retained for a transition period, see model)
+)
+from dojo.vulnerability.models import (  # noqa: E402 -- re-export; FKs reference dojo.Finding / dojo.Vulnerability by string
+    FindingVulnerabilityReference,  # noqa: F401 -- re-export
+    Vulnerability,  # noqa: F401 -- re-export
 )
 
 

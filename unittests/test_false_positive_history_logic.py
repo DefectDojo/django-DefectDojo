@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from crum import impersonate
 from django.conf import settings
+from django.test import override_settings
 
 from dojo.finding.deduplication import do_false_positive_history_batch
 from dojo.finding.ui.views import EditFinding
@@ -125,7 +126,26 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 # product 3: Security Podcast
 
 
+# Module-level candidate-filter hooks for FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD.
+# get_custom_method resolves the setting to a dotted path and imports it, so these must be
+# importable at module scope.
+_fp_candidate_filter_calls = []
+
+
+def _drop_all_fp_candidates(finding, candidates):
+    """Hook that discards every candidate — simulates a plugin rejecting all matches."""
+    _fp_candidate_filter_calls.append((finding, list(candidates)))
+    return []
+
+
+def _passthrough_fp_candidates(finding, candidates):
+    """Hook that keeps every candidate — FP history must behave exactly as with no hook."""
+    _fp_candidate_filter_calls.append((finding, list(candidates)))
+    return candidates
+
+
 @versioned_fixtures
+@override_settings(SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestFalsePositiveHistoryLogic(DojoTestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -174,6 +194,46 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         # Assert that both findings belongs to the same test and are marked as fp
         self.assert_finding(find_created_before_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
         self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+
+    # Candidate-filter hook (FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD) #
+
+    @override_settings(
+        FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD="unittests.test_false_positive_history_logic._drop_all_fp_candidates",
+    )
+    def test_fp_history_hook_can_suppress_matches(self):
+        # A plugin hook that drops all candidates must prevent FP replication even when
+        # findings share a hash_code with an existing false-positive finding.
+        _fp_candidate_filter_calls.clear()
+        find_created_before_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_before_mark.save()
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.save()
+        find_created_after_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_after_mark.save()
+        # Hook discarded every candidate, so neither copy is marked despite the shared hash_code.
+        self.assert_finding(find_created_before_mark, false_p=False, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        self.assert_finding(find_created_after_mark, false_p=False, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        # And the hook was actually invoked.
+        self.assertTrue(_fp_candidate_filter_calls)
+
+    @override_settings(
+        FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD="unittests.test_false_positive_history_logic._passthrough_fp_candidates",
+    )
+    def test_fp_history_hook_passthrough_matches_default(self):
+        # A passthrough hook must leave default FP-history behavior unchanged.
+        _fp_candidate_filter_calls.clear()
+        find_created_before_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_before_mark.save()
+        find_2 = Finding.objects.get(id=2)
+        find_2.false_p = True
+        find_2.save()
+        find_created_after_mark, find_2 = self.copy_and_reset_finding(find_id=2)
+        find_created_after_mark.save()
+        # Identical outcome to test_fp_history_equal_hash_code_same_test — both copies marked.
+        self.assert_finding(find_created_before_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        self.assert_finding(find_created_after_mark, false_p=True, not_pk=2, test_id=3, hash_code=find_2.hash_code)
+        self.assertTrue(_fp_candidate_filter_calls)
 
     # Finding 2 in Product 2, Engagement 1, Test 3
     def test_fp_history_equal_hash_code_same_test_non_retroactive(self):
@@ -1684,7 +1744,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
             #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
             #   1 candidates SELECT (with .only())
             #   1 bulk UPDATE
-            with self.assertNumQueries(7):
+            with self.assertNumQueries(6):
                 do_false_positive_history_batch(batch)
             # One candidate-fetch call for the whole batch — not one per finding.
             self.assertEqual(mock_fetch.call_count, 1, "Expected exactly one call to _fetch_fp_candidates_for_batch")
@@ -1713,7 +1773,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
         #   1 candidates SELECT (with .only())
         #   1 bulk UPDATE
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(6):
             do_false_positive_history_batch(batch)
 
         # The pre-existing active finding must now be retroactively marked FP.
@@ -1721,9 +1781,9 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
 
     def test_fp_history_batch_query_count_does_not_grow_with_affected_findings(self):
         """
-        Query count must stay flat (7) no matter how many findings are retroactively marked.
+        Query count must stay flat (6) no matter how many findings are retroactively marked.
 
-        With the old per-finding approach this would have been 7 + N queries where N is the
+        With the old per-finding approach this would have been 6 + N queries where N is the
         number of pre-existing findings that get marked as FP. With the batch approach it is
         always 7: System_Settings, 4 lazy-load chain, candidates SELECT, one bulk UPDATE.
         """
@@ -1748,7 +1808,7 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         #   4 lazy-load chain: findings[0].test / .engagement / .product / .test_type
         #   1 candidates SELECT (with .only())
         #   1 bulk UPDATE covering all retroactively marked findings
-        with self.assertNumQueries(7):
+        with self.assertNumQueries(6):
             do_false_positive_history_batch(batch)
 
         # All pre-existing findings must now be marked as FP.
@@ -2029,26 +2089,26 @@ class TestFalsePositiveHistoryLogic(DojoTestCase):
         return test_new, eng_new, product_new
 
     def enable_false_positive_history(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.false_positive_history = True
         system_settings.save()
 
     def enable_retroactive_false_positive_history(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.retroactive_false_positive_history = True
         system_settings.save()
 
     def disable_retroactive_false_positive_history(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.retroactive_false_positive_history = False
         system_settings.save()
 
     def enable_dedupe(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.enable_deduplication = True
         system_settings.save()
 
     def disable_dedupe(self):
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.enable_deduplication = False
         system_settings.save()

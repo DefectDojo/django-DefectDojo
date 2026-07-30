@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class HadolintParser:
@@ -62,5 +65,10 @@ def get_item(vulnerability, test):
     )
 
     finding.description = finding.description.strip()
+
+    if settings.V3_FEATURE_LOCATIONS and vulnerability["file"]:
+        finding.unsaved_locations.append(
+            LocationData.code(file_path=vulnerability["file"], line=vulnerability["line"]),
+        )
 
     return finding

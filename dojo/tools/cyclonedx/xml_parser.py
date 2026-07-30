@@ -189,13 +189,9 @@ class CycloneDXXMLParser:
                         finding.severity = cvssv3.severities()[0]
         # if there is some CWE
         cwes = self.get_cwes(vulnerability, "v", ns)
-        if len(cwes) > 1:
-            # TODO: support more than one CWE
-            LOGGER.debug(
-                "more than one CWE for a finding %s. NOT supported by parser API", cwes,
-            )
         if len(cwes) > 0:
             finding.cwe = cwes[0]
+            finding.unsaved_cwes = cwes
         vulnerability_ids = []
         # set id as first vulnerability id
         if vuln_id:
@@ -315,13 +311,9 @@ class CycloneDXXMLParser:
             cwes = self.get_cwes(vulnerability, "v", ns)
             if not cwes:
                 cwes = self.get_cwes(vulnerability, "b", ns)
-            if len(cwes) > 1:
-                # TODO: support more than one CWE
-                LOGGER.debug(
-                    "more than one CWE for a finding %s. NOT supported by parser API", cwes,
-                )
             if len(cwes) > 0:
                 finding.cwe = cwes[0]
+                finding.unsaved_cwes = cwes
             # Check for mitigation
             analysis = vulnerability.findall("b:analysis", namespaces=ns)
             if analysis and len(analysis) == 1:

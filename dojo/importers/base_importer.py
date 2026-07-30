@@ -12,6 +12,7 @@ from django.utils.timezone import make_aware
 
 import dojo.finding.helper as finding_helper
 import dojo.risk_acceptance.helper as ra_helper
+from dojo.finding.cwe import finding_cwe_labels
 from dojo.importers.options import ImporterOptions
 from dojo.jira.services import is_keep_in_sync
 from dojo.location.models import Location
@@ -30,17 +31,18 @@ from dojo.models import (
     Engagement,
     FileUpload,
     Finding,
+    Finding_CWE,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
     Test_Type,
-    Vulnerability_Id,
 )
 from dojo.notifications.helper import create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.tools.factory import get_parser
 from dojo.tools.parser_test import ParserTest
 from dojo.utils import max_safe
+from dojo.vulnerability.manager import VulnerabilityIdManager
 
 logger = logging.getLogger(__name__)
 
@@ -81,8 +83,11 @@ class BaseImporter(ImporterOptions):
         and will raise a `NotImplemented` exception
         """
         ImporterOptions.__init__(self, *args, **kwargs)
-        self.pending_vulnerability_ids: list[Vulnerability_Id] = []
-        self.pending_vuln_id_deletes: list[int] = []
+        # Write seam: buffers the Vulnerability entity + FindingVulnerabilityReference rows,
+        # flushed at the batch boundary.
+        self.vulnerability_id_manager = VulnerabilityIdManager()
+        self.pending_cwes: list[Finding_CWE] = []
+        self.pending_cwe_deletes: list[int] = []
         self.pending_burp_rr: list[BurpRawRequestResponse] = []
         # Handles for async post-processing tasks to await in 'async_wait' mode.
         # Set after ImporterOptions.__init__ so it stays out of field_names
@@ -877,7 +882,21 @@ class BaseImporter(ImporterOptions):
                 burpResponseBase64=base64.b64encode(unsaved_response.encode()),
             ))
 
-    def drop_rows_for_deleted_findings(self, rows: list) -> list:
+    def deleted_finding_ids(self, finding_ids: set[int]) -> set[int]:
+        """
+        Of the given buffered finding ids, the ones whose finding row is gone.
+
+        One indexed primary-key lookup for the whole set; see
+        drop_rows_for_deleted_findings() for why the buffers need this at all.
+        """
+        if not finding_ids:
+            return set()
+        live_finding_ids = set(
+            Finding.objects.filter(pk__in=finding_ids).values_list("pk", flat=True),
+        )
+        return finding_ids - live_finding_ids
+
+    def drop_rows_for_deleted_findings(self, rows: list, deleted_finding_ids: set[int] | None = None) -> list:
         """
         Return only the buffered child rows whose finding still exists.
 
@@ -898,14 +917,17 @@ class BaseImporter(ImporterOptions):
         is the correct outcome, and it costs one indexed primary-key lookup per flush.
         Rows whose finding id is not resolvable yet are left alone: bulk_create fills the
         id in from the related object, and reporting on them is its job, not this guard's.
+
+        Callers that flush several buffers at one boundary resolve the deleted ids once and
+        pass them in, so the whole boundary still costs a single lookup.
         """
         finding_ids = {row.finding_id for row in rows if row.finding_id is not None}
         if not finding_ids:
             return rows
-        live_finding_ids = set(
-            Finding.objects.filter(pk__in=finding_ids).values_list("pk", flat=True),
-        )
-        deleted_finding_ids = finding_ids - live_finding_ids
+        if deleted_finding_ids is None:
+            deleted_finding_ids = self.deleted_finding_ids(finding_ids)
+        else:
+            deleted_finding_ids = deleted_finding_ids & finding_ids
         if not deleted_finding_ids:
             return rows
         logger.warning(
@@ -966,32 +988,66 @@ class BaseImporter(ImporterOptions):
         finding: Finding,
     ) -> Finding:
         """
-        Accumulate Vulnerability_Id objects for bulk insert at the batch boundary.
+        Accumulate a finding's vulnerability-id references for bulk insert at the batch boundary.
         Call flush_vulnerability_ids() to persist.
         """
         self.sanitize_vulnerability_ids(finding)
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
-        self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid)
-            for vid in vulnerability_ids_to_process
-        ])
+        self.vulnerability_id_manager.record(finding, vulnerability_ids_to_process)
         if vulnerability_ids_to_process:
             finding.cve = vulnerability_ids_to_process[0]
         else:
             finding.cve = None
+        self.store_cwes(finding)
         return finding
 
+    def finding_cwe_values(self, finding: Finding) -> list[str]:
+        """Canonical CWE-<n> labels: the primary Finding.cwe plus any parser-supplied unsaved_cwes."""
+        return finding_cwe_labels(finding.cwe, getattr(finding, "unsaved_cwes", None))
+
+    def store_cwes(self, finding: Finding) -> None:
+        """Accumulate Finding_CWE rows for bulk insert at the batch boundary (via flush_vulnerability_ids)."""
+        self.pending_cwes.extend([
+            Finding_CWE(finding=finding, cwe=cwe) for cwe in self.finding_cwe_values(finding)
+        ])
+
+    def reconcile_cwes(self, finding: Finding) -> None:
+        """Accumulate a delete+insert of Finding_CWE rows for a reimported finding when its CWEs changed."""
+        new_cwes = set(self.finding_cwe_values(finding))
+        # finding_cwe_set is prefetched on reimport candidates (build_candidate_scope_queryset).
+        existing_cwes = {row.cwe for row in finding.finding_cwe_set.all()}
+        if existing_cwes == new_cwes:
+            return
+        self.pending_cwe_deletes.append(finding.id)
+        self.pending_cwes.extend([Finding_CWE(finding=finding, cwe=cwe) for cwe in new_cwes])
+
     def flush_vulnerability_ids(self) -> None:
-        """Delete stale and bulk-insert accumulated Vulnerability_Id objects, then clear buffers."""
-        if self.pending_vuln_id_deletes:
-            Vulnerability_Id.objects.filter(finding_id__in=self.pending_vuln_id_deletes).delete()
-            self.pending_vuln_id_deletes.clear()
-        if self.pending_vulnerability_ids:
-            rows = self.drop_rows_for_deleted_findings(self.pending_vulnerability_ids)
+        """Flush the vulnerability-id buffers, then the Finding_CWE buffers, and clear."""
+        # Every buffer flushed at this boundary hangs off a finding that may have been
+        # deleted since it was buffered, so resolve the deleted ids once (one lookup for
+        # the whole boundary) and drop those rows -- see drop_rows_for_deleted_findings().
+        deleted_finding_ids = self.deleted_finding_ids(
+            {
+                finding.id
+                for finding, _ in self.vulnerability_id_manager.pending
+                if finding.id is not None
+            }
+            | {row.finding_id for row in self.pending_cwes if row.finding_id is not None},
+        )
+        if deleted_finding_ids:
+            self.vulnerability_id_manager.drop_findings(deleted_finding_ids)
+        # Vulnerability entity + FindingVulnerabilityReference rows, in one transaction.
+        self.vulnerability_id_manager.flush()
+        # CWE buffers ride the same flush boundary as before (not owned by the manager).
+        if self.pending_cwe_deletes:
+            Finding_CWE.objects.filter(finding_id__in=self.pending_cwe_deletes).delete()
+            self.pending_cwe_deletes.clear()
+        if self.pending_cwes:
+            rows = self.drop_rows_for_deleted_findings(self.pending_cwes, deleted_finding_ids)
             if rows:
-                Vulnerability_Id.objects.bulk_create(rows, batch_size=1000)
-            self.pending_vulnerability_ids.clear()
+                Finding_CWE.objects.bulk_create(rows, batch_size=1000, ignore_conflicts=True)
+            self.pending_cwes.clear()
 
     def process_files(
         self,

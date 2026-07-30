@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class WhispersParser:
@@ -92,28 +95,31 @@ class WhispersParser:
                 f'in {vuln.get("file")}:{vuln.get("line")}'
             )
             description = f'{summary} `{self._mask(vuln.get("value"))}`'
-            findings.append(
-                Finding(
-                    title=summary,
-                    description=description,
-                    mitigation=(
-                        "Replace hardcoded secret with a placeholder (ie: ENV-VAR). "
-                        "Invalidate the leaked secret and generate a new one. "
-                        "Supply the new secret through a placeholder to avoid disclosing "
-                        "sensitive information in code."
-                    ),
-                    references="https://cwe.mitre.org/data/definitions/798.html",
-                    cwe=798,
-                    severity=self.SEVERITY_MAP.get(
-                        vuln.get("severity"), "Info",
-                    ),
-                    file_path=vuln.get("file"),
-                    line=int(vuln.get("line")),
-                    vuln_id_from_tool=vuln.get("message"),
-                    static_finding=True,
-                    dynamic_finding=False,
-                    test=test,
+            finding = Finding(
+                title=summary,
+                description=description,
+                mitigation=(
+                    "Replace hardcoded secret with a placeholder (ie: ENV-VAR). "
+                    "Invalidate the leaked secret and generate a new one. "
+                    "Supply the new secret through a placeholder to avoid disclosing "
+                    "sensitive information in code."
                 ),
+                references="https://cwe.mitre.org/data/definitions/798.html",
+                cwe=798,
+                severity=self.SEVERITY_MAP.get(
+                    vuln.get("severity"), "Info",
+                ),
+                file_path=vuln.get("file"),
+                line=int(vuln.get("line")),
+                vuln_id_from_tool=vuln.get("message"),
+                static_finding=True,
+                dynamic_finding=False,
+                test=test,
             )
+            if settings.V3_FEATURE_LOCATIONS and vuln.get("file"):
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=vuln.get("file"), line=int(vuln.get("line"))),
+                )
+            findings.append(finding)
 
         return findings

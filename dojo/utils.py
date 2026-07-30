@@ -539,7 +539,7 @@ def get_period_counts(findings,
         try:
             closed_in_range_count = findings_closed.filter(
                 mitigated__date__range=[new_date, end_date]).count()
-        except:
+        except Exception:
             closed_in_range_count = findings_closed.filter(
                 mitigated_time__range=[new_date, end_date]).count()
 
@@ -550,7 +550,7 @@ def get_period_counts(findings,
             ]
             try:
                 risks_a = accepted_findings.filter(risk_acceptance__created__date__range=date_range)
-            except:
+            except Exception:
                 risks_a = accepted_findings.filter(date__range=date_range)
         else:
             risks_a = None
@@ -570,14 +570,14 @@ def get_period_counts(findings,
                 severity = finding.severity
                 active = finding.active
 #                risk_accepted = finding.risk_accepted TODO: in future release
-            except:
+            except Exception:
                 severity = finding.finding.severity
                 active = finding.finding.active
 #                risk_accepted = finding.finding.risk_accepted
 
             try:
                 f_time = datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=tz)
-            except:
+            except Exception:
                 f_time = finding.date
 
             if f_time <= end_date:
@@ -606,7 +606,7 @@ def get_period_counts(findings,
             for finding in risks_a:
                 try:
                     severity = finding.severity
-                except:
+                except Exception:
                     severity = finding.finding.severity
                 if severity == "Critical":
                     ra_crit_count += 1
