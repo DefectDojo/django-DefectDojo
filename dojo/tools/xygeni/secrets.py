@@ -8,7 +8,10 @@ parser surfaces those fields as-is.
 
 from pathlib import PurePosixPath
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 from dojo.tools.xygeni._common import map_severity, parse_cwe
 
 DEFAULT_CWE = 798  # CWE-798: Use of Hard-coded Credentials
@@ -58,7 +61,7 @@ def _build_finding(occurrences, test):
 
     cwe = parse_cwe(tags=secret.get("tags")) or DEFAULT_CWE
 
-    return Finding(
+    finding = Finding(
         test=test,
         title=f"{secret_type} secret detected in {filename}",
         description="\n\n".join(description_parts) if description_parts else "",
@@ -78,3 +81,13 @@ def _build_finding(occurrences, test):
         unique_id_from_tool=secret.get("uniqueHash"),
         vuln_id_from_tool=secret.get("detector"),
     )
+
+    if settings.V3_FEATURE_LOCATIONS and filepath:
+        # One location per line the secret is leaked on; the aggregated Finding
+        # above keeps a single scalar line while the locations carry them all.
+        for begin_line in lines or [location.get("beginLine")]:
+            finding.unsaved_locations.append(
+                LocationData.code(file_path=filepath, line=begin_line),
+            )
+
+    return finding

@@ -9,6 +9,8 @@ Global Component Deduplication is a DefectDojo Pro algorithm that identifies dup
 
 Unlike the other deduplication algorithms, Global Component matching is **not scoped to a single Product or Engagement**. A Finding imported into Product B can be marked as a duplicate of an older Finding in Product A, even if the two Products are unrelated.
 
+> **Global Component vs. Global Locations:** Global Component matches only on component name and version. If your instance uses the Locations data model, [Global Locations Deduplication](/triage_findings/finding_deduplication/pro__global_locations_deduplication/) is the more precise successor — it keys dependencies on the full Package URL and additionally deduplicates URL/DAST Findings across Products. See that page's comparison table for which to choose.
+
 ## Enabling the Global Component Algorithm
 
 Global Component Deduplication is gated behind a feature flag and is **off by default**. A superuser can turn it on from **Settings > Feature Flags** on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).

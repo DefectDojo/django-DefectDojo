@@ -115,6 +115,14 @@ class TestGitlabSastParser(DojoTestCase):
         self.assertEqual(89, findings[1].cwe)
         self.assertEqual(None, findings[2].cwe)
 
+    def test_parse_file_with_multiple_cwes_v15(self):
+        with (get_unit_tests_scans_path("gitlab_sast") / "gl-sast-report-multiple-cwe-fabricated_v15.json").open(encoding="utf-8") as testfile:
+            parser = GitlabSastParser()
+            findings = parser.get_findings(testfile, Test())
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(79, findings[0].cwe)  # primary is the first CWE identifier
+        self.assertEqual([79, 89], findings[0].unsaved_cwes)  # both CWE identifiers are kept
+
     def test_parse_file_issue4336_v14(self):
         with (get_unit_tests_scans_path("gitlab_sast") / "gl-sast-report_issue4344_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabSastParser()

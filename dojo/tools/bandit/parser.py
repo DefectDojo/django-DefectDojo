@@ -1,8 +1,10 @@
 import json
 
 import dateutil.parser
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class BanditParser:
@@ -105,6 +107,14 @@ class BanditParser:
                 finding.scanner_confidence = confidence
             if "more_info" in item:
                 finding.references = item["more_info"]
+            if settings.V3_FEATURE_LOCATIONS and item["filename"]:
+                finding.unsaved_locations.append(
+                    LocationData.code(
+                        file_path=item["filename"],
+                        line=item["line_number"],
+                        snippet=item.get("code") or "",
+                    ),
+                )
 
             results.append(finding)
 

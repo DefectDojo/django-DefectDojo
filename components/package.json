@@ -4,7 +4,7 @@
   "license": "BSD-3-Clause",
   "private": true,
   "dependencies": {
-    "@fontsource-variable/work-sans": "^5.1",
+    "@fontsource-variable/work-sans": "^5.3",
     "JUMFlot": "jumjum123/JUMFlot#*",
     "alpinejs": "^3.15",
     "bootstrap": "^3.4.1",

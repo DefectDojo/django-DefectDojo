@@ -1406,6 +1406,9 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
         client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         return client
 
+    def _authorize_reader_user(self):
+        self.product.authorized_users.add(self.reader_user)
+
     def setUp(self):
         super().setUp()
         # Legacy auth collapses Reader/Writer/Maintainer/Owner into
@@ -1493,11 +1496,13 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
 
     # ── Engagement: files ──────────────────────────────────────────────
 
-    def test_engagement_files_post_reader_denied(self):
+    def test_engagement_files_post_member_allowed(self):
+        self._authorize_reader_user()
         client = self._client_for_user(self.reader_user)
         url = reverse("engagement-files", args=(self.engagement.id,))
-        response = client.post(url, data={}, format="json")
-        self.assertEqual(response.status_code, 403, response.content)
+        test_file = SimpleUploadedFile("reader-proof.txt", b"engagement file content", content_type="text/plain")
+        response = client.post(url, data={"title": "reader proof", "file": test_file}, format="multipart")
+        self.assertEqual(response.status_code, 201, response.content)
 
     def test_engagement_files_post_writer_allowed(self):
         client = self._client_for_user(self.writer_user)
@@ -1587,11 +1592,13 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
 
     # ── Finding: files ─────────────────────────────────────────────────
 
-    def test_finding_files_post_reader_denied(self):
+    def test_finding_files_post_member_allowed(self):
+        self._authorize_reader_user()
         client = self._client_for_user(self.reader_user)
         url = reverse("finding-files", args=(self.finding.id,))
-        response = client.post(url, data={}, format="json")
-        self.assertEqual(response.status_code, 403, response.content)
+        test_file = SimpleUploadedFile("reader-evidence.txt", b"finding file content", content_type="text/plain")
+        response = client.post(url, data={"title": "reader evidence", "file": test_file}, format="multipart")
+        self.assertEqual(response.status_code, 201, response.content)
 
     def test_finding_files_post_writer_allowed(self):
         client = self._client_for_user(self.writer_user)
@@ -1599,6 +1606,26 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
         test_file = SimpleUploadedFile("evidence.txt", b"finding file content", content_type="text/plain")
         response = client.post(url, data={"title": "test evidence", "file": test_file}, format="multipart")
         self.assertEqual(response.status_code, 201, response.content)
+
+    def test_manage_files_member_can_upload_to_finding(self):
+        self._authorize_reader_user()
+        client = Client()
+        client.login(username="relobjperm_reader", password="testTEST1234!@#$")  # noqa: S106
+        test_file = SimpleUploadedFile("reader-ui-evidence.txt", b"finding file content", content_type="text/plain")
+        response = client.post(
+            reverse("manage_files", args=(self.finding.id, "Finding")),
+            data={
+                "form-TOTAL_FORMS": "3",
+                "form-INITIAL_FORMS": "0",
+                "form-MIN_NUM_FORMS": "0",
+                "form-MAX_NUM_FORMS": "10",
+                "form-0-title": "reader ui evidence",
+                "form-0-file": test_file,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302, response.content)
+        self.assertTrue(self.finding.files.filter(title="reader ui evidence").exists())
 
     # ── Finding: remove_note (NotePermission — PATCH uses Edit) ────────
 
@@ -1691,11 +1718,13 @@ class TestRelatedObjectPermissions(LegacyAuthMirrorMixin, DojoTestCase):
 
     # ── Test: files ────────────────────────────────────────────────────
 
-    def test_test_files_post_reader_denied(self):
+    def test_test_files_post_member_allowed(self):
+        self._authorize_reader_user()
         client = self._client_for_user(self.reader_user)
         url = reverse("test-files", args=(self.test.id,))
-        response = client.post(url, data={}, format="json")
-        self.assertEqual(response.status_code, 403, response.content)
+        test_file = SimpleUploadedFile("reader-results.txt", b"test file content", content_type="text/plain")
+        response = client.post(url, data={"title": "reader results", "file": test_file}, format="multipart")
+        self.assertEqual(response.status_code, 201, response.content)
 
     def test_test_files_post_writer_allowed(self):
         client = self._client_for_user(self.writer_user)
