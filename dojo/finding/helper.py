@@ -803,7 +803,9 @@ def bulk_clear_finding_m2m(finding_qs):
     Bulk-clear M2M through tables for a queryset of findings.
 
     Must be called BEFORE cascade_delete since M2M through tables
-    are not discovered by _meta.related_objects.
+    are not discovered by _meta.related_objects, and inside the same
+    transaction as the delete it clears for -- see
+    _bulk_delete_findings_internal for why the two cannot be separated.
 
     Special handling for FileUpload: deletes via ORM so the custom
     FileUpload.delete() fires and removes files from disk storage.
@@ -875,10 +877,20 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     """
     Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
 
-    Sends the pre_bulk_delete signal, clears M2M through tables (not
-    discovered by _meta.related_objects), then uses cascade_delete for
-    all FK relations via raw SQL.
+    Sends the pre_bulk_delete signal, then per chunk clears the chunk's M2M through
+    tables (not discovered by _meta.related_objects) and uses cascade_delete for all
+    FK relations via raw SQL.
     Chunked with per-chunk transaction.atomic() for crash safety.
+
+    The M2M clear belongs inside the chunk's transaction, next to the delete it
+    protects. Clearing once up front for the whole queryset left every chunk after
+    the first exposed: each chunk commits separately, so a through row written after
+    that one pass -- a note added, a finding re-tagged by a concurrent import --
+    survived into its chunk's COMMIT, where the through table's foreign key rejected
+    it. Django declares those keys DEFERRABLE INITIALLY DEFERRED, so the failure
+    landed at COMMIT rather than at the delete, and the caller saw an opaque
+    constraint error naming an internal table. Per chunk, the through rows and the
+    findings they point at go in one transaction and no such window exists.
 
     When order_desc is True, findings are processed highest id first (matches
     finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
@@ -891,7 +903,6 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     )
 
     pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
-    bulk_clear_finding_m2m(finding_qs)
     ordered_qs = finding_qs.order_by("-id") if order_desc else finding_qs.order_by("id")
     for chunk_num, chunk_ids in enumerate(
         batched(
@@ -903,6 +914,7 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     ):
         chunk_qs = Finding.objects.filter(id__in=chunk_ids)
         with transaction.atomic():
+            bulk_clear_finding_m2m(chunk_qs)
             cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
             execute_delete_sql(chunk_qs)
         logger.info(
