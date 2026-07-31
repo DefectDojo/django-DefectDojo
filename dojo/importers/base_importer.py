@@ -273,7 +273,16 @@ class BaseImporter(ImporterOptions):
         # Make sure we have at least one test returned
         if len(tests) == 0:
             logger.info(f"No tests found in import for {self.scan_type}")
-            self.test = None
+            # A report that describes no tests is a report with no findings, not a failure: every
+            # later step (dedupe algorithm, close-old-findings bookkeeping, timestamps, product
+            # grading) still needs a Test to work against, so self.test must never be left unset.
+            #
+            # On reimport the caller supplied the Test being reimported into; clearing it here made
+            # the whole rest of the reimport operate on None and surfaced as a 500 for what is a
+            # valid empty report. On import there is no Test yet and none can be named from the
+            # report, so fall back to the scan type exactly as the static-test-type path does.
+            if not self.test:
+                self.create_test(self.scan_type)
             return parsed_findings
         # for now we only consider the first test in the list and artificially aggregate all findings of all tests
         # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case
@@ -292,9 +301,16 @@ class BaseImporter(ImporterOptions):
             # During reimport, validate that the test_type matches the incoming report.
             # Accept either the current (idempotent) name or the legacy name the pre-patch code
             # produced, so reimports into tests created before the doubling fix keep working.
+            #
+            # The bare scan type is accepted too. A report that declares no tests names no tool
+            # either, so the Test created for it falls back to the scan type; the same is true of
+            # a Test created outside the dynamic path. The check exists to stop a report from a
+            # different tool being reimported into a Test, and the bare scan type carries no tool
+            # identity to conflict with. The historical name is kept rather than rewritten, as it
+            # is for the legacy name above.
             expected_test_type_name = self.resolve_dynamic_test_type_name(test_raw.type)
             legacy_test_type_name = self.legacy_dynamic_test_type_name(test_raw.type)
-            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name}:
+            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name, self.scan_type}:
                 msg = (
                     f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
                     f"but the report contains test_type '{expected_test_type_name}'. "

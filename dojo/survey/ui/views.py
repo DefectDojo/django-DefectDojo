@@ -637,6 +637,10 @@ def add_empty_questionnaire(request):
 
 def view_empty_survey(request, esid):
     survey = get_object_or_404(Answered_Survey, id=esid)
+    if survey.engagement:
+        # A questionnaire that is linked to an engagement is scoped to that
+        # engagement, whichever route reaches it.
+        user_has_permission_or_403(request.user, survey.engagement, "view")
     engagement = None
     questions = get_answered_questions(survey=survey, read_only=True)
     add_breadcrumb(
@@ -655,6 +659,8 @@ def view_empty_survey(request, esid):
 def delete_empty_questionnaire(request, esid):
     engagement = None
     survey = get_object_or_404(Answered_Survey, id=esid)
+    if survey.engagement:
+        user_has_permission_or_403(request.user, survey.engagement, "edit")
     questions = get_answered_questions(survey=survey, read_only=True)
     form = Delete_Questionnaire_Form(instance=survey)
 
@@ -672,7 +678,7 @@ def delete_empty_questionnaire(request, esid):
                 messages.SUCCESS,
                 "Questionnaire deleted successfully.",
                 extra_tags="alert-success")
-            return HttpResponseRedirect(reverse("survey"))
+            return HttpResponseRedirect(reverse("questionnaire"))
         messages.add_message(
             request,
             messages.ERROR,
