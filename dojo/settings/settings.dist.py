@@ -1466,6 +1466,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Sqlmap Scan": DEDUPE_ALGO_HASH_CODE,
     "YARA Scan": DEDUPE_ALGO_HASH_CODE,
     "ClamAV Scan": DEDUPE_ALGO_HASH_CODE,
+    "Firmwalker Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
