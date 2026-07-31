@@ -39,7 +39,7 @@ Scanner parser fails with an error pointing you to the SARIF scan type.
 Sample Govulncheck scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/govulncheck).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - cwe
