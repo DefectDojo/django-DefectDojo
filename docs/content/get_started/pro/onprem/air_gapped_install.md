@@ -2,7 +2,7 @@
 title: "Installing DefectDojo Pro in an Air-Gapped Environment"
 description: "Stage the DefectDojo Pro install artifacts on a host with internet access, then move them into an air-gapped network"
 draft: false
-weight: 7
+weight: 8
 audience: pro
 ---
 
