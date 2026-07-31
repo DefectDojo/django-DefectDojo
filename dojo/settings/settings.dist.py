@@ -1449,6 +1449,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "WhatWeb Scan": DEDUPE_ALGO_HASH_CODE,
     "Dirsearch Scan": DEDUPE_ALGO_HASH_CODE,
     "Naabu Scan": DEDUPE_ALGO_HASH_CODE,
+    "Gobuster Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
