@@ -2,7 +2,7 @@
 title: "Upload Size Limits for Large Scan Files"
 description: "Why a large scan file fails to upload, and which limit to raise in Kubernetes and Docker Compose deployments"
 draft: false
-weight: 9
+weight: 10
 audience: pro
 ---
 
