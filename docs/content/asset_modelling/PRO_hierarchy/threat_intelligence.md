@@ -83,6 +83,25 @@ no-CVE findings drop in *relative* rank even though their score is unchanged.
 * **Air-gapped support.** The daily bundle (including EPSS data) can be transferred and
   imported offline, so isolated instances get the same enrichment.
 
+## Self-hosted deployments
+
+DefectDojo Cloud instances need no configuration. Self-hosted instances have three options:
+
+* **Connected (default).** The instance fetches the signed bundle nightly from
+  `intel.defectdojo.com` over HTTPS. This is a destination no other DefectDojo feature
+  uses, so it usually has to be allowed explicitly: open outbound 443 to that host, and on
+  Kubernetes add it to your egress network policy. Note the fetch runs on the **Celery
+  worker**, not the web pod, so proxy settings must reach that workload too.
+* **Internal mirror.** Point `DD_THREAT_INTEL_BUNDLE_URL` (and the matching digest and
+  signature URLs) at a location inside your network that you sync yourself. Signature
+  verification still applies, so a mirror cannot alter the data.
+* **Air-gapped.** Transfer the bundle and its signature by hand and import them with
+  `manage.py load_threat_intel_bundle --file <bundle>`. The signature is verified on import.
+
+If the instance cannot reach the feed, the feature fails closed: the run is recorded as
+failed and your existing scores and evidence are left exactly as they were. Nothing degrades
+except intelligence freshness.
+
 ## Enabling it
 
 The feature ships off by default. Administrators can enable it directly, or first run it
