@@ -217,7 +217,7 @@ tar -xzvf artifacts-x.y.z.tar.gz
 sudo cp artifacts-x.y.z/dojo-directory.tar.gz /opt/
 ```
 
-Registration may have created a nearly empty `/opt/dojo` holding only the license. If so, remove it first so the archive does not merge into it:
+Setting up the CLI may have created a nearly empty `/opt/dojo` holding only the license. If it is there, remove it first so the archive does not merge into it:
 
 ```bash
 sudo ls -lah /opt/dojo
@@ -235,7 +235,7 @@ sudo chmod -R go+w /opt/dojo/media
 
 ### 8. Set the configuration by hand
 
-The CLI's first install command needs registry access, so on an air-gapped host you set the same values directly. Use the keys you captured in step 4:
+An air-gapped install does not use the interactive first install, so set the values it would otherwise generate for you. Use the keys you captured in step 4:
 
 ```bash
 dojo-compose-cli environment add --key "DD_CREDENTIAL_AES_256_KEY" --value "<64-character-key-from-step-4>"
