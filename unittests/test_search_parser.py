@@ -66,3 +66,12 @@ class TestSearch(DojoTestCase):
         self.assertEqual(operators["cve"][0], "CVE-2020-1234")
         self.assertEqual(len(keywords), 1)
         self.assertEqual(keywords[0], "jquery")
+
+    def test_parse_query_with_unbalanced_quote(self):
+        # A visitor typing a quoted phrase has an unbalanced quote for as long as it
+        # takes them to type the closing one, and shlex refuses to split that. Parsing
+        # falls back to a whitespace split rather than raising.
+        operators, keywords = parse_search_query('tags:anchore "space inside')
+        self.assertEqual(len(operators), 1)
+        self.assertEqual(operators["tags"][0], "anchore")
+        self.assertEqual(keywords, ['"space', "inside"])

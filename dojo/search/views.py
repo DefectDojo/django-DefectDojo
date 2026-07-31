@@ -97,6 +97,11 @@ def simple_search(request):
     findings_filter = None
     title_words = None
     component_words = None
+    # Only the GET branch below fills these in, but every request reaches the render
+    # call at the end -- including the HEAD and OPTIONS requests that monitoring and
+    # link-preview bots send, which CSRF does not turn away.
+    generic = None
+    activetab = "generic"
 
     # if request.method == 'GET' and "query" in request.GET:
     if request.method == "GET":
@@ -162,7 +167,10 @@ def simple_search(request):
                 logger.debug("searching finding id")
 
                 findings = authorized_findings
-                findings = findings.filter(id=operators["id"][0])
+                finding_id = operators["id"][0]
+                # ids come straight from the query string, so anything that is not a
+                # plain number would blow up the queryset instead of finding nothing.
+                findings = findings.filter(id=finding_id) if finding_id.isdigit() else findings.none()
 
             elif search_findings:
                 logger.debug("searching findings")
@@ -370,14 +378,22 @@ def simple_search(request):
 
         add_breadcrumb(title=_("Simple Search"), top_level=True, request=request)
 
-        activetab = "findings" if findings \
-            else "products" if products \
-                else "engagements" if engagements else \
-                    "tests" if tests else \
-                         "endpoint" if endpoints else \
-                            "tagged" if tagged_results else \
-                                "vulnerability_ids" if vulnerability_ids else \
-                                    "generic"
+        # The tab to open on load: the first facet that has results. Every name here has
+        # to be one the template knows how to map to a pane, otherwise it falls through to
+        # the "no pane opens" case and the results area looks empty until the visitor
+        # clicks a tab themselves.
+        activetab = next((name for name, results in (
+            ("findings", findings),
+            ("products", products),
+            ("engagements", engagements),
+            ("tests", tests),
+            ("endpoints", endpoints),
+            ("tagged", tagged_results),
+            ("vulnerability_ids", vulnerability_ids),
+            ("finding_templates", finding_templates),
+            ("languages", languages),
+            ("technologies", app_analysis),
+        ) if results), "generic")
 
     response = render(request, "dojo/simple_search.html", {
         "clean_query": original_clean_query,
@@ -423,7 +439,14 @@ def parse_search_query(clean_query):
     operators = {}  # operator:parameter formatted in searchquery, i.e. tag:php
     keywords = []  # just keywords to search on
 
-    query_parts = shlex.split(clean_query)
+    try:
+        query_parts = shlex.split(clean_query)
+    except ValueError:
+        # shlex raises on an unbalanced quote, which a visitor types the moment they
+        # start wrapping a phrase in quotes. Fall back to a plain whitespace split so
+        # they get results for what they typed so far instead of a 500.
+        logger.debug("could not shlex-split query, falling back to a whitespace split: %s", clean_query)
+        query_parts = clean_query.split()
 
     for query_part in query_parts:
         if ":" in query_part:
