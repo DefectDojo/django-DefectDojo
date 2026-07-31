@@ -1431,6 +1431,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Trufflehog3 Scan": DEDUPE_ALGO_HASH_CODE,
     "Detect-secrets Scan": DEDUPE_ALGO_HASH_CODE,
     "Secretlint Scan": DEDUPE_ALGO_HASH_CODE,
+    "njsscan Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
