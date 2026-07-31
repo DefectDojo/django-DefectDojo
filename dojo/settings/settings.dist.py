@@ -1464,6 +1464,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Gobuster Scan": DEDUPE_ALGO_HASH_CODE,
     "Masscan Scan": DEDUPE_ALGO_HASH_CODE,
     "Sqlmap Scan": DEDUPE_ALGO_HASH_CODE,
+    "YARA Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
