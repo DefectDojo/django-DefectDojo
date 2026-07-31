@@ -55,6 +55,25 @@ finding whose EPSS already exceeds the floor is unaffected. The familiar per-pro
 **external-score scalar** in your Prioritization Engine settings scales this contribution
 exactly as it always scaled EPSS/KEV.
 
+### The actively-exploited Risk floor
+
+The table above raises **Priority**, but proportionally to a finding's base severity. That
+has a consequence worth stating plainly: a Low-severity finding carrying a CVE that is being
+exploited in the wild receives only a small absolute bump, and could still sit in a low
+**Risk** band. Most teams consider that wrong — "actively exploited" should never be filed
+under Low.
+
+So there is a second, categorical rule. When threat intelligence reports **active
+exploitation in the wild**, the finding's Risk band is raised to a configured minimum
+regardless of what Priority alone would have produced. It ships set to **Needs Action**;
+each product type can raise it to Urgent, lower it, or clear it to switch the floor off, in
+Prioritization Engine settings under *Actively-Exploited Risk Floor*.
+
+The floor only ever raises a band — it never moves a finding down, and a finding that
+already bands higher on its own is untouched. Priority itself is left exactly as calculated,
+so that number stays explainable; the Risk band and Risk score are floored together, so
+sorting and filtering by Risk stay consistent.
+
 ## Findings without a CVE
 
 Threat intelligence is matched by CVE. Many findings — most SAST results, secrets,
