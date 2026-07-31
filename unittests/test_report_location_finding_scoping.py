@@ -6,6 +6,7 @@ from dojo.finding.queries import get_authorized_findings
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import (
+    Dojo_User,
     Engagement,
     Finding,
     Product,
@@ -61,6 +62,8 @@ class TestReportLocationFindingScoping(DojoTestCase):
             username="rptscope_alice",
             password="not-a-real-secret",  # noqa: S106 - test fixture user
         )
+        # Legacy authorization reads authorized_users, the role model reads Product_Member.
+        cls.product_a.authorized_users.add(Dojo_User.objects.get(pk=cls.alice.pk))
         Product_Member.objects.create(product=cls.product_a, user=cls.alice, role=reader)
 
         # One URL referenced by both products dedupes to a single Location row.
