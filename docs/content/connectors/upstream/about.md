@@ -87,7 +87,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Wiz**
 * **YesWeHack**
 
-For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../connectors_tool_reference/) reference.
+For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
 
 Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitLab**, **Jira Service Management Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
@@ -135,5 +135,5 @@ Even without a connector, DefectDojo can still handle manual import for a wide r
 # **Next Steps**
 
 * Check out the **Upstream Connectors** page by switching to DefectDojo's **Pro UI** and opening **Connectors \> Upstream Connectors** under the **Import** header.
-* Follow our guide to [create your first Connector](../add_edit/).
+* Follow our guide to [create your first Upstream Connector](../add_edit/).
 * Check out the process of [Running Operations](../manage_operations/) with your Connected security tools and see how they can be configured to import data.
