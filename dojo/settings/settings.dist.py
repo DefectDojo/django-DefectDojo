@@ -1219,6 +1219,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Naabu Scan": ["title", "endpoints"],
     "Masscan Scan": ["title", "endpoints"],
     "Sqlmap Scan": ["title", "endpoints"],
+    "Nettacker Scan": ["title", "endpoints"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1274,8 +1275,11 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "AWS Security Hub Scan": True,
     "Meterian Scan": True,
     "SARIF": True,
-    # These parsers subclass SarifParser, so they inherit its dedupe fields (which include cwe) and
-    # need the same null-CWE allowance: a SARIF rule is not obliged to carry a CWE.
+    # These three parsers read SARIF, where a rule is not obliged to carry a CWE, so they are listed
+    # for the same reason "SARIF" is above. Note that this setting only takes effect for a scan type
+    # that ALSO has an entry in HASHCODE_FIELDS_PER_SCANNER - without one the legacy algorithm runs
+    # and never consults it - so this matters to an operator who configures fields for them through
+    # DD_HASHCODE_FIELDS_PER_SCANNER rather than to the shipped defaults.
     "Flawfinder Scan": True,
     "Cppcheck Scan": True,
     "DevSkim Scan": True,
@@ -1467,6 +1471,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "YARA Scan": DEDUPE_ALGO_HASH_CODE,
     "ClamAV Scan": DEDUPE_ALGO_HASH_CODE,
     "Firmwalker Scan": DEDUPE_ALGO_HASH_CODE,
+    "Nettacker Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
