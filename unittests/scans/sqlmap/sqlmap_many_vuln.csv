@@ -1,0 +1,3 @@
+Target URL,Place,Parameter,Technique(s),Note(s)
+http://wave3sqli:5000/two?id=1&name=widget,GET,id,BTU,
+http://wave3sqli:5000/two?id=1&name=widget,GET,name,BT,

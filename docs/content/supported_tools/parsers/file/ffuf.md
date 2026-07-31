@@ -68,3 +68,14 @@ which is pinned in the fixtures so they are byte-stable; nothing else was altere
 
 `title`, `cwe`, `line`, `file_path`, `description` — the legacy default. The path is in the title and
 the URL in the description, so two hosts fuzzed with the same wordlist stay distinct.
+
+### Default Deduplication Hashcode Fields
+
+By default, DefectDojo identifies duplicate findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- endpoints
+
+The description is deliberately left out: it records what the scan saw at the time (a response size,
+a detected version, a timestamp, a payload) and that changes between two scans of an unchanged
+target, which would import the same finding again on every rescan.

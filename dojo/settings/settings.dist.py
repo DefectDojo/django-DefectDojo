@@ -1207,6 +1207,18 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
     "Alert Logic Scan": ["title", "component_name", "vuln_id_from_tool"],
     "PICUS Scan": ["vuln_id_from_tool"],
+    # The network scanners below describe what they found in the description: a response size, a
+    # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
+    # All of those change between two scans of an unchanged target, so the legacy algorithm (which
+    # hashes the description) would import the same open port or the same injectable parameter again
+    # on every rescan. What each finding IS lives in the title and the endpoint, so those are hashed.
+    "ffuf Scan": ["title", "endpoints"],
+    "Dirsearch Scan": ["title", "endpoints"],
+    "Gobuster Scan": ["title", "endpoints"],
+    "WhatWeb Scan": ["title", "endpoints"],
+    "Naabu Scan": ["title", "endpoints"],
+    "Masscan Scan": ["title", "endpoints"],
+    "Sqlmap Scan": ["title", "endpoints"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1451,6 +1463,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Naabu Scan": DEDUPE_ALGO_HASH_CODE,
     "Gobuster Scan": DEDUPE_ALGO_HASH_CODE,
     "Masscan Scan": DEDUPE_ALGO_HASH_CODE,
+    "Sqlmap Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,

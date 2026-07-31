@@ -44,4 +44,8 @@ Sample Gobuster scans can be found [here](https://github.com/DefectDojo/django-D
 By default, DefectDojo identifies duplicate findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
-- description
+- endpoints
+
+The description is deliberately left out: it records what the scan saw at the time (a response size,
+a detected version, a timestamp, a payload) and that changes between two scans of an unchanged
+target, which would import the same finding again on every rescan.

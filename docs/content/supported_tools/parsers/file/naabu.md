@@ -70,3 +70,14 @@ nothing outside the local network was scanned. Timestamps are pinned for byte-st
 
 `title`, `cwe`, `line`, `file_path`, `description` — the legacy default. Host, port and protocol are all
 in the title, so a port opening on a second host is a separate finding.
+
+### Default Deduplication Hashcode Fields
+
+By default, DefectDojo identifies duplicate findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+
+- title
+- endpoints
+
+The description is deliberately left out: it records what the scan saw at the time (a response size,
+a detected version, a timestamp, a payload) and that changes between two scans of an unchanged
+target, which would import the same finding again on every rescan.
