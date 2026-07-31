@@ -1440,6 +1440,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "cfn-nag Scan": DEDUPE_ALGO_HASH_CODE,
     "KubeLinter Scan": DEDUPE_ALGO_HASH_CODE,
     "Polaris Scan": DEDUPE_ALGO_HASH_CODE,
+    "Conftest Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
