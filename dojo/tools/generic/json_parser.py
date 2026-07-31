@@ -1,4 +1,5 @@
 import base64
+import math
 
 import dateutil
 from django.conf import settings
@@ -7,6 +8,33 @@ from django.core.files.base import ContentFile
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
+
+# Accepted fields that map to a numeric column on Finding, and the type they hold.
+NUMERIC_FIELDS = {
+    "cvssv3_score": float,
+    "cvssv4_score": float,
+    "cwe": int,
+    "epss_percentile": float,
+    "epss_score": float,
+    "line": int,
+    "nb_occurences": int,
+    "sast_source_line": int,
+    "scanner_confidence": int,
+    "thread_id": int,
+}
+
+
+def to_number(value, converter):
+    """Convert value with converter, returning None when it does not hold a number."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+    try:
+        number = converter(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
 
 
 class GenericJSONParser:
@@ -116,6 +144,8 @@ class GenericJSONParser:
             if not_allowed:
                 msg = f"Not allowed fields are present: {not_allowed}"
                 raise ValueError(msg)
+
+            self._normalize_numeric_fields(item)
             finding = Finding(**item)
 
             # manage endpoints
@@ -180,3 +210,22 @@ class GenericJSONParser:
                     )
             test_internal.findings.append(finding)
         return test_internal
+
+    def _normalize_numeric_fields(self, item):
+        """
+        Coerce the numeric fields of a finding, dropping the ones that hold no number.
+
+        Django accepts any value on assignment and only rejects a non-numeric one when
+        the finding is written, so a report using a placeholder such as "N/A" for a line
+        number it could not determine aborts the whole import from deep inside the
+        database write. Dropping the key here lets the model default apply instead, and
+        a number that arrives quoted is kept by converting it.
+        """
+        for field, converter in NUMERIC_FIELDS.items():
+            if field not in item or item[field] is None:
+                continue
+            number = to_number(item[field], converter)
+            if number is None:
+                del item[field]
+            else:
+                item[field] = number

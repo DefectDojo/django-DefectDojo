@@ -98,6 +98,10 @@ The list of supported fields in JSON format:
 - fix_available: Bool
 - fix_version: String
 
+A numeric field may be given as a number or as a quoted number. A value that holds no
+number at all, such as a `"N/A"` placeholder for a line number the tool could not
+determine, is ignored and the field keeps its default.
+
 ### Example JSON
 
 ```JSON

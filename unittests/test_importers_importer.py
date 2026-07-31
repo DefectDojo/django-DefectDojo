@@ -203,6 +203,44 @@ class TestDojoDefaultImporter(DojoTestCase):
             self.assertEqual(1, len_new_findings)
             self.assertEqual(0, len_closed_findings)
 
+    def test_import_generic_with_non_numeric_line_is_written(self):
+        """A report using a placeholder instead of a line number must not abort the import."""
+        generic_non_numeric_fields = get_unit_tests_scans_path("generic") / "generic_non_numeric_fields.json"
+        with generic_non_numeric_fields.open(encoding="utf-8") as scan:
+            user, _ = User.objects.get_or_create(username="admin")
+            product_type, _ = Product_Type.objects.get_or_create(name="test_generic_non_numeric")
+            product, _ = Product.objects.get_or_create(
+                name="TestGenericNonNumericImporter",
+                description="test product",
+                prod_type=product_type,
+            )
+            engagement, _ = Engagement.objects.get_or_create(
+                name="Test Generic Non Numeric Engagement",
+                product=product,
+                target_start=timezone.now(),
+                target_end=timezone.now(),
+            )
+            environment, _ = Development_Environment.objects.get_or_create(name="Development")
+            import_options = {
+                "user": user,
+                "lead": user,
+                "scan_date": None,
+                "environment": environment,
+                "minimum_severity": "Info",
+                "active": True,
+                "verified": True,
+                "scan_type": "Generic Findings Import",
+                "engagement": engagement,
+                "close_old_findings": False,
+            }
+            importer = DefaultImporter(**import_options)
+            test, _, len_new_findings, _, _, _, _ = importer.process_scan(scan)
+            self.assertEqual(3, len_new_findings)
+            findings = Finding.objects.filter(test=test).order_by("id")
+            self.assertIsNone(findings[0].line)
+            self.assertEqual(42, findings[1].line)
+            self.assertEqual(42, findings[2].line)
+
     def test_reimport_generic_with_matching_test_type(self):
         """Test Case 1: Reimport with matching test_type (should succeed)"""
         generic_test_type_1 = get_unit_tests_scans_path("generic") / "generic_test_type_1.json"
