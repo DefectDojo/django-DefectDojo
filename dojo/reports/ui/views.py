@@ -280,7 +280,10 @@ def test_report(request, tid):
 def product_endpoint_report(request, pid):
     product = get_object_or_404(Product.objects.all().prefetch_related("engagement_set__test_set__test_type", "engagement_set__test_set__environment"), id=pid)
     if settings.V3_FEATURE_LOCATIONS:
-        endpoints = Location.objects.filter(findings__status=FindingLocationStatus.Active)
+        endpoints = Location.objects.filter(
+            products__product=product,
+            findings__status=FindingLocationStatus.Active,
+        )
         endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
