@@ -1,0 +1,35 @@
+{
+    "findings": [
+        {
+            "title": "numeric fields reported as placeholders",
+            "severity": "Medium",
+            "description": "the tool could not determine the numeric values",
+            "cwe": "N/A",
+            "line": "N/A",
+            "nb_occurences": "N/A",
+            "sast_source_line": "N/A",
+            "scanner_confidence": "N/A",
+            "thread_id": "N/A",
+            "cvssv3_score": "N/A",
+            "cvssv4_score": "N/A",
+            "epss_percentile": "N/A",
+            "epss_score": "N/A"
+        },
+        {
+            "title": "numeric fields reported as strings",
+            "severity": "Medium",
+            "description": "the tool quoted its numeric values",
+            "cwe": "79",
+            "line": "42",
+            "epss_score": "0.5"
+        },
+        {
+            "title": "numeric fields reported as numbers",
+            "severity": "Medium",
+            "description": "the tool reported proper numeric values",
+            "cwe": 79,
+            "line": 42,
+            "epss_score": 0.5
+        }
+    ]
+}
