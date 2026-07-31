@@ -1166,6 +1166,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "kube-bench Scan": ["title", "vuln_id_from_tool", "description"],
     "Threagile risks report": ["title", "cwe", "severity"],
     "Trufflehog Scan": ["title", "description", "line"],
+    # Secretlint names a rule at a source position, the same shape as Bandit. The masked value is
+    # deliberately left out, so rotating a secret to one of a different length does not create a
+    # second finding for the same hard-coded credential.
+    "Secretlint Scan": ["file_path", "line", "vuln_id_from_tool"],
     "Humble Json Importer": ["title"],
     "MSDefender Parser": ["title", "description"],
     "HCLAppScan XML": ["title", "description"],
@@ -1424,6 +1428,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Trufflehog Scan": DEDUPE_ALGO_HASH_CODE,
     "Trufflehog3 Scan": DEDUPE_ALGO_HASH_CODE,
     "Detect-secrets Scan": DEDUPE_ALGO_HASH_CODE,
+    "Secretlint Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
