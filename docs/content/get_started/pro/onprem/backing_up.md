@@ -2,7 +2,7 @@
 title: "Backing Up a Self-Hosted Deployment"
 description: "The four things to capture, where each one lives for Compose and Kubernetes deployments, and how to confirm a backup can actually be restored"
 draft: false
-weight: 11
+weight: 12
 audience: pro
 ---
 
