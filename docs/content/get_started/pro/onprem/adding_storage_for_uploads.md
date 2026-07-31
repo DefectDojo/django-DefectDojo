@@ -2,7 +2,7 @@
 title: "Adding Storage for Uploaded Files"
 description: "Expand the storage available for uploaded files on a Docker Compose deployment without altering the deployment itself"
 draft: false
-weight: 10
+weight: 11
 audience: pro
 ---
 
