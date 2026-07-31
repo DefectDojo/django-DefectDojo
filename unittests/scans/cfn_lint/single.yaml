@@ -1,0 +1,14 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A stack with one unused parameter.
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name of the application bucket.
+  UnusedParameter:
+    Type: String
+    Description: Never referenced anywhere.
+Resources:
+  ApplicationBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
