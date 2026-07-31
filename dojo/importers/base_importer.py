@@ -273,7 +273,16 @@ class BaseImporter(ImporterOptions):
         # Make sure we have at least one test returned
         if len(tests) == 0:
             logger.info(f"No tests found in import for {self.scan_type}")
-            self.test = None
+            # A report that describes no tests is a report with no findings, not a failure: every
+            # later step (dedupe algorithm, close-old-findings bookkeeping, timestamps, product
+            # grading) still needs a Test to work against, so self.test must never be left unset.
+            #
+            # On reimport the caller supplied the Test being reimported into; clearing it here made
+            # the whole rest of the reimport operate on None and surfaced as a 500 for what is a
+            # valid empty report. On import there is no Test yet and none can be named from the
+            # report, so fall back to the scan type exactly as the static-test-type path does.
+            if not self.test:
+                self.create_test(self.scan_type)
             return parsed_findings
         # for now we only consider the first test in the list and artificially aggregate all findings of all tests
         # this is the same as the old behavior as current import/reimporter implementation doesn't handle the case

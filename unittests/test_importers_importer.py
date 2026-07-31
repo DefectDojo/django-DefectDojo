@@ -588,6 +588,128 @@ class TestDojoDefaultImporter(DojoTestCase):
         self.assertEqual(legacy_doubled_name, test.test_type.name)
         self.assertGreater(len_new_findings, 0)
 
+    # Regression: a dynamic-test-type report carrying no tests dropped the reimport target test
+    def _setup_dynamic_no_runs_reimport(self, suffix: str):
+        """Import a SARIF report with one finding and return (test, user, environment) for a reimport."""
+        scan_type = "SARIF"
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name=f"test_no_runs_{suffix}")
+        product, _ = Product.objects.get_or_create(
+            name=f"TestNoRuns{suffix}",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name=f"Test No Runs {suffix} Engagement",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        import_options = {
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": scan_type,
+            "engagement": engagement,
+            "close_old_findings": False,
+        }
+        with (get_unit_tests_scans_path("sarif") / "appendix_k2.sarif").open(encoding="utf-8") as scan:
+            test, _, len_new_findings, _, _, _, _ = DefaultImporter(**import_options).process_scan(scan)
+        self.assertGreater(len_new_findings, 0)
+        return test, user, environment
+
+    def test_reimport_dynamic_test_type_report_without_tests_keeps_test(self):
+        """A report with zero tests must not drop the reimport target: the supplied test is returned unchanged."""
+        test, user, environment = self._setup_dynamic_no_runs_reimport("Keep")
+        original_test_type_name = test.test_type.name
+        reimport_options = {
+            "test": test,
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": "SARIF",
+            "close_old_findings": False,
+        }
+        reimporter = DefaultReImporter(**reimport_options)
+        with (get_unit_tests_scans_path("sarif") / "no_runs.sarif").open(encoding="utf-8") as scan:
+            # Must NOT raise "'NoneType' object has no attribute ..." for an empty report
+            test_after_reimport, _, len_new_findings, _, _, _, _ = reimporter.process_scan(scan)
+        self.assertIsNotNone(test_after_reimport)
+        self.assertEqual(test.id, test_after_reimport.id)
+        self.assertEqual(0, len_new_findings)
+        test.refresh_from_db()
+        self.assertEqual(original_test_type_name, test.test_type.name)
+
+    def test_import_dynamic_test_type_report_without_tests_creates_empty_test(self):
+        """A first import of a report with zero tests must yield an empty test rather than failing."""
+        scan_type = "SARIF"
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type, _ = Product_Type.objects.get_or_create(name="test_no_runs_import")
+        product, _ = Product.objects.get_or_create(
+            name="TestNoRunsImport",
+            description="test product",
+            prod_type=product_type,
+        )
+        engagement, _ = Engagement.objects.get_or_create(
+            name="Test No Runs Import Engagement",
+            product=product,
+            target_start=timezone.now(),
+            target_end=timezone.now(),
+        )
+        environment, _ = Development_Environment.objects.get_or_create(name="Development")
+        import_options = {
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": scan_type,
+            "engagement": engagement,
+            "close_old_findings": False,
+        }
+        importer = DefaultImporter(**import_options)
+        with (get_unit_tests_scans_path("sarif") / "no_runs.sarif").open(encoding="utf-8") as scan:
+            test, _, len_new_findings, _, _, _, _ = importer.process_scan(scan)
+        self.assertIsNotNone(test)
+        self.assertEqual(0, len_new_findings)
+        # No report content to name the test type after, so it falls back to the scan type
+        self.assertEqual(scan_type, test.test_type.name)
+
+    def test_reimport_dynamic_test_type_report_without_tests_closes_old_findings(self):
+        """Zero tests means zero findings reported, so close_old_findings must mitigate what the test still holds."""
+        test, user, environment = self._setup_dynamic_no_runs_reimport("Close")
+        reimport_options = {
+            "test": test,
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": "SARIF",
+            "close_old_findings": True,
+        }
+        reimporter = DefaultReImporter(**reimport_options)
+        with (get_unit_tests_scans_path("sarif") / "no_runs.sarif").open(encoding="utf-8") as scan:
+            _, _, _, len_closed_findings, _, _, _ = reimporter.process_scan(scan)
+        self.assertGreater(len_closed_findings, 0)
+        self.assertFalse(
+            Finding.objects.filter(test=test, is_mitigated=False).exists(),
+            msg="every finding in the test should be mitigated after reimporting a report with no results",
+        )
+
 
 class FlexibleImportTestAPI(DojoAPITestCase):
     def __init__(self, *args, **kwargs):
