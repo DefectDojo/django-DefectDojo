@@ -1433,6 +1433,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Secretlint Scan": DEDUPE_ALGO_HASH_CODE,
     "njsscan Scan": DEDUPE_ALGO_HASH_CODE,
     "cwe_checker Scan": DEDUPE_ALGO_HASH_CODE,
+    "Infer Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
