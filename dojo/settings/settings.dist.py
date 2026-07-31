@@ -1446,6 +1446,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "chkrootkit Scan": DEDUPE_ALGO_HASH_CODE,
     "AIDE Scan": DEDUPE_ALGO_HASH_CODE,
     "ffuf Scan": DEDUPE_ALGO_HASH_CODE,
+    "WhatWeb Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
