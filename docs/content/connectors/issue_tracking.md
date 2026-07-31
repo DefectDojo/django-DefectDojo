@@ -1,7 +1,11 @@
 ---
 title: "Issue Tracking Integration"
 description: "Sync DefectDojo findings with your issue tracking system to streamline remediation and accountability."
-weight: 1
+weight: 5
+aliases:
+  - /issue_tracking/
+  - /issue_tracking/intro/
+  - /issue_tracking/intro/intro/
 ---
 
 ## Overview
@@ -10,8 +14,8 @@ The DefectDojo issue tracking integrations connect your vulnerability management
 
 | Edition      | Supported Issue Tracking Integrations |
 |--------------|---------------------------------------|
-| Community Edition  | * [Jira](/issue_tracking/jira/os__jira_guide/)                          |
-| Pro          | * [Jira](/issue_tracking/jira/pro__jira_guide/)<br>* [Azure DevOps Boards](/issue_tracking/pro_integration/integrations_toolreference/#azure-devops-boards)<br>* [Bitbucket](/issue_tracking/pro_integration/integrations_toolreference/#bitbucket)<br>* [Freshservice](/issue_tracking/pro_integration/integrations_toolreference/#freshservice)<br>* [GitHub](/issue_tracking/pro_integration/integrations_toolreference/#github)<br>* [GitLab](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)<br>* [Linear](/issue_tracking/pro_integration/integrations_toolreference/#linear)<br>* [PagerDuty](/issue_tracking/pro_integration/integrations_toolreference/#pagerduty)<br>* [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)<br>* [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)<br>* [Shortcut](/issue_tracking/pro_integration/integrations_toolreference/#shortcut)<br>* [Zendesk](/issue_tracking/pro_integration/integrations_toolreference/#zendesk) |
+| Community Edition  | * [Jira](/connectors/os_jira/os__jira_guide/)                          |
+| Pro          | * [Jira](/connectors/downstream/downstream_toolreference/#jira) ([legacy guide](/connectors/downstream/pro__jira_guide/))<br>* [Azure DevOps](/connectors/downstream/downstream_toolreference/#azure-devops-boards)<br>* [Bitbucket](/connectors/downstream/downstream_toolreference/#bitbucket)<br>* [Freshservice](/connectors/downstream/downstream_toolreference/#freshservice)<br>* [GitHub](/connectors/downstream/downstream_toolreference/#github)<br>* [GitLab Boards](/connectors/downstream/downstream_toolreference/#gitlab)<br>* [Linear](/connectors/downstream/downstream_toolreference/#linear)<br>* [PagerDuty](/connectors/downstream/downstream_toolreference/#pagerduty)<br>* [ServiceDesk Plus](/connectors/downstream/downstream_toolreference/#servicedesk-plus)<br>* [ServiceNow](/connectors/downstream/downstream_toolreference/#servicenow)<br>* [Shortcut](/connectors/downstream/downstream_toolreference/#shortcut)<br>* [Zendesk](/connectors/downstream/downstream_toolreference/#zendesk) |
 
 
 When enabled, DefectDojo can create issues automatically, or selectively from Products or Engagement. As Findings are updated in DefectDojo—resolved, mitigated, or reactivated—the corresponding issues can be kept in sync, ensuring both systems reflect the current state of risk.

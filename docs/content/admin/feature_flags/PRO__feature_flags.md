@@ -89,7 +89,7 @@ Most features are available on both installation types. The exceptions are:
 
 | Feature | Availability | How it is controlled |
 | --- | --- | --- |
-| Downstream Connections | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise, which does not run the required infrastructure. See [Pro Integrations](/issue_tracking/pro_integration/integrations/). |
+| Downstream Connectors | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise, which does not run the required infrastructure. See [Downstream Connectors](/connectors/downstream/about/). |
 | Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
 | Locations | Both | Feature Flags page. Note that Locations cannot be turned back off once it is enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
 | Organization / Asset Relabeling | Both | Deployment configuration: `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`. |
