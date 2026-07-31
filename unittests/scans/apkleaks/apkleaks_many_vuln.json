@@ -1,0 +1,45 @@
+{
+  "package": "com.example.genericapp",
+  "results": [
+    {
+      "name": "Firebase",
+      "matches": [
+        "generic-app-0000.firebaseio.com"
+      ]
+    },
+    {
+      "name": "Generic_API_Key",
+      "matches": [
+        "API_KEY = \"AIzaSy00000000000000000000000000000000A\""
+      ]
+    },
+    {
+      "name": "Generic_Secret",
+      "matches": [
+        "SECRET = \"0000000000000000000000000000000000000000\""
+      ]
+    },
+    {
+      "name": "Google_API_Key",
+      "matches": [
+        "AIzaSy00000000000000000000000000000000A"
+      ]
+    },
+    {
+      "name": "IP_Address",
+      "matches": [
+        "10.0.2.2"
+      ]
+    },
+    {
+      "name": "LinkFinder",
+      "matches": [
+        "\"http://schemas.android.com/apk/res/android\"",
+        "\"https://api.example.com/v1/\"",
+        "\"https://api.example.com/v1/https://uploads.example.com/generic-app/https://generic-app-0000.firebaseio.com\"",
+        "\"https://generic-app-0000.firebaseio.com\"",
+        "\"https://uploads.example.com/generic-app/\""
+      ]
+    }
+  ]
+}
