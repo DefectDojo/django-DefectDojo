@@ -340,7 +340,11 @@ An air-gapped deployment runs without any outbound connectivity, but features th
 
 These are configured per deployment rather than being on by default, so an air-gapped install is not broken by their absence. If you enable one, expect it to fail with name resolution or connection errors until the deployment has a route to that service. Where the outbound path exists but goes through a proxy, see [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/).
 
-If you need enrichment data in a disconnected deployment, contact support to discuss the options for your version.
+### EPSS and KEV data from an internal mirror
+
+EPSS and KEV enrichment is an exception worth setting up, because it does not require a route to the public internet. Both are configured in the Tuner under Finding Enrichment, and each has its own enable toggle and its own lookup URL. The URL fields ship pointing at the public sources, and you can repoint them at a copy hosted inside your own network.
+
+The mirror has to serve the same files in the same format as the public sources. The lookups fetch a specific file from the URL you give them rather than discovering whatever is there, so a mirror that repackages or reorganizes the data will not work. Refresh your copies on a schedule that suits you, since the deployment only reads what your mirror serves.
 
 ## Questions or support
 
