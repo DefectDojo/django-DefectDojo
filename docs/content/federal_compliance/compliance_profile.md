@@ -37,7 +37,7 @@ choice, and is the default.
 existing findings, and the rest of the Compliance tab becomes available.
 
 With **Automatic Sync** on, the ledger keeps itself current — see
-[The POA&M Ledger](poam_ledger). **Sync POA&M Now** runs a sync immediately, which is useful
+[The POA&M Ledger](../poam_ledger). **Sync POA&M Now** runs a sync immediately, which is useful
 right after you change the profile or import a new scan.
 
 ## Settings available through the API only
@@ -47,7 +47,7 @@ Two profile settings are not on the form and are set through the compliance API:
 * **Default scan controls** — the controls attributed to scanner findings that carry no control
   mapping of their own. `RA-5` is the common choice for vulnerability scan results. Findings that
   *do* carry their own control references are mapped from those instead; see
-  [Control Coverage](control_coverage).
+  [Control Coverage](../control_coverage).
 * **Configuration test types** — the test types whose findings are treated as configuration items,
   which is what drives CM-6 consolidation in the ledger.
 

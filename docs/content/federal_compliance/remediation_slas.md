@@ -44,7 +44,7 @@ preset ahead of it is the recommended path.
 
 SLA deadlines drive the scheduled completion dates on POA&M items, and determine which items count
 as late in a snapshot's month-over-month metrics. They also decide what a **past-due-only** scan
-item policy includes — see [Compliance Profile](compliance_profile).
+item policy includes — see [Compliance Profile](../compliance_profile).
 
 For how priority and SLAs work outside a federal context, see
-[Assign Priority, Risk and SLAs](../asset_modelling/PRO_hierarchy/priority_sla).
+[Assign Priority, Risk and SLAs](/asset_modelling/pro_hierarchy/priority_sla/).

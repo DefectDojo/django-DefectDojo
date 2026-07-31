@@ -54,7 +54,7 @@ cannot remediate directly. The date of your last vendor check-in is tracked with
 ## KEV tracking
 
 Items tied to a CISA Known Exploited Vulnerability carry the KEV due date. That date also caps the
-remediation deadline — see [Remediation Deadlines](remediation_slas).
+remediation deadline — see [Remediation Deadlines](../remediation_slas).
 
 ## Milestones
 

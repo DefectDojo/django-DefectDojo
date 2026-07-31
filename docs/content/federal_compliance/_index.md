@@ -27,7 +27,7 @@ Everything described in this section lives on the **Compliance** tab of an Asset
 
 Federal Compliance ships behind the **Compliance** feature flag, which is in beta and off by
 default. An administrator turns it on from the feature flags menu — see
-[Feature Flags](../admin/feature_flags/PRO__feature_flags). Once enabled, a Compliance tab
+[Feature Flags](/admin/feature_flags/pro__feature_flags/). Once enabled, a Compliance tab
 appears on each Asset.
 
 ## Beta: confirm results before you rely on them

@@ -23,7 +23,7 @@ Extraction is grounded in the imported catalog, so an identifier the catalog doe
 never produces a mapping.
 
 Findings that carry no control references of their own are attributed to the default scan controls
-on the Compliance Profile — see [Compliance Profile](compliance_profile).
+on the Compliance Profile — see [Compliance Profile](../compliance_profile).
 
 ### Backfilling existing findings
 
