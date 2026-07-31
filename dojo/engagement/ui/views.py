@@ -1086,6 +1086,7 @@ class ImportScanResultsView(View):
         return self.success_redirect(request, context)
 
 
+@require_POST
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
@@ -1130,6 +1131,7 @@ def unlink_jira(request, eid):
         return HttpResponse(status=400)
 
 
+@require_POST
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
@@ -1438,6 +1440,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         })
 
 
+@require_POST
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     # Validate the engagement ID exists before moving forward
@@ -1448,6 +1451,7 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
+@require_POST
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
@@ -1459,6 +1463,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
+@require_POST
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)

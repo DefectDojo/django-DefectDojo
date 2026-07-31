@@ -24,9 +24,27 @@ def push(obj, *args, **kwargs):
     """
     Push a finding, finding group, or engagement to Jira.
 
+    Returns a (success, message) tuple when the push ran in the foreground and
+    an AsyncResult when it was queued. Do not test the return value for
+    truthiness -- both shapes are truthy even for a failed push. Pass it
+    through push_succeeded() instead.
+
     Wraps: jira_helper.push_to_jira
     """
     return _get_helper().push_to_jira(obj, *args, **kwargs)
+
+
+def push_succeeded(result) -> bool:
+    """
+    Report whether a push() return value represents a successful push.
+
+    A queued push counts as success: it has not reported a result yet, and
+    failures inside the worker surface as alerts.
+
+    Wraps: jira_helper.interpret_push_result
+    """
+    success, _message = _get_helper().interpret_push_result(result)
+    return success
 
 
 def add_comment(obj, note, *, force_push=False, **kwargs):

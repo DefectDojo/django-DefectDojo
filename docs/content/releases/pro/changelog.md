@@ -12,6 +12,46 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## July 2026: v3.1
 
+### July 29, 2026: v3.1.302
+
+* **(Connectors)** Added another large batch of Connectors to the Pro UI. New findings connectors: AppCheck, CyCognito, Picus, Red Hat Satellite, ImmuniWeb, Trustwave Fusion, Scantist, Black Duck Continuous Dynamic, Finite State, SOOS, Ostorlab, Automox, Qwiet AI, HiddenLayer, Nozomi Networks, NetRise, Uptycs, Klocwork, Parasoft DTP, CI Fuzz, Akto, BigID, Action1, ManageEngine Vulnerability Manager Plus, Zimperium, Dragos, CyberArk Certificate Manager, Calico Cloud, Rapid7 InsightCloudSec, Holm Security, Wazuh SCA, Fleet, and Elastic Security.
+* **(Connectors)** Checkmarx One branch tracking now accepts wildcard branch patterns, and JFrog Xray gained a `repository_filter` that scopes discovery before any per-repository work is done. The all-records view can now be filtered by record state.
+* **(Connectors)** Fixed a Microsoft Defender export page whose body arrives truncated being dropped instead of refetched, Microsoft Defender for Cloud now tolerates Azure Resource Graph shape drift on `additionalData.cve`, and a Checkmarx One wildcard that matches no branch in the scan window now skips the sync instead of closing every finding.
+* **(Performance)** Connector syncs now fetch only the records they need rather than the full record set.
+* **(Security)** Hardened SAML assertion handling, and the login rate limiter now also applies to the API token authentication endpoint.
+* **(Import)** Failure-path cleanup no longer masks the real import error, and import/reimport failures keep their intended status codes.
+* **(Search)** The search language facet is now seeded from the authorized queryset.
+* **(Bug Fixes)** The affected-engagements recompute no longer deadlocks concurrent risk acceptance updates, and stored JFrog api-summary deduplication settings are refreshed to match the current algorithm.
+
+### July 28, 2026: v3.1.301
+
+* **(Connectors)** Added nine parser-backed findings connectors: Google Artifact Analysis, Zora, PingCastle, Promptfoo, Alert Logic, Cyberwatch, WebInspect Enterprise, TruffleHog, and Chef Automate. Each mirrors its existing DefectDojo parser's mapping and scan type, so connector imports and file imports land in the same parser and the same deduplication configuration. Also wired up the credential forms for the Coverity, Cobalt.io, and Nuclei connectors, and gave five connectors their own logo.
+* **(Connectors)** Connector syncs can now stream findings in chunks, so very large syncs no longer exhaust memory. Checkmarx One per-branch tracking now defaults on for new installations only, leaving existing installations on their current behavior.
+* **(FIPS)** Added optional FIPS 140-3 image variants (CMVP #5247) for the connectors service, MCP server, integrators, and PSIRT advisory engine, deployable via `fips.enabled` in the Helm chart.
+* **(Integrations)** Added Opsgenie and ServiceNow SecOps / Vulnerability Response outbound integrators.
+* **(SSO)** Added structured attribute-mapping editors for SAML, LDAP, and OIDC in the Tuner, along with OIDC group mapping.
+* **(Pro UI)** Feature Flags and Appearance are now flagged as new in the menu, and dropdown menu triggers are hidden when they have no visible items.
+* **(Authorization)** Risk acceptances are now scoped by their accepted findings, the Jira finding-mapping project field and the bulk-update target finding group are restricted to authorized objects, the member-management check is applied on every serializer exposing the field, metadata API object authorization was hardened, and finding and engagement UI actions now require POST.
+* **(Bug Fixes)** Locations are now carried across a finding merge; the risk acceptance expiration job no longer aborts on an unattached risk acceptance; chained duplicates are re-pointed before excess duplicates are deleted; the deduplication hash-recompute task no longer prefetches deprecated endpoints; and the API returns a validation error instead of a 500 when `environment` is omitted.
+* **(Docs)** Documented the SSO attribute-mapping editors and OIDC group mapping, and enabling the Jira integration in System Settings. Clarified that the Jira webhook secret authenticates incoming requests.
+
+### July 27, 2026: v3.1.300
+
+* **(RBAC)** Added user-defined Custom Roles. You can now create your own roles with a granular permission set per object type, instead of being limited to the built-in roles.
+* **(Connectors)** Added another large batch of Connectors. New findings connectors: Fortify (SSC and FoD), HCL AppScan (ASoC and AppScan 360°), Datadog Cloud Security, MobSF, Deepfence ThreatMapper, NeuVector, Lacework / FortiCNAPP, Socket.dev, Bright Security, Aqua Security, Escape, Detectify, Fairwinds Insights, Wallarm, Vanta, NowSecure, FOSSA, Codacy, DeepSource, Beagle Security, Orca, AccuKnox, Halo Security, and Nightfall AI. Connector nomenclature is now unified as Upstream and Downstream Connectors, and you can request either type from the cloud UI.
+* **(Connectors)** JFrog Xray gained an artifact-level record mode, with connector-declared parents materialized as asset hierarchy edges. The new mode is on by default for new installations only, so existing installations keep their current record layout. Checkmarx One added opt-in per-branch sync via a `track_branches` toggle, which creates a separate engagement per tracked branch. Connector engagement names now include the asset name.
+* **(Connectors)** Connector syncs are more resilient on large data sets.
+* **(Sensei)** Added Bitbucket, Azure DevOps, and GitHub Enterprise connections, along with a Revert action and GitLab remediation support.
+* **(Authentication)** Login, logout, MFA, SSO, and password reset now run natively in the Pro UI rather than falling back to the classic UI. Added a generic LDAP authentication integration, configurable from the Tuner.
+* **(SSO)** Added self-serve SSO diagnostics and logs so you can troubleshoot a misconfigured provider without opening a support ticket.
+* **(Feature Flags)** Organization / Asset relabeling is now a database-driven feature flag. Feature flags are also readable through the v2 API and MCP, and the legacy feature flag table was retired.
+* **(Integrations)** The ServiceNow integrator now supports transition-time custom fields and `client_credentials` authentication, and surfaces integration errors in the UI.
+* **(Filters)** Date filters now resolve day boundaries in the viewing user's timezone, and the SLA filter options were reworked.
+* **(API)** Tightened validation and authorization across the user, product type, test, location, and endpoint reference endpoints. Configuration permission assignment is now restricted to superusers.
+* **(Performance)** Reimport matching now builds a run-scoped candidate index, global search splits matching into per-lane index-served queries, and vulnerability IDs gained a case-insensitive index.
+* **(Tools)** Added a Fortify parser V2 that prefers the true line number reported by the scanner. Fixed KICS severity mapping.
+* **(Bug Fixes)** Report summary charts now render after the table of contents is rebuilt; connector records are marked STALE when their owner is deleted through an async cascade; non-superusers can view the MCP page while MCP is enabled; a background sub-fetch failure no longer ejects you to the error page on secondary navigation; dropdown filters keep every character you type; an explicit scalar `cwe` stays primary when a `cwes` list is also supplied; API schema generation no longer scopes serializer querysets by `AnonymousUser`.
+
 ### July 22, 2026: v3.1.202
 
 * **(Connectors)** Registered the Intigriti bug bounty connector and the runZero asset connector in the Pro UI. The Qualys connector now sizes its request timeout for large detection exports.

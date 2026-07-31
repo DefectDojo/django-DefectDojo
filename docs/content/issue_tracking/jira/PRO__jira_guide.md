@@ -13,14 +13,46 @@ DefectDojo's Jira integration can be used to push Finding data to one or more Ji
 * DefectDojo can selectively push Findings from separate Products &/or Engagements to separate Jira Spaces, to keep things in their proper context.
 
 # Setting Up Jira
+
 Setting Up Jira requires the following steps:
-1. Connect a Jira Instance, either with a username / password or an API token.  Multiple instances can be linked.
-2. Add that Jira Instance to one or more Products or Engagements within DefectDojo.
-3. If you wish to use bidirectional sync, create a Jira Webhook which will send updates to DefectDojo.
+1. Enable the Jira integration in System Settings.  Until you do, the rest of the Jira settings are hidden throughout DefectDojo.
+2. Connect a Jira Instance, either with a username / password or an API token.  Multiple instances can be linked.
+3. Add that Jira Instance to one or more Products or Engagements within DefectDojo.
+4. If you wish to use bidirectional sync, create a Jira Webhook which will send updates to DefectDojo.
 
-## Step 1: Connect a Jira Instance
+## Step 1: Enable the Jira integration in System Settings
 
-Connecting a Jira Instance is the first step to take when setting up DefectDojo's Jira integration.  Please note Jira Service Management is currently not supported.
+The Jira integration is off by default, and while it is off DefectDojo hides every other Jira control in the interface.  This is the first thing to configure: none of the steps below are available until it is enabled.
+
+While the integration is disabled, there is no **Jira Instances** entry in the sidebar, so there is nowhere to add a Jira Instance:
+
+![image](images/jira-menu-hidden-pro.png)
+
+### Enable the integration
+
+1. Navigate to **\<Your Edition\> Settings \> System Settings** from the DefectDojo sidebar.  The menu is named after your license package, so it reads **Pro Settings** on a Pro instance and **Enterprise Settings** on an Enterprise instance.
+​
+2. In the **Jira Integration Settings** section, check **Enable Jira Integration**.
+​
+3. Click **Submit**.  **Jira Instances** appears in the sidebar immediately, without reloading the page:
+
+![image](images/jira-enable-system-settings-pro.png)
+
+### What the setting controls
+
+Enabling **Enable Jira Integration** is what makes the rest of the Jira interface appear.  With it turned on you get:
+
+* the **Jira Instances** menu, where Jira Instances are added and edited
+* the **Jira Project Settings** page on the Asset ⚙️ menu, and the Jira settings on Engagements
+* the **Push to Jira** actions on Findings and Finding Groups, the Jira fields on the Finding and bulk edit forms, and the Jira columns on the Asset, Engagement, Finding and Finding Group lists (including CSV exports)
+
+The setting also gates the integration outside the UI: while it is off, DefectDojo will not push Findings to Jira (including `push_to_jira` requests sent through the API), and incoming Jira webhooks are ignored.
+
+The remaining Jira fields in **Jira Integration Settings** (**Add Vulnerability ID as Jira Label**, **Enable Jira Web Hook**, **Disable Jira Web Hook Secret**, **Jira Web Hook Secret**, **Jira Minimum Severity**) stay visible whether the integration is on or off, but they have no effect until it is enabled.
+
+## Step 2: Connect a Jira Instance
+
+With the integration enabled, connecting a Jira Instance is the next step in setting up DefectDojo's Jira integration.  Please note Jira Service Management is currently not supported.
 
 #### Required information from Jira
 
@@ -46,7 +78,7 @@ Multiple Jira Spaces can be handled by a single Jira Instance connection, as lon
 
 ### Add a Jira Instance
 
-1. If you have not already done so, navigate to the System Settings page and check the box on **Enable Jira Integration**.
+1. Make sure **Enable Jira Integration** is checked in System Settings, as described in [Step 1](#step-1-enable-the-jira-integration-in-system-settings).  The **Jira Instances** menu does not appear on the sidebar until it is.
 
 2. Navigate to the  **Enterprise Settings \> Jira Instances \> + New Jira Instance**  page from the DefectDojo sidebar.
 
@@ -82,7 +114,7 @@ If you leave this field blank, it will default to **Jira\_full.**  If you need a
 
 The form can be submitted from here.  If you wish, you can further customize your Jira integration under Optional Fields.  Clicking this button will allow you to apply generic text to Jira Issues or change the mapping of Jira Severity Mappings.
 
-## Step 2: Connect a Product or Engagement to Jira
+## Step 3: Connect a Product or Engagement to Jira
 
 Each Product or Engagement in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated Jira Space and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
 
@@ -235,13 +267,15 @@ Note that once an Engagement has its own Jira project assigned, it can no longer
 
 ![image](images/Creating_Issues_in_Jira_5.png)
 
-## Step 3: Configure Bidirectional Sync: Jira Webhook
+## Step 4: Configure Bidirectional Sync: Jira Webhook
 
 The Jira integration allows for bidirectional sync via webhook. DefectDojo receives Jira notifications at a unique address, which can allow for Jira comments to be received on Findings, or for Findings to be resolved via Jira depending on your configuration.
 
 ### Locating your Jira Webhook URL
 
 Your Jira Webhook is located on the System Settings form under **Jira Integration Settings**: **Enterprise Settings \> System Settings** from the sidebar.
+
+You also need to check **Enable Jira Web Hook** on the same page before DefectDojo will process incoming Jira notifications.  Incoming webhooks are ignored if either that box or **Enable Jira Integration** (see [Step 1](#step-1-enable-the-jira-integration-in-system-settings)) is unchecked.
 
 ![image](images/Configuring_the_Jira_DefectDojo_Webhook.png)
 
@@ -255,7 +289,7 @@ Your Jira Webhook is located on the System Settings form under **Jira Integratio
 
 Note that you do not need to create a Secret within Jira to use this webhook. The Secret is built into DefectDojo's URL, so simply adding the complete URL to the Jira Webhook form is sufficient.
 
-DefectDojo's Jira Webhook only accepts requests from the Jira API.
+Incoming webhook requests are authenticated by the secret in that URL, so treat the full URL as a credential and keep it private.
 
 #### Testing the Webhook
 

@@ -661,6 +661,43 @@ True,11/7/2015,Title,0,http://localhost,Severity,Description,Mitigation,Impact,R
                     "Not allowed fields are present: ['invalid_field', 'last_status_update']"):
                 parser.get_findings(file, Test())
 
+    def test_parse_json_non_numeric_value_falls_back_to_default(self):
+        with (get_unit_tests_scans_path("generic") / "generic_non_numeric_fields.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            finding = findings[0]
+            self.assertIsNone(finding.line)
+            self.assertIsNone(finding.nb_occurences)
+            self.assertIsNone(finding.sast_source_line)
+            self.assertIsNone(finding.scanner_confidence)
+            self.assertIsNone(finding.cvssv3_score)
+            self.assertIsNone(finding.cvssv4_score)
+            self.assertIsNone(finding.epss_percentile)
+            self.assertIsNone(finding.epss_score)
+            self.assertEqual(0, finding.cwe)
+            self.assertEqual(0, finding.thread_id)
+
+    def test_parse_json_numeric_value_given_as_string_is_converted(self):
+        with (get_unit_tests_scans_path("generic") / "generic_non_numeric_fields.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            finding = findings[1]
+            self.assertEqual(42, finding.line)
+            self.assertEqual(79, finding.cwe)
+            self.assertEqual(0.5, finding.epss_score)
+
+    def test_parse_json_numeric_value_given_as_number_is_kept(self):
+        with (get_unit_tests_scans_path("generic") / "generic_non_numeric_fields.json").open(encoding="utf-8") as file:
+            parser = GenericParser()
+            findings = parser.get_findings(file, self.test)
+            self.validate_locations(findings)
+            finding = findings[2]
+            self.assertEqual(42, finding.line)
+            self.assertEqual(79, finding.cwe)
+            self.assertEqual(0.5, finding.epss_score)
+
     def test_parse_csv_with_epss(self):
         with (get_unit_tests_scans_path("generic") / "generic_csv_with_epss.csv").open(encoding="utf-8") as file:
             parser = GenericParser()
