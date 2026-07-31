@@ -39,6 +39,10 @@ class EndpointViewFindingScopingTest(DojoTestCase):
     def setUpTestData(cls):
         prod_type = Product_Type.objects.create(name="epscope_pt")
         test_type, _ = Test_Type.objects.get_or_create(name="epscope_scan")
+        cls.user_a = Dojo_User.objects.create(username="epscope_user_a", is_active=True)
+        cls.superuser = Dojo_User.objects.create(
+            username="epscope_super", is_active=True, is_superuser=True,
+        )
 
         def build(name, finding_title):
             product = Product.objects.create(name=name, description=name, prod_type=prod_type)
@@ -53,6 +57,7 @@ class EndpointViewFindingScopingTest(DojoTestCase):
             finding = Finding.objects.create(
                 test=test, title=finding_title, severity="High",
                 numerical_severity="S1", active=True, verified=True,
+                reporter=cls.superuser,
             )
             return product, finding
 
@@ -66,12 +71,10 @@ class EndpointViewFindingScopingTest(DojoTestCase):
             cls.location.associate_with_finding(finding, audit_time=now())
             cls.location.associate_with_product(product)
 
-        cls.user_a = Dojo_User.objects.create(username="epscope_user_a", is_active=True)
+        # Legacy authorization reads authorized_users, the role model reads Product_Member.
+        cls.product_a.authorized_users.add(cls.user_a)
         Product_Member.objects.create(
             product=cls.product_a, user=cls.user_a, role=Role.objects.get(id=Roles.Reader),
-        )
-        cls.superuser = Dojo_User.objects.create(
-            username="epscope_super", is_active=True, is_superuser=True,
         )
 
         # Titles are normalised on save, so compare against what was stored.
