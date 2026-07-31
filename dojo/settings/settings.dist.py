@@ -1220,6 +1220,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Masscan Scan": ["title", "endpoints"],
     "Sqlmap Scan": ["title", "endpoints"],
     "Nettacker Scan": ["title", "endpoints"],
+    "httpx Scan": ["title", "endpoints"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1472,6 +1473,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "ClamAV Scan": DEDUPE_ALGO_HASH_CODE,
     "Firmwalker Scan": DEDUPE_ALGO_HASH_CODE,
     "Nettacker Scan": DEDUPE_ALGO_HASH_CODE,
+    "httpx Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
