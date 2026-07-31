@@ -23,7 +23,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter
@@ -636,6 +636,8 @@ def add_finding_from_template(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
     user_has_permission_or_403(request.user, test, "add")
+    # fid is a Finding_Template id, not a finding; templates are a shared cross-product store
+    user_has_global_permission_or_403(request.user, "edit")
     template = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
     push_all_jira_issues = jira_services.is_push_all_issues(template)
