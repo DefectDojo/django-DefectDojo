@@ -18,7 +18,7 @@ On the staging host, a Linux host with internet access, Docker installed, and en
 
 On the air-gapped host, Docker installed and working, and a PostgreSQL server already provisioned and reachable, both per the standard installation instructions.
 
-On both, a copy of the `dojo-compose-cli` archive and your license file, as supplied by DefectDojo.
+On both, a copy of the `dojo-compose-cli` archive and your license file, as supplied by DefectDojo. Use CLI version 2.1.0 or later. Earlier versions have no air-gapped mode, and without it the CLI tries to reach the container registry on every command and fails with name resolution errors instead of telling you what is wrong.
 
 ## Stage the artifacts
 
@@ -167,7 +167,7 @@ Move `artifacts-x.y.z.tar.gz` into the air-gapped network using your normal tran
 
 ## Install on the air-gapped host
 
-### 6. Install the CLI
+### 6. Install the CLI and enable air-gapped mode
 
 Extract the CLI archive, then place the license where the CLI expects it:
 
@@ -176,18 +176,35 @@ sudo mkdir /etc/defectdojo/
 sudo cp dojopro.lic /etc/defectdojo/
 ```
 
-Run registration:
+Turn on air-gapped mode. This is the first CLI command you run on this host, and it installs the CLI to `/usr/bin`, validates the license from the file, and encrypts the stored configuration as it goes:
 
 ```bash
-sudo ./dojo-compose-cli register
+sudo ./dojo-compose-cli config set --air-gapped true
 ```
 
-Registration completes the local setup, installing the CLI, creating the groups, and encrypting the configuration, and then fails when it tries to authenticate against the container registry. That failure is expected on a host with no route to the registry. The error names a DNS or registry authentication problem, and everything before it has already been done.
-
-Confirm the CLI is in place and pick up your new group membership:
+Confirm it took effect:
 
 ```bash
-which dojo-compose-cli
+dojo-compose-cli config print
+```
+
+The output includes `Air Gapped Deploy` set to true. Set `DOJO_CLI_KEY` in the environment here as well, so later commands do not prompt for it.
+
+Do not run `register` on this host. Registration exists to authenticate against the container registry, which is unreachable by definition, and in air-gapped mode the CLI declines it rather than attempting it. The same applies to the other commands that reach the registry:
+
+| Command | Behavior in air-gapped mode |
+| --- | --- |
+| `register` | Declined. Registry authentication is not available. |
+| `deploy download` | Declined. Run it on the staging host instead. |
+| `app pull-images` | Declined. Run it on the staging host instead. |
+| `app upgrade` | Declined. See the upgrade section below. |
+| `app start`, `app stop`, `app restart` | Available. These do not contact the registry. |
+
+Each declined command exits with a message naming air-gapped mode, so a refusal here is the CLI working as intended rather than a fault to diagnose.
+
+Pick up your new group membership before continuing:
+
+```bash
 newgrp docker
 ```
 
@@ -288,49 +305,33 @@ Then confirm with `docker image ls` that every image loaded, at the version you 
 
 ### 10. Start the stack
 
-The compose file reads its configuration from the environment, so supply the values you set in step 8 when you start it. A wrapper script keeps this repeatable:
+Start the stack with the CLI. This works in air-gapped mode, since it reads the configuration you set and drives the local compose file without contacting the registry:
 
 ```bash
-#!/bin/bash
-
-# Set empty to suppress warnings about unset optional variables
-export HTTPS_PROXY=""
-export HTTP_PROXY=""
-export NO_PROXY=""
-export DD_ADMIN_PASSWORD=""
-
-# Required
-export DD_ALLOWED_HOSTS="*"
-export DD_CREDENTIAL_AES_256_KEY="<your-value>"
-export DD_SECRET_KEY="<your-value>"
-export DD_SITE_URL="<your-value>"
-export DD_DATABASE_URL="<your-value>"
-export DD_LICENSE="<license file, base64 encoded as a single line>"
-export version="x.y.z"
-export base_directory="/opt/dojo"
-export sub_level="pro"
-
-# Starting points, tune to the host
-export DD_UWSGI_NUM_OF_PROCESSES=9
-export DD_UWSGI_NUM_OF_THREADS=4
-export DD_CELERY_WORKER_CONCURRENCY=4
-export DD_CELERY_WORKER_AUTOSCALE_MAX=4
-
-cd "$base_directory" || exit 1
-docker compose up -d
+dojo-compose-cli app start
 ```
 
-A matching stop script is the same file with `docker compose down` as the last line.
+`app stop` and `app restart` are available the same way. Use `app restart` after changing any environment value, because it recreates the containers so the new values are picked up.
 
-The `version` value decides which image tags compose uses, so it has to match the images you loaded. Keep these scripts under restricted permissions, since they contain your keys and database password.
+Two things to check if the stack does not come up. The command needs the deployment directory in place, so confirm `/opt/dojo/docker-compose.yml` exists from step 7. And the configured version selects the image tags, so it has to match the images you loaded in step 9.
 
 DefectDojo is then available at the address you set as the site URL.
 
 ## Upgrading an air-gapped deployment
 
-The CLI's upgrade command downloads from the container registry, so it cannot run on the air-gapped host. Upgrades follow the same route as the install. Stage the new version's deployment artifacts and images on the staging host, move them across, load the images, and update the configured version.
+`app upgrade` downloads from the container registry, so it is one of the commands air-gapped mode declines. Upgrades follow the same route as the install rather than being driven by a single command.
 
-Two things catch people out. Bringing the stack up without changing the configured version starts it on the images you already had, because the version value selects the image tags, so update the version in the CLI configuration and in your start script together. And the set of images can change between releases, so compare what you loaded against what the new version's pull produced rather than assuming the previous list still applies.
+On the staging host, set the new version and repeat steps 3 through 5 for it. Move the new bundle across, load the new images, then on the air-gapped host set the version to the new one and restart:
+
+```bash
+dojo-compose-cli config set --version x.y.z
+dojo-compose-cli config set --deploy-version x.y.z
+dojo-compose-cli app restart
+```
+
+Two things catch people out. Restarting without changing the configured version brings the stack back on the images you already had, because the version selects the image tags. And the set of images can change between releases, so compare what you loaded against what the new version's pull produced rather than assuming the previous list still applies.
+
+Your existing deployment directory does not pick up the new version's compose file or nginx configuration on its own, so restore the new `/opt/dojo` contents as you did in step 7, keeping your own customizations, certificates, and media.
 
 Back up your database before any upgrade, and review the [upgrade notes](/releases/os_upgrading/upgrading_guide/) for every version between your current one and your target. If you are several releases behind, contact support before starting.
 
