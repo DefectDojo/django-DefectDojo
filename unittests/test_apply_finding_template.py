@@ -393,7 +393,7 @@ class TestMkTemplate(DojoTestCase):
 
     def make_request(self, user, finding_id):
         rf = RequestFactory()
-        request = rf.get(f"/finding/{finding_id}/mktemplate")
+        request = rf.post(f"/finding/{finding_id}/mktemplate")
         request.user = user
         request.session = {}
         messages = FallbackStorage(request)

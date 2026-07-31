@@ -1715,9 +1715,11 @@ def clear_finding_review(request, fid):
     )
 
 
+@require_POST
 def mktemplate(request, fid):
-    user_has_global_permission_or_403(request.user, "add")
     finding = get_object_or_404(Finding, id=fid)
+    user_has_permission_or_403(request.user, finding, "view")
+    user_has_global_permission_or_403(request.user, "add")
     templates = Finding_Template.objects.filter(title=finding.title)
     if len(templates) > 0:
         messages.add_message(
