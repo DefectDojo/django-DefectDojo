@@ -40,7 +40,7 @@ When a Finding carries **multiple CVEs**, it is marked **Known Exploited** if **
 
 A KEV signal is never suppressed by a higher-EPSS sibling. If a Finding carries one CVE with a high EPSS score that is *not* KEV-listed, and another with a low EPSS score that *is*, the Finding takes the high EPSS score **and** is marked Known Exploited — each field independently reflects the worst case across the Finding's CVEs.
 
-> **Findings without a CVE are not enriched.** Both sources match strictly on CVE identifiers (`CVE-YYYY-NNNNN`). A Finding with no CVE — or with only a vendor-specific or GHSA-style identifier — receives no EPSS or KEV data.
+> **Findings without a CVE are not enriched — unless one of their identifiers is linked to a CVE.** Both sources match strictly on CVE identifiers (`CVE-YYYY-NNNNN`), so a Finding whose only identifier is a GHSA, RUSTSEC or vendor-specific advisory has nothing to match on. [Linking equivalent identifiers](#linking-equivalent-identifiers) closes that gap: once `GHSA-jfh8-c2jp-5v3q` is recorded as an alias of `CVE-2021-44228`, Findings carrying only the GHSA inherit that CVE's EPSS and KEV data.
 
 ## When it syncs
 
@@ -88,6 +88,59 @@ Once enrichment has run, the same panel reports what was actually found:
 
 This matters because "we have not looked yet" and "we looked and it is not exploited" would otherwise be indistinguishable, and only one of them is a reason to relax.
 
+## Linking equivalent identifiers
+
+The same vulnerability is often published under several identifiers. Log4Shell is `CVE-2021-44228`, and it is also `GHSA-jfh8-c2jp-5v3q`. A Rust advisory is `RUSTSEC-2021-0001` and may also carry a CVE. DefectDojo treats each identifier string as its own vulnerability, so by default they look unrelated.
+
+That matters because **EPSS and KEV are only published per CVE**. A Finding whose scanner reported only the GHSA gets no EPSS score, is not marked Known Exploited, and gets no KEV-capped SLA — even though the equivalent CVE has all three.
+
+An **alias link** records that two identifiers describe the same vulnerability. Once linked, a Finding carrying either identifier inherits the other's EPSS and KEV data, exactly as if the CVE had been on the Finding all along.
+
+### Where aliases appear
+
+Each vulnerability's page in the **Vulnerability Explorer** has a **Related Identifiers** section listing the identifiers DefectDojo associates with it, labelled by how strong that association is:
+
+| Label | Meaning |
+| --- | --- |
+| **Linked** | A recorded alias. This is what drives EPSS/KEV inheritance. |
+| **Co-occurring** | Another identifier that merely appears on the same Findings. Suggestive, but drives nothing. |
+
+Only a **Linked** identifier has any effect. A co-occurring identifier is shown because it is often the alias you are looking for — each one carries a **Link as alias** action to promote it — but until it is linked it changes nothing.
+
+On the Finding itself, a **Linked Identifiers** row lists the identifiers its own IDs are aliases of. When a Finding with no CVE of its own shows an EPSS score, that row is where the score came from.
+
+### How aliases get created
+
+Four sources, all of which can be in play at once:
+
+| Source | What it does |
+| --- | --- |
+| **Import** | When a scanner reports a non-CVE identifier and a CVE on the same Finding, DefectDojo records the link. Several scanners do publish this equivalence (Grype's related vulnerabilities, and the `aliases` arrays from cargo-audit, govulncheck and Dependency-Track), and this recovers it. On by default. |
+| **Backfill** | The `backfill_vulnerability_aliases` management command applies the same rule to Findings you already have, so an existing instance benefits without re-importing everything. |
+| **Manual** | Link any two identifiers by hand from the Vulnerability Explorer. Requires Tuner edit permission, since an alias is instance-wide. |
+| **OSV** | An optional nightly sweep that asks [OSV](https://osv.dev/) which CVEs your non-CVE identifiers are aliases of. Off by default; see [Configuration](#configuration). |
+
+Import-derived links are deliberately conservative: DefectDojo only links a non-CVE identifier to a **CVE**, never CVE-to-CVE or one non-CVE to another, because only the CVE-anchored case unlocks anything. Two identifiers appearing together does not always mean they are the same vulnerability, which is why every link is reviewable and reversible.
+
+### Reviewing and removing a link
+
+A wrong link is consequential: it can mark a Finding Known Exploited and pull in its SLA deadline. So links are visible and revocable. **Unlink** on any linked identifier does two things:
+
+1. Stops the inheritance, immediately.
+2. **Withdraws what the link granted** — the Known Exploited, Ransomware Used and KEV Date values it supplied are cleared from the affected Findings, and each Finding is re-evaluated so any *other* valid source can put them back.
+
+An unlinked pair also stays unlinked. None of the automatic sources will re-create it on the next import or nightly sweep, so you do not have to keep removing the same bad link.
+
+> **EPSS scores are not withdrawn on unlink.** DefectDojo never clears an EPSS score, because scanners populate that field directly and clearing it would destroy scanner-reported data. After unlinking, an inherited EPSS score remains until a source supplies a new value. Only the KEV fields are withdrawn.
+
+### Aliases resolve one step, not transitively
+
+Resolution follows exactly **one** link. If `GHSA-x` is linked to `CVE-1`, and `CVE-1` is separately linked to `CVE-2`, then `GHSA-x` inherits from `CVE-1` only — not from `CVE-2`. This keeps resolution predictable and bounded; if you need the second relationship, link it directly.
+
+### Aliases never change deduplication
+
+Linking identifiers does **not** change any Finding's own list of vulnerability IDs. That list feeds DefectDojo's deduplication and reimport matching, so altering it would re-shuffle duplicates across your whole instance. Aliases are applied when enrichment data is read, never by rewriting the Finding — so you can link and unlink freely without disturbing deduplication.
+
 ## Running a sync on demand
 
 You do not have to wait for the daily cycle. The **Sync KEV/EPSS data** button at the top of the Vulnerability Explorer starts a sync immediately:
@@ -132,3 +185,18 @@ On **DefectDojo Cloud**, EPSS and KEV enrichment is enabled and maintained for y
 If EPSS or KEV data is not appearing on Findings you expect it to (and those Findings do carry CVEs), start by checking the status line on the Vulnerability Explorer — it reports the outcome of the most recent sync, including when no source is configured. If that looks healthy and data is still missing, contact DefectDojo support, who can confirm whether the daily sync is delivering data to your instance.
 
 > *On-premise installations* configure enrichment differently — each source can be enabled or disabled and pointed at a custom feed URL under the Tuner's finding-enrichment settings. That configuration does not apply to Cloud, where the data is delivered by DefectDojo.
+
+### Alias discovery against OSV
+
+Automatic alias discovery is the one enrichment source that queries a third party once per identifier, so it is **off by default** and enabled explicitly under the Tuner's finding-enrichment settings:
+
+| Setting | Meaning |
+| --- | --- |
+| **Vulnerability Alias Lookup Enabled** | When on, a nightly sweep asks OSV which CVEs your non-CVE identifiers are aliases of. |
+| **OSV Lookup URL** | The endpoint to query. Defaults to the public OSV API. |
+
+Leaving it off costs you nothing else: the import-derived, backfill and manual sources are all local to your database and keep working regardless. An air-gapped instance should leave this off and rely on those.
+
+When enabled, discovery is a **background sweep and nothing waits on it**. Imports, Finding pages and the link/unlink actions never contact OSV, so an OSV outage cannot slow down or fail anything you do in the UI — only the sweep itself is affected, and it reports its own failure. Each sweep looks at a bounded number of identifiers and re-checks an identifier only occasionally, so a large instance works through its backlog over successive nights rather than in one burst.
+
+You can also start a discovery sweep on demand from the Vulnerability Explorer. It returns immediately and reports progress as it goes, in the same way the KEV/EPSS sync does.
