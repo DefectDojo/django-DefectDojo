@@ -35,7 +35,7 @@
         <p></p>
     </div>
 
-    <div role="tabpanel" x-data="{ activeTab: '{% if activetab == 'findings' %}tabs-1{% elif activetab == 'vulnerability_ids' %}tabs-2{% elif activetab == 'products' %}tabs-3{% elif activetab == 'engagements' %}tabs-4{% elif activetab == 'tests' %}tabs-5{% elif activetab == 'endpoints' %}tabs-6{% elif activetab == 'tagged' %}tabs-10{% elif activetab == 'generic' %}tabs-11{% else %}tabs-1{% endif %}' }">
+    <div role="tabpanel" x-data="{ activeTab: '{% if activetab == 'findings' %}tabs-1{% elif activetab == 'vulnerability_ids' %}tabs-2{% elif activetab == 'products' %}tabs-3{% elif activetab == 'engagements' %}tabs-4{% elif activetab == 'tests' %}tabs-5{% elif activetab == 'endpoints' %}tabs-6{% elif activetab == 'finding_templates' %}tabs-7{% elif activetab == 'languages' %}tabs-8{% elif activetab == 'technologies' %}tabs-9{% elif activetab == 'tagged' %}tabs-10{% elif activetab == 'generic' %}tabs-11{% else %}tabs-1{% endif %}' }">
 
         <!-- Nav tabs -->
         <ul class="nav nav-tabs" role="tablist">
@@ -101,13 +101,13 @@
         <!-- Tab panes -->
         <div class="tab-content">
             {% if findings %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-1" x-show="activeTab === 'tabs-1'" x-cloak>
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-1" :class="activeTab === 'tabs-1' && 'active'">
                     {% comment %} include inherits the current context so findings, filtered and other variables {% endcomment %}
                     {% include "dojo/findings_list_snippet.html" with form_id="custom_search_filter" %}
                 </div>
             {% endif %}
             {% if vulnerability_ids %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-2" x-show="activeTab === 'tabs-2'" x-cloak>
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-2" :class="activeTab === 'tabs-2' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -160,7 +160,7 @@
                 </div>
             {% endif %}
             {% if products %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-3" x-show="activeTab === 'tabs-3'" x-cloak>
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-3" :class="activeTab === 'tabs-3' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -186,7 +186,7 @@
                 </div>
             {% endif %}
             {% if engagements %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-4" x-show="activeTab === 'tabs-4'" x-cloak>
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-4" :class="activeTab === 'tabs-4' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -219,7 +219,7 @@
                 </div>
             {% endif %}
             {% if tests %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-5" x-show="activeTab === 'tabs-5'" x-cloak>
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-5" :class="activeTab === 'tabs-5' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -257,7 +257,7 @@
                 </div>
             {% endif %}
             {% if endpoints %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-6" x-show="activeTab === 'tabs-6'" x-cloak>
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-6" :class="activeTab === 'tabs-6' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -295,7 +295,7 @@
                 </div>
             {% endif %}
             {% if finding_templates %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-7" x-show="activeTab === 'tabs-7'" x-cloak>
+                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-7" :class="activeTab === 'tabs-7' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -320,7 +320,7 @@
             {% if languages %}
             <div role="tabpanel"
                  class="table-responsive tab-pane"
-                 id="tabs-8" x-show="activeTab === 'tabs-8'" x-cloak>
+                 id="tabs-8" :class="activeTab === 'tabs-8' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -345,7 +345,7 @@
             {% if app_analysis %}
             <div role="tabpanel"
                  class="table-responsive tab-pane"
-                 id="tabs-9" x-show="activeTab === 'tabs-9'" x-cloak>
+                 id="tabs-9" :class="activeTab === 'tabs-9' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -370,7 +370,7 @@
             {% if tagged_findings or tagged_finding_templates or tagged_products or tagged_tests or tagged_endpoints or tagged_engagements %}
                 <div role="tabpanel"
                      class="table-responsive tab-pane"
-                     id="tabs-10" x-show="activeTab === 'tabs-10'" x-cloak>
+                     id="tabs-10" :class="activeTab === 'tabs-10' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -440,7 +440,7 @@
             {% endif %}
             {% if generic %}
                 <div role="tabpanel" class="table-responsive tab-pane"
-                     id="tabs-11" x-show="activeTab === 'tabs-11'" x-cloak>
+                     id="tabs-11" :class="activeTab === 'tabs-11' && 'active'">
                     <table class="table table-striped">
                         <thead>
                         <tr>

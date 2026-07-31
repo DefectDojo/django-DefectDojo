@@ -100,7 +100,15 @@ def get_filter_groups(form):
         {% for group in filter_groups %}
             {{ group.name }} — {{ group.fields }}
         {% endfor %}
+
+    Pages that render a filter panel without having a filter form -- the search page
+    does that for an ``id:`` query -- resolve ``form`` to the empty string, so return
+    no groups rather than raising. The classic templates looped over
+    ``form.visible_fields`` directly, which failed silently the same way.
     """
+    if not hasattr(form, "visible_fields"):
+        return []
+
     visible_fields = list(form.visible_fields())
 
     if not _is_finding_filter(form):
