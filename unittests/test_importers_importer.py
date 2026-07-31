@@ -686,6 +686,29 @@ class TestDojoDefaultImporter(DojoTestCase):
         # No report content to name the test type after, so it falls back to the scan type
         self.assertEqual(scan_type, test.test_type.name)
 
+        # A later report that does name a tool must still reimport into that test: the bare scan
+        # type is not a "Test type mismatch", or the first empty report would poison the test.
+        reimport_options = {
+            "test": test,
+            "user": user,
+            "lead": user,
+            "scan_date": None,
+            "environment": environment,
+            "minimum_severity": "Info",
+            "active": True,
+            "verified": True,
+            "scan_type": scan_type,
+            "close_old_findings": False,
+        }
+        reimporter = DefaultReImporter(**reimport_options)
+        with (get_unit_tests_scans_path("sarif") / "appendix_k2.sarif").open(encoding="utf-8") as scan:
+            test_after_reimport, _, len_new_findings, _, _, _, _ = reimporter.process_scan(scan)
+        self.assertEqual(test.id, test_after_reimport.id)
+        self.assertGreater(len_new_findings, 0)
+        test.refresh_from_db()
+        # The historical name is preserved, as it is for legacy doubled names
+        self.assertEqual(scan_type, test.test_type.name)
+
     def test_reimport_dynamic_test_type_report_without_tests_closes_old_findings(self):
         """Zero tests means zero findings reported, so close_old_findings must mitigate what the test still holds."""
         test, user, environment = self._setup_dynamic_no_runs_reimport("Close")

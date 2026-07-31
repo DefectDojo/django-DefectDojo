@@ -301,9 +301,16 @@ class BaseImporter(ImporterOptions):
             # During reimport, validate that the test_type matches the incoming report.
             # Accept either the current (idempotent) name or the legacy name the pre-patch code
             # produced, so reimports into tests created before the doubling fix keep working.
+            #
+            # The bare scan type is accepted too. A report that declares no tests names no tool
+            # either, so the Test created for it falls back to the scan type; the same is true of
+            # a Test created outside the dynamic path. The check exists to stop a report from a
+            # different tool being reimported into a Test, and the bare scan type carries no tool
+            # identity to conflict with. The historical name is kept rather than rewritten, as it
+            # is for the legacy name above.
             expected_test_type_name = self.resolve_dynamic_test_type_name(test_raw.type)
             legacy_test_type_name = self.legacy_dynamic_test_type_name(test_raw.type)
-            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name}:
+            if self.test.test_type.name not in {expected_test_type_name, legacy_test_type_name, self.scan_type}:
                 msg = (
                     f"Test type mismatch: Test {self.test.id} has test_type '{self.test.test_type.name}', "
                     f"but the report contains test_type '{expected_test_type_name}'. "
