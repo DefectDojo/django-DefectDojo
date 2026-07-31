@@ -64,15 +64,16 @@ exploited in the wild receives only a small absolute bump, and could still sit i
 under Low.
 
 So there is a second, categorical rule. When threat intelligence reports **active
-exploitation in the wild**, the finding's Risk band is raised to a configured minimum
-regardless of what Priority alone would have produced. It ships set to **Needs Action**;
-each product type can raise it to Urgent, lower it, or clear it to switch the floor off, in
-Prioritization Engine settings under *Actively-Exploited Risk Floor*.
+exploitation in the wild**, the finding's Priority is raised to at least the level of a
+configured Risk band, regardless of what the weighted calculation alone produced. It ships
+set to **Needs Action**; each product type can raise it to Urgent, lower it, or clear it to
+switch the floor off, in Prioritization Engine settings under *Actively-Exploited Risk
+Floor*.
 
-The floor only ever raises a band — it never moves a finding down, and a finding that
-already bands higher on its own is untouched. Priority itself is left exactly as calculated,
-so that number stays explainable; the Risk band and Risk score are floored together, so
-sorting and filtering by Risk stay consistent.
+The floor only ever raises — it never moves a finding down, and a finding that already
+scores higher on its own is untouched. Because it applies to Priority, the Risk band and
+Risk score follow from it automatically, so every list, filter, chart and SLA calculation
+sees the same consistent number.
 
 ## Findings without a CVE
 
