@@ -1441,6 +1441,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "KubeLinter Scan": DEDUPE_ALGO_HASH_CODE,
     "Polaris Scan": DEDUPE_ALGO_HASH_CODE,
     "Conftest Scan": DEDUPE_ALGO_HASH_CODE,
+    "Lynis Scan": DEDUPE_ALGO_HASH_CODE,
     "Solar Appscreener Scan": DEDUPE_ALGO_HASH_CODE,
     "Gitleaks Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-audit Scan": DEDUPE_ALGO_HASH_CODE,
