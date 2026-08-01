@@ -1,0 +1,148 @@
+[
+  {
+    "name": "CWE134",
+    "version": "0.1",
+    "addresses": [
+      "4198785"
+    ],
+    "tids": [
+      "instr_0x00401181_2"
+    ],
+    "symbols": [
+      "printf"
+    ],
+    "other": [],
+    "description": "(Externally Controlled Format String) Potential externally controlled format string for call to printf at 4198785"
+  },
+  {
+    "name": "CWE190",
+    "version": "0.1",
+    "addresses": [
+      "4198933"
+    ],
+    "tids": [
+      "instr_0x00401215_2"
+    ],
+    "symbols": [
+      "malloc"
+    ],
+    "other": [],
+    "description": "(Integer Overflow or Wraparound) Potential overflow due to multiplication before call to malloc at 4198933"
+  },
+  {
+    "name": "CWE215",
+    "version": "0.2",
+    "addresses": [],
+    "tids": [],
+    "symbols": [],
+    "other": [],
+    "description": "(Information Exposure Through Debug Information) The binary contains debug symbols."
+  },
+  {
+    "name": "CWE415",
+    "version": "0.3",
+    "addresses": [
+      "4198851"
+    ],
+    "tids": [
+      "instr_0x004011c3_2"
+    ],
+    "symbols": [],
+    "other": [
+      [
+        "Accessed ID instr_0x00401196_2 @ RAX:i64 may have been freed before at instr_0x004011b7_2.",
+        "Relevant callgraph TIDs: [fun_0x00401189]"
+      ]
+    ],
+    "description": "(Double Free) Object may have been freed before at 4198851"
+  },
+  {
+    "name": "CWE416",
+    "version": "0.3",
+    "addresses": [
+      "4198897"
+    ],
+    "tids": [
+      "instr_0x004011f1_1"
+    ],
+    "symbols": [],
+    "other": [
+      [
+        "Accessed ID instr_0x004011d8_2 @ RAX:i64 may have been freed before at instr_0x004011e8_2.",
+        "Relevant callgraph TIDs: [fun_0x004011cb]"
+      ]
+    ],
+    "description": "(Use After Free) Access through a dangling pointer at 4198897"
+  },
+  {
+    "name": "CWE476",
+    "version": "0.3",
+    "addresses": [
+      "4198806",
+      "4198829"
+    ],
+    "tids": [
+      "instr_0x00401196_2",
+      "instr_0x004011ad_1"
+    ],
+    "symbols": [
+      "malloc"
+    ],
+    "other": [],
+    "description": "(NULL Pointer Dereference) There is no check if the return value is NULL at 4198806 (malloc)."
+  },
+  {
+    "name": "CWE476",
+    "version": "0.3",
+    "addresses": [
+      "4198872",
+      "4198888"
+    ],
+    "tids": [
+      "instr_0x004011d8_2",
+      "instr_0x004011e8_2"
+    ],
+    "symbols": [
+      "malloc"
+    ],
+    "other": [],
+    "description": "(NULL Pointer Dereference) There is no check if the return value is NULL at 4198872 (malloc)."
+  },
+  {
+    "name": "CWE476",
+    "version": "0.3",
+    "addresses": [
+      "4198933",
+      "4198946"
+    ],
+    "tids": [
+      "instr_0x00401215_2",
+      "instr_0x00401222_1"
+    ],
+    "symbols": [
+      "malloc"
+    ],
+    "other": [],
+    "description": "(NULL Pointer Dereference) There is no check if the return value is NULL at 4198933 (malloc)."
+  },
+  {
+    "name": "CWE676",
+    "version": "0.1",
+    "addresses": [
+      "4198768"
+    ],
+    "tids": [
+      "instr_0x00401170_2"
+    ],
+    "symbols": [
+      "dangerous_copy"
+    ],
+    "other": [
+      [
+        "dangerous_function",
+        "strcpy"
+      ]
+    ],
+    "description": "(Use of Potentially Dangerous Function) dangerous_copy (4198768) -> strcpy"
+  }
+]
