@@ -70,7 +70,8 @@ class TestNettackerParser(DojoTestCase):
         findings = self.parse("nettacker_many_vuln.json")
         self.assertEqual({"Info"}, {finding.severity for finding in findings})
         for finding in findings:
-            self.assertEqual([], finding.unsaved_vulnerability_ids)
+            # Finding.__init__ sets this to None, so a module naming no CVE leaves it None.
+            self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_a_vulnerability_module_is_medium_and_carries_its_cve(self):
         """
@@ -110,7 +111,8 @@ class TestNettackerParser(DojoTestCase):
         }]))
         finding = list(NettackerParser().get_findings(report, Test()))[0]
         self.assertEqual("Medium", finding.severity)
-        self.assertEqual([], finding.unsaved_vulnerability_ids)
+        # Finding.__init__ sets this to None, so a module naming no CVE leaves it None.
+        self.assertIsNone(finding.unsaved_vulnerability_ids)
 
     def test_an_event_with_no_port_still_gets_an_endpoint(self):
         report = io.StringIO(json.dumps([{

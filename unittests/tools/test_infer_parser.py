@@ -146,7 +146,8 @@ class TestInferParser(DojoTestCase):
     def test_no_cwe(self):
         """Infer reports no CWE, so findings carry none rather than a guessed value."""
         for finding in self.parse("infer_many_vuln.json"):
-            self.assertIsNone(finding.cwe)
+            # Finding.cwe is an IntegerField(default=0), so no CWE reads as 0, not None.
+            self.assertEqual(0, finding.cwe)
 
     def test_empty_report(self):
         self.assertEqual([], list(InferParser().get_findings(io.StringIO("[]"), Test())))

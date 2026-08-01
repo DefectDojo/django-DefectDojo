@@ -34,7 +34,8 @@ class TestDevskimParser(DojoTestCase):
 
         # DevSkim's SARIF carries no CWE taxonomy at all, which is why "DevSkim Scan" is registered
         # in HASHCODE_ALLOWS_NULL_CWE.
-        self.assertIsNone(finding.cwe)
+        # Finding.cwe is an IntegerField(default=0), so a rule with no CWE reads as 0.
+        self.assertEqual(0, finding.cwe)
 
         # DevSkim publishes its rule categories as SARIF result tags.
         self.assertEqual(["Cryptography.BannedHashAlgorithm"], finding.unsaved_tags)
@@ -55,7 +56,8 @@ class TestDevskimParser(DojoTestCase):
         self.assertEqual(7, len(findings))
         for finding in findings:
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            self.assertIsNone(finding.cwe)
+            # Finding.cwe is an IntegerField(default=0), so no CWE reads as 0, not None.
+            self.assertEqual(0, finding.cwe)
 
     def test_many_vuln_rules_and_lines(self):
         """Each rule keeps its own id, file and line across three languages."""

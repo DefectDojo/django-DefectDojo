@@ -37,7 +37,8 @@ class TestCppcheckParser(DojoTestCase):
 
         # Cppcheck's SARIF carries no CWE taxonomy at all, which is why "Cppcheck Scan" is registered in
         # HASHCODE_ALLOWS_NULL_CWE.
-        self.assertIsNone(finding.cwe)
+        # Finding.cwe is an IntegerField(default=0), so a rule with no CWE reads as 0.
+        self.assertEqual(0, finding.cwe)
 
     def test_many_vuln(self):
         """
