@@ -39,7 +39,7 @@ class TestNaabuParser(DojoTestCase):
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertTrue(finding.dynamic_finding)
         self.assertFalse(finding.static_finding)
-        self.assertEqual(1, len(finding.unsaved_endpoints))
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
         self.assertIn("**Port:** 80/tcp", finding.description)
         self.assertIn("**TLS:** no", finding.description)
@@ -70,7 +70,7 @@ class TestNaabuParser(DojoTestCase):
         ))
         for finding in findings:
             self.assertEqual("Info", finding.severity)
-            self.assertEqual(1, len(finding.unsaved_endpoints))
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
     def test_severity_is_info_because_an_open_port_is_an_observation(self):
         """
@@ -88,7 +88,9 @@ class TestNaabuParser(DojoTestCase):
         A bare host would be parsed as a URL path instead of a hostname.
         """
         finding = self.parse("naabu_one_vuln.json")[0]
-        self.assertEqual("//172.29.0.3:80", finding.unsaved_endpoints[0].uri)
+        location = self.get_unsaved_locations(finding)[0]
+        self.assertEqual("172.29.0.3", location.host)
+        self.assertEqual(80, location.port)
 
     def test_a_resolved_hostname_reports_both_names(self):
         """Scanning a hostname makes naabu report the name and the address it resolved to."""
@@ -101,7 +103,9 @@ class TestNaabuParser(DojoTestCase):
         self.assertIn("**Host:** target.example.com", finding.description)
         self.assertIn("**Address:** 203.0.113.10", finding.description)
         self.assertIn("**TLS:** yes", finding.description)
-        self.assertEqual("//target.example.com:443", finding.unsaved_endpoints[0].uri)
+        location = self.get_unsaved_locations(finding)[0]
+        self.assertEqual("target.example.com", location.host)
+        self.assertEqual(443, location.port)
 
     def test_udp_is_not_reported_as_tcp(self):
         report = io.StringIO('{"ip":"203.0.113.10","port":53,"protocol":"udp"}\n')

@@ -1,7 +1,10 @@
 import json
 from urllib.parse import urlparse
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # ffuf reports what it FOUND, not what is wrong. A 200 on /index.html is not a weakness; an exposed
 # /.git or /backup is. The tool cannot tell them apart, so everything imports at Info and triage is by
@@ -60,7 +63,14 @@ class FfufParser:
         if url:
             # A full URL, so from_uri parses it directly - no "//" prefix needed as it is for tools
             # that report a bare hostname.
-            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+            # Finding.__init__ creates unsaved_locations OR unsaved_endpoints depending on
+            # V3_FEATURE_LOCATIONS, and only the matching importer reads it, so the location is
+            # built and attached the way the nmap parser does it.
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [LocationData.url(url=url)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(url)]
         return finding
 
     def path_of(self, url):

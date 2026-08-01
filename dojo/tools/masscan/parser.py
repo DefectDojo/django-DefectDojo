@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # An open port is an observation, not a weakness - whether it should be open is a question about the
 # host, which masscan cannot answer. DefectDojo already treats nmap's open ports as Info, and this
@@ -98,7 +101,14 @@ class MasscanParser:
         if host and port:
             # An open port is a host and port, not a URL, so the endpoint is built from those two.
             # A bare host would otherwise be parsed as a URL path, which is why the "//" is needed.
-            finding.unsaved_endpoints = [Endpoint.from_uri(f"//{host}:{port}")]
+            # An open port is a host and a port, not a URL, so those are passed as fields rather
+            # than parsed out of a string. unsaved_locations and unsaved_endpoints are chosen by
+            # V3_FEATURE_LOCATIONS, as in the nmap parser.
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [LocationData.url(host=host, port=port)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint(host=host, port=port)]
         return finding
 
     def build_description(self, record, port_record, host, port, protocol):

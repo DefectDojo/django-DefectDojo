@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # WhatWeb identifies what a URL is running. That is inventory rather than a weakness, so everything
 # imports at Info - the same treatment ffuf's discovered paths and nmap's open ports get. Disclosed
@@ -65,7 +68,14 @@ class WhatWebParser:
             dynamic_finding=True,
         )
         if target:
-            finding.unsaved_endpoints = [Endpoint.from_uri(target)]
+            # Finding.__init__ creates unsaved_locations OR unsaved_endpoints depending on
+            # V3_FEATURE_LOCATIONS, and only the matching importer reads it, so the location is
+            # built and attached the way the nmap parser does it.
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [LocationData.url(url=target)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(target)]
         return finding
 
     def build_description(self, entry, target, status):

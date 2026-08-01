@@ -1,6 +1,9 @@
 import re
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # gobuster reports paths that EXIST, not paths that are wrong - the same call the ffuf and Dirsearch
 # parsers make. Whether a discovered path matters depends on which path it is.
@@ -85,7 +88,14 @@ class GobusterParser:
         # absolute URL available is a redirect target. An endpoint is set when there is one; otherwise
         # the path alone is not enough to build one.
         if redirect and "://" in redirect:
-            finding.unsaved_endpoints = [Endpoint.from_uri(redirect.strip())]
+            # Finding.__init__ creates unsaved_locations OR unsaved_endpoints depending on
+            # V3_FEATURE_LOCATIONS, and only the matching importer reads it, so the location is
+            # built and attached the way the nmap parser does it.
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [LocationData.url(url=redirect.strip())]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(redirect.strip())]
         return finding
 
     def as_path(self, name):

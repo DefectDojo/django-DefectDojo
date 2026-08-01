@@ -143,7 +143,7 @@ class TestPolarisParser(DojoTestCase):
         finding = list(PolarisParser().get_findings(report, Test()))[0]
         self.assertIsNone(finding.file_path)
         self.assertEqual("payments/Deployment/api", finding.component_name)
-        self.assertEqual([], finding.unsaved_locations)
+        self.assertEqual([], self.get_unsaved_locations(finding))
 
     def test_absent_results_key(self):
         self.assertEqual([], list(PolarisParser().get_findings(io.StringIO("{}"), Test())))
@@ -157,7 +157,7 @@ class TestPolarisParser(DojoTestCase):
     @skip_unless_v3
     def test_locations(self):
         findings = self.parse("polaris_one_vuln.json")
-        locations = findings[0].unsaved_locations
+        locations = findings[0].unsaved_locations  # code locations, V3-only (guarded)
         self.assertEqual(1, len(locations))
         self.assertEqual("code", locations[0].type)
         self.assertEqual("/manifests/single.yaml", locations[0].data["file_path"])

@@ -52,8 +52,10 @@ class TestHttpxParser(DojoTestCase):
         self.assertIn("**Method:** GET", finding.description)
         self.assertIn("**Resolved to:** 172.29.0.2", finding.description)
 
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        self.assertEqual("http://172.29.0.2/", finding.unsaved_endpoints[0].uri)
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+        location = self.get_unsaved_locations(finding)[0]
+        self.assertEqual("172.29.0.2", location.host)
+        self.assertEqual("http", location.protocol)
 
     def test_many_vuln(self):
         findings = self.parse("httpx_many_vuln.json")
@@ -82,9 +84,9 @@ class TestHttpxParser(DojoTestCase):
     def test_every_finding_carries_the_probed_url_as_its_endpoint(self):
         """Httpx reports the full URL it probed, so the endpoint needs no reconstructing."""
         for finding in self.parse("httpx_many_vuln.json"):
-            self.assertEqual(1, len(finding.unsaved_endpoints))
-            self.assertEqual("172.29.0.2", finding.unsaved_endpoints[0].host)
-            self.assertEqual("http", finding.unsaved_endpoints[0].protocol)
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+            self.assertEqual("172.29.0.2", self.get_unsaved_locations(finding)[0].host)
+            self.assertEqual("http", self.get_unsaved_locations(finding)[0].protocol)
 
     def test_a_page_with_no_title_still_imports(self):
         """robots.txt has no title; httpx omits the field rather than sending an empty one."""

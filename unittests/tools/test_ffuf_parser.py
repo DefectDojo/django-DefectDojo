@@ -47,7 +47,7 @@ class TestFfufParser(DojoTestCase):
         This is a DAST-style tool: nothing here is a source position.
         """
         finding = self.parse("ffuf_one_vuln.json")[0]
-        self.assertEqual(1, len(finding.unsaved_endpoints))
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
         self.assertIsNone(getattr(finding, "file_path", None))
         self.assertIsNone(getattr(finding, "line", None))
 
@@ -75,7 +75,7 @@ class TestFfufParser(DojoTestCase):
             sorted(finding.title for finding in findings),
         )
         for finding in findings:
-            self.assertEqual(1, len(finding.unsaved_endpoints))
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
     def test_the_command_line_is_kept_as_evidence(self):
         """
@@ -116,7 +116,7 @@ class TestFfufParser(DojoTestCase):
         report = io.StringIO(json.dumps({"results": [{"input": {"FUZZ": "x"}, "status": 200}]}))
         finding = list(FfufParser().get_findings(report, Test()))[0]
         self.assertEqual("HTTP 200: /", finding.title)
-        self.assertEqual([], finding.unsaved_endpoints)
+        self.assertEqual([], self.get_unsaved_locations(finding))
 
     def test_absent_results_key(self):
         self.assertEqual([], list(FfufParser().get_findings(io.StringIO("{}"), Test())))

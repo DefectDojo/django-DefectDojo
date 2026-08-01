@@ -76,9 +76,9 @@ class TestSqlmapParser(DojoTestCase):
 
         So a log import has no endpoint and a CSV import does, rather than a host being invented.
         """
-        self.assertEqual([], self.parse("sqlmap_one_vuln.log")[0].unsaved_endpoints)
+        self.assertEqual([], self.get_unsaved_locations(self.parse("sqlmap_one_vuln.log")[0]))
 
-        endpoints = self.parse("sqlmap_one_vuln.csv")[0].unsaved_endpoints
+        endpoints = self.get_unsaved_locations(self.parse("sqlmap_one_vuln.csv")[0])
         self.assertEqual(1, len(endpoints))
         self.assertEqual("wave3sqli", endpoints[0].host)
 

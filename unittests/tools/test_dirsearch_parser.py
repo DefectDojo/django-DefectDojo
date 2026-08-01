@@ -35,7 +35,7 @@ class TestDirsearchParser(DojoTestCase):
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertTrue(finding.dynamic_finding)
         self.assertFalse(finding.static_finding)
-        self.assertEqual(1, len(finding.unsaved_endpoints))
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
         self.assertIn("**Status:** 301", finding.description)
         self.assertIn("**Content length:** 169", finding.description)
@@ -71,7 +71,7 @@ class TestDirsearchParser(DojoTestCase):
             sorted(finding.title for finding in findings),
         )
         for finding in findings:
-            self.assertEqual(1, len(finding.unsaved_endpoints))
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
     def test_the_invocation_is_kept_as_evidence(self):
         """The wordlist and status filters decide what counted as a hit."""
@@ -108,7 +108,7 @@ class TestDirsearchParser(DojoTestCase):
         report = io.StringIO(json.dumps({"results": [{"status": 200}]}))
         finding = list(DirsearchParser().get_findings(report, Test()))[0]
         self.assertEqual("HTTP 200: /", finding.title)
-        self.assertEqual([], finding.unsaved_endpoints)
+        self.assertEqual([], self.get_unsaved_locations(finding))
 
     def test_absent_results_key(self):
         self.assertEqual([], list(DirsearchParser().get_findings(io.StringIO("{}"), Test())))

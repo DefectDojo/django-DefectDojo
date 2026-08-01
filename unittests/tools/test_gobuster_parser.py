@@ -67,8 +67,8 @@ class TestGobusterParser(DojoTestCase):
         says so rather than leaving a reader to wonder where the host went.
         """
         findings = self.parse("gobuster_many_vuln.txt")
-        redirecting = [f for f in findings if f.unsaved_endpoints]
-        direct = [f for f in findings if not f.unsaved_endpoints]
+        redirecting = [f for f in findings if self.get_unsaved_locations(f)]
+        direct = [f for f in findings if not self.get_unsaved_locations(f)]
 
         self.assertEqual(3, len(redirecting))  # /.git, /admin, /backup
         self.assertEqual(2, len(direct))       # /robots.txt, /index.html
@@ -78,7 +78,7 @@ class TestGobusterParser(DojoTestCase):
     def test_a_hit_with_no_redirect_has_no_endpoint(self):
         findings = self.parse("gobuster_many_vuln.txt")
         robots = next(f for f in findings if f.title == "HTTP 200: /robots.txt")
-        self.assertEqual([], robots.unsaved_endpoints)
+        self.assertEqual([], self.get_unsaved_locations(robots))
         self.assertNotIn("**Redirects to:**", robots.description)
 
     def test_the_banner_is_not_imported(self):

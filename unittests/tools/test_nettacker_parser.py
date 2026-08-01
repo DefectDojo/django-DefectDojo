@@ -49,8 +49,10 @@ class TestNettackerParser(DojoTestCase):
         self.assertIn("**Port:** 80", finding.description)
         self.assertIn("**Event:** host: wave3target", finding.description)
 
-        self.assertEqual(1, len(finding.unsaved_endpoints))
-        self.assertEqual("//wave3target:80", finding.unsaved_endpoints[0].uri)
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
+        location = self.get_unsaved_locations(finding)[0]
+        self.assertEqual("wave3target", location.host)
+        self.assertEqual(80, location.port)
 
     def test_many_vuln(self):
         findings = self.parse("nettacker_many_vuln.json")
@@ -121,7 +123,9 @@ class TestNettackerParser(DojoTestCase):
         }]))
         finding = list(NettackerParser().get_findings(report, Test()))[0]
         self.assertEqual("subdomain_scan: target.example.com", finding.title)
-        self.assertEqual("//target.example.com", finding.unsaved_endpoints[0].uri)
+        location = self.get_unsaved_locations(finding)[0]
+        self.assertEqual("target.example.com", location.host)
+        self.assertIsNone(location.port)
         self.assertNotIn("**Port:**", finding.description)
 
     def test_the_scan_id_and_date_are_not_in_the_description(self):

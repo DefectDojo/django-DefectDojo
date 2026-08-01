@@ -35,7 +35,7 @@ class TestWhatWebParser(DojoTestCase):
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertTrue(finding.dynamic_finding)
         self.assertFalse(finding.static_finding)
-        self.assertEqual(1, len(finding.unsaved_endpoints))
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
         self.assertIn("**Status:** 200", finding.description)
         self.assertIn("- HTTPServer: string nginx/1.31.3", finding.description)
@@ -109,7 +109,7 @@ class TestWhatWebParser(DojoTestCase):
         report = io.StringIO(json.dumps([{"http_status": 200, "plugins": {}}]))
         finding = list(WhatWebParser().get_findings(report, Test()))[0]
         self.assertEqual("Technologies identified", finding.title)
-        self.assertEqual([], finding.unsaved_endpoints)
+        self.assertEqual([], self.get_unsaved_locations(finding))
 
     def test_entry_without_plugins(self):
         report = io.StringIO(json.dumps([{"target": "http://target.example.com/"}]))

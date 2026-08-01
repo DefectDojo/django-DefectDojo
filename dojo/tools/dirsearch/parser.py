@@ -1,7 +1,10 @@
 import json
 from urllib.parse import urlparse
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # dirsearch reports paths that EXIST, not paths that are wrong. A 200 on /index.html is not a
 # weakness; an exposed /.git is - and dirsearch cannot tell them apart. Everything imports at Info and
@@ -52,7 +55,14 @@ class DirsearchParser:
             dynamic_finding=True,
         )
         if url:
-            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+            # Finding.__init__ creates unsaved_locations OR unsaved_endpoints depending on
+            # V3_FEATURE_LOCATIONS, and only the matching importer reads it, so the location is
+            # built and attached the way the nmap parser does it.
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [LocationData.url(url=url)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(url)]
         return finding
 
     def build_description(self, result, info, url, status):

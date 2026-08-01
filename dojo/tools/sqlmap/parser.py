@@ -2,7 +2,10 @@ import csv
 import io
 import re
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # sqlmap only reports an injection point after it has confirmed the injection works, so this is not a
 # pattern match that might be wrong. Confirmed SQL injection is commonly triaged up to Critical
@@ -156,7 +159,14 @@ class SqlmapParser:
             dynamic_finding=True,
         )
         if url:
-            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+            # Finding.__init__ creates unsaved_locations OR unsaved_endpoints depending on
+            # V3_FEATURE_LOCATIONS, and only the matching importer reads it, so the location is
+            # built and attached the way the nmap parser does it.
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [LocationData.url(url=url)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint.from_uri(url)]
         return finding
 
     def csv_description(self, url, place, parameter, techniques, notes):

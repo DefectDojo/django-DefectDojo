@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # httpx reports what a URL is running and what it answered with. That is inventory rather than a
 # weakness - the same call the WhatWeb parser makes - so everything imports at Info. Disclosed
@@ -74,7 +77,14 @@ class HttpxParser:
             dynamic_finding=True,
         )
         # httpx reports the full URL it probed, so the endpoint needs no reconstructing.
-        finding.unsaved_endpoints = [Endpoint.from_uri(url)]
+        # Finding.__init__ creates unsaved_locations OR unsaved_endpoints depending on
+        # V3_FEATURE_LOCATIONS, and only the matching importer reads it, so the location is
+        # built and attached the way the nmap parser does it.
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations = [LocationData.url(url=url)]
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints = [Endpoint.from_uri(url)]
         return finding
 
     def build_description(self, record, url, status):

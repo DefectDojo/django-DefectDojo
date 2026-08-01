@@ -1,7 +1,10 @@
 import json
 import re
 
+from django.conf import settings
+
 from dojo.models import Endpoint, Finding
+from dojo.tools.locations import LocationData
 
 # Nettacker's report carries no severity field, so any severity here is derived from the module that
 # produced the event. A scan module reports that something exists - a port answers, a path is served -
@@ -85,9 +88,14 @@ class NettackerParser:
         if target:
             # An event is a host and possibly a port, not a URL, so the endpoint is built from those.
             # A bare host would otherwise be parsed as a URL path, which is why the "//" is needed.
-            finding.unsaved_endpoints = [
-                Endpoint.from_uri(f"//{target}:{port}" if port is not None else f"//{target}"),
-            ]
+            # An event is a host and possibly a port, not a URL, so those are passed as fields.
+            # unsaved_locations and unsaved_endpoints are chosen by V3_FEATURE_LOCATIONS, as in
+            # the nmap parser.
+            if settings.V3_FEATURE_LOCATIONS:
+                finding.unsaved_locations = [LocationData.url(host=target, port=port)]
+            else:
+                # TODO: Delete this after the move to Locations
+                finding.unsaved_endpoints = [Endpoint(host=target, port=port)]
         return finding
 
     def cve_from_module(self, module):

@@ -40,7 +40,7 @@ class TestMasscanParser(DojoTestCase):
         self.assertIn(finding.severity, Finding.SEVERITIES)
         self.assertTrue(finding.dynamic_finding)
         self.assertFalse(finding.static_finding)
-        self.assertEqual(1, len(finding.unsaved_endpoints))
+        self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
         self.assertIn("**Host:** 172.29.0.3", finding.description)
         self.assertIn("**Port:** 80/tcp", finding.description)
@@ -55,7 +55,7 @@ class TestMasscanParser(DojoTestCase):
             sorted(int(finding.title.split(": ")[1].split("/")[0]) for finding in findings),
         )
         for finding in findings:
-            self.assertEqual(1, len(finding.unsaved_endpoints))
+            self.assertEqual(1, len(self.get_unsaved_locations(finding)))
 
     def test_severity_is_info_because_an_open_port_is_an_observation(self):
         """
@@ -73,7 +73,9 @@ class TestMasscanParser(DojoTestCase):
         A bare host would be parsed as a URL path instead of a hostname.
         """
         finding = self.parse("masscan_one_vuln.json")[0]
-        self.assertEqual("//172.29.0.3:80", finding.unsaved_endpoints[0].uri)
+        location = self.get_unsaved_locations(finding)[0]
+        self.assertEqual("172.29.0.3", location.host)
+        self.assertEqual(80, location.port)
 
     def test_a_closed_port_is_not_a_finding(self):
         """Masscan reports a closed port when it gets a RST, which is the opposite of a finding."""
