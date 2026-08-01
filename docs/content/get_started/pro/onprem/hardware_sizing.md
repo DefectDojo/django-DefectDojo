@@ -21,8 +21,11 @@ Specs are given as generic vCPU and memory figures so they apply to any cloud pr
 | 500K–1M | ~50–100 | 8 vCPU / 64–96 GB | 2–3 × (8 vCPU / 32 GB) |
 | 1M–5M | ~100–250 | 8–16 vCPU / 96–128 GB | 5–6 × (8 vCPU / 32 GB) |
 | 5M–10M | ~250–500 | 16 vCPU / 128–192 GB | 9–10 × (8 vCPU / 32 GB) |
+| 500M | 500+ | 192 vCPU / 768 GB | 10+ × (8 vCPU / 32 GB) |
 
 Where you land inside a range depends on your workload. Start at the upper end of a range if anything in [What pushes you up a tier](#what-pushes-you-up-a-tier) applies to you.
+
+The 500M row is a reference point at the far end rather than a continuation of the pattern above it, so do not interpolate between it and the 10M tier. A deployment sitting between those two needs to be sized individually. It also assumes work that hardware alone will not do for you, covered in [Very large deployments](#very-large-deployments).
 
 ## How to read these numbers
 
@@ -40,9 +43,13 @@ Kubernetes will spread the load whether you give it a few large nodes or more sm
 
 ## Storage
 
-Plan on 20–30 GB of database storage per million findings. Where you fall in that spread depends on how much you hang off each finding. Long descriptions and large endpoint counts push you toward the top of it.
+Plan on 20–30 GB of database storage per million findings. Where you fall in that spread depends on how much you hang off each finding. Long descriptions and large endpoint counts push you toward the top of it. The finding rows themselves are a small part of this. Most of the space goes to indexes and to the related tables that hang off each finding, so sizing from row data alone will leave you well short.
 
-Even the largest deployment in the table fits inside a few hundred GB of general-purpose SSD. Storage is cheap next to the cost of running out, so provision for where you expect to be in a year rather than where you are now. If your provider offers storage autoscaling, turn it on.
+Every tier through 10M fits inside a few hundred GB of general-purpose SSD. Storage is cheap next to the cost of running out, so provision for where you expect to be in a year rather than where you are now. If your provider offers storage autoscaling, turn it on.
+
+The 500M row is sized at 2.5 TB. That figure assumes the live data set is actively managed, with older findings archived out of the hot path rather than accumulating indefinitely. Applied naively, the per-million rate above would put an unmanaged 500M deployment several times higher. If you are heading toward this scale, treat the archiving strategy as part of the sizing exercise rather than something to sort out later.
+
+Storage at this scale also needs attention to throughput, not only capacity. Once the working set stops fitting in memory, default baseline IOPS on general-purpose volumes becomes the limit well before capacity does.
 
 Media storage is separate and usually much smaller. It holds uploaded artifacts such as screenshots and risk acceptance documents, so size it from your own upload habits.
 
@@ -55,6 +62,16 @@ Finding count is the headline number, but several things will have you sizing up
 - **Reporting and dashboards.** Metrics views and large report generation are read-heavy, and they hit the database harder than day-to-day triage does.
 - **API traffic.** Integrations that poll or pull large result sets add concurrent load that never shows up in your interactive user count.
 - **Retention.** Deployments that keep everything forever grow into the next tier on schedule. Archiving or deleting old data keeps you where you are for longer.
+
+## Very large deployments
+
+Past the 10M tier, hardware stops being the whole answer. Two things change.
+
+The binding constraint moves from reading to writing. Deduplication compares each incoming finding against what you already hold, so the cost of an import grows with the size of the data set behind it. At the top of the table this is usually what you hit first, ahead of anything users notice in the UI. Whatever import volume built a data set that large is generally still running, so you pay that cost continuously rather than once.
+
+The memory figures assume the hot set stays small. A deployment works recent findings and leaves older ones largely untouched, which is what lets a database hold far more data than it has memory and still perform well. If your access pattern is genuinely spread across the whole data set, you will need more memory than the table lists, and past a point no single instance will have enough.
+
+Both of those point at the same work. Partitioning and archiving cold findings out of the live data set matter more at this scale than another increment of vCPU, and heavy reporting belongs on a read replica rather than on the primary. Plan for that alongside the hardware rather than after it, and talk to us before you provision.
 
 ## When in doubt, round up
 
