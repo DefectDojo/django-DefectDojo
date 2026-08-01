@@ -97,9 +97,10 @@
                             <li role="separator" class="divider"></li>
                             {% if "Finding_Add"|has_global_permission %}
                                 <li role="presentation">
-                                    <a href="{% url 'mktemplate' finding.id %}">
+                                    <a href="#" onclick="this.nextElementSibling.submit(); return false;">
                                         <i class="fa-solid fa-copy"></i> Make Finding a Template
                                     </a>
+                                    <form method="post" action="{% url 'mktemplate' finding.id %}">{% csrf_token %}</form>
                                 </li>
                             {% endif %}
 
