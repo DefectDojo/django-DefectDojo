@@ -1849,6 +1849,7 @@ def find_template_to_apply(request, fid):
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     user_has_permission_or_403(request.user, finding, "edit")
+    user_has_global_permission_or_403(request.user, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__.copy()
     # Remove tags and other non-serializable fields
@@ -1937,6 +1938,7 @@ def choose_finding_template_options(request, tid, fid):
 def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
     user_has_permission_or_403(request.user, finding, "edit")
+    user_has_global_permission_or_403(request.user, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
 
     if request.method == "POST":
