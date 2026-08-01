@@ -21,7 +21,7 @@ Specs are given as generic vCPU and memory figures so they apply to any cloud pr
 | 500K–1M | ~50–100 | 8 vCPU / 64–96 GB | 2–3 × (8 vCPU / 32 GB) |
 | 1M–5M | ~100–250 | 8–16 vCPU / 96–128 GB | 5–6 × (8 vCPU / 32 GB) |
 | 5M–10M | ~250–500 | 16–32 vCPU / 128–192 GB | 9–10 × (8 vCPU / 32 GB) |
-| 500M | 500+ | 192 vCPU / 768 GB | 10+ × (8 vCPU / 32 GB) |
+| 500M | 500+ | 192 vCPU / 768 GB+ | 10+ × (8 vCPU / 32 GB) |
 
 Where you land inside a range depends on your workload. Start at the upper end of a range if anything in [What pushes you up a tier](#what-pushes-you-up-a-tier) applies to you.
 
