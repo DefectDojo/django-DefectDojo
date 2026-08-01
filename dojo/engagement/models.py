@@ -115,6 +115,27 @@ class Engagement(BaseModel):
     def get_absolute_url(self):
         return reverse("view_engagement", args=[str(self.id)])
 
+    def pre_save_logic(self) -> None:
+        """
+        Fill in an empty `status` / `engagement_type` from the field's own default.
+
+        Both columns are nullable, but neither offers an empty choice and both declare a
+        default, so an empty value carries no meaning the rest of the codebase can read --
+        filters, reports and the UI all assume one of the listed choices. Django counts
+        None among a field's empty values, so a row storing NULL in either column failed
+        its own validation ("This field cannot be blank.") on every save, which made rows
+        written before these defaults existed permanently unsavable: every (re)import
+        writes its engagement back at the end of a run, so one such row turned every scan
+        ingest into that engagement into a hard failure.
+
+        Normalizing here rather than widening the fields to `blank=True` keeps a value
+        outside the choice list from becoming valid, and lets each affected row heal the
+        next time anything saves it.
+        """
+        for field_name in ("status", "engagement_type"):
+            if not getattr(self, field_name):
+                setattr(self, field_name, self._meta.get_field(field_name).get_default())
+
     def copy(self):
         from dojo.models import Test, copy_model_util  # noqa: PLC0415 -- lazy import, avoids circular dependency
         copy = copy_model_util(self)
