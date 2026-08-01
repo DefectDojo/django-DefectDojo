@@ -21,7 +21,7 @@ Specs are given as generic vCPU and memory figures so they apply to any cloud pr
 | 500K–1M | ~50–100 | 8 vCPU / 64–96 GB | 2–3 × (8 vCPU / 32 GB) |
 | 1M–5M | ~100–250 | 8–16 vCPU / 96–128 GB | 5–6 × (8 vCPU / 32 GB) |
 | 5M–10M | ~250–500 | 16–32 vCPU / 128–192 GB | 9–10 × (8 vCPU / 32 GB) |
-| 500M | 500+ | 192 vCPU / 768 GB+ | 10+ × (8 vCPU / 32 GB) |
+| 500M | 500+ | 192 vCPU / 768 GB+ | 50+ × (8 vCPU / 32 GB) |
 
 Where you land inside a range depends on your workload. Start at the upper end of a range if anything in [What pushes you up a tier](#what-pushes-you-up-a-tier) applies to you.
 
@@ -36,6 +36,8 @@ DefectDojo runs aggregation-heavy queries across your findings. Those stay fast 
 ### Application nodes track users, not findings
 
 The concurrent user figures in the table assume smaller datasets belong to smaller teams. That assumption breaks often. If you hold 200K findings but have 100 people in the UI at once, size the application layer for the users and leave the database where your finding count puts it. The two scale independently.
+
+There is one exception, at the far end of the table. Import and deduplication run on the application tier rather than in the database, so once a data set is large enough for that work to dominate, node count follows ingest volume instead of user count. That is why the 500M row sits well above what its user figure on its own would suggest.
 
 ### Node shape is flexible
 
