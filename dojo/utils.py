@@ -16,8 +16,8 @@ from datetime import date, datetime, timedelta
 from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
+from urllib.parse import urlparse
 
-import bleach
 import crum
 import cvss
 import redis as redis_lib
@@ -51,6 +51,7 @@ from django.http import FileResponse, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, reverse
 from django.utils import timezone
+from django.utils.html import escape, format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from kombu import Connection
@@ -1531,15 +1532,18 @@ def get_current_request():
     return crum.get_current_request()
 
 
+ALLOWED_LINK_SCHEMES = {"http", "https", "mailto"}
+
+
 def create_bleached_link(url, title):
-    link = '<a href="'
-    link += url
-    link += '" target="_blank" title="'
-    link += title
-    link += '">'
-    link += title
-    link += "</a>"
-    return bleach.clean(link, tags={"a"}, attributes={"a": ["href", "target", "title"]})
+    # format_html escapes the values but does not block a javascript:/data: href.
+    scheme = urlparse(url).scheme.lower()
+    if scheme and scheme not in ALLOWED_LINK_SCHEMES:
+        return escape(title)
+    return format_html(
+        '<a href="{}" target="_blank" rel="noopener noreferrer" title="{}">{}</a>',
+        url, title, title,
+    )
 
 
 def get_object_or_none(klass, *args, **kwargs):
