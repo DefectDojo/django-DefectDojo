@@ -1207,6 +1207,13 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Qualys VMDR": ["title", "component_name", "vuln_id_from_tool"],
     "Alert Logic Scan": ["title", "component_name", "vuln_id_from_tool"],
     "PICUS Scan": ["vuln_id_from_tool"],
+    # Package-manager advisory scanners: a finding is identified by the package it affects and
+    # the advisory id, both stable. Composer is the exception - its report names the affected
+    # version RANGE and never the installed version, so there is no version to hash.
+    "Composer Audit Scan": ["component_name", "vuln_id_from_tool"],
+    "pnpm Audit Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "Dotnet Vulnerable Packages Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "Mix Audit Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1351,6 +1358,10 @@ DEDUPE_ALGO_ENDPOINT_FIELDS = ["host", "path"]
 # Key = the scan_type from factory.py (= the test_type)
 # Default is DEDUPE_ALGO_LEGACY
 DEDUPLICATION_ALGORITHM_PER_PARSER = {
+    "Composer Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "pnpm Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Dotnet Vulnerable Packages Scan": DEDUPE_ALGO_HASH_CODE,
+    "Mix Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
