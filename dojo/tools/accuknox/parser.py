@@ -126,11 +126,7 @@ class AccuKnoxParser:
         data = json.load(filename)
         rows = self.extract_rows(data)
 
-        findings = []
-        for row in rows:
-            if isinstance(row, dict):
-                findings.append(self.build_finding(row, test))
-        return findings
+        return [self.build_finding(row, test) for row in rows if isinstance(row, dict)]
 
     def extract_rows(self, data):
         """AccuKnox's findings endpoint pages rows under "results"; a bare array is common too."""
@@ -231,7 +227,8 @@ class AccuKnoxParser:
         finding.risk_accepted = status == STATUS_ACCEPTED_RISK
         finding.duplicate = status == STATUS_DUPLICATE
         finding.active = not (finding.is_mitigated or finding.risk_accepted or finding.duplicate)
-        finding.verified = status != "" and status != STATUS_POTENTIAL
+        # Note a blank status counts as UNVERIFIED here, alongside "potential".
+        finding.verified = status not in {"", STATUS_POTENTIAL}
 
     def title(self, row):
         """
