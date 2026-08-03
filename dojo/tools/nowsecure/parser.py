@@ -259,8 +259,12 @@ class NowSecureParser:
         Static or dynamic, per finding.
 
         One NowSecure assessment runs both analyses of the same app, so the file cannot decide this.
-        An analysis type the connector does not recognise leaves both flags at their default rather
-        than guessing which kind of test ran.
+
+        An analysis type the connector does not recognise leaves both flags alone, which is NOT
+        neutral: DefectDojo's own defaults are static_finding False and dynamic_finding **True**, so
+        such a finding is recorded as dynamic. That is what the connector's findings do too, which is
+        why it is mirrored rather than "corrected" to two Falses - doing that would make a file import
+        and an API sync disagree about the same finding.
         """
         analysis = str(row.get("analysis_type") or "").strip().lower()
         if analysis == ANALYSIS_STATIC:

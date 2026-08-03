@@ -32,10 +32,13 @@ which one found it:
 | --- | --- |
 | `static` | static |
 | `dynamic` | dynamic |
-| anything else | neither flag set |
+| anything else | left to DefectDojo's defaults — which means **dynamic** |
 
-An unrecognised analysis type leaves both flags at their default rather than guessing which kind of
-test ran.
+An unrecognised analysis type leaves both flags alone rather than guessing which kind of test ran. Note
+that is not neutral: DefectDojo defaults `static_finding` to false and `dynamic_finding` to **true**, so
+such a finding is recorded as dynamic. That is also what the connector's findings do, which is why it is
+mirrored rather than forced to two falses — doing that would make a file import and an API sync disagree
+about the same finding.
 
 ### Severity
 

@@ -95,8 +95,10 @@ class TestNowSecureParser(DojoTestCase):
         """
         One assessment runs both analyses of the same app, so the file cannot decide this.
 
-        An analysis type the connector does not recognise leaves both flags at their default rather
-        than guessing which kind of test ran.
+        An analysis type the connector does not recognise leaves both flags alone - which is NOT
+        neutral, because DefectDojo defaults static_finding to False and dynamic_finding to TRUE. Such
+        a finding is therefore recorded as dynamic, exactly as the connector's own findings are.
+        Setting two Falses instead would make a file import and an API sync disagree.
         """
         findings = self.by_uid("nowsecure_many_vuln.json")
 
@@ -110,7 +112,7 @@ class TestNowSecureParser(DojoTestCase):
 
         unknown = findings["nowsecure-debug-symbols-present-in-the-binary"]
         self.assertFalse(unknown.static_finding)
-        self.assertFalse(unknown.dynamic_finding)
+        self.assertTrue(unknown.dynamic_finding)
 
     def test_severity_labels(self):
         for label, expected in (("critical", "Critical"), ("high", "High"), ("medium", "Medium"),
