@@ -1,0 +1,131 @@
+{
+  "program_code": "generic-app",
+  "data": [
+    {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "type": "submission",
+      "attributes": {
+        "title": "Stored XSS in the profile page: reachable via @mention",
+        "severity": 1,
+        "state": "triaged",
+        "submitted_at": "2026-07-28T09:00:00.000Z",
+        "description": "Submitting a crafted display name stores script that runs for other users.",
+        "remediation_advice": "Encode the display name before rendering it.",
+        "bug_url": "https://app.example.com/profile/edit"
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000001"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000002",
+      "type": "submission",
+      "attributes": {
+        "title": "Resolved rate limit issue",
+        "severity": 3,
+        "state": "resolved",
+        "submitted_at": "2026-07-27T10:00:00.000Z",
+        "description": "Login had no rate limit.",
+        "remediation_advice": "Add rate limiting.",
+        "bug_url": "app.example.com/login"
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000002"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "type": "submission",
+      "attributes": {
+        "title": "Could not be reproduced",
+        "severity": 2,
+        "state": "not_reproducible",
+        "submitted_at": "2026-07-26T11:00:00.000Z",
+        "description": "Reported but not reproducible.",
+        "remediation_advice": "",
+        "bug_url": ""
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000003"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000004",
+      "type": "submission",
+      "attributes": {
+        "title": "Reported against an out of scope host",
+        "severity": 4,
+        "state": "out-of-scope",
+        "submitted_at": "2026-07-25T12:00:00.000Z",
+        "description": "Host is not in scope.",
+        "remediation_advice": "",
+        "bug_url": "https://legacy.example.com/"
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000004"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000005",
+      "type": "submission",
+      "attributes": {
+        "title": "Judged not applicable",
+        "severity": 1,
+        "state": "not_applicable",
+        "submitted_at": "2026-07-24T13:00:00.000Z",
+        "description": "Not applicable to this programme.",
+        "remediation_advice": "",
+        "bug_url": ""
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000005"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000006",
+      "type": "submission",
+      "attributes": {
+        "title": "Still being triaged",
+        "severity": 2,
+        "state": "triaging",
+        "submitted_at": "2026-07-23T14:00:00.000Z",
+        "description": "Awaiting triage.",
+        "remediation_advice": "",
+        "bug_url": ""
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000006"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000007",
+      "type": "submission",
+      "attributes": {
+        "title": "Brand new submission",
+        "severity": 3,
+        "state": "new",
+        "submitted_at": "2026-07-22T15:00:00.000Z",
+        "description": "Just arrived.",
+        "remediation_advice": "",
+        "bug_url": ""
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000007"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000008",
+      "type": "submission",
+      "attributes": {
+        "title": "Informational courtesy report",
+        "severity": 5,
+        "state": "informational",
+        "submitted_at": "2026-07-21T16:00:00.000Z",
+        "description": "Just letting you know.",
+        "remediation_advice": "",
+        "bug_url": ""
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000008"}
+    },
+    {
+      "id": "00000000-0000-4000-8000-000000000009",
+      "type": "submission",
+      "attributes": {
+        "title": "Unresolved and open",
+        "severity": 2,
+        "state": "unresolved",
+        "submitted_at": "2026-07-20T17:00:00.000Z",
+        "description": "Confirmed and awaiting a fix.",
+        "remediation_advice": "Patch the endpoint.",
+        "bug_url": "https://api.example.com:8443/v1/orders"
+      },
+      "links": {"self": "/submissions/00000000-0000-4000-8000-000000000009"}
+    }
+  ]
+}
