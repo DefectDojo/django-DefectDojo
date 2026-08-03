@@ -1268,6 +1268,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Elastic Security:Posture - Connectors Import": ["title", "severity", "vuln_id_from_tool"],
     "Elastic Security:Detections - Connectors Import": ["title", "severity", "vuln_id_from_tool"],
     "Action1 Scan": ["title", "severity", "component_name", "component_version"],
+    "Datadog Cloud Security": ["title", "severity", "component_name"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1447,6 +1448,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Elastic Security:Posture - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Elastic Security:Detections - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Action1 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Datadog Cloud Security": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
