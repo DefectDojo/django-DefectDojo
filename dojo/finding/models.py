@@ -557,7 +557,8 @@ class Finding(BaseModel):
 
     @classmethod
     def persisted_title(cls, title: str | None) -> str:
-        """Return a title in the exact form a persisted finding carries.
+        """
+        Return a title in the exact form a persisted finding carries.
 
         The single source of truth for the title transform. Anything that needs to know
         what a title *will* look like once stored -- notably a hash computed before the
@@ -572,7 +573,8 @@ class Finding(BaseModel):
         return titlecase((title or "")[:cls._meta.get_field("title").max_length])
 
     def derive_persisted_fields(self, *, dedupe_option: bool = True, is_new_finding: bool = False) -> None:
-        """Normalize and derive the fields that must hold for any persisted finding.
+        """
+        Normalize and derive the fields that must hold for any persisted finding.
 
         This is the transform ``save()`` applies to a finding's own columns before the row
         is written: title casing/truncation, blank-component normalization, the date
