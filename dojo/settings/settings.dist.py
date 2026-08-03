@@ -1233,6 +1233,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # GitGuardian incident ids are stable, so the connector hashes on the unique id alone. Note this
     # one pairs with the plain hash_code algorithm, not unique_id_from_tool_or_hash_code.
     "GitGuardian - Connectors Import": ["unique_id_from_tool"],
+    "Codacy - Connectors Import": ["title", "severity", "vuln_id_from_tool"],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1387,6 +1388,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "FOSSA - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Endor Labs - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "GitGuardian - Connectors Import": DEDUPE_ALGO_HASH_CODE,
+    "Codacy - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
