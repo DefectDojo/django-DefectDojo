@@ -1261,6 +1261,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "AccuKnox - Connectors Import": ["title", "severity", "description"],
     "Halo Security - Connectors Import": ["title", "severity", "endpoints"],
     "Beagle Security - Connectors Import": ["title", "severity", "endpoints"],
+    "Nightfall AI - Connectors Import": ["title", "severity", "description"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1433,6 +1434,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AccuKnox - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Halo Security - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Beagle Security - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Nightfall AI - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
