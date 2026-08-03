@@ -11,7 +11,7 @@ with `-scan-type` UDP) ports on a host answer, and optionally whether the port s
 | naabu | DefectDojo |
 |---|---|
 | `port`, `protocol`, `host` | `title` |
-| `host` and `port` | an **endpoint**, as `//host:port` |
+| `host` and `port` | an **endpoint** — host and port, no scheme |
 | `host`, `ip`, `port`, `protocol`, `tls`, `timestamp` | `description` |
 | — | `severity`, always Info |
 
@@ -19,8 +19,8 @@ with `-scan-type` UDP) ports on a host answer, and optionally whether the port s
 open is a question about the host, which naabu cannot answer. DefectDojo already treats nmap's open
 ports as Info and this follows that precedent.
 
-The endpoint is built as `//host:port` rather than a URL, because an open port has no scheme. The
-leading `//` matters: without it a bare hostname is parsed as a URL *path* instead of a host.
+The endpoint records the host and the port rather than a URL, because an open port has no scheme.
+Both are set as separate fields, so nothing has to be parsed back out of a string.
 
 Scanning a hostname makes naabu report both the name and the address it resolved to, and both are kept.
 

@@ -19,7 +19,8 @@ ports. Whether a port *should* be open is a question about the host, not somethi
 answer. A port masscan reports as `closed` (it answered with a RST) is the opposite of a finding and
 is not imported.
 
-The endpoint is built as `//host:port`, because an open port has no scheme.
+The endpoint records the host and the port as separate fields, with no scheme — an open port has
+none to record.
 
 Two masscan behaviours the parser accommodates, both covered by tests:
 

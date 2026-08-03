@@ -31,8 +31,8 @@ module saw but never how bad it is, so:
 identifier as a field, so the module name is the only place it can come from. Where one is present it
 becomes the finding's vulnerability id. A `_vuln` module that names no CVE is still reported.
 
-The module name becomes `vuln_id_from_tool`, and the endpoint is built as `//host:port` because an
-event is a host and a port rather than a URL.
+The module name becomes `vuln_id_from_tool`, and the endpoint records the host and the port as
+separate fields rather than a URL, because an event is a host and a port.
 
 A scan where no module produces an event writes an **empty file**, which parses to zero findings —
 that is the ordinary result of scanning a target that answers nothing.
