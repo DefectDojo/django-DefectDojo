@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Universal Parser is only available in DefectDojo Pro.</span>
 
-The Universal Parser is currently in Beta.  See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
+The Universal Parser is on for every DefectDojo Pro instance; there is nothing to enable. See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
 
 ## About Universal Parser
 DefectDojo has a large, regularly updated library of parsers to help security teams ingest data.  However, sometimes users have a tool that's unsupported by the parsers, or they may want to import data into the DefectDojo model differently from the way the parser does.
