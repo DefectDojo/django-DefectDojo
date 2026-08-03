@@ -1274,6 +1274,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Intruder API Import": ["unique_id_from_tool", "title", "severity"],
     "NowSecure": ["title", "severity", "component_name"],
     "Vanta Compliance": ["title", "severity", "component_name"],
+    "Wallarm API Security": ["title", "severity", "component_name"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1459,6 +1460,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Intruder API Import": DEDUPE_ALGO_HASH_CODE,
     "NowSecure": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Vanta Compliance": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Wallarm API Security": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
