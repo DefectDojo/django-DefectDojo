@@ -1214,6 +1214,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "pnpm Audit Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     "Dotnet Vulnerable Packages Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     "Mix Audit Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    # Copied verbatim from the Socket and Lacework blocks in dojo-pro pro_settings.py. These
+    # must agree or a file import and an API sync compute different hash codes for the same
+    # finding and stop deduplicating against each other.
+    "Socket - Connectors Import": ["title", "severity", "component_name"],
+    "Lacework - Connectors Import": ["title", "severity", "component_name"],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1362,6 +1367,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "pnpm Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "Dotnet Vulnerable Packages Scan": DEDUPE_ALGO_HASH_CODE,
     "Mix Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Socket - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Lacework - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
