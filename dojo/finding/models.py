@@ -571,7 +571,7 @@ class Finding(BaseModel):
         """
         return titlecase((title or "")[:cls._meta.get_field("title").max_length])
 
-    def derive_persisted_fields(self, *, dedupe_option: bool = True) -> None:
+    def derive_persisted_fields(self, *, dedupe_option: bool = True, is_new_finding: bool = False) -> None:
         """Normalize and derive the fields that must hold for any persisted finding.
 
         This is the transform ``save()`` applies to a finding's own columns before the row
@@ -640,22 +640,11 @@ class Finding(BaseModel):
 
         self.set_hash_code(dedupe_option)
 
-    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
-        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
-
-        is_new_finding = self.pk is None
-
-        # if not isinstance(self.date, (datetime, date)):
-        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
-
-        if not user:
-            from dojo.utils import get_current_user  # noqa: PLC0415 -- lazy import, avoids circular dependency
-            user = get_current_user()
-        self.derive_persisted_fields(dedupe_option=dedupe_option)
-
         if is_new_finding:
+            # A new finding's static/dynamic flags come from file_path plus the locations
+            # the parser attached, both of which are in memory -- no row required. The
+            # equivalent branch for an *existing* finding queries self.locations/endpoints
+            # and so stays in save().
             if settings.V3_FEATURE_LOCATIONS:
                 if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
                     self.static_finding = True
@@ -669,6 +658,22 @@ class Finding(BaseModel):
             elif (self.file_path is not None):
                 self.static_finding = True
 
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        is_new_finding = self.pk is None
+
+        # if not isinstance(self.date, (datetime, date)):
+        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
+
+        if not user:
+            from dojo.utils import get_current_user  # noqa: PLC0415 -- lazy import, avoids circular dependency
+            user = get_current_user()
+        self.derive_persisted_fields(dedupe_option=dedupe_option, is_new_finding=is_new_finding)
+
+        if is_new_finding:
             # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
             # so we call it manually
             finding_helper.update_finding_status(self, user, changed_fields={"id": (None, None)})
