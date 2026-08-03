@@ -1,0 +1,807 @@
+{
+  "Issues": [
+    {
+      "FromLinter": "exhaustruct",
+      "Text": "http.Transport is missing fields Proxy, OnProxyConnectResponse, DialContext, Dial, DialTLSContext, DialTLS, TLSHandshakeTimeout, DisableKeepAlives, DisableCompression, MaxIdleConns, MaxIdleConnsPerHost, MaxConnsPerHost, IdleConnTimeout, ResponseHeaderTimeout, ExpectContinueTimeout, TLSNextProto, ProxyConnectHeader, GetProxyConnectHeader, MaxResponseHeaderBytes, WriteBufferSize, ReadBufferSize, ForceAttemptHTTP2, HTTP2, Protocols",
+      "Severity": "",
+      "SourceLines": [
+        "\ttr := &http.Transport{"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 622,
+        "Line": 29,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "exhaustruct",
+      "Text": "http.Client is missing fields CheckRedirect, Jar, Timeout",
+      "Severity": "",
+      "SourceLines": [
+        "\treturn &http.Client{Transport: tr}"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 719,
+        "Line": 32,
+        "Column": 10
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "forbidigo",
+      "Text": "use of `fmt.Println` forbidden by pattern `^(fmt\\.Print(|f|ln)|print|println)$`",
+      "Severity": "",
+      "SourceLines": [
+        "\tfmt.Println(apiToken, weakHash([]byte(\"x\")), weakRandom())"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 1335,
+        "Line": 53,
+        "Column": 2
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "forbidigo",
+      "Text": "use of `fmt.Println` forbidden by pattern `^(fmt\\.Print(|f|ln)|print|println)$`",
+      "Severity": "",
+      "SourceLines": [
+        "\tfmt.Println(insecureTLS())"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 1396,
+        "Line": 54,
+        "Column": 2
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "forbidigo",
+      "Text": "use of `fmt.Println` forbidden by pattern `^(fmt\\.Print(|f|ln)|print|println)$`",
+      "Severity": "",
+      "SourceLines": [
+        "\t\tfmt.Println(err)"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 1496,
+        "Line": 56,
+        "Column": 3
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G501: Blocklisted import crypto/md5: weak cryptographic primitive",
+      "Severity": "medium",
+      "SourceLines": [
+        "\t\"crypto/md5\""
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 5,
+        "Column": 2
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G101: Potential hardcoded credentials",
+      "Severity": "high",
+      "SourceLines": [
+        "const apiToken = \"3f8a1c9e7b2d4f6a8c0e1b3d5f7a9c2e\""
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 16,
+        "Column": 7
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G401: Use of weak cryptographic primitive",
+      "Severity": "medium",
+      "SourceLines": [
+        "\th := md5.New() // G401 / G501 weak cryptographic primitive"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 19,
+        "Column": 7
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+      "Severity": "high",
+      "SourceLines": [
+        "\treturn rand.Intn(100) // G404 weak random number generator"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 25,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G402: TLS InsecureSkipVerify set true.",
+      "Severity": "high",
+      "SourceLines": [
+        "\t\tTLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // G402"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 30,
+        "Column": 52
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G304: Potential file inclusion via variable",
+      "Severity": "medium",
+      "SourceLines": [
+        "\treturn os.ReadFile(path) // G304 file inclusion via variable"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 41,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G306: Expect WriteFile permissions to be 0600 or less",
+      "Severity": "medium",
+      "SourceLines": [
+        "\treturn os.WriteFile(path, data, 0o777) // G306 poor file permissions"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 45,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "nlreturn",
+      "Text": "return with no blank line before",
+      "Severity": "",
+      "SourceLines": [
+        "\treturn fmt.Sprintf(\"%x\", h.Sum(nil))"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 445,
+        "Line": 21,
+        "Column": 2
+      },
+      "SuggestedFixes": [
+        {
+          "Message": "",
+          "TextEdits": [
+            {
+              "Pos": 445,
+              "End": 445,
+              "NewText": "Cg=="
+            }
+          ]
+        }
+      ],
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "nlreturn",
+      "Text": "return with no blank line before",
+      "Severity": "",
+      "SourceLines": [
+        "\treturn db.Query(query)"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 893,
+        "Line": 37,
+        "Column": 2
+      },
+      "SuggestedFixes": [
+        {
+          "Message": "",
+          "TextEdits": [
+            {
+              "Pos": 893,
+              "End": 893,
+              "NewText": "Cg=="
+            }
+          ]
+        }
+      ],
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "unused",
+      "Text": "func sqlInjection is unused",
+      "Severity": "",
+      "SourceLines": [
+        "func sqlInjection(db *sql.DB, name string) (*sql.Rows, error) {"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 757,
+        "Line": 35,
+        "Column": 6
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "wrapcheck",
+      "Text": "error returned from external package is unwrapped: sig: func (*os/exec.Cmd).Output() ([]byte, error)",
+      "Severity": "",
+      "SourceLines": [
+        "\treturn exec.Command(\"sh\", \"-c\", userInput).Output() // G204 subprocess with variable"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 1235,
+        "Line": 49,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "wsl",
+      "Text": "if statements should only be cuddled with assignments",
+      "Severity": "",
+      "SourceLines": [
+        "\tif err := writeWorldWritable(\"/tmp/out\", []byte(\"x\")); err != nil {"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 1425,
+        "Line": 55,
+        "Column": 2
+      },
+      "SuggestedFixes": [
+        {
+          "Message": "",
+          "TextEdits": [
+            {
+              "Pos": 1425,
+              "End": 1425,
+              "NewText": "Cg=="
+            }
+          ]
+        }
+      ],
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "wsl",
+      "Text": "if statements should only be cuddled with assignments",
+      "Severity": "",
+      "SourceLines": [
+        "\tif _, err := readAnyFile(\"/etc/hosts\"); err != nil {"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 1519,
+        "Line": 58,
+        "Column": 2
+      },
+      "SuggestedFixes": [
+        {
+          "Message": "",
+          "TextEdits": [
+            {
+              "Pos": 1519,
+              "End": 1519,
+              "NewText": "Cg=="
+            }
+          ]
+        }
+      ],
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "wsl",
+      "Text": "if statements should only be cuddled with assignments",
+      "Severity": "",
+      "SourceLines": [
+        "\tif _, err := runCommand(\"ls\"); err != nil {"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 1598,
+        "Line": 61,
+        "Column": 2
+      },
+      "SuggestedFixes": [
+        {
+          "Message": "",
+          "TextEdits": [
+            {
+              "Pos": 1598,
+              "End": 1598,
+              "NewText": "Cg=="
+            }
+          ]
+        }
+      ],
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    }
+  ],
+  "Report": {
+    "Linters": [
+      {
+        "Name": "asasalint",
+        "Enabled": true
+      },
+      {
+        "Name": "asciicheck",
+        "Enabled": true
+      },
+      {
+        "Name": "bidichk",
+        "Enabled": true
+      },
+      {
+        "Name": "bodyclose",
+        "Enabled": true
+      },
+      {
+        "Name": "canonicalheader",
+        "Enabled": true
+      },
+      {
+        "Name": "containedctx",
+        "Enabled": true
+      },
+      {
+        "Name": "contextcheck",
+        "Enabled": true
+      },
+      {
+        "Name": "copyloopvar",
+        "Enabled": true
+      },
+      {
+        "Name": "cyclop",
+        "Enabled": true
+      },
+      {
+        "Name": "decorder",
+        "Enabled": true
+      },
+      {
+        "Name": "depguard",
+        "Enabled": true
+      },
+      {
+        "Name": "dogsled",
+        "Enabled": true
+      },
+      {
+        "Name": "dupl",
+        "Enabled": true
+      },
+      {
+        "Name": "dupword",
+        "Enabled": true
+      },
+      {
+        "Name": "durationcheck",
+        "Enabled": true
+      },
+      {
+        "Name": "errcheck",
+        "Enabled": true
+      },
+      {
+        "Name": "errchkjson",
+        "Enabled": true
+      },
+      {
+        "Name": "errname",
+        "Enabled": true
+      },
+      {
+        "Name": "errorlint",
+        "Enabled": true
+      },
+      {
+        "Name": "exhaustive",
+        "Enabled": true
+      },
+      {
+        "Name": "exhaustruct",
+        "Enabled": true
+      },
+      {
+        "Name": "exptostd",
+        "Enabled": true
+      },
+      {
+        "Name": "forbidigo",
+        "Enabled": true
+      },
+      {
+        "Name": "forcetypeassert",
+        "Enabled": true
+      },
+      {
+        "Name": "funcorder",
+        "Enabled": true
+      },
+      {
+        "Name": "fatcontext",
+        "Enabled": true
+      },
+      {
+        "Name": "funlen",
+        "Enabled": true
+      },
+      {
+        "Name": "gci"
+      },
+      {
+        "Name": "ginkgolinter",
+        "Enabled": true
+      },
+      {
+        "Name": "gocheckcompilerdirectives",
+        "Enabled": true
+      },
+      {
+        "Name": "gochecknoglobals",
+        "Enabled": true
+      },
+      {
+        "Name": "gochecknoinits",
+        "Enabled": true
+      },
+      {
+        "Name": "gochecksumtype",
+        "Enabled": true
+      },
+      {
+        "Name": "gocognit",
+        "Enabled": true
+      },
+      {
+        "Name": "goconst",
+        "Enabled": true
+      },
+      {
+        "Name": "gocritic",
+        "Enabled": true
+      },
+      {
+        "Name": "gocyclo",
+        "Enabled": true
+      },
+      {
+        "Name": "godot",
+        "Enabled": true
+      },
+      {
+        "Name": "godox",
+        "Enabled": true
+      },
+      {
+        "Name": "err113",
+        "Enabled": true
+      },
+      {
+        "Name": "gofmt"
+      },
+      {
+        "Name": "gofumpt"
+      },
+      {
+        "Name": "golines"
+      },
+      {
+        "Name": "goheader",
+        "Enabled": true
+      },
+      {
+        "Name": "goimports"
+      },
+      {
+        "Name": "mnd",
+        "Enabled": true
+      },
+      {
+        "Name": "gomoddirectives",
+        "Enabled": true
+      },
+      {
+        "Name": "gomodguard",
+        "Enabled": true
+      },
+      {
+        "Name": "goprintffuncname",
+        "Enabled": true
+      },
+      {
+        "Name": "gosec",
+        "Enabled": true
+      },
+      {
+        "Name": "gosmopolitan",
+        "Enabled": true
+      },
+      {
+        "Name": "govet",
+        "Enabled": true
+      },
+      {
+        "Name": "grouper",
+        "Enabled": true
+      },
+      {
+        "Name": "iface",
+        "Enabled": true
+      },
+      {
+        "Name": "importas",
+        "Enabled": true
+      },
+      {
+        "Name": "inamedparam",
+        "Enabled": true
+      },
+      {
+        "Name": "ineffassign",
+        "Enabled": true
+      },
+      {
+        "Name": "interfacebloat",
+        "Enabled": true
+      },
+      {
+        "Name": "intrange",
+        "Enabled": true
+      },
+      {
+        "Name": "ireturn",
+        "Enabled": true
+      },
+      {
+        "Name": "lll",
+        "Enabled": true
+      },
+      {
+        "Name": "loggercheck",
+        "Enabled": true
+      },
+      {
+        "Name": "maintidx",
+        "Enabled": true
+      },
+      {
+        "Name": "makezero",
+        "Enabled": true
+      },
+      {
+        "Name": "mirror",
+        "Enabled": true
+      },
+      {
+        "Name": "misspell",
+        "Enabled": true
+      },
+      {
+        "Name": "musttag",
+        "Enabled": true
+      },
+      {
+        "Name": "nakedret",
+        "Enabled": true
+      },
+      {
+        "Name": "nestif",
+        "Enabled": true
+      },
+      {
+        "Name": "nilerr",
+        "Enabled": true
+      },
+      {
+        "Name": "nilnesserr",
+        "Enabled": true
+      },
+      {
+        "Name": "nilnil",
+        "Enabled": true
+      },
+      {
+        "Name": "nlreturn",
+        "Enabled": true
+      },
+      {
+        "Name": "noctx",
+        "Enabled": true
+      },
+      {
+        "Name": "nonamedreturns",
+        "Enabled": true
+      },
+      {
+        "Name": "nosprintfhostport",
+        "Enabled": true
+      },
+      {
+        "Name": "paralleltest",
+        "Enabled": true
+      },
+      {
+        "Name": "perfsprint",
+        "Enabled": true
+      },
+      {
+        "Name": "prealloc",
+        "Enabled": true
+      },
+      {
+        "Name": "predeclared",
+        "Enabled": true
+      },
+      {
+        "Name": "promlinter",
+        "Enabled": true
+      },
+      {
+        "Name": "protogetter",
+        "Enabled": true
+      },
+      {
+        "Name": "reassign",
+        "Enabled": true
+      },
+      {
+        "Name": "recvcheck",
+        "Enabled": true
+      },
+      {
+        "Name": "revive",
+        "Enabled": true
+      },
+      {
+        "Name": "rowserrcheck",
+        "Enabled": true
+      },
+      {
+        "Name": "sloglint",
+        "Enabled": true
+      },
+      {
+        "Name": "sqlclosecheck",
+        "Enabled": true
+      },
+      {
+        "Name": "spancheck",
+        "Enabled": true
+      },
+      {
+        "Name": "staticcheck",
+        "Enabled": true
+      },
+      {
+        "Name": "tagalign",
+        "Enabled": true
+      },
+      {
+        "Name": "tagliatelle",
+        "Enabled": true
+      },
+      {
+        "Name": "testableexamples",
+        "Enabled": true
+      },
+      {
+        "Name": "testifylint",
+        "Enabled": true
+      },
+      {
+        "Name": "testpackage",
+        "Enabled": true
+      },
+      {
+        "Name": "thelper",
+        "Enabled": true
+      },
+      {
+        "Name": "tparallel",
+        "Enabled": true
+      },
+      {
+        "Name": "typecheck",
+        "Enabled": true
+      },
+      {
+        "Name": "unconvert",
+        "Enabled": true
+      },
+      {
+        "Name": "unparam",
+        "Enabled": true
+      },
+      {
+        "Name": "unused",
+        "Enabled": true
+      },
+      {
+        "Name": "usestdlibvars",
+        "Enabled": true
+      },
+      {
+        "Name": "usetesting",
+        "Enabled": true
+      },
+      {
+        "Name": "varnamelen",
+        "Enabled": true
+      },
+      {
+        "Name": "wastedassign",
+        "Enabled": true
+      },
+      {
+        "Name": "whitespace",
+        "Enabled": true
+      },
+      {
+        "Name": "wrapcheck",
+        "Enabled": true
+      },
+      {
+        "Name": "wsl",
+        "Enabled": true
+      },
+      {
+        "Name": "zerologlint",
+        "Enabled": true
+      },
+      {
+        "Name": "nolintlint",
+        "Enabled": true
+      }
+    ]
+  }
+}

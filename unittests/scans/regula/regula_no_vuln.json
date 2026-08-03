@@ -1,0 +1,1061 @@
+{
+  "rule_results": [
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_cloudtrail.audit",
+      "resource_type": "aws_cloudtrail",
+      "resource_tags": {},
+      "rule_description": "CloudTrail trails should be configured to log management events. Management events provide visibility into management operations that are performed on resources in your AWS account. Management events can also include non-API events that occur in your account. For example, when a user logs in to your account, CloudTrail logs the ConsoleLogin event. CloudTrail logging enables security analysis, resource change tracking, and compliance auditing.",
+      "rule_id": "FG_R00237",
+      "rule_message": "",
+      "rule_name": "tf_aws_cloudtrail_management_events",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00237.html",
+      "rule_result": "PASS",
+      "rule_severity": "Medium",
+      "rule_summary": "CloudTrail trails should be configured to log management events",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 50,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_db_instance.primary",
+      "resource_type": "aws_db_instance",
+      "resource_tags": {},
+      "rule_description": "RDS instances should have FedRAMP approved database engines. FedRAMP-approved database engines such as MySQL and PostgresQL satisfy strict U.S. government requirements for securing sensitive data. An RDS instance should use an approved database engine.",
+      "rule_id": "FG_R00094",
+      "rule_message": "",
+      "rule_name": "tf_aws_rds_instance_engine",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00094.html",
+      "rule_result": "PASS",
+      "rule_severity": "Low",
+      "rule_summary": "RDS instances should have FedRAMP approved database engines",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 39,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.artifacts",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow all actions for all IAM principals and public users. S3 bucket policies - and access control policies in general - should not allow wildcard/all actions, except in very specific administrative situations. Allowing all principals to wildcard access is overly permissive.",
+      "rule_id": "FG_R00210",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowall",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00210.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow all actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.artifacts",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow list actions for all IAM principals and public users. S3 bucket policies list actions enable users to enumerate information on an organization's S3 buckets and objects. Malicious actors may use this information to identify potential targets for hacks. Users should scope list actions only to users and roles that require this information - not all principals.",
+      "rule_id": "FG_R00211",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowlist",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00211.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow list actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group inbound rules should not permit ingress from a public address to all ports and protocols. Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security groups explicitly allow inbound ports.",
+      "rule_id": "FG_R00044",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_inbound_all",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00044.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group inbound rules should not permit ingress from a public address to all ports and protocols",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group inbound rules should not permit ingress from any address to all ports and protocols. Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security groups explicitly allow inbound ports.",
+      "rule_id": "FG_R00350",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_inbound_all_private",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00350.html",
+      "rule_result": "PASS",
+      "rule_severity": "Medium",
+      "rule_summary": "VPC security group inbound rules should not permit ingress from any address to all ports and protocols",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 11214 (Memcached SSL). Removing unfettered connectivity to a Memcached SSL server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00242",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_11214",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00242.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 11214 (Memcached SSL)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 11215 (Memcached SSL). Removing unfettered connectivity to a Memcached SSL server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00243",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_11215",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00243.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 11215 (Memcached SSL)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 135 (MSSQL Debugger). Removing unfettered connectivity to a MSSQL Debugger server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00244",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_135",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00244.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 135 (MSSQL Debugger)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 137 (NetBIOS Name Service). Removing unfettered connectivity to a NetBIOS Name Service server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00245",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_137",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00245.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 137 (NetBIOS Name Service)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 138 (NetBios Datagram Service). Removing unfettered connectivity to a NetBios Datagram Service server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00246",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_138",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00246.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 138 (NetBios Datagram Service)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 139 (NetBios Session Service). Removing unfettered connectivity to a NetBios Session Service server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00247",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_139",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00247.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 139 (NetBios Session Service)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 1433 (MSSQL Server). Removing unfettered connectivity to a MSSQL Server server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00248",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_1433",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00248.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 1433 (MSSQL Server)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 1434 (MSSQL Admin). Removing unfettered connectivity to a MSSQL Admin server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00249",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_1434",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00249.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 1434 (MSSQL Admin)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 23 (Telnet). Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security group allows unrestricted ingress access to port 23. Removing unfettered connectivity to remote console services reduces a server's exposure to risk.",
+      "rule_id": "FG_R00040",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_23",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00040.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 23 (Telnet)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2379 (etcd). Removing unfettered connectivity to an etcd server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00214",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_2379",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00214.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2379 (etcd)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2382 (SQL Server Analysis Services browser). Removing unfettered connectivity to a SQL Server Analysis Services Browser server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00256",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_2382",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00256.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2382 (SQL Server Analysis Services browser)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2383 (SQL Server Analysis Services). Removing unfettered connectivity to a SQL Server Analysis Services server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00257",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_2383",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00257.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2383 (SQL Server Analysis Services)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2484 (Oracle DB SSL). Removing unfettered connectivity to an Oracle DB SSL server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00258",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_2484",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00258.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 2484 (Oracle DB SSL)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 27017 (MongoDB). Removing unfettered connectivity to a MongoDB server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00215",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_27017",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00215.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 27017 (MongoDB)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 27018 (MongoDB). Removing unfettered connectivity to a MongoDB server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00216",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_27018",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00216.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 27018 (MongoDB)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 27019 (MongoDB). Removing unfettered connectivity to a MongoDB server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00217",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_27019",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00217.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 27019 (MongoDB)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 3000 (Ruby on Rails web server). Removing unfettered connectivity to a Ruby on Rails web server reduces its exposure to risk.",
+      "rule_id": "FG_R00259",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_3000",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00259.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 3000 (Ruby on Rails web server)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 3020 (CIFS / SMB). Removing unfettered connectivity to CIFS / SMB ports reduces a server's exposure to risk.",
+      "rule_id": "FG_R00260",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_3020",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00260.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 3020 (CIFS / SMB)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 3306 (MySQL). Removing unfettered connectivity to MySQL ports reduces a server's exposure to risk.",
+      "rule_id": "FG_R00261",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_3306",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00261.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 3306 (MySQL)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [
+        "CIS-AWS_v1.2.0_4.2",
+        "CIS-AWS_v1.3.0_5.2",
+        "CIS-AWS_v1.4.0_5.2"
+      ],
+      "families": [
+        "CIS-AWS_v1.2.0",
+        "CIS-AWS_v1.3.0",
+        "CIS-AWS_v1.4.0"
+      ],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to port 3389 (Remote Desktop Protocol). Removing unfettered connectivity to remote console services, such as Remote Desktop Protocol, reduces a server's exposure to risk.",
+      "rule_id": "FG_R00087",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_3389",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00087.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to port 3389 (Remote Desktop Protocol)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 4505 (SaltStack Master). Removing unfettered connectivity to a SaltStack Master server reduces its exposure to risk.",
+      "rule_id": "FG_R00262",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_4505",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00262.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 4505 (SaltStack Master)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 4506 (SaltStack Master). Removing unfettered connectivity to a SaltStack Master server reduces its exposure to risk.",
+      "rule_id": "FG_R00263",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_4506",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00263.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 4506 (SaltStack Master)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5432 (PostgreSQL). Removing unfettered connectivity to a PostgreSQL server reduces its exposure to risk.",
+      "rule_id": "FG_R00264",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_5432",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00264.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5432 (PostgreSQL)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5500 (Virtual Network Computing). Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security group allows unrestricted ingress access to port 5500. Removing unfettered connectivity to remote console services reduces a server's exposure to risk.",
+      "rule_id": "FG_R00039",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_5500",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00039.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5500 (Virtual Network Computing)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5800 (Virtual Network Computing), unless from ELBs. Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security group allows unrestricted ingress access to port 5800, unless it is from AWS Elastic Load Balancer. Removing unfettered connectivity to remote console services reduces a server's exposure to risk.",
+      "rule_id": "FG_R00038",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_5800",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00038.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5800 (Virtual Network Computing), unless from ELBs",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5900 (Virtual Network Computing). Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security group allows unrestricted ingress access to port 5900. Removing unfettered connectivity to remote console services reduces a server's exposure to risk.",
+      "rule_id": "FG_R00037",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_5900",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00037.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 5900 (Virtual Network Computing)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP port 61621 (Cassandra OpsCenter Agent). Removing unfettered connectivity to a Cassandra OpsCenter Agent server reduces its exposure to risk.",
+      "rule_id": "FG_R00265",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_61621",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00265.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP port 61621 (Cassandra OpsCenter Agent)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP port 636 (LDAP SSL). Removing unfettered connectivity to a LDAP SSL server reduces its exposure to risk.",
+      "rule_id": "FG_R00266",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_636",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00266.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP port 636 (LDAP SSL)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP port 7001 (Cassandra). Removing unfettered connectivity to a Cassandra server reduces its exposure to risk.",
+      "rule_id": "FG_R00267",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_7001",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00267.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP port 7001 (Cassandra)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 80 (HTTP), unless from ELBs. Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security group allow unrestricted ingress access to port 80, unless it is from an AWS Elastic Load Balancer.",
+      "rule_id": "FG_R00041",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_80",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00041.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 80 (HTTP), unless from ELBs",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 8000 (HTTP Alternate). Removing unfettered connectivity to an HTTP Alternate server reduces its exposure to risk.",
+      "rule_id": "FG_R00268",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_8000",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00268.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 8000 (HTTP Alternate)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 9200 (Elasticsearch). Removing unfettered connectivity to an Elasticsearch server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00212",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_9200",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00212.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 9200 (Elasticsearch)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 9300 (Elasticsearch). Removing unfettered connectivity to an Elasticsearch server reduces the chance of exposing critical data.",
+      "rule_id": "FG_R00213",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_9300",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00213.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group rules should not permit ingress from '0.0.0.0/0' to TCP/UDP port 9300 (Elasticsearch)",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group inbound rules should not permit ingress from '0.0.0.0/0' to all ports and protocols. Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security group allows unrestricted ingress access from 0.0.0.0/0 to all ports. Removing unfettered connectivity to remote console services reduces a server's exposure to risk.",
+      "rule_id": "FG_R00045",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_ingress_all",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00045.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group inbound rules should not permit ingress from '0.0.0.0/0' to all ports and protocols",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "filepaths": [
+      "infra/main.tf"
+    ],
+    "rule_results": {
+      "PASS": 40
+    },
+    "severities": {}
+  }
+}

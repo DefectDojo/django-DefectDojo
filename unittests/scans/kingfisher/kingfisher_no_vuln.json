@@ -1,0 +1,55 @@
+{
+  "findings": [],
+  "metadata": {
+    "generated_at": "2026-08-03T04:07:44.315353133+00:00",
+    "scan_timestamp": "2026-08-03T04:07:43.954149662+00:00",
+    "target": "/scan",
+    "command_line_args": [
+      "kingfisher",
+      "scan",
+      "/scan",
+      "--no-validate",
+      "--format",
+      "json",
+      "--confidence",
+      "medium"
+    ],
+    "kingfisher_version": "1.110.0",
+    "latest_version_available": "1.110.0",
+    "update_check_status": "ok",
+    "summary": {
+      "findings": 0,
+      "active_findings": 0,
+      "inactive_findings": 0,
+      "unknown_validation_findings": 0,
+      "access_map_identities": 0,
+      "rules_applied": 1017,
+      "confidence_level": "medium",
+      "custom_rules_used": false,
+      "successful_validations": 0,
+      "failed_validations": 0,
+      "skipped_validations": 0,
+      "blobs_scanned": 3,
+      "bytes_scanned": 328,
+      "scan_duration_seconds": 0.361184369
+    }
+  }
+}
+{
+  "findings": 0,
+  "successful_validations": 0,
+  "failed_validations": 0,
+  "skipped_validations": 0,
+  "rules_applied": 1017,
+  "blobs_scanned": 3,
+  "bytes_scanned": 328,
+  "scan_duration": 0.361247874,
+  "scan_date": "2026-08-03T04:07:43.954149662+00:00",
+  "kingfisher": {
+    "version_used": "1.110.0",
+    "latest_version": "1.110.0",
+    "update_check_status": "ok",
+    "update_check_message": "Kingfisher 1.110.0 is up to date"
+  },
+  "findings_by_rule": []
+}

@@ -1214,6 +1214,13 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "pnpm Audit Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     "Dotnet Vulnerable Packages Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     "Mix Audit Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    # Kingfisher gives every finding a fingerprint, carried as unique_id_from_tool and used as the
+    # primary identity. These are the fallback hash fields; the description is deliberately left
+    # out of them because it carries the entropy figure.
+    "Kingfisher Scan": ["title", "cwe", "file_path", "line"],
+    # Regula's identity is the rule/resource pair, carried as unique_id_from_tool. Line is left out
+    # of the fallback hash fields because moving a resource within a template is not a new finding.
+    "Regula Scan": ["title", "file_path", "component_name"],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1362,6 +1369,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "pnpm Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "Dotnet Vulnerable Packages Scan": DEDUPE_ALGO_HASH_CODE,
     "Mix Audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Kingfisher Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Regula Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,

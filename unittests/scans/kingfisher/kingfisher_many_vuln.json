@@ -1,0 +1,166 @@
+{
+  "findings": [
+    {
+      "rule": {
+        "name": "Generic API Key",
+        "id": "kingfisher.generic.2"
+      },
+      "finding": {
+        "snippet": "AIzaSyFAKEnotreal7fQ3xZ9mK2pR4tY6uI8o",
+        "fingerprint": "9651124012441020779",
+        "confidence": "low",
+        "entropy": "4.89",
+        "validation": {
+          "status": "Not Attempted",
+          "response": ""
+        },
+        "language": "Unknown",
+        "line": 2,
+        "column_start": 15,
+        "column_end": 51,
+        "path": "/scan/deploy.env"
+      }
+    },
+    {
+      "rule": {
+        "name": "AWS Access Key ID",
+        "id": "kingfisher.aws.1"
+      },
+      "finding": {
+        "snippet": "AKIAFAKE7X2LMWV9TDKR",
+        "fingerprint": "1000000000000000001",
+        "confidence": "high",
+        "entropy": "4.50",
+        "validation": {
+          "status": "Active",
+          "response": ""
+        },
+        "language": "Unknown",
+        "line": 3,
+        "column_start": 15,
+        "column_end": 51,
+        "path": "/scan/config.yml"
+      }
+    },
+    {
+      "rule": {
+        "name": "GitHub Personal Access Token",
+        "id": "kingfisher.github.1"
+      },
+      "finding": {
+        "snippet": "ghp_FAKEnotarealtoken7fQ3xZ9mK2pR4tY6uI8oP",
+        "fingerprint": "1000000000000000002",
+        "confidence": "high",
+        "entropy": "4.50",
+        "validation": {
+          "status": "Inactive",
+          "response": ""
+        },
+        "language": "Unknown",
+        "line": 1,
+        "column_start": 15,
+        "column_end": 51,
+        "path": "/scan/deploy.env"
+      }
+    },
+    {
+      "rule": {
+        "name": "Slack Webhook",
+        "id": "kingfisher.slack.1"
+      },
+      "finding": {
+        "snippet": "EXAMPLE-FAKE-WEBHOOK-VALUE-NOT-REAL",
+        "fingerprint": "1000000000000000003",
+        "confidence": "medium",
+        "entropy": "4.50",
+        "validation": {
+          "status": "Unknown",
+          "response": ""
+        },
+        "language": "Unknown",
+        "line": 12,
+        "column_start": 15,
+        "column_end": 51,
+        "path": "/scan/notify.py"
+      }
+    },
+    {
+      "rule": {
+        "name": "Private Key",
+        "id": "kingfisher.pem.1"
+      },
+      "finding": {
+        "snippet": "-----BEGIN RSA PRIVATE KEY-----EXAMPLEFAKEKEY",
+        "fingerprint": "1000000000000000004",
+        "confidence": "low",
+        "entropy": "4.50",
+        "validation": {
+          "status": "Not Attempted",
+          "response": ""
+        },
+        "language": "Unknown",
+        "line": 1,
+        "column_start": 15,
+        "column_end": 51,
+        "path": "/scan/certs/key.pem"
+      }
+    }
+  ],
+  "metadata": {
+    "generated_at": "2026-08-03T04:07:57.231124053+00:00",
+    "scan_timestamp": "2026-08-03T04:07:57.132645393+00:00",
+    "target": "/scan",
+    "command_line_args": [
+      "kingfisher",
+      "scan",
+      "/scan",
+      "--no-validate",
+      "--format",
+      "json",
+      "--confidence",
+      "low"
+    ],
+    "kingfisher_version": "1.110.0",
+    "latest_version_available": "1.110.0",
+    "update_check_status": "ok",
+    "summary": {
+      "findings": 1,
+      "active_findings": 0,
+      "inactive_findings": 0,
+      "unknown_validation_findings": 1,
+      "access_map_identities": 0,
+      "rules_applied": 1051,
+      "confidence_level": "low",
+      "custom_rules_used": false,
+      "successful_validations": 0,
+      "failed_validations": 0,
+      "skipped_validations": 0,
+      "blobs_scanned": 3,
+      "bytes_scanned": 328,
+      "scan_duration_seconds": 0.098114734
+    }
+  }
+}
+{
+  "findings": 1,
+  "successful_validations": 0,
+  "failed_validations": 0,
+  "skipped_validations": 0,
+  "rules_applied": 1051,
+  "blobs_scanned": 3,
+  "bytes_scanned": 328,
+  "scan_duration": 0.098530363,
+  "scan_date": "2026-08-03T04:07:57.132645393+00:00",
+  "kingfisher": {
+    "version_used": "1.110.0",
+    "latest_version": "1.110.0",
+    "update_check_status": "ok",
+    "update_check_message": "Kingfisher 1.110.0 is up to date"
+  },
+  "findings_by_rule": [
+    [
+      "Generic API Key",
+      1
+    ]
+  ]
+}

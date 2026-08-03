@@ -1,0 +1,64 @@
+// Package main is a deliberately insecure sample used to generate parser test fixtures.
+package main
+
+import (
+	"crypto/md5"
+	"crypto/tls"
+	"database/sql"
+	"fmt"
+	"math/rand"
+	"net/http"
+	"os"
+	"os/exec"
+)
+
+// apiToken is a hardcoded credential (gosec G101).
+const apiToken = "3f8a1c9e7b2d4f6a8c0e1b3d5f7a9c2e"
+
+func weakHash(data []byte) string {
+	h := md5.New() // G401 / G501 weak cryptographic primitive
+	h.Write(data)
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func weakRandom() int {
+	return rand.Intn(100) // G404 weak random number generator
+}
+
+func insecureTLS() *http.Client {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // G402
+	}
+	return &http.Client{Transport: tr}
+}
+
+func sqlInjection(db *sql.DB, name string) (*sql.Rows, error) {
+	query := "SELECT id FROM users WHERE name = '" + name + "'" // G201/G202
+	return db.Query(query)
+}
+
+func readAnyFile(path string) ([]byte, error) {
+	return os.ReadFile(path) // G304 file inclusion via variable
+}
+
+func writeWorldWritable(path string, data []byte) error {
+	return os.WriteFile(path, data, 0o777) // G306 poor file permissions
+}
+
+func runCommand(userInput string) ([]byte, error) {
+	return exec.Command("sh", "-c", userInput).Output() // G204 subprocess with variable
+}
+
+func main() {
+	fmt.Println(apiToken, weakHash([]byte("x")), weakRandom())
+	fmt.Println(insecureTLS())
+	if err := writeWorldWritable("/tmp/out", []byte("x")); err != nil {
+		fmt.Println(err)
+	}
+	if _, err := readAnyFile("/etc/hosts"); err != nil {
+		fmt.Println(err)
+	}
+	if _, err := runCommand("ls"); err != nil {
+		fmt.Println(err)
+	}
+}

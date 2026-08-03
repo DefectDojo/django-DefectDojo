@@ -1,0 +1,180 @@
+{
+  "rule_results": [
+    {
+      "controls": [
+        "CIS-AWS_v1.2.0_2.4",
+        "CIS-AWS_v1.3.0_3.4",
+        "CIS-AWS_v1.4.0_3.4"
+      ],
+      "families": [
+        "CIS-AWS_v1.2.0",
+        "CIS-AWS_v1.3.0",
+        "CIS-AWS_v1.4.0"
+      ],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_cloudtrail.audit",
+      "resource_type": "aws_cloudtrail",
+      "resource_tags": {},
+      "rule_description": "CloudTrail trails should have CloudWatch log integration enabled. It is recommended that users configure CloudTrail to send log events to CloudWatch Logs. Users can then create CloudWatch Logs metric filters to search for specific terms such as a user or resource, or create CloudWatch alarms to trigger based on thresholds or anomalous activity.\r\n\r\nNote: CIS recognizes that there are alternative logging solutions instead of CloudWatch Logs. The intent of this recommendation is to capture, monitor, and appropriately alarm on an AWS account.",
+      "rule_id": "FG_R00029",
+      "rule_message": "",
+      "rule_name": "tf_aws_cloudtrail_cloudwatch",
+      "rule_raw_result": false,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00029.html",
+      "rule_result": "FAIL",
+      "rule_severity": "Medium",
+      "rule_summary": "CloudTrail trails should have CloudWatch log integration enabled",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 50,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_cloudtrail.audit",
+      "resource_type": "aws_cloudtrail",
+      "resource_tags": {},
+      "rule_description": "CloudTrail trails should be configured to log management events. Management events provide visibility into management operations that are performed on resources in your AWS account. Management events can also include non-API events that occur in your account. For example, when a user logs in to your account, CloudTrail logs the ConsoleLogin event. CloudTrail logging enables security analysis, resource change tracking, and compliance auditing.",
+      "rule_id": "FG_R00237",
+      "rule_message": "",
+      "rule_name": "tf_aws_cloudtrail_management_events",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00237.html",
+      "rule_result": "PASS",
+      "rule_severity": "Medium",
+      "rule_summary": "CloudTrail trails should be configured to log management events",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 50,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_db_instance.primary",
+      "resource_type": "aws_db_instance",
+      "resource_tags": {},
+      "rule_description": "RDS instances should have FedRAMP approved database engines. FedRAMP-approved database engines such as MySQL and PostgresQL satisfy strict U.S. government requirements for securing sensitive data. An RDS instance should use an approved database engine.",
+      "rule_id": "FG_R00094",
+      "rule_message": "",
+      "rule_name": "tf_aws_rds_instance_engine",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00094.html",
+      "rule_result": "PASS",
+      "rule_severity": "Low",
+      "rule_summary": "RDS instances should have FedRAMP approved database engines",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 39,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.artifacts",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow all actions for all IAM principals and public users. S3 bucket policies - and access control policies in general - should not allow wildcard/all actions, except in very specific administrative situations. Allowing all principals to wildcard access is overly permissive.",
+      "rule_id": "FG_R00210",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowall",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00210.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow all actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_s3_bucket.artifacts",
+      "resource_type": "aws_s3_bucket",
+      "resource_tags": {},
+      "rule_description": "S3 bucket policies should not allow list actions for all IAM principals and public users. S3 bucket policies list actions enable users to enumerate information on an organization's S3 buckets and objects. Malicious actors may use this information to identify potential targets for hacks. Users should scope list actions only to users and roles that require this information - not all principals.",
+      "rule_id": "FG_R00211",
+      "rule_message": "",
+      "rule_name": "tf_aws_s3_bucketpolicy_allowlist",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00211.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "S3 bucket policies should not allow list actions for all IAM principals and public users",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 6,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "controls": [],
+      "families": [],
+      "filepath": "infra/main.tf",
+      "input_type": "tf",
+      "provider": "aws",
+      "resource_id": "aws_security_group.open_ssh",
+      "resource_type": "aws_security_group",
+      "resource_tags": {},
+      "rule_description": "VPC security group inbound rules should not permit ingress from a public address to all ports and protocols. Security groups provide stateful filtering of ingress/egress network traffic to AWS resources. AWS recommends that no security groups explicitly allow inbound ports.",
+      "rule_id": "FG_R00044",
+      "rule_message": "",
+      "rule_name": "tf_aws_security_groups_inbound_all",
+      "rule_raw_result": true,
+      "rule_remediation_doc": "https://docs.fugue.co/FG_R00044.html",
+      "rule_result": "PASS",
+      "rule_severity": "High",
+      "rule_summary": "VPC security group inbound rules should not permit ingress from a public address to all ports and protocols",
+      "source_location": [
+        {
+          "path": "infra/main.tf",
+          "line": 12,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "filepaths": [
+      "infra/main.tf"
+    ],
+    "rule_results": {
+      "FAIL": 1,
+      "PASS": 5
+    },
+    "severities": {
+      "Medium": 1
+    }
+  }
+}

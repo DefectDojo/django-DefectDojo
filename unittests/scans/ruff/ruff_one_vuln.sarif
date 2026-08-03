@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/one/sample.py"
+                },
+                "region": {
+                  "endColumn": 23,
+                  "endLine": 6,
+                  "startColumn": 12,
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Probable use of insecure hash functions in `hashlib`: `md5`"
+          },
+          "ruleId": "S324"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/astral-sh/ruff",
+          "name": "ruff",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for uses of weak or broken cryptographic hash functions in\n`hashlib` and `crypt` libraries.\n\n## Why is this bad?\nWeak or broken cryptographic hash functions may be susceptible to\ncollision attacks (where two different inputs produce the same hash) or\npre-image attacks (where an attacker can find an input that produces a\ngiven hash). This can lead to security vulnerabilities in applications\nthat rely on these hash functions.\n\nAvoid using weak or broken cryptographic hash functions in security\ncontexts. Instead, use a known secure hash function such as SHA256.\n\nNote: This rule targets the following weak algorithm names in `hashlib`:\n`md4`, `md5`, `sha`, and `sha1`. It also flags uses of `crypt.crypt` and\n`crypt.mksalt` when configured with `METHOD_CRYPT`, `METHOD_MD5`, or\n`METHOD_BLOWFISH`.\n\nIt does not attempt to lint OpenSSL- or platform-specific aliases and OIDs\n(for example: `\"sha-1\"`, `\"ssl3-sha1\"`, `\"ssl3-md5\"`, or\n`\"1.3.14.3.2.26\"`), nor variations with trailing spaces, as the set of\naccepted aliases depends on the underlying OpenSSL version and varies across\nplatforms and Python builds.\n\n## Example\n```python\nimport hashlib\n\n\ndef certificate_is_valid(certificate: bytes, known_hash: str) -> bool:\n    hash = hashlib.md5(certificate).hexdigest()\n    return hash == known_hash\n```\n\nUse instead:\n```python\nimport hashlib\n\n\ndef certificate_is_valid(certificate: bytes, known_hash: str) -> bool:\n    hash = hashlib.sha256(certificate).hexdigest()\n    return hash == known_hash\n```\n\nor add `usedforsecurity=False` if the hashing algorithm is not used in a security context, e.g.\nas a non-cryptographic one-way compression function:\n```python\nimport hashlib\n\n\ndef certificate_is_valid(certificate: bytes, known_hash: str) -> bool:\n    hash = hashlib.md5(certificate, usedforsecurity=False).hexdigest()\n    return hash == known_hash\n```\n\n\n## References\n- [Python documentation: `hashlib` — Secure hashes and message digests](https://docs.python.org/3/library/hashlib.html)\n- [Python documentation: `crypt` — Function to check Unix passwords](https://docs.python.org/3/library/crypt.html)\n- [Python documentation: `FIPS` - FIPS compliant hashlib implementation](https://docs.python.org/3/library/hashlib.html#hashlib.algorithms_guaranteed)\n- [Common Weakness Enumeration: CWE-327](https://cwe.mitre.org/data/definitions/327.html)\n- [Common Weakness Enumeration: CWE-328](https://cwe.mitre.org/data/definitions/328.html)\n- [Common Weakness Enumeration: CWE-916](https://cwe.mitre.org/data/definitions/916.html)\n"
+              },
+              "help": {
+                "text": "Probable use of insecure hash functions in `{library}`: `{string}`"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/hashlib-insecure-hash-function",
+              "id": "S324",
+              "properties": {
+                "id": "S324",
+                "kind": "flake8-bandit",
+                "name": "hashlib-insecure-hash-function",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Probable use of insecure hash functions in `{library}`: `{string}`"
+              }
+            }
+          ],
+          "version": "0.16.1"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

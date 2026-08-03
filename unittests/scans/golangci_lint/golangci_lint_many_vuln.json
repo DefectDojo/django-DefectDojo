@@ -1,0 +1,453 @@
+{
+  "Issues": [
+    {
+      "FromLinter": "gosec",
+      "Text": "G501: Blocklisted import crypto/md5: weak cryptographic primitive",
+      "Severity": "medium",
+      "SourceLines": [
+        "\t\"crypto/md5\""
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 5,
+        "Column": 2
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G101: Potential hardcoded credentials",
+      "Severity": "high",
+      "SourceLines": [
+        "const apiToken = \"3f8a1c9e7b2d4f6a8c0e1b3d5f7a9c2e\""
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 16,
+        "Column": 7
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G401: Use of weak cryptographic primitive",
+      "Severity": "medium",
+      "SourceLines": [
+        "\th := md5.New() // G401 / G501 weak cryptographic primitive"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 19,
+        "Column": 7
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G404: Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand)",
+      "Severity": "high",
+      "SourceLines": [
+        "\treturn rand.Intn(100) // G404 weak random number generator"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 25,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G402: TLS InsecureSkipVerify set true.",
+      "Severity": "high",
+      "SourceLines": [
+        "\t\tTLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // G402"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 30,
+        "Column": 52
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G304: Potential file inclusion via variable",
+      "Severity": "medium",
+      "SourceLines": [
+        "\treturn os.ReadFile(path) // G304 file inclusion via variable"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 41,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    },
+    {
+      "FromLinter": "gosec",
+      "Text": "G306: Expect WriteFile permissions to be 0600 or less",
+      "Severity": "medium",
+      "SourceLines": [
+        "\treturn os.WriteFile(path, data, 0o777) // G306 poor file permissions"
+      ],
+      "Pos": {
+        "Filename": "main.go",
+        "Offset": 0,
+        "Line": 45,
+        "Column": 9
+      },
+      "ExpectNoLint": false,
+      "ExpectedNoLintLinter": ""
+    }
+  ],
+  "Report": {
+    "Linters": [
+      {
+        "Name": "asasalint"
+      },
+      {
+        "Name": "asciicheck"
+      },
+      {
+        "Name": "bidichk",
+        "Enabled": true
+      },
+      {
+        "Name": "bodyclose"
+      },
+      {
+        "Name": "canonicalheader"
+      },
+      {
+        "Name": "containedctx"
+      },
+      {
+        "Name": "contextcheck"
+      },
+      {
+        "Name": "copyloopvar"
+      },
+      {
+        "Name": "cyclop"
+      },
+      {
+        "Name": "decorder"
+      },
+      {
+        "Name": "depguard"
+      },
+      {
+        "Name": "dogsled"
+      },
+      {
+        "Name": "dupl"
+      },
+      {
+        "Name": "dupword"
+      },
+      {
+        "Name": "durationcheck"
+      },
+      {
+        "Name": "errcheck"
+      },
+      {
+        "Name": "errchkjson"
+      },
+      {
+        "Name": "errname"
+      },
+      {
+        "Name": "errorlint"
+      },
+      {
+        "Name": "exhaustive"
+      },
+      {
+        "Name": "exhaustruct"
+      },
+      {
+        "Name": "exptostd"
+      },
+      {
+        "Name": "forbidigo"
+      },
+      {
+        "Name": "forcetypeassert"
+      },
+      {
+        "Name": "funcorder"
+      },
+      {
+        "Name": "fatcontext"
+      },
+      {
+        "Name": "funlen"
+      },
+      {
+        "Name": "gci"
+      },
+      {
+        "Name": "ginkgolinter"
+      },
+      {
+        "Name": "gocheckcompilerdirectives"
+      },
+      {
+        "Name": "gochecknoglobals"
+      },
+      {
+        "Name": "gochecknoinits"
+      },
+      {
+        "Name": "gochecksumtype"
+      },
+      {
+        "Name": "gocognit"
+      },
+      {
+        "Name": "goconst"
+      },
+      {
+        "Name": "gocritic"
+      },
+      {
+        "Name": "gocyclo"
+      },
+      {
+        "Name": "godot"
+      },
+      {
+        "Name": "godox"
+      },
+      {
+        "Name": "err113"
+      },
+      {
+        "Name": "gofmt"
+      },
+      {
+        "Name": "gofumpt"
+      },
+      {
+        "Name": "golines"
+      },
+      {
+        "Name": "goheader"
+      },
+      {
+        "Name": "goimports"
+      },
+      {
+        "Name": "mnd"
+      },
+      {
+        "Name": "gomoddirectives"
+      },
+      {
+        "Name": "gomodguard"
+      },
+      {
+        "Name": "goprintffuncname"
+      },
+      {
+        "Name": "gosec",
+        "Enabled": true
+      },
+      {
+        "Name": "gosmopolitan"
+      },
+      {
+        "Name": "govet"
+      },
+      {
+        "Name": "grouper"
+      },
+      {
+        "Name": "iface"
+      },
+      {
+        "Name": "importas"
+      },
+      {
+        "Name": "inamedparam"
+      },
+      {
+        "Name": "ineffassign"
+      },
+      {
+        "Name": "interfacebloat"
+      },
+      {
+        "Name": "intrange"
+      },
+      {
+        "Name": "ireturn"
+      },
+      {
+        "Name": "lll"
+      },
+      {
+        "Name": "loggercheck"
+      },
+      {
+        "Name": "maintidx"
+      },
+      {
+        "Name": "makezero"
+      },
+      {
+        "Name": "mirror"
+      },
+      {
+        "Name": "misspell"
+      },
+      {
+        "Name": "musttag"
+      },
+      {
+        "Name": "nakedret"
+      },
+      {
+        "Name": "nestif"
+      },
+      {
+        "Name": "nilerr"
+      },
+      {
+        "Name": "nilnesserr"
+      },
+      {
+        "Name": "nilnil"
+      },
+      {
+        "Name": "nlreturn"
+      },
+      {
+        "Name": "noctx"
+      },
+      {
+        "Name": "nonamedreturns"
+      },
+      {
+        "Name": "nosprintfhostport"
+      },
+      {
+        "Name": "paralleltest"
+      },
+      {
+        "Name": "perfsprint"
+      },
+      {
+        "Name": "prealloc"
+      },
+      {
+        "Name": "predeclared"
+      },
+      {
+        "Name": "promlinter"
+      },
+      {
+        "Name": "protogetter"
+      },
+      {
+        "Name": "reassign"
+      },
+      {
+        "Name": "recvcheck"
+      },
+      {
+        "Name": "revive"
+      },
+      {
+        "Name": "rowserrcheck"
+      },
+      {
+        "Name": "sloglint"
+      },
+      {
+        "Name": "sqlclosecheck"
+      },
+      {
+        "Name": "spancheck"
+      },
+      {
+        "Name": "staticcheck"
+      },
+      {
+        "Name": "tagalign"
+      },
+      {
+        "Name": "tagliatelle"
+      },
+      {
+        "Name": "testableexamples"
+      },
+      {
+        "Name": "testifylint"
+      },
+      {
+        "Name": "testpackage"
+      },
+      {
+        "Name": "thelper"
+      },
+      {
+        "Name": "tparallel"
+      },
+      {
+        "Name": "typecheck",
+        "Enabled": true
+      },
+      {
+        "Name": "unconvert"
+      },
+      {
+        "Name": "unparam"
+      },
+      {
+        "Name": "unused"
+      },
+      {
+        "Name": "usestdlibvars"
+      },
+      {
+        "Name": "usetesting"
+      },
+      {
+        "Name": "varnamelen"
+      },
+      {
+        "Name": "wastedassign"
+      },
+      {
+        "Name": "whitespace"
+      },
+      {
+        "Name": "wrapcheck"
+      },
+      {
+        "Name": "wsl"
+      },
+      {
+        "Name": "zerologlint"
+      },
+      {
+        "Name": "nolintlint"
+      }
+    ]
+  }
+}

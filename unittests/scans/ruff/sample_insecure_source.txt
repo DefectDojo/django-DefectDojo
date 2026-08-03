@@ -1,0 +1,41 @@
+"""Deliberately insecure sample used to generate a Ruff SARIF fixture."""
+import hashlib
+import pickle
+import random
+import subprocess
+
+import requests
+
+API_TOKEN = "placeholder-not-a-real-secret"
+
+
+def connect(password="placeholder-not-a-real-secret"):
+    return password
+
+
+def weak_digest(data):
+    return hashlib.md5(data).hexdigest()
+
+
+def pick():
+    return random.random()
+
+
+def load(blob):
+    return pickle.loads(blob)
+
+
+def run(user_input):
+    return subprocess.run(user_input, shell=True, check=False)
+
+
+def fetch(url):
+    return requests.get(url, verify=False, timeout=10)
+
+
+def lookup(conn, name):
+    return conn.execute("SELECT * FROM users WHERE name = '" + name + "'")
+
+
+def evaluate(expression):
+    return eval(expression)

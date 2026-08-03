@@ -1,0 +1,388 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 44,
+                  "endLine": 9,
+                  "startColumn": 13,
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Possible hardcoded password assigned to: \"API_TOKEN\""
+          },
+          "ruleId": "S105"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 53,
+                  "endLine": 12,
+                  "startColumn": 22,
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Possible hardcoded password assigned to function default: \"password\""
+          },
+          "ruleId": "S107"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 23,
+                  "endLine": 17,
+                  "startColumn": 12,
+                  "startLine": 17
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Probable use of insecure hash functions in `hashlib`: `md5`"
+          },
+          "ruleId": "S324"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 27,
+                  "endLine": 21,
+                  "startColumn": 12,
+                  "startLine": 21
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Standard pseudo-random generators are not suitable for cryptographic purposes"
+          },
+          "ruleId": "S311"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 30,
+                  "endLine": 25,
+                  "startColumn": 12,
+                  "startLine": 25
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "`pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue"
+          },
+          "ruleId": "S301"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 26,
+                  "endLine": 29,
+                  "startColumn": 12,
+                  "startLine": 29
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "`subprocess` call with `shell=True` identified, security issue"
+          },
+          "ruleId": "S602"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 42,
+                  "endLine": 33,
+                  "startColumn": 30,
+                  "startLine": 33
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Probable use of `requests` call with `verify=False` disabling SSL certificate checks"
+          },
+          "ruleId": "S501"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 74,
+                  "endLine": 37,
+                  "startColumn": 25,
+                  "startLine": 37
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Possible SQL injection vector through string-based query construction"
+          },
+          "ruleId": "S608"
+        },
+        {
+          "level": "error",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///w/many/sample.py"
+                },
+                "region": {
+                  "endColumn": 28,
+                  "endLine": 41,
+                  "startColumn": 12,
+                  "startLine": 41
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Use of possibly insecure function; consider using `ast.literal_eval`"
+          },
+          "ruleId": "S307"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://github.com/astral-sh/ruff",
+          "name": "ruff",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for potential uses of hardcoded passwords in strings.\n\n## Why is this bad?\nIncluding a hardcoded password in source code is a security risk, as an\nattacker could discover the password and use it to gain unauthorized\naccess.\n\nInstead, store passwords and other secrets in configuration files,\nenvironment variables, or other sources that are excluded from version\ncontrol.\n\n## Example\n```python\nSECRET_KEY = \"hunter2\"\n```\n\nUse instead:\n```python\nimport os\n\nSECRET_KEY = os.environ[\"SECRET_KEY\"]\n```\n\n## References\n- [Common Weakness Enumeration: CWE-259](https://cwe.mitre.org/data/definitions/259.html)\n"
+              },
+              "help": {
+                "text": "Possible hardcoded password assigned to: \"{}\""
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/hardcoded-password-string",
+              "id": "S105",
+              "properties": {
+                "id": "S105",
+                "kind": "flake8-bandit",
+                "name": "hardcoded-password-string",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Possible hardcoded password assigned to: \"{}\""
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for potential uses of hardcoded passwords in function argument\ndefaults.\n\n## Why is this bad?\nIncluding a hardcoded password in source code is a security risk, as an\nattacker could discover the password and use it to gain unauthorized\naccess.\n\nInstead, store passwords and other secrets in configuration files,\nenvironment variables, or other sources that are excluded from version\ncontrol.\n\n## Example\n\n```python\ndef connect_to_server(password=\"hunter2\"): ...\n```\n\nUse instead:\n\n```python\nimport os\n\n\ndef connect_to_server(password=os.environ[\"PASSWORD\"]): ...\n```\n\n## References\n- [Common Weakness Enumeration: CWE-259](https://cwe.mitre.org/data/definitions/259.html)\n"
+              },
+              "help": {
+                "text": "Possible hardcoded password assigned to function default: \"{}\""
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/hardcoded-password-default",
+              "id": "S107",
+              "properties": {
+                "id": "S107",
+                "kind": "flake8-bandit",
+                "name": "hardcoded-password-default",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Possible hardcoded password assigned to function default: \"{}\""
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for calls to `pickle` functions or modules that wrap them.\n\n## Why is this bad?\nDeserializing untrusted data with `pickle` and other deserialization\nmodules is insecure as it can allow for the creation of arbitrary objects,\nwhich can then be used to achieve arbitrary code execution and otherwise\nunexpected behavior.\n\nAvoid deserializing untrusted data with `pickle` and other deserialization\nmodules. Instead, consider safer formats, such as JSON.\n\nIf you must deserialize untrusted data with `pickle`, consider signing the\ndata with a secret key and verifying the signature before deserializing the\npayload, This will prevent an attacker from injecting arbitrary objects\ninto the serialized data.\n\nIn [preview], this rule will also flag references to `pickle` functions.\n\n## Example\n```python\nimport pickle\n\nwith open(\"foo.pickle\", \"rb\") as file:\n    foo = pickle.load(file)\n```\n\nUse instead:\n```python\nimport json\n\nwith open(\"foo.json\", \"rb\") as file:\n    foo = json.load(file)\n```\n\n## References\n- [Python documentation: `pickle` — Python object serialization](https://docs.python.org/3/library/pickle.html)\n- [Common Weakness Enumeration: CWE-502](https://cwe.mitre.org/data/definitions/502.html)\n\n[preview]: https://docs.astral.sh/ruff/preview/\n"
+              },
+              "help": {
+                "text": "`pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/suspicious-pickle-usage",
+              "id": "S301",
+              "properties": {
+                "id": "S301",
+                "kind": "flake8-bandit",
+                "name": "suspicious-pickle-usage",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "`pickle` and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for uses of the builtin `eval()` function.\n\n## Why is this bad?\nThe `eval()` function is insecure as it enables arbitrary code execution.\n\nIf you need to evaluate an expression from a string, consider using\n`ast.literal_eval()` instead, which will raise an exception if the\nexpression is not a valid Python literal.\n\nIn [preview], this rule will also flag references to `eval`.\n\n## Example\n```python\nx = eval(input(\"Enter a number: \"))\n```\n\nUse instead:\n```python\nfrom ast import literal_eval\n\nx = literal_eval(input(\"Enter a number: \"))\n```\n\n## References\n- [Python documentation: `eval`](https://docs.python.org/3/library/functions.html#eval)\n- [Python documentation: `literal_eval`](https://docs.python.org/3/library/ast.html#ast.literal_eval)\n- [_Eval really is dangerous_ by Ned Batchelder](https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html)\n\n[preview]: https://docs.astral.sh/ruff/preview/\n"
+              },
+              "help": {
+                "text": "Use of possibly insecure function; consider using `ast.literal_eval`"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/suspicious-eval-usage",
+              "id": "S307",
+              "properties": {
+                "id": "S307",
+                "kind": "flake8-bandit",
+                "name": "suspicious-eval-usage",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Use of possibly insecure function; consider using `ast.literal_eval`"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for uses of cryptographically weak pseudo-random number generators.\n\n## Why is this bad?\nCryptographically weak pseudo-random number generators are insecure, as they\nare easily predictable. This can allow an attacker to guess the generated\nnumbers and compromise the security of the system.\n\nInstead, use a cryptographically secure pseudo-random number generator\n(such as using the [`secrets` module](https://docs.python.org/3/library/secrets.html))\nwhen generating random numbers for security purposes.\n\nIn [preview], this rule will also flag references to these generators.\n\n## Example\n```python\nimport random\n\nrandom.randrange(10)\n```\n\nUse instead:\n```python\nimport secrets\n\nsecrets.randbelow(10)\n```\n\n## References\n- [Python documentation: `random` — Generate pseudo-random numbers](https://docs.python.org/3/library/random.html)\n\n[preview]: https://docs.astral.sh/ruff/preview/\n"
+              },
+              "help": {
+                "text": "Standard pseudo-random generators are not suitable for cryptographic purposes"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/suspicious-non-cryptographic-random-usage",
+              "id": "S311",
+              "properties": {
+                "id": "S311",
+                "kind": "flake8-bandit",
+                "name": "suspicious-non-cryptographic-random-usage",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Standard pseudo-random generators are not suitable for cryptographic purposes"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for uses of weak or broken cryptographic hash functions in\n`hashlib` and `crypt` libraries.\n\n## Why is this bad?\nWeak or broken cryptographic hash functions may be susceptible to\ncollision attacks (where two different inputs produce the same hash) or\npre-image attacks (where an attacker can find an input that produces a\ngiven hash). This can lead to security vulnerabilities in applications\nthat rely on these hash functions.\n\nAvoid using weak or broken cryptographic hash functions in security\ncontexts. Instead, use a known secure hash function such as SHA256.\n\nNote: This rule targets the following weak algorithm names in `hashlib`:\n`md4`, `md5`, `sha`, and `sha1`. It also flags uses of `crypt.crypt` and\n`crypt.mksalt` when configured with `METHOD_CRYPT`, `METHOD_MD5`, or\n`METHOD_BLOWFISH`.\n\nIt does not attempt to lint OpenSSL- or platform-specific aliases and OIDs\n(for example: `\"sha-1\"`, `\"ssl3-sha1\"`, `\"ssl3-md5\"`, or\n`\"1.3.14.3.2.26\"`), nor variations with trailing spaces, as the set of\naccepted aliases depends on the underlying OpenSSL version and varies across\nplatforms and Python builds.\n\n## Example\n```python\nimport hashlib\n\n\ndef certificate_is_valid(certificate: bytes, known_hash: str) -> bool:\n    hash = hashlib.md5(certificate).hexdigest()\n    return hash == known_hash\n```\n\nUse instead:\n```python\nimport hashlib\n\n\ndef certificate_is_valid(certificate: bytes, known_hash: str) -> bool:\n    hash = hashlib.sha256(certificate).hexdigest()\n    return hash == known_hash\n```\n\nor add `usedforsecurity=False` if the hashing algorithm is not used in a security context, e.g.\nas a non-cryptographic one-way compression function:\n```python\nimport hashlib\n\n\ndef certificate_is_valid(certificate: bytes, known_hash: str) -> bool:\n    hash = hashlib.md5(certificate, usedforsecurity=False).hexdigest()\n    return hash == known_hash\n```\n\n\n## References\n- [Python documentation: `hashlib` — Secure hashes and message digests](https://docs.python.org/3/library/hashlib.html)\n- [Python documentation: `crypt` — Function to check Unix passwords](https://docs.python.org/3/library/crypt.html)\n- [Python documentation: `FIPS` - FIPS compliant hashlib implementation](https://docs.python.org/3/library/hashlib.html#hashlib.algorithms_guaranteed)\n- [Common Weakness Enumeration: CWE-327](https://cwe.mitre.org/data/definitions/327.html)\n- [Common Weakness Enumeration: CWE-328](https://cwe.mitre.org/data/definitions/328.html)\n- [Common Weakness Enumeration: CWE-916](https://cwe.mitre.org/data/definitions/916.html)\n"
+              },
+              "help": {
+                "text": "Probable use of insecure hash functions in `{library}`: `{string}`"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/hashlib-insecure-hash-function",
+              "id": "S324",
+              "properties": {
+                "id": "S324",
+                "kind": "flake8-bandit",
+                "name": "hashlib-insecure-hash-function",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Probable use of insecure hash functions in `{library}`: `{string}`"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for HTTPS requests that disable SSL certificate checks.\n\n## Why is this bad?\nIf SSL certificates are not verified, an attacker could perform a \"man in\nthe middle\" attack by intercepting and modifying traffic between the client\nand server.\n\n## Example\n```python\nimport requests\n\nrequests.get(\"https://www.example.com\", verify=False)\n```\n\nUse instead:\n```python\nimport requests\n\nrequests.get(\"https://www.example.com\")  # By default, `verify=True`.\n```\n\n## References\n- [Common Weakness Enumeration: CWE-295](https://cwe.mitre.org/data/definitions/295.html)\n"
+              },
+              "help": {
+                "text": "Probable use of `{string}` call with `verify=False` disabling SSL certificate checks"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/request-with-no-cert-validation",
+              "id": "S501",
+              "properties": {
+                "id": "S501",
+                "kind": "flake8-bandit",
+                "name": "request-with-no-cert-validation",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Probable use of `{string}` call with `verify=False` disabling SSL certificate checks"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nCheck for method calls that initiate a subprocess with a shell.\n\n## Why is this bad?\nStarting a subprocess with a shell can allow attackers to execute arbitrary\nshell commands. Consider starting the process without a shell call and\nsanitize the input to mitigate the risk of shell injection.\n\n## Example\n```python\nimport subprocess\n\nsubprocess.run(\"ls -l\", shell=True)\n```\n\nUse instead:\n```python\nimport subprocess\n\nsubprocess.run([\"ls\", \"-l\"])\n```\n\n## References\n- [Python documentation: `subprocess` — Subprocess management](https://docs.python.org/3/library/subprocess.html)\n- [Common Weakness Enumeration: CWE-78](https://cwe.mitre.org/data/definitions/78.html)\n"
+              },
+              "help": {
+                "text": "`subprocess` call with `shell=True` seems safe, but may be changed in the future; consider rewriting without `shell`"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/subprocess-popen-with-shell-equals-true",
+              "id": "S602",
+              "properties": {
+                "id": "S602",
+                "kind": "flake8-bandit",
+                "name": "subprocess-popen-with-shell-equals-true",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "`subprocess` call with `shell=True` seems safe, but may be changed in the future; consider rewriting without `shell`"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "## What it does\nChecks for strings that resemble SQL statements involved in some form\nstring building operation.\n\n## Why is this bad?\nSQL injection is a common attack vector for web applications. Directly\ninterpolating user input into SQL statements should always be avoided.\nInstead, favor parameterized queries, in which the SQL statement is\nprovided separately from its parameters, as supported by `psycopg3`\nand other database drivers and ORMs.\n\n## Example\n```python\nquery = \"DELETE FROM foo WHERE id = '%s'\" % identifier\n```\n\n## References\n- [B608: Test for SQL injection](https://bandit.readthedocs.io/en/latest/plugins/b608_hardcoded_sql_expressions.html)\n- [psycopg3: Server-side binding](https://www.psycopg.org/psycopg3/docs/basic/from_pg2.html#server-side-binding)\n"
+              },
+              "help": {
+                "text": "Possible SQL injection vector through string-based query construction"
+              },
+              "helpUri": "https://docs.astral.sh/ruff/rules/hardcoded-sql-expression",
+              "id": "S608",
+              "properties": {
+                "id": "S608",
+                "kind": "flake8-bandit",
+                "name": "hardcoded-sql-expression",
+                "problem.severity": "error"
+              },
+              "shortDescription": {
+                "text": "Possible SQL injection vector through string-based query construction"
+              }
+            }
+          ],
+          "version": "0.16.1"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}
