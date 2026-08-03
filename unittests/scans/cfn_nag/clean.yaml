@@ -1,0 +1,8 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A hardened stack for generic-app.
+Resources:
+  ApplicationQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: generic-app-queue
+      KmsMasterKeyId: alias/aws/sqs

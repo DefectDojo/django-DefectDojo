@@ -14,6 +14,8 @@ class Permission_Helper:
         self.delete = kwargs.pop("delete", False)
 
     def display_name(self):
+        if self.name == "cicdinfrastructure":
+            return "CI/CD Infrastructure"
         if self.name == "bannerconf":
             return "Login Banner"
         if self.name == "github conf":
@@ -87,6 +89,7 @@ def get_configuration_permissions_fields():
 
     rules_permissions = []
     return [
+        Permission_Helper(name="cicdinfrastructure", app="dojo", view=True, add=True, change=True, delete=True),
         Permission_Helper(name="development environment", app="dojo", add=True, change=True, delete=True),
         Permission_Helper(name="finding template", app="dojo", view=True, add=True, change=True, delete=True),
         *github_permissions,

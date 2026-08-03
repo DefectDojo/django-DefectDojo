@@ -54,6 +54,7 @@ class TestBurpParser(DojoTestCase):
             self.assertEqual("7340288", findings[0].vuln_id_from_tool)
             self.assertEqual("Cacheable HTTPS response", findings[0].title)
             self.assertEqual(524, findings[0].cwe)
+            self.assertEqual([524, 525], findings[0].unsaved_cwes)
             self.assertEqual("Info", findings[0].severity)
 
     def test_burp_issue4399(self):

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load navigation_tags %}
+{% load authorization_tags %}
+{% block content %}
+    {{ block.super }}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading tight">
+                    <h3 class="has-filters">
+                        CI/CD Infrastructure
+                        <div class="dropdown pull-right">
+                            {% if "dojo.add_cicdinfrastructure"|has_configuration_permission:request %}
+                            <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
+                                    data-toggle="dropdown" aria-expanded="true" aria-label="CI/CD infrastructure options">
+                                <span class="fa-solid fa-server"></span>
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu"
+                                aria-labelledby="dropdownMenu1">
+                                    <li role="presentation">
+                                        <a href="{% url 'add_cicd_infrastructure' %}">
+                                            <i class="fa-solid fa-plus"></i> Add CI/CD Infrastructure
+                                        </a>
+                                    </li>
+                            </ul>
+                            {% endif %}
+                        </div>
+                    </h3>
+                </div>
+            </div>
+            {% if confs %}
+                <div class="panel panel-default table-responsive">
+                    <table id="cicd_infrastructure"
+                           class="tablesorter-bootstrap table table-condensed table-striped">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>URL</th>
+                            <th>Type</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for conf in confs %}
+                            <tr>
+                                <td>
+                                    {% if "dojo.change_cicdinfrastructure"|has_configuration_permission:request %}
+                                        <a href="{% url 'edit_cicd_infrastructure' conf.id %}"><b>{{ conf.name }}</b></a>
+                                    {% else %}
+                                        {{ conf.name }}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if conf.description %}{{ conf.description }}{% endif %}
+                                </td>
+                                <td>
+                                    {% if conf.url %}{{ conf.url }}{% endif %}
+                                </td>
+                                <td>
+                                    {{ conf.get_infrastructure_type_display }}
+                                </td>
+                                <td>
+                                    {% if "dojo.delete_cicdinfrastructure"|has_configuration_permission:request %}
+                                        <a href="{% url 'delete_cicd_infrastructure' conf.id %}" class="btn btn-xs" title="Delete">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-center">No CI/CD infrastructure found.</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -30,7 +30,7 @@ While the integration is disabled, there is no **Jira Instances** entry in the s
 
 ### Enable the integration
 
-1. Navigate to **\<Your Edition\> Settings \> System Settings** from the DefectDojo sidebar.  The menu is named after your license package, so it reads **Pro Settings** on a Pro instance and **Enterprise Settings** on an Enterprise instance.
+1. Navigate to **Settings \> System \> System Settings** from the DefectDojo sidebar. On instances still using the previous menu layout this sits under a group named after your license package — **Pro Settings** or **Enterprise Settings**. See [The Settings Menu](/navigation/pro__settings_menu/).
 ​
 2. In the **Jira Integration Settings** section, check **Enable Jira Integration**.
 ​
