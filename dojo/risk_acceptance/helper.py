@@ -101,8 +101,13 @@ def reinstate(risk_acceptance, old_expiration_date):
     if risk_acceptance.expiration_date_handled:
         logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
-        expiration_delta_days = get_system_setting("risk_acceptance_form_default_days", 90)
-        risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
+        # The "Reinstate" button has no date to offer and passes the expiration date
+        # unchanged, so fall back to the configured default for it. The edit form and
+        # the API only reach this point because the caller supplied a new date, which
+        # is already on the instance — recomputing the default would throw it away.
+        if risk_acceptance.expiration_date == old_expiration_date:
+            expiration_delta_days = get_system_setting("risk_acceptance_form_default_days", 90)
+            risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
 
         reinstated_findings = []
         for finding in risk_acceptance.accepted_findings.all():
