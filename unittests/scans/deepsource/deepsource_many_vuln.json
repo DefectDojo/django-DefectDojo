@@ -1,159 +1,240 @@
 {
-  "run": {
-    "runUid": "00000000-0000-4000-8000-0000000000aa",
-    "commitOid": "abcdef1234567890abcdef1234567890abcdef12",
-    "branchName": "main",
-    "status": "SUCCESS",
-    "createdAt": "2026-06-20T08:00:00Z",
-    "finishedAt": "2026-06-20T08:12:00Z"
-  },
-  "occurrences": [
-    {
-      "id": "occ-0001",
-      "path": "src/generic_app/views.py",
-      "beginLine": 42,
-      "beginColumn": 4,
-      "endLine": 47,
-      "endColumn": 20,
-      "title": "Possible SQL injection through string formatting",
-      "issue": {
-        "shortcode": "PY-A6006",
-        "title": "SQL injection risk",
-        "shortDescription": "Query is built with string formatting instead of parameters.",
-        "category": "SECURITY",
-        "severity": "CRITICAL",
-        "isRecommended": true,
-        "analyzer": {"name": "Python", "shortcode": "python"}
-      }
-    },
-    {
-      "id": "occ-0002",
-      "path": "src/generic_app/utils.py",
-      "beginLine": 10,
-      "endLine": 10,
-      "title": "",
-      "issue": {
-        "shortcode": "PY-W0012",
-        "title": "Mutable default argument",
-        "shortDescription": "A mutable object is used as a default argument value.",
-        "category": "BUG_RISK",
-        "severity": "CRITICAL",
-        "analyzer": {"name": "Python", "shortcode": "python"}
-      }
-    },
-    {
-      "id": "occ-0003",
-      "path": "src/generic_app/models.py",
-      "beginLine": 88,
-      "title": "",
-      "issue": {
-        "shortcode": "PY-D0003",
-        "title": "Missing docstring",
-        "shortDescription": "",
-        "category": "DOCUMENTATION",
-        "severity": "MINOR",
-        "analyzer": {"shortcode": "python"}
-      }
-    },
-    {
-      "id": "occ-0004",
-      "path": "deploy/settings.py",
-      "beginLine": 3,
-      "title": "Hardcoded credential detected",
-      "issue": {
-        "shortcode": "SCRT-0001",
-        "title": "Committed credential",
-        "shortDescription": "A credential appears to be committed to the repository.",
-        "category": "SECURITY",
-        "severity": "MINOR",
-        "analyzer": {"name": "Secrets", "shortcode": "secrets"}
-      }
-    },
-    {
-      "id": "occ-0005",
-      "path": "",
-      "beginLine": 0,
-      "title": "",
-      "issue": {
-        "shortcode": "",
-        "title": "",
-        "category": "SOME_NEW_CATEGORY",
-        "severity": "MAJOR",
-        "analyzer": {}
-      }
-    }
-  ],
-  "vulnerabilities": [
-    {
-      "id": "dep-0001",
-      "reachability": "REACHABLE",
-      "fixability": "FIXABLE",
-      "vulnerability": {
-        "identifier": "CVE-2000-0001",
-        "aliases": ["GHSA-0000-0000-0001", "cve-2000-0001"],
-        "summary": "Remote code execution in generic-lib.",
-        "severity": "CRITICAL",
-        "cvssV3BaseScore": 9.8,
-        "cvssV3Severity": "CRITICAL",
-        "epssScore": 0.0431,
-        "publishedAt": "2026-05-01T00:00:00Z",
-        "fixedVersions": ["1.2.4", "2.0.0"],
-        "referenceUrls": [
-          "https://example.com/advisories/cve-2000-0001",
-          "https://example.com/commit/abcdef1"
+  "data": {
+    "repository": {
+      "id": "UmVwb3NpdG9yeTpnZW5lcmljLWFwcA==",
+      "name": "generic-app",
+      "analysisRuns": {
+        "edges": [
+          {
+            "node": {
+              "runUid": "00000000-0000-4000-8000-0000000000aa",
+              "commitOid": "abcdef1234567890abcdef1234567890abcdef12",
+              "branchName": "main",
+              "status": "SUCCESS",
+              "createdAt": "2026-06-20T08:00:00Z",
+              "finishedAt": "2026-06-20T08:12:00Z"
+            }
+          }
         ]
       },
-      "package": {"name": "generic-lib", "ecosystem": "PYPI"},
-      "packageVersion": {"version": "1.2.3"}
-    },
-    {
-      "id": "dep-0002",
-      "reachability": "UNREACHABLE",
-      "fixability": "UNFIXABLE",
-      "vulnerability": {
-        "identifier": "GHSA-0000-0000-0002",
-        "aliases": [],
-        "summary": "Denial of service in generic-parser.",
-        "severity": "MODERATE",
-        "cvssV3BaseScore": 0,
-        "cvssV3Severity": "",
-        "epssScore": 0,
-        "publishedAt": "not-a-timestamp",
-        "fixedVersions": [],
-        "referenceUrls": []
+      "issueOccurrences": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        },
+        "edges": [
+          {
+            "node": {
+              "id": "occ-0001",
+              "path": "src/generic_app/views.py",
+              "beginLine": 42,
+              "beginColumn": 4,
+              "endLine": 47,
+              "endColumn": 20,
+              "title": "Possible SQL injection through string formatting",
+              "issue": {
+                "shortcode": "PY-A6006",
+                "title": "SQL injection risk",
+                "shortDescription": "Query is built with string formatting instead of parameters.",
+                "category": "SECURITY",
+                "severity": "CRITICAL",
+                "isRecommended": true,
+                "analyzer": {
+                  "name": "Python",
+                  "shortcode": "python"
+                }
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "occ-0002",
+              "path": "src/generic_app/utils.py",
+              "beginLine": 10,
+              "endLine": 10,
+              "title": "",
+              "issue": {
+                "shortcode": "PY-W0012",
+                "title": "Mutable default argument",
+                "shortDescription": "A mutable object is used as a default argument value.",
+                "category": "BUG_RISK",
+                "severity": "CRITICAL",
+                "analyzer": {
+                  "name": "Python",
+                  "shortcode": "python"
+                }
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "occ-0003",
+              "path": "src/generic_app/models.py",
+              "beginLine": 88,
+              "title": "",
+              "issue": {
+                "shortcode": "PY-D0003",
+                "title": "Missing docstring",
+                "shortDescription": "",
+                "category": "DOCUMENTATION",
+                "severity": "MINOR",
+                "analyzer": {
+                  "shortcode": "python"
+                }
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "occ-0004",
+              "path": "deploy/settings.py",
+              "beginLine": 3,
+              "title": "Hardcoded credential detected",
+              "issue": {
+                "shortcode": "SCRT-0001",
+                "title": "Committed credential",
+                "shortDescription": "A credential appears to be committed to the repository.",
+                "category": "SECURITY",
+                "severity": "MINOR",
+                "analyzer": {
+                  "name": "Secrets",
+                  "shortcode": "secrets"
+                }
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "occ-0005",
+              "path": "",
+              "beginLine": 0,
+              "title": "",
+              "issue": {
+                "shortcode": "",
+                "title": "",
+                "category": "SOME_NEW_CATEGORY",
+                "severity": "MAJOR",
+                "analyzer": {}
+              }
+            }
+          }
+        ]
       },
-      "package": {"name": "generic-parser", "ecosystem": "NPM"},
-      "packageVersion": {"version": "3.1.0"}
-    },
-    {
-      "id": "dep-0003",
-      "reachability": "",
-      "fixability": "",
-      "vulnerability": {
-        "identifier": "",
-        "aliases": [],
-        "summary": "An advisory with no identifier at all.",
-        "severity": "not-a-severity",
-        "cvssV3BaseScore": 0,
-        "publishedAt": "2026-05-05T00:00:00Z",
-        "fixedVersions": [],
-        "referenceUrls": []
-      },
-      "package": {"name": "", "ecosystem": ""},
-      "packageVersion": {"version": ""}
-    },
-    {
-      "id": "dep-0004",
-      "vulnerability": {
-        "identifier": "CVE-2000-0004",
-        "summary": "A low-scored advisory.",
-        "cvssV3BaseScore": 2.1,
-        "publishedAt": "2026-05-06T00:00:00Z",
-        "fixedVersions": ["4.0.1"],
-        "referenceUrls": []
-      },
-      "package": {"name": "generic-widget", "ecosystem": "MAVEN"},
-      "packageVersion": {"version": "4.0.0"}
+      "dependencyVulnerabilityOccurrences": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        },
+        "edges": [
+          {
+            "node": {
+              "id": "dep-0001",
+              "reachability": "REACHABLE",
+              "fixability": "FIXABLE",
+              "vulnerability": {
+                "identifier": "CVE-2000-0001",
+                "aliases": [
+                  "GHSA-0000-0000-0001",
+                  "cve-2000-0001"
+                ],
+                "summary": "Remote code execution in generic-lib.",
+                "severity": "CRITICAL",
+                "cvssV3BaseScore": 9.8,
+                "cvssV3Severity": "CRITICAL",
+                "epssScore": 0.0431,
+                "publishedAt": "2026-05-01T00:00:00Z",
+                "fixedVersions": [
+                  "1.2.4",
+                  "2.0.0"
+                ],
+                "referenceUrls": [
+                  "https://example.com/advisories/cve-2000-0001",
+                  "https://example.com/commit/abcdef1"
+                ]
+              },
+              "package": {
+                "name": "generic-lib",
+                "ecosystem": "PYPI"
+              },
+              "packageVersion": {
+                "version": "1.2.3"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "dep-0002",
+              "reachability": "UNREACHABLE",
+              "fixability": "UNFIXABLE",
+              "vulnerability": {
+                "identifier": "GHSA-0000-0000-0002",
+                "aliases": [],
+                "summary": "Denial of service in generic-parser.",
+                "severity": "MODERATE",
+                "cvssV3BaseScore": 0,
+                "cvssV3Severity": "",
+                "epssScore": 0,
+                "publishedAt": "not-a-timestamp",
+                "fixedVersions": [],
+                "referenceUrls": []
+              },
+              "package": {
+                "name": "generic-parser",
+                "ecosystem": "NPM"
+              },
+              "packageVersion": {
+                "version": "3.1.0"
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "dep-0003",
+              "reachability": "",
+              "fixability": "",
+              "vulnerability": {
+                "identifier": "",
+                "aliases": [],
+                "summary": "An advisory with no identifier at all.",
+                "severity": "not-a-severity",
+                "cvssV3BaseScore": 0,
+                "publishedAt": "2026-05-05T00:00:00Z",
+                "fixedVersions": [],
+                "referenceUrls": []
+              },
+              "package": {
+                "name": "",
+                "ecosystem": ""
+              },
+              "packageVersion": {
+                "version": ""
+              }
+            }
+          },
+          {
+            "node": {
+              "id": "dep-0004",
+              "vulnerability": {
+                "identifier": "CVE-2000-0004",
+                "summary": "A low-scored advisory.",
+                "cvssV3BaseScore": 2.1,
+                "publishedAt": "2026-05-06T00:00:00Z",
+                "fixedVersions": [
+                  "4.0.1"
+                ],
+                "referenceUrls": []
+              },
+              "package": {
+                "name": "generic-widget",
+                "ecosystem": "MAVEN"
+              },
+              "packageVersion": {
+                "version": "4.0.0"
+              }
+            }
+          }
+        ]
+      }
     }
-  ]
+  }
 }

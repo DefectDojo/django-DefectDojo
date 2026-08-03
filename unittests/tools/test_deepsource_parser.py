@@ -276,4 +276,38 @@ class TestDeepSourceParser(DojoTestCase):
     def test_an_unexpected_shape_is_rejected_with_a_clear_message(self):
         with self.assertRaises(TypeError) as raised:
             list(DeepSourceParser().get_findings(io.StringIO('"nope"'), Test()))
-        self.assertIn("occurrences", str(raised.exception))
+        self.assertIn("GraphQL", str(raised.exception))
+        self.assertIn("issueOccurrences", str(raised.exception))
+
+    def test_the_input_is_a_saved_graphql_response(self):
+        """
+        DeepSource has NO REST API - everything goes through POST /graphql/.
+
+        So the only file a user can actually produce is a saved GraphQL response, wrapped in
+        data.repository with each connection under edges[].node. An earlier version of this parser
+        read an invented {"occurrences": [...]} envelope, which no DeepSource user could have
+        generated; this test pins the real shape so that cannot regress.
+        """
+        raw = json.loads((get_unit_tests_scans_path("deepsource")
+                          / "deepsource_many_vuln.json").read_text(encoding="utf-8"))
+        repository = raw["data"]["repository"]
+        self.assertIn("issueOccurrences", repository)
+        self.assertIn("dependencyVulnerabilityOccurrences", repository)
+        self.assertIn("analysisRuns", repository)
+        # The findings are behind edges/node, not directly in a list.
+        self.assertNotIsInstance(repository["issueOccurrences"], list)
+        self.assertIn("node", repository["issueOccurrences"]["edges"][0])
+        # And the invented envelope is genuinely absent.
+        self.assertNotIn("occurrences", raw)
+        self.assertNotIn("vulnerabilities", raw)
+
+        # Both connections still import, so the unwrapping works.
+        findings = self.parse("deepsource_many_vuln.json")
+        self.assertEqual(9, len(findings))
+
+    def test_the_data_wrapper_may_be_omitted(self):
+        """Someone may save just the repository object; both forms are accepted."""
+        raw = json.loads((get_unit_tests_scans_path("deepsource")
+                          / "deepsource_one_vuln.json").read_text(encoding="utf-8"))
+        report = io.StringIO(json.dumps({"repository": raw["data"]["repository"]}))
+        self.assertEqual(1, len(list(DeepSourceParser().get_findings(report, Test()))))

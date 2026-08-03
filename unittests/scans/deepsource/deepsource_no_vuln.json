@@ -1,12 +1,36 @@
 {
-  "run": {
-    "runUid": "00000000-0000-4000-8000-0000000000aa",
-    "commitOid": "abcdef1234567890abcdef1234567890abcdef12",
-    "branchName": "main",
-    "status": "SUCCESS",
-    "createdAt": "2026-06-20T08:00:00Z",
-    "finishedAt": "2026-06-20T08:12:00Z"
-  },
-  "occurrences": [],
-  "vulnerabilities": []
+  "data": {
+    "repository": {
+      "id": "UmVwb3NpdG9yeTpnZW5lcmljLWFwcA==",
+      "name": "generic-app",
+      "analysisRuns": {
+        "edges": [
+          {
+            "node": {
+              "runUid": "00000000-0000-4000-8000-0000000000aa",
+              "commitOid": "abcdef1234567890abcdef1234567890abcdef12",
+              "branchName": "main",
+              "status": "SUCCESS",
+              "createdAt": "2026-06-20T08:00:00Z",
+              "finishedAt": "2026-06-20T08:12:00Z"
+            }
+          }
+        ]
+      },
+      "issueOccurrences": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        },
+        "edges": []
+      },
+      "dependencyVulnerabilityOccurrences": {
+        "pageInfo": {
+          "hasNextPage": false,
+          "endCursor": null
+        },
+        "edges": []
+      }
+    }
+  }
 }

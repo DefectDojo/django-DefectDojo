@@ -11,13 +11,34 @@ same data over the API; this parser accepts the same data as a file.
 
 ### File Types
 
-JSON. DeepSource reports two different things, and both are accepted, together or separately:
+JSON — a **saved GraphQL response**. DeepSource has no REST API; everything goes through
+`POST /graphql/`, so the file to upload is whatever that endpoint returned:
 
-- **Analysis issue occurrences** — static issues found in the code, under `occurrences`
-- **Dependency vulnerabilities** — advisories against your dependencies, under `vulnerabilities`
+```
+curl -H "Authorization: Bearer $DEEPSOURCE_TOKEN" -H "Content-Type: application/json"   -d '{"query": "query { repository(login: \"org\", vcsProvider: GITHUB, name: \"repo\") { issueOccurrences(first: 100) { edges { node { id path beginLine endLine title issue { shortcode title shortDescription category severity analyzer { name shortcode } } } } } analysisRuns(first: 1) { edges { node { runUid createdAt finishedAt } } } } }"}'   https://api.deepsource.io/graphql/ > deepsource.json
+```
 
-An `AnalysisRun` under `run` dates the issue findings. A bare array of either shape is accepted too,
-and each entry is classified individually, so a mixed array is not mis-mapped.
+The response is wrapped in `data.repository`, with each collection behind a GraphQL
+connection (`edges[].node`):
+
+```json
+{"data": {"repository": {
+  "analysisRuns": {"edges": [{"node": {"runUid": "...", "finishedAt": "..."}}]},
+  "issueOccurrences": {"edges": [{"node": {"id": "...", "path": "...", "issue": {...}}}]},
+  "dependencyVulnerabilityOccurrences": {"edges": [{"node": {...}}]}}}}
+```
+
+Both of DeepSource's queries return that same repository envelope, so one file may carry
+**issue occurrences**, **dependency vulnerabilities**, or both. The `data` wrapper may be omitted if
+you saved just the repository object.
+
+DeepSource reports two different things and they are mapped differently:
+
+- **Analysis issue occurrences** (`issueOccurrences`) — static issues found in the code
+- **Dependency vulnerabilities** (`dependencyVulnerabilityOccurrences`) — advisories against your
+  dependencies
+
+The latest `analysisRuns` entry dates the issue findings.
 
 ### Severity: two ladders, because the category decides
 
@@ -63,9 +84,11 @@ Identity is the occurrence or vulnerability id, carried as `unique_id_from_tool`
 
 Sample DeepSource scans can be found [here](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/deepsource).
 
-The samples are constructed from DeepSource's documented issue-occurrence and dependency-vulnerability
-schemas, covering both severity ladders, the secrets-analyzer override and both scored and unscored
-advisories, with generic file paths and placeholder advisory identifiers.
+The samples are real GraphQL response envelopes — `data.repository` with `edges[]`/`node` connections —
+built from DeepSource's documented schema. They cover both severity ladders, the secrets-analyzer
+override, and both scored and unscored advisories, with generic file paths and placeholder advisory
+identifiers. A test pins the envelope shape, because an earlier draft of this parser read an invented
+flat `{"occurrences": [...]}` structure that no DeepSource user could have produced.
 
 ### Default Deduplication Hashcode Fields
 

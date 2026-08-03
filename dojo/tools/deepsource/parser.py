@@ -134,11 +134,28 @@ class DeepSourceParser:
 
     def extract(self, data):
         """
-        Split an export into its issue occurrences and its dependency vulnerabilities.
+        Split a DeepSource GraphQL response into occurrences, vulnerabilities and the analysis run.
 
-        A bare array is treated as occurrences unless the entries look like vulnerabilities, which is
-        decided per entry rather than for the file as a whole.
+        DeepSource has no REST API - everything goes through POST /graphql/ - so the file a user can
+        actually produce is a saved GraphQL response:
+
+            {"data": {"repository": {
+                "analysisRuns": {"edges": [{"node": {...}}]},
+                "issueOccurrences": {"edges": [{"node": {...}}]},
+                "dependencyVulnerabilityOccurrences": {"edges": [{"node": {...}}]}}}}
+
+        Both queries return the same repository envelope, so one file may carry either connection or
+        both. The edges/node wrapping is unwrapped here.
         """
+        repository = self.repository(data)
+        if repository is not None:
+            occurrences = self.nodes(repository.get("issueOccurrences"))
+            vulnerabilities = self.nodes(repository.get("dependencyVulnerabilityOccurrences"))
+            runs = self.nodes(repository.get("analysisRuns"))
+            run = runs[0] if runs else None
+            return occurrences, vulnerabilities, run
+
+        # Convenience shapes, for anyone who has already unwrapped the response themselves.
         if isinstance(data, list):
             occurrences = [row for row in data if not self.looks_like_vulnerability(row)]
             vulnerabilities = [row for row in data if self.looks_like_vulnerability(row)]
@@ -156,10 +173,39 @@ class DeepSourceParser:
                 return occurrences, vulnerabilities, run
 
         msg = (
-            "A DeepSource export is a JSON object with an 'occurrences' or 'vulnerabilities' list, "
-            f"or a bare array of either; got {type(data).__name__}."
+            "A DeepSource export is a saved GraphQL response with data.repository containing "
+            "issueOccurrences or dependencyVulnerabilityOccurrences; got "
+            f"{type(data).__name__}."
         )
         raise TypeError(msg)
+
+    def repository(self, data):
+        """
+        Find the repository object in a GraphQL response, whether or not the "data" wrapper is kept.
+
+        Returns None when this is not a GraphQL response at all, so the caller can try the
+        convenience shapes.
+        """
+        if not isinstance(data, dict):
+            return None
+        for candidate in (data.get("data"), data):
+            if isinstance(candidate, dict):
+                repository = candidate.get("repository")
+                if isinstance(repository, dict):
+                    return repository
+        return None
+
+    def nodes(self, connection):
+        """Unwrap a GraphQL connection's edges into a plain list of nodes."""
+        if not isinstance(connection, dict):
+            return []
+        edges = connection.get("edges")
+        if not isinstance(edges, list):
+            return []
+        return [
+            edge["node"] for edge in edges
+            if isinstance(edge, dict) and isinstance(edge.get("node"), dict)
+        ]
 
     def first_list(self, data, keys):
         """Return the first list found under these keys, and whether any of them was present."""
