@@ -122,6 +122,17 @@ Risk Acceptance visibility is **gated by a distinct minimum permission from Find
 
 For the complete role-permission chart that lists Risk Acceptance permissions alongside other Asset-level actions, see [Action permission charts](/admin/user_management/user_permission_chart/#role-permission-chart).
 
+## Expiring and Reinstating a Risk Acceptance
+
+A Risk Acceptance that has expired is labelled **Expired** next to its expiration date in the Risk Acceptances table, so you can tell at a glance which ones are no longer suppressing their Findings.
+
+The gear menu on a Risk Acceptance — in the table or on its detail page — offers whichever of these applies:
+
+- **Expire Risk Acceptance**, on one that is still live.  It expires immediately rather than waiting for its expiration date, and its Findings are reactivated according to its **Reactivate Expired Findings** and **Restart SLA Expired** settings.
+- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.
+
+Both require the same permission as editing the Risk Acceptance, and both ask for confirmation first.  To reinstate for a specific length of time instead of the default window, edit the expiration date rather than using the Reinstate action — see below.
+
 ## When a Risk Acceptance Expiration Date is Changed
 
 A Risk Acceptance's expiration date can be edited at any time after creation.  How DefectDojo responds depends on whether the Risk Acceptance is currently active or has already expired.
