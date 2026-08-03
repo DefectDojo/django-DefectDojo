@@ -1235,6 +1235,19 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "GitGuardian - Connectors Import": ["unique_id_from_tool"],
     "Codacy - Connectors Import": ["title", "severity", "vuln_id_from_tool"],
     "DeepSource - Connectors Import": ["title", "severity", "file_path"],
+    # Probely does not follow the "<Vendor> - Connectors Import" naming. Note this block pairs
+    # the plain hash_code algorithm with a wide field set that includes endpoints, so the
+    # endpoint must be populated for the hash to mean anything.
+    "Probely API Import": [
+        "title",
+        "description",
+        "severity",
+        "vuln_id_from_tool",
+        "unique_id_from_tool",
+        "endpoints",
+        "cwe",
+        "mitigation",
+    ],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1391,6 +1404,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "GitGuardian - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Codacy - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "DeepSource - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Probely API Import": DEDUPE_ALGO_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
