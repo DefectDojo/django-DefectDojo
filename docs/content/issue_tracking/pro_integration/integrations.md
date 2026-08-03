@@ -5,9 +5,7 @@ audience: pro
 aliases:
   - /en/share_your_findings/integrations
 ---
-**Availability:** Integrations is currently in **Beta** and is only available for **Cloud-hosted** DefectDojo Pro instances. On-premise deployments do not yet have the required infrastructure to support Integrations. If you are an on-premise customer interested in this feature, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for updates on availability.
-
-**Enabling Integrations:** On a Cloud instance, a superuser can turn Integrations on from **Settings > Feature Flags**, where it is listed as **Downstream Connections**. See [Feature Flags](/admin/feature_flags/pro__feature_flags/). On an on-premise instance it is shown as **Unavailable on This Deployment**.
+**Availability:** Integrations are generally available and on for every DefectDojo Pro instance, both Cloud and On-Premise. There is nothing to enable, and they are no longer listed on the Feature Flags page.
 
 DefectDojo Pro's Integrations let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 
