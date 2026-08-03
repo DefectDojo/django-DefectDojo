@@ -1,5 +1,4 @@
 import logging
-from contextlib import suppress
 
 import pghistory
 from dateutil.relativedelta import relativedelta
@@ -35,6 +34,26 @@ def default_expiration_date():
     return timezone.now() + relativedelta(days=expiration_days())
 
 
+def engagement_for(risk_acceptance: Risk_Acceptance) -> Engagement | None:
+    """
+    Return an engagement this risk acceptance can be reached through, or None.
+
+    Prefers the `Engagement.risk_acceptance` link and falls back to the engagement of an
+    accepted finding, which is the same derivation `RiskAcceptanceSerializer` uses to attach
+    an engagement on create and to repair an orphan on update.
+    """
+    engagement = risk_acceptance.engagement
+    if engagement is not None:
+        return engagement
+
+    # iterate rather than .first(), to reuse the accepted_findings prefetch
+    accepted_finding = next(iter(risk_acceptance.accepted_findings.all()), None)
+    if accepted_finding is not None:
+        return accepted_finding.test.engagement
+
+    return None
+
+
 def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement | None:
     """
     Return an engagement to address a risk acceptance's expiration notification to.
@@ -52,20 +71,13 @@ def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement |
     nothing to notify about; the notification names a product and links to a per-engagement
     URL, and neither can be produced from an empty risk acceptance.
     """
-    engagement = risk_acceptance.engagement
-    if engagement is not None:
-        return engagement
-
-    # iterate rather than .first(), to reuse the accepted_findings prefetch
-    accepted_finding = next(iter(risk_acceptance.accepted_findings.all()), None)
-    if accepted_finding is not None:
-        return accepted_finding.test.engagement
-
-    logger.warning(
-        "risk acceptance %i:%s has no engagement and no findings, skipping its expiration notification",
-        risk_acceptance.id, risk_acceptance,
-    )
-    return None
+    engagement = engagement_for(risk_acceptance)
+    if engagement is None:
+        logger.warning(
+            "risk acceptance %i:%s has no engagement and no findings, skipping its expiration notification",
+            risk_acceptance.id, risk_acceptance,
+        )
+    return engagement
 
 
 def note_on_risk_acceptance(risk_acceptance: Risk_Acceptance, user: Dojo_User | None, action: str, *, reason=None) -> None:
@@ -301,13 +313,18 @@ def expiration_handler(*args, **kwargs):
 
 
 def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
-    """Return the full qualified URL of the view risk acceptance page."""
-    # Suppressing this error because it does not happen under most circumstances that a risk acceptance does not have engagement
-    with suppress(AttributeError):
-        get_full_url(
-            reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
-        )
-    return ""
+    """
+    Return the full qualified URL of the view risk acceptance page, or "" if there is none.
+
+    The page is per-engagement, and a risk acceptance does not always have one - see
+    `engagement_to_notify_about` for why that is a supported state rather than corrupt data.
+    """
+    engagement = engagement_for(risk_acceptance)
+    if engagement is None:
+        return ""
+    return get_full_url(
+        reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)),
+    )
 
 
 def expiration_message_creator(risk_acceptance, heads_up_days=0):

@@ -279,6 +279,56 @@ class RiskAcceptanceTestUI(DojoTestCase):
         expected = timezone.now() + relativedelta(days=ra_helper.expiration_days())
         self.assertEqual(ra.expiration_date.date(), expected.date())
 
+    def test_audit_note_links_to_the_risk_acceptance(self):
+        """The note written when a finding is accepted carries a usable link, not empty parens."""
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        finding = ra.accepted_findings.first()
+
+        entries = [note.entry for note in finding.notes.all()]
+        self.assertTrue(entries, "accepting a finding should leave a note")
+        self.assertTrue(
+            any(f"/engagement/1/risk_acceptance/{ra.id}" in entry for entry in entries),
+            f"no note links to the risk acceptance: {entries}",
+        )
+        self.assertFalse(any("()" in entry for entry in entries), f"empty link in note: {entries}")
+
+    def test_get_view_risk_acceptance_without_an_engagement_link(self):
+        """A risk acceptance reachable only through its findings still resolves a URL."""
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        for engagement in ra.engagement_set.all():
+            engagement.risk_acceptance.remove(ra)
+
+        self.assertIn(f"/engagement/1/risk_acceptance/{ra.id}", ra_helper.get_view_risk_acceptance(ra))
+
+    def test_get_view_risk_acceptance_with_nothing_to_link_to(self):
+        ra = Risk_Acceptance.objects.create(name="empty", owner=self.get_test_admin())
+
+        self.assertEqual("", ra_helper.get_view_risk_acceptance(ra))
+
+    def test_breadcrumbs_use_the_engagement(self):
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+
+        crumbs = ra.get_breadcrumbs()
+
+        self.assertEqual(f"/engagement/1/risk_acceptance/{ra.id}", crumbs[-1]["url"])
+
+    def test_breadcrumbs_without_an_engagement(self):
+        ra = Risk_Acceptance.objects.create(name="empty", owner=self.get_test_admin())
+
+        self.assertEqual([{"title": str(ra), "url": None}], ra.get_breadcrumbs())
+
+    def test_download_proof_without_a_proof_is_not_found(self):
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        self.assertFalse(ra.path, "this risk acceptance is expected to have no proof")
+
+        response = self.client.get(reverse("download_risk_acceptance", args=(1, ra.id)))
+
+        self.assertEqual(404, response.status_code)
+
     def test_expiration_days_falls_back_when_setting_is_cleared(self):
         """The setting is nullable and get_system_setting() passes None straight through."""
         system_settings = System_Settings.objects.get(no_cache=True)

@@ -75,8 +75,12 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
 
 
 class ReplaceRiskAcceptanceProofForm(forms.ModelForm):
-    path = forms.FileField(label="Proof", required=True, widget=forms.widgets.FileInput(attrs={"accept": ".jpg,.png,.pdf"}))
+    # same accept list and same clean_path validation as adding the proof in the first place:
+    # replacing it used to accept any extension, since it validated nothing
+    path = forms.FileField(label="Proof", required=True, widget=forms.widgets.FileInput(attrs={"accept": ", ".join(settings.FILE_IMPORT_TYPES)}))
 
     class Meta:
         model = Risk_Acceptance
         fields = ["path"]
+
+    clean_path = EditRiskAcceptanceForm.clean_path
