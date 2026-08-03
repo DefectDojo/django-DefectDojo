@@ -1,0 +1,34 @@
+{
+  "run": {
+    "runUid": "00000000-0000-4000-8000-0000000000aa",
+    "commitOid": "abcdef1234567890abcdef1234567890abcdef12",
+    "branchName": "main",
+    "status": "SUCCESS",
+    "createdAt": "2026-06-20T08:00:00Z",
+    "finishedAt": "2026-06-20T08:12:00Z"
+  },
+  "occurrences": [
+    {
+      "id": "occ-0001",
+      "path": "src/generic_app/views.py",
+      "beginLine": 42,
+      "beginColumn": 4,
+      "endLine": 47,
+      "endColumn": 20,
+      "title": "Possible SQL injection through string formatting",
+      "issue": {
+        "shortcode": "PY-A6006",
+        "title": "SQL injection risk",
+        "shortDescription": "Query is built with string formatting instead of parameters.",
+        "category": "SECURITY",
+        "severity": "CRITICAL",
+        "isRecommended": true,
+        "analyzer": {
+          "name": "Python",
+          "shortcode": "python"
+        }
+      }
+    }
+  ],
+  "vulnerabilities": []
+}
