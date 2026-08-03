@@ -37,7 +37,6 @@ from dojo.endpoint.queries import (
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import (
     get_authorized_findings,
-    get_authorized_vulnerability_ids,
 )
 from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.github.models import GITHUB_Issue, GITHUB_PKey
@@ -94,7 +93,6 @@ from dojo.models import (
     Tool_Product_Settings,
     Tool_Type,
     UserContactInfo,
-    Vulnerability_Id,
 )
 from dojo.notifications.models import Notification_Webhooks, Notifications
 from dojo.product.queries import (
@@ -110,6 +108,14 @@ from dojo.risk_acceptance.queries import get_authorized_risk_acceptances
 from dojo.test.queries import get_authorized_test_imports, get_authorized_tests
 from dojo.tool_product.queries import get_authorized_tool_product_settings
 from dojo.url.models import URL
+from dojo.vulnerability.models import (
+    FindingVulnerabilityReference,
+    Vulnerability,
+)
+from dojo.vulnerability.queries import (
+    get_authorized_finding_vulnerability_references,
+    get_authorized_vulnerability_id_entities,
+)
 
 ########
 # Models backed by ViewSets (api_v2.views) from which we can derive the required permission check.
@@ -215,7 +221,8 @@ for model in (
 # Models where we can simply fall back to a `get_authorized_*` method to check auth
 for model, helper in (
     (Finding_Group, get_authorized_finding_groups),
-    (Vulnerability_Id, get_authorized_vulnerability_ids),
+    (Vulnerability, get_authorized_vulnerability_id_entities),
+    (FindingVulnerabilityReference, get_authorized_finding_vulnerability_references),
 ):
     register(model, discard_user(helper), "view")
 

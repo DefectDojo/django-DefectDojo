@@ -1,0 +1,5 @@
+robots.txt           (Status: 200) [Size: 49]
+index.html           (Status: 200) [Size: 182]
+.git                 (Status: 301) [Size: 169] [--> http://wave3target/.git/]
+admin                (Status: 301) [Size: 169] [--> http://wave3target/admin/]
+backup               (Status: 301) [Size: 169] [--> http://wave3target/backup/]

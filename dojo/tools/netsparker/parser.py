@@ -51,11 +51,13 @@ class NetsparkerParser:
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = html2text.html2text(item.get("Description", ""))
-            if "Cwe" in item["Classification"]:
+            unsaved_cwes = []
+            if item["Classification"].get("Cwe"):
                 try:
                     cwe = int(item["Classification"]["Cwe"].split(",")[0])
                 except Exception:
                     cwe = None
+                unsaved_cwes = [value.strip() for value in item["Classification"]["Cwe"].split(",") if value.strip()]
             else:
                 cwe = None
             sev = item["Severity"]
@@ -82,6 +84,8 @@ class NetsparkerParser:
                 cwe=cwe,
                 static_finding=True,
             )
+            if unsaved_cwes:
+                finding.unsaved_cwes = unsaved_cwes
             state = item.get("State", None)
             if state == "FalsePositive":
                 finding.active = False

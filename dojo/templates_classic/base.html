@@ -613,6 +613,13 @@
                                                         </a>
                                                     </li>
                                                 {% endif %}
+                                                {% if "dojo.view_cicdinfrastructure"|has_configuration_permission:request %}
+                                                    <li>
+                                                        <a href="{% url 'cicd_infrastructure' %}">
+                                                            {% trans "CI/CD Infrastructure" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
                                             </ul>
                                         </li>
                                     {% endblock %}

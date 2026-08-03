@@ -71,6 +71,8 @@ def report_url_resolver(request):
     try:
         url_resolver = request.META["HTTP_X_FORWARDED_PROTO"] + "://" + request.META["HTTP_X_FORWARDED_FOR"]
     except:
+        if "HTTP_HOST" not in request.META:
+            return request.build_absolute_uri("/").rstrip("/")
         hostname = request.META["HTTP_HOST"]
         port_index = hostname.find(":")
         if port_index != -1:
@@ -284,7 +286,7 @@ def product_endpoint_report(request, pid):
             products__product=product,
             findings__status=FindingLocationStatus.Active,
         )
-        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct())
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), user=request.user)
         endpoints = URLFilter(request.GET, queryset=endpoints)
     else:
         # TODO: Delete this after the move to Locations
@@ -295,7 +297,7 @@ def product_endpoint_report(request, pid):
                                             finding__out_of_scope=False)
         if get_system_setting("enforce_verified_status", True) or get_system_setting("enforce_verified_status_metrics", True):
             endpoints = endpoints.filter(finding__active=True)
-        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), product=product)
+        endpoints = prefetch_related_endpoints_for_report(endpoints.distinct(), product=product, user=request.user)
         endpoints = EndpointReportFilter(request.GET, queryset=endpoints)
 
     paged_endpoints = get_page_items(request, endpoints.qs, 25)
@@ -849,8 +851,11 @@ class CSVExportView(View):
         findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
+        return self.build_response(findings)
+
+    def build_response(self, findings, filename="findings.csv"):
         response = HttpResponse(content_type="text/csv")
-        response["Content-Disposition"] = "attachment; filename=findings.csv"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         writer = csv.writer(response)
         allowed_attributes = get_attributes()
         excludes_list = get_excludes()
@@ -990,6 +995,9 @@ class ExcelExportView(View):
         findings = prefetch_related_findings_for_report(findings)
         self.findings = findings
         findings = self.add_findings_data()
+        return self.build_response(findings)
+
+    def build_response(self, findings, filename="findings.xlsx"):
         workbook = Workbook()
         workbook.iso_dates = True
         worksheet = workbook.active
@@ -1151,5 +1159,5 @@ class ExcelExportView(View):
             content=stream,
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = "attachment; filename=findings.xlsx"
+        response["Content-Disposition"] = f"attachment; filename={filename}"
         return response

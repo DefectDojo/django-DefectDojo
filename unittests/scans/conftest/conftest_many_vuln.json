@@ -1,0 +1,35 @@
+[
+  {
+    "filename": "many.yaml",
+    "namespace": "main",
+    "successes": 0,
+    "warnings": [
+      {
+        "msg": "Deployment generic-app should carry an app.kubernetes.io/name label",
+        "metadata": {
+          "query": "data.main.warn"
+        }
+      }
+    ],
+    "failures": [
+      {
+        "msg": "Container server must not use the :latest tag",
+        "metadata": {
+          "query": "data.main.deny"
+        }
+      },
+      {
+        "msg": "Container server must set a memory limit",
+        "metadata": {
+          "query": "data.main.deny"
+        }
+      },
+      {
+        "msg": "Deployment generic-app must set securityContext.runAsNonRoot",
+        "metadata": {
+          "query": "data.main.deny"
+        }
+      }
+    ]
+  }
+]

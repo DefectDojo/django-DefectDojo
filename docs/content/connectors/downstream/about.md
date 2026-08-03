@@ -6,9 +6,7 @@ aliases:
   - /en/share_your_findings/integrations
   - /issue_tracking/pro_integration/integrations/
 ---
-**Availability:** Downstream Connectors are currently in **Beta** and are only available for **Cloud-hosted** DefectDojo Pro instances.  If you are an on-premise customer interested in this feature, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for updates on availability.
-
-**Enabling Downstream Connectors:** On a Cloud instance, a superuser can turn this on from **Settings > Feature Flags**, where it is listed as **Downstream Connectors**. See [Feature Flags](/admin/feature_flags/pro__feature_flags/). On an on-premise instance it is shown as **Unavailable on This Deployment**.
+**Availability:** Downstream Connectors are generally available and on for every DefectDojo Pro instance, both Cloud and On-Premise. There is nothing to enable, and they are no longer listed on the Feature Flags page.
 
 Downstream Connectors let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 
@@ -20,6 +18,7 @@ Supported Downstream Connectors:
 - GitLab Boards
 - Jira
 - Linear
+- Opsgenie
 - PagerDuty
 - ServiceDesk Plus
 - ServiceNow
@@ -100,6 +99,7 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [GitLab Boards](/connectors/downstream/downstream_toolreference/#gitlab)
 - [Jira](/connectors/downstream/downstream_toolreference/#jira)
 - [Linear](/connectors/downstream/downstream_toolreference/#linear)
+- [Opsgenie](/connectors/downstream/downstream_toolreference/#opsgenie)
 - [PagerDuty](/connectors/downstream/downstream_toolreference/#pagerduty)
 - [ServiceDesk Plus](/connectors/downstream/downstream_toolreference/#servicedesk-plus)
 - [ServiceNow](/connectors/downstream/downstream_toolreference/#servicenow)
@@ -118,3 +118,19 @@ These errors can be found by looking at the All Issue Tracker Mappings & Assignm
 ![image](images/integrators_4.png)
 
 Clicking on the Total Errors entry will bring you to a page with more detailed descriptions of errors associated with this Downstream Connector.
+
+### Seeing every failure in one place
+
+The per-mapping error table covers one Downstream Connector. [Diagnostics](/admin/diagnostics/pro__diagnostics/) covers all of them, alongside every other integration attempt on the instance — upstream connectors, imports, Jira, SSO, and the rules engine — with the same filtering and sorting over all of it.
+
+Use it when the question is broader than one mapping:
+
+* an attempt that **never completed** rather than failed, which no error table reports, because nothing errored
+* whether a failure is specific to one integration or is happening across several at once
+* who or what set an attempt off, and against which configuration
+
+Credentials quoted in an error are removed before the row is stored, and the full technical detail is restricted to superusers.
+
+## Downstream Connectors page layout
+
+Downstream Connectors are listed in two sections, **Configured Connectors** and **Available Connectors**, each sorted alphabetically with a count of what is shown beside its heading. A tool can hold several configurations; each is its own tile, titled `<Tool> - <label>`, ordered by label. The **Request Downstream Connector** tile on DefectDojo Pro Cloud is not counted.

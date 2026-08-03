@@ -22,6 +22,25 @@ The page lists every optional feature with:
 
 Use the search box to filter the list by feature name or description.
 
+### Features that are not listed
+
+The page lists the features you can choose to adopt. Two kinds of feature are absent from it.
+
+**Always on.** Once a feature reaches general availability it is on for every instance and stops being listed, because there is no longer a decision to make:
+
+* **Downstream Connectors** — see [Downstream Connectors](/connectors/downstream/about/)
+* **Universal Parser** — see [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
+* **Asset Hierarchy** — see [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
+* **Appearance** and **Feature Flags** — the two Settings pages of the same name
+
+Nothing changes for your instance if you had one of these turned on. If you had one turned off, it is now on: these features are part of DefectDojo Pro rather than opt-in. Contact [DefectDojo Support](mailto:support@defectdojo.com) if that is a problem for your instance.
+
+**Enabled by DefectDojo on request.** A few capabilities depend on infrastructure that is provisioned per instance, so they are switched on by DefectDojo rather than from this page:
+
+* **Scheduling Service** — see [Scheduling Rules](/automation/rules_engine/scheduling/)
+
+Contact [DefectDojo Support](mailto:support@defectdojo.com) to have one of these enabled. If it is already on for your instance, it stays on.
+
 ## Turning a feature on or off
 
 1. Find the feature in the list.
@@ -89,7 +108,6 @@ Most features are available on both installation types. The exceptions are:
 
 | Feature | Availability | How it is controlled |
 | --- | --- | --- |
-| Downstream Connectors | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise, which does not run the required infrastructure. See [Downstream Connectors](/connectors/downstream/about/). |
 | Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
 | Locations | Both | Feature Flags page. Note that Locations cannot be turned back off once it is enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
 | Organization / Asset Relabeling | Both | Deployment configuration: `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`. |

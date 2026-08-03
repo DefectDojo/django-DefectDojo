@@ -36,7 +36,7 @@ To access the Pro UI, open your User Options menu from the top-right hand corner
 
 5. The **Settings** section allows you to configure your DefectDojo instance, including your License, Cloud Settings, Users, Feature Configuration and admin-level Enterprise Settings. (Integrations have moved to **Import > Connectors > Downstream Connectors**.)
 
-6. The **Pro Settings** section contains the System Settings, Banner Settings, Notification Settings, Jira Instances, Deduplication Settings, and Authentication Settings, including SAML, OIDC, OAuth, Login, and MFA forms.
+6. The **Settings** section holds the administrative pages, grouped as System, Users & Permissions, Finding Workflow, Configuration, Notifications, Operations, and License & Support, with an **All Settings** page that lists and searches all of them. See [The Settings Menu](/navigation/pro__settings_menu/).
 
 7. The Pro UI also has a **new table format**, used in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/) to help with navigation.  Each column can be clicked on to apply a relevant filter, and columns can be reordered to present data however you like.
 

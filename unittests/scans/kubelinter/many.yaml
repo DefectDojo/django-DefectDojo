@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generic-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: generic-app
+  template:
+    metadata:
+      labels:
+        app: generic-app
+    spec:
+      containers:
+        - name: server
+          image: generic-app:latest
+          securityContext:
+            privileged: true
+            runAsUser: 0

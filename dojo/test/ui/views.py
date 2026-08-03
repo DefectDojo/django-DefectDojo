@@ -23,7 +23,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 import dojo.finding.helper as finding_helper
-from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.authorization import user_has_global_permission_or_403, user_has_permission_or_403
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.finding.queries import prefetch_for_findings
 from dojo.finding.ui.filters import FindingFilter, FindingFilterWithoutObjectLookups, TemplateFindingFilter
@@ -82,6 +82,7 @@ from dojo.utils import (
     process_tag_notifications,
     redirect_to_return_url_or_else,
 )
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 parse_logger = logging.getLogger("dojo")
@@ -172,7 +173,7 @@ class ViewTest(View):
             "jira_project": jira_services.get_project(test),
             "bulk_edit_form": FindingBulkUpdateForm(request.GET),
             "enable_table_filtering": get_system_setting("enable_ui_table_based_searching"),
-            "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", "findings__vulnerability_id_set"),
+            "finding_groups": test.finding_group_set.all().prefetch_related("findings", "jira_issue", "creator", vulnerability_id_prefetch(prefix="findings__")),
             "finding_group_by_options": Finding_Group.GROUP_BY_OPTIONS,
         }
         # Set the form using the context, and then update the context
@@ -636,6 +637,8 @@ def add_finding_from_template(request, tid, fid):
     jform = None
     test = get_object_or_404(Test, id=tid)
     user_has_permission_or_403(request.user, test, "add")
+    # fid is a Finding_Template id, not a finding; templates are a shared cross-product store
+    user_has_global_permission_or_403(request.user, "edit")
     template = get_object_or_404(Finding_Template, id=fid)
     findings = Finding_Template.objects.all()
     push_all_jira_issues = jira_services.is_push_all_issues(template)

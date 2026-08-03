@@ -45,6 +45,50 @@ the work to `bugfix` first.
 The ack covers one session. A `SessionStart` hook reports the branch and its release line
 at startup so the branch is settled before the first edit.
 
+## Pull Requests
+
+### Every new PR gets a milestone, and that milestone already exists
+
+Set the milestone in the same step that opens the PR, not in a later cleanup pass. Which
+milestone follows from the PR's **base branch**, for the same reason the Branch Check
+above matters: a `dev` PR cannot ship in a patch release, so it must not carry a patch
+milestone.
+
+| Base branch | Milestone to attach | Example, for a PR opened 2026-08-03 |
+|-------------|---------------------|-------------------------------------|
+| `bugfix` | next weekly patch, `X.Y.<hundreds>` | `3.2.100` |
+| `dev` | next monthly minor, `X.Y.0` | `3.3.0` |
+| `master` | the version actually being released or backported into — ask, do not guess | `3.2.0` |
+
+"Next" means the earliest **open** milestone of that kind whose due date is still in the
+future. A milestone due today or overdue is usually a release already cut, so a PR opened
+now will not make it. Read the answer out of the repo instead of from memory:
+
+```bash
+# base bugfix -> next weekly patch milestone
+gh api repos/DefectDojo/django-DefectDojo/milestones --paginate --jq \
+  '[.[] | select(.state=="open" and (.title|test("\\.[1-9]00$")) and .due_on > (now|todate))] | sort_by(.due_on)[0].title'
+# base dev -> next monthly minor milestone
+gh api repos/DefectDojo/django-DefectDojo/milestones --paginate --jq \
+  '[.[] | select(.state=="open" and (.title|test("\\.0$")) and .due_on > (now|todate))] | sort_by(.due_on)[0].title'
+```
+
+Attach it on creation, or immediately after if the body is written in a second step:
+
+```bash
+gh pr create ... --milestone "3.2.100"
+gh pr edit <n> --milestone "3.2.100"
+```
+
+**Never create a milestone.** The milestone list is the published release schedule, so a
+milestone invented at PR time is a release that does not exist. If the query returns
+`null`, the schedule has not been extended that far: say so and leave the PR
+unmilestoned.
+
+**Retargeting the base changes the milestone.** Moving a PR between `bugfix` and `dev`
+moves which release it ships in, so re-run the query for the new base and `gh pr edit
+--milestone` to match.
+
 ## Project Overview
 
 DefectDojo is a Django application (`dojo` app) for vulnerability management. The codebase is undergoing a modular reorganization to move from monolithic files toward self-contained domain modules.
@@ -99,6 +143,7 @@ Modules in various stages of reorganization:
 |--------|-----------|-------------|-----|------|--------|
 | **url** | In module | N/A | Done | Done | **Complete** |
 | **location** | In module | N/A | N/A | Done | **Complete** |
+| **cicd_infrastructure** | In module | N/A | Done | Done | **Complete** |
 | **product_type** | In module | N/A | Done | Done | **Complete** (#14970) |
 | **test** | In module | N/A | Done | Done | **Complete** (#14971) |
 | **engagement** | In module | In module | Done | Done | **Complete** (#14972) |
