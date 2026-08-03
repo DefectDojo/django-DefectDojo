@@ -1,0 +1,10 @@
+{
+  "application/vnd.security.vulnerability.report; version=1.1": {
+    "generated_at": "2026-07-30T09:00:00Z",
+    "severity": "None",
+    "repository": "generic-project/generic-app",
+    "tag": "1.4.0",
+    "digest": "sha256:aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa7777bbbb8888",
+    "vulnerabilities": []
+  }
+}

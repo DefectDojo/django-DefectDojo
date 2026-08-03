@@ -1258,6 +1258,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Intigriti - Connectors Import": ["unique_id_from_tool"],
     "Bugcrowd - Connectors Import": ["unique_id_from_tool"],
     "Cobalt.io - Connectors Import": ["unique_id_from_tool"],
+    "Harbor - Connectors Import": ["unique_id_from_tool"],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1421,6 +1422,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Intigriti - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Bugcrowd - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Cobalt.io - Connectors Import": DEDUPE_ALGO_HASH_CODE,
+    "Harbor - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,

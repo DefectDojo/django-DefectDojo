@@ -1,0 +1,54 @@
+{
+  "application/vnd.security.vulnerability.report; version=1.1": {
+    "generated_at": "2026-07-30T09:00:00Z",
+    "severity": "Critical",
+    "repository": "generic-project/generic-app",
+    "tag": "1.4.0",
+    "digest": "sha256:aaaa1111bbbb2222cccc3333dddd4444eeee5555ffff6666aaaa7777bbbb8888",
+    "vulnerabilities": [
+      {
+        "id": "CVE-2000-0001",
+        "package": "openssl",
+        "version": "3.0.11-1",
+        "description": "A flaw in certificate verification allows an attacker to bypass validation.",
+        "severity": "Critical",
+        "fix_version": "3.0.13-1",
+        "links": [
+          "https://example.com/advisories/cve-2000-0001",
+          "https://example.com/tracker/1"
+        ],
+        "cwe_ids": ["CWE-295", "CWE-297"]
+      },
+      {
+        "id": "CVE-2000-0002",
+        "package": "curl",
+        "version": "7.81.0-1",
+        "description": "",
+        "severity": "High",
+        "fix_version": "",
+        "links": [],
+        "cwe_ids": []
+      },
+      {
+        "id": "GHSA-0000-0000-0003",
+        "package": "zlib",
+        "version": "1.2.13",
+        "description": "A compression flaw.",
+        "severity": "Medium",
+        "fix_version": "1.2.14",
+        "links": ["https://example.com/advisories/ghsa-0000-0000-0003"],
+        "cwe_ids": ["not-a-cwe"]
+      },
+      {
+        "id": "CVE-2000-0004",
+        "package": "busybox",
+        "version": "1.35.0",
+        "description": "A shell flaw.",
+        "severity": "not-a-severity",
+        "fix_version": "",
+        "links": [],
+        "cwe_ids": ["CWE-improper"]
+      }
+    ]
+  }
+}
