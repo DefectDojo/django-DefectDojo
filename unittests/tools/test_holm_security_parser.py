@@ -89,12 +89,23 @@ class TestHolmSecurityParser(DojoTestCase):
         The separately-reported detected_port is in the identity and the description instead, so an
         endpoint carries a port only when the URL itself names one. Adding it here would invent an
         endpoint the API path never produces.
+
+        This asserts against a detected_port of 8443 on a URL that names no port, because a port
+        matching the scheme's own default could not tell the two sources apart: the locations model
+        fills an unspecified port in from the protocol, so an https URL is port 443 there either way.
         """
-        finding = self.parse("holm_security_one_vuln.json")[0]
+        finding = self.by_uid("holm_security_many_vuln.json")["holm-HID-100002-asset-0001-8443"]
         location = self.get_unsaved_locations(finding)[0]
-        self.assertFalse(location.port)
+        self.assertEqual("app.example.com", location.host)
+        self.assertNotEqual(8443, location.port)
+        self.assertIn("**Port:** 8443", finding.description)
+
+    def test_a_scheme_default_port_is_not_evidence_either_way(self):
+        """Holm's own 443 and the https default are the same number; only the URL decides."""
+        finding = self.parse("holm_security_one_vuln.json")[0]
         self.assertIn("**Port:** 443/tcp", finding.description)
         self.assertIn("-443", finding.unique_id_from_tool)
+        self.assertEqual("app.example.com", self.get_unsaved_locations(finding)[0].host)
 
     def test_a_url_naming_its_own_port_keeps_it(self):
         findings = self.parse_string(self.row(url="https://app.example.com:8443/thing"))
