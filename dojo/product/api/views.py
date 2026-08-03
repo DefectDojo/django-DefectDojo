@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
@@ -8,7 +10,12 @@ from rest_framework.response import Response
 import dojo.api_v2.mixins as dojo_mixins
 from dojo.api_v2 import prefetch
 from dojo.api_v2 import serializers as api_v2_serializers
-from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
+from dojo.api_v2.views import (
+    DeprecationNoticeMixin,
+    PrefetchDojoModelViewSet,
+    report_generate_response,
+    schema_with_prefetch,
+)
 from dojo.authorization import api_permissions as permissions
 from dojo.models import Endpoint, Product, Product_API_Scan_Configuration
 from dojo.product.api.filters import ApiProductFilter
@@ -24,10 +31,14 @@ from dojo.utils import async_delete, get_setting
 
 
 # Authorization: object-based
+# Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
 @extend_schema_view(**schema_with_prefetch())
 class ProductAPIScanConfigurationViewSet(
+    DeprecationNoticeMixin,
     PrefetchDojoModelViewSet,
 ):
+    deprecated = True
+    end_of_life_date = datetime(2026, 11, 1)
     serializer_class = ProductAPIScanConfigurationSerializer
     queryset = Product_API_Scan_Configuration.objects.none()
     filter_backends = (DjangoFilterBackend,)
@@ -120,11 +131,10 @@ class ProductViewSet(
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, product, options)
-        report = api_v2_serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, product, options)

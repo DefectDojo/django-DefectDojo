@@ -10,6 +10,7 @@ from django.db.models.query_utils import Q
 import dojo.finding.helper as finding_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
+    deduplication_ordering_key,
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_uid_or_hash,
     find_candidates_for_deduplication_unique_id,
@@ -26,7 +27,6 @@ from dojo.models import (
     Notes,
     Test,
     Test_Import,
-    Vulnerability_Id,
 )
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tags.inheritance import apply_inherited_tags_for_findings
@@ -327,7 +327,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls
+        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls.
+        # Findings are also fully prepared here (test/service/hash_code) so they can be
+        # sorted by a stable content key below — this makes the "which duplicate becomes
+        # the surviving finding" decision deterministic regardless of the order the
+        # scanner emitted its findings (intra-report duplicates are matched to whichever
+        # is created first; see add_new_finding_to_candidates).
         cleaned_findings = []
         for raw_finding in parsed_findings or []:
             sanitized = self.sanitize_severity(raw_finding)
@@ -339,7 +344,27 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     self.minimum_severity,
                 )
                 continue
+            # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
+            # Finding.mitigated is DateTimeField and it requires timezone
+            if sanitized.mitigated and not sanitized.mitigated.tzinfo:
+                sanitized.mitigated = sanitized.mitigated.replace(tzinfo=self.now.tzinfo)
+            # Override the test if needed
+            if not hasattr(sanitized, "test"):
+                sanitized.test = self.test
+            # Set the service supplied at import time
+            if self.service is not None:
+                sanitized.service = self.service
+            self.location_handler.clean_unsaved(sanitized)
+            # Calculate the hash code to be used to identify duplicates
+            sanitized.hash_code = self.calculate_unsaved_finding_hash_code(sanitized)
+            deduplicationLogger.debug(f"unsaved finding's hash_code: {sanitized.hash_code}")
             cleaned_findings.append(sanitized)
+
+        # Sort by the stable content key so intra-report duplicate resolution is
+        # independent of the scanner's export order. Unsaved findings have no id, so
+        # the id tiebreak is inert here and byte-identical findings keep their relative
+        # (immaterial) order via Python's stable sort.
+        cleaned_findings.sort(key=deduplication_ordering_key)
 
         # Each entry carries the finding's own push_to_jira flag: grouped findings are pushed to
         # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
@@ -367,22 +392,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
             logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
 
-            # Prepare findings in batch: set test, service, calculate hash codes
-            for unsaved_finding in unsaved_findings_batch:
-                # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
-                # Finding.mitigated is DateTimeField and it requires timezone
-                if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
-                    unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
-                # Override the test if needed
-                if not hasattr(unsaved_finding, "test"):
-                    unsaved_finding.test = self.test
-                # Set the service supplied at import time
-                if self.service is not None:
-                    unsaved_finding.service = self.service
-                self.location_handler.clean_unsaved(unsaved_finding)
-                # Calculate the hash code to be used to identify duplicates
-                unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
-                deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
+            # Findings are already prepared (test/service/hash_code) and globally sorted above.
 
             # Fetch all candidates for this batch at once (batch candidate finding)
             candidates_by_hash, candidates_by_uid, candidates_by_key = self.get_reimport_match_candidates_for_batch(
@@ -1013,8 +1023,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         vulnerability_ids_to_process = list(dict.fromkeys(finding.unsaved_vulnerability_ids or []))
         vulnerability_ids_to_process = [x for x in vulnerability_ids_to_process if x.strip()]
 
-        # Use prefetched data directly without triggering queries
-        existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
+        # Reconcile CWEs independently of the vulnerability_ids early-exit below (CWEs may change
+        # while vulnerability_ids do not, and vice versa).
+        self.reconcile_cwes(finding)
+
+        # Read the existing ids through the entity read helper (not a legacy relation). The prefetch
+        # is matched upstream (the reimport finding query uses vulnerability_id_prefetch()), so this
+        # stays a no-query read.
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
+
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed
@@ -1025,12 +1043,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             return finding
 
-        # Accumulate delete + insert for batch flush
-        self.pending_vuln_id_deletes.append(finding.id)
-        self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid)
-            for vid in vulnerability_ids_to_process
-        ])
+        # Accumulate delete + insert for batch flush (entity references).
+        self.vulnerability_id_manager.record_reconcile(finding, vulnerability_ids_to_process)
         if vulnerability_ids_to_process:
             finding.cve = vulnerability_ids_to_process[0]
         else:

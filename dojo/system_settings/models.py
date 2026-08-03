@@ -351,6 +351,22 @@ class System_Settings(models.Model):
     from dojo.middleware import System_Settings_Manager  # noqa: PLC0415 circular import
     objects = System_Settings_Manager()
 
+    def save(self, *args, **kwargs):
+        # Guard against persisting an instance handed back by the read-through
+        # cache. ``System_Settings.objects.get()`` returns a snapshot rebuilt from
+        # the cached dict (see dojo.middleware.get_cached_system_settings); saving
+        # it could overwrite concurrent changes with stale values. Writers must
+        # fetch a fresh instance with ``System_Settings.objects.get(no_cache=True)``.
+        from dojo.caching import READ_ONLY_CACHE_MARKER, ReadOnlyCachedInstanceError  # noqa: PLC0415 circular import
+        if getattr(self, READ_ONLY_CACHE_MARKER, False):
+            msg = (
+                "Refusing to save a System_Settings instance obtained from the read-through cache "
+                "(System_Settings.objects.get()); it is a read-only snapshot. Fetch a fresh instance "
+                "with System_Settings.objects.get(no_cache=True) before saving."
+            )
+            raise ReadOnlyCachedInstanceError(msg)
+        super().save(*args, **kwargs)
+
     def clean(self):
         super().clean()
 

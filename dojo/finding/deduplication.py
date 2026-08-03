@@ -9,6 +9,7 @@ from django.db.models.query_utils import Q
 
 from dojo.celery import app
 from dojo.models import Endpoint_Status, Finding, System_Settings
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -340,11 +341,11 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
         queryset = Finding.objects.filter(scope_q)
 
     if settings.V3_FEATURE_LOCATIONS:
-        prefetch_list = ["locations__location__url", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
     else:
         # TODO: Delete this after the move to Locations
         # Base prefetches for both modes
-        prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["endpoints", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
@@ -544,11 +545,47 @@ def find_candidates_for_reimport_legacy(test, findings, service=None):
     return existing_by_key
 
 
+def deduplication_ordering_key(finding):
+    """
+    Stable, content-derived sort key used by the reimporter to decide the order
+    findings from one report are created (and therefore get their ids) in.
+
+    Deduplication itself always picks the lowest-id finding as the canonical
+    "original". Because the reimporter sorts a report's findings by this key
+    BEFORE saving them, "lowest id" among findings created by one reimport
+    equals "canonical by content", so the winner among findings that collide
+    on the deduplication key is reproducible across re-scans regardless of the
+    order the scanner exports its findings in. Findings from earlier imports
+    always have smaller ids, so an already-established original never flips.
+
+    id is the final tiebreak and is only reached when two findings are
+    identical across every content field in the key (in which case the choice
+    is immaterial because the findings are interchangeable).
+
+    All fields referenced here are part of ``Finding.DEDUPLICATION_FIELDS``, so
+    building this key never triggers extra database queries during dedupe.
+    """
+    return (
+        finding.hash_code or "",
+        finding.unique_id_from_tool or "",
+        finding.file_path or "",
+        finding.line if finding.line is not None else -1,
+        finding.title or "",
+        finding.id or 0,
+    )
+
+
 def _is_candidate_older(new_finding, candidate):
     # Unsaved findings (e.g. preview mode) have no PK — all DB candidates are older by definition
     if new_finding.pk is None:
         return True
-    # Ensure the newer finding is marked as duplicate of the older finding
+    # Ensure the newer finding is marked as duplicate of the older finding.
+    # This comparison must stay a pure id comparison: it is evaluated
+    # independently from concurrent dedupe batches (and from the `dedupe`
+    # management command over pre-existing findings), so it has to be globally
+    # antisymmetric — for any pair, exactly one side may see the other as
+    # "older". Content-stable winner selection is achieved by the reimporter
+    # creating a report's findings in deduplication_ordering_key order instead.
     is_older = candidate.id < new_finding.id
     if not is_older:
         deduplicationLogger.debug(f"candidate is newer than or equal to new finding: {new_finding.id} and candidate {candidate.id}")
@@ -1098,6 +1135,13 @@ def do_false_positive_history_batch(findings):
     # Fetch all candidate existing findings with one DB query
     candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg)
 
+    # Optional plugin hook: refine the per-finding candidate list after it is resolved by
+    # deduplication_algorithm. Lets a plugin (e.g. Pro) narrow candidates by fields that are
+    # excluded from the hash string but compared per pair (set-match tokens on
+    # vulnerability_ids / CWEs). Resolved once; a no-op when unset. See get_custom_method.
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+    fp_candidate_filter = get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD")
+
     to_mark_as_fp_ids: set = set()
 
     for finding in findings:
@@ -1120,6 +1164,9 @@ def do_false_positive_history_batch(findings):
             existing = candidates.get(key, []) if key else []
         else:
             existing = []
+
+        if fp_candidate_filter:
+            existing = fp_candidate_filter(finding, existing)
 
         existing_fps = [ef for ef in existing if ef.false_p]
 

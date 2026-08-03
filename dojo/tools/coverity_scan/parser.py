@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class CoverityScanParser:
@@ -64,6 +67,11 @@ class CoverityScanParser:
                 impact=checker_properties.get("subcategoryLocalEffect"),
                 vuln_id_from_tool=vuln_id,
             )
+
+            if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                finding.unsaved_locations.append(
+                    LocationData.code(file_path=finding.file_path, line=finding.line),
+                )
 
             findings.append(finding)
 

@@ -625,7 +625,7 @@ class CommonImportScanSerializer(serializers.Serializer):
         else:
             try:
                 environment = Development_Environment.objects.get(name=data.get("environment", "Development"))
-            except:
+            except Development_Environment.DoesNotExist:
                 msg = "Environment named " + data.get("environment", "Development") + " does not exist."
                 raise ValidationError(msg)
 
@@ -1017,10 +1017,22 @@ class AddNewFileOptionSerializer(serializers.ModelSerializer):
 
 
 class ReportGenerateOptionSerializer(serializers.Serializer):
+    REPORT_TYPE_CHOICES = (
+        ("JSON", "JSON"),
+        ("HTML", "HTML"),
+        ("CSV", "CSV"),
+        ("Excel", "Excel"),
+    )
+
     include_finding_notes = serializers.BooleanField(default=False)
     include_finding_images = serializers.BooleanField(default=False)
     include_executive_summary = serializers.BooleanField(default=False)
     include_table_of_contents = serializers.BooleanField(default=False)
+    report_type = serializers.ChoiceField(
+        choices=REPORT_TYPE_CHOICES,
+        default="JSON",
+        help_text="Format for the generated report.",
+    )
 
 
 class ExecutiveSummarySerializer(serializers.Serializer):

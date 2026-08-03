@@ -11,11 +11,11 @@ from dojo.models import (
     Product,
     Product_API_Scan_Configuration,
 )
-from dojo.request_cache import cache_for_request
+from dojo.request_cache import cache_for_request_or_task
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_products(permission, user=None):
     impl = get_auth_filter("product.get_authorized_products")
     if impl:
@@ -24,7 +24,7 @@ def get_authorized_products(permission, user=None):
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_app_analysis(permission):
     impl = get_auth_filter("product.get_authorized_app_analysis")
     if impl:
@@ -33,7 +33,7 @@ def get_authorized_app_analysis(permission):
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_dojo_meta(permission):
     impl = get_auth_filter("product.get_authorized_dojo_meta")
     if impl:
@@ -42,7 +42,7 @@ def get_authorized_dojo_meta(permission):
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_languages(permission):
     impl = get_auth_filter("product.get_authorized_languages")
     if impl:
@@ -51,7 +51,7 @@ def get_authorized_languages(permission):
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_engagement_presets(permission):
     impl = get_auth_filter("product.get_authorized_engagement_presets")
     if impl:
@@ -60,7 +60,7 @@ def get_authorized_engagement_presets(permission):
 
 
 # Cached: all parameters are hashable, no dynamic queryset filtering
-@cache_for_request
+@cache_for_request_or_task
 def get_authorized_product_api_scan_configurations(permission):
     impl = get_auth_filter("product.get_authorized_product_api_scan_configurations")
     if impl:

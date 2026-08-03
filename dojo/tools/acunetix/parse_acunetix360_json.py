@@ -67,13 +67,14 @@ class AcunetixJSONParser:
         for item in data["Vulnerabilities"]:
             title = item["Name"]
             findingdetail = text_maker.handle(item.get("Description", ""))
+            cwes = []
             if item["Classification"] is not None and "Cwe" in item["Classification"]:
-                try:
-                    cwe = int(item["Classification"]["Cwe"].split(",")[0])
-                except BaseException:
-                    cwe = None
-            else:
-                cwe = None
+                for cwe_part in item["Classification"]["Cwe"].split(","):
+                    try:
+                        cwes.append(int(cwe_part.strip()))
+                    except (ValueError, TypeError):
+                        continue
+            cwe = cwes[0] if cwes else None
             sev = item["Severity"]
             if sev not in {"Info", "Low", "Medium", "High", "Critical"}:
                 sev = "Info"
@@ -117,6 +118,8 @@ class AcunetixJSONParser:
                 cwe=cwe,
                 static_finding=True,
             )
+            if cwes:
+                finding.unsaved_cwes = cwes
             if (
                 (item["Classification"] is not None)
                 and (item["Classification"]["Cvss"] is not None)

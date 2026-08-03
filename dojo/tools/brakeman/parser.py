@@ -3,8 +3,10 @@ __author__ = "feeltheajf"
 import json
 
 from dateutil import parser
+from django.conf import settings
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class BrakemanParser:
@@ -112,6 +114,14 @@ class BrakemanParser:
                     date=find_date,
                     static_finding=True,
                 )
+                if settings.V3_FEATURE_LOCATIONS and item["file"]:
+                    find.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=item["file"],
+                            line=item["line"],
+                            snippet=item["code"] or "",
+                        ),
+                    )
 
                 dupes[dupe_key] = find
 

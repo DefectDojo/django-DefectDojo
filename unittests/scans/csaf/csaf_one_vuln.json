@@ -1,0 +1,92 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "2.0",
+    "title": "Example Corp advisory for CVE-2026-10001",
+    "publisher": {
+      "category": "vendor",
+      "name": "Example Corp",
+      "namespace": "https://example.com"
+    },
+    "tracking": {
+      "id": "EXAMPLE-2026-0001",
+      "status": "final",
+      "version": "1",
+      "initial_release_date": "2026-07-29T00:00:00Z",
+      "current_release_date": "2026-07-29T00:00:00Z",
+      "revision_history": [
+        {
+          "number": "1",
+          "date": "2026-07-29T00:00:00Z",
+          "summary": "Initial release"
+        }
+      ],
+      "generator": {
+        "engine": {
+          "name": "hand-authored for DefectDojo parser tests"
+        }
+      }
+    }
+  },
+  "product_tree": {
+    "full_product_names": [
+      {
+        "product_id": "CSAFPID-0001",
+        "name": "Generic App 1.0.0"
+      }
+    ]
+  },
+  "vulnerabilities": [
+    {
+      "cve": "CVE-2026-10001",
+      "title": "Remote code execution in the request handler",
+      "cwe": {
+        "id": "CWE-94",
+        "name": "Improper Control of Generation of Code"
+      },
+      "notes": [
+        {
+          "category": "description",
+          "text": "An unauthenticated attacker can execute arbitrary code by sending a crafted request to the affected endpoint."
+        }
+      ],
+      "product_status": {
+        "known_affected": [
+          "CSAFPID-0001"
+        ]
+      },
+      "scores": [
+        {
+          "products": [
+            "CSAFPID-0001"
+          ],
+          "cvss_v3": {
+            "version": "3.1",
+            "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+            "baseScore": 9.8,
+            "baseSeverity": "CRITICAL"
+          }
+        }
+      ],
+      "remediations": [
+        {
+          "category": "vendor_fix",
+          "details": "Upgrade to Generic App 1.0.1.",
+          "product_ids": [
+            "CSAFPID-0001"
+          ],
+          "url": "https://example.com/advisories/EXAMPLE-2026-0001",
+          "restart_required": {
+            "category": "service"
+          }
+        }
+      ],
+      "references": [
+        {
+          "summary": "Vendor advisory",
+          "url": "https://example.com/advisories/EXAMPLE-2026-0001"
+        }
+      ]
+    }
+  ]
+}

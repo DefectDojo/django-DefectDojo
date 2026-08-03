@@ -26,12 +26,21 @@ Record a result for each of the 110 requirements:
 
 ![The requirements workflow](images/06-cmmc-requirements.png)
 
+### Partial credit
+
+A few requirements have a documented partial condition that the methodology scores at a reduced
+deduction rather than the full weight. Where one exists, the **Partial Credit** column lets you
+record it, and the requirement deducts the reduced points instead. `3.13.11` is the example:
+encryption employed, but not FIPS-validated, deducts 3 instead of 5.
+
+Requirements with no documented partial condition always deduct their full weight.
+
 ## What the assessment computes
 
 ### SPRS score
 
-110 minus the weight of every requirement that is not met or merely planned. Weights are 1, 3, or
-5 points, so scores range from 110 down to -203.
+110 minus the deduction for every requirement that is not met or merely planned. Weights are 1, 3,
+or 5 points, so scores range from 110 down to -203.
 
 Requirement 3.12.4 (the System Security Plan requirement) scores as not applicable, per the
 methodology.

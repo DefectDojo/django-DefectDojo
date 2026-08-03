@@ -201,10 +201,14 @@ class GovulncheckParser:
                                     "imports"
                                 ][0]["symbols"],
                             )
-                        d["impact"] = "; ".join(impact) if impact else None
+                        # sorted(): both are sets, and iteration order of a set of
+                        # strings varies per process (PYTHONHASHSEED). description is
+                        # part of hash_code, so an unsorted join gives the same report a
+                        # different hash on every import.
+                        d["impact"] = "; ".join(sorted(impact)) if impact else None
                         d[
                             "description"
-                        ] = f"Vulnerable functions: {'; '.join(vuln_methods)}"
+                        ] = f"Vulnerable functions: {'; '.join(sorted(vuln_methods))}"
                         finding = Finding(**d)
                         if settings.V3_FEATURE_LOCATIONS and d["component_name"]:
                             finding.unsaved_locations.append(
@@ -237,8 +241,11 @@ class GovulncheckParser:
                             formatted_ranges.append(f"type {r['type']}: {'. '.join(event_pairs)}")
                         range_info = "\n ".join(formatted_ranges)
 
+                        # sorted(): a set of strings iterates in a different order in
+                        # every process (PYTHONHASHSEED), and this string goes into
+                        # description, which is hashed into hash_code.
                         vuln_functions = ", ".join(
-                            set(osv_data["affected"][0].get("ecosystem_specific", {}).get("imports", [{}])[0].get("symbols", [])),
+                            sorted(set(osv_data["affected"][0].get("ecosystem_specific", {}).get("imports", [{}])[0].get("symbols", []))),
                         )
 
                         description = (

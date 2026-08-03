@@ -258,6 +258,15 @@ class TestDependencyCheckParser(DojoTestCase):
                 self.assertEqual(items[i].file_path, "log4j-api-2.12.4.jar")
                 self.assertEqual(items[i].date, datetime(2022, 1, 15, 14, 31, 13, 42600, tzinfo=UTC))
 
+    def test_parse_java_6_5_3_multi_cwe(self):
+        """A vulnerability with multiple <cwe> entries populates the primary cwe plus the full unsaved_cwes list."""
+        with (get_unit_tests_scans_path("dependency_check") / "version-6.5.3_multi_cwe_fabricated.xml").open(encoding="utf-8") as test_file:
+            parser = DependencyCheckParser()
+            items = parser.get_findings(test_file, Test())
+            # The multi-CWE vulnerability is the only/first vulnerability and therefore the first finding.
+            self.assertEqual(items[0].cwe, 295)
+            self.assertEqual(items[0].unsaved_cwes, [295, 297])
+
     def test_parse_file_pr6439(self):
         with (get_unit_tests_scans_path("dependency_check") / "PR6439.xml").open(encoding="utf-8") as testfile:
             parser = DependencyCheckParser()
