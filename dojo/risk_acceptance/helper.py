@@ -68,7 +68,25 @@ def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement |
     return None
 
 
-def expire_now(risk_acceptance):
+def note_on_risk_acceptance(risk_acceptance: Risk_Acceptance, user: Dojo_User | None, action: str, *, reason=None) -> None:
+    """
+    Record an action taken against the risk acceptance itself.
+
+    Skipped when there is no user: the scheduled expiry job acts on its own behalf and is
+    already covered by the expiration notification, so a note authored by nobody adds nothing.
+    """
+    if user is None:
+        return
+    risk_acceptance.notes.add(Notes.objects.create(
+        entry=(
+            f"{Dojo_User.generate_full_name(user)} ({user.id}) {action} this risk acceptance"
+            f"{describe_cause(reason=reason)}"
+        ),
+        author=user,
+    ))
+
+
+def expire_now(risk_acceptance, user=None, reason=None):
     logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
     reactivated_findings = []
@@ -101,6 +119,8 @@ def expire_now(risk_acceptance):
     risk_acceptance.expiration_date_handled = timezone.now()
     risk_acceptance.save()
 
+    note_on_risk_acceptance(risk_acceptance, user, "expired", reason=reason)
+
     # the expiry above is the job here, the notification below is best effort
     engagement = engagement_to_notify_about(risk_acceptance)
     if engagement is None:
@@ -116,7 +136,7 @@ def expire_now(risk_acceptance):
                          url=reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)))
 
 
-def reinstate(risk_acceptance, old_expiration_date):
+def reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
     if risk_acceptance.expiration_date_handled:
         logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
@@ -146,6 +166,8 @@ def reinstate(risk_acceptance, old_expiration_date):
 
         # best effort JIRA integration, no status changes, just a comment
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), reinstation_message_creator)
+
+        note_on_risk_acceptance(risk_acceptance, user, "reinstated", reason=reason)
 
     risk_acceptance.expiration_date_handled = None
     risk_acceptance.expiration_date_warned = None
@@ -411,7 +433,14 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, *, perform_save=True) 
         ))
 
 
-def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_comments=True) -> None:
+def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_comments=True, reason=None, source=None) -> None:
+    """
+    Drop a finding's risk acceptance.
+
+    `source` names the mechanism that did it (for example the reimporter closing a fixed
+    finding) and `reason` carries free text. Both end up in the note left on the finding,
+    which is the only record that survives - the membership row itself is removed.
+    """
     logger.debug("unaccepting finding %i:%s if it is currently risk accepted", finding.id, finding)
     if finding.risk_accepted:
         logger.debug("unaccepting finding %i:%s", finding.id, finding)
@@ -438,9 +467,24 @@ def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
             finding.notes.add(Notes.objects.create(
-                entry=(f"{Dojo_User.generate_full_name(user)} ({user.id}) removed a risk exception from this finding"),
+                entry=(
+                    f"{Dojo_User.generate_full_name(user)} ({user.id}) removed a risk exception from this finding"
+                    f"{describe_cause(reason=reason, source=source)}"
+                ),
                 author=user,
             ))
+
+
+def describe_cause(*, reason=None, source=None) -> str:
+    """Render the optional source/reason of an action as a suffix for a note entry."""
+    parts = []
+    if source:
+        parts.append(f"via {source}")
+    if reason:
+        parts.append(f"reason: {reason}")
+    if not parts:
+        return ""
+    return " (" + ", ".join(parts) + ")"
 
 
 def remove_from_any_risk_acceptance(finding):

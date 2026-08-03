@@ -161,6 +161,13 @@ API consumers can observe expiration state on the Risk Acceptance object via the
 
 When a reinstate happens, both `expiration_date_handled` and `expiration_date_warned` are cleared back to `null`, and `expiration_date` holds the date you sent — or today + N days when the reinstate was triggered without a new date.  Tooling that watches Risk Acceptances for state changes can use the `expiration_date_handled` field as the canonical "is this Risk Acceptance currently expired?" flag.
 
+Expiring and reinstating are also available directly, so you do not have to drive them by editing `expiration_date`:
+
+- `POST /api/v2/risk_acceptance/{id}/expire/` expires it now.  Returns `400` if it has already expired.
+- `POST /api/v2/risk_acceptance/{id}/reinstate/` reinstates an expired one, re-accepting the Findings it covers.  Returns `400` if it has not expired.  Send `expiration_date` to choose how long for; omit it to use today + N days.
+
+Both accept an optional `reason`, which is recorded as a note on the Risk Acceptance along with who performed the action.  Both require the same permission as editing the Risk Acceptance.
+
 ## Risk Acceptance Best Practices 
 
 While it is possible to affect Findings within Full Risk Acceptance objects using Simple Risk Acceptance workflows (and vice versa), it is generally preferable to default to either process exclusively rather than having both enabled at once. 
