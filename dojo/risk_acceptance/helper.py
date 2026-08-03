@@ -15,6 +15,25 @@ from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
 
+# Mirrors the System_Settings.risk_acceptance_form_default_days column default. The column is
+# nullable, and get_system_setting() only substitutes its own default when the attribute is
+# missing entirely - a null column still returns None - so every caller needs this fallback to
+# avoid doing arithmetic with None.
+DEFAULT_RISK_ACCEPTANCE_EXPIRATION_DAYS = 180
+
+
+def expiration_days() -> int:
+    """Return the configured expiry window in days, falling back when the setting is unset."""
+    configured = get_system_setting("risk_acceptance_form_default_days")
+    if configured is None:
+        return DEFAULT_RISK_ACCEPTANCE_EXPIRATION_DAYS
+    return configured
+
+
+def default_expiration_date():
+    """Return the expiration date a risk acceptance gets when nobody asked for a specific one."""
+    return timezone.now() + relativedelta(days=expiration_days())
+
 
 def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement | None:
     """
@@ -104,10 +123,9 @@ def reinstate(risk_acceptance, old_expiration_date):
         # The "Reinstate" button has no date to offer and passes the expiration date
         # unchanged, so fall back to the configured default for it. The edit form and
         # the API only reach this point because the caller supplied a new date, which
-        # is already on the instance — recomputing the default would throw it away.
+        # is already on the instance - recomputing the default would throw it away.
         if risk_acceptance.expiration_date == old_expiration_date:
-            expiration_delta_days = get_system_setting("risk_acceptance_form_default_days", 90)
-            risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
+            risk_acceptance.expiration_date = default_expiration_date()
 
         reinstated_findings = []
         for finding in risk_acceptance.accepted_findings.all():

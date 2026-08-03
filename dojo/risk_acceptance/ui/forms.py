@@ -60,7 +60,9 @@ class RiskAcceptanceForm(EditRiskAcceptanceForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        expiration_delta_days = get_system_setting("risk_acceptance_form_default_days")
+        import dojo.risk_acceptance.helper as ra_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        expiration_delta_days = ra_helper.expiration_days()
         logger.debug("expiration_delta_days: %i", expiration_delta_days)
         if expiration_delta_days > 0:
             expiration_date = timezone.now().date() + relativedelta(days=expiration_delta_days)

@@ -143,7 +143,7 @@ If the Risk Acceptance has **already expired** — meaning the periodic job has 
 - Endpoint statuses on those Findings are updated to reflect the re-acceptance.
 - A comment is posted to any linked Jira issues recording the reinstate.
 
-> **Important — your chosen date may be overridden.** When a previously-expired Risk Acceptance is reinstated, the expiration date that actually gets saved is **today + N days**, where `N` is the system setting **Risk Acceptance Form Default Days** (default: 90).  This means the date you typed into the edit form will be replaced during the reinstate.  If you need a specific future expiration date on a reinstated Risk Acceptance, edit the Risk Acceptance a second time after the reinstate completes — at that point the Risk Acceptance is active again and the second edit will be saved as-is.
+The date you enter is the date that is saved.  The system setting **Risk Acceptance Form Default Days** (default: 180) is only used when you did not ask for a particular date — for example when you use the **Reinstate** action, which reinstates the Risk Acceptance without editing its expiration date, and therefore sets it to today + N days.
 
 ### Moving the date backwards or to a date still in the past
 
@@ -159,7 +159,7 @@ API consumers can observe expiration state on the Risk Acceptance object via the
 - `expiration_date_handled` is `null` while the Risk Acceptance is active, and is set to a timestamp when the periodic job has processed the expiration.  A Risk Acceptance is "expired" precisely when `expiration_date_handled` is non-null.
 - `expiration_date_warned` is set when the system has sent the expiration-warning notification.
 
-When a reinstate happens, both `expiration_date_handled` and `expiration_date_warned` are cleared back to `null`, and `expiration_date` is updated to the reinstate target (today + N days).  Tooling that watches Risk Acceptances for state changes can use the `expiration_date_handled` field as the canonical "is this Risk Acceptance currently expired?" flag.
+When a reinstate happens, both `expiration_date_handled` and `expiration_date_warned` are cleared back to `null`, and `expiration_date` holds the date you sent — or today + N days when the reinstate was triggered without a new date.  Tooling that watches Risk Acceptances for state changes can use the `expiration_date_handled` field as the canonical "is this Risk Acceptance currently expired?" flag.
 
 ## Risk Acceptance Best Practices 
 

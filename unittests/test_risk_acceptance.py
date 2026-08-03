@@ -230,6 +230,65 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # findings remain in (expired) risk acceptance
         self.assertTrue(all(finding in ra.accepted_findings.all() for finding in findings))
 
+    def test_reinstate_risk_acceptance_keeps_requested_expiration_date(self):
+        """Extending an expired risk acceptance to a specific future date keeps that date."""
+        self.test_expire_risk_acceptance_findings_active()
+        ra = Risk_Acceptance.objects.last()
+        findings = ra.accepted_findings.all()
+
+        # The edit form and the API serializer both save the new date before calling reinstate,
+        # so reinstate sees the requested date on the instance and the previous one as argument.
+        old_expiration_date = ra.expiration_date
+        requested_expiration_date = timezone.now() + relativedelta(days=30)
+        ra.expiration_date = requested_expiration_date
+        ra.save()
+
+        ra_helper.reinstate(ra, old_expiration_date)
+
+        ra.refresh_from_db()
+        self.assertEqual(ra.expiration_date.date(), requested_expiration_date.date())
+        # and it is genuinely reinstated, not merely re-dated
+        self.assertIsNone(ra.expiration_date_handled)
+        self.assertIsNone(ra.expiration_date_warned)
+        self.assertTrue(self.assert_all_inactive_risk_accepted(findings))
+
+    def test_reinstate_risk_acceptance_defaults_when_no_date_requested(self):
+        """The Reinstate action edits no date, so the configured window applies."""
+        self.test_expire_risk_acceptance_findings_active()
+        ra = Risk_Acceptance.objects.last()
+
+        # what reinstate_risk_acceptance() passes: the date the risk acceptance already carries
+        ra_helper.reinstate(ra, ra.expiration_date)
+
+        ra.refresh_from_db()
+        expected = timezone.now() + relativedelta(days=ra_helper.expiration_days())
+        self.assertEqual(ra.expiration_date.date(), expected.date())
+
+    def test_reinstate_risk_acceptance_defaults_when_requested_date_is_not_in_the_future(self):
+        """A past date would lapse again on the next expiry run, so it is not a reinstatement."""
+        self.test_expire_risk_acceptance_findings_active()
+        ra = Risk_Acceptance.objects.last()
+
+        old_expiration_date = ra.expiration_date
+        ra.expiration_date = timezone.now() - relativedelta(days=3)
+        ra.save()
+
+        ra_helper.reinstate(ra, old_expiration_date)
+
+        ra.refresh_from_db()
+        expected = timezone.now() + relativedelta(days=ra_helper.expiration_days())
+        self.assertEqual(ra.expiration_date.date(), expected.date())
+
+    def test_expiration_days_falls_back_when_setting_is_cleared(self):
+        """The setting is nullable and get_system_setting() passes None straight through."""
+        system_settings = System_Settings.objects.get(no_cache=True)
+        system_settings.risk_acceptance_form_default_days = None
+        system_settings.save()
+
+        self.assertEqual(ra_helper.expiration_days(), ra_helper.DEFAULT_RISK_ACCEPTANCE_EXPIRATION_DAYS)
+        # and the derived date is a real datetime rather than an arithmetic error
+        self.assertGreater(ra_helper.default_expiration_date(), timezone.now())
+
     def create_multiple_ras(self):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data["accepted_findings"] = [2]

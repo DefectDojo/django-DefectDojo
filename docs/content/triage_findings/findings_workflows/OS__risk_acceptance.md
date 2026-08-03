@@ -114,13 +114,13 @@ If the Risk Acceptance has **already expired** — meaning the periodic expirati
 - Every Finding linked to the Risk Acceptance that is currently Active is re-accepted (set back to Risk Accepted / Inactive).
 - A comment is posted to any linked Jira issues recording the reinstate.
 
-> **Important — your chosen date may be overridden.** When a previously-expired Risk Acceptance is reinstated, the expiration date that actually gets saved is **today + N days**, where `N` is the system setting **Risk Acceptance Form Default Days** (default: 90).  This means the date you typed into the edit form will be replaced during the reinstate.  If you need a specific future expiration date on a reinstated Risk Acceptance, edit the Risk Acceptance a second time after the reinstate completes.
+The date you enter is the date that is saved.  The system setting **Risk Acceptance Form Default Days** (default: 180) is only used when you did not ask for a particular date — for example when you use the **Reinstate** action, which reinstates the Risk Acceptance without editing its expiration date, and therefore sets it to today + N days.
 
 ### Moving the date backwards or to a date still in the past
 
 Moving the expiration date to an earlier-but-still-future date has no special behavior — the Risk Acceptance stays active and the new date is saved.
 
-Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior.
+Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior.  On an **already-expired** Risk Acceptance a past date is not a reinstatement at all — the next expiration run would simply lapse it again — so the reinstate falls back to today + N days.
 
 ### What the API exposes
 
