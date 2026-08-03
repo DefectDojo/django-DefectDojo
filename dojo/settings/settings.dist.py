@@ -1270,6 +1270,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Action1 Scan": ["title", "severity", "component_name", "component_version"],
     "Datadog Cloud Security": ["title", "severity", "component_name"],
     "Escape - Connectors Import": ["title", "severity", "endpoints"],
+    "Rapid7 InsightAppSec - Connectors Import": ["unique_id_from_tool"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1451,6 +1452,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Action1 Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Datadog Cloud Security": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Escape - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Rapid7 InsightAppSec - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
