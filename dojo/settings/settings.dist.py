@@ -1251,6 +1251,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # Detectify also breaks the "<Vendor> - Connectors Import" naming. Findings carry a stable
     # uuid, so the connector prefers it and falls back to these hash fields.
     "Detectify Scan": ["title", "severity", "component_name"],
+    # HackerOne and YesWeHack report ids are globally unique on their platforms, so both
+    # connector blocks hash the unique id alone.
+    "HackerOne - Connectors Import": ["unique_id_from_tool"],
+    "YesWeHack - Connectors Import": ["unique_id_from_tool"],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1409,6 +1413,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "DeepSource - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Probely API Import": DEDUPE_ALGO_HASH_CODE,
     "Detectify Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "HackerOne - Connectors Import": DEDUPE_ALGO_HASH_CODE,
+    "YesWeHack - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
