@@ -200,12 +200,16 @@ class TestDetectifyParser(DojoTestCase):
         The location is only appended when it starts with "/".
 
         Otherwise it is not a path and concatenating it would produce a nonsense host.
+
+        Asserted as falsey rather than None: an unset path is "" on the URL location model
+        (CharField(blank=True)) and None on Endpoint, so asserting either one specifically passes
+        under one value of V3_FEATURE_LOCATIONS and fails under the other.
         """
         finding = self.by_uid("detectify_many_vuln.json")["00000000-0000-4000-8000-000000000006"]
         locations = self.get_unsaved_locations(finding)
         self.assertEqual(1, len(locations))
         self.assertEqual("api.example.com", locations[0].host)
-        self.assertIsNone(locations[0].path)
+        self.assertFalse(locations[0].path)
 
     def test_a_full_url_location_is_used_when_there_is_no_host(self):
         finding = self.by_uid("detectify_many_vuln.json")["00000000-0000-4000-8000-000000000003"]
