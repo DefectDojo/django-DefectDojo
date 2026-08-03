@@ -1248,6 +1248,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
         "cwe",
         "mitigation",
     ],
+    # Detectify also breaks the "<Vendor> - Connectors Import" naming. Findings carry a stable
+    # uuid, so the connector prefers it and falls back to these hash fields.
+    "Detectify Scan": ["title", "severity", "component_name"],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1405,6 +1408,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Codacy - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "DeepSource - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Probely API Import": DEDUPE_ALGO_HASH_CODE,
+    "Detectify Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
