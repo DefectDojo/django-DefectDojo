@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: generic-app
+spec:
+  template:
+    spec:
+      containers:
+        - name: server
+          image: generic-app:latest

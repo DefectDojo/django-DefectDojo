@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
@@ -20,6 +21,7 @@ from dojo.user.api.serializer import (
     UserSerializer,
 )
 from dojo.user.authentication import reset_token_for_user
+from dojo.user.utils import user_may_delete_account
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +48,9 @@ class UsersViewSet(
                 "Users may not delete themselves",
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if not user_may_delete_account(request.user, instance):
+            msg = "Only superusers are allowed to delete superusers or staff users."
+            raise PermissionDenied(msg)
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
 

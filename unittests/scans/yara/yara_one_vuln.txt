@@ -1,0 +1,2 @@
+Suspicious_Reverse_Shell_Command [description="Shell command that reconnects to an attacker-controlled host",severity="high",author="generic-ruleset",reference="https://example.com/rules/reverse-shell",date="2026-07-31"] /scan/targets/helper.sh
+0x1f:$bash: bash -i >& /dev/tcp/

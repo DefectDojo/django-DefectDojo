@@ -118,3 +118,16 @@ def get_configuration_permissions_codenames():
         codenames.extend(permission_field.codenames())
 
     return codenames
+
+
+def user_may_delete_account(acting_user, target_user):
+    """
+    Whether acting_user is allowed to delete target_user.
+
+    is_superuser and is_staff are both reserved to superusers on the write path
+    (UserSerializer.validate), and in Open Source is_staff is an unconditional
+    authorization bypass, so deletion honours the same floor.
+    """
+    if acting_user.is_superuser:
+        return True
+    return not (target_user.is_superuser or target_user.is_staff)

@@ -1,0 +1,107 @@
+{
+  "errors": [],
+  "njsscan_version": "0.4.3",
+  "nodejs": {
+    "eval_nodejs": {
+      "files": [
+        {
+          "file_path": "server.js",
+          "match_lines": [
+            14,
+            14
+          ],
+          "match_position": [
+            12,
+            38
+          ],
+          "match_string": "  res.send(eval(req.query.expression));"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')",
+        "description": "User controlled data in eval() or similar functions may result in Server Side Injection or Remote Code Injection",
+        "owasp-web": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "express_xss": {
+      "files": [
+        {
+          "file_path": "server.js",
+          "match_lines": [
+            14,
+            14
+          ],
+          "match_position": [
+            3,
+            39
+          ],
+          "match_string": "  res.send(eval(req.query.expression));"
+        },
+        {
+          "file_path": "server.js",
+          "match_lines": [
+            18,
+            18
+          ],
+          "match_position": [
+            3,
+            75
+          ],
+          "match_string": "  res.send(crypto.createHash('md5').update(req.query.value).digest('hex'));"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "Untrusted User Input in Response will result in Reflected Cross Site Scripting Vulnerability.",
+        "owasp-web": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "generic_os_command_exec": {
+      "files": [
+        {
+          "file_path": "server.js",
+          "match_lines": [
+            8,
+            10
+          ],
+          "match_position": [
+            3,
+            5
+          ],
+          "match_string": "  exec('ls ' + req.query.dir, (err, stdout) => {\n    res.send(stdout);\n  });"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+        "description": "User controlled data in 'child_process.exec()' can result in Remote OS Command Execution.",
+        "owasp-web": "A1: Injection",
+        "severity": "ERROR"
+      }
+    },
+    "node_md5": {
+      "files": [
+        {
+          "file_path": "server.js",
+          "match_lines": [
+            18,
+            18
+          ],
+          "match_position": [
+            12,
+            36
+          ],
+          "match_string": "  res.send(crypto.createHash('md5').update(req.query.value).digest('hex'));"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+        "description": "MD5 is a a weak hash which is known to have collision. Use a strong hashing function.",
+        "owasp-web": "A9: Using Components with Known Vulnerabilities",
+        "severity": "WARNING"
+      }
+    }
+  },
+  "templates": {}
+}

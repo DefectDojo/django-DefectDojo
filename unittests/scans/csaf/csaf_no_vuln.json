@@ -1,0 +1,39 @@
+{
+  "document": {
+    "category": "csaf_security_advisory",
+    "csaf_version": "2.0",
+    "title": "Example Corp advisory with no vulnerabilities",
+    "publisher": {
+      "category": "vendor",
+      "name": "Example Corp",
+      "namespace": "https://example.com"
+    },
+    "tracking": {
+      "id": "EXAMPLE-2026-0000",
+      "status": "final",
+      "version": "1",
+      "initial_release_date": "2026-07-29T00:00:00Z",
+      "current_release_date": "2026-07-29T00:00:00Z",
+      "revision_history": [
+        {
+          "number": "1",
+          "date": "2026-07-29T00:00:00Z",
+          "summary": "Initial release"
+        }
+      ],
+      "generator": {
+        "engine": {
+          "name": "hand-authored for DefectDojo parser tests"
+        }
+      }
+    }
+  },
+  "product_tree": {
+    "full_product_names": [
+      {
+        "product_id": "CSAFPID-0001",
+        "name": "Generic App 1.0.0"
+      }
+    ]
+  }
+}

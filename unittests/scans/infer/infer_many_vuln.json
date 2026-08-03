@@ -1,0 +1,420 @@
+[
+  {
+    "bug_type": "NULLPTR_DEREFERENCE",
+    "qualifier": "`values` could be null (null value originating from line 5) and is dereferenced.",
+    "severity": "ERROR",
+    "category": "Null pointer dereference",
+    "line": 6,
+    "column": 5,
+    "procedure": "leaked_allocation",
+    "procedure_start_line": 4,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 5,
+        "column_number": 19,
+        "description": "in call to `malloc (null case)` (modelled)"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 5,
+        "column_number": 19,
+        "description": "is assigned to the null pointer"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 5,
+        "column_number": 5,
+        "description": "assigned"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 6,
+        "column_number": 5,
+        "description": "invalid access occurs here"
+      }
+    ],
+    "bug_trace_length": 4,
+    "bug_trace_max_depth": 1,
+    "key": "defects.c|leaked_allocation|NULLPTR_DEREFERENCE",
+    "node_key": "dc9dc8b8b677fc98244024494c65c144",
+    "hash": "7564967da68d377cab91acb81406dc8b",
+    "bug_type_hum": "Null Dereference",
+    "extras": {}
+  },
+  {
+    "bug_type": "MEMORY_LEAK_C",
+    "qualifier": "Memory dynamically allocated by `malloc` on line 5 is not freed after the last access at line 7, column 12.",
+    "severity": "ERROR",
+    "category": "Resource leak",
+    "line": 7,
+    "column": 12,
+    "procedure": "leaked_allocation",
+    "procedure_start_line": 4,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 5,
+        "column_number": 19,
+        "description": "allocation part of the trace starts here"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 5,
+        "column_number": 19,
+        "description": "allocated by `malloc` here"
+      },
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 7,
+        "column_number": 12,
+        "description": "memory becomes unreachable here"
+      }
+    ],
+    "bug_trace_length": 3,
+    "bug_trace_max_depth": 1,
+    "key": "defects.c|leaked_allocation|MEMORY_LEAK_C",
+    "node_key": "7d8c45ed01e55aba992fbb0ffb6aa875",
+    "hash": "8c5b8bb04530418ed5410609d8231a6d",
+    "bug_type_hum": "Memory Leak",
+    "extras": {}
+  },
+  {
+    "bug_type": "MEMORY_LEAK_C",
+    "qualifier": "Memory dynamically allocated by `malloc` on line 13 is not freed after the last access at line 15, column 12.",
+    "severity": "ERROR",
+    "category": "Resource leak",
+    "line": 15,
+    "column": 12,
+    "procedure": "null_dereference",
+    "procedure_start_line": 10,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 13,
+        "column_number": 18,
+        "description": "allocation part of the trace starts here"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 13,
+        "column_number": 18,
+        "description": "allocated by `malloc` here"
+      },
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 15,
+        "column_number": 12,
+        "description": "memory becomes unreachable here"
+      }
+    ],
+    "bug_trace_length": 3,
+    "bug_trace_max_depth": 1,
+    "key": "defects.c|null_dereference|MEMORY_LEAK_C",
+    "node_key": "7d8c45ed01e55aba992fbb0ffb6aa875",
+    "hash": "e8171a32dadb0740cc0320370f5effa4",
+    "bug_type_hum": "Memory Leak",
+    "extras": {}
+  },
+  {
+    "bug_type": "NULLPTR_DEREFERENCE",
+    "qualifier": "`values` could be null (null value originating from line 11) and is dereferenced.",
+    "severity": "ERROR",
+    "category": "Null pointer dereference",
+    "line": 15,
+    "column": 12,
+    "procedure": "null_dereference",
+    "procedure_start_line": 10,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 11,
+        "column_number": 5,
+        "description": "is assigned to the null pointer"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 11,
+        "column_number": 5,
+        "description": "assigned"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 15,
+        "column_number": 12,
+        "description": "invalid access occurs here"
+      }
+    ],
+    "bug_trace_length": 3,
+    "bug_trace_max_depth": 1,
+    "key": "defects.c|null_dereference|NULLPTR_DEREFERENCE",
+    "node_key": "e4f1d3e6f9430d22983eb1262df81bc6",
+    "hash": "3a92d814504f39fcf46849386fac2f8a",
+    "bug_type_hum": "Null Dereference",
+    "extras": {}
+  },
+  {
+    "bug_type": "NULLPTR_DEREFERENCE",
+    "qualifier": "`values` could be null (null value originating from line 13) and is dereferenced.",
+    "severity": "ERROR",
+    "category": "Null pointer dereference",
+    "line": 15,
+    "column": 12,
+    "procedure": "null_dereference",
+    "procedure_start_line": 10,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 13,
+        "column_number": 18,
+        "description": "in call to `malloc (null case)` (modelled)"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 13,
+        "column_number": 18,
+        "description": "is assigned to the null pointer"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 13,
+        "column_number": 9,
+        "description": "assigned"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 15,
+        "column_number": 12,
+        "description": "invalid access occurs here"
+      }
+    ],
+    "bug_trace_length": 4,
+    "bug_trace_max_depth": 1,
+    "key": "defects.c|null_dereference|NULLPTR_DEREFERENCE",
+    "node_key": "e4f1d3e6f9430d22983eb1262df81bc6",
+    "hash": "3a92d814504f39fcf46849386fac2f8a",
+    "bug_type_hum": "Null Dereference",
+    "extras": {}
+  },
+  {
+    "bug_type": "PULSE_UNINITIALIZED_VALUE",
+    "qualifier": "a value is read without initialization.",
+    "severity": "ERROR",
+    "category": "Memory error",
+    "line": 15,
+    "column": 12,
+    "procedure": "null_dereference",
+    "procedure_start_line": 10,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 13,
+        "column_number": 18,
+        "description": "allocated by call to `malloc` (modelled)"
+      },
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 13,
+        "column_number": 9,
+        "description": "assigned"
+      },
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 15,
+        "column_number": 12,
+        "description": "read to uninitialized value occurs here"
+      }
+    ],
+    "bug_trace_length": 3,
+    "bug_trace_max_depth": 0,
+    "key": "defects.c|null_dereference|PULSE_UNINITIALIZED_VALUE",
+    "node_key": "e4f1d3e6f9430d22983eb1262df81bc6",
+    "hash": "34dd75fbb674db09610725e381b9f402",
+    "bug_type_hum": "Uninitialized Value",
+    "extras": {}
+  },
+  {
+    "bug_type": "NULLPTR_DEREFERENCE",
+    "qualifier": "`block` could be null (null value originating from line 19) and is dereferenced.",
+    "severity": "ERROR",
+    "category": "Null pointer dereference",
+    "line": 21,
+    "column": 12,
+    "procedure": "use_after_release",
+    "procedure_start_line": 18,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 19,
+        "description": "in call to `malloc (null case)` (modelled)"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 19,
+        "description": "is assigned to the null pointer"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 5,
+        "description": "assigned"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 21,
+        "column_number": 12,
+        "description": "invalid access occurs here"
+      }
+    ],
+    "bug_trace_length": 4,
+    "bug_trace_max_depth": 1,
+    "key": "defects.c|use_after_release|NULLPTR_DEREFERENCE",
+    "node_key": "d7599a9f73d792fbc8e5e954716aba4c",
+    "hash": "ca5f30f08b9f05a1f5eda214296b161b",
+    "bug_type_hum": "Null Dereference",
+    "extras": {}
+  },
+  {
+    "bug_type": "USE_AFTER_FREE",
+    "qualifier": "accessing `block` that was invalidated by call to `free()` on line 20.",
+    "severity": "ERROR",
+    "category": "Memory error",
+    "line": 21,
+    "column": 12,
+    "procedure": "use_after_release",
+    "procedure_start_line": 18,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 19,
+        "description": "invalidation part of the trace starts here"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 19,
+        "description": "allocated by call to `malloc` (modelled)"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 5,
+        "description": "assigned"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 20,
+        "column_number": 5,
+        "description": "was invalidated by call to `free()`"
+      },
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 19,
+        "description": "use-after-lifetime part of the trace starts here"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 19,
+        "description": "allocated by call to `malloc` (modelled)"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 19,
+        "column_number": 5,
+        "description": "assigned"
+      },
+      {
+        "level": 1,
+        "filename": "defects.c",
+        "line_number": 21,
+        "column_number": 12,
+        "description": "invalid access occurs here"
+      }
+    ],
+    "bug_trace_length": 8,
+    "bug_trace_max_depth": 1,
+    "key": "defects.c|use_after_release|USE_AFTER_FREE",
+    "node_key": "d7599a9f73d792fbc8e5e954716aba4c",
+    "hash": "5e1440904ff85af2397baeea23fabb1d",
+    "bug_type_hum": "Use After Free",
+    "extras": {}
+  },
+  {
+    "bug_type": "PULSE_UNINITIALIZED_VALUE",
+    "qualifier": "`value` is read without initialization.",
+    "severity": "ERROR",
+    "category": "Memory error",
+    "line": 26,
+    "column": 12,
+    "procedure": "uninitialised_read",
+    "procedure_start_line": 24,
+    "file": "defects.c",
+    "bug_trace": [
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 24,
+        "column_number": 1,
+        "description": "variable `value` declared here"
+      },
+      {
+        "level": 0,
+        "filename": "defects.c",
+        "line_number": 26,
+        "column_number": 12,
+        "description": "read to uninitialized value occurs here"
+      }
+    ],
+    "bug_trace_length": 2,
+    "bug_trace_max_depth": 0,
+    "key": "defects.c|uninitialised_read|PULSE_UNINITIALIZED_VALUE",
+    "node_key": "2404dc232a7a061bf1b09415ad5116d5",
+    "hash": "3d0b2d609c2eaf1b3d9a7db2158fd54a",
+    "bug_type_hum": "Uninitialized Value",
+    "extras": {}
+  }
+]
