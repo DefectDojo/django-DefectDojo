@@ -42,7 +42,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import OperationalError, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -1816,8 +1816,27 @@ def _get_object_name(obj):
     return obj.__class__.__name__
 
 
-@app.task
-def async_delete_task(model_label, pk, **kwargs):
+# SQLSTATEs for "this transaction lost a concurrency race": 40P01 deadlock_detected
+# and 40001 serialization_failure. Postgres aborts one participant and lets the other
+# commit, so the aborted work is not invalid -- it just has to run again.
+TRANSIENT_DB_CONFLICT_SQLSTATES = frozenset({"40P01", "40001"})
+
+
+def is_transient_db_conflict(exc):
+    """
+    Whether exc is a deadlock or serialization failure, and so safe to retry.
+
+    Django re-raises the driver error as its own OperationalError and keeps the
+    driver exception -- the one carrying the SQLSTATE -- as ``__cause__``, so check
+    both rather than matching on the message text.
+    """
+    return any(
+        getattr(err, "sqlstate", None) in TRANSIENT_DB_CONFLICT_SQLSTATES
+        for err in (exc, exc.__cause__)
+    )
+
+
+def _async_delete_object(model_label, pk):
     """
     Delete an object and all its related objects using the SQL cascade walker.
 
@@ -1829,8 +1848,8 @@ def async_delete_task(model_label, pk, **kwargs):
     efficient bottom-up SQL deletion of all FK-related tables. The top-level
     object is deleted via ORM obj.delete() to fire Django signals.
 
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    Every step refetches or re-filters what it deletes, so calling this again
+    after a partial failure resumes from whatever is left.
     """
     from django.apps import apps  # noqa: PLC0415
 
@@ -1906,6 +1925,48 @@ def async_delete_task(model_label, pk, **kwargs):
         perform_product_grading(product)
 
     logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)
+
+
+# Seconds before the first retry; doubled on each subsequent attempt.
+ASYNC_DELETE_RETRY_DELAY = 5
+
+
+@app.task(bind=True)
+def async_delete_task(self, model_label, pk, **kwargs):
+    """
+    Celery entry point for cascade deletion, retrying transient DB conflicts.
+
+    Bulk deletions run several of these concurrently and they contend on rows shared
+    across the objects being deleted (tag bookkeeping, grading), so Postgres picks a
+    deadlock victim. The victim's work is not wrong, only rolled back, so retry it
+    instead of reporting a failed delete and leaving the object partly removed.
+
+    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
+    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    """
+    try:
+        _async_delete_object(model_label, pk)
+    except OperationalError as exc:
+        if not is_transient_db_conflict(exc):
+            raise
+        max_retries = get_setting("ASYNC_OBJECT_DELETE_MAX_CONFLICT_RETRIES")
+        retries = self.request.retries
+        if retries >= max_retries:
+            logger.error(
+                "ASYNC_DELETE: giving up on %s pk=%s after %s transient DB conflict(s): %s",
+                model_label, pk, retries, exc,
+            )
+            raise
+        # Stagger tasks that deadlocked against each other so they do not collide
+        # again on the retry. The pk is a stable per-task offset, so no randomness
+        # is needed to spread them out.
+        backoff = ASYNC_DELETE_RETRY_DELAY * (2 ** retries)
+        countdown = backoff + backoff * (pk % 100) / 100
+        logger.warning(
+            "ASYNC_DELETE: transient DB conflict on %s pk=%s, retry %s/%s in %.1fs: %s",
+            model_label, pk, retries + 1, max_retries, countdown, exc,
+        )
+        raise self.retry(exc=exc, countdown=countdown, max_retries=max_retries)
 
 
 class async_delete:

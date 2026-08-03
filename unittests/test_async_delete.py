@@ -8,14 +8,19 @@ The original bug was that @app.task decorated instance methods didn't properly h
 the injected kwargs, causing TypeError for unexpected keyword arguments.
 """
 import logging
+from unittest.mock import patch
 
+from celery.exceptions import Retry
 from crum import impersonate
 from django.contrib.auth.models import User
+from django.db import OperationalError
 from django.test import override_settings
 from django.utils import timezone
+from parameterized import parameterized
+from psycopg.errors import DeadlockDetected, QueryCanceled, SerializationFailure
 
 from dojo.models import Engagement, Finding, Product, Product_Type, Test, Test_Type, UserContactInfo
-from dojo.utils import async_delete
+from dojo.utils import async_delete, async_delete_task, is_transient_db_conflict
 
 from .dojo_test_case import DojoTestCase
 
@@ -295,4 +300,151 @@ class TestAsyncDelete(DojoTestCase):
             async_delete.get_object_name(Product),
             "Product",
             "get_object_name should work with model class",
+        )
+
+
+class TestAsyncDeleteTransientConflictRetry(DojoTestCase):
+
+    # Regression: a Postgres deadlock raised while cascade-deleting aborted
+    # async_delete_task outright, so the object was left partly deleted and the
+    # failure surfaced to the operator instead of the task simply running again.
+
+    def setUp(self):
+        super().setUp()
+        self.system_settings(enable_product_grade=False)
+        self.product_type = Product_Type.objects.create(name="Product Type for conflict retry")
+
+    def tearDown(self):
+        Product.objects.filter(prod_type=self.product_type).delete()
+        self.product_type.delete()
+        super().tearDown()
+
+    def _create_product(self, name="Product for conflict retry"):
+        return Product.objects.create(name=name, description="d", prod_type=self.product_type)
+
+    @staticmethod
+    def _wrapped_db_error(driver_error_class):
+        """
+        Build the exception shape the cloud reports show.
+
+        Django re-raises the driver error as its own OperationalError and keeps the
+        psycopg exception -- the one carrying the SQLSTATE -- as ``__cause__``.
+        """
+        cause = driver_error_class("deadlock detected")
+        exc = OperationalError(str(cause))
+        exc.__cause__ = cause
+        return exc
+
+    @parameterized.expand([
+        ("deadlock", DeadlockDetected, True),
+        ("serialization_failure", SerializationFailure, True),
+        # Control: a statement timeout is not a lost concurrency race. Retrying it
+        # would just re-run an already too-slow delete, so it must not be retried.
+        ("statement_timeout", QueryCanceled, False),
+    ])
+    def test_is_transient_db_conflict(self, case_name, driver_error_class, expected):
+        exc = self._wrapped_db_error(driver_error_class)
+        self.assertEqual(
+            is_transient_db_conflict(exc), expected,
+            msg=f"{case_name} (sqlstate={exc.__cause__.sqlstate}) classified as "
+                f"{is_transient_db_conflict(exc)}, expected {expected}",
+        )
+
+    def test_is_transient_db_conflict_without_driver_cause(self):
+        """An OperationalError with no driver cause carries no SQLSTATE, so it is not retryable."""
+        self.assertFalse(
+            is_transient_db_conflict(OperationalError("connection closed")),
+            msg="an OperationalError without a SQLSTATE must not be treated as retryable",
+        )
+
+    @parameterized.expand([
+        ("deadlock", DeadlockDetected),
+        ("serialization_failure", SerializationFailure),
+    ])
+    @override_settings(ASYNC_OBJECT_DELETE=True)
+    def test_transient_conflict_retries_instead_of_failing(self, case_name, driver_error_class):
+        """The reported failure: the cascade step raises a deadlock, so the task must retry."""
+        product = self._create_product()
+        exc = self._wrapped_db_error(driver_error_class)
+
+        with patch(
+            "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+        ), patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+            async_delete_task.push_request(retries=0)
+            try:
+                with self.assertRaises(Retry):
+                    async_delete_task("dojo.product", product.pk)
+            finally:
+                async_delete_task.pop_request()
+
+        mock_retry.assert_called_once()
+        countdown = mock_retry.call_args.kwargs["countdown"]
+        self.assertGreater(
+            countdown, 0,
+            msg=f"{case_name}: retry must be delayed so the winning transaction commits "
+                f"first, got countdown={countdown}",
+        )
+
+    @override_settings(ASYNC_OBJECT_DELETE=True)
+    def test_non_conflict_db_error_is_not_retried(self):
+        """Control: an error that is not a lost concurrency race still fails loudly."""
+        product = self._create_product()
+        exc = self._wrapped_db_error(QueryCanceled)
+
+        with patch(
+            "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+        ), patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+            async_delete_task.push_request(retries=0)
+            try:
+                with self.assertRaises(OperationalError):
+                    async_delete_task("dojo.product", product.pk)
+            finally:
+                async_delete_task.pop_request()
+
+        mock_retry.assert_not_called()
+
+    @override_settings(ASYNC_OBJECT_DELETE=True, ASYNC_OBJECT_DELETE_MAX_CONFLICT_RETRIES=2)
+    def test_deadlock_surfaces_once_retries_are_exhausted(self):
+        """A deadlock that keeps repeating must still be reported rather than retried forever."""
+        product = self._create_product()
+        exc = self._wrapped_db_error(DeadlockDetected)
+
+        with patch(
+            "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+        ), patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+            async_delete_task.push_request(retries=2)
+            try:
+                with self.assertRaises(OperationalError):
+                    async_delete_task("dojo.product", product.pk)
+            finally:
+                async_delete_task.pop_request()
+
+        mock_retry.assert_not_called()
+
+    @override_settings(ASYNC_OBJECT_DELETE=True)
+    def test_retry_delay_grows_with_each_attempt(self):
+        """Successive attempts back off, so a busy table is not hammered by the retries."""
+        product = self._create_product()
+        exc = self._wrapped_db_error(DeadlockDetected)
+        countdowns = []
+
+        for attempt in (0, 1, 2):
+            with patch(
+                "dojo.utils_cascade_delete.cascade_delete_related_objects", side_effect=exc,
+            ), patch.object(async_delete_task, "retry", side_effect=Retry()) as mock_retry:
+                async_delete_task.push_request(retries=attempt)
+                try:
+                    with self.assertRaises(Retry):
+                        async_delete_task("dojo.product", product.pk)
+                finally:
+                    async_delete_task.pop_request()
+            countdowns.append(mock_retry.call_args.kwargs["countdown"])
+
+        self.assertEqual(
+            countdowns, sorted(countdowns),
+            msg=f"countdowns must be non-decreasing across attempts, got {countdowns}",
+        )
+        self.assertGreater(
+            countdowns[-1], countdowns[0],
+            msg=f"backoff must grow between the first and last attempt, got {countdowns}",
         )

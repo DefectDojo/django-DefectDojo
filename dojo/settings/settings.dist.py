@@ -251,6 +251,10 @@ env = environ.FileAwareEnv(
     DD_ASYNC_OBJECT_DELETE=(bool, False),
     # The number of objects to be deleted per celeryworker
     DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE=(int, 100),
+    # How often an async delete is retried when Postgres aborts it as a deadlock or
+    # serialization-failure victim. Concurrent deletes contend on rows shared by the
+    # objects being removed, so the victim only needs to run again.
+    DD_ASYNC_OBJECT_DELETE_MAX_CONFLICT_RETRIES=(int, 3),
     # When enabled, display the preview of objects to be deleted. This can take a long time to render
     # for very large objects
     DD_DELETE_PREVIEW=(bool, True),
@@ -1770,6 +1774,9 @@ SONARQUBE_API_PARSER_HOTSPOTS = env("DD_SONARQUBE_API_PARSER_HOTSPOTS")
 ASYNC_OBJECT_DELETE = env("DD_ASYNC_OBJECT_DELETE")
 # The number of objects to be deleted per celeryworker
 ASYNC_OBEJECT_DELETE_CHUNK_SIZE = env("DD_ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
+# How often an async delete is retried after Postgres aborts it as a deadlock or
+# serialization-failure victim
+ASYNC_OBJECT_DELETE_MAX_CONFLICT_RETRIES = env("DD_ASYNC_OBJECT_DELETE_MAX_CONFLICT_RETRIES")
 # When enabled, display the preview of objects to be deleted. This can take a long time to render
 # for very large objects
 DELETE_PREVIEW = env("DD_DELETE_PREVIEW")
