@@ -1282,6 +1282,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Bright - Connectors Import": ["title", "severity", "endpoints"],
     "Microsoft Defender for Cloud - Connectors Import": ["unique_id_from_tool"],
     "Akto Scan": ["title", "severity", "endpoints", "vuln_id_from_tool"],
+    "Holm Security Scan": ["title", "severity", "endpoints", "vuln_id_from_tool"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1471,6 +1472,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Bright - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Microsoft Defender for Cloud - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Akto Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Holm Security Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
