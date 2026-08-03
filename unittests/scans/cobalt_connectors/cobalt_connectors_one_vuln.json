@@ -1,0 +1,65 @@
+{
+  "data": [
+    {
+      "resource": {
+        "id": "fnd_0000000001",
+        "title": "Authenticated SQL injection in the reporting export",
+        "description": "The date range parameters are concatenated into a SQL query.",
+        "state": "need_fix",
+        "severity": "Critical",
+        "impact": 3,
+        "likelihood": 3,
+        "severity_justification": "Direct database access with an authenticated low-privilege account.",
+        "suggested_fix": "Use parameterised queries for the date range.",
+        "proof_of_concept": "1. Log in as a standard user.\n2. Request the export with a crafted range.",
+        "affected_targets": [
+          "https://app.example.com/reports/export"
+        ],
+        "log": [
+          {
+            "action": "created",
+            "timestamp": "2026-07-15T09:00:00.000Z"
+          },
+          {
+            "action": "state_changed",
+            "timestamp": "2026-07-18T14:30:00.000Z"
+          }
+        ],
+        "asset_id": "ast_0000000001",
+        "created_at": "2026-07-16T00:00:00.000Z",
+        "updated_at": "2026-07-18T14:30:00.000Z",
+        "cwes": [
+          {
+            "id": 89,
+            "name": "SQL Injection"
+          }
+        ],
+        "cves": [
+          {
+            "cve_id": "CVE-2000-0001"
+          }
+        ],
+        "cvsss": [
+          {
+            "score": 7.0,
+            "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P",
+            "version": "2.0"
+          },
+          {
+            "score": 8.8,
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+            "version": "3.1"
+          }
+        ]
+      },
+      "links": {
+        "ui": {
+          "url": "https://app.example.com/findings/fnd_0000000001"
+        }
+      }
+    }
+  ],
+  "pagination": {
+    "next_page": ""
+  }
+}

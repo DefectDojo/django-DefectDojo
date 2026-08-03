@@ -1,0 +1,147 @@
+{
+  "data": [
+    {
+      "resource": {
+        "id": "fnd_0000000001",
+        "title": "Authenticated SQL injection in the reporting export",
+        "description": "The date range parameters are concatenated into a SQL query.",
+        "state": "need_fix",
+        "severity": "Critical",
+        "impact": 3,
+        "likelihood": 3,
+        "severity_justification": "Direct database access with an authenticated low-privilege account.",
+        "suggested_fix": "Use parameterised queries for the date range.",
+        "proof_of_concept": "1. Log in as a standard user.\n2. Request the export with a crafted range.",
+        "affected_targets": ["https://app.example.com/reports/export"],
+        "log": [
+          {"action": "created", "timestamp": "2026-07-15T09:00:00.000Z"},
+          {"action": "state_changed", "timestamp": "2026-07-18T14:30:00.000Z"}
+        ],
+        "asset_id": "ast_0000000001",
+        "created_at": "2026-07-16T00:00:00.000Z",
+        "updated_at": "2026-07-18T14:30:00.000Z",
+        "cwes": [{"id": 89, "name": "SQL Injection"}],
+        "cves": [{"cve_id": "CVE-2000-0001"}],
+        "cvsss": [
+          {"score": 7.0, "vector": "AV:N/AC:L/Au:S/C:P/I:P/A:P", "version": "2.0"},
+          {"score": 8.8, "vector": "CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", "version": "3.1"}
+        ]
+      },
+      "links": {"ui": {"url": "https://app.example.com/findings/fnd_0000000001"}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000002",
+        "title": "Fix verified",
+        "description": "Header was missing.",
+        "state": "valid_fix",
+        "severity": "Low",
+        "impact": 1,
+        "likelihood": 1,
+        "suggested_fix": "Add the header.",
+        "proof_of_concept": "",
+        "affected_targets": [],
+        "log": [{"action": "created", "timestamp": "2026-07-10T09:00:00.000Z"}],
+        "created_at": "2026-07-10T09:00:00.000Z",
+        "cwes": [],
+        "cves": [],
+        "cvsss": []
+      },
+      "links": {"ui": {"url": "https://app.example.com/findings/fnd_0000000002"}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000003",
+        "title": "Determined to be a false positive",
+        "description": "",
+        "state": "invalid",
+        "severity": "Medium",
+        "impact": 0,
+        "likelihood": 0,
+        "affected_targets": [],
+        "log": [],
+        "created_at": "2026-07-11T09:00:00.000Z",
+        "cwes": [],
+        "cves": [],
+        "cvsss": []
+      },
+      "links": {"ui": {"url": ""}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000004",
+        "title": "Duplicate of another finding",
+        "state": "duplicate",
+        "severity": "High",
+        "affected_targets": ["app.example.com"],
+        "log": [],
+        "created_at": "2026-07-12T09:00:00.000Z"
+      },
+      "links": {"ui": {"url": "https://app.example.com/findings/fnd_0000000004"}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000005",
+        "title": "Risk accepted by the customer",
+        "state": "wont_fix",
+        "severity": "Medium",
+        "affected_targets": [],
+        "log": [],
+        "created_at": "2026-07-13T09:00:00.000Z"
+      },
+      "links": {"ui": {"url": ""}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000006",
+        "title": "Outside the pentest scope",
+        "state": "out_of_scope",
+        "severity": "Low",
+        "affected_targets": [],
+        "log": [],
+        "created_at": "2026-07-14T09:00:00.000Z"
+      },
+      "links": {"ui": {"url": ""}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000007",
+        "title": "Not yet verified by the pentest team",
+        "state": "new",
+        "severity": "not-a-severity",
+        "affected_targets": [],
+        "log": [],
+        "created_at": "not-a-timestamp"
+      },
+      "links": {"ui": {"url": ""}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000008",
+        "title": "Carried over from the previous pentest",
+        "state": "carried_over",
+        "severity": "High",
+        "affected_targets": [],
+        "log": [
+          {"action": "created", "timestamp": "2026-01-05T09:00:00.000Z"},
+          {"action": "carried_over", "timestamp": "2026-07-01T09:00:00.000Z"}
+        ],
+        "created_at": "2026-07-01T09:00:00.000Z"
+      },
+      "links": {"ui": {"url": ""}}
+    },
+    {
+      "resource": {
+        "id": "fnd_0000000009",
+        "title": "A state Cobalt added later",
+        "state": "some_new_state",
+        "severity": "High",
+        "affected_targets": [],
+        "log": [],
+        "created_at": "2026-07-02T09:00:00.000Z"
+      },
+      "links": {"ui": {"url": ""}}
+    }
+  ],
+  "pagination": {"next_page": ""}
+}
