@@ -1259,6 +1259,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Google Cloud SCC - Connectors Import": ["unique_id_from_tool"],
     "Fairwinds Insights - Connectors Import": ["title", "severity", "component_name"],
     "AccuKnox - Connectors Import": ["title", "severity", "description"],
+    "Halo Security - Connectors Import": ["title", "severity", "endpoints"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1429,6 +1430,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Google Cloud SCC - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Fairwinds Insights - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "AccuKnox - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Halo Security - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
