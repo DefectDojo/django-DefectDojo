@@ -34,7 +34,10 @@ class Compliance:
         mitigation += "\n" + finding.get("Remediation", {}).get("Recommendation", {}).get("Url", "")
         description = "This is a Security Hub Finding \n" + finding.get("Description", "") + "\n"
         description += f"**AWS Finding ARN:** {finding_id}\n"
-        description += f"**Resource IDs:** {', '.join(set(resource_arns))}\n"
+        # sorted(): a set of strings iterates in a different order in every process
+        # (PYTHONHASHSEED). description is hashed into hash_code, so an unsorted join
+        # gives the same report a different hash on every import.
+        description += f"**Resource IDs:** {', '.join(sorted(set(resource_arns)))}\n"
         description += f"**AwsAccountId:** {finding.get('AwsAccountId', '')}\n"
         if finding.get("Region"):
             description += f"**Region:** {finding.get('Region', '')}\n"

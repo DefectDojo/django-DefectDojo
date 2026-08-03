@@ -25,6 +25,7 @@ class StateChangingActionsRequirePostTest(DojoTestCase):
             ("risk_unaccept_finding", (2,)),
             ("reopen_finding", (2,)),
             ("touch_finding", (2,)),
+            ("mktemplate", (2,)),
             ("close_engagement", (1,)),
             ("reopen_engagement", (1,)),
             ("expire_risk_acceptance", (1, 1)),

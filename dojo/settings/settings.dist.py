@@ -1075,7 +1075,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Aqua Scan": ["severity", "vulnerability_ids", "component_name", "component_version"],
     "Bandit Scan": ["file_path", "line", "vuln_id_from_tool"],
     "Burp Enterprise Scan": ["title", "severity", "cwe"],
-    "Burp Suite DAST": ["title", "severity", "cwe"],
+    # "Burp Suite DAST Scan" is the renamed "Burp Enterprise Scan" (same parser, see
+    # dojo/tools/burp_suite_dast). The key here was "Burp Suite DAST" -- a name no parser
+    # ever produces -- so the list below never applied to the renamed scan type and it fell
+    # back to the legacy hash, giving the two names different identities for the same tool.
+    "Burp Suite DAST Scan": ["title", "severity", "cwe"],
     "Burp Scan": ["title", "severity", "vuln_id_from_tool"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
@@ -1658,6 +1662,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Qualys VMDR": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Alert Logic Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "PICUS Scan": DEDUPE_ALGO_HASH_CODE,
+    # These three carry a curated HASHCODE_FIELDS_PER_SCANNER list but had no entry here, so
+    # they deduplicated with the legacy algorithm and their hash_code -- correctly computed
+    # from the configured fields -- was never what matching consulted.
+    "Snyk Code Scan": DEDUPE_ALGO_HASH_CODE,
+    "Cycognito Scan": DEDUPE_ALGO_HASH_CODE,
+    "n0s1 Scanner": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

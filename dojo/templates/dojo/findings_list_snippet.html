@@ -464,9 +464,10 @@
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"add" %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'mktemplate' finding.id %}" role="menuitem">
+                                                                <a href="#" role="menuitem" onclick="this.nextElementSibling.submit(); return false;">
                                                                     <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                                 </a>
+                                                                <form method="post" action="{% url 'mktemplate' finding.id %}">{% csrf_token %}</form>
                                                             </li>
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"edit" %}

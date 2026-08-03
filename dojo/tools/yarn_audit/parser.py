@@ -59,8 +59,11 @@ class YarnAuditParser:
             childissue = child.get("Issue")
             childseverity = child.get("Severity")
             child_vuln_version = child.get("Vulnerable Versions")
-            child_tree_versions = ", ".join(set(child.get("Tree Versions")))
-            child_dependents = ", ".join(set(child.get("Dependents")))
+            # sorted(): set iteration order varies per process (PYTHONHASHSEED).
+            # "Yarn Audit Scan" declares hash fields that cover neither description nor
+            # component_version, so neither is hashed -- but both flap between imports.
+            child_tree_versions = ", ".join(sorted(set(child.get("Tree Versions"))))
+            child_dependents = ", ".join(sorted(set(child.get("Dependents"))))
             description += childissue + "\n"
             description += "**Vulnerable Versions:** " + child_vuln_version + "\n"
             description += "**Dependents:** " + child_dependents + "\n"
@@ -81,7 +84,7 @@ class YarnAuditParser:
             if value is not None:
                 dojo_finding.component_name = value
                 if settings.V3_FEATURE_LOCATIONS:
-                    for version in set(child.get("Tree Versions")):
+                    for version in sorted(set(child.get("Tree Versions"))):
                         dojo_finding.unsaved_locations.append(
                             LocationData.dependency(purl_type="npm", name=value, version=str(version)),
                         )
