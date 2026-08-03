@@ -1256,6 +1256,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "HackerOne - Connectors Import": ["unique_id_from_tool"],
     "YesWeHack - Connectors Import": ["unique_id_from_tool"],
     "Intigriti - Connectors Import": ["unique_id_from_tool"],
+    "Google Cloud SCC - Connectors Import": ["unique_id_from_tool"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1423,6 +1424,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "HackerOne - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "YesWeHack - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Intigriti - Connectors Import": DEDUPE_ALGO_HASH_CODE,
+    "Google Cloud SCC - Connectors Import": DEDUPE_ALGO_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
