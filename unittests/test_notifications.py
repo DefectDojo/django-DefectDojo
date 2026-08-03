@@ -207,6 +207,18 @@ class TestNotifications(DojoTestCase):
             create_notification(event="user_mentioned", title="user_mentioned", recipients=["admin"])
             self.assertEqual(mock_manager.send_alert_notification.call_count, last_count + 1)
 
+    def test_fallback_template_escapes_description(self):
+        # events without a channel template of their own render through other.tpl
+        payload = '<a href="https://evil.example/phish">click</a>'
+        manager = AlertNotificationManger()
+        for channel in ("mail", "slack", "alert"):
+            with self.subTest(channel=channel):
+                message = manager._create_notification_message(
+                    "finding_added", None, channel, {"description": payload, "title": "t", "url": None},
+                )
+                self.assertNotIn(payload, message)
+                self.assertIn("&lt;a href=", message)
+
 
 @skip("Legacy authorization changes the recipient-filtering count: under "
       "RBAC, get_authorized_users_for_product_and_product_type expanded "
