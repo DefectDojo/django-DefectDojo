@@ -1219,6 +1219,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # finding and stop deduplicating against each other.
     "Socket - Connectors Import": ["title", "severity", "component_name"],
     "Lacework - Connectors Import": ["title", "severity", "component_name"],
+    # Likewise copied verbatim from the CrowdStrike Spotlight block. Note it lists
+    # unique_id_from_tool among the hash fields as well as pairing with the
+    # unique_id_from_tool_or_hash_code algorithm; that is what the connector configures.
+    "CrowdStrike:Spotlight - Connectors Import": [
+        "unique_id_from_tool",
+        "title",
+        "severity",
+        "vulnerability_ids",
+    ],
     # The network scanners below describe what they found in the description: a response size, a
     # detected version, a scan timestamp, or - for sqlmap - a payload built from random numbers.
     # All of those change between two scans of an unchanged target, so the legacy algorithm (which
@@ -1369,6 +1378,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Mix Audit Scan": DEDUPE_ALGO_HASH_CODE,
     "Socket - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Lacework - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "CrowdStrike:Spotlight - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Policies Report": DEDUPE_ALGO_HASH_CODE,
