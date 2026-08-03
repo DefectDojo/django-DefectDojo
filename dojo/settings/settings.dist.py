@@ -1285,6 +1285,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Holm Security Scan": ["title", "severity", "endpoints", "vuln_id_from_tool"],
     "Klocwork Scan": ["title", "severity", "file_path", "vuln_id_from_tool"],
     "Qwiet Scan": ["title", "severity", "file_path", "cwe", "component_name"],
+    "Automox Scan": ["title", "severity", "component_name"],
+    "BigID Scan": ["title", "severity", "component_name"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1477,6 +1479,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Holm Security Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Klocwork Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Qwiet Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Automox Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "BigID Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
