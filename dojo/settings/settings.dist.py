@@ -1272,6 +1272,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Escape - Connectors Import": ["title", "severity", "endpoints"],
     "Rapid7 InsightAppSec - Connectors Import": ["unique_id_from_tool"],
     "Intruder API Import": ["unique_id_from_tool", "title", "severity"],
+    "NowSecure": ["title", "severity", "component_name"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1455,6 +1456,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Escape - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Rapid7 InsightAppSec - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Intruder API Import": DEDUPE_ALGO_HASH_CODE,
+    "NowSecure": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
