@@ -221,6 +221,30 @@ class TestFleetVulnerabilitiesParser(DojoTestCase):
         ]}]})
         self.assertEqual(0, len(self.get_unsaved_locations(findings[0])))
 
+    def test_a_host_name_that_cannot_be_a_host_records_no_endpoint(self):
+        """
+        Fleet's display name is free text - "Jane's MacBook" is a normal value.
+
+        DefectDojo's host field would reject it, and a ValidationError fails the whole import rather
+        than the one finding, so the endpoint is dropped instead. The name is still in the
+        description's Host line.
+        """
+        findings = self.parse_string({"hosts": [{
+            "id": 1, "display_name": "Someone's MacBook Pro", "software": [
+                {"name": "pkg", "version": "1.0", "vulnerabilities": [{"cve": "CVE-2000-0001"}]},
+            ],
+        }]})
+        self.assertEqual([], self.get_unsaved_locations(findings[0]))
+        self.assertIn("**Host:** Someone's MacBook Pro", findings[0].description)
+
+    def test_an_ipv6_address_is_accepted_as_a_host(self):
+        findings = self.parse_string({"hosts": [{
+            "id": 1, "primary_ip": "2001:db8::1", "software": [
+                {"name": "pkg", "version": "1.0", "vulnerabilities": [{"cve": "CVE-2000-0001"}]},
+            ],
+        }]})
+        self.assertEqual("2001:db8::1", self.get_unsaved_locations(findings[0])[0].host)
+
     def test_single_host_and_bare_list_shapes(self):
         """Fleet's list response nests hosts under "hosts" and its single-host response under "host"."""
         host = {"id": 1, "hostname": "h.example.com", "software": [

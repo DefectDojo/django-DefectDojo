@@ -1,6 +1,8 @@
 import json
+import re
 from contextlib import suppress
 from datetime import datetime
+from ipaddress import ip_address
 
 from django.conf import settings
 
@@ -23,6 +25,11 @@ SEVERITY_BY_LABEL = {
 CVSS_CRITICAL_FLOOR = 9.0
 CVSS_HIGH_FLOOR = 7.0
 CVSS_MEDIUM_FLOOR = 4.0
+
+
+# The host DefectDojo accepts: letters, digits, dot, hyphen, underscore or plus, at least two
+# characters - or an IP address. See Endpoint.clean().
+HOST_PATTERN = re.compile(r"^[A-Za-z0-9_\-+][A-Za-z0-9_.\-+]+$")
 
 
 class ElasticSecurityDocuments:
@@ -213,13 +220,29 @@ class ElasticSecurityDocuments:
         identity, falling back to the resource or pod name.
         """
         name = self.host_identity(source) or self.asset_name(source)
-        if not name:
+        if not name or not self.usable_host(name):
             return
         if settings.V3_FEATURE_LOCATIONS:
             finding.unsaved_locations.append(LocationData.url(host=name))
         else:
             # TODO: Delete this after the move to Locations
             finding.unsaved_endpoints.append(Endpoint(host=name))
+
+    def usable_host(self, value):
+        """
+        Whether DefectDojo will accept this as an endpoint host.
+
+        A host is letters, digits, dot, hyphen, underscore or plus, or an IP address. Anything else -
+        a path, a space, a container image tag - makes Endpoint.clean() raise, and that fails the
+        whole import rather than the one finding, so it is dropped here instead. The value is still
+        reported in the description, so nothing is lost.
+        """
+        if HOST_PATTERN.match(value):
+            return True
+        with suppress(ValueError):
+            ip_address(value)
+            return True
+        return False
 
     def flex_float(self, value):
         """Elastic sends these numbers as either a number or a numeric string."""

@@ -2,6 +2,8 @@ import json
 import re
 from contextlib import suppress
 from datetime import UTC, datetime
+from ipaddress import ip_address
+from urllib.parse import urlparse
 
 from django.conf import settings
 
@@ -29,6 +31,11 @@ CWE_PATTERN = re.compile(r"CWE-(\d+)", re.IGNORECASE)
 # An item Codacy has ignored for this reason is a false positive rather than a closed finding. The
 # comparison strips spaces, so "False Positive" and "falsepositive" both match.
 FALSE_POSITIVE_REASON = "falsepositive"
+
+
+# The host DefectDojo accepts: letters, digits, dot, hyphen, underscore or plus, at least two
+# characters - or an IP address. See Endpoint.clean().
+HOST_PATTERN = re.compile(r"^[A-Za-z0-9_\-+][A-Za-z0-9_.\-+]+$")
 
 
 class CodacyParser:
@@ -171,18 +178,53 @@ class CodacyParser:
         """
         Record the scanned application or target, for the item types that have one.
 
-        The connector emits this as an endpoint string; here the host is set directly, using the
-        locations idiom so it survives under either value of V3_FEATURE_LOCATIONS.
+        The connector emits this as an endpoint string and lets DefectDojo parse it. Here it is parsed
+        first, because the value is not always a bare host: a DAST item names an application, which
+        may be a URL, and a container item names an image, which carries a repository path. Putting
+        either in the host field unparsed fails validation for the whole import.
         """
         for key in ("application", "affectedTargets"):
             target = (item.get(key) or "").strip()
             if target:
-                if settings.V3_FEATURE_LOCATIONS:
-                    finding.unsaved_locations.append(LocationData.url(host=target))
-                else:
-                    # TODO: Delete this after the move to Locations
-                    finding.unsaved_endpoints.append(Endpoint(host=target))
+                self.attach_location(finding, target)
                 return
+
+    def attach_location(self, finding, target):
+        parsed = urlparse(target if "//" in target else f"//{target}")
+        try:
+            port = parsed.port
+        except ValueError:
+            # An image tag ("registry/image:1.2") is not a port, and the tag belongs to the path.
+            return
+        host = parsed.hostname or ""
+        if not host or not self.usable_host(host):
+            return
+        path = parsed.path.lstrip("/")
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(LocationData.url(
+                host=host, protocol=parsed.scheme or None, port=port, path=path,
+            ))
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(Endpoint(
+                host=host, protocol=parsed.scheme or None, port=port, path=path or None,
+            ))
+
+    def usable_host(self, value):
+        """
+        Whether DefectDojo will accept this as an endpoint host.
+
+        A host is letters, digits, dot, hyphen, underscore or plus, or an IP address. Anything else -
+        a path, a space, a container image tag - makes Endpoint.clean() raise, and that fails the
+        whole import rather than the one finding, so it is dropped here instead. The value is still
+        reported in the description, so nothing is lost.
+        """
+        if HOST_PATTERN.match(value):
+            return True
+        with suppress(ValueError):
+            ip_address(value)
+            return True
+        return False
 
     def title(self, item):
         """Codacy's title when it has one, else a composed one, else the item id."""

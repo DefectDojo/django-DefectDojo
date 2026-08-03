@@ -12,6 +12,9 @@ class TestYesWeHackParser(DojoTestCase):
         with (get_unit_tests_scans_path("yeswehack") / filename).open(encoding="utf-8") as file:
             return list(YesWeHackParser().get_findings(file, Test()))
 
+    def parse_string(self, payload):
+        return list(YesWeHackParser().get_findings(io.StringIO(json.dumps(payload)), Test()))
+
     def by_uid(self, filename):
         return {f.unique_id_from_tool: f for f in self.parse(filename)}
 
@@ -230,3 +233,26 @@ class TestYesWeHackParser(DojoTestCase):
         with self.assertRaises(TypeError) as raised:
             list(YesWeHackParser().get_findings(io.StringIO('"nope"'), Test()))
         self.assertIn("items", str(raised.exception))
+
+    def test_an_endpoint_with_a_port_is_split_rather_than_kept_whole(self):
+        """
+        A researcher writes whatever the programme scope allows, so the value may be a full URL.
+
+        Keeping "host:port" in the host field fails DefectDojo's validation, and that fails the whole
+        import rather than the one finding.
+        """
+        findings = self.parse_string({"items": [{
+            "id": 1, "title": "A report", "severity": "high", "status": "accepted",
+            "end_point": "https://app.example.com:8443/login",
+        }]})
+        location = self.get_unsaved_locations(findings[0])[0]
+        self.assertEqual("app.example.com", location.host)
+        self.assertEqual(8443, location.port)
+        self.assertEqual("https", location.protocol)
+
+    def test_an_endpoint_that_cannot_be_a_host_is_dropped(self):
+        findings = self.parse_string({"items": [{
+            "id": 1, "title": "A report", "severity": "high", "status": "accepted",
+            "end_point": "the mobile app",
+        }]})
+        self.assertEqual([], self.get_unsaved_locations(findings[0]))

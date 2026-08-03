@@ -1,6 +1,9 @@
 import json
 import re
+from contextlib import suppress
 from datetime import UTC, datetime
+from ipaddress import ip_address
+from urllib.parse import urlparse
 
 from django.conf import settings
 
@@ -22,6 +25,11 @@ STATUS_ACK_ACCEPTABLE_RISK = "ack_acceptable_risk"
 UNASSIGNED = "nobody"
 
 CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,}", re.IGNORECASE)
+
+
+# The host DefectDojo accepts: letters, digits, dot, hyphen, underscore or plus, at least two
+# characters - or an IP address. See Endpoint.clean().
+HOST_PATTERN = re.compile(r"^[A-Za-z0-9_\-+][A-Za-z0-9_.\-+]+$")
 
 
 class HaloSecurityParser:
@@ -304,14 +312,39 @@ class HaloSecurityParser:
         This scan type's deduplication hashes the endpoints, so leaving it unpopulated would leave the
         hash computed over nothing and every rescan would reimport.
         """
-        host = self.target(row)
-        if not host:
+        target = self.target(row)
+        if not target:
             return
-        host = host.split("//")[-1].split("/")[0]
-        if not host:
+        parsed = urlparse(target if "//" in target else f"//{target}")
+        try:
+            port = parsed.port
+        except ValueError:
+            return
+        host = parsed.hostname or ""
+        if not host or not self.usable_host(host):
             return
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations.append(LocationData.url(host=host))
+            finding.unsaved_locations.append(LocationData.url(
+                host=host, protocol=parsed.scheme or None, port=port,
+            ))
         else:
             # TODO: Delete this after the move to Locations
-            finding.unsaved_endpoints.append(Endpoint(host=host))
+            finding.unsaved_endpoints.append(Endpoint(
+                host=host, protocol=parsed.scheme or None, port=port,
+            ))
+
+    def usable_host(self, value):
+        """
+        Whether DefectDojo will accept this as an endpoint host.
+
+        A host is letters, digits, dot, hyphen, underscore or plus, or an IP address. Anything else -
+        a path, a space, a container image tag - makes Endpoint.clean() raise, and that fails the
+        whole import rather than the one finding, so it is dropped here instead. The value is still
+        reported in the description, so nothing is lost.
+        """
+        if HOST_PATTERN.match(value):
+            return True
+        with suppress(ValueError):
+            ip_address(value)
+            return True
+        return False

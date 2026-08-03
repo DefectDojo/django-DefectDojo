@@ -2,6 +2,8 @@ import json
 import re
 from contextlib import suppress
 from datetime import datetime
+from ipaddress import ip_address
+from urllib.parse import urlparse
 
 from django.conf import settings
 
@@ -45,6 +47,11 @@ CVE_PATTERN = re.compile(r"CVE-\d{4}-\d{4,}", re.IGNORECASE)
 
 # The timestamp layouts the connector tries, in order.
 DATE_FORMATS = ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d")
+
+
+# The host DefectDojo accepts: letters, digits, dot, hyphen, underscore or plus, at least two
+# characters - or an IP address. See Endpoint.clean().
+HOST_PATTERN = re.compile(r"^[A-Za-z0-9_\-+][A-Za-z0-9_.\-+]+$")
 
 
 class YesWeHackParser:
@@ -253,18 +260,49 @@ class YesWeHackParser:
             finding.active = False
 
     def attach_endpoint(self, finding, report):
-        """The reported endpoint, falling back to the programme scope."""
+        """
+        The reported endpoint, falling back to the programme scope.
+
+        Parsed rather than string-split: a researcher writes whatever the scope allows, so the
+        value may carry a scheme, a port and a path, and an unparsed "host:port" in the host field
+        fails validation for the whole import.
+        """
         location = (report.get("end_point") or "").strip() or (report.get("scope") or "").strip()
         if not location:
             return
-        host = location.split("//")[-1].split("/")[0].strip()
-        if not host:
+        parsed = urlparse(location if "//" in location else f"//{location}")
+        try:
+            port = parsed.port
+        except ValueError:
+            return
+        host = parsed.hostname or ""
+        if not host or not self.usable_host(host):
             return
         if settings.V3_FEATURE_LOCATIONS:
-            finding.unsaved_locations.append(LocationData.url(host=host))
+            finding.unsaved_locations.append(LocationData.url(
+                host=host, protocol=parsed.scheme or None, port=port,
+            ))
         else:
             # TODO: Delete this after the move to Locations
-            finding.unsaved_endpoints.append(Endpoint(host=host))
+            finding.unsaved_endpoints.append(Endpoint(
+                host=host, protocol=parsed.scheme or None, port=port,
+            ))
+
+    def usable_host(self, value):
+        """
+        Whether DefectDojo will accept this as an endpoint host.
+
+        A host is letters, digits, dot, hyphen, underscore or plus, or an IP address. Anything else -
+        a path, a space, a container image tag - makes Endpoint.clean() raise, and that fails the
+        whole import rather than the one finding, so it is dropped here instead. The value is still
+        reported in the description, so nothing is lost.
+        """
+        if HOST_PATTERN.match(value):
+            return True
+        with suppress(ValueError):
+            ip_address(value)
+            return True
+        return False
 
     def cves(self, report):
         """The connector scans the title, description, impact and technical information for CVEs."""

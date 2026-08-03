@@ -1,7 +1,9 @@
 import hashlib
 import json
+import re
 from contextlib import suppress
 from datetime import UTC, datetime
+from ipaddress import ip_address
 from urllib.parse import urlparse
 
 from django.conf import settings
@@ -78,6 +80,11 @@ OCCURRENCE_ALIASES = ("occurences", "occurrences", "instances")
 APPLICATION_TOKEN_KEYS = ("applicationToken", "application_token", "applicationtoken")
 
 STATUS_FIXED = "fixed"
+
+
+# The host DefectDojo accepts: letters, digits, dot, hyphen, underscore or plus, at least two
+# characters - or an IP address. See Endpoint.clean().
+HOST_PATTERN = re.compile(r"^[A-Za-z0-9_\-+][A-Za-z0-9_.\-+]+$")
 
 
 class BeagleParser:
@@ -457,7 +464,7 @@ class BeagleParser:
             return
         with suppress(ValueError):
             parsed = urlparse(url)
-            if not parsed.hostname:
+            if not parsed.hostname or not self.usable_host(parsed.hostname):
                 return
             if settings.V3_FEATURE_LOCATIONS:
                 finding.unsaved_locations.append(LocationData.url(
@@ -470,6 +477,22 @@ class BeagleParser:
                     host=parsed.hostname, protocol=parsed.scheme or None, port=parsed.port,
                     path=parsed.path.lstrip("/") or None, query=parsed.query or None,
                 ))
+
+    def usable_host(self, value):
+        """
+        Whether DefectDojo will accept this as an endpoint host.
+
+        A host is letters, digits, dot, hyphen, underscore or plus, or an IP address. Anything else -
+        a path, a space, a container image tag - makes Endpoint.clean() raise, and that fails the
+        whole import rather than the one finding, so it is dropped here instead. The value is still
+        reported in the description, so nothing is lost.
+        """
+        if HOST_PATTERN.match(value):
+            return True
+        with suppress(ValueError):
+            ip_address(value)
+            return True
+        return False
 
     def first_string(self, fields, aliases):
         """The first alias holding a non-empty string."""

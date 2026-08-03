@@ -167,6 +167,21 @@ class TestElasticSecurityCnvmParser(DojoTestCase):
             with self.subTest(expected=expected):
                 self.assertEqual(expected, ElasticSecurityCnvmParser().asset_name(source))
 
+    def test_an_asset_name_that_cannot_be_a_host_records_no_endpoint(self):
+        """
+        A cloud resource name is not always host-shaped - a bucket path or an ARN is not.
+
+        DefectDojo's host field would reject it, and a ValidationError fails the whole import rather
+        than the one finding, so the endpoint is dropped. The name is still in the description's
+        Resource line.
+        """
+        findings = self.parse_string(self.document({
+            "vulnerability": {"id": "CVE-2000-0001", "severity": "low"},
+            "resource": {"name": "projects/example/buckets/example-bucket", "type": "gcs"},
+        }))
+        self.assertEqual([], self.get_unsaved_locations(findings[0]))
+        self.assertIn("**Resource:** projects/example/buckets/example-bucket (gcs)", findings[0].description)
+
     def test_the_endpoint_prefers_the_host_over_the_resource(self):
         """
         The finding is about a machine, so the endpoint is the host identity.

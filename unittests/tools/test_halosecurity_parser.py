@@ -13,6 +13,9 @@ class TestHaloSecurityParser(DojoTestCase):
         with path.open(encoding="utf-8") as file:
             return list(HaloSecurityParser().get_findings(file, Test()))
 
+    def parse_string(self, payload):
+        return list(HaloSecurityParser().get_findings(io.StringIO(json.dumps(payload)), Test()))
+
     def by_uid(self, filename):
         return {f.unique_id_from_tool: f for f in self.parse(filename)}
 
@@ -271,3 +274,27 @@ class TestHaloSecurityParser(DojoTestCase):
         with self.assertRaises(TypeError) as raised:
             list(HaloSecurityParser().get_findings(io.StringIO('"nope"'), Test()))
         self.assertIn("list", str(raised.exception))
+
+    def test_a_target_with_a_port_is_split_rather_than_kept_whole(self):
+        """
+        Halo scans a host and port, so its target can carry one.
+
+        Keeping "host:port" in the host field fails DefectDojo's validation, and that fails the whole
+        import rather than the one finding.
+        """
+        findings = self.parse_string({"list": [{
+            "issue": {"issue_id": 1, "name": "An issue", "severity": 3},
+            "target": {"target_id": 1, "target": "https://app.example.com:8443/login"},
+            "status": {"issue_id": 1, "target_id": 1, "status": "new"},
+        }]})
+        location = self.get_unsaved_locations(findings[0])[0]
+        self.assertEqual("app.example.com", location.host)
+        self.assertEqual(8443, location.port)
+
+    def test_a_target_that_cannot_be_a_host_is_dropped(self):
+        findings = self.parse_string({"list": [{
+            "issue": {"issue_id": 1, "name": "An issue", "severity": 3},
+            "target": {"target_id": 1, "target": "an internal service"},
+            "status": {"issue_id": 1, "target_id": 1, "status": "new"},
+        }]})
+        self.assertEqual([], self.get_unsaved_locations(findings[0]))

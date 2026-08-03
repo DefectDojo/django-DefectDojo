@@ -12,6 +12,9 @@ class TestCodacyParser(DojoTestCase):
         with (get_unit_tests_scans_path("codacy") / filename).open(encoding="utf-8") as file:
             return list(CodacyParser().get_findings(file, Test()))
 
+    def parse_string(self, payload):
+        return list(CodacyParser().get_findings(io.StringIO(json.dumps(payload)), Test()))
+
     def by_uid(self, filename):
         return {f.unique_id_from_tool: f for f in self.parse(filename)}
 
@@ -106,10 +109,36 @@ class TestCodacyParser(DojoTestCase):
         self.assertEqual(1, len(dast))
         self.assertEqual("app.example.com", dast[0].host)
 
-        # No application, so the converter falls back to affectedTargets.
+        # No application, so the converter falls back to affectedTargets - an image reference, whose
+        # repository is a path rather than part of the host. Leaving it in the host field fails
+        # Endpoint.clean(), and that fails the whole import rather than this one finding.
         container = self.get_unsaved_locations(findings["00000000-0000-4000-8000-000000000003"])
         self.assertEqual(1, len(container))
-        self.assertEqual("registry.example.com/generic-app", container[0].host)
+        self.assertEqual("registry.example.com", container[0].host)
+        self.assertEqual("generic-app", container[0].path)
+
+    def test_a_target_that_cannot_be_a_host_records_no_endpoint(self):
+        """
+        DefectDojo's host field accepts letters, digits, dot, hyphen, underscore, plus, or an IP.
+
+        An image reference with a tag has nowhere sensible to go - the tag is neither a port nor part
+        of a path - so no endpoint is recorded rather than one that fails validation and takes the
+        whole import down with it. The value is still in the description.
+        """
+        findings = self.parse_string({"items": [
+            {"itemId": "1", "affectedTargets": "generic-app:1.2", "priority": "high"},
+        ]})
+        self.assertEqual([], self.get_unsaved_locations(findings[0]))
+
+    def test_an_application_url_is_split_into_its_parts(self):
+        findings = self.parse_string({"items": [
+            {"itemId": "1", "application": "https://app.example.com:8443/login", "priority": "high"},
+        ]})
+        location = self.get_unsaved_locations(findings[0])[0]
+        self.assertEqual("app.example.com", location.host)
+        self.assertEqual(8443, location.port)
+        self.assertEqual("https", location.protocol)
+        self.assertEqual("login", location.path)
 
     def test_an_item_with_no_target_records_none(self):
         finding = self.by_uid("codacy_many_vuln.json")["00000000-0000-4000-8000-000000000001"]
