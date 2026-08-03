@@ -1,6 +1,7 @@
 import base64
 import logging
 import time
+from uuid import uuid4
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -1080,8 +1081,16 @@ class BaseImporter(ImporterOptions):
             for unsaved_file in finding.unsaved_files:
                 data = base64.b64decode(unsaved_file.get("data"))
                 title = unsaved_file.get("title", "<No title>")
-                file_upload, _ = FileUpload.objects.get_or_create(title=title)
-                file_upload.file.save(title, ContentFile(data))
+                # FileUpload.title is unique per instance: only reuse a row this
+                # finding already owns, and give any new row a unique title.
+                file_upload = finding.files.filter(title=title).first()
+                if file_upload is None:
+                    unique_title = title
+                    if FileUpload.objects.filter(title=unique_title).exists():
+                        suffix = f" - {uuid4()!s:.8}"
+                        unique_title = f"{title[:100 - len(suffix)]}{suffix}"
+                    file_upload = FileUpload(title=unique_title)
+                file_upload.file.save(file_upload.title, ContentFile(data))
                 file_upload.save()
                 finding.files.add(file_upload)
 

@@ -1,3 +1,4 @@
+import base64
 import logging
 import uuid
 from unittest.mock import patch
@@ -1607,3 +1608,58 @@ class TestDojoImporterBatchPushToJira(DojoTestCase):
             flags[ungrouped_db.id],
             msg=f"ungrouped finding must be pushed individually, dispatched with push_to_jira={flags[ungrouped_db.id]}",
         )
+
+
+class ProcessFilesOwnershipTest(DojoTestCase):
+
+    """A file imported into one finding must not reuse or overwrite a FileUpload row owned by a finding in another product."""
+
+    def setUp(self):
+        self.user, _ = User.objects.get_or_create(username="admin")
+        Development_Environment.objects.get_or_create(name="Development")
+        self.importer = DefaultImporter.__new__(DefaultImporter)
+
+    def _finding_in_new_product(self, name):
+        product_type, _ = Product_Type.objects.get_or_create(name=f"{name}-pt")
+        product, _ = Product.objects.get_or_create(name=name, prod_type=product_type, description="t")
+        engagement = Engagement.objects.create(
+            name=f"{name}-eng", product=product,
+            target_start=timezone.now(), target_end=timezone.now())
+        test = Test.objects.create(
+            engagement=engagement, test_type=Test_Type.objects.get_or_create(name="Generic Findings Import")[0],
+            target_start=timezone.now(), target_end=timezone.now())
+        return Finding.objects.create(
+            test=test, title=f"{name}-finding", severity="Info",
+            description="t", reporter=self.user)
+
+    def _attach(self, finding, title, data):
+        finding.unsaved_files = [{"title": title, "data": base64.b64encode(data).decode()}]
+        self.importer.process_files(finding)
+
+    def test_same_title_across_products_does_not_cross_bind(self):
+        title = "evidence.png"
+        victim = self._finding_in_new_product("cross-bind-victim")
+        attacker = self._finding_in_new_product("cross-bind-attacker")
+
+        self._attach(victim, title, b"VICTIM-BYTES")
+        victim_file = victim.files.get()
+
+        # The attacker imports a file with the victim's exact title.
+        self._attach(attacker, title, b"ATTACKER-BYTES")
+        attacker_file = attacker.files.get()
+
+        self.assertNotEqual(victim_file.id, attacker_file.id)
+        victim_file.refresh_from_db()
+        self.assertEqual(victim_file.file.read(), b"VICTIM-BYTES")
+        self.assertNotIn(victim_file.id, attacker.files.values_list("id", flat=True))
+        self.assertNotIn(attacker_file.id, victim.files.values_list("id", flat=True))
+
+    def test_reimport_of_same_finding_reuses_its_own_row(self):
+        title = "evidence.png"
+        finding = self._finding_in_new_product("reuse-own")
+        self._attach(finding, title, b"FIRST")
+        first_id = finding.files.get().id
+        # Re-importing the same finding's own file keeps a single row.
+        self._attach(finding, title, b"SECOND")
+        self.assertEqual([first_id], list(finding.files.values_list("id", flat=True)))
+        self.assertEqual(finding.files.get().file.read(), b"SECOND")
