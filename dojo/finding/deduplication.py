@@ -8,6 +8,7 @@ from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
+from dojo.location.queries import location_prefetch_lookups
 from dojo.models import Endpoint_Status, Finding, System_Settings
 from dojo.vulnerability.queries import vulnerability_id_prefetch
 
@@ -18,7 +19,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 def get_finding_models_for_deduplication(finding_ids):
     """
     Load findings with optimal prefetching for deduplication operations.
-    This avoids N+1 queries when accessing test, engagement, product, endpoints, and original_finding.
+    This avoids N+1 queries when accessing test, engagement, product, locations, and original_finding.
 
     Args:
         finding_ids: A list of Finding IDs
@@ -36,7 +37,7 @@ def get_finding_models_for_deduplication(finding_ids):
         .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
-            "endpoints",
+            *location_prefetch_lookups(),
             # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
             Prefetch(
                 "original_finding",
@@ -340,13 +341,10 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
             )
         queryset = Finding.objects.filter(scope_q)
 
-    if settings.V3_FEATURE_LOCATIONS:
-        prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
-    else:
-        # TODO: Delete this after the move to Locations
-        # Base prefetches for both modes
-        prefetch_list = ["endpoints", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
+    prefetch_list = [*location_prefetch_lookups(), vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
+    if not settings.V3_FEATURE_LOCATIONS:
+        # TODO: Delete this after the move to Locations
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
         # is done in Python by EndpointManager.get_non_special_endpoint_statuses().
