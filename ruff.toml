@@ -129,6 +129,10 @@ preview = true
 "dojo/filters.py" = [
     "A003",  # ruff upgrade to 0.13.3
 ]
+"scripts/check_migration_leaves.py" = [
+    "T201",   # print statements are fine for console output scripts
+    "EXE001", # git won't commit the executable flag I don't know why
+]
 "scripts/update_performance_test_counts.py" = [
     "S603",  # subprocess.run without shell=True is safe for this script
     "S604",  # subprocess.run without shell=True is safe for this script
