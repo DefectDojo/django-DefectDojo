@@ -26,6 +26,7 @@ This release added many entries to the Feature Flags list: features that can be 
 * **(Compliance)** The federal compliance pack: FedRAMP POA&M ledger and ConMon deliverables, CMMC Level 2 assessments, and control coverage.
 
 Additional features:
+* **(API)** DefectDojo REST API can now produce reports as HTML, CSV, and Excel, not just JSON.  Use the `/generate_report/` endpoint path, e.g. `api/v2/findings/generate_report/`
 * **(Performance)** Improved the performance of Celery/Async tasks.
 * **(Deduplication)** Added set-based deduplication that matches Findings on their full set of vulnerability IDs and CWEs, including partial/subset matches, alongside a new global vulnerability-ID deduplication algorithm and `global_locations` cross-product deduplication on shared locations. False-positive history now honors the same vulnerability-ID/CWE set-match tokens, false-positive-history candidate filtering is now pluggable, and deduplication now produces a stable "original" finding regardless of scan-import order.
 * **(Findings)** Findings can now carry multiple CWEs across the API, the Vue UI, and the universal parser. Vulnerability IDs are normalized into a first-class Vulnerability entity with ordered references, per-vulnerability KEV/EPSS enrichment columns, and vulnerability aliases. Added a copy-finding action with an auto-detected vulnerability-ID type.
