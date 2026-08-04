@@ -1301,6 +1301,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Parasoft DTP Scan": ["title", "severity", "file_path", "vuln_id_from_tool"],
     "Uptycs Scan": ["title", "severity", "component_name"],
     "CyberArk Certificate Manager Scan": ["title", "severity", "component_name"],
+    "ManageEngine Vulnerability Manager Plus Scan": [
+        "title",
+        "severity",
+        "component_name",
+    ],
+    "Zimperium zScan": ["title", "severity", "file_path", "vuln_id_from_tool"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1504,6 +1510,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Parasoft DTP Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Uptycs Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "CyberArk Certificate Manager Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "ManageEngine Vulnerability Manager Plus Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Zimperium zScan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,

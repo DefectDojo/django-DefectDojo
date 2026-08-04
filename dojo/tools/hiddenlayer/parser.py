@@ -24,91 +24,51 @@ TITLE_MAX_LENGTH = 150
 CWE_TAG_PREFIX = "external/cwe/"
 
 
-class HiddenlayerParser:
+class SarifConnectorFindings:
 
     """
-    Parses a HiddenLayer model-scan SARIF log.
+    The SARIF mapping shared by every connector that reports SARIF.
 
-    Mirrors pkg/tools/hiddenlayer/connector/finding_converter field for field so a file import and an
-    API sync deduplicate against each other instead of producing two copies of everything.
+    On the Go side these connectors share one utility (pkg/utils/sarif), parameterised by a PREFIX for
+    the identity and a static/dynamic flag. Mirroring that here as a mixin is what keeps the parsers
+    from drifting apart: a change to the shared mapping has to land in one place, exactly as it does
+    upstream. The shipped invicti parser extends netsparker the same way.
 
-    HiddenLayer scans machine-learning models and reports SARIF. DefectDojo ships a generic SARIF
-    parser, but importing through it would record the findings under the "SARIF" scan type, where they
-    would NOT deduplicate against the HiddenLayer connector's - which is the whole reason this exists.
-    The mapping is the connector's, which itself mirrors dojo/tools/sarif/parser.py.
+    NOT registered as a parser itself - dojo/tools/factory.py only registers the class whose lowercased
+    name matches its module, so this one is invisible to it.
     """
 
-    def get_scan_types(self):
-        # Byte-identical to the connector's ScanTypeName. Note it does NOT follow the
-        # "<Vendor> - Connectors Import" pattern, so it cannot be derived - it has to be copied.
-        return ["HiddenLayer Model Scan"]
+    # Overridden per vendor: the identity prefix, and whether the tool reads an artifact or runs it.
+    tool_prefix = ""
+    is_static = True
 
-    def get_label_for_scan_types(self, scan_type):
-        return "HiddenLayer Model Scan"
+    def scope_id(self, data):
+        """The id that namespaces every identity - a scan, an assessment. Overridden per vendor."""
+        return ""
 
-    def get_description_for_scan_types(self, scan_type):
-        return (
-            "Import a HiddenLayer model-scan SARIF log. Matches the scan type used by the HiddenLayer "
-            "connector so file and API findings deduplicate - give the scan's scan_id to deduplicate "
-            "against connector findings."
-        )
-
-    def get_fields(self) -> list[str]:
+    def prepare(self, data):
         """
-        Return the list of fields used in the HiddenLayer Parser.
+        Hook run once, before any finding is built.
 
-        Mirrors the connector's convertResult:
-        - title: the result message, then the rule's short then full description, then its name or id.
-          Shortened to 150 characters.
-        - severity: the rule's security-severity property as a CVSS score, then as a word, then the
-          result level - defaulting to Medium; see severity().
-        - description: the result message and the rule's name and descriptions.
-        - cvssv3_score: the security-severity property, when it is a number.
-        - cwe: from the rule's relationships, then the rule's tags, then the result's tags.
-        - file_path / line: the first physical location.
-        - active / false_p: a suppressed result is inactive AND a false positive.
-        - unique_id_from_tool: "hiddenlayer-<scan id>-<rule id>-<file>:<line>".
+        A vendor that decorates its findings with context the SARIF document does not carry reads that
+        context here, rather than as a side effect of something else. Does nothing by default.
         """
-        return [
-            "title",
-            "severity",
-            "description",
-            "cvssv3_score",
-            "cwe",
-            "file_path",
-            "line",
-            "mitigation",
-            "references",
-            "unique_id_from_tool",
-            "vuln_id_from_tool",
-            "unsaved_vulnerability_ids",
-            "tags",
-            "active",
-            "false_p",
-            "static_finding",
-            "dynamic_finding",
-        ]
-
-    def get_dedupe_fields(self) -> list[str]:
-        """
-        Return the list of fields used for deduplication in the HiddenLayer Parser.
-
-        Copied from the HiddenLayer block in the Pro connector settings, which pairs
-        unique_id_from_tool_or_hash_code with these hash fields. The file path is in the hash because
-        one rule firing on two files in a model archive is two findings.
-        """
-        return ["title", "severity", "file_path"]
 
     def get_findings(self, filename, test):
         data = json.load(filename)
         if not isinstance(data, dict):
-            msg = f"A HiddenLayer export is a SARIF log, a JSON object with a 'runs' list; got {type(data).__name__}."
+            msg = (
+                f"A {self.vendor} export is a SARIF log, a JSON object with a 'runs' list; got "
+                f"{type(data).__name__}."
+            )
             raise TypeError(msg)
 
-        scan_id, log = self.unwrap(data)
+        self.prepare(data)
+        scope = self.scope_id(data)
+        log = self.log(data)
         runs = log.get("runs")
         if not isinstance(runs, list):
-            msg = "A HiddenLayer export is a SARIF log; this object has no 'runs' list."
+            msg = f"A {self.vendor} export is a SARIF log; this object has no 'runs' list."
             raise TypeError(msg)
 
         findings = []
@@ -119,30 +79,33 @@ class HiddenlayerParser:
             for result in run.get("results") or []:
                 if not isinstance(result, dict):
                     continue
-                if finding := self.build_finding(result, rules, scan_id, test):
+                if finding := self.build_finding(result, rules, scope, test):
                     findings.append(finding)
         return findings
 
-    def unwrap(self, data):
+    def log(self, data):
         """
-        Return the scan id and the SARIF log.
+        The SARIF log itself, unwrapped from whatever envelope supplied the scope id.
 
-        The scan id is part of every identity the connector builds and a downloaded SARIF log does not
-        carry it, so it is read from the file when a wrapper states it. WITHOUT it the identities differ
-        from the connector's and file findings will not deduplicate against synced ones.
+        A downloaded log has no envelope at all, and then it is the log.
         """
-        scan_id = ""
-        for key in ("scan_id", "scanId", "scanID"):
-            if value := str(data.get(key) or "").strip():
-                scan_id = value
-                break
-
-        log = data
         for key in ("sarif", "log", "report"):
             if isinstance(data.get(key), dict):
-                log = data[key]
-                break
-        return scan_id, log
+                return data[key]
+        return data
+
+    def scope_from(self, data, keys):
+        """
+        The scope id, read from whichever spelling the file uses.
+
+        It is part of every identity the connector builds and a downloaded SARIF log does not carry it,
+        so WITHOUT it the identities differ from the connector's and file findings will not deduplicate
+        against synced ones.
+        """
+        for key in keys:
+            if value := str(data.get(key) or "").strip():
+                return value
+        return ""
 
     def rules_by_id(self, run):
         """The run's rule definitions, keyed by id, so a result can be read with its rule."""
@@ -163,7 +126,7 @@ class HiddenlayerParser:
         """A SARIF multiformatMessageString: {"text": "..."}."""
         return str(self.block(holder, key).get("text") or "")
 
-    def build_finding(self, result, rules, scan_id, test):
+    def build_finding(self, result, rules, scope, test):
         kind = str(result.get("kind") or "")
         if kind and kind != "fail":
             # SARIF uses kind for results that are not failures at all - "pass", "open",
@@ -183,11 +146,12 @@ class HiddenlayerParser:
             file_path=file_path or None,
             line=line or None,
             references=self.references(rule) or None,
-            unique_id_from_tool=f"hiddenlayer-{scan_id}-{rule_id}-{file_path}:{line}",
+            unique_id_from_tool=f"{self.tool_prefix}-{scope}-{rule_id}-{file_path}:{line}",
             vuln_id_from_tool=rule_id or None,
-            # A model scan reads an artifact; nothing is exercised.
-            static_finding=True,
-            dynamic_finding=False,
+            # Whether the tool reads an artifact or exercises it is the one thing the shared
+            # mapping cannot decide for itself.
+            static_finding=self.is_static,
+            dynamic_finding=not self.is_static,
             # A suppressed result is BOTH inactive and a false positive: SARIF suppression is a
             # reviewer saying this one does not count, which is what false_p records.
             active=not suppressed,
@@ -202,7 +166,11 @@ class HiddenlayerParser:
             finding.cwe = cwe
         if fix := self.fixes(result):
             finding.mitigation = fix
+        self.decorate(finding, result)
         return finding
+
+    def decorate(self, finding, result):
+        """Hook for the context a SARIF document does not carry. Does nothing by default."""
 
     def title(self, result, rule):
         if message := self.text(result, "message"):
@@ -363,3 +331,88 @@ class HiddenlayerParser:
             with suppress(ValueError):
                 return int(float(value.strip() or 0))
         return 0
+
+
+class HiddenlayerParser(SarifConnectorFindings):
+
+    """
+    Parses a HiddenLayer model-scan SARIF log.
+
+    Mirrors pkg/tools/hiddenlayer/connector/finding_converter field for field so a file import and an
+    API sync deduplicate against each other instead of producing two copies of everything.
+
+    HiddenLayer scans machine-learning models and reports SARIF. DefectDojo ships a generic SARIF
+    parser, but importing through it would record the findings under the "SARIF" scan type, where they
+    would NOT deduplicate against the HiddenLayer connector's - which is the whole reason this exists.
+    The mapping is the connector's, which itself mirrors dojo/tools/sarif/parser.py.
+    """
+
+    vendor = "HiddenLayer"
+    tool_prefix = "hiddenlayer"
+    # A model scan reads an artifact; nothing is exercised.
+    is_static = True
+
+    def scope_id(self, data):
+        """HiddenLayer namespaces its identities by scan id."""
+        return self.scope_from(data, ("scan_id", "scanId", "scanID"))
+
+    def get_scan_types(self):
+        # Byte-identical to the connector's ScanTypeName. Note it does NOT follow the
+        # "<Vendor> - Connectors Import" pattern, so it cannot be derived - it has to be copied.
+        return ["HiddenLayer Model Scan"]
+
+    def get_label_for_scan_types(self, scan_type):
+        return "HiddenLayer Model Scan"
+
+    def get_description_for_scan_types(self, scan_type):
+        return (
+            "Import a HiddenLayer model-scan SARIF log. Matches the scan type used by the HiddenLayer "
+            "connector so file and API findings deduplicate - give the scan's scan_id to deduplicate "
+            "against connector findings."
+        )
+
+    def get_fields(self) -> list[str]:
+        """
+        Return the list of fields used in the HiddenLayer Parser.
+
+        Mirrors the connector's convertResult:
+        - title: the result message, then the rule's short then full description, then its name or id.
+          Shortened to 150 characters.
+        - severity: the rule's security-severity property as a CVSS score, then as a word, then the
+          result level - defaulting to Medium; see severity().
+        - description: the result message and the rule's name and descriptions.
+        - cvssv3_score: the security-severity property, when it is a number.
+        - cwe: from the rule's relationships, then the rule's tags, then the result's tags.
+        - file_path / line: the first physical location.
+        - active / false_p: a suppressed result is inactive AND a false positive.
+        - unique_id_from_tool: "hiddenlayer-<scan id>-<rule id>-<file>:<line>".
+        """
+        return [
+            "title",
+            "severity",
+            "description",
+            "cvssv3_score",
+            "cwe",
+            "file_path",
+            "line",
+            "mitigation",
+            "references",
+            "unique_id_from_tool",
+            "vuln_id_from_tool",
+            "unsaved_vulnerability_ids",
+            "tags",
+            "active",
+            "false_p",
+            "static_finding",
+            "dynamic_finding",
+        ]
+
+    def get_dedupe_fields(self) -> list[str]:
+        """
+        Return the list of fields used for deduplication in the HiddenLayer Parser.
+
+        Copied from the HiddenLayer block in the Pro connector settings, which pairs
+        unique_id_from_tool_or_hash_code with these hash fields. The file path is in the hash because
+        one rule firing on two files in a model archive is two findings.
+        """
+        return ["title", "severity", "file_path"]
