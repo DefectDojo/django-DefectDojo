@@ -1115,7 +1115,10 @@ class BaseImporter(ImporterOptions):
         )
         # Remove risk acceptance if present (vulnerability is now fixed)
         # risk_unaccept will check if finding.risk_accepted is True before proceeding
-        ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
+        ra_helper.risk_unaccept(
+            self.user, finding, perform_save=False, post_comments=False,
+            source="reimport", reason="the scan no longer reports this finding",
+        )
         self.location_handler.record_mitigations_for_finding(finding, self.user)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:
