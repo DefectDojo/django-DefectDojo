@@ -179,6 +179,143 @@ Expiring and reinstating are also available directly, so you do not have to driv
 
 Both accept an optional `reason`, which is recorded as a note on the Risk Acceptance along with who performed the action.  Both require the same permission as editing the Risk Acceptance.
 
+## Risk Acceptances 2.0 (Beta)
+
+By default, a Risk Acceptance has one state: as soon as it exists, the Findings it covers are
+accepted. That works when one person decides. It does not describe an organization where somebody
+*requests* an exception, somebody else *approves* it, and an auditor later asks who agreed to what
+and why.
+
+**Risk Acceptances 2.0** adds that shape. Enable **Risk Acceptances 2.0** on the Feature Flags
+settings page. It is off by default, and while it is off nothing changes: every Risk Acceptance
+behaves exactly as described above.
+
+### The lifecycle
+
+A Risk Acceptance moves through these states:
+
+| State | What it means | Are the Findings suppressed? |
+| --- | --- | --- |
+| **Proposed** | Somebody has asked for the exception. Nobody has answered. | No |
+| **Under Review** | A reviewer has picked it up. | No |
+| **Approved** | The decision is yes, but it has not been switched on yet. | No |
+| **Rejected** | The decision is no. | No |
+| **Active** | The acceptance is in force. | Yes |
+| **Expired** | It ran out, or somebody ended it. | No |
+
+Only **Active** suppresses anything. A Finding in a Proposed, Under Review or Approved Risk
+Acceptance stays Active and keeps counting — because it *is* still active, and nobody has agreed to
+accept it yet.
+
+The moves allowed between states:
+
+```
+Proposed ──→ Under Review ──→ Approved ──→ Active ──→ Expired
+    │              │              │                      │
+    └──────────────┴──────────────┴──→ Rejected          └──→ Active (reinstated)
+                                          │
+                                          └──→ Proposed (reworked and resubmitted)
+```
+
+Two shapes worth calling out:
+
+- **An Active acceptance cannot be Rejected.** Once it is in force, the way to end it is to expire
+  it, which puts its Findings back the way expiry always has. "Rejected" means the request was
+  declined before it ever suppressed anything, and using it for both would make the record untrue.
+- **A Rejected acceptance can go back to Proposed.** A declined request can be reworked and
+  resubmitted instead of recreated, which would throw away its history.
+
+Every move is recorded: which state it left, which it entered, who made it, when, and why. That
+sequence is the approval chain, and it is never edited or deleted.
+
+### Who can do what
+
+Requesting an exception and deciding one are separate permissions, so the person who asks is not
+automatically the person who agrees.
+
+| Move | Permission required | Minimum role on the Asset |
+| --- | --- | --- |
+| Propose, submit for review, resubmit | Risk Acceptance Edit | Writer |
+| Approve, Reject | **Risk Acceptance Approve** | Maintainer |
+| Activate an approved acceptance | **Risk Acceptance Approve** | Maintainer |
+| Expire | Risk Acceptance Edit | Writer |
+
+Activating is an approval because it is the moment suppression starts. Reinstating an expired
+acceptance is the same move, and needs the same permission.
+
+### Requested exceptions in your metrics
+
+The problem this solves: a team asks for an exception and waits — on a change board, on a vendor, on
+somebody outside DefectDojo entirely. Until now the only options were to accept the Finding before
+anyone agreed (which hides it, and is not true), or to leave it counting as unaddressed work (which
+is what customers describe as their Active numbers being polluted).
+
+With Risk Acceptances 2.0 enabled, a Finding in an undecided Risk Acceptance is reported in its own
+status band, **Exception Requested**, instead of **Active**:
+
+- The Finding is not hidden and not suppressed. Its own status is still Active.
+- Charts and status splits show **Exception Requested** as its own slice, so the total still adds up
+  and you can see how much work is sitting in a queue waiting on a decision.
+- Filter Findings on `has_pending_exception` to build that queue.
+- Filter Risk Acceptances on `workflow_state=proposed&workflow_state=under_review` to see the
+  requests waiting for a reviewer.
+
+When the acceptance is activated, its Findings become Risk Accepted as normal. When it is rejected,
+they simply stay Active.
+
+### The record of what was accepted
+
+DefectDojo has always tracked which Findings a Risk Acceptance covers as a live membership list, and
+Findings leave that list for ordinary reasons: the acceptance expires, or a re-import stops seeing
+the Finding. Both are correct, and both used to remove the only evidence that the Finding was ever
+accepted.
+
+With Risk Acceptances 2.0 enabled, DefectDojo Pro keeps a durable record per Finding per Risk
+Acceptance. When a Finding leaves the acceptance, its record is **closed, not deleted**, and it
+records:
+
+- whether it was **removed** (a person's decision), **expired** (the clock), or **superseded** (a
+  scan stopped reporting the Finding),
+- who added it and who closed it, and when the acceptance took effect and stopped,
+- a per-Finding justification, separate from the acceptance's overall recommendation — auditors ask
+  about individual Findings, and the answer is rarely the same for every Finding in a batch.
+
+Records are not backfilled. A Risk Acceptance created before you enabled the feature can be seeded
+from the Findings it still covers, but Findings whose membership was already severed cannot be
+recovered — that history was not kept.
+
+### API
+
+```
+GET  /api/v2/risk_acceptance/{id}/state/
+POST /api/v2/risk_acceptance/{id}/transition/
+```
+
+`state/` reports where a Risk Acceptance is and which moves are available from there, so a client
+can offer the actions that exist rather than guessing:
+
+```json
+{"workflow_state": "under_review", "allowed_next_states": ["approved", "proposed", "rejected"]}
+```
+
+`transition/` makes a move:
+
+```json
+{"to_state": "rejected", "reason": "a fix is scheduled for the next release"}
+```
+
+- `reason` is **required** when moving to `rejected` or `expired`. Both are refusals of risk somebody
+  accepted, and "why" is the whole content of the record.
+- `400` if the move is not allowed from the current state — the response says which move was refused.
+- `403` if you may not make that particular move, for example a Writer trying to approve.
+- Moving to `active` accepts the Findings, exactly as accepting them any other way does.
+
+Both endpoints return `403` with an explanatory message while the feature flag is off.
+
+`workflow_state` is also readable on the Risk Acceptance object itself, and is read-only there: the
+state changes only through `transition/`, so that every change is validated and recorded. Risk
+Acceptances created before the feature existed report `active`, which is what they are.
+
 ## Risk Acceptance Best Practices 
 
 While it is possible to affect Findings within Full Risk Acceptance objects using Simple Risk Acceptance workflows (and vice versa), it is generally preferable to default to either process exclusively rather than having both enabled at once. 
