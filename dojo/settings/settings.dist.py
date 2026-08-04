@@ -1307,6 +1307,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
         "component_name",
     ],
     "Zimperium zScan": ["title", "severity", "file_path", "vuln_id_from_tool"],
+    "Group-IB ASM - Connectors Import": ["title", "severity"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1512,6 +1513,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "CyberArk Certificate Manager Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "ManageEngine Vulnerability Manager Plus Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Zimperium zScan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Group-IB ASM - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
