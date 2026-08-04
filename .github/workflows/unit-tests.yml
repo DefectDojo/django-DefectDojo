@@ -9,6 +9,14 @@ on:
       - bugfix
       - release/**
       - hotfix/**
+  # Run the suite against the speculative merge commit a merge queue builds, which
+  # is the only thing that tests what will actually land: two pull requests can
+  # each be green on their own and broken in combination, and nothing before this
+  # point ever evaluates their union.
+  #
+  # Inert until a merge queue is configured -- nothing emits merge_group events
+  # otherwise -- so this can land well ahead of the ruleset that enables one.
+  merge_group:
 
 jobs:
   # hard gate: linting must pass before we spend any time building images or running tests
@@ -56,4 +64,48 @@ jobs:
     needs: build-docker-containers
     uses: ./.github/workflows/k8s-tests.yml
     secrets: inherit
+
+  # One stable context for a branch ruleset or merge queue to require.
+  #
+  # The jobs above report contexts like
+  #   "test-rest-framework (linux/amd64, true) / Rest Framework Unit Tests (debian)"
+  # which change whenever a matrix entry is added, removed or renamed. Requiring
+  # those individually means the ruleset silently stops covering a job the moment
+  # the matrix moves; requiring this one job cannot drift, because its `needs`
+  # list is checked by the workflow itself.
+  #
+  # Why this matters more under a merge queue than it does today: right now a
+  # human reads the checks and decides to merge, so a failing-but-not-required
+  # job still gets seen. A queue merges as soon as the *required* checks pass, so
+  # anything not required stops being a gate at all. Requiring this context is
+  # what keeps the suite meaningful once merging is automatic.
+  unit-tests-complete:
+    name: Unit Tests Complete
+    # always() so this still reports when something upstream fails -- without it
+    # the job would be skipped, and a skipped required check blocks the queue
+    # instead of failing it.
+    if: always()
+    needs:
+      - ruff
+      - build-docker-containers
+      - test-performance
+      - test-rest-framework
+      - test-user-interface
+      - test-k8s
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify every job succeeded
+        # A skipped or cancelled dependency is not a pass. Checking explicitly
+        # rather than relying on this job's own conclusion, because a job whose
+        # needs were skipped can otherwise report success by omission.
+        run: |
+          results="${{ join(needs.*.result, ' ') }}"
+          echo "dependency results: ${results}"
+          for result in ${results}; do
+            if [ "${result}" != "success" ]; then
+              echo "::error::At least one job did not succeed (${results})"
+              exit 1
+            fi
+          done
+          echo "All jobs succeeded."
 
