@@ -77,6 +77,37 @@ jobs:
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
+      # mailhog and webhook.endpoint are the only two images this job fetches from
+      # Docker Hub; django, nginx and integration-tests all arrive as artifacts
+      # from the build job. Pulling those two is the single most common cause of a
+      # red check here -- four runs on one branch failed as
+      #
+      #   mailhog Error Get "https://registry-1.docker.io/v2/": context deadline exceeded
+      #
+      # with no test failure anywhere in the log. `docker compose up` gives a pull
+      # exactly one attempt, so a transient timeout takes the whole job with it,
+      # and this matrix plays that lottery 113 times per pull request.
+      #
+      # Retrying here rather than adding a step to fetch them as artifacts: this is
+      # three lines and fixes the observed failure, where plumbing two more images
+      # through the build-and-upload path touches four workflows. If Docker Hub
+      # rate limits become the problem rather than timeouts, the artifact route is
+      # the better answer.
+      - name: Pull external images
+        run: |
+          for attempt in 1 2 3; do
+            if docker compose pull --quiet mailhog webhook.endpoint; then
+              exit 0
+            fi
+            echo "::warning::pull attempt ${attempt} failed; retrying in 15s"
+            sleep 15
+          done
+          echo "::error::could not pull mailhog / webhook.endpoint after 3 attempts"
+          exit 1
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: alpine
+
       - name: Start Dojo
         run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey webhook.endpoint
         env:
