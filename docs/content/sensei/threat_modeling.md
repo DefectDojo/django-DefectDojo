@@ -19,7 +19,7 @@ This is Sensei's **pre-code** capability. Where [scan-and-fix](/sensei/about_sen
 
 - The **Sensei** licensed feature. Threat modeling ships under the same entitlement as scan-and-fix.
 - A global **Maintainer** or **Owner** role. Users without it do not see the page.
-- A product to attach the threat model to.
+- A product to attach the threat model to. Instances using V3 naming see products called **assets**; this page says *product* throughout, and the UI follows whichever naming your instance is set to.
 
 Nothing is installed and no repository is connected. Threat modeling reads only the design you supply.
 
