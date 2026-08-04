@@ -14,6 +14,7 @@ from dojo.finding.deduplication import (
     get_finding_models_for_deduplication,
     hashcode_values_writer,
 )
+from dojo.location.queries import location_prefetch_lookups
 from dojo.models import Finding, Product
 from dojo.utils import (
     calculate_grade,
@@ -92,37 +93,22 @@ class Command(BaseCommand):
             findings = Finding.objects.all().filter(id__gt=0).exclude(duplicate=True)
             logger.info("######## Will process the full database with %d findings ########", findings.count())
 
-        if settings.V3_FEATURE_LOCATIONS:
-            # Prefetch related objects for synchronous deduplication
-            findings = findings.select_related(
-                "test", "test__engagement", "test__engagement__product", "test__test_type",
-            ).prefetch_related(
-                "locations",
-                # vulnerability id store feeds hash_code computation for parsers whose
-                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
-                # a per-finding query in get_vulnerability_ids().
-                vulnerability_id_prefetch(),
-                Prefetch(
-                    "original_finding",
-                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-                ),
-            )
-        else:
-            # TODO: Delete this after the move to Locations
-            # Prefetch related objects for synchronous deduplication
-            findings = findings.select_related(
-                "test", "test__engagement", "test__engagement__product", "test__test_type",
-            ).prefetch_related(
-                "endpoints",
-                # vulnerability id store feeds hash_code computation for parsers whose
-                # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
-                # a per-finding query in get_vulnerability_ids().
-                vulnerability_id_prefetch(),
-                Prefetch(
-                    "original_finding",
-                    queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
-                ),
-            )
+        # Prefetch related objects for synchronous deduplication
+        findings = findings.select_related(
+            "test", "test__engagement", "test__engagement__product", "test__test_type",
+        ).prefetch_related(
+            # location relation for the parsers that hash it; the lookup differs per location
+            # model, and prefetching the deprecated endpoint relation under V3 raises.
+            *location_prefetch_lookups(),
+            # vulnerability id store feeds hash_code computation for parsers whose
+            # HASHCODE_FIELDS_PER_SCANNER includes vulnerability_ids; prefetch to avoid
+            # a per-finding query in get_vulnerability_ids().
+            vulnerability_id_prefetch(),
+            Prefetch(
+                "original_finding",
+                queryset=Finding.objects.only("id", "duplicate_finding_id").order_by("-id"),
+            ),
+        )
 
         # Phase 1: update hash_codes without deduplicating
         if not dedupe_only:
