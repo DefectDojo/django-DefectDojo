@@ -1,0 +1,40 @@
+name: Migration Graph
+
+# Its own workflow rather than a job inside the lint workflow: this check goes
+# red for a reason that has nothing to do with code style, and it goes red on a
+# branch whose own commits are usually fine, so the name on the PR rollup needs
+# to say what actually broke.
+#
+# Both triggers are load-bearing, because there are two ways to fork the graph
+# and each trigger catches only one of them:
+#
+#   pull_request - actions/checkout resolves a pull_request event to the merge
+#     commit, so this sees the branch *combined with* its base. That is the only
+#     way to catch a migration written against a base branch that had already
+#     moved on: the branch on its own has a single leaf and looks fine.
+#
+#   push - catches the mirror case, where two PRs each add a migration on the
+#     same parent. Both are internally consistent so both go green pre-merge,
+#     and the fork exists only in their union. Nothing else re-derives the graph
+#     after a merge, since the test suite is per-PR.
+#
+# Without this check the failure mode is every container-based job dying at boot
+# with ~120 red checks, none of which says "migration graph" in its name.
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+jobs:
+  migration-graph:
+    name: Migration Graph Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # The script is stdlib-only (ast, no Django, no database, no settings), so
+      # it needs no setup beyond the checkout and finishes in well under a second.
+      - name: Check for multiple migration leaf nodes
+        run: python3 scripts/check_migration_leaves.py
