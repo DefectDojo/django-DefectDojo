@@ -296,6 +296,56 @@ Records are not backfilled. A Risk Acceptance created before you enabled the fea
 from the Findings it still covers, but Findings whose membership was already severed cannot be
 recovered — that history was not kept.
 
+### Standing acceptances
+
+The ask this answers: *we accepted this base-image CVE once — stop asking us again on every asset
+and every rescan.* Adding Findings by hand cannot, because the Findings that need accepting do not
+exist yet; they arrive with the next scan.
+
+So a Risk Acceptance can carry **criteria** describing the Findings it covers. A new Finding that
+matches is added to the acceptance as it is imported, exactly as if somebody had added it, and its
+record says the criteria covered it rather than naming a person.
+
+```json
+{
+    "acceptance_criteria": {
+        "scope": { "type": "product", "ids": [12] },
+        "vulnerability_ids": ["CVE-2021-44228"],
+        "component_name": "*log4j-core*",
+        "component_version": "2.14.*"
+    }
+}
+```
+
+Matchable attributes — all optional, and **all of the ones present must match**:
+
+| Key | Matches on |
+| --- | --- |
+| `vulnerability_ids` | any of the Finding's vulnerability IDs (or its `cve`), case-insensitive |
+| `cwes` | the Finding's CWE |
+| `severities` | the Finding's severity, case-insensitive |
+| `component_name`, `component_version` | glob patterns — the same component is named differently by different scanners, and versions come in ranges |
+| `title_pattern` | a glob against the title |
+
+`scope` is **required** and is what stops an acceptance reaching Findings its author has no business
+accepting. `type` is `engagement`, `product`, `product_type` or `global`; everything except `global`
+needs `ids`.
+
+Three rules keep this safe to leave switched on:
+
+- **Only while the acceptance is Active.** Expiry and rejection stop it — there is no second
+  lifetime to manage, and a lapsed decision cannot keep suppressing new Findings. This is what the
+  lifecycle in front of it is for.
+- **Only inside its scope.** A Finding outside the scope never matches, however well its
+  vulnerability lines up.
+- **Criteria with nothing to match are refused.** A scope with no matchable attribute would mean
+  "every Finding in this product", so the API returns `400` rather than accepting it. An acceptance
+  with *no* criteria at all is fine and covers exactly what was added to it — which is every Risk
+  Acceptance that existed before this feature.
+
+Applying criteria never fails an import: if it cannot run, the Finding is imported unaccepted and
+the next reimport tries again.
+
 ### API
 
 ```
