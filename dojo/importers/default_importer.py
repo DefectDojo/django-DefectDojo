@@ -246,6 +246,12 @@ class DefaultImporter(BaseImporter, DefaultImporterOptions):
                 unsaved_finding.unsaved_tags = merged_tags
             unsaved_finding.tags = None
             finding = self.process_cve(unsaved_finding)
+            # Normalize the locations/endpoints before they are hashed. Cleaning rewrites the
+            # canonical string form (a leading "/" is stripped from the path, a leading "?" from
+            # the query, the port is coerced to an int), so hashing before cleaning would make
+            # import store a different hash_code than reimport computes for the same report -
+            # reimport cleans first (see DefaultReImporter._process_findings_internal).
+            self.location_handler.clean_unsaved(finding)
             # Calculate hash_code before saving based on unsaved_endpoints/unsaved_locations and unsaved_vulnerability_ids
             finding.set_hash_code(True)
 

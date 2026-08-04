@@ -889,8 +889,13 @@ class Finding(BaseModel):
                     deduplicationLogger.debug("get_endpoints before the finding was saved")
                     # convert list of unsaved endpoints to the list of their canonical representation
                     endpoint_str_list = [str(endpoint) for endpoint in finding.unsaved_endpoints]
-                    # deduplicate (usually done upon saving finding) and sort endpoints
-                    return "".join(dict.fromkeys(endpoint_str_list))
+                    # deduplicate (usually done upon saving finding) and sort endpoints.
+                    # Sorting is what makes this agree with _get_saved_endpoints below: the
+                    # stored hash_code of an imported finding comes from this branch, so
+                    # without it the scanner's emission order would become part of the
+                    # finding's identity and any later recomputation would produce a
+                    # different hash_code for the same finding.
+                    return "".join(sorted(dict.fromkeys(endpoint_str_list)))
                 # we can get here when the parser defines static_finding=True but leaves dynamic_finding defaulted
                 # In this case, before saving the finding, both static_finding and dynamic_finding are True
                 # After saving dynamic_finding may be set to False probably during the saving process (observed on Bandit scan before forcing dynamic_finding=False at parser level)
@@ -939,10 +944,12 @@ class Finding(BaseModel):
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
                 url_locations = finding.locations.filter(location__location_type=URL.get_location_type())
                 deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(url_locations.count()))
-                # convert list of locations to the list of their canonical representation
-                locations = sorted({location_ref.location.get_location_value() for location_ref in url_locations.all()})
-                # sort locations strings
-                return "".join(sorted(locations))
+                # deduplicate and sort the canonical representation of every location. The stored
+                # Location.location_value *is* that canonical representation: it is written from
+                # AbstractLocation.get_location_value() when the Location row is created, so this
+                # matches what _get_unsaved_locations computes below.
+                locations = sorted({location_ref.location.location_value for location_ref in url_locations.all()})
+                return "".join(locations)
             return ""
 
         return _get_saved_locations(self) or _get_unsaved_locations(self)
