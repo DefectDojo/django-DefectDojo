@@ -81,10 +81,15 @@ echo "------------------------------------------------------------"
 # because they interfere with their neighbours. That is the same property
 # --parallel needs, so it is enabled here and nowhere else.
 #
+# "auto" rather than a count from nproc: Django's get_max_test_processes() falls
+# back to a single process if the multiprocessing start method is one its worker
+# initialisation cannot handle, and only "auto" consults it. An explicit count
+# bypasses that check and fails instead. See the note in manage.py.
+#
 # Set DD_TEST_PARALLEL=1 to go back to a single process -- useful locally when a
 # failure's traceback matters more than the wall clock, and the one-line revert
 # if this turns out to cost more in flakes than it saves in minutes.
-python3 manage.py test unittests --keepdb --no-input --parallel="${DD_TEST_PARALLEL:-$(nproc)}" --exclude-tag="non-parallel" --exclude-tag="transactional" --exclude-tag="performance" || {
+python3 manage.py test unittests --keepdb --no-input --parallel="${DD_TEST_PARALLEL:-auto}" --exclude-tag="non-parallel" --exclude-tag="transactional" --exclude-tag="performance" || {
     exit 1;
 }
 python3 manage.py test unittests --keepdb --no-input --tag="non-parallel" --exclude-tag="performance" || {
