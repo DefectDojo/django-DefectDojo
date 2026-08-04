@@ -1,0 +1,17 @@
+{
+  "hosts": [
+    {
+      "id": 11,
+      "hostname": "laptop-11.example.com",
+      "platform": "darwin",
+      "os_version": "macOS 14.5",
+      "software": [
+        {"id": 501, "name": "Example Browser", "version": "120.0.2", "vulnerabilities": []},
+        {"id": 502, "name": "Example Reader", "version": "9.2"}
+      ],
+      "policies": [
+        {"id": 90, "name": "Disk encryption enabled", "response": "fail", "critical": true}
+      ]
+    }
+  ]
+}
