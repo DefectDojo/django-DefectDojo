@@ -24,6 +24,33 @@ unset DD_CELERY_BROKER_URL
 
 wait_for_database_to_be_reachable
 
+# What this script should do about the database before it runs anything.
+#
+#   full     (default) check the migration state, apply it, then run the tests.
+#   prepare  apply migrations and exit, leaving a migrated database behind for
+#            the caller to snapshot. Keeps the makemigrations guard.
+#   reuse    the database is already migrated -- restored from a snapshot by the
+#            caller -- so go straight to the tests.
+#
+# `reuse` skips the makemigrations guard along with the migrate, which is only
+# safe because the snapshot is keyed on the models as well as on the migrations:
+# a model change with no migration for it cannot happen without changing that
+# key, and a changed key means there is no snapshot to restore and therefore no
+# way to reach this branch. Do not key a snapshot on migrations alone.
+DD_TEST_DB_MODE="${DD_TEST_DB_MODE:-full}"
+
+case "${DD_TEST_DB_MODE}" in
+    full|prepare|reuse) ;;
+    *)
+        echo "DD_TEST_DB_MODE must be one of full, prepare, reuse (got '${DD_TEST_DB_MODE}')" >&2
+        exit 1
+        ;;
+esac
+
+# Nothing to do with the database: this checks the API schema, and it has to run
+# per test job because DD_V3_FEATURE_LOCATIONS changes the schema it produces.
+# Skipped only when preparing a database, which runs no tests.
+if [ "${DD_TEST_DB_MODE}" != "prepare" ]; then
 python3 manage.py spectacular --fail-on-warn > /dev/null || {
     cat <<-EOF
 
@@ -51,7 +78,12 @@ EOF
     python3 manage.py spectacular > /dev/null
     exit 1
 }
+fi  # DD_TEST_DB_MODE != prepare
 
+# The bodies below are deliberately left unindented: they contain `<<-EOF`
+# heredocs, which strip leading tabs but not spaces, so indenting them would
+# change the message text they print.
+if [ "${DD_TEST_DB_MODE}" != "reuse" ]; then
 python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
     cat <<-EOF
 
@@ -72,6 +104,12 @@ EOF
 }
 
 python3 manage.py migrate
+fi  # DD_TEST_DB_MODE != reuse
+
+if [ "${DD_TEST_DB_MODE}" = "prepare" ]; then
+    echo "Database migrated; DD_TEST_DB_MODE=prepare, so not running any tests."
+    exit 0
+fi
 
 echo "Unit Tests"
 echo "------------------------------------------------------------"
