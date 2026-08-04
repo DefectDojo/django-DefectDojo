@@ -1,6 +1,6 @@
 import io
 import json
-from datetime import date
+from datetime import UTC, date, datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.calicocloud.parser import CalicocloudParser
@@ -294,7 +294,7 @@ class TestCalicocloudParser(DojoTestCase):
 
     def test_an_image_with_no_timestamp_leaves_the_date_alone(self):
         finding = self.by_uid("calicocloud_many_vuln.json")["calico-cloud-img-0004-CVE-2000-0005"]
-        self.assertEqual(date.today(), finding.date)
+        self.assertEqual(datetime.now(tz=UTC).date(), finding.date)
 
     def test_severity_is_always_a_known_value(self):
         for filename in ("calicocloud_many_vuln.json", "calicocloud_one_vuln.json",

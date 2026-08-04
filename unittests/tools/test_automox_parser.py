@@ -1,6 +1,6 @@
 import io
 import json
-from datetime import date
+from datetime import UTC, date, datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.automox.parser import AutomoxParser
@@ -214,7 +214,7 @@ class TestAutomoxParser(DojoTestCase):
     def test_an_unparseable_timestamp_leaves_the_date_alone(self):
         """Losing the finding over a malformed date would lose a real missing patch."""
         finding = self.by_uid("automox_many_vuln.json")["automox-900003"]
-        self.assertEqual(date.today(), finding.date)
+        self.assertEqual(datetime.now(tz=UTC).date(), finding.date)
 
     def test_requires_reboot_is_tagged_only_when_true(self):
         findings = self.by_uid("automox_many_vuln.json")

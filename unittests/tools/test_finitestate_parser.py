@@ -1,6 +1,6 @@
 import io
 import json
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.finitestate.parser import FinitestateParser
@@ -364,7 +364,7 @@ class TestFinitestateParser(DojoTestCase):
 
     def test_an_unparseable_date_leaves_the_date_alone(self):
         finding = self.by_uid("finitestate_many_vuln.json")["finding-0006"]
-        self.assertEqual(date.today(), finding.date)
+        self.assertEqual(datetime.now(tz=UTC).date(), finding.date)
 
     def test_the_date_falls_back_to_when_the_finding_was_created(self):
         findings = self.by_uid("finitestate_many_vuln.json")

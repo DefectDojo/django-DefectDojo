@@ -1,6 +1,6 @@
 import io
 import json
-from datetime import date
+from datetime import UTC, date, datetime
 
 from dojo.models import Finding, Test
 from dojo.tools.bigid.parser import BigidParser
@@ -205,8 +205,8 @@ class TestBigidParser(DojoTestCase):
         default rather than failing the whole file.
         """
         findings = self.by_uid("bigid_many_vuln.json")
-        self.assertEqual(date.today(), findings["bigid-case-0003"].date)
-        self.assertEqual(date.today(), findings["bigid-case-0004"].date)
+        self.assertEqual(datetime.now(tz=UTC).date(), findings["bigid-case-0003"].date)
+        self.assertEqual(datetime.now(tz=UTC).date(), findings["bigid-case-0004"].date)
 
     def test_the_data_source_is_the_component(self):
         """The same policy failing on two data sources stays two findings."""
