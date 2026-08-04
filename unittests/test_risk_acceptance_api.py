@@ -1,9 +1,12 @@
 import datetime
+from unittest.mock import patch
 
 from rest_framework.authtoken.models import Token
+from rest_framework.request import Request
 from rest_framework.reverse import reverse
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APIClient, APIRequestFactory, APITestCase
 
+from dojo.authorization.api_permissions import UserHasRiskAcceptancePermission
 from dojo.authorization.models import (
     Product_Type_Member,
     Role,
@@ -555,6 +558,31 @@ class TestRiskAcceptanceApi(APITestCase):
 
         risk_acceptance.refresh_from_db()
         self.assertIsNone(risk_acceptance.expiration_date_handled, "an outsider must not be able to expire it")
+
+    def test_post_object_permission_names_a_permission(self):
+        """
+        A POST to this viewset must be checked against a real permission, not None.
+
+        ``check_object_permission`` takes the POST permission as its fourth argument. Omitting it
+        passes None down to ``user_has_permission``, which this codebase happens to answer False --
+        but a stricter authorization layer treats an unmapped permission as unimplemented and
+        raises, turning a 403 into a 500. DefectDojo Pro does exactly that, and its own tests
+        caught it on the expire and reinstate actions: the first POST actions this viewset gained.
+
+        Asserted on the call rather than through a request because neither outcome is visible
+        end-to-end here: a superuser is allowed before the permission is read, and a user without
+        access is filtered out of the queryset and gets a 404 first.
+        """
+        risk_acceptance = self.make_risk_acceptance()
+        request = Request(APIRequestFactory().post(f"{self.url}{risk_acceptance.id}/expire/", {}, format="json"))
+        request.user = User.objects.create(username="ra_post_permission_user")
+
+        with patch("dojo.authorization.api_permissions.check_object_permission") as check:
+            UserHasRiskAcceptancePermission().has_object_permission(request, None, risk_acceptance)
+
+        # (request, obj, get, put, delete, post)
+        self.assertEqual(len(check.call_args.args), 6, "the POST permission is missing")
+        self.assertEqual(check.call_args.args[5], "edit")
 
     def test_risk_acceptance_created_filter(self):
         # 1. Create a baseline Risk Acceptance using the existing test setup
