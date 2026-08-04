@@ -243,6 +243,12 @@ automatically the person who agrees.
 Activating is an approval because it is the moment suppression starts. Reinstating an expired
 acceptance is the same move, and needs the same permission.
 
+**Reinstating needs an approver, by every route.** Open source treats reinstating an expired Risk
+Acceptance as an edit — which is right when there is no review to respect. With Risk Acceptances 2.0
+enabled there is one, so `POST .../reinstate/` and changing the expiration date on an expired Risk
+Acceptance (which reinstates it as a side effect) both require **Risk Acceptance Approve**. Editing
+any other field on an expired Risk Acceptance is still an ordinary edit.
+
 **The requester cannot be the approver.** Holding the approve permission is not the same as being
 a second pair of eyes, so whoever requested a Risk Acceptance cannot approve or activate it
 themselves — the API returns `403` and says so. Rejecting your own request is still allowed; that
