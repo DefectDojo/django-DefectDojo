@@ -1295,6 +1295,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     ],
     "Dragos Scan": ["title", "severity", "component_name"],
     "HiddenLayer Model Scan": ["title", "severity", "file_path"],
+    "NetRise Scan": ["title", "severity", "component_name"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1492,6 +1493,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Calico Cloud Image Assurance Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Dragos Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "HiddenLayer Model Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "NetRise Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
