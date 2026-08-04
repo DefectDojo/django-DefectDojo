@@ -1,0 +1,70 @@
+name: "CI: Warm Caches"
+
+# Why this workflow exists at all.
+#
+# GitHub scopes every Actions cache entry to the ref that saved it. A run can
+# restore entries saved by its own ref, by its base branch (pull_request events
+# only), and by the repository's default branch -- nothing else. So a pull
+# request cannot leave behind a cache that any *other* pull request can use: it
+# saves into its own PR scope, and that scope dies with the PR.
+#
+# The consequence is that without a workflow like this one, "cache the docker
+# layers" quietly does nothing for the case that matters -- the first push of a
+# new branch, which is most branches most of the time. Something has to save an
+# entry into a scope that pull requests are allowed to read, and only a run
+# triggered from a release line itself can do that.
+#
+# That is the whole job here: rebuild the images the test suite needs, on the
+# release lines, so the layer cache exists where pull requests will look for it.
+
+on:
+  push:
+    branches:
+      - bugfix
+      - dev
+    # Only when something that actually invalidates the expensive layers moves.
+    # App code under dojo/ is copied in near the end of the Dockerfile, so it
+    # busts only cheap layers and does not need a rebuild here.
+    paths:
+      - 'Dockerfile.django-*'
+      - 'requirements.txt'
+      - 'requirements-dev.txt'
+      - '.github/workflows/ci-warm-caches.yml'
+      - '.github/workflows/build-docker-images-for-testing.yml'
+  # GitHub evicts a cache entry it has not seen used for 7 days. Pull request
+  # builds read these constantly, which keeps them alive on their own, but a
+  # quiet week on a release line would let them go cold. This refreshes them for
+  # the price of a cache-hit rebuild.
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+concurrency:
+  # Two pushes in quick succession would warm the same key twice.
+  group: warm-caches-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  warm-build-cache:
+    name: Warm Build Cache
+    # A fork has its own cache scope and its own billing, so there is nothing
+    # here for it to warm. Same guard as release-nightly-dev.yml.
+    if: github.repository == 'DefectDojo/django-DefectDojo'
+    strategy:
+      matrix:
+        platform: ['linux/amd64', 'linux/arm64']
+      fail-fast: false
+    # Deliberately the same reusable workflow the test suite builds with, rather
+    # than a copy of its build step. If the two definitions drifted, this one
+    # could warm a scope nothing reads, and the failure would be silent -- every
+    # PR would just quietly keep paying for a full build.
+    uses: ./.github/workflows/build-docker-images-for-testing.yml
+    with:
+      platform: ${{ matrix.platform }}
+      # django only for now. It is where the costly layers are (apt, the wheel
+      # build, two pip installs); nginx and integration-tests are comparatively
+      # cheap, and leaving them out keeps this well inside the 10 GB cache
+      # budget so that LRU eviction never reaches the entries being warmed.
+      docker-images: '["django"]'
+      # Nothing downstream consumes the tarballs in a warming run.
+      upload-artifacts: false

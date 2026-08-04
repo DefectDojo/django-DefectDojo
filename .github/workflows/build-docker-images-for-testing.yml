@@ -7,11 +7,28 @@ on:
         platform:
           type: string
           default: "linux/amd64"
+        docker-images:
+          type: string
+          default: '["django", "nginx", "integration-tests"]'
+        upload-artifacts:
+          type: boolean
+          default: true
   workflow_call:
     inputs:
         platform:
           type: string
           default: "linux/amd64"
+        # Which images to build, as a JSON array. Callers that only want to
+        # populate the layer cache (ci-warm-caches.yml) narrow this down.
+        docker-images:
+          type: string
+          default: '["django", "nginx", "integration-tests"]'
+        # The image tarballs are what the test jobs consume. A run that exists
+        # only to warm the layer cache has no consumer, and the upload is the
+        # slowest step in the job, so it can be skipped.
+        upload-artifacts:
+          type: boolean
+          default: true
 
 jobs:
   build:
@@ -20,7 +37,7 @@ jobs:
     strategy:
       matrix:
         # integration tests are only build (and run) on debian linux/amd64
-        docker-image: [django, nginx, integration-tests]
+        docker-image: ${{ fromJSON(inputs.docker-images) }}
         os: [alpine, debian]
         platform: ["${{ inputs.platform }}"]
         exclude:
@@ -37,6 +54,7 @@ jobs:
         run: |
           platform=${{ inputs.platform }}
           echo "PLATFORM=${platform//\//-}" >> $GITHUB_ENV
+          echo "BUILD_CACHE_SCOPE=${{ matrix.docker-image }}-${{ matrix.os }}-${platform//\//-}" >> $GITHUB_ENV
           echo $GITHUB_ENV
 
       - name: Checkout
@@ -63,9 +81,22 @@ jobs:
           tags: defectdojo/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }},${{ env.IMAGE_REPOSITORY }}/defectdojo-${{ matrix.docker-image }}:${{ matrix.os }}
           file: Dockerfile.${{ matrix.docker-image }}-${{ matrix.os }}
           outputs: type=docker,dest=${{ matrix.docker-image }}-${{ matrix.os }}-${{ env.PLATFORM }}_img
+          # A miss costs nothing but the lookup, so this is unconditional.
+          cache-from: type=gha,scope=${{ env.BUILD_CACHE_SCOPE }}
+          # mode=max is what makes this worth doing: the expensive layer is the
+          # `pip3 wheel` in the `build` stage, which never reaches the final
+          # image, and the default mode=min would not export it.
+          #
+          # Only non-pull_request runs write. Two reasons: the 10 GB per-repo
+          # cache budget should not be spent by every push to every branch (and
+          # LRU eviction would then throw away the entries that are actually
+          # read), and a pull request from a fork has no write access to this
+          # repository's cache in the first place.
+          cache-to: ${{ github.event_name != 'pull_request' && format('type=gha,mode=max,scope={0}', env.BUILD_CACHE_SCOPE) || '' }}
 
       # export docker images to be used in next jobs below
       - name: Upload image ${{ matrix.docker-image }} as artifact
+        if: inputs.upload-artifacts
         timeout-minutes: 15
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
