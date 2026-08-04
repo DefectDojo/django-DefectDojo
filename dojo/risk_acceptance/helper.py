@@ -1,5 +1,4 @@
 import logging
-from contextlib import suppress
 
 import pghistory
 from dateutil.relativedelta import relativedelta
@@ -14,6 +13,45 @@ from dojo.notifications.helper import create_notification
 from dojo.utils import get_full_url, get_system_setting
 
 logger = logging.getLogger(__name__)
+
+# Mirrors the System_Settings.risk_acceptance_form_default_days column default. The column is
+# nullable, and get_system_setting() only substitutes its own default when the attribute is
+# missing entirely - a null column still returns None - so every caller needs this fallback to
+# avoid doing arithmetic with None.
+DEFAULT_RISK_ACCEPTANCE_EXPIRATION_DAYS = 180
+
+
+def expiration_days() -> int:
+    """Return the configured expiry window in days, falling back when the setting is unset."""
+    configured = get_system_setting("risk_acceptance_form_default_days")
+    if configured is None:
+        return DEFAULT_RISK_ACCEPTANCE_EXPIRATION_DAYS
+    return configured
+
+
+def default_expiration_date():
+    """Return the expiration date a risk acceptance gets when nobody asked for a specific one."""
+    return timezone.now() + relativedelta(days=expiration_days())
+
+
+def engagement_for(risk_acceptance: Risk_Acceptance) -> Engagement | None:
+    """
+    Return an engagement this risk acceptance can be reached through, or None.
+
+    Prefers the `Engagement.risk_acceptance` link and falls back to the engagement of an
+    accepted finding, which is the same derivation `RiskAcceptanceSerializer` uses to attach
+    an engagement on create and to repair an orphan on update.
+    """
+    engagement = risk_acceptance.engagement
+    if engagement is not None:
+        return engagement
+
+    # iterate rather than .first(), to reuse the accepted_findings prefetch
+    accepted_finding = next(iter(risk_acceptance.accepted_findings.all()), None)
+    if accepted_finding is not None:
+        return accepted_finding.test.engagement
+
+    return None
 
 
 def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement | None:
@@ -33,23 +71,34 @@ def engagement_to_notify_about(risk_acceptance: Risk_Acceptance) -> Engagement |
     nothing to notify about; the notification names a product and links to a per-engagement
     URL, and neither can be produced from an empty risk acceptance.
     """
-    engagement = risk_acceptance.engagement
-    if engagement is not None:
-        return engagement
-
-    # iterate rather than .first(), to reuse the accepted_findings prefetch
-    accepted_finding = next(iter(risk_acceptance.accepted_findings.all()), None)
-    if accepted_finding is not None:
-        return accepted_finding.test.engagement
-
-    logger.warning(
-        "risk acceptance %i:%s has no engagement and no findings, skipping its expiration notification",
-        risk_acceptance.id, risk_acceptance,
-    )
-    return None
+    engagement = engagement_for(risk_acceptance)
+    if engagement is None:
+        logger.warning(
+            "risk acceptance %i:%s has no engagement and no findings, skipping its expiration notification",
+            risk_acceptance.id, risk_acceptance,
+        )
+    return engagement
 
 
-def expire_now(risk_acceptance):
+def note_on_risk_acceptance(risk_acceptance: Risk_Acceptance, user: Dojo_User | None, action: str, *, reason=None) -> None:
+    """
+    Record an action taken against the risk acceptance itself.
+
+    Skipped when there is no user: the scheduled expiry job acts on its own behalf and is
+    already covered by the expiration notification, so a note authored by nobody adds nothing.
+    """
+    if user is None:
+        return
+    risk_acceptance.notes.add(Notes.objects.create(
+        entry=(
+            f"{Dojo_User.generate_full_name(user)} ({user.id}) {action} this risk acceptance"
+            f"{describe_cause(reason=reason)}"
+        ),
+        author=user,
+    ))
+
+
+def expire_now(risk_acceptance, user=None, reason=None):
     logger.info("Expiring risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
     reactivated_findings = []
@@ -82,6 +131,8 @@ def expire_now(risk_acceptance):
     risk_acceptance.expiration_date_handled = timezone.now()
     risk_acceptance.save()
 
+    note_on_risk_acceptance(risk_acceptance, user, "expired", reason=reason)
+
     # the expiry above is the job here, the notification below is best effort
     engagement = engagement_to_notify_about(risk_acceptance)
     if engagement is None:
@@ -97,17 +148,16 @@ def expire_now(risk_acceptance):
                          url=reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)))
 
 
-def reinstate(risk_acceptance, old_expiration_date):
+def reinstate(risk_acceptance, old_expiration_date, user=None, reason=None):
     if risk_acceptance.expiration_date_handled:
         logger.info("Reinstating risk acceptance %i:%s with %i findings", risk_acceptance.id, risk_acceptance, len(risk_acceptance.accepted_findings.all()))
 
         # The "Reinstate" button has no date to offer and passes the expiration date
         # unchanged, so fall back to the configured default for it. The edit form and
         # the API only reach this point because the caller supplied a new date, which
-        # is already on the instance — recomputing the default would throw it away.
+        # is already on the instance - recomputing the default would throw it away.
         if risk_acceptance.expiration_date == old_expiration_date:
-            expiration_delta_days = get_system_setting("risk_acceptance_form_default_days", 90)
-            risk_acceptance.expiration_date = timezone.now() + relativedelta(days=expiration_delta_days)
+            risk_acceptance.expiration_date = default_expiration_date()
 
         reinstated_findings = []
         for finding in risk_acceptance.accepted_findings.all():
@@ -128,6 +178,8 @@ def reinstate(risk_acceptance, old_expiration_date):
 
         # best effort JIRA integration, no status changes, just a comment
         post_jira_comments(risk_acceptance, risk_acceptance.accepted_findings.all(), reinstation_message_creator)
+
+        note_on_risk_acceptance(risk_acceptance, user, "reinstated", reason=reason)
 
     risk_acceptance.expiration_date_handled = None
     risk_acceptance.expiration_date_warned = None
@@ -261,13 +313,18 @@ def expiration_handler(*args, **kwargs):
 
 
 def get_view_risk_acceptance(risk_acceptance: Risk_Acceptance) -> str:
-    """Return the full qualified URL of the view risk acceptance page."""
-    # Suppressing this error because it does not happen under most circumstances that a risk acceptance does not have engagement
-    with suppress(AttributeError):
-        get_full_url(
-            reverse("view_risk_acceptance", args=(risk_acceptance.engagement.id, risk_acceptance.id)),
-        )
-    return ""
+    """
+    Return the full qualified URL of the view risk acceptance page, or "" if there is none.
+
+    The page is per-engagement, and a risk acceptance does not always have one - see
+    `engagement_to_notify_about` for why that is a supported state rather than corrupt data.
+    """
+    engagement = engagement_for(risk_acceptance)
+    if engagement is None:
+        return ""
+    return get_full_url(
+        reverse("view_risk_acceptance", args=(engagement.id, risk_acceptance.id)),
+    )
 
 
 def expiration_message_creator(risk_acceptance, heads_up_days=0):
@@ -393,7 +450,14 @@ def simple_risk_accept(user: Dojo_User, finding: Finding, *, perform_save=True) 
         ))
 
 
-def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_comments=True) -> None:
+def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_comments=True, reason=None, source=None) -> None:
+    """
+    Drop a finding's risk acceptance.
+
+    `source` names the mechanism that did it (for example the reimporter closing a fixed
+    finding) and `reason` carries free text. Both end up in the note left on the finding,
+    which is the only record that survives - the membership row itself is removed.
+    """
     logger.debug("unaccepting finding %i:%s if it is currently risk accepted", finding.id, finding)
     if finding.risk_accepted:
         logger.debug("unaccepting finding %i:%s", finding.id, finding)
@@ -420,9 +484,24 @@ def risk_unaccept(user: Dojo_User, finding: Finding, *, perform_save=True, post_
         # Add a note to reflect that the finding was removed from the risk acceptance
         if user is not None:
             finding.notes.add(Notes.objects.create(
-                entry=(f"{Dojo_User.generate_full_name(user)} ({user.id}) removed a risk exception from this finding"),
+                entry=(
+                    f"{Dojo_User.generate_full_name(user)} ({user.id}) removed a risk exception from this finding"
+                    f"{describe_cause(reason=reason, source=source)}"
+                ),
                 author=user,
             ))
+
+
+def describe_cause(*, reason=None, source=None) -> str:
+    """Render the optional source/reason of an action as a suffix for a note entry."""
+    parts = []
+    if source:
+        parts.append(f"via {source}")
+    if reason:
+        parts.append(f"reason: {reason}")
+    if not parts:
+        return ""
+    return " (" + ", ".join(parts) + ")"
 
 
 def remove_from_any_risk_acceptance(finding):
