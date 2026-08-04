@@ -57,6 +57,7 @@ from django.utils.translation import gettext as _
 from kombu import Connection
 
 from dojo.celery import app
+from dojo.db_utils import is_transient_db_conflict
 from dojo.finding.queries import get_authorized_findings
 from dojo.github.services import (
     add_external_issue_github,
@@ -1816,27 +1817,7 @@ def _get_object_name(obj):
     return obj.__class__.__name__
 
 
-# SQLSTATEs for "this transaction lost a concurrency race": 40P01 deadlock_detected
-# and 40001 serialization_failure. Postgres aborts one participant and lets the other
-# commit, so the aborted work is not invalid -- it just has to run again.
-TRANSIENT_DB_CONFLICT_SQLSTATES = frozenset({"40P01", "40001"})
-
-
-def is_transient_db_conflict(exc):
-    """
-    Whether exc is a deadlock or serialization failure, and so safe to retry.
-
-    Django re-raises the driver error as its own OperationalError and keeps the
-    driver exception -- the one carrying the SQLSTATE -- as ``__cause__``, so check
-    both rather than matching on the message text.
-    """
-    return any(
-        getattr(err, "sqlstate", None) in TRANSIENT_DB_CONFLICT_SQLSTATES
-        for err in (exc, exc.__cause__)
-    )
-
-
-def _async_delete_object(model_label, pk):
+def _async_delete_object(model_label, pk, *, is_retry=False):
     """
     Delete an object and all its related objects using the SQL cascade walker.
 
@@ -1848,8 +1829,11 @@ def _async_delete_object(model_label, pk):
     efficient bottom-up SQL deletion of all FK-related tables. The top-level
     object is deleted via ORM obj.delete() to fire Django signals.
 
-    Every step refetches or re-filters what it deletes, so calling this again
-    after a partial failure resumes from whatever is left.
+    Steps 1-4 refetch or re-filter what they delete, so calling this again after a
+    failure in one of them resumes from whatever is left. Steps 5 and 6 are NOT
+    resumable: once the top-level obj.delete() commits, a re-invocation finds nothing
+    and returns early, so any post-delete work is skipped rather than redone. Pass
+    ``is_retry=True`` on a re-invocation so that case is logged as the anomaly it is.
     """
     from django.apps import apps  # noqa: PLC0415
 
@@ -1862,7 +1846,17 @@ def _async_delete_object(model_label, pk):
     Model = apps.get_model(model_label)
     obj = Model.objects.filter(pk=pk).first()
     if obj is None:
-        logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
+        if is_retry:
+            # The top-level delete committed and the conflict came after it, so the
+            # object is gone and step 6 never ran. Louder than the first-call case:
+            # nothing is broken, but a product grade may now be stale.
+            logger.warning(
+                "ASYNC_DELETE: %s pk=%s already gone on a retry -- the delete itself "
+                "completed, but post-delete work (product grading) was not redone",
+                model_label, pk,
+            )
+        else:
+            logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
         return
 
     logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
@@ -1929,6 +1923,8 @@ def _async_delete_object(model_label, pk):
 
 # Seconds before the first retry; doubled on each subsequent attempt.
 ASYNC_DELETE_RETRY_DELAY = 5
+# How often to retry before reporting the conflict as a failure.
+ASYNC_DELETE_MAX_CONFLICT_RETRIES = 3
 
 
 @app.task(bind=True)
@@ -1936,22 +1932,37 @@ def async_delete_task(self, model_label, pk, **kwargs):
     """
     Celery entry point for cascade deletion, retrying transient DB conflicts.
 
-    Bulk deletions run several of these concurrently and they contend on rows shared
-    across the objects being deleted (tag bookkeeping, grading), so Postgres picks a
-    deadlock victim. The victim's work is not wrong, only rolled back, so retry it
-    instead of reporting a failed delete and leaving the object partly removed.
+    Deterministic lock ordering in the tag bookkeeping (see
+    ``dojo.tags.utils.bulk_remove_all_tags``) is what stops these deletes deadlocking
+    against each other. This retry is the backstop for the conflicts that ordering
+    cannot rule out -- a delete overlapping an import, say -- because the aborted
+    transaction's work is not wrong, only rolled back, and failing here would leave the
+    object partly deleted.
+
+    Only applies to background execution: under eager execution Celery re-runs the body
+    inline and ignores ``countdown``, which would retry into an unfinished conflicting
+    transaction, so eager callers get the error instead.
 
     Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
     Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
     """
+    retries = self.request.retries
     try:
-        _async_delete_object(model_label, pk)
+        _async_delete_object(model_label, pk, is_retry=retries > 0)
     except OperationalError as exc:
         if not is_transient_db_conflict(exc):
             raise
-        max_retries = get_setting("ASYNC_OBJECT_DELETE_MAX_CONFLICT_RETRIES")
-        retries = self.request.retries
-        if retries >= max_retries:
+        if self.request.is_eager:
+            # Verified against celery 5.6.3: under apply() retry re-invokes the body
+            # immediately and drops countdown, so retrying would just re-run the whole
+            # delete inside the caller's request while the winner may still be open.
+            logger.warning(
+                "ASYNC_DELETE: transient DB conflict on %s pk=%s running eagerly; "
+                "not retrying because eager retries ignore the backoff: %s",
+                model_label, pk, exc,
+            )
+            raise
+        if retries >= ASYNC_DELETE_MAX_CONFLICT_RETRIES:
             logger.error(
                 "ASYNC_DELETE: giving up on %s pk=%s after %s transient DB conflict(s): %s",
                 model_label, pk, retries, exc,
@@ -1964,9 +1975,9 @@ def async_delete_task(self, model_label, pk, **kwargs):
         countdown = backoff + backoff * (pk % 100) / 100
         logger.warning(
             "ASYNC_DELETE: transient DB conflict on %s pk=%s, retry %s/%s in %.1fs: %s",
-            model_label, pk, retries + 1, max_retries, countdown, exc,
+            model_label, pk, retries + 1, ASYNC_DELETE_MAX_CONFLICT_RETRIES, countdown, exc,
         )
-        raise self.retry(exc=exc, countdown=countdown, max_retries=max_retries)
+        raise self.retry(exc=exc, countdown=countdown, max_retries=ASYNC_DELETE_MAX_CONFLICT_RETRIES)
 
 
 class async_delete:
