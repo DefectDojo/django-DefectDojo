@@ -120,7 +120,7 @@ The date you enter is the date that is saved.  The system setting **Risk Accepta
 
 Moving the expiration date to an earlier-but-still-future date has no special behavior — the Risk Acceptance stays active and the new date is saved.
 
-Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior.  On an **already-expired** Risk Acceptance a past date is not a reinstatement at all — the next expiration run would simply lapse it again — so the reinstate falls back to today + N days.
+Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior.  That holds for an **already-expired** Risk Acceptance too: a past date is still the date you chose, so it is saved as-is and the next expiration run lapses the Risk Acceptance again.
 
 ### What the API exposes
 

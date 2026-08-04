@@ -264,20 +264,27 @@ class RiskAcceptanceTestUI(DojoTestCase):
         expected = timezone.now() + relativedelta(days=ra_helper.expiration_days())
         self.assertEqual(ra.expiration_date.date(), expected.date())
 
-    def test_reinstate_risk_acceptance_defaults_when_requested_date_is_not_in_the_future(self):
-        """A past date would lapse again on the next expiry run, so it is not a reinstatement."""
+    def test_reinstate_risk_acceptance_honors_a_past_date_the_caller_chose(self):
+        """
+        Any date the caller supplied is kept, including one in the past.
+
+        The fallback exists for the Reinstate action, which supplies no date at all. A past
+        date is still a deliberate choice, so it is stored as-is and the next expiration run
+        simply lapses the risk acceptance again - the alternative would be silently
+        overriding the user's input, which is the behaviour this whole path removed.
+        """
         self.test_expire_risk_acceptance_findings_active()
         ra = Risk_Acceptance.objects.last()
 
         old_expiration_date = ra.expiration_date
-        ra.expiration_date = timezone.now() - relativedelta(days=3)
+        requested_expiration_date = timezone.now() - relativedelta(days=3)
+        ra.expiration_date = requested_expiration_date
         ra.save()
 
         ra_helper.reinstate(ra, old_expiration_date)
 
         ra.refresh_from_db()
-        expected = timezone.now() + relativedelta(days=ra_helper.expiration_days())
-        self.assertEqual(ra.expiration_date.date(), expected.date())
+        self.assertEqual(ra.expiration_date.date(), requested_expiration_date.date())
 
     def test_audit_note_links_to_the_risk_acceptance(self):
         """The note written when a finding is accepted carries a usable link, not empty parens."""
