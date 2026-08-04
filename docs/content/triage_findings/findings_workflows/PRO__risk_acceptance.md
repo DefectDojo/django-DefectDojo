@@ -243,6 +243,15 @@ automatically the person who agrees.
 Activating is an approval because it is the moment suppression starts. Reinstating an expired
 acceptance is the same move, and needs the same permission.
 
+**The requester cannot be the approver.** Holding the approve permission is not the same as being
+a second pair of eyes, so whoever requested a Risk Acceptance cannot approve or activate it
+themselves — the API returns `403` and says so. Rejecting your own request is still allowed; that
+is a withdrawal, and needs nobody's agreement.
+
+An administrator can turn this off with **Block Self-Approval of Risk Acceptances** in System
+Settings (on by default). Turning it off is for a team small enough that one person is the whole
+approval chain, where the alternative is that nobody uses the workflow at all.
+
 ### Requested exceptions in your metrics
 
 The problem this solves: a team asks for an exception and waits — on a change board, on a vendor, on
@@ -256,6 +265,9 @@ status band, **Exception Requested**, instead of **Active**:
 - The Finding is not hidden and not suppressed. Its own status is still Active.
 - Charts and status splits show **Exception Requested** as its own slice, so the total still adds up
   and you can see how much work is sitting in a queue waiting on a decision.
+- Findings waiting on a decision carry an **Exception Requested** badge in Finding tables,
+  alongside their real status — the Finding is still Active, and the badge says somebody is
+  waiting.
 - Filter Findings on `has_pending_exception` to build that queue.
 - Filter Risk Acceptances on `workflow_state=proposed&workflow_state=under_review` to see the
   requests waiting for a reviewer.
@@ -318,6 +330,9 @@ Acceptances created before the feature existed report `active`, which is what th
 
 #### Asking for an exception
 
+From the UI: **Request Security Exception** on a Finding's action menu, or on the Risk Acceptance
+menu after selecting several Findings in a table — bulk is the normal case.
+
 ```
 POST /api/v2/risk_acceptance/request/
 ```
@@ -358,7 +373,8 @@ GET /api/v2/findings/{id}/acceptance_history/
   left it**, which the accepted-findings list cannot show.
 - `acceptance_history/` is the same records from the Finding's side: every Risk Acceptance this
   Finding has been part of. This is the endpoint that answers "was this ever accepted, and by whom"
-  about a Finding whose membership was severed months ago.
+  about a Finding whose membership was severed months ago. The Finding page shows it as an
+  **Acceptance History** tab.
 
 `acceptance_history/` only lists Risk Acceptances you may see in your own right. Risk Acceptance
 visibility is a separate grant from Finding visibility, so being able to read the Finding does not
