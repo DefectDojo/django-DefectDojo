@@ -77,6 +77,7 @@ class Notifications(models.Model):
                 result.engagement_added = {*result.engagement_added, *notifications.engagement_added}
                 result.test_added = {*result.test_added, *notifications.test_added}
                 result.scan_added = {*result.scan_added, *notifications.scan_added}
+                result.scan_added_empty = {*result.scan_added_empty, *notifications.scan_added_empty}
                 result.jira_update = {*result.jira_update, *notifications.jira_update}
                 result.upcoming_engagement = {*result.upcoming_engagement, *notifications.upcoming_engagement}
                 result.stale_engagement = {*result.stale_engagement, *notifications.stale_engagement}

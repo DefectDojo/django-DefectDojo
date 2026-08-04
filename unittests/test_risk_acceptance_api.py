@@ -419,6 +419,13 @@ class TestRiskAcceptanceApi(APITestCase):
         self.assertIsNone(ra.expiration_date_handled)
         self.assertIsNone(ra.expiration_date_warned)
 
+        # The date the caller asked for is the date that gets stored. reinstate()
+        # used to overwrite it with risk_acceptance_form_default_days.
+        self.assertEqual(
+            future_date.replace(microsecond=0),
+            ra.expiration_date.replace(microsecond=0),
+        )
+
     def test_update_never_expired_risk_acceptance_leaves_findings_unchanged(self):
         """
         Regression test companion: editing the expiration_date of a risk acceptance that
