@@ -328,8 +328,16 @@ Matchable attributes — all optional, and **all of the ones present must match*
 | `title_pattern` | a glob against the title |
 
 `scope` is **required** and is what stops an acceptance reaching Findings its author has no business
-accepting. `type` is `engagement`, `product`, `product_type` or `global`; everything except `global`
-needs `ids`.
+accepting. `type` is `engagement`, `product`, `product_type` or `global`.
+
+You can leave `ids` empty and DefectDojo fills them in from the Findings the Risk Acceptance already
+covers — so a client can say "this asset" without hunting for an id. That cannot widen anything: the
+ids come from where the acceptance is already accepting. If there is nothing to derive from, the
+criteria are refused rather than quietly broadened.
+
+**From the UI:** *Edit Standing Criteria* on the Risk Acceptance menu. It asks how far the acceptance
+should reach — this engagement, this asset, this asset's type, or everywhere — rather than asking you
+to pick ids, and refuses to save until both a scope and at least one matchable attribute are set.
 
 Three rules keep this safe to leave switched on:
 
