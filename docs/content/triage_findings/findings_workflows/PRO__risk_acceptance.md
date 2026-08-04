@@ -360,6 +360,30 @@ Three rules keep this safe to leave switched on:
 Applying criteria never fails an import: if it cannot run, the Finding is imported unaccepted and
 the next reimport tries again.
 
+### Rules Engine 2.0 conditions
+
+With both features enabled, a rule can condition on what an acceptance is doing, not just on the
+`Risk Accepted` flag:
+
+| Condition path | Type | Says |
+| --- | --- | --- |
+| `finding.has_pending_exception` | boolean | Somebody has asked for this Finding to be accepted and nobody has answered |
+| `finding.risk_acceptance_state` | select | The state of the Risk Acceptance covering it (a picker, drawn from the lifecycle's own states) |
+| `finding.risk_acceptance_expiration_date` | string | When that acceptance expires, ISO-8601 |
+| `finding.risk_acceptance_days_to_expiry` | number | Days until it expires — **negative once the date has passed**, so "expired 3 days ago" is expressible |
+| `finding.risk_acceptance_is_global` | boolean | Whether that acceptance spans more than one Asset |
+
+What this makes possible, for example: notify an owner when an acceptance covering their Findings is
+within a week of expiring (`risk_acceptance_days_to_expiry <= 7`), or chase requests that have sat
+unanswered (`has_pending_exception == true`).
+
+All of these read empty while **Risk Acceptances 2.0** is off — `false` for the boolean and `null`
+for the rest — so a rule written against them matches nothing rather than acting on a lifecycle the
+install does not use.
+
+Where a Finding is covered by more than one Risk Acceptance, these describe the earliest one it was
+accepted under.
+
 ### API
 
 ```
