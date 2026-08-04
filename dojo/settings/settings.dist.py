@@ -1300,6 +1300,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Ostorlab Scan": ["title", "severity", "component_name"],
     "Parasoft DTP Scan": ["title", "severity", "file_path", "vuln_id_from_tool"],
     "Uptycs Scan": ["title", "severity", "component_name"],
+    "CyberArk Certificate Manager Scan": ["title", "severity", "component_name"],
     "Quay - Connectors Import": [
         "title",
         "severity",
@@ -1502,6 +1503,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Ostorlab Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Parasoft DTP Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Uptycs Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "CyberArk Certificate Manager Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Quay - Connectors Import": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Anchore Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "AnchoreCTL Vuln Report": DEDUPE_ALGO_HASH_CODE,
