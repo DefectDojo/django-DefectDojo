@@ -545,7 +545,7 @@ The Pro UI has been significantly reorganized, with changes to page organization
 ### July 14, 2025: v2.48.2
 
 - **(Findings)** KEV ([Known Exploited Vulnerabilities](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)) related data can now be added as metadata to Findings. 
-![image](images/Findings_kev.png)
+![image](images/findings_kev.png)
 
 ### July 8, 2025: v2.48.1
 
