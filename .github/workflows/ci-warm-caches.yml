@@ -64,15 +64,25 @@ jobs:
         with:
           persist-credentials: false
 
-      # KEEP THIS KEY IN SYNC with the two copies in rest-framework-tests.yml.
-      # If they drift, this job warms an entry nothing reads and every pull
-      # request goes on paying the full migrate, with nothing failing to say so.
+      # Computed once, before anything runs Python, and referenced by both the
+      # probe and the save. Not written inline in both places: hashFiles is
+      # evaluated per step, and `dojo/db_migrations/**` picks up the
+      # __pycache__/*.pyc that migrating writes into the bind-mounted workspace,
+      # so the save would land under a key the probe will never ask for.
+      #
+      # KEEP IN SYNC with the same block in rest-framework-tests.yml. If they
+      # drift, this job warms an entry nothing reads and every pull request goes
+      # on paying the full migrate, with nothing failing to say so.
+      - name: Compute migrated database snapshot key
+        id: db-key
+        run: echo "key=migrated-db-v1-${{ hashFiles('requirements.txt', 'dojo/db_migrations/**', 'dojo/models.py', 'dojo/base_models/**', 'dojo/pghistory_models.py', 'dojo/settings/settings.dist.py', 'docker-compose.yml', 'docker-compose.override.unit_tests_cicd.yml', 'docker/entrypoint-unit-tests.sh') }}" >> "$GITHUB_OUTPUT"
+
       - name: Probe for an existing snapshot
         id: probe
         uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: migrated-db.dump
-          key: migrated-db-v1-${{ hashFiles('requirements.txt', 'dojo/db_migrations/**', 'dojo/models.py', 'dojo/base_models/**', 'dojo/pghistory_models.py', 'dojo/settings/settings.dist.py', 'docker-compose.yml', 'docker-compose.override.unit_tests_cicd.yml', 'docker/entrypoint-unit-tests.sh') }}
+          key: ${{ steps.db-key.outputs.key }}
           # Do not download it -- whether the key exists is the whole question,
           # and on most runs the answer is usually yes.
           lookup-only: true
@@ -121,7 +131,7 @@ jobs:
         uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: migrated-db.dump
-          key: migrated-db-v1-${{ hashFiles('requirements.txt', 'dojo/db_migrations/**', 'dojo/models.py', 'dojo/base_models/**', 'dojo/pghistory_models.py', 'dojo/settings/settings.dist.py', 'docker-compose.yml', 'docker-compose.override.unit_tests_cicd.yml', 'docker/entrypoint-unit-tests.sh') }}
+          key: ${{ steps.db-key.outputs.key }}
 
       - name: Logs
         if: failure()
