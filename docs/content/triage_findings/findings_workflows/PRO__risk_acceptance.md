@@ -316,6 +316,54 @@ Both endpoints return `403` with an explanatory message while the feature flag i
 state changes only through `transition/`, so that every change is validated and recorded. Risk
 Acceptances created before the feature existed report `active`, which is what they are.
 
+#### Asking for an exception
+
+```
+POST /api/v2/risk_acceptance/request/
+```
+
+```json
+{
+    "findings": [1234, 1235],
+    "name": "Waiting on the Q4 platform upgrade",
+    "reason": "the fix requires a platform version we upgrade to in Q4",
+    "justification": "compensating control in the gateway",
+    "expiration_date": "2027-01-15T00:00:00Z"
+}
+```
+
+Creates a Risk Acceptance that starts in **Proposed** and **does not accept its Findings**. This has
+its own endpoint because creating a Risk Acceptance the ordinary way accepts its Findings
+immediately — which is the one thing a request must not do — and an Active Risk Acceptance
+deliberately cannot move back to Proposed, so there is no transition that would undo it.
+
+`reason` is required: a request with no argument cannot be reviewed. `justification` is optional and
+is recorded against every Finding in the request, where it can be edited per Finding afterwards.
+
+Requesting needs the same permission as editing a Risk Acceptance, plus permission to view every
+Finding named. Deciding the request needs **Risk Acceptance Approve**, which is what keeps the
+request and the decision two different acts.
+
+#### Reading the history
+
+```
+GET /api/v2/risk_acceptance/{id}/transitions/
+GET /api/v2/risk_acceptance/{id}/finding_records/
+GET /api/v2/findings/{id}/acceptance_history/
+```
+
+- `transitions/` is the approval chain, oldest first: which state each move left and entered, who
+  made it, when, and why.
+- `finding_records/` is what the Risk Acceptance has covered — **including Findings that have since
+  left it**, which the accepted-findings list cannot show.
+- `acceptance_history/` is the same records from the Finding's side: every Risk Acceptance this
+  Finding has been part of. This is the endpoint that answers "was this ever accepted, and by whom"
+  about a Finding whose membership was severed months ago.
+
+`acceptance_history/` only lists Risk Acceptances you may see in your own right. Risk Acceptance
+visibility is a separate grant from Finding visibility, so being able to read the Finding does not
+show you the exceptions raised against it.
+
 ## Risk Acceptance Best Practices 
 
 While it is possible to affect Findings within Full Risk Acceptance objects using Simple Risk Acceptance workflows (and vice versa), it is generally preferable to default to either process exclusively rather than having both enabled at once. 
