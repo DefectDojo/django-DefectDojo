@@ -1,0 +1,110 @@
+{
+  "issues": [
+    {
+      "id": 1001,
+      "createdAt": "2026-05-11T08:14:02.000Z",
+      "type": "vulnerability",
+      "vulnId": "FOSSA-2026-0001",
+      "title": "Prototype pollution in generic-lib",
+      "cve": "CVE-2000-0001",
+      "cvss": 9.8,
+      "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+      "severity": "critical",
+      "details": "A crafted payload can pollute Object.prototype and lead to remote code execution.",
+      "cveStatus": "PUBLISHED",
+      "published": "2026-05-01",
+      "cwes": ["CWE-1321", "CWE-20"],
+      "cpes": ["cpe:2.3:a:example:generic-lib:1.2.3:*:*:*:*:*:*:*"],
+      "affectedVersionRanges": ["<1.2.4"],
+      "patchedVersionRanges": [">=1.2.4"],
+      "references": [
+        {"url": "https://example.com/advisories/cve-2000-0001", "title": "Advisory"},
+        "https://example.com/commit/abcdef1"
+      ],
+      "remediation": {
+        "partialFix": "1.2.4",
+        "partialFixDistance": "PATCH",
+        "completeFix": "2.0.0",
+        "completeFixDistance": "MAJOR"
+      },
+      "license": "",
+      "source": {
+        "id": "npm+generic-lib$1.2.3",
+        "name": "generic-lib",
+        "url": "https://example.com/packages/generic-lib",
+        "version": "1.2.3",
+        "packageManager": "npm"
+      },
+      "depths": {"direct": 1, "deep": 3},
+      "statuses": {"active": 1, "ignored": 0},
+      "projects": [
+        {"id": "custom+1/generic-app", "title": "generic-app"},
+        {"id": "custom+1/generic-service", "title": "generic-service"}
+      ]
+    },
+    {
+      "id": 1002,
+      "createdAt": "2026-05-12T09:00:00.000Z",
+      "type": "vulnerability",
+      "vulnId": "FOSSA-2026-0002",
+      "title": "Denial of service in generic-parser",
+      "cve": "",
+      "cvss": 7.5,
+      "cvssVector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+      "severity": "unknown",
+      "details": "Deeply nested input causes unbounded recursion.",
+      "cwes": ["not-a-cwe"],
+      "cpes": [],
+      "affectedVersionRanges": [],
+      "patchedVersionRanges": [],
+      "references": [],
+      "remediation": {"completeFix": "", "partialFix": "3.1.1", "partialFixDistance": ""},
+      "source": {
+        "id": "pip+generic-parser$3.1.0",
+        "name": "generic-parser",
+        "version": "3.1.0",
+        "packageManager": "pip"
+      },
+      "depths": {"direct": 0, "deep": 0},
+      "projects": [{"id": "custom+1/generic-app"}]
+    },
+    {
+      "id": 1003,
+      "createdAt": "2026-05-13T10:30:00.000Z",
+      "type": "policy_conflict",
+      "license": "GPL-3.0-only",
+      "source": {
+        "id": "maven+com.example:generic-widget$4.0.0",
+        "name": "com.example:generic-widget",
+        "version": "4.0.0",
+        "packageManager": "maven"
+      },
+      "projects": [{"id": "custom+1/generic-app"}]
+    },
+    {
+      "id": 1004,
+      "createdAt": "2026-05-14",
+      "type": "risk_empty-package",
+      "source": {"name": "generic-stub", "version": "0.0.1", "packageManager": "npm"},
+      "projects": [{"id": "custom+1/generic-app"}]
+    },
+    {
+      "id": 1005,
+      "createdAt": "not-a-timestamp",
+      "type": "some_new_type_fossa_added",
+      "source": {"name": "generic-thing", "version": "1.0.0"},
+      "projects": [{"id": "custom+1/generic-app"}]
+    },
+    {
+      "id": 1006,
+      "createdAt": "2026-05-15T11:00:00.000Z",
+      "type": "",
+      "cve": "CVE-2000-0006",
+      "cvss": 0,
+      "severity": "",
+      "details": "",
+      "source": {},
+      "projects": [{"id": "custom+1/generic-app"}]
+    }
+  ]
+}
