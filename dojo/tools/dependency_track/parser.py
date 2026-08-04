@@ -71,14 +71,18 @@ class DependencyTrackParser:
 
         title = f"{component_name}:{version_description} affected by: {vuln_id} ({source})"
 
-        # Collect all vulnerability IDs: vulnId itself plus any aliases
-        set_of_ids = {vuln_id}
-        set_of_alias_sources = {"cveId", "sonatypeId", "ghsaId", "osvId", "snykId", "gsdId", "vulnDbId"}
+        # Collect all vulnerability IDs: vulnId itself plus any aliases.
+        # vuln_id is kept first because the first entry becomes the finding's primary
+        # vulnerability id (its `cve`), and the aliases are sorted: they are collected in a set,
+        # so emitting them in set order would let PYTHONHASHSEED decide both the primary id and
+        # the order the ids are stored in.
+        alias_sources = ("cveId", "sonatypeId", "ghsaId", "osvId", "snykId", "gsdId", "vulnDbId")
+        aliases = set()
         for alias in dependency_track_finding["vulnerability"].get("aliases") or []:
-            for alias_source in set_of_alias_sources:
+            for alias_source in alias_sources:
                 if alias_source in alias:
-                    set_of_ids.add(alias[alias_source])
-        vulnerability_id = list(set_of_ids)
+                    aliases.add(alias[alias_source])
+        vulnerability_id = [vuln_id, *sorted(aliases - {vuln_id})]
 
         # Default CWE to CWE-1035 Using Components with Known Vulnerabilities if there is no CWE
         if "cweId" in dependency_track_finding["vulnerability"] and dependency_track_finding["vulnerability"]["cweId"] is not None:
