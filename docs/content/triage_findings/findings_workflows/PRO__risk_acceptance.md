@@ -360,6 +360,40 @@ Three rules keep this safe to leave switched on:
 Applying criteria never fails an import: if it cannot run, the Finding is imported unaccepted and
 the next reimport tries again.
 
+### Notifications and webhooks
+
+Two events fire on the review, and they go to different people because they answer different
+questions:
+
+| Event | Fires when | Goes to |
+| --- | --- | --- |
+| **Risk Acceptance Requested** | somebody submits a Risk Acceptance for review | the named reviewers, or everybody subscribed to the event if none are named |
+| **Risk Acceptance Decided** | it is approved or rejected | whoever requested it |
+
+Both are ordinary notification events, so each user picks their own channels — alert, mail, Slack,
+Teams or **webhook** — under Notification Settings.
+
+Activation, expiry and reinstatement are deliberately silent here. They are not somebody waiting on
+somebody else, expiry already has its own long-standing notification, and mailing about every state
+change is how people learn to ignore the ones that matter.
+
+The webhook body carries the state change itself, so a subscriber does not have to parse a sentence:
+
+```yaml
+risk_acceptance:
+    id: 42
+    name: "Accepted pending the Q4 platform upgrade"
+    from_state: "under_review"
+    to_state: "approved"
+    actor: "someone"
+    reason: "the compensating control is adequate"
+    url_ui: "https://your-instance/ui/risk_acceptance/42"
+```
+
+Notifications are reinforcement, not the mechanism: every state change is already visible on the
+Risk Acceptance, in its Approvals tab and in the review queue, whether or not a message is sent or
+ever arrives. A send that fails is logged and does not undo the decision.
+
 ### Rules Engine 2.0 conditions
 
 With both features enabled, a rule can condition on what an acceptance is doing, not just on the
