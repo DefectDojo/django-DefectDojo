@@ -13,6 +13,28 @@ createSecret: false
 createValkeySecret: false
 # -- create postgresql secret in defectdojo chart, outside of postgresql chart
 createPostgresqlSecret: false
+
+# -- External Secrets Operator integration
+externalSecret:
+  # -- Enable the ExternalSecret resource
+  enabled: false
+  labels: {}
+  annotations: {}
+  # -- How often to refresh the secret from the external store
+  refreshInterval: 1h0m0s
+  # -- Reference to a SecretStore or ClusterSecretStore
+  secretStoreRef:
+    name: ""
+    kind: ""
+  # -- Name of the Kubernetes Secret created by ESO
+  targetSecretName: ""
+  # -- Data mappings from the external store
+  data: []
+  # - secretKey: DD_ADMIN_PASSWORD
+  #   remoteRef:
+  #     key: my-vault-path
+  #     property: admin-password
+
 # -- Track configuration (trackConfig): will automatically respin application pods in case of config changes detection
 # can be:
 # 1. disabled (default)
@@ -372,6 +394,21 @@ django:
     # `nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"`
     # `nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"`
     annotations: {}
+  # -- Kubernetes Gateway API HTTPRoute configuration (alternative to Ingress)
+  httpRoute:
+    enabled: false
+    labels: {}
+    annotations: {}
+    parentRefs: []
+    # - name: my-gateway
+    #   namespace: default
+    hostnames: []
+    # - defectdojo.example.com
+    rules: []
+    # - matches:
+    #     - path:
+    #         type: PathPrefix
+    #         value: /
   nginx:
     # -- If empty, uses values from images.nginx.image
     image:

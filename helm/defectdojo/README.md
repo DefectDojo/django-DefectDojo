@@ -618,6 +618,7 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.extraInitContainers | list | `[]` | A list of additional initContainers to run before the uwsgi and nginx containers. |
 | django.extraVolumeMounts | list | `[]` | Array of additional volume mount points common to all containers and initContainers. |
 | django.extraVolumes | list | `[]` | A list of extra volumes to mount. |
+| django.httpRoute | object | `{"annotations":{},"enabled":false,"hostnames":[],"labels":{},"parentRefs":[],"rules":[]}` | Kubernetes Gateway API HTTPRoute configuration (alternative to Ingress) |
 | django.ingress.activateTLS | bool | `true` |  |
 | django.ingress.annotations | object | `{}` | Restricts the type of ingress controller that can interact with our chart (nginx, traefik, ...) `kubernetes.io/ingress.class: nginx` Depending on the size and complexity of your scans, you might want to increase the default ingress timeouts if you see repeated 504 Gateway Timeouts `nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"` `nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"` |
 | django.ingress.enabled | bool | `true` |  |
@@ -683,6 +684,12 @@ A Helm chart for Kubernetes to install DefectDojo
 | django.uwsgi.startupProbe.periodSeconds | int | `5` |  |
 | django.uwsgi.startupProbe.successThreshold | int | `1` |  |
 | django.uwsgi.startupProbe.timeoutSeconds | int | `1` |  |
+| externalSecret | object | `{"annotations":{},"data":[],"enabled":false,"labels":{},"refreshInterval":"1h0m0s","secretStoreRef":{"kind":"","name":""},"targetSecretName":""}` | External Secrets Operator integration |
+| externalSecret.data | list | `[]` | Data mappings from the external store |
+| externalSecret.enabled | bool | `false` | Enable the ExternalSecret resource |
+| externalSecret.refreshInterval | string | `"1h0m0s"` | How often to refresh the secret from the external store |
+| externalSecret.secretStoreRef | object | `{"kind":"","name":""}` | Reference to a SecretStore or ClusterSecretStore |
+| externalSecret.targetSecretName | string | `""` | Name of the Kubernetes Secret created by ESO |
 | extraAnnotations | object | `{}` | Annotations globally added to all resources |
 | extraConfigs | object | `{}` | To add extra variables not predefined by helm config it is possible to define in extraConfigs block, e.g. below: NOTE  Do not store any kind of sensitive information inside of it ``` DD_SOCIAL_AUTH_AUTH0_OAUTH2_ENABLED: 'true' DD_SOCIAL_AUTH_AUTH0_KEY: 'dev' DD_SOCIAL_AUTH_AUTH0_DOMAIN: 'xxxxx' ``` |
 | extraEnv | list | `[]` | To add (or override) extra variables which need to be pulled from another configMap, you can use extraEnv. For example: ``` - name: DD_DATABASE_HOST   valueFrom:     configMapKeyRef:       name: my-other-postgres-configmap       key: cluster_endpoint ``` |

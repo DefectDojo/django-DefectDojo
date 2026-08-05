@@ -34,4 +34,8 @@ dependencies:
 #     description: Critical bug
 annotations:
   artifacthub.io/prerelease: "true"
-  artifacthub.io/changes: ""
+  artifacthub.io/changes: |
+    - kind: added
+      description: Add Gateway API HTTPRoute support as an alternative to Ingress
+    - kind: added
+      description: Add External Secrets Operator (ESO) support for external secret stores
