@@ -990,13 +990,23 @@ class Finding(BaseModel):
         def _get_saved_locations(finding) -> str:
             if finding.id is not None:
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                url_locations = finding.locations.filter(location__location_type=URL.get_location_type())
-                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: " + str(url_locations.count()))
+                url_location_type = URL.get_location_type()
+                # Read the relation with .all() and narrow in Python rather than with .filter():
+                # .filter() on a related manager clones the queryset and drops _result_cache, so it
+                # bypasses the prefetch every caller of the hash paths sets up (the batch dedupe
+                # loader, build_candidate_scope_queryset and manage.py dedupe among them all
+                # prefetch this relation). Narrowing here keeps that prefetch effective;
+                # a finding has few locations, so filtering them in Python costs nothing.
                 # deduplicate and sort the canonical representation of every location. The stored
                 # Location.location_value *is* that canonical representation: it is written from
                 # AbstractLocation.get_location_value() when the Location row is created, so this
                 # matches what _get_unsaved_locations computes below.
-                locations = sorted({location_ref.location.location_value for location_ref in url_locations.all()})
+                locations = sorted({
+                    location_ref.location.location_value
+                    for location_ref in finding.locations.all()
+                    if location_ref.location.location_type == url_location_type
+                })
+                deduplicationLogger.debug("get_locations: after the finding was saved. Locations count: %d", len(locations))
                 return "".join(locations)
             return ""
 
