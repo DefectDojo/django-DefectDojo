@@ -45,9 +45,15 @@ jobs:
           "tests/base_test_class.py",
         ]
         os: [debian]
-        v3_feature_locations: [true, false]
+        # Two tiers: pull requests run the UI suite once, with the flag in its
+        # default (false) position; the merge queue and manual dispatch run both
+        # values against the exact commit that will land. github.event_name is
+        # the CALLING workflow's event -- workflow_call inherits the caller's
+        # context -- so this follows unit-tests.yml's tiering automatically.
+        v3_feature_locations: ${{ github.event_name == 'pull_request' && fromJSON('[false]') || fromJSON('[true, false]') }}
         exclude:
-          # standalone create endpoint page is gone in v3
+          # standalone create endpoint page is gone in v3. On the light tier
+          # v3=true is absent and this exclude simply matches nothing.
           - v3_feature_locations: true
             test-case: "tests/endpoint_test.py"
       fail-fast: false
