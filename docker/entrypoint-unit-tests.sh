@@ -57,9 +57,21 @@ python3 manage.py makemigrations --no-input --check --dry-run --verbosity 3 || {
 
 ********************************************************************************
 
-You made changes to the models without creating a DB migration for them.
+The makemigrations check failed. This happens for two different reasons,
+and the error Django printed above says which one you have:
 
-**NEVER** change existing migrations, create a new one.
+1) "Your models ... have changes that are not yet reflected in a migration"
+   -- you changed models without creating a migration for them. Create one
+   with 'python3 manage.py makemigrations'.
+   **NEVER** change existing migrations, create a new one.
+
+2) "Conflicting migrations detected; multiple leaf nodes in the migration
+   graph" -- the graph is forked: two migrations declare the same parent,
+   usually after merging or rebasing onto a base branch that had already
+   moved. No model change of yours is involved. Fix it by re-parenting the
+   later migration onto the other leaf (renumbering it if the numbers
+   collide), or with an empty merge migration that depends on both. The
+   Migration Graph Check on the pull request names the offending files.
 
 If you're not familiar with migrations in Django, please read the
 great documentation thoroughly:
