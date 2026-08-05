@@ -197,7 +197,7 @@ Additional features:
 * **(SSO)** SSO providers (SAML, OIDC, Google, Okta, Azure AD, GitLab, Auth0, Keycloak, GitHub Enterprise, remote-user header auth) are now DefectDojo Pro-only. See [SSO providers are available in DefectDojo Pro only](/releases/os_upgrading/3.0/#sso-providers-are-available-in-defectdojo-pro-only).
 * **(API)** Removed the Questionnaire API endpoints. See [Removal: Questionnaire API Endpoints](/releases/os_upgrading/3.0/#removal-questionnaire-api-endpoints).
 * **(API)** Removed the Credential Manager feature and its API endpoints. See [Removal: Credential Manager](/releases/os_upgrading/3.0/#removal-credential-manager).
-* **(API)** Removed the Stub Findings feature and its API endpoint. See [Removal: Stub Findings](/releases/os_upgrading/3.0/#removal-stub-Findings).
+* **(API)** Removed the Stub Findings feature and its API endpoint. See [Removal: Stub Findings](/releases/os_upgrading/3.0/#removal-stub-findings).
 * **(Search)** Watson search index updates during import/reimport are now batched, tunable via `DD_WATSON_ASYNC_INDEX_UPDATE_BATCH_SIZE`. See [Configuration change in Watson Search Indexing](/releases/os_upgrading/3.0/#configuration-change-in-watson-search-indexing).
 
 ## May 2026: v2.58
@@ -660,7 +660,7 @@ The Priority Insights dashboard can quickly render a list of all SOC or AppSec F
 
 - **(Calendar)** New filters have been added to Calendar view: Unassigned Lead, and Engagement/Test Type.
 - **(Dashboard)** Added Finding Status filter for Dashboard tiles.
-- **(Engagements)** A repository URI can be added to an Engagement via **Edit Engagement > Optional Fields > Repo**.  If this field is set, Findings under that Engagement will automatically generate clickable links to the source code if File Path is set on the Finding.  See [docs](/en/working_with_Findings/organizing_engagements_tests/source-code-repositories/) for more details.
+- **(Engagements)** A repository URI can be added to an Engagement via **Edit Engagement > Optional Fields > Repo**.  If this field is set, Findings under that Engagement will automatically generate clickable links to the source code if File Path is set on the Finding.  See [docs](/en/working_with_findings/organizing_engagements_tests/source-code-repositories/) for more details.
 - **(Findings)** Added "Jira Issue URL" column to the CSV export of Finding tables.
 - **(Metrics)** Priority Dashboard has been added to Metrics, to display your organization's risk profile at a glance.
 ![image](images/pro_dashboard_priority.png)
@@ -803,7 +803,7 @@ Previously synced Findings that are no longer within the filter parameters will 
 - **(API)** Pro users can now specify the fields they want to return in a given API payload.  For example, this request will only return the title, severity and description fields for each Finding.  <span style="background-color:rgba(242, 86, 29, 0.5)">(Pro)</span>
 ```
 curl -X 'GET' \
-  'https://localhost/api/v2/Findings/?response_fields=title,severity,description' \
+  'https://localhost/api/v2/findings/?response_fields=title,severity,description' \
   -H 'accept: application/json'
 ```
 - **(Findings)** Excel and CSV exports now include tags.
@@ -966,7 +966,7 @@ configuration fields.
 - **(API)**  It is now possible to prefetch a Finding with attached files via API.
 - **(Login)**  A new "Forgot Username" link has been added to the login form.  The link will navigate to a page which requests the user's email address. The username will be sent to that address if it exists.
 - **Risk Acceptances**  Notes are now added to Findings when they are removed from Risk Acceptances.
-- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](/triage_Findings/Findings_workflows/pro__risk_acceptance/) for more details.
+- **(Risk Acceptance)**  Risk Acceptance overhaul. Feature has been extended with new functions.  See [Risk Acceptance documentation](/triage_findings/findings_workflows/pro__risk_acceptance/) for more details.
 - **Tools**  Qualys HackerGuardian parser added.
 - **Tools**  Semgrep Parser updated with new severity mappings. HackerOne parser updated and now supports bug bounty reports.
 - **Tools**  fixed an issue where certain tools would not process asyncronously: Whitehat_Sentinel, SSLyze, SSLscan, Qualys_Webapp, Mend, Intsights, H1, and Blackduck.
