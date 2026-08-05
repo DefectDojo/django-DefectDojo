@@ -372,11 +372,13 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # instead of applying one finding's flag to the whole batch.
         #
         # The finding is held rather than its id, and the id is read at dispatch time below.
-        # Nothing here needs the id any earlier, and holding the object keeps this loop free of
-        # primary-key reads, so an importer that buffers inserts and flushes them per batch can
-        # do so by overriding process_finding_that_was_not_matched alone -- in the same spirit
-        # as get_original_findings and get_reimport_match_candidates_for_batch, which exist so
-        # downstream editions need not copy this method.
+        # Nothing between the append and the dispatch needs the id, and deferring the read
+        # keeps this loop body free of direct primary-key reads -- one less obstacle for an
+        # importer that buffers inserts and writes them at batch boundaries, in the same
+        # spirit as get_original_findings and get_reimport_match_candidates_for_batch, which
+        # exist so downstream editions need not copy this method. (Not the only obstacle:
+        # the batch-boundary block below persists locations and applies tags, which also
+        # require written rows, before the ids are read.)
         batch_findings_to_dispatch: list[tuple[Finding, bool]] = []
         batch_findings: list[Finding] = []
         # Findings that were newly created (else branch below) — pass these to
