@@ -14,8 +14,24 @@ on:
   # each be green on their own and broken in combination, and nothing before this
   # point ever evaluates their union.
   #
-  # Inert until a merge queue is configured -- nothing emits merge_group events
-  # otherwise -- so this can land well ahead of the ruleset that enables one.
+  # The queue that emits these events is the "Merge Queue" ruleset (id 20466211),
+  # active on bugfix: SQUASH, ALLGREEN grouping, max 3 entries building, and it
+  # requires `ruff-linting` and `Unit Tests Complete` on the merge group. Two
+  # operational notes recorded here so they survive the people who know them:
+  #
+  #   - The queue applies ONE merge method (squash) to everything it lands.
+  #     Release merge-backs must stay real merge commits, so they go around the
+  #     queue via the ruleset's bypass actors (repo admins + the maintainer
+  #     teams), exactly as they bypass branch protection today. Nothing in this
+  #     repository's automation calls `gh pr merge`, and that is load-bearing:
+  #     on a queue-enabled branch that command can exit 0 WITHOUT merging (it
+  #     arms auto-merge and the queue lands the PR later, with the queue's
+  #     method), so any future script must read the PR's merged state back
+  #     rather than trusting the exit code.
+  #
+  #   - Under the two-tier matrices below, pull requests run the light tier and
+  #     the queue re-runs the full tier on the speculative merge commit, so a
+  #     queued PR's checks taking longer than its own PR run is expected.
   merge_group:
 
 jobs:
