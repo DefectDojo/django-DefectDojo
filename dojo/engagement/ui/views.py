@@ -20,7 +20,15 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict, StreamingHttpResponse
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+    QueryDict,
+    StreamingHttpResponse,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
@@ -1483,7 +1491,14 @@ def download_risk_acceptance(request, eid, raid):
     # Ensure the risk acceptance is under the supplied engagement
     if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
         raise PermissionDenied
-    file_handle = (Path(settings.MEDIA_ROOT) / risk_acceptance.path.name).open(mode="rb")
+    # No proof uploaded, or the file is gone from storage. Opening it blindly raises
+    # ValueError/FileNotFoundError, which surfaces as a 500 rather than a missing file.
+    if not risk_acceptance.path:
+        raise Http404
+    proof_path = Path(settings.MEDIA_ROOT) / risk_acceptance.path.name
+    if not proof_path.is_file():
+        raise Http404
+    file_handle = proof_path.open(mode="rb")
     response = StreamingHttpResponse(FileIterWrapper(file_handle))
     if hasattr(response, "_resource_closers"):
         response._resource_closers.append(file_handle.close)
