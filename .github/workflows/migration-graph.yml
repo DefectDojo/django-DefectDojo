@@ -23,7 +23,18 @@ name: Migration Graph
 
 on:
   workflow_dispatch:
+  # The push trigger exists for the post-merge case described above, and that
+  # case only happens on the release lines -- so it is scoped to them. Unfiltered
+  # it also fired on every push to every PR branch, where it duplicated the
+  # pull_request run of the same commit (and the pull_request run is the better
+  # of the two there: it sees the branch merged with its base).
   push:
+    branches:
+      - master
+      - dev
+      - bugfix
+      - release/**
+      - hotfix/**
   pull_request:
 
 jobs:

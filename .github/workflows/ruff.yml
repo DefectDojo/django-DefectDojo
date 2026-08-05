@@ -4,7 +4,16 @@ on:
   workflow_dispatch:
   # called by unit-tests.yml as a gate: nothing else runs until ruff passes
   workflow_call:
+  # push is for the release lines: it is what lints the merged result after a
+  # pull request lands. Unfiltered it also fired on every push to every PR
+  # branch, doubling up with the pull_request trigger below on the same commit.
   push:
+    branches:
+      - master
+      - dev
+      - bugfix
+      - release/**
+      - hotfix/**
   pull_request:
   # A merge queue tests each speculative merge commit and waits for the required
   # status checks to report against it. `ruff-linting` is a required check, so it
