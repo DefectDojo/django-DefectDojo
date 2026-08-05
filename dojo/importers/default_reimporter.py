@@ -370,7 +370,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
         # same batch must still be pushed. The batch is partitioned by flag at dispatch time
         # instead of applying one finding's flag to the whole batch.
-        batch_finding_ids: list[tuple[int, bool]] = []
+        #
+        # The finding is held rather than its id, and the id is read at dispatch time below.
+        # Nothing here needs the id any earlier, and holding the object keeps this loop free of
+        # primary-key reads, so an importer that buffers inserts and flushes them per batch can
+        # do so by overriding process_finding_that_was_not_matched alone -- in the same spirit
+        # as get_original_findings and get_reimport_match_candidates_for_batch, which exist so
+        # downstream editions need not copy this method.
+        batch_findings_to_dispatch: list[tuple[Finding, bool]] = []
         batch_findings: list[Finding] = []
         # Findings that were newly created (else branch below) — pass these to
         # `apply_inherited_tags_for_findings` instead of `batch_findings` so
@@ -458,7 +465,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
-                    batch_finding_ids.append((finding.id, push_to_jira))
+                    batch_findings_to_dispatch.append((finding, push_to_jira))
                     batch_findings.append(finding)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
@@ -476,7 +483,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Matching batches: optimize candidate fetching (solve 1+N query problem)
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
-                    if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
+                    if len(batch_findings_to_dispatch) >= dedupe_batch_max_size or is_final:
                         self.location_handler.persist()
                         self.flush_vulnerability_ids()
                         self.flush_burp_request_response()
@@ -499,9 +506,9 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                         # finding's grouping state is not applied to the whole batch. Uniform
                         # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
                         finding_ids_by_push: dict[bool, list[int]] = {}
-                        for finding_id, finding_push_to_jira in batch_finding_ids:
-                            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(finding_id)
-                        batch_finding_ids.clear()
+                        for dispatch_finding, finding_push_to_jira in batch_findings_to_dispatch:
+                            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(dispatch_finding.id)
+                        batch_findings_to_dispatch.clear()
                         for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
                             result = dojo_dispatch_task(
                                 finding_helper.post_process_findings_batch,
