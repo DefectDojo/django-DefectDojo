@@ -28,7 +28,17 @@ jobs:
     needs: ruff
     strategy:
         matrix:
-          platform: ['linux/amd64', 'linux/arm64']
+          # Two tiers, one workflow. Pull requests build amd64 only; the merge
+          # queue (and manual dispatch) builds both platforms and tests the
+          # speculative merge commit with everything. The queue is the gate, the
+          # pull-request run is feedback -- an arm64-only breakage surfaces when
+          # the queue tests the exact commit that would land, where it costs one
+          # queue ejection instead of a bad merge.
+          #
+          # Tiering must shrink MATRICES, never skip whole jobs: the
+          # unit-tests-complete gate requires every job in its `needs` to report
+          # success, and a skipped job reports skipped. Same jobs, fewer cells.
+          platform: ${{ github.event_name == 'pull_request' && fromJSON('["linux/amd64"]') || fromJSON('["linux/amd64", "linux/arm64"]') }}
         fail-fast: false
     uses: ./.github/workflows/build-docker-images-for-testing.yml
     secrets: inherit
@@ -43,7 +53,12 @@ jobs:
   test-rest-framework:
     strategy:
       matrix:
-        platform: ['linux/amd64', 'linux/arm64']
+        # Light tier drops the arm64 cells, matching the build tiering above (a
+        # pull-request run has no arm64 image artifact to test anyway). Both
+        # v3_feature_locations values stay in BOTH tiers: the flag changes the
+        # API schema and endpoint behaviour, so the two runs are genuinely
+        # different suites, not a platform duplicate.
+        platform: ${{ github.event_name == 'pull_request' && fromJSON('["linux/amd64"]') || fromJSON('["linux/amd64", "linux/arm64"]') }}
         v3_feature_locations: [ false, true ]
       fail-fast: false
     needs: build-docker-containers
