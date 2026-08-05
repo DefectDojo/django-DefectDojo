@@ -136,7 +136,7 @@ class TestReimportFinalBatchFlush(DojoTestCase):
         # The post-loop drain is unconditional; an empty report must stay a no-op.
         reimporter = self._reimporter()
         with mock.patch("dojo.importers.default_reimporter.dojo_dispatch_task") as dispatch:
-            new_items, reactivated, to_mitigate, _ = reimporter.process_findings([])
+            new_items, reactivated, _to_mitigate, _ = reimporter.process_findings([])
         self.assertEqual([], new_items)
         self.assertEqual([], reactivated)
         self.assertEqual([], self._dispatched_finding_ids(dispatch))
