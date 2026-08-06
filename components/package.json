@@ -5,7 +5,6 @@
   "private": true,
   "dependencies": {
     "@fontsource-variable/work-sans": "^5.3",
-    "alpinejs": "^3.15",
     "bootstrap-wysiwyg": "^2.0.0",
     "chart.js": "^4.4",
     "chartjs-adapter-moment": "^1.0",
@@ -17,9 +16,7 @@
     "datatables.net-colreorder": "^2.1.2",
     "easymde": "^2.21.0",
     "flatpickr": "^4.6",
-    "font-awesome": "^4.0.0",
     "fullcalendar": "^3.10.2",
-    "htmx.org": "^2.0",
     "jquery": "^3.7.1",
     "jquery-ui": "1.14.2",
     "jquery.hotkeys": "jeresig/jquery.hotkeys#master",

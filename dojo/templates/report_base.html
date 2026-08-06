@@ -9,7 +9,13 @@
          vendored Bootstrap build. -->
     <link rel="stylesheet" href="{% static "dojo/css/tailwind-out.css" %}">
     <!-- Custom Fonts -->
-    <link href="{% static "font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+    <!-- Font Awesome 6, same as the app shell. The report templates use v6
+         class names (fa-solid), which the v4 build previously linked here does
+         not define -- that is the "icons don't work in the report template"
+         the report templates carry comments about. -->
+    <link href="{% static 'fontawesomefree/css/fontawesome.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/solid.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'fontawesomefree/css/brands.min.css' %}" rel="stylesheet" type="text/css">
 
     <style type="text/css">
         @import url(https://fonts.googleapis.com/css?family=Roboto+Slab:400,700);
@@ -184,6 +190,14 @@
         *, pre {
             font-family: 'Roboto Slab', monospace !important;
             font-size: 13px;
+        }
+
+        /* That `*` rule sets font-family with !important, which also overrode
+           the icon font on Font Awesome elements and rendered every icon in a
+           report as a missing glyph. Put the icon font back. */
+        .fa, .fa-solid, .fa-regular, .fa-brands,
+        .fa::before, .fa-solid::before, .fa-regular::before, .fa-brands::before {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
         }
 
         /* Heading scale. The `*` rule above sets every element to 13px; element
