@@ -1328,6 +1328,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Sqlmap Scan": ["title", "endpoints"],
     "Nettacker Scan": ["title", "endpoints"],
     "httpx Scan": ["title", "endpoints"],
+    "OPF Scan": ["title", "cwe", "severity", "description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1410,6 +1411,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
     "OpenReports": True,
+    "OPF Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1717,6 +1719,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Snyk Code Scan": DEDUPE_ALGO_HASH_CODE,
     "Cycognito Scan": DEDUPE_ALGO_HASH_CODE,
     "n0s1 Scanner": DEDUPE_ALGO_HASH_CODE,
+    "OPF Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
