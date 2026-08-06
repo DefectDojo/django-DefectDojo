@@ -1,0 +1,66 @@
+{
+  "status": "scanned",
+  "tag": "1.4.0",
+  "data": {
+    "Layer": {
+      "Name": "sha256:aaaa1111bbbb2222cccc3333dddd4444",
+      "Features": [
+        {
+          "Name": "openssl",
+          "Version": "3.0.11-1",
+          "Vulnerabilities": [
+            {
+              "Name": "CVE-2000-0001",
+              "Description": "<p>A flaw in certificate verification allows an attacker to bypass validation.</p>",
+              "Link": "https://example.com/advisories/cve-2000-0001",
+              "Severity": "Critical",
+              "FixedBy": "3.0.13-1",
+              "NamespaceName": "debian:12"
+            },
+            {
+              "Name": "CVE-2000-0002",
+              "Description": "A second flaw in the same package.",
+              "Link": "",
+              "Severity": "Defcon1",
+              "FixedBy": "",
+              "NamespaceName": "debian:12"
+            }
+          ]
+        },
+        {
+          "Name": "curl",
+          "Version": "7.81.0-1",
+          "Vulnerabilities": [
+            {
+              "Name": "CVE-2000-0003",
+              "Description": "A flaw in URL parsing.<script>alert('x')</script>",
+              "Link": "https://example.com/advisories/cve-2000-0003",
+              "Severity": "High",
+              "FixedBy": "7.81.0-4",
+              "NamespaceName": "debian:12"
+            }
+          ]
+        },
+        {
+          "Name": "zlib",
+          "Version": "1.2.13",
+          "Vulnerabilities": [
+            {
+              "Name": "CVE-2000-0004",
+              "Description": "",
+              "Link": "",
+              "Severity": "not-a-severity",
+              "FixedBy": "",
+              "NamespaceName": ""
+            }
+          ]
+        },
+        {
+          "Name": "busybox",
+          "Version": "1.35.0",
+          "Vulnerabilities": []
+        }
+      ]
+    }
+  }
+}
