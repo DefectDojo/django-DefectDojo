@@ -55,12 +55,19 @@ class TestImportersBlankEngagementStatus(DojoTestCase):
             description="Test",
             prod_type=product_type,
         )
+        # CI/CD, because that is what the reported imports ran into and it is the only
+        # engagement_type whose target_end update_timestamps() touches -- so the write-back
+        # this regression is about actually has a reason to save the engagement.
+        # target_start/target_end are dates: they back DateFields, and update_timestamps()
+        # compares target_end against scan_date.date(), which a datetime cannot be ordered
+        # against.
+        today = timezone.now().date()
         self.engagement, _ = Engagement.objects.get_or_create(
             name="Blank Status Engagement",
             product=self.product,
             engagement_type="CI/CD",
-            target_start=timezone.now(),
-            target_end=timezone.now(),
+            target_start=today,
+            target_end=today,
         )
         with (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan:
             self.test, _, len_new_findings, _, _, _, _ = self._importer().process_scan(scan)
@@ -163,11 +170,12 @@ class TestImportersBlankEngagementStatus(DojoTestCase):
         Only meaningful with V3_FEATURE_LOCATIONS on, which is what makes the base model run
         `full_clean()` at all; with it off nothing validates the value either way.
         """
+        today = timezone.now().date()
         engagement = Engagement(
             name="Bogus Status Engagement",
             product=self.product,
-            target_start=timezone.now(),
-            target_end=timezone.now(),
+            target_start=today,
+            target_end=today,
             status="Nonsense",
         )
         with self.assertRaises(ValidationError) as caught:
