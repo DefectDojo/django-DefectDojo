@@ -16,6 +16,8 @@ Setting up Sensei has two parts: **connect a source-control provider**, then **o
 
 Onboarding, configuration, scanning, and fixing are the same for every provider; only the initial connection differs. This page covers [connecting a GitHub App](#connect-a-github-app), [GitHub Enterprise Server](#connect-github-enterprise-server), [GitLab](#connect-gitlab), [Bitbucket](#connect-bitbucket), and [Azure DevOps](#connect-azure-devops); the [Select repositories](#select-repositories) step onward is shared.
 
+**Add Repositories** on the Sensei hub is the entry point for both. It opens a menu listing each connection by name — pick one to choose repositories from it — plus **Connect a new source…** to set up a provider you haven't connected yet. With nothing connected, it goes straight to the connect flow.
+
 ## Connections
 
 A **connection** is one configured source-control identity — a GitHub App installation group, a GitLab token, a Bitbucket workspace, or an Azure DevOps organization. You onboard repositories from a connection, and manage or disconnect it, from the **Connections** page (the **Connections** button on the Sensei hub).
@@ -41,7 +43,7 @@ To rotate a token, PAT, or app password, use **Update credentials** on that conn
 
 ## Choose a source-control provider
 
-From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page) to open **Set Up Sensei**, then pick your source-control provider — **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Set Up Sensei**, then pick your source-control provider — **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
 
 ![Choose a source-control provider](images/setup_providers.png)
 
@@ -49,7 +51,7 @@ From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connecti
 
 Sensei runs entirely through a GitHub App. Install it on your org/account and DefectDojo uses short-lived tokens to open PRs, scan, and apply fixes. Nothing to paste, nothing to rotate.
 
-From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page) to open **Set Up Sensei**.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Set Up Sensei**.
 
 ### Step 1: Create the App
 
@@ -77,7 +79,7 @@ On GitHub, confirm the installation location (your organization), choose **All r
 
 Sensei also supports **GitLab**, both **gitlab.com** and **self-managed** instances. Instead of a GitHub App, GitLab connects with a **project or group access token** plus a webhook; Sensei uses that token to scan, open merge requests, and apply fixes.
 
-From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page) to open **Set Up Sensei**, then select **GitLab** as the source-control provider.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Set Up Sensei**, then select **GitLab** as the source-control provider.
 
 ### Step 1: Create an access token
 
@@ -137,7 +139,7 @@ Click **Save App credentials**. DefectDojo validates them against your enterpris
 
 Sensei supports **Bitbucket Cloud** (`bitbucket.org`) and **Bitbucket Server / Data Center** (self-hosted). Three non-deprecated auth methods are offered; **OAuth is recommended**.
 
-From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page), then select **Bitbucket** and your **deployment** (Cloud or Server/Data Center) and **authentication** type.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page), then select **Bitbucket** and your **deployment** (Cloud or Server/Data Center) and **authentication** type.
 
 ### Step 1: Create the credential
 
@@ -177,7 +179,7 @@ After connecting, click **Choose repositories** and continue with [Select reposi
 
 Sensei supports **Azure DevOps Repos** using a **Personal Access Token (PAT)**. Repositories live in an **organization → project → repository** hierarchy.
 
-From the Sensei hub, choose **Add Repositories** (or **Connect** on the Connections page), then select **Azure DevOps**.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page), then select **Azure DevOps**.
 
 ### Step 1: Create a PAT
 
