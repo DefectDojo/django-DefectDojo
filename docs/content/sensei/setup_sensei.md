@@ -9,43 +9,43 @@ weight: 2
 
 Setting up Sensei has two parts: **connect a source-control provider**, then **onboard the repositories** you want to scan. You need a global **Maintainer** or **Owner** role to do this. Sensei supports:
 
-- **GitHub** — a GitHub App (github.com or **GitHub Enterprise Server**).
-- **GitLab** — an access token (gitlab.com or self-managed).
-- **Bitbucket** — Cloud or Server/Data Center, via OAuth (recommended), an Atlassian API token, or an access token.
-- **Azure DevOps** — a Personal Access Token.
+- **GitHub**: a GitHub App (github.com or **GitHub Enterprise Server**).
+- **GitLab**: an access token (gitlab.com or self-managed).
+- **Bitbucket**: Cloud or Server/Data Center, via OAuth (recommended), an Atlassian API token, or an access token.
+- **Azure DevOps**: a Personal Access Token.
 
 Onboarding, configuration, scanning, and fixing are the same for every provider; only the initial connection differs. This page covers [connecting a GitHub App](#connect-a-github-app), [GitHub Enterprise Server](#connect-github-enterprise-server), [GitLab](#connect-gitlab), [Bitbucket](#connect-bitbucket), and [Azure DevOps](#connect-azure-devops); the [Select repositories](#select-repositories) step onward is shared.
 
-**Add Repositories** on the Sensei hub is the entry point for both. It opens a menu listing each connection by name — pick one to choose repositories from it — plus **Connect a new source…** to set up a provider you haven't connected yet. With nothing connected, it goes straight to the connect flow.
+**Add Repositories** on the Sensei hub is the entry point for both. It opens a menu listing each connection by name: pick one to choose repositories from it, or choose **Connect a new source** to set up a provider you haven't connected yet. With nothing connected, it goes straight to the connect flow.
 
 ## Connections
 
-A **connection** is one configured source-control identity — a GitHub App installation group, a GitLab token, a Bitbucket workspace, or an Azure DevOps organization. You onboard repositories from a connection, and manage or disconnect it, from the **Connections** page (the **Connections** button on the Sensei hub).
+A **connection** is one configured source-control identity: a GitHub App registration, a GitLab token, a Bitbucket workspace, or an Azure DevOps organization. You onboard repositories from a connection, and manage or disconnect it, from the **Connections** page (the **Connections** button on the Sensei hub).
 
 ![Sensei Connections](images/connections.png)
 
-The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, open it for editing (**Update credentials**, or **Manage App & installations** for GitHub), or disconnect it. **Add a connection** never shows an existing connection's details — everything about one you already have is on its own screen, reached from its row.
+The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, open it for editing (**Update credentials**, or **Manage App & installations** for GitHub), or disconnect it. **Add a connection** never shows an existing connection's details. Everything about a connection you already have is on its own screen, reached from its row.
 
 ### Several organizations per provider
 
-An instance can hold **as many connections as you need, for every provider** — one per organization, group, or workspace:
+An instance can hold **as many connections as you need, for every provider**, one per organization, group, or workspace:
 
-- **GitHub:** install the App on each organization or user account (**Install on another account**) — one App registration covers them all. To keep separate registrations (for example a GitHub Enterprise Server host alongside github.com), use **Register another GitHub App**. An App's own state — its installations, permission approvals, **Install on another account** and **Disconnect this App** — lives on that connection's screen, opened with **Manage App & installations** on its row; with more than one registration a picker there switches between them.
+- **GitHub:** install the App on each organization or user account (**Install on another account**). One App registration covers them all. To keep separate registrations, such as a GitHub Enterprise Server host alongside github.com, use **Register another GitHub App**. An App's own state (its installations, permission approvals, **Install on another account**, and **Disconnect this App**) lives on that connection's screen, opened with **Manage App & installations** on its row. With more than one registration, a picker there switches between them.
 - **GitLab:** one connection per group or project token, including several on the same host (`gitlab.com` plus self-managed).
 - **Bitbucket:** one connection per workspace.
 - **Azure DevOps:** one connection per organization, since a PAT is org-scoped.
 
-Each pass through **Connect** on the Connections page **adds** a connection, so connecting a second group or workspace never replaces the first. Give each one a **Connection Label** to tell them apart in the table. Every repository remembers the connection it was onboarded through, and scans, pull requests and fixes for it use that connection's credential — so when more than one connection exists for a provider, onboarding asks you which one to use rather than choosing for you.
+Each pass through **Connect** on the Connections page **adds** a connection, so connecting a second group or workspace never replaces the first. Give each one a **Connection Label** to tell them apart in the table. Each repository records the connection it was onboarded through, and its scans, pull requests, and fixes use that connection's credential. When more than one connection exists for a provider, onboarding asks which one to use instead of choosing for you.
 
 To rotate a token, PAT, or app password, use **Update credentials** on that connection's row. The screen that opens is about a single connection: it is titled **Edit connection: \<label\>** and saving updates that connection instead of adding another. Reaching it from **Connect** instead titles it **Add a connection**. (GitHub App credentials are managed on GitHub.)
 
-A provider's **webhook URL is shared by all of its connections** — each connection verifies its own secret — so you do not need a different URL per group, workspace or organization.
+A provider's **webhook URL is shared by all of its connections**, and each connection verifies its own secret, so you do not need a different URL per group, workspace, or organization.
 
 > **⚠️ Disconnecting is destructive:** disconnecting a connection removes it **and every repository onboarded through it**. This cannot be undone.
 
 ## Choose a source-control provider
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**, then pick your source-control provider — **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**, then pick your source-control provider: **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
 
 ![Choose a source-control provider](images/setup_providers.png)
 
@@ -57,7 +57,7 @@ From the Sensei hub, choose **Add Repositories → Connect a new source** (or **
 
 ### Step 1: Create the App
 
-Enter the **organization** that owns the repositories you want to scan (leave blank to create the App on your personal account), then click **Create GitHub App**. GitHub pre-fills the app name, URLs, and permissions; you just review and confirm.
+Enter the **organization** that owns the repositories you want to scan (leave blank to create the App on your personal account), then click **Create GitHub App**. GitHub pre-fills the app name, URLs, and permissions, so review them and confirm.
 
 ![Create the GitHub App](images/setup_create_app.png)
 
@@ -120,7 +120,7 @@ After connecting, click **Choose projects** and continue with [Select repositori
 
 ## Connect GitHub Enterprise Server
 
-Sensei works with **GitHub Enterprise Server (GHES)** using the same GitHub App model as github.com — only the host differs. Because the App-manifest auto-create flow is github.com-only, on GHES you **create the App manually** on your enterprise host and then enter its credentials plus the host in DefectDojo.
+Sensei works with **GitHub Enterprise Server (GHES)** using the same GitHub App model as github.com. Only the host differs. Because the App-manifest auto-create flow is github.com-only, on GHES you **create the App manually** on your enterprise host and then enter its credentials plus the host in DefectDojo.
 
 ### Step 1: Create the App on your GHES host
 
@@ -145,16 +145,16 @@ From the Sensei hub, choose **Add Repositories → Connect a new source** (or **
 
 ### Step 1: Create the credential
 
-**OAuth (recommended)** — in Bitbucket, open **Workspace settings → OAuth consumers → Add consumer**:
+**OAuth (recommended):** in Bitbucket, open **Workspace settings → OAuth consumers → Add consumer**:
 
 - **Callback URL:** the one shown on the connection screen (`https://<your-defectdojo-host>/sensei/bitbucket/oauth/callback`).
 - **Permissions:** **Account: Read**, **Repositories: Read + Write**, **Pull requests: Read + Write** (add **Webhooks: Read + Write** if you'll manage webhooks via the API).
 
 Save it, then copy the consumer's **Key** (Client ID) and **Secret**.
 
-**API token** — create an Atlassian **API token** at `id.atlassian.com` (Account settings → Security → API tokens). Use it with your **Atlassian account email**.
+**API token**: create an Atlassian **API token** at `id.atlassian.com` (Account settings → Security → API tokens). Use it with your **Atlassian account email**.
 
-**Access token** — create a repository or workspace **Access Token** in Bitbucket and use it as a bearer credential.
+**Access token**: create a repository or workspace **Access Token** in Bitbucket and use it as a bearer credential.
 
 ### Step 2: Connect
 
@@ -188,7 +188,7 @@ From the Sensei hub, choose **Add Repositories → Connect a new source** (or **
 In Azure DevOps, open **User settings → Personal access tokens → New Token**:
 
 - **Organization:** the organization whose repositories you want to scan.
-- **Scopes:** **Code (Read, Write, & Manage)** — covers cloning, pushing fix branches, and opening pull requests.
+- **Scopes:** **Code (Read, Write, & Manage)**, which covers cloning, pushing fix branches, and opening pull requests.
 
 Create the token and copy it (Azure DevOps shows it only once).
 
@@ -223,7 +223,7 @@ Use **Add** to select one or more repositories, then click **Configure N repo(s)
 
 ### A repository isn't listed
 
-The picker can only show repositories the connection was granted, so a repository you never gave Sensei access to won't appear — and if the connection covers a single repository that is already onboarded, the list looks like there is nothing to add. Widen what the connection can see, then return to this step:
+The picker only shows repositories the connection was granted. A repository you never gave Sensei access to will not appear. If the connection covers a single repository that is already onboarded, the list looks like there is nothing to add. Widen what the connection can see, then return to this step:
 
 - **GitHub:** use **Manage repository access for \<account\>** to open that installation's page on GitHub, where you can add repositories to the installation. Use **Install on another account** to install the App on a second organization or user account.
 - **GitLab, Bitbucket, Azure DevOps:** the list is scoped by the credential you connected. Grant the token, app password, or PAT access to the project (a GitLab **group** token covers every project in the group), or add a second connection for another group, workspace, or organization.
