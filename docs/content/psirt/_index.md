@@ -24,3 +24,20 @@ inventory, and turns confirmed exposure into DefectDojo findings.
 PSIRT is a Pro feature in beta. It requires the **PSIRT** feature flag (which
 depends on **Locations**) and the **PSIRT Advisory Engine** license
 entitlement.
+
+## How it fits together
+
+1. **[Advisory Feeds](feeds/)** — choose which publishers to poll. Every source
+   ships disabled; enabling one records your acceptance of its terms.
+2. **[Import SBOM](import-sbom/)** — give PSIRT an inventory to match against.
+3. **[Matching Rules](matching-rules/)** — optional. For advisories that publish
+   no machine-readable version ranges, where structural matching has nothing to
+   compare.
+4. **[Feed Findings](feed-findings/)** — the queue. Each advisory leads with an
+   explicit answer to "am I affected?", and confirming a match files a DefectDojo
+   finding.
+5. **[Cases and SLA](cases/)** — group related matches into work items and track
+   the triage obligation on them.
+
+You do not need all five. Feeds plus an inventory is enough to start getting
+answers; rules, cases and SLAs are for teams that want the workflow around them.
