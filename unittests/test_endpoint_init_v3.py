@@ -18,19 +18,23 @@ These tests cover the sites that were guarded/repaired for that:
   carries legacy endpoint rows must not crash.
 * API ``report_generate`` (Product/Engagement) -- ``get_endpoint_ids(Endpoint.objects...)``.
 * API ``metadata/batch`` -- the ``endpoint`` parent fetch.
+* The deduplication finding loader -- its ``prefetch_related`` hydrates the legacy relation for
+  every batch of findings post-processed after an import, so the whole batch task dies.
 """
 import logging
 from io import BytesIO
 from types import SimpleNamespace
 
 from django.contrib.auth.models import User
-from django.test import Client
+from django.test import Client, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from openpyxl import load_workbook
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from dojo.finding.deduplication import get_finding_models_for_deduplication
+from dojo.finding.helper import post_process_findings_batch
 from dojo.github.services import github_body
 from dojo.jira.helper import jira_description
 from dojo.location.models import LocationFindingReference, LocationProductReference
@@ -231,6 +235,40 @@ class TestEndpointInitV3(DojoTestCase):
         self.assertIn("loc-engrpt.example.com", hosts)
 
     # ------------------------------------------------------------------
+    # Deduplication finding loader / post-import batch task
+    # ------------------------------------------------------------------
+    # Regression: post_process_findings_batch raised NotImplementedError for every batch of
+    # findings on a V3 instance migrated from endpoints, because the deduplication loader
+    # prefetched the deprecated ``endpoints`` relation unconditionally.
+    def test_dedupe_loader_does_not_hydrate_legacy_endpoints_under_v3(self):
+        """The loader must prefetch the location relation, never the deprecated endpoint one."""
+        tree = self._make_tree("dedupe-loader")
+        self._add_legacy_endpoint(tree, "legacy-loader.example.com")  # crash trigger under old code
+        self._add_location(tree, "loc-loader.example.com")
+
+        findings = get_finding_models_for_deduplication([tree.finding.id])
+
+        self.assertEqual([finding.id for finding in findings], [tree.finding.id])
+        prefetched = findings[0]._prefetched_objects_cache
+        self.assertNotIn(
+            "endpoints", prefetched,
+            msg=f"deprecated endpoint relation was prefetched under V3: {sorted(prefetched)}",
+        )
+        self.assertIn(
+            "locations", prefetched,
+            msg=f"location relation was not prefetched under V3: {sorted(prefetched)}",
+        )
+
+    def test_post_process_findings_batch_with_legacy_endpoints_under_v3(self):
+        """The post-import batch task must survive a finding that still carries endpoint rows."""
+        tree = self._make_tree("post-process")
+        self._add_legacy_endpoint(tree, "legacy-postprocess.example.com")
+        self._add_location(tree, "loc-postprocess.example.com")
+
+        # Raised NotImplementedError before the fix; the task has no return value.
+        post_process_findings_batch([tree.finding.id])
+
+    # ------------------------------------------------------------------
     # API metadata batch
     # ------------------------------------------------------------------
     def test_api_metadata_batch_with_endpoint_under_v3(self):
@@ -249,3 +287,45 @@ class TestEndpointInitV3(DojoTestCase):
         )
 
         self.assertNotEqual(response.status_code, 500)
+
+
+@override_settings(V3_FEATURE_LOCATIONS=False)
+class TestDedupeLoaderPrefetchPreV3(DojoTestCase):
+
+    """
+    The pre-V3 direction of the same loader: with the flag off, ``endpoints`` is still the
+    relation deduplication compares on, so it must stay prefetched. Pinning both directions is
+    what keeps the fix from turning a crash into an N+1.
+    """
+
+    # TODO: Delete this class after the move to Locations
+    def test_pre_v3_still_prefetches_endpoints(self):
+        reporter = User.objects.create(username="test_dedupe_loader_pre_v3", is_staff=True)
+        product = Product.objects.create(
+            name="Product dedupe-loader-pre-v3", description="regression fixture",
+            prod_type=Product_Type.objects.create(name="Org dedupe-loader-pre-v3"),
+        )
+        engagement = Engagement.objects.create(
+            name="Eng dedupe-loader-pre-v3", product=product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=Test_Type.objects.get_or_create(name="Manual Test")[0],
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        finding = Finding.objects.create(
+            test=test, title="Finding dedupe-loader-pre-v3", severity="High", cwe=79,
+            description="regression fixture", mitigation="n/a", impact="n/a",
+            reporter=reporter, active=True, verified=True,
+        )
+        endpoint = Endpoint.objects.create(product=product, protocol="https", host="pre-v3.example.com")
+        Endpoint_Status.objects.create(endpoint=endpoint, finding=finding)
+
+        findings = get_finding_models_for_deduplication([finding.id])
+
+        prefetched = findings[0]._prefetched_objects_cache
+        self.assertIn(
+            "endpoints", prefetched,
+            msg=f"endpoint relation was not prefetched pre-V3: {sorted(prefetched)}",
+        )

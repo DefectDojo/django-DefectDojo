@@ -599,6 +599,13 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
     These mirror TestDojoImporterPerformanceSmall but run with V3_FEATURE_LOCATIONS=True.
     Query counts are specific to the locations code path and will differ from the v2 endpoint counts.
 
+    +2 on every path that post-processes a batch of findings: the deduplication loader now
+    prefetches "locations__location__url" (reference + location + url) instead of the single
+    deprecated "endpoints" query, which under V3 hydrated nothing usable and raised on a
+    migrated instance. The counterpart is the second import of the deduplication test, where
+    dedupe compares locations: with them prefetched the per-finding location lookups are gone,
+    so that step drops from 211 to 107.
+
     To determine or update the expected counts, run:
         python3 scripts/update_performance_test_counts.py
     """
@@ -694,11 +701,11 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=194,
+            expected_num_queries1=196,
             expected_num_async_tasks1=2,
-            expected_num_queries2=154,
+            expected_num_queries2=156,
             expected_num_async_tasks2=1,
-            expected_num_queries3=53,
+            expected_num_queries3=55,
             expected_num_async_tasks3=1,
             expected_num_queries4=110,
             expected_num_async_tasks4=0,
@@ -719,11 +726,11 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=207,
+            expected_num_queries1=209,
             expected_num_async_tasks1=5,
-            expected_num_queries2=167,
+            expected_num_queries2=169,
             expected_num_async_tasks2=4,
-            expected_num_queries3=62,
+            expected_num_queries3=64,
             expected_num_async_tasks3=3,
             expected_num_queries4=122,
             expected_num_async_tasks4=3,
@@ -846,8 +853,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=130,
+            expected_num_queries1=132,
             expected_num_async_tasks1=2,
-            expected_num_queries2=211,
+            expected_num_queries2=107,
             expected_num_async_tasks2=2,
         )
