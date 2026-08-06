@@ -1481,6 +1481,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # agree with that instead of falling through to the legacy field set, whose "description"
     # is what every result family assigns to "title" as well.
     "Checkmarx One Scan": ["unique_id_from_tool"],
+    "OPF Scan": ["title", "cwe", "severity", "description"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1563,6 +1564,7 @@ HASHCODE_ALLOWS_NULL_CWE = {
     "Cyberwatch scan (Galeax)": True,
     "OpenVAS Parser v2": True,
     "OpenReports": True,
+    "OPF Scan": True,
 }
 
 # List of fields that are known to be usable in hash_code computation)
@@ -1938,6 +1940,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # key is (title.lower(), severity). Xeol's severity is a function of the wall clock, so
     # that key rewrites itself as time passes even though the report never changed.
     "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
+    "OPF Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
