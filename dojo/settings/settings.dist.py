@@ -259,7 +259,8 @@ env = environ.FileAwareEnv(
                                  ".sarif", ".xlsx", ".doc", ".html", ".js", ".nessus", ".zip", ".fpr"]),
     # List of acceptable file types that can be (re)imported
     DD_FILE_IMPORT_TYPES=(list, [".xml", ".csv", ".nessus", ".json", ".jsonl", ".html", ".js", ".zip",
-                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl"]),
+                                 ".xlsx", ".txt", ".sarif", ".fpr", ".md", ".log", ".fvdl", ".ckl",
+                                 ".cklb"]),
     # Max file size for scan added via API in MB
     DD_SCAN_FILE_MAX_SIZE=(int, 100),
     # When disabled, existing user tokens will not be removed but it will not be
@@ -1111,6 +1112,12 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # for backwards compatibility because someone decided to rename this scanner:
     "Symfony Security Check": ["title", "vulnerability_ids"],
     "DSOP Scan": ["vulnerability_ids"],
+    # A checklist item is identified by its V-number on the host it was assessed on. The
+    # revision-suffixed Rule_ID changes with every STIG release, severity is overridable by the
+    # assessor, and the description holds per-scan finding details, so none of them may take part.
+    # Matching uses unique_id_from_tool (the host-qualified V-number); this entry is what keeps the
+    # stored hash_code stable for everything else that reads it.
+    "DISA STIG Checklist": ["vuln_id_from_tool", "endpoints"],
     "Acunetix Scan": ["title", "description"],
     "Terrascan Scan": ["vuln_id_from_tool", "title", "severity", "file_path", "line", "component_name"],
     "Trivy Operator Scan": ["title", "severity", "vulnerability_ids", "description"],
@@ -1567,6 +1574,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # for backwards compatibility because someone decided to rename this scanner:
     "Symfony Security Check": DEDUPE_ALGO_HASH_CODE,
     "DSOP Scan": DEDUPE_ALGO_HASH_CODE,
+    "DISA STIG Checklist": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Terrascan Scan": DEDUPE_ALGO_HASH_CODE,
     "Trivy Operator Scan": DEDUPE_ALGO_HASH_CODE,
     "Trivy Scan": DEDUPE_ALGO_HASH_CODE,

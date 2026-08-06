@@ -1,0 +1,31 @@
+﻿{
+  "title": "bomhost",
+  "cklb_version": "1.0",
+  "target_data": {
+    "host_name": "bomhost",
+    "fqdn": "bomhost.example.mil",
+    "ip_address": "10.0.0.31"
+  },
+  "stigs": [
+    {
+      "display_name": "Red Hat Enterprise Linux 9 Security Technical Implementation Guide",
+      "stig_id": "RHEL_9_STIG",
+      "release_info": "Release: 3 Benchmark Date: 24 Jul 2024",
+      "version": "2",
+      "rules": [
+        {
+          "group_id": "V-257777",
+          "rule_id": "SV-257777r925318_rule",
+          "rule_version": "RHEL-09-211010",
+          "rule_title": "RHEL 9 must be a vendor-supported release.",
+          "severity": "high",
+          "status": "open",
+          "discussion": "An operating system release is considered supported if the vendor continues to provide security patches.",
+          "check_content": "$ cat /etc/redhat-release",
+          "fix_text": "Upgrade to a supported version of RHEL 9.",
+          "ccis": ["CCI-000366"]
+        }
+      ]
+    }
+  ]
+}

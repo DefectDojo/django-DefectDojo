@@ -1,0 +1,33 @@
+{
+  "title": "sparsehost",
+  "cklb_version": "1.0",
+  "target_data": {
+    "host_name": "sparsehost"
+  },
+  "stigs": [
+    {
+      "stig_name": "Red Hat Enterprise Linux 9 Security Technical Implementation Guide",
+      "stig_id": "RHEL_9_STIG",
+      "rules": [
+        {
+          "group_id": "V-257777",
+          "rule_id": "SV-257777r925318_rule",
+          "rule_title": "RHEL 9 must be a vendor-supported release.",
+          "status": "open",
+          "fix_text": "Upgrade to a supported version of RHEL 9.",
+          "check_content": "$ cat /etc/redhat-release",
+          "discussion": null,
+          "ccis": null,
+          "overrides": null,
+          "comments": null,
+          "finding_details": null
+        },
+        {
+          "group_id": "V-257778",
+          "rule_title": "RHEL 9 vendor packaged system security patches and updates must be installed and up to date.",
+          "status": "open"
+        }
+      ]
+    }
+  ]
+}

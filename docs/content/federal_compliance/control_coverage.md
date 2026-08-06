@@ -18,9 +18,24 @@ automatically. Among others:
 * **Prowler** writes NIST 800-53 control lists into finding references.
 * **Tenable** plugins carry 800-53 cross-references.
 * **InSpec** and **MITRE SAF** profiles tag their checks with `nist` identifiers.
+* **DISA STIG checklists** cite CCIs, which DefectDojo crosswalks onto 800-53 — see below.
 
 Extraction is grounded in the imported catalog, so an identifier the catalog does not recognize
 never produces a mapping.
+
+### STIG checklists and CCIs
+
+A STIG rule does not name an 800-53 control directly. It cites one or more **Control Correlation
+Identifiers** (`CCI-000366`), DISA's own index into the control catalog. When you import a checklist
+with the [DISA STIG Checklist](/supported_tools/parsers/file/stig_checklist/) parser, DefectDojo
+reads those CCIs and maps each item onto the 800-53 Rev 5 controls that DISA's published CCI list
+associates with them.
+
+That mapping is what makes a STIG assessment show up as control coverage: the checklist tells you
+which rules failed, and the crosswalk tells you which controls those failures speak to.
+
+Crosswalked mappings rank above the ones extracted from finding text, because DISA's list is the
+authority for what a CCI means. Mappings you make by hand still win over both.
 
 Findings that carry no control references of their own are attributed to the default scan controls
 on the Compliance Profile — see [Compliance Profile](../compliance_profile).

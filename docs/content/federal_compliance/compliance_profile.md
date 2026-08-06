@@ -49,7 +49,10 @@ Two profile settings are not on the form and are set through the compliance API:
   *do* carry their own control references are mapped from those instead; see
   [Control Coverage](../control_coverage).
 * **Configuration test types** — the test types whose findings are treated as configuration items,
-  which is what drives CM-6 consolidation in the ledger.
+  which is what drives CM-6 consolidation in the ledger. `DISA STIG Checklist` is the usual
+  candidate: a benchmark assessment produces many configuration items at once, and consolidating
+  them keeps the ledger readable. Whether to consolidate is a per-system decision, so no test type
+  is listed here by default.
 
 ## Auditability
 

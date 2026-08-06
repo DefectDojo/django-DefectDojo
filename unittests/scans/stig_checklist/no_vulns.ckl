@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--DISA STIG Viewer :: 2.18-->
+<CHECKLIST>
+  <ASSET>
+    <ROLE>Member Server</ROLE>
+    <ASSET_TYPE>Computing</ASSET_TYPE>
+    <HOST_NAME>freshhost</HOST_NAME>
+    <HOST_IP>10.0.0.11</HOST_IP>
+    <HOST_MAC/>
+    <HOST_FQDN>freshhost.example.mil</HOST_FQDN>
+    <TARGET_KEY>5544</TARGET_KEY>
+    <WEB_OR_DATABASE>false</WEB_OR_DATABASE>
+  </ASSET>
+  <STIGS>
+    <iSTIG>
+      <STIG_INFO>
+        <SI_DATA>
+          <SID_NAME>version</SID_NAME>
+          <SID_DATA>2</SID_DATA>
+        </SI_DATA>
+        <SI_DATA>
+          <SID_NAME>stigid</SID_NAME>
+          <SID_DATA>RHEL_9_STIG</SID_DATA>
+        </SI_DATA>
+        <SI_DATA>
+          <SID_NAME>title</SID_NAME>
+          <SID_DATA>Red Hat Enterprise Linux 9 Security Technical Implementation Guide</SID_DATA>
+        </SI_DATA>
+        <SI_DATA>
+          <SID_NAME>releaseinfo</SID_NAME>
+          <SID_DATA>Release: 3 Benchmark Date: 24 Jul 2024</SID_DATA>
+        </SI_DATA>
+      </STIG_INFO>
+    </iSTIG>
+  </STIGS>
+</CHECKLIST>

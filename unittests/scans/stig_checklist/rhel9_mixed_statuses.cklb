@@ -1,0 +1,141 @@
+{
+  "title": "rhel9host",
+  "id": "8f1a4c02-5c1c-4e0b-9a3f-0b5d6d3f9a71",
+  "cklb_version": "1.0",
+  "active": false,
+  "mode": 1,
+  "has_path": true,
+  "target_data": {
+    "target_type": "Computing",
+    "host_name": "rhel9host",
+    "ip_address": "10.0.0.5",
+    "mac_address": "",
+    "fqdn": "rhel9.example.mil",
+    "comments": "",
+    "role": "Member Server",
+    "is_web_database": false,
+    "technology_area": "",
+    "web_db_site": "",
+    "web_db_instance": ""
+  },
+  "stigs": [
+    {
+      "stig_name": "Red Hat Enterprise Linux 9 Security Technical Implementation Guide",
+      "display_name": "Red Hat Enterprise Linux 9 Security Technical Implementation Guide",
+      "stig_id": "RHEL_9_STIG",
+      "release_info": "Release: 3 Benchmark Date: 24 Jul 2024",
+      "version": "2",
+      "uuid": "0b25b7f0-2f8a-4a3e-9b62-6c8a2b4e1d33",
+      "reference_identifier": "5544",
+      "size": 4,
+      "rules": [
+        {
+          "group_id_src": "V-257777",
+          "group_tree": [
+            {
+              "id": "V-257777",
+              "title": "SRG-OS-000480-GPOS-00227",
+              "description": "<GroupDescription></GroupDescription>"
+            }
+          ],
+          "group_id": "V-257777",
+          "severity": "high",
+          "group_title": "SRG-OS-000480-GPOS-00227",
+          "rule_id_src": "SV-257777r925318_rule",
+          "rule_id": "SV-257777r925318_rule",
+          "rule_version": "RHEL-09-211010",
+          "rule_title": "RHEL 9 must be a vendor-supported release.",
+          "fix_text": "Upgrade to a supported version of RHEL 9.",
+          "weight": "10.0",
+          "check_content": "Verify the version of the operating system is vendor supported with the following command:\n\n$ cat /etc/redhat-release\n\nIf the installed version of RHEL 9 is not supported, this is a finding.",
+          "discussion": "An operating system release is considered \"supported\" if the vendor continues to provide security patches for the product.",
+          "ccis": [
+            "CCI-000366",
+            "CCI-002617"
+          ],
+          "legacy_ids": [],
+          "references": "",
+          "status": "open",
+          "overrides": {},
+          "comments": "Upgrade scheduled for the next maintenance window.",
+          "finding_details": "Installed release reached end of maintenance support on 2025-05-31."
+        },
+        {
+          "group_id_src": "V-257778",
+          "group_id": "V-257778",
+          "severity": "medium",
+          "group_title": "SRG-OS-000480-GPOS-00227",
+          "rule_id_src": "SV-257778r925321_rule",
+          "rule_id": "SV-257778r925321_rule",
+          "rule_version": "RHEL-09-211015",
+          "rule_title": "RHEL 9 vendor packaged system security patches and updates must be installed and up to date.",
+          "fix_text": "Install the operating system patches or updated packages available from the vendor.",
+          "weight": "10.0",
+          "check_content": "Verify the operating system security patches are up to date with the following command:\n\n$ dnf history list | more",
+          "discussion": "Timely patching is critical for maintaining the operational availability, confidentiality, and integrity of information technology systems.",
+          "ccis": [
+            "CCI-000366"
+          ],
+          "legacy_ids": [],
+          "references": "",
+          "status": "not_a_finding",
+          "overrides": {},
+          "comments": "",
+          "finding_details": "All available vendor updates applied on 2026-07-30."
+        },
+        {
+          "group_id_src": "V-257779",
+          "group_id": "V-257779",
+          "severity": "medium",
+          "group_title": "SRG-OS-000023-GPOS-00006",
+          "rule_id_src": "SV-257779r925324_rule",
+          "rule_id": "SV-257779r925324_rule",
+          "rule_version": "RHEL-09-211020",
+          "rule_title": "RHEL 9 must display the Standard Mandatory DOD Notice and Consent Banner before granting local or remote access to the system via a graphical user logon.",
+          "fix_text": "Configure the graphical logon banner text in /etc/dconf/db/local.d/01-banner-message.",
+          "weight": "10.0",
+          "check_content": "Verify RHEL 9 displays the banner at the graphical logon. If the system does not have a graphical user interface installed, this requirement is Not Applicable.",
+          "discussion": "Display of the Standard Mandatory DOD Notice and Consent Banner before granting access to the operating system ensures privacy and security notification verbiage used is consistent with applicable federal laws.",
+          "ccis": [
+            "CCI-000048",
+            "CCI-001384"
+          ],
+          "legacy_ids": [],
+          "references": "",
+          "status": "not_applicable",
+          "overrides": {},
+          "comments": "",
+          "finding_details": "No graphical user interface is installed on this server."
+        },
+        {
+          "group_id_src": "V-257781",
+          "group_id": "V-257781",
+          "severity": "medium",
+          "group_title": "SRG-OS-000033-GPOS-00014",
+          "rule_id_src": "SV-257781r925330_rule",
+          "rule_id": "SV-257781r925330_rule",
+          "rule_version": "RHEL-09-211030",
+          "rule_title": "RHEL 9 must implement DOD-approved encryption to protect the confidentiality of remote access sessions.",
+          "fix_text": "Configure the SSH daemon to use only FIPS-validated key exchange algorithms and restart sshd.",
+          "weight": "10.0",
+          "check_content": "Verify the SSH daemon is configured to use only FIPS-validated key exchange algorithms.",
+          "discussion": "Without confidentiality protection mechanisms, an unauthorized individual may be able to view and modify privileged information.",
+          "ccis": [
+            "CCI-000068"
+          ],
+          "legacy_ids": [],
+          "references": "",
+          "status": "not_reviewed",
+          "overrides": {
+            "severity": {
+              "severity": "low",
+              "reason": "Host is reachable only from an isolated management enclave, so exposure is limited."
+            }
+          },
+          "comments": "Awaiting the crypto policy review before this item can be assessed.",
+          "finding_details": ""
+        }
+      ]
+    }
+  ]
+}
