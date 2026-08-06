@@ -30,20 +30,22 @@ The table lists each connection's label, identity, number of onboarded repos, cr
 
 An instance can hold **as many connections as you need, for every provider** — one per organization, group, or workspace:
 
-- **GitHub:** install the App on each organization or user account (**Install on another account**) — one App registration covers them all. To keep separate registrations (for example a GitHub Enterprise Server host alongside github.com), use **Register another GitHub App**; a picker then appears on the Set Up Sensei page, and the installations, permissions, links and **Disconnect this App** all apply to the App you have selected.
+- **GitHub:** install the App on each organization or user account (**Install on another account**) — one App registration covers them all. To keep separate registrations (for example a GitHub Enterprise Server host alongside github.com), use **Register another GitHub App**; a picker then appears on the connection screen, and the installations, permissions, links and **Disconnect this App** all apply to the App you have selected.
 - **GitLab:** one connection per group or project token, including several on the same host (`gitlab.com` plus self-managed).
 - **Bitbucket:** one connection per workspace.
 - **Azure DevOps:** one connection per organization, since a PAT is org-scoped.
 
 Each pass through **Connect** on the Connections page **adds** a connection, so connecting a second group or workspace never replaces the first. Give each one a **Connection Label** to tell them apart in the table. Every repository remembers the connection it was onboarded through, and scans, pull requests and fixes for it use that connection's credential — so when more than one connection exists for a provider, onboarding asks you which one to use rather than choosing for you.
 
-To rotate a token, PAT, or app password, use **Update credentials** on that connection's row: it reopens the connect form scoped to that connection, so saving updates it instead of adding another. (GitHub App credentials are managed on GitHub.)
+To rotate a token, PAT, or app password, use **Update credentials** on that connection's row. The screen that opens is about a single connection: it is titled **Edit connection: \<label\>** and saving updates that connection instead of adding another. Reaching it from **Connect** instead titles it **Add a connection**. (GitHub App credentials are managed on GitHub.)
+
+A provider's **webhook URL is shared by all of its connections** — each connection verifies its own secret — so you do not need a different URL per group, workspace or organization.
 
 > **⚠️ Disconnecting is destructive:** disconnecting a connection removes it **and every repository onboarded through it**. This cannot be undone.
 
 ## Choose a source-control provider
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Set Up Sensei**, then pick your source-control provider — **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**, then pick your source-control provider — **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
 
 ![Choose a source-control provider](images/setup_providers.png)
 
@@ -51,7 +53,7 @@ From the Sensei hub, choose **Add Repositories → Connect a new source** (or **
 
 Sensei runs entirely through a GitHub App. Install it on your org/account and DefectDojo uses short-lived tokens to open PRs, scan, and apply fixes. Nothing to paste, nothing to rotate.
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Set Up Sensei**.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**.
 
 ### Step 1: Create the App
 
@@ -79,7 +81,7 @@ On GitHub, confirm the installation location (your organization), choose **All r
 
 Sensei also supports **GitLab**, both **gitlab.com** and **self-managed** instances. Instead of a GitHub App, GitLab connects with a **project or group access token** plus a webhook; Sensei uses that token to scan, open merge requests, and apply fixes.
 
-From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Set Up Sensei**, then select **GitLab** as the source-control provider.
+From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**, then select **GitLab** as the source-control provider.
 
 ### Step 1: Create an access token
 
@@ -94,19 +96,19 @@ Create the token and copy the generated `glpat-…` value (GitLab shows it only 
 
 ### Step 2: Connect
 
-Back in **Set Up Sensei** with **GitLab** selected, fill in:
+Back in **Add a connection** with **GitLab** selected, fill in:
 
 - **GitLab Base URL:** `https://gitlab.com`, or your self-managed instance URL (for example `https://gitlab.example.com`).
 - **Access Token:** the `glpat-…` token from Step 1.
 - **Webhook Secret:** leave blank to auto-generate (recommended). You'll add this secret to the webhook in the next step.
 
-Click **Connect GitLab**. DefectDojo validates the token, stores it encrypted, and can then list projects, open merge requests, and run scans.
+Click **Add GitLab connection**. DefectDojo validates the token, stores it encrypted, and can then list projects, open merge requests, and run scans.
 
 ### Step 3: Add the webhook
 
 So DefectDojo receives push, merge-request, and comment events, add a webhook to **each** GitLab project you plan to onboard (**Settings → Webhooks → Add new webhook**):
 
-- **URL:** the webhook URL shown on the Set Up Sensei page (`https://<your-defectdojo-host>/sensei/gitlab/webhooks`).
+- **URL:** the webhook URL shown on the connection screen (`https://<your-defectdojo-host>/sensei/gitlab/webhooks`).
 - **Secret token:** the webhook secret from Step 2.
 - **Trigger events:** enable **Push events**, **Merge request events**, and **Comments**.
 
@@ -126,7 +128,7 @@ On your GitHub Enterprise Server instance, go to **Settings → Developer settin
 
 ### Step 2: Connect manually
 
-In **Set Up Sensei** with **GitHub** selected, click **Set up manually instead** and fill in:
+On the connection screen with **GitHub** selected, click **Set up manually instead** and fill in:
 
 - **App ID** and **Private Key (PEM)** from Step 1 (plus Client ID/Secret and Webhook Secret if configured).
 - **GitHub Enterprise host:** your instance host, for example `https://github.example.com`. DefectDojo derives the API (`/api/v3`) and web origins from it. Leave blank for github.com.
@@ -145,7 +147,7 @@ From the Sensei hub, choose **Add Repositories → Connect a new source** (or **
 
 **OAuth (recommended)** — in Bitbucket, open **Workspace settings → OAuth consumers → Add consumer**:
 
-- **Callback URL:** the one shown on the Set Up Sensei page (`https://<your-defectdojo-host>/sensei/bitbucket/oauth/callback`).
+- **Callback URL:** the one shown on the connection screen (`https://<your-defectdojo-host>/sensei/bitbucket/oauth/callback`).
 - **Permissions:** **Account: Read**, **Repositories: Read + Write**, **Pull requests: Read + Write** (add **Webhooks: Read + Write** if you'll manage webhooks via the API).
 
 Save it, then copy the consumer's **Key** (Client ID) and **Secret**.
@@ -156,7 +158,7 @@ Save it, then copy the consumer's **Key** (Client ID) and **Secret**.
 
 ### Step 2: Connect
 
-Back in **Set Up Sensei** with **Bitbucket** selected:
+Back on the connection screen with **Bitbucket** selected:
 
 - **OAuth:** paste the **Client ID** and **Client Secret**, then click **Connect with Bitbucket**. Approve the consent screen; DefectDojo stores the resulting tokens encrypted and refreshes them automatically.
 - **API token / Access token:** enter your **Workspace** (Cloud), your **email** (API-token auth only), and the **token**. For Server/Data Center, enter your host **Base URL**.
@@ -167,7 +169,7 @@ DefectDojo validates the credential and can then list repositories, open pull re
 
 Add a webhook to **each** Bitbucket repository (**Repository settings → Webhooks → Add webhook**):
 
-- **URL:** the webhook URL shown on the Set Up Sensei page (`https://<your-defectdojo-host>/sensei/bitbucket/webhooks`).
+- **URL:** the webhook URL shown on the connection screen (`https://<your-defectdojo-host>/sensei/bitbucket/webhooks`).
 - **Secret:** the webhook secret shown on the page (used for HMAC-SHA256 `X-Hub-Signature` verification).
 - **Triggers:** **Repository push**, **Pull request** (created, updated, merged, declined), and **Pull request comment created** (for `/fix` comments).
 
@@ -192,7 +194,7 @@ Create the token and copy it (Azure DevOps shows it only once).
 
 ### Step 2: Connect
 
-Back in **Set Up Sensei** with **Azure DevOps** selected, fill in:
+Back on the connection screen with **Azure DevOps** selected, fill in:
 
 - **Base URL:** `https://dev.azure.com`, or your Azure DevOps **Server** collection URL.
 - **Organization:** your organization name.
@@ -204,7 +206,7 @@ Click **Connect**. DefectDojo validates the PAT against `…/_apis/projects`, st
 
 Azure DevOps authenticates its **Service Hooks** with HTTP Basic, and uses **one subscription per event type**. In **Project settings → Service hooks → Create subscription → Web Hooks**, create a subscription for each of **Code pushed**, **Pull request created**, **Pull request updated**, and **Pull request merged**, all with:
 
-- **URL:** the webhook URL shown on the Set Up Sensei page (`https://<your-defectdojo-host>/sensei/azure/webhooks`).
+- **URL:** the webhook URL shown on the connection screen (`https://<your-defectdojo-host>/sensei/azure/webhooks`).
 - **Basic authentication username / password:** the values shown on the page.
 
 After connecting, click **Choose repositories** and continue with [Select repositories](#select-repositories).
