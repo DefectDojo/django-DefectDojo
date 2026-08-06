@@ -69,22 +69,29 @@ class CloseOldDedupeTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "finding?page=1")
 
-        if self.element_exists_by_id("no_findings"):
-            text = driver.find_element(By.ID, "no_findings").text
-            if "No findings found." in text:
-                return
+        # Files sharing this stack may have left more than one page of findings
+        # behind, and the bulk-delete action only covers the page it is on, so
+        # delete page by page until the empty state appears. Bounded, so a
+        # delete that stops shrinking the list fails loudly instead of looping.
+        for _ in range(10):
+            if self.element_exists_by_id("no_findings"):
+                break
+            driver.find_element(By.ID, "select_all").click()
+            driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-trash").click()
+            try:
+                WebDriverWait(driver, 2).until(expected_conditions.alert_is_present(),
+                    "Timed out waiting for finding delete confirmation popup to appear.")
+                driver.switch_to.alert.accept()
+            except TimeoutException:
+                self.fail("Confirmation dialogue not shown, cannot delete previous findings")
+            # The delete POSTs and redirects. Wait for the reloaded page to show
+            # either the empty state or the next page's table, rather than
+            # probing the old DOM with only the 1-second implicit wait -- a
+            # bulk delete of a full page is not done in 1 second.
+            WebDriverWait(driver, 30).until(
+                lambda d: d.find_elements(By.ID, "no_findings") or d.find_elements(By.ID, "select_all"),
+                "Timed out waiting for the findings list to reload after bulk delete.")
 
-        driver.find_element(By.ID, "select_all").click()
-        driver.find_element(By.CSS_SELECTOR, "i.fa-solid.fa-trash").click()
-        try:
-            WebDriverWait(driver, 1).until(expected_conditions.alert_is_present(),
-                "Timed out waiting for finding delete confirmation popup to appear.")
-            driver.switch_to.alert.accept()
-        except TimeoutException:
-            self.fail("Confirmation dialogue not shown, cannot delete previous findings")
-
-        logger.debug("page source when checking for no_findings element")
-        logger.debug(self.driver.page_source)
         text = driver.find_element(By.ID, "no_findings").text
 
         self.assertIsNotNone(text)

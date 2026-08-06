@@ -99,6 +99,15 @@ class TestSysdigParsers(DojoTestCase):
             critical_finding = critical_findings[0]
             self.assertIn("CVE-", critical_finding.unsaved_vulnerability_ids[0])
 
+            # Pin the runtime in-use tag format: the exact "InUse:<bool>" shape is
+            # part of the parser's observable contract (users filter on it and
+            # downstream tooling reads it), so changes must be deliberate.
+            in_use_tags = [t for f in findings for t in (f.unsaved_tags or []) if t.startswith("InUse:")]
+            self.assertTrue(in_use_tags, "expected InUse tags for rows with cluster context")
+            self.assertTrue(all(t in {"InUse:True", "InUse:False"} for t in in_use_tags))
+            self.assertIn("InUse:True", in_use_tags)
+            self.assertIn("InUse:False", in_use_tags)
+
     def test_sysdig_parser_2025_json_format(self):
         """Test JSON parsing with new 2025 format that has metadata before data section"""
         with (get_unit_tests_scans_path("sysdig_reports") / "sysdig-2025.json").open(encoding="utf-8") as testfile:
