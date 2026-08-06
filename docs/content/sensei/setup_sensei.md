@@ -18,13 +18,17 @@ Onboarding, configuration, scanning, and fixing are the same for every provider;
 
 **Add Repositories** on the Sensei hub is the entry point for both. It opens a menu listing each connection by name: pick one to choose repositories from it, or choose **Connect a new source** to set up a provider you haven't connected yet. With nothing connected, it goes straight to the connect flow.
 
+![The Add Repositories menu](images/add_repositories_menu.png)
+
 ## Connections
 
 A **connection** is one configured source-control identity: a GitHub App registration, a GitLab token, a Bitbucket workspace, or an Azure DevOps organization. You onboard repositories from a connection, and manage or disconnect it, from the **Connections** page (the **Connections** button on the Sensei hub).
 
 ![Sensei Connections](images/connections.png)
 
-The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, open it for editing (**Update credentials**, or **Manage App & installations** for GitHub), or disconnect it. **Add a connection** never shows an existing connection's details. Everything about a connection you already have is on its own screen, reached from its row.
+The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, open it for editing (**Update credentials**, or **Manage App & installations** for GitHub), or disconnect it.
+
+![Connection row actions](images/connection_row_menu.png) **Add a connection** never shows an existing connection's details. Everything about a connection you already have is on its own screen, reached from its row.
 
 ### Several organizations per provider
 
@@ -47,7 +51,7 @@ A provider's **webhook URL is shared by all of its connections**, and each conne
 
 From the Sensei hub, choose **Add Repositories → Connect a new source** (or **Connect** on the Connections page) to open **Add a connection**, then pick your source-control provider: **GitHub** (including GitHub Enterprise Server), **GitLab**, **Bitbucket**, or **Azure DevOps**. Each provider's connect flow is described below.
 
-![Choose a source-control provider](images/setup_providers.png)
+![Add a connection, with the source-control provider chosen here](images/setup_providers.png)
 
 ## Connect a GitHub App
 
@@ -71,7 +75,7 @@ GitHub opens a confirmation page. Click **Create GitHub App for `<org>`** to reg
 
 Back in DefectDojo, the app shows as *configured*. Click **Install on GitHub** to install it on your organization.
 
-![App created, install it](images/setup_install_app.png)
+![The connection's own screen, where the App is installed and managed](images/setup_install_app.png)
 
 On GitHub, confirm the installation location (your organization), choose **All repositories** or **Only select repositories**, and review the requested permissions. Sensei needs read access to actions, issues, and metadata, and read/write access to checks, code, pull requests, secrets, and workflows so it can scan and open fix PRs. Click **Install**.
 
