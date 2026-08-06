@@ -24,13 +24,13 @@ A **connection** is one configured source-control identity — a GitHub App inst
 
 ![Sensei Connections](images/connections.png)
 
-The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, update its credentials, or disconnect it.
+The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, open it for editing (**Update credentials**, or **Manage App & installations** for GitHub), or disconnect it. **Add a connection** never shows an existing connection's details — everything about one you already have is on its own screen, reached from its row.
 
 ### Several organizations per provider
 
 An instance can hold **as many connections as you need, for every provider** — one per organization, group, or workspace:
 
-- **GitHub:** install the App on each organization or user account (**Install on another account**) — one App registration covers them all. To keep separate registrations (for example a GitHub Enterprise Server host alongside github.com), use **Register another GitHub App**; a picker then appears on the connection screen, and the installations, permissions, links and **Disconnect this App** all apply to the App you have selected.
+- **GitHub:** install the App on each organization or user account (**Install on another account**) — one App registration covers them all. To keep separate registrations (for example a GitHub Enterprise Server host alongside github.com), use **Register another GitHub App**. An App's own state — its installations, permission approvals, **Install on another account** and **Disconnect this App** — lives on that connection's screen, opened with **Manage App & installations** on its row; with more than one registration a picker there switches between them.
 - **GitLab:** one connection per group or project token, including several on the same host (`gitlab.com` plus self-managed).
 - **Bitbucket:** one connection per workspace.
 - **Azure DevOps:** one connection per organization, since a PAT is org-scoped.
