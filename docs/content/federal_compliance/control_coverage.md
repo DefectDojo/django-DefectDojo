@@ -49,8 +49,10 @@ was enabled, backfill them:
 manage.py extract_control_mappings --product <id>
 ```
 
-Use `--all` to scan every active finding instead of one product. The command reports how many
-mappings it created, and it leaves manual and suppressed mappings alone.
+Use `--all` to scan every active finding instead of one product. Both passes — scanner references
+and the CCI crosswalk — run by default, and each reports how many mappings it created. Add
+`--skip-crosswalk` or `--skip-scanner-refs` to run only one. Manual and suppressed mappings are left
+alone either way.
 
 ## Correcting a mapping
 

@@ -36,6 +36,9 @@ Reimporting a newer checklist for the same asset moves findings between those st
 changes from Open to Not A Finding is closed, and one that regresses from Not A Finding to Open is
 reactivated.
 
+Note that DefectDojo marks any out-of-scope finding as mitigated as well, so a Not Applicable item
+shows both flags. Out of Scope is the one that says why.
+
 ### Severity
 
 The rule's DISA category maps to severity — `high` to High, `medium` to Medium and `low` to Low —
