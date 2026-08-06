@@ -9,6 +9,16 @@ weight: 3
 
 Once a repository is onboarded, Sensei surfaces directly on your findings and on the Sensei hub. This page covers scanning a repository, triaging auto-fix candidates, and remediating individual findings. You need at least **Writer** access to a finding's product to trigger a fix.
 
+## Finding your way around the Sensei hub
+
+The hub's toggle selects which **view** you are looking at:
+
+- **Repositories** — the repositories onboarded to Sensei, with their status and row actions.
+- **Auto-fix Candidates** — findings staged for approval.
+- **Scan Activity** — the ledger of every scan and fix run.
+
+If an administrator enabled in-repo CI scanning, the Repositories view also offers a **Scanning** choice between **DefectDojo-hosted** and **In-repo CI**. This selects where scans run for the repositories listed; it is not a separate view, so auto-fix candidates and scan activity always cover every onboarded repository regardless of where its scans run. With CI mode off (the default) there is nothing to choose and the control is not shown.
+
 ## Scan a repository
 
 Scans import findings into an engagement named after the branch. You can trigger a scan on demand from the Sensei hub: open a repository's row actions and choose **Scan now**.
