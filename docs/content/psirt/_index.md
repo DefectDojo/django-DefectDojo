@@ -38,6 +38,16 @@ entitlement.
    finding.
 5. **[Cases and SLA](cases/)** — group related matches into work items and track
    the triage obligation on them.
+6. **[Advisories](advisories/)** — write, review and publish your *own* advisories
+   about your own products, with fingerprint-bound signoffs and honest delivery
+   states.
+7. **[PSIRT dashboard](dashboard/)** — a shared template that leads with the
+   affected question, beside whether the pipeline is actually working.
 
-You do not need all five. Feeds plus an inventory is enough to start getting
-answers; rules, cases and SLAs are for teams that want the workflow around them.
+You do not need all seven. Feeds plus an inventory is enough to start getting
+answers; rules, cases and SLAs are for teams that want the workflow around them,
+and advisory publishing is for teams that ship software to customers who need to
+be told.
+
+Everything up to step 5 is about what other people published. Step 6 is the other
+direction — what you publish — and it is a separate job with separate approvals.
