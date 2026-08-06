@@ -258,6 +258,41 @@ An administrator can turn this off with **Block Self-Approval of Risk Acceptance
 Settings (on by default). Turning it off is for a team small enough that one person is the whole
 approval chain, where the alternative is that nobody uses the workflow at all.
 
+### Extending an expired acceptance
+
+An expiration date exists because somebody wanted the risk looked at again on that date. So by
+default an expired Risk Acceptance cannot simply be switched back on — it has to go back through
+review:
+
+1. Move it to **proposed** (Risk Acceptance Edit). This is the "please extend this" step.
+2. It is approved or rejected as any other request is (Risk Acceptance Approve).
+3. Approving and activating it puts the suppression back.
+
+Trying to move an expired Risk Acceptance straight to `active` returns `409` with a message saying
+it has to be reviewed again — including through `POST .../reinstate/`, so the older route is not a
+way around the review. `409` rather than `403` because the caller may hold every permission there
+is; what is wrong is the state, and asking for a review is a move they can make.
+
+An administrator can turn this off with **Require Review to Extend an Expired Risk Acceptance** in
+System Settings (on by default), for teams whose expiry dates are a reminder rather than a gate.
+
+This governs what a person may ask for through the API. If expiry is cleared by any other path,
+the lifecycle still follows it — open source remains the authority on whether a Risk Acceptance has
+expired, and Pro records the consequence rather than arguing with it.
+
+### Finding what needs attention
+
+Two list filters on `/api/v2/risk_acceptance/` answer the questions people actually ask of this
+data:
+
+| Filter | Answers |
+| --- | --- |
+| `expiring_within_days=7` | What lands on somebody's desk this week. Bounded at both ends — already-expired Risk Acceptances are excluded, because those are a different queue (`workflow_state=expired`) |
+| `finding_host=api.example.com` | What have we accepted on this host — the question asked when a host is decommissioned, handed to another team, or turns up in an audit. Matches part of a host, and matches the host of the Finding's Location (or its Endpoint, on installs that have not moved to Locations) |
+
+Combine them with `workflow_state` to build a review queue: `?workflow_state=proposed&workflow_state=under_review`
+is everything nobody has decided yet.
+
 ### Requested exceptions in your metrics
 
 The problem this solves: a team asks for an exception and waits — on a change board, on a vendor, on
