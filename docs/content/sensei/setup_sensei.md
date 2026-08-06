@@ -202,7 +202,14 @@ After the App is installed, DefectDojo shows the repositories it can access. Onl
 
 ![Select repositories to onboard](images/setup_repo_picker.png)
 
-Use **Add** to select one or more repositories, then click **Configure N repo(s)**.
+Use **Add** to select one or more repositories, then click **Configure N repo(s)**. Repositories already onboarded are marked **Configured** and cannot be added twice.
+
+### A repository isn't listed
+
+The picker can only show repositories the connection was granted, so a repository you never gave Sensei access to won't appear — and if the connection covers a single repository that is already onboarded, the list looks like there is nothing to add. Widen what the connection can see, then return to this step:
+
+- **GitHub:** use **Manage repository access for \<account\>** to open that installation's page on GitHub, where you can add repositories to the installation. Use **Install on another account** to install the App on a second organization or user account.
+- **GitLab, Bitbucket, Azure DevOps:** the list is scoped by the credential you connected. Grant the token, app password, or PAT access to the project (a GitLab **group** token covers every project in the group), or add a second connection for another group, workspace, or organization.
 
 ## Configure a repository
 
