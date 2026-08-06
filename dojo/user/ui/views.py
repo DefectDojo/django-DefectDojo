@@ -226,11 +226,9 @@ def view_profile(request):
                                  messages.SUCCESS,
                                  _("Profile updated successfully."),
                                  extra_tags="alert-success")
-            # Redirect so the response renders against a fresh request — this
-            # ensures UIPreferenceLoader and the UI-toggle banner read the
-            # just-saved usercontactinfo (e.g. ui_use_tailwind) instead of any
-            # state cached on the POST request. Also prevents form
-            # resubmission on refresh.
+            # Redirect so the response renders against a fresh request, reading
+            # the just-saved usercontactinfo instead of any state cached on the
+            # POST request. Also prevents form resubmission on refresh.
             return HttpResponseRedirect(reverse("view_profile"))
     add_breadcrumb(title=_("User Profile - %(user_full_name)s") % {"user_full_name": user.get_full_name()}, top_level=True, request=request)
     return render(request, "dojo/profile.html", {

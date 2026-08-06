@@ -38,10 +38,11 @@
         <script src="{% static "moment/min/moment.min.js" %}"></script>
         <script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
         <!-- DataTables -->
+        <!-- Core DataTables only — the Bootstrap styling integrations were
+             dropped; markup is styled by datatables-dd.css against DataTables'
+             own dt-* classes. -->
         <script src="{% static 'datatables.net/js/dataTables.min.js' %}"></script>
-        <script src="{% static 'datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
-        <script src="{% static 'datatables.net-buttons-bs/js/buttons.bootstrap.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/buttons.html5.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/buttons.colVis.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/buttons.print.min.js' %}"></script>

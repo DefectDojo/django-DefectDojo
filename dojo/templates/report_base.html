@@ -4,7 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ report_name }}</title>
-    <link rel="stylesheet" href="{% static "dojo/css/bootswatch/yeti/bootstrap.min.css" %}">
+    <!-- Same compiled stylesheet the app shell uses, so reports pick up the
+         component styles (panels, grid, tables) from one place rather than a
+         vendored Bootstrap build. -->
+    <link rel="stylesheet" href="{% static "dojo/css/tailwind-out.css" %}">
     <!-- Custom Fonts -->
     <link href="{% static "font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
 
@@ -114,6 +117,13 @@
             font-size: 120%;
             border-bottom: 1px solid black;
             padding-bottom: 8px;
+            /* h6 is the field label in reports ("Description", "Mitigation").
+               The app stylesheet styles h6 as a small uppercase muted label,
+               which is right for the UI but would restyle every field label in
+               a customer-facing report, so opt out of it here. */
+            text-transform: none;
+            letter-spacing: normal;
+            color: inherit;
         }
 
         .panel-heading h6{
@@ -175,6 +185,18 @@
             font-family: 'Roboto Slab', monospace !important;
             font-size: 13px;
         }
+
+        /* Heading scale. The `*` rule above sets every element to 13px; element
+           selectors outrank it, which is how the headings kept their sizes when
+           a full Bootstrap build was loaded here. The stylesheet now in use
+           resets headings to inherit (in @layer base, which the unlayered `*`
+           rule beats), so the scale has to be stated explicitly or every
+           heading collapses to body size. */
+        h1 { font-size: 36px; }
+        h2 { font-size: 30px; }
+        h3 { font-size: 24px; }
+        h4 { font-size: 18px; }
+        h5 { font-size: 14px; }
 
         .flot-tick-label.tickLabel {
             font-size: 11px;
