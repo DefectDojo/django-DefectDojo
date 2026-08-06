@@ -1,5 +1,5 @@
 ---
-title: "📋 Jira Integration Guide"
+title: "Jira Integration Guide"
 description: "Work with the Jira integration"
 weight: 2
 audience: opensource
@@ -307,6 +307,87 @@ Once you have one or more Issues created from DefectDojo Findings, you can test 
 If this doesn't work correctly, it could be due to a Firewall issue on your Jira instance blocking the Webhook.
 
 * DefectDojo's Firewall Rules include a checkbox for **Jira Cloud,** which needs to be enabled before DefectDojo can receive Webhook messages from Jira.
+
+### Alternative: Using Jira Automation (Send web request)
+
+Some Jira instances don't allow system webhooks under `/plugins/servlet/webhooks` — for example, when that administration area is restricted and only **Jira Automation** rules are permitted. In that case you can drive the same bidirectional sync using Automation's **Send web request** action, which posts to the same DefectDojo webhook endpoint.
+
+DefectDojo's webhook endpoint accepts any HTTP `POST` with `Content-Type: application/json` and a valid secret in the URL path. It does **not** require the request to originate from Jira's system webhook mechanism, so Automation's "Send web request" action works as a drop-in alternative.
+
+#### Prerequisites
+
+The same prerequisites as the system webhook apply:
+
+* **Enable JIRA integration** and **Enable JIRA web hook** are both checked on the ⚙️ **Configuration \> System Settings** page.
+* A non-empty **Jira webhook secret** is set on that page. The secret may only contain the characters `A-Z`, `a-z`, `0-9`, `_` and `-`.
+* The Finding (or Finding Group) is already linked to the Jira issue. If the issue isn't linked to a DefectDojo Finding, the request is still accepted (HTTP `200`) but no action is taken.
+
+#### How DefectDojo processes the request
+
+* DefectDojo branches on a top-level `webhookEvent` field. Only `"jira:issue_updated"` and `"comment_created"` are processed; any other value is accepted and ignored. Automation does **not** add this field on its own, so you must include it in the request body yourself.
+* Because of that, set the request **Body** to **Custom data** and supply the JSON below. The **Empty** and **Jira issue data** body options do not include the required `webhookEvent` field, so DefectDojo will ignore them.
+* The endpoint always returns HTTP `200`, regardless of whether an update was applied. Success or failure is only visible in the response body and in the DefectDojo logs — a `200` in Automation's audit log does **not** by itself confirm the update reached a Finding.
+
+#### Rule 1 — Issue updated
+
+Create an Automation rule with:
+
+* **Trigger:** *Issue transitioned* (or another trigger that fires when the fields you sync change, e.g. *Field value changed* on Status).
+* **Action:** *Send web request*
+  * **Web request URL:** `https://<YOUR DOJO DOMAIN>/jira/webhook/<YOUR WEBHOOK SECRET>`
+  * **HTTP method:** `POST`
+  * **Web request body:** *Custom data*
+  * **Headers:** `Content-Type: application/json`
+  * **Custom data:**
+
+```json
+{
+  "webhookEvent": "jira:issue_updated",
+  "issue": {
+    "id": "{{issue.id}}",
+    "fields": {
+      "updated": "{{issue.updated}}",
+      "resolution": null,
+      "status": { "statusCategory": { "key": "{{issue.status.statusCategory.key}}" } },
+      "assignee": { "name": "{{issue.assignee.accountId}}", "displayName": "{{issue.assignee.displayName}}" }
+    }
+  }
+}
+```
+
+Constraints for issue updates:
+
+* `issue.id` must be the **numeric internal Jira issue ID** (`{{issue.id}}`), not the issue key (e.g. `PROJ-123`). DefectDojo matches the update to a Finding by this numeric ID.
+* The `resolution` and `updated` fields must always be present. `resolution` may be `null`, but if either field is missing the request is accepted (`200`) and silently not processed.
+* Status sync and auto-mitigation are driven by `status.statusCategory.key`, whose Jira values are `new` (To Do), `indeterminate` (In Progress) and `done` (Done). A Finding is only mitigated when the issue is genuinely closed, not merely because a resolution value happens to be present.
+
+#### Rule 2 — Issue commented
+
+Create a second Automation rule with:
+
+* **Trigger:** *Issue commented*
+* **Action:** *Send web request* — same URL, method, header and *Custom data* body option as Rule 1, with this body:
+
+```json
+{
+  "webhookEvent": "comment_created",
+  "comment": {
+    "self": "https://<your-jira-host>/rest/api/2/issue/{{issue.id}}/comment/{{comment.id}}",
+    "body": "{{comment.body}}",
+    "updateAuthor": { "name": "{{comment.author.accountId}}", "displayName": "{{comment.author.displayName}}" }
+  }
+}
+```
+
+Constraints for comments:
+
+* Both `body` and `updateAuthor` must be present.
+* DefectDojo derives the target issue from the `comment.self` URL — specifically the `<id>` in the `.../issue/<id>/comment/...` segment — so `{{issue.id}}` (the numeric ID) must appear there.
+* **Loop prevention:** if the comment author matches the Jira account DefectDojo uses to post its own comments, DefectDojo skips the comment to avoid an echo loop. If you want *all* comments ingested, run the Automation rule as a **different** Jira user than the one configured in DefectDojo's Jira instance.
+
+#### A note on smart values
+
+The smart values shown above (`{{issue.id}}`, `{{issue.status.statusCategory.key}}`, `{{comment.author.accountId}}`, and so on) are the standard Jira Cloud names, but they can vary between instances. Before going live, use Automation's payload preview to confirm each smart value resolves to what you expect.
 
 ## Testing the Jira integration
 
