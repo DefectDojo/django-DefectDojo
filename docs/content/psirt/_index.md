@@ -30,24 +30,34 @@ entitlement.
 1. **[Advisory Feeds](feeds/)** — choose which publishers to poll. Every source
    ships disabled; enabling one records your acceptance of its terms.
 2. **[Import SBOM](import-sbom/)** — give PSIRT an inventory to match against.
-3. **[Matching Rules](matching-rules/)** — optional. For advisories that publish
+3. **[Components](components/)** — that inventory as PSIRT reads it, plus the
+   judgement you add to it: a risk rating, an authoritative CPE, tags.
+4. **[Matching Rules](matching-rules/)** — optional. For advisories that publish
    no machine-readable version ranges, where structural matching has nothing to
-   compare.
-4. **[Feed Findings](feed-findings/)** — the queue. Each advisory leads with an
+   compare. Also where you preview a rule, check coverage per asset, and see
+   whether a rule has earned its keep.
+5. **[Feed Findings](feed-findings/)** — the queue. Each advisory leads with an
    explicit answer to "am I affected?", and confirming a match files a DefectDojo
    finding.
-5. **[Cases and SLA](cases/)** — group related matches into work items and track
+6. **[Cases and SLA](cases/)** — group related matches into work items and track
    the triage obligation on them.
-6. **[Advisories](advisories/)** — write, review and publish your *own* advisories
+7. **[Advisories](advisories/)** — write, review and publish your *own* advisories
    about your own products, with fingerprint-bound signoffs and honest delivery
    states.
-7. **[PSIRT dashboard](dashboard/)** — a shared template that leads with the
+8. **[PSIRT dashboard](dashboard/)** — a shared template that leads with the
    affected question, beside whether the pipeline is actually working.
 
-You do not need all seven. Feeds plus an inventory is enough to start getting
+Two pages are configuration rather than workflow:
+
+- **[SLA Policies](sla-policies/)** — how long each severity tier gets before a
+  triage clock warns and breaches.
+- **[PSIRT Settings](settings/)** — the case-worthiness calibration, the "new"
+  item window, and which upstream changes count as material.
+
+You do not need all of it. Feeds plus an inventory is enough to start getting
 answers; rules, cases and SLAs are for teams that want the workflow around them,
 and advisory publishing is for teams that ship software to customers who need to
 be told.
 
-Everything up to step 5 is about what other people published. Step 6 is the other
+Everything up to step 6 is about what other people published. Step 7 is the other
 direction — what you publish — and it is a separate job with separate approvals.

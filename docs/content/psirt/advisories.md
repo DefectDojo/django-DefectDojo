@@ -2,7 +2,7 @@
 title: "Advisories"
 description: "Write, review, publish and revise your own security advisories"
 draft: false
-weight: 7
+weight: 8
 pro-feature: true
 ---
 

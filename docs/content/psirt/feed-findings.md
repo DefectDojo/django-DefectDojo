@@ -2,7 +2,7 @@
 title: "Feed Findings"
 description: "Triage incoming advisories and read the tri-state answer to 'am I affected?'"
 draft: false
-weight: 5
+weight: 6
 pro-feature: true
 ---
 
