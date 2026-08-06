@@ -28,7 +28,7 @@ The table lists each connection's label, identity, number of onboarded repos, cr
 
 An instance can hold **as many connections as you need, for every provider** — one per organization, group, or workspace:
 
-- **GitHub:** install the App on each organization or user account (**Install on another account**). One App registration covers them all; you can also register more than one App.
+- **GitHub:** install the App on each organization or user account (**Install on another account**) — one App registration covers them all. To keep separate registrations (for example a GitHub Enterprise Server host alongside github.com), use **Register another GitHub App**; a picker then appears on the Set Up Sensei page, and the installations, permissions, links and **Disconnect this App** all apply to the App you have selected.
 - **GitLab:** one connection per group or project token, including several on the same host (`gitlab.com` plus self-managed).
 - **Bitbucket:** one connection per workspace.
 - **Azure DevOps:** one connection per organization, since a PAT is org-scoped.
