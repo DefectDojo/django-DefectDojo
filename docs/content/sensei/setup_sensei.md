@@ -22,7 +22,20 @@ A **connection** is one configured source-control identity — a GitHub App inst
 
 ![Sensei Connections](images/connections.png)
 
-The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, or disconnect it.
+The table lists each connection's label, identity, number of onboarded repos, creation date, and provider. Use the row actions (the menu on the left of each row) to manage the connection on its provider, add repositories from that connection, update its credentials, or disconnect it.
+
+### Several organizations per provider
+
+An instance can hold **as many connections as you need, for every provider** — one per organization, group, or workspace:
+
+- **GitHub:** install the App on each organization or user account (**Install on another account**). One App registration covers them all; you can also register more than one App.
+- **GitLab:** one connection per group or project token, including several on the same host (`gitlab.com` plus self-managed).
+- **Bitbucket:** one connection per workspace.
+- **Azure DevOps:** one connection per organization, since a PAT is org-scoped.
+
+Each pass through **Connect** on the Connections page **adds** a connection, so connecting a second group or workspace never replaces the first. Give each one a **Connection Label** to tell them apart in the table. Every repository remembers the connection it was onboarded through, and scans, pull requests and fixes for it use that connection's credential — so when more than one connection exists for a provider, onboarding asks you which one to use rather than choosing for you.
+
+To rotate a token, PAT, or app password, use **Update credentials** on that connection's row: it reopens the connect form scoped to that connection, so saving updates it instead of adding another. (GitHub App credentials are managed on GitHub.)
 
 > **⚠️ Disconnecting is destructive:** disconnecting a connection removes it **and every repository onboarded through it**. This cannot be undone.
 
