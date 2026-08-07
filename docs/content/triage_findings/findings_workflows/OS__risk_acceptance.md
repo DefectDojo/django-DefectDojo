@@ -71,7 +71,7 @@ To remove a Finding from a Full Risk Acceptance, click the **Remove** button wit
 
 The Full Risk Acceptance's view also includes a table at the bottom for all other Findings from Tests within that Engagement. From there, you may select additional Findings and add them to that Full Risk Acceptance. 
 
-Additionally, there is a Notes function that allows Users to include additional context to the Full Risk Acceptance. All public notes will appear in any Reports that are generated for the Full Risk Acceptance, whereas notes that are toggled as **Private** will not appear in reports. 
+Additionally, there is a Notes function that allows Users to include additional context to the Full Risk Acceptance. All public notes will appear in any Reports that are generated for the Full Risk Acceptance. Notes toggled as **Private** are visible only to their author and to superusers, and are left out of reports. 
 
 Importantly, if a Full Risk Acceptance is deleted entirely, the Findings within will have their status automatically reverted to “Active.”
 

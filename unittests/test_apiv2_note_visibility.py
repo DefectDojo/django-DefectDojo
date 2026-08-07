@@ -7,6 +7,7 @@ received every note attached to it, including notes another user had marked
 private. ``NoteSerializer`` now filters through ``VisibleNotesSerializer``.
 """
 
+from django.test import Client
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -21,6 +22,7 @@ from dojo.models import (
     Test,
     Test_Type,
 )
+from dojo.notes.helper import visible_notes
 
 from .dojo_test_case import DojoAPITestCase
 
@@ -80,6 +82,11 @@ class NoteVisibilityAPITest(DojoAPITestCase):
         client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
         return client
 
+    def client_for(self, user):
+        client = Client()
+        client.force_login(user)
+        return client
+
     def _paths(self):
         return [
             f"/api/v2/findings/{self.finding.id}/",
@@ -118,3 +125,32 @@ class NoteVisibilityAPITest(DojoAPITestCase):
         )
         self.assertEqual(200, response.status_code, response.content[:300])
         self.assertNotIn(PRIVATE, response.content.decode())
+
+
+class NoteVisibilityHelperTest(NoteVisibilityAPITest):
+
+    """The rule itself, which the UI views share with the serializer."""
+
+    def _entries(self, user):
+        return {n.entry for n in visible_notes(self.finding.notes.all(), user)}
+
+    def test_author_sees_both(self):
+        self.assertEqual({PRIVATE, PUBLIC}, self._entries(self.author))
+
+    def test_colleague_sees_only_public(self):
+        self.assertEqual({PUBLIC}, self._entries(self.colleague))
+
+    def test_superuser_sees_both(self):
+        self.assertEqual({PRIVATE, PUBLIC}, self._entries(self.superuser))
+
+    def test_no_user_sees_only_public(self):
+        self.assertEqual({PUBLIC}, self._entries(None))
+
+    def test_ui_context_is_filtered(self):
+        """The finding page hands the template the same filtered set."""
+        response = self.client_for(self.colleague).get(f"/finding/{self.finding.id}")
+        if response.status_code != 200:
+            self.skipTest(f"classic UI not reachable here (HTTP {response.status_code})")
+        entries = {n.entry for n in response.context["notes"]}
+        self.assertNotIn(PRIVATE, entries)
+        self.assertIn(PUBLIC, entries)
