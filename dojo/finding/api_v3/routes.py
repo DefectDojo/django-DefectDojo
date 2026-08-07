@@ -25,7 +25,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
 from django.http import HttpResponse
-from ninja import Router, Schema
+from ninja import Router
 from ninja.constants import NOT_SET
 
 from dojo.api_v3.csv_export import stream_csv_export
@@ -48,7 +48,7 @@ from dojo.api_v3.filtering import (
     severity_rank_order,
 )
 from dojo.api_v3.include import apply_includes
-from dojo.api_v3.pagination import paginate
+from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.api_v3.schemas import (
@@ -117,19 +117,11 @@ FINDING_FILTER_SPEC = register_filter_spec("finding", FilterSpec(
 _ALLOWED_INCLUDES = {"counts"}
 
 
-class FindingListResponse(Schema):
-
-    """
-    OpenAPI documentation of the list envelope (I1). Runtime serialization is manual so
-    ``?expand=``/``?fields=`` can reshape ``results`` dynamically; this schema documents the base
-    slim shape for client codegen.
-    """
-
-    count: int
-    next: str | None
-    previous: str | None
-    results: list[FindingSlim]
-    meta: dict | None = None
+# Derived from the row schema, not pinned to a literal: a router factory called with
+# ``schema=<subclass>`` must document what it actually serves, or a downstream distribution serves
+# one shape and publishes another (I4). Kept under the same name so the OS spec is unchanged.
+# See ``dojo/api_v3/pagination.py::list_envelope``.
+FindingListResponse = list_envelope(FindingSlim, name="FindingListResponse")
 
 
 def _base_queryset(request: HttpRequest, queryset_hook: Callable | None) -> QuerySet:
@@ -164,7 +156,7 @@ def build_findings_router(
     """Build the findings router (I5)."""
     router = Router(tags=["findings"], auth=auth)
 
-    @router.get("/findings", response=FindingListResponse, url_name="findings_list")
+    @router.get("/findings", response=list_envelope(schema), url_name="findings_list")
     def list_findings(request: HttpRequest):
         filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
 

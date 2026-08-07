@@ -45,14 +45,13 @@ from dojo.api_v3.expand import (
     serialize_list_row,
 )
 from dojo.api_v3.filtering import FilterSpec, apply_filters, filter_field, register_filter_spec
-from dojo.api_v3.pagination import paginate
+from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.queries import get_authorized_findings
 from dojo.location.api_v3.schemas import (
     AssetLocationListResponse,
     FindingLocationListResponse,
     LocationDetail,
-    LocationListResponse,
     LocationSlim,
     asset_location_edge,
     finding_location_edge,
@@ -106,7 +105,9 @@ def build_locations_router(
             qs = queryset_hook(qs, request)
         return qs
 
-    @router.get("/locations", response=LocationListResponse, url_name="locations_list")
+    # Derived from ``schema`` so a downstream override documents what it serves (I4); the two edge
+    # sub-resource routers below take no ``schema=`` and so keep their literal envelopes.
+    @router.get("/locations", response=list_envelope(schema), url_name="locations_list")
     def list_locations(request: HttpRequest):
         filtered = apply_filters(request, _base_queryset(request), filter_spec)
 

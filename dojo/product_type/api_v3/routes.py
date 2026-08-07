@@ -30,7 +30,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import HttpResponse
-from ninja import Router, Schema
+from ninja import Router
 from ninja.constants import NOT_SET
 
 from dojo.api_v3.csv_export import stream_csv_export
@@ -52,7 +52,7 @@ from dojo.api_v3.filtering import (
     register_filter_spec,
 )
 from dojo.api_v3.include import apply_includes
-from dojo.api_v3.pagination import paginate
+from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.authorization.authorization import user_has_global_permission, user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.models import Endpoint, Product_Type
@@ -93,15 +93,9 @@ ORGANIZATION_FILTER_SPEC = register_filter_spec("organization", FilterSpec(
 ))
 
 
-class OrganizationListResponse(Schema):
-
-    """OpenAPI documentation of the list envelope (I1); runtime serialization is manual."""
-
-    count: int
-    next: str | None
-    previous: str | None
-    results: list[OrganizationSlim]
-    meta: dict | None = None
+# Derived from the row schema so a factory called with ``schema=<subclass>`` documents what it
+# serves (I4). See ``dojo/api_v3/pagination.py::list_envelope``.
+OrganizationListResponse = list_envelope(OrganizationSlim, name="OrganizationListResponse")
 
 
 def _base_queryset(request: HttpRequest, queryset_hook: Callable | None) -> QuerySet:
@@ -140,7 +134,7 @@ def build_organizations_router(
     """Build the organizations router (I5)."""
     router = Router(tags=["organizations"], auth=auth)
 
-    @router.get("/organizations", response=OrganizationListResponse, url_name="organizations_list")
+    @router.get("/organizations", response=list_envelope(schema), url_name="organizations_list")
     def list_organizations(request: HttpRequest):
         filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
 

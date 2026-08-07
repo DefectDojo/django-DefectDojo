@@ -25,7 +25,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import HttpResponse
-from ninja import Router, Schema
+from ninja import Router
 from ninja.constants import NOT_SET
 
 from dojo.api_v3.csv_export import stream_csv_export
@@ -47,7 +47,7 @@ from dojo.api_v3.filtering import (
     register_filter_spec,
 )
 from dojo.api_v3.include import apply_includes
-from dojo.api_v3.pagination import paginate
+from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.models import Dojo_User
 from dojo.user.api_v3.schemas import UserDetail, UserSlim, UserUpdate, UserWrite
@@ -87,15 +87,9 @@ USER_FILTER_SPEC = register_filter_spec("user", FilterSpec(
 ))
 
 
-class UserListResponse(Schema):
-
-    """OpenAPI documentation of the list envelope (I1); runtime serialization is manual."""
-
-    count: int
-    next: str | None
-    previous: str | None
-    results: list[UserSlim]
-    meta: dict | None = None
+# Derived from the row schema so a factory called with ``schema=<subclass>`` documents what it
+# serves (I4). See ``dojo/api_v3/pagination.py::list_envelope``.
+UserListResponse = list_envelope(UserSlim, name="UserListResponse")
 
 
 def _base_queryset(request: HttpRequest, queryset_hook: Callable | None) -> QuerySet:
@@ -173,7 +167,7 @@ def build_users_router(
     """Build the users router (I5)."""
     router = Router(tags=["users"], auth=auth)
 
-    @router.get("/users", response=UserListResponse, url_name="users_list")
+    @router.get("/users", response=list_envelope(schema), url_name="users_list")
     def list_users(request: HttpRequest):
         filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
 

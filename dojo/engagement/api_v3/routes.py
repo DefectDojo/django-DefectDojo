@@ -29,7 +29,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.http import HttpResponse
-from ninja import Router, Schema
+from ninja import Router
 from ninja.constants import NOT_SET
 
 from dojo.api_v3.csv_export import stream_csv_export
@@ -51,7 +51,7 @@ from dojo.api_v3.filtering import (
     register_filter_spec,
 )
 from dojo.api_v3.include import apply_includes
-from dojo.api_v3.pagination import paginate
+from dojo.api_v3.pagination import list_envelope, paginate
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.engagement.api_v3.schemas import (
@@ -107,15 +107,9 @@ ENGAGEMENT_FILTER_SPEC = register_filter_spec("engagement", FilterSpec(
 _UNSET = object()
 
 
-class EngagementListResponse(Schema):
-
-    """OpenAPI documentation of the list envelope (I1); runtime serialization is manual."""
-
-    count: int
-    next: str | None
-    previous: str | None
-    results: list[EngagementSlim]
-    meta: dict | None = None
+# Derived from the row schema so a factory called with ``schema=<subclass>`` documents what it
+# serves (I4). See ``dojo/api_v3/pagination.py::list_envelope``.
+EngagementListResponse = list_envelope(EngagementSlim, name="EngagementListResponse")
 
 
 def _base_queryset(request: HttpRequest, queryset_hook: Callable | None) -> QuerySet:
@@ -176,7 +170,7 @@ def build_engagements_router(
     """Build the engagements router (I5)."""
     router = Router(tags=["engagements"], auth=auth)
 
-    @router.get("/engagements", response=EngagementListResponse, url_name="engagements_list")
+    @router.get("/engagements", response=list_envelope(schema), url_name="engagements_list")
     def list_engagements(request: HttpRequest):
         filtered = apply_filters(request, _base_queryset(request, queryset_hook), filter_spec)
 
