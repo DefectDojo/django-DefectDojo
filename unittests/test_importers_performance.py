@@ -599,6 +599,13 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
     These mirror TestDojoImporterPerformanceSmall but run with V3_FEATURE_LOCATIONS=True.
     Query counts are specific to the locations code path and will differ from the v2 endpoint counts.
 
+    +2 on every path that post-processes a batch of findings: the deduplication loader now
+    prefetches "locations__location__url" (reference + location + url) instead of the single
+    deprecated "endpoints" query, which under V3 hydrated nothing usable and raised on a
+    migrated instance. The counterpart is the second import of the deduplication test, where
+    dedupe compares locations: with them prefetched the per-finding location lookups are gone,
+    so that step drops from 211 to 107.
+
     To determine or update the expected counts, run:
         python3 scripts/update_performance_test_counts.py
     """

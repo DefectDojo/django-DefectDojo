@@ -21,13 +21,15 @@ These tests cover the sites that were guarded/repaired for that:
 * API ``test_imports`` list -- the ``findings_affected__endpoints`` prefetch on the queryset.
 * Batch deduplication -- ``get_finding_models_for_deduplication`` prefetches ``locations``
   under V3, so ``post_process_findings_batch`` no longer hydrates legacy endpoint rows.
+  The pre-V3 direction is pinned too: with the flag off, ``endpoints`` must stay prefetched,
+  so the fix cannot turn the crash into an N+1.
 """
 import logging
 from io import BytesIO
 from types import SimpleNamespace
 
 from django.contrib.auth.models import User
-from django.test import Client
+from django.test import Client, override_settings
 from django.urls import reverse
 from django.utils import timezone
 from openpyxl import load_workbook
@@ -335,3 +337,45 @@ class TestEndpointInitV3(DojoTestCase):
         )
 
         self.assertTrue(Finding.objects.filter(id=tree.finding.id).exists())
+
+
+@override_settings(V3_FEATURE_LOCATIONS=False)
+class TestDedupeLoaderPrefetchPreV3(DojoTestCase):
+
+    """
+    The pre-V3 direction of the same loader: with the flag off, ``endpoints`` is still the
+    relation deduplication compares on, so it must stay prefetched. Pinning both directions is
+    what keeps the fix from turning a crash into an N+1.
+    """
+
+    # TODO: Delete this class after the move to Locations
+    def test_pre_v3_still_prefetches_endpoints(self):
+        reporter = User.objects.create(username="test_dedupe_loader_pre_v3", is_staff=True)
+        product = Product.objects.create(
+            name="Product dedupe-loader-pre-v3", description="regression fixture",
+            prod_type=Product_Type.objects.create(name="Org dedupe-loader-pre-v3"),
+        )
+        engagement = Engagement.objects.create(
+            name="Eng dedupe-loader-pre-v3", product=product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        test = Test.objects.create(
+            engagement=engagement,
+            test_type=Test_Type.objects.get_or_create(name="Manual Test")[0],
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        finding = Finding.objects.create(
+            test=test, title="Finding dedupe-loader-pre-v3", severity="High", cwe=79,
+            description="regression fixture", mitigation="n/a", impact="n/a",
+            reporter=reporter, active=True, verified=True,
+        )
+        endpoint = Endpoint.objects.create(product=product, protocol="https", host="pre-v3.example.com")
+        Endpoint_Status.objects.create(endpoint=endpoint, finding=finding)
+
+        findings = get_finding_models_for_deduplication([finding.id])
+
+        prefetched = findings[0]._prefetched_objects_cache
+        self.assertIn(
+            "endpoints", prefetched,
+            msg=f"endpoint relation was not prefetched pre-V3: {sorted(prefetched)}",
+        )

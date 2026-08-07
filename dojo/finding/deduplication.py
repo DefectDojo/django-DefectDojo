@@ -19,7 +19,7 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 def get_finding_models_for_deduplication(finding_ids):
     """
     Load findings with optimal prefetching for deduplication operations.
-    This avoids N+1 queries when accessing test, engagement, product, endpoints, and original_finding.
+    This avoids N+1 queries when accessing test, engagement, product, locations, and original_finding.
 
     Args:
         finding_ids: A list of Finding IDs
@@ -32,9 +32,11 @@ def get_finding_models_for_deduplication(finding_ids):
         logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
-    # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
-    # endpoints m2m hydrates legacy rows and crashes the batch. are_locations_duplicates()
-    # reads ref.location.url, which is what the locations prefetch has to reach.
+    # The location relation deduplication compares on, for the location model actually in use.
+    # Endpoint rows survive the move to Locations (the migration keeps them as backup) and
+    # Endpoint.__init__ raises once V3_FEATURE_LOCATIONS is on, so prefetching the endpoint
+    # relation under V3 hydrates the deprecated model and kills the caller. Same selection as
+    # build_candidate_scope_queryset below.
     # TODO: Delete the endpoints branch after the move to Locations
     location_prefetch = "locations__location__url" if settings.V3_FEATURE_LOCATIONS else "endpoints"
 
