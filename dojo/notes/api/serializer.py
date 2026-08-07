@@ -1,3 +1,5 @@
+from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -13,6 +15,21 @@ class NoteHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = NoteHistory
         fields = "__all__"
+
+
+class VisibleNotesSerializer(serializers.ListSerializer):
+
+    """Serialize only the notes the requester may see: non-private, or their own."""
+
+    def to_representation(self, data):
+        notes = data.all() if isinstance(data, models.Manager) else data
+        user = getattr(self.context.get("request"), "user", None)
+        if user is None:
+            # No requester to compare against, so keep private notes out.
+            notes = notes.filter(private=False)
+        elif not user.is_superuser:
+            notes = notes.filter(Q(private=False) | Q(author=user))
+        return super().to_representation(notes)
 
 
 class NoteSerializer(serializers.ModelSerializer):
@@ -39,3 +56,4 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notes
         fields = "__all__"
+        list_serializer_class = VisibleNotesSerializer
