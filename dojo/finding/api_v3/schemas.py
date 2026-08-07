@@ -43,6 +43,7 @@ from dojo.product.api_v3.schemas import AssetSlim
 from dojo.product_type.api_v3.schemas import OrganizationSlim
 from dojo.test.api_v3.schemas import EnvironmentSlim, TestSlim, TestTypeSlim
 from dojo.user.api_v3.schemas import UserSlim
+from dojo.vulnerability.queries import finding_vulnerability_id_strings, vulnerability_id_prefetch
 
 __all__ = [
     "AssetSlim",
@@ -64,7 +65,11 @@ class FindingSlim(Schema):
     django_model: ClassVar = Finding
     # Base relation paths the finding resolvers read; applied by the route regardless of expand.
     SELECT_RELATED: ClassVar[tuple] = ("test__test_type", "test__engagement__product__prod_type", "reporter")
-    PREFETCH_RELATED: ClassVar[tuple] = ("tags", "vulnerability_id_set", "finding_cwe_set")
+    # ``vulnerability_id_prefetch()`` is a ``Prefetch`` over the entity store (the reference rows
+    # select_related their Vulnerability, keeping this one batched query). Safe here because
+    # findings are never an expand *target* (expand.py composes PREFETCH_RELATED entries of the
+    # target schema as strings); if that changes, the entry must become string-composable.
+    PREFETCH_RELATED: ClassVar[tuple] = ("tags", vulnerability_id_prefetch(), "finding_cwe_set")
     EXPANDABLE: ClassVar[dict[str, ExpandRel]] = {}
 
     id: int
@@ -122,9 +127,9 @@ class FindingSlim(Schema):
     @staticmethod
     def resolve_vulnerability_ids(obj) -> list[str]:
         # Flat strings in storage order (first = the id mirrored into ``cve``); symmetric with what
-        # ``FindingWrite`` accepts, NOT v2's object list. Reads the prefetched ``vulnerability_id_set``
-        # reverse relation (default related_name; v2 uses the same source) -- no per-row query.
-        return [v.vulnerability_id for v in obj.vulnerability_id_set.all()]
+        # ``FindingWrite`` accepts, NOT v2's object list. Reads the entity/reference store through
+        # the same seam as v2, honoring the prefetched ``vulnerability_references`` -- no per-row query.
+        return finding_vulnerability_id_strings(obj)
 
     @staticmethod
     def resolve_cwes(obj) -> list[int]:

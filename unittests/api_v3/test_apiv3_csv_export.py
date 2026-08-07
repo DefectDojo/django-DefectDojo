@@ -29,8 +29,8 @@ from dojo.models import (
     Product_Type,
     Test,
     Test_Type,
-    Vulnerability_Id,
 )
+from dojo.vulnerability.manager import persist_for_finding
 
 from .base import ApiV3TestCase
 
@@ -100,8 +100,7 @@ class TestApiV3CsvExportHappyPath(_CsvExportTestCase):
 
     def test_vulnerability_ids_and_cwes_columns_render_semicolon_joined(self):
         finding = Finding.objects.first()
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="GHSA-aaaa-bbbb-cccc")
+        persist_for_finding(finding, ["CVE-2020-1234", "GHSA-aaaa-bbbb-cccc"], delete_existing=False)
         Finding_CWE.objects.create(finding=finding, cwe="CWE-79")
         Finding_CWE.objects.create(finding=finding, cwe="CWE-89")
         row = self._by_id(self._rows(self._get("findings/export.csv")))[str(finding.id)]

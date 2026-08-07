@@ -11,7 +11,8 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
-from dojo.models import Finding, Finding_CWE, Test, Vulnerability_Id
+from dojo.models import Finding, Finding_CWE, Test
+from dojo.vulnerability.manager import persist_for_finding
 
 from .base import ApiV3TestCase
 
@@ -88,7 +89,7 @@ class TestApiV3FindingsQueryCount(ApiV3TestCase):
 
     def test_query_count_constant_with_vuln_ids_and_cwes(self):
         """
-        The vulnerability_id_set / finding_cwe_set prefetches are fixed IN-batches, not per-row.
+        The vulnerability_references / finding_cwe_set prefetches are fixed IN-batches, not per-row.
 
         Attaching a vuln-id + CWE row to every finding would surface a per-row query (COUNT/SELECT
         per finding) if these fields were resolved lazily; the count must stay row-independent.
@@ -97,9 +98,9 @@ class TestApiV3FindingsQueryCount(ApiV3TestCase):
 
         def _attach_identity_rows() -> None:
             for finding in Finding.objects.all():
-                Vulnerability_Id.objects.get_or_create(
-                    finding=finding, vulnerability_id=f"CVE-2020-{finding.id}",
-                )
+                # delete_existing=True keeps the re-run over already-seeded findings idempotent
+                # (this helper runs again after the second bulk-create batch).
+                persist_for_finding(finding, [f"CVE-2020-{finding.id}"])
                 Finding_CWE.objects.get_or_create(finding=finding, cwe="CWE-79")
 
         self._bulk_create_findings(10, test)

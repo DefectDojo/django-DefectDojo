@@ -6,7 +6,8 @@ from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
 
 from dojo.location.models import Location, LocationFindingReference
-from dojo.models import Finding, Finding_CWE, User, Vulnerability_Id
+from dojo.models import Finding, Finding_CWE, User
+from dojo.vulnerability.manager import persist_for_finding
 
 from .base import ApiV3TestCase
 
@@ -360,8 +361,7 @@ class TestApiV3FindingsVulnIdsAndCwes(ApiV3TestCase):
             test=test, reporter=self.admin, active=True, verified=False, cwe=79,
         )
         # Two vuln ids: the first is the one mirrored into `cve` (storage order is preserved).
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="CVE-2020-1234")
-        Vulnerability_Id.objects.create(finding=finding, vulnerability_id="GHSA-aaaa-bbbb-cccc")
+        persist_for_finding(finding, ["CVE-2020-1234", "GHSA-aaaa-bbbb-cccc"], delete_existing=False)
         # Two CWE rows stored as canonical "CWE-<n>" strings (the primary cwe=79 is one of them,
         # mirroring what save_cwes persists).
         Finding_CWE.objects.create(finding=finding, cwe="CWE-79")

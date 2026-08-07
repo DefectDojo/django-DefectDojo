@@ -13,7 +13,8 @@ from unittest.mock import patch
 
 from django.test import override_settings
 
-from dojo.models import Dojo_User, Finding, Finding_CWE, Test, User, Vulnerability_Id
+from dojo.models import Dojo_User, Finding, Finding_CWE, Test, User
+from dojo.vulnerability.models import FindingVulnerabilityReference
 
 from .base import ApiV3TestCase
 
@@ -54,7 +55,7 @@ class TestApiV3FindingCreate(ApiV3TestCase):
         response = self.client.post(self.v3_url("findings"), payload, format="json")
         self.assertEqual(201, response.status_code, response.content[:500])
         created = Finding.objects.get(pk=response.json()["id"])
-        vids = set(Vulnerability_Id.objects.filter(finding=created).values_list("vulnerability_id", flat=True))
+        vids = set(FindingVulnerabilityReference.objects.filter(finding=created).values_list("vulnerability__vulnerability_id", flat=True))
         self.assertEqual({"CVE-2020-1234", "CVE-2020-5678"}, vids)
         self.assertEqual("CVE-2020-1234", created.cve)  # first vuln id mirrored into cve
 
@@ -141,7 +142,7 @@ class TestApiV3FindingUpdate(ApiV3TestCase):
         self.assertEqual(200, response.status_code, response.content[:500])
         self.finding.refresh_from_db()
         self.assertEqual("CVE-2019-9999", self.finding.cve)
-        self.assertTrue(Vulnerability_Id.objects.filter(finding=self.finding, vulnerability_id="CVE-2019-9999").exists())
+        self.assertTrue(FindingVulnerabilityReference.objects.filter(finding=self.finding, vulnerability__vulnerability_id="CVE-2019-9999").exists())
 
     def _seed_cwe_rows(self, primary: int, extras: list[int]) -> None:
         self.finding.cwe = primary
