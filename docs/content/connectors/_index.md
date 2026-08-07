@@ -1,9 +1,9 @@
 ---
-title: "Pro Integrations"
-description: ""
+title: "Connectors"
+description: "Connect DefectDojo to your scanners and issue trackers"
 summary: ""
-date: 2023-09-07T16:06:50+02:00
-lastmod: 2023-09-07T16:06:50+02:00
+date: 2026-07-14T00:00:00+00:00
+lastmod: 2026-07-14T00:00:00+00:00
 draft: false
 weight: 3
 chapter: true
@@ -12,6 +12,6 @@ seo:
   description: "" # custom description (recommended)
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
-exclude_search: true
 audience: pro
+exclude_search: true
 ---

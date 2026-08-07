@@ -38,7 +38,7 @@ Both sections have a search box that matches on provider name and on protocol, s
 
 Identity provider settings are a single set of values per provider per instance — one Okta application, one SAML identity provider, one LDAP directory. The tiles say so, and there is no "add another": to change how a provider is set up, you edit the configuration that already exists.
 
-This is what makes Authorization Connectors different from the [connector galleries](/import_data/pro/connectors/about_connectors/), where a tool can have many configurations side by side.
+This is what makes Authorization Connectors different from the [connector galleries](/connectors/upstream/about/), where a tool can have many configurations side by side.
 
 ## The three states, and what they mean
 
@@ -77,4 +77,4 @@ Keep at least one superuser account with a username and password as a fallback, 
 
 * [Single Sign-On](/admin/sso/) — the per-provider setup guides and login settings
 * [Diagnostics](/admin/diagnostics/pro__diagnostics/) — why a sign-in attempt failed
-* [Connectors](/import_data/pro/connectors/about_connectors/) — the upstream gallery this page is modelled on
+* [Connectors](/connectors/upstream/about/) — the upstream gallery this page is modelled on
