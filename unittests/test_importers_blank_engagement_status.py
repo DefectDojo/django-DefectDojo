@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -55,19 +56,20 @@ class TestImportersBlankEngagementStatus(DojoTestCase):
             description="Test",
             prod_type=product_type,
         )
-        # CI/CD, because that is what the reported imports ran into and it is the only
-        # engagement_type whose target_end update_timestamps() touches -- so the write-back
-        # this regression is about actually has a reason to save the engagement.
-        # target_start/target_end are dates: they back DateFields, and update_timestamps()
-        # compares target_end against scan_date.date(), which a datetime cannot be ordered
-        # against.
-        today = timezone.now().date()
+        # CI/CD with a target_end in the past, so the closing write-back actually saves the
+        # engagement. update_timestamps() only moves target_end for a CI/CD engagement, and
+        # since #15512 process_scan() saves the engagement only when that move happened
+        # (`engagement_target_end_updated`). An engagement whose target_end is already in the
+        # future is never written back, so it would not exercise the save this regression is
+        # about. Dates, not datetimes: these back DateFields, and update_timestamps() orders
+        # target_end against scan_date.date().
+        self.past = timezone.now().date() - timedelta(days=30)
         self.engagement, _ = Engagement.objects.get_or_create(
             name="Blank Status Engagement",
             product=self.product,
             engagement_type="CI/CD",
-            target_start=today,
-            target_end=today,
+            target_start=self.past,
+            target_end=self.past,
         )
         with (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan:
             self.test, _, len_new_findings, _, _, _, _ = self._importer().process_scan(scan)
@@ -101,8 +103,13 @@ class TestImportersBlankEngagementStatus(DojoTestCase):
         `pre_save_logic()` and `full_clean()` -- the same as any write made before the base
         model started validating, and the same as loading DefectDojo's sample data, which
         ships an engagement with an empty status.
+
+        target_end is put back in the past in the same statement: setUp's initial import
+        already pushed it out to the scan date, and a reimport only writes the engagement
+        back when update_timestamps() moves target_end again (#15512). Without this reset
+        there would be nothing to move, and the write-back under test would never run.
         """
-        Engagement.objects.filter(pk=self.engagement.pk).update(status=value)
+        Engagement.objects.filter(pk=self.engagement.pk).update(status=value, target_end=self.past)
         # Re-read the test so its engagement is loaded from the row, not from setUp's copy.
         return Test.objects.get(pk=self.test.pk)
 
@@ -120,6 +127,17 @@ class TestImportersBlankEngagementStatus(DojoTestCase):
             msg=f"the same scan must reimport without new findings, got {len_new_findings}",
         )
         persisted = Engagement.objects.get(pk=self.engagement.pk)
+        # Guard the premise: since #15512 the engagement is written back only when
+        # update_timestamps() moved its target end. If that stops happening, this test would
+        # pass its status assertion for the wrong reason -- never having saved the engagement
+        # at all -- so assert the move landed before reading anything into the status.
+        self.assertGreater(
+            persisted.target_end, self.past,
+            msg=(
+                "the reimport must have written the engagement back for this test to mean "
+                f"anything, but target_end is still {persisted.target_end}"
+            ),
+        )
         self.assertEqual(
             self.default_status, persisted.status,
             msg=f"expected status={self.default_status!r}, persisted={persisted.status!r}",
