@@ -4,7 +4,7 @@ description: "Learn about notifications, in-app alerts"
 aliases:
   - /en/customize_dojo/notifications/about_notifications
 ---
-DefectDojo keeps you up to date in a variety of ways. Notifications can be sent for upcoming Engagements, user Mentions, SLA expiry, and other events in the software.
+DefectDojo keeps you up to date in a variety of ways. Notifications can be sent for upcoming Engagements, [user Mentions](/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions), SLA expiry, and other events in the software.
 
 This article contains an overview of notifications at both System\-wide and Personal levels.
 
@@ -60,6 +60,30 @@ To remove one or more Alerts from the Alerts Page, check the empty box next to i
 * Using the **Clear All Alerts \>** function in the Alerts Menu will also completely clear the **Alerts Page**, so use this feature with care.
 * Removing an Alert only affects your own Alerts List \- it will not affect any other user’s Alerts.
 * Removing an Alert does not remove any import history or activity logs from DefectDojo.
+
+## Narrowing Review Request Notifications (Pro)
+
+If a review is requested from all eligible reviewers, everyone eligible on that asset is notified. That is a lot of mail for a reviewer who only looks after part of your estate.
+
+In the DefectDojo Pro UI you can narrow your own review-request notifications. On your notification settings page, under **Review Requests**:
+
+* **Review Request Scope** — *All* (the default) notifies you about everything you can see. *Selected* narrows you to the assets and asset types you pick.
+* **Review Request Assets** / **Review Request Asset Types** — the slice of the estate you want to hear about. A request matches if it is on one of your selected assets *or* one of your selected asset types.
+
+Two things to be clear about:
+
+* Choosing *Selected* and picking nothing means **none**, not all.
+* Narrowing suppresses the notification, **not the request**. You remain a requested reviewer and the request still appears in your [My Work](/metrics_reports/dashboards/pro__my_work/) queue under **Awaiting My Review** — you simply are not messaged about it. This is deliberate: the queue is the durable record, notifications are the reminder.
+
+This narrowing also takes precedence over the system-level override described below, so a reviewer who has scoped themselves out is not notified even when `review_requested` is configured to trump personal preferences.
+
+Narrowing can also be set over the API on the notifications endpoint, which is the practical route if you are configuring many reviewers at once.
+
+## Work Assignment Notifications (Pro)
+
+When Findings are assigned to you, the **Work Assigned** notification tells you how many and links to your My Work queue.
+
+It is aggregated per person rather than per Finding: assigning a hundred Findings sends one message, not a hundred. As with review requests, the assignment is visible in your queue whether or not the notification reaches you.
 
 ## Open-Source Considerations
 

@@ -70,17 +70,17 @@
                 </li>
             {% endif %}
             {% if finding_templates %}
-                <li role="presentation">
+                <li role="presentation" {% if activetab == 'finding_templates' %}class="active"{% endif %}>
                     <a href="#tabs-7" role="tab" data-toggle="tab">{% trans "Finding Templates" %} ({{ finding_templates|length }})</a>
                 </li>
             {% endif %}
             {% if languages %}
-                <li role="presentation">
+                <li role="presentation" {% if activetab == 'languages' %}class="active"{% endif %}>
                     <a href="#tabs-8" role="tab" data-toggle="tab">{% trans "Languages" %} ({{ languages|length }})</a>
                 </li>
             {% endif %}
             {% if app_analysis %}
-                <li role="presentation">
+                <li role="presentation" {% if activetab == 'technologies' %}class="active"{% endif %}>
                     <a href="#tabs-9" role="tab" data-toggle="tab">{% trans "Application Technolgies" %} ({{ app_analysis|length }})</a>
                 </li>
             {% endif %}
@@ -295,7 +295,7 @@
                 </div>
             {% endif %}
             {% if finding_templates %}
-                <div role="tabpanel" class="table-responsive tab-pane" id="tabs-7">
+                <div role="tabpanel" class="table-responsive tab-pane {% if activetab == 'finding_templates' %}active{% endif %}" id="tabs-7">
                     <table class="table table-striped">
                         <thead>
                         <tr>
@@ -319,7 +319,7 @@
             {% endif %}
             {% if languages %}
             <div role="tabpanel"
-                 class="table-responsive tab-pane"
+                 class="table-responsive tab-pane {% if activetab == 'languages' %}active{% endif %}"
                  id="tabs-8">
                     <table class="table table-striped">
                         <thead>
@@ -344,7 +344,7 @@
             {% endif %}
             {% if app_analysis %}
             <div role="tabpanel"
-                 class="table-responsive tab-pane"
+                 class="table-responsive tab-pane {% if activetab == 'technologies' %}active{% endif %}"
                  id="tabs-9">
                     <table class="table table-striped">
                         <thead>

@@ -187,7 +187,7 @@ class Endpoint(models.Model):
                 return clean_url
             msg = "Missing host"
             raise ValueError(msg)
-        except:
+        except (ValueError, ValidationError):
             url = ""
             if self.protocol:
                 url += f"{self.protocol}://"
@@ -303,7 +303,7 @@ class Endpoint(models.Model):
     def is_broken(self):
         try:
             self.clean()
-        except:
+        except (ValueError, ValidationError):
             return True
         else:
             return not self.product

@@ -43,7 +43,7 @@ Finding views contain a variety of tables to help interpret a Finding’s status
     - **Severity**: The severity rating of that Finding, which is applied automatically. 
         - As mentioned above, DefectDojo automatically translates a security tool’s severity metric into a Severity score for each Finding, which confers an SLA onto the Finding according to your Asset’s SLA configuration.
     - **SLA**: The intended due date by which the Finding is intended to be resolved. 
-    - **Status**: The status of the Finding (e.g., Active, Verified, False Positive, Duplicate, Out of SCope, and Under Defect Review).
+    - **Status**: The status of the Finding (e.g., Active, Verified, False Positive, Duplicate, Out of Scope, and Under Defect Review).
     - **Finding type**: Whether the Finding is Static (SAST) or Dynamic (DAST).
     - **Date discovered**: The date on which the Finding was discovered. 
     - **CWE**: The CWE classification of the Finding. 
@@ -160,7 +160,7 @@ The ⋮ kebab menu next to Findings contains the following functions:
 - **Delete**: Deletes the selected Finding. 
 
 #### Attaching Files to Findings 
-You can attach image files to any Finding to provide visual context — for example, a screenshot of a vulnerability in action or a proof-of-concept image.
+You can attach files to any Finding to provide visual context — for example, a screenshot of a vulnerability in action or a proof-of-concept image.
 
 Supported file types include: 
 
@@ -233,7 +233,7 @@ To manually perform Finding Group actions:
 1. Navigate to a list of Findings within a Test. 
 2. Select the Finding(s) you wish to add to a Finding Group by clicking the corresponding checkbox. 
 3. Click the **Group** checkbox. 
-4. Click the corresponding action you wish to complete
+4. Click the corresponding action you wish to complete.
     - **Create**: Creates a Finding Group that includes the selected Findings.
     - **Add to**: Adds the selected Findings to a pre-existing Finding Group.
     - **Remove from any group**: Removes the selected Findings from any Finding Groups they were previously a part of. 
@@ -253,6 +253,8 @@ The adjoining **Create Finding Groups for all Findings** checkbox performs two f
 - **Unchecked**: Creates Finding Groups only when there are actually multiple Findings to group together.
 
 ![image](images/osfindings_ss5.png)
+
+If an option is not selected from the Group By dropdown menu during import, no grouping will occur. 
 
 If the grouping criteria (e.g., component name, vulnerability ID, etc.) isn’t populated in the Finding, it will not have a group created or be added to a pre-existing Finding Group. 
 
@@ -294,6 +296,6 @@ More information about DefectDojo’s Report Builder can be found [here](/metric
 
 #### Export Findings 
 
-Pages that show a list of Findings or a list of engagements have a CSV and Excel export option in the top-right dropdown menu.
+Pages that show a list of Findings or a list of Engagements have a CSV and Excel export option in the top-right dropdown menu.
 
-From any Findings list page, open the dropdown menu in the top-right corner to export the visible Findings as a CSV or Excel file. The list of engagements can also be exported as CSV or Excel using the same dropdown menu on the engagements list page.
+From any Findings list page, open the dropdown menu in the top-right corner to export the visible Findings as a CSV or Excel file. The list of Engagements can also be exported as CSV or Excel using the same dropdown menu on the Engagements list page.

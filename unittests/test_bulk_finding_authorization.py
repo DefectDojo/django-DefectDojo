@@ -4,12 +4,13 @@ Authorization scoping for the bulk finding endpoint.
 A product-scoped, non-staff user must not be able to bulk-delete (or edit)
 findings belonging to products they are not authorized for via
 ``finding_bulk_update_all`` (``/finding/bulk``), even by POSTing arbitrary
-finding ids.
+finding ids. The same scoping applies to the target finding group when adding
+findings to a group.
 """
 
 from django.urls import reverse
 
-from dojo.models import Dojo_User, Finding, Test
+from dojo.models import Dojo_User, Finding, Finding_Group, Test
 
 from .dojo_test_case import DojoTestCase, versioned_fixtures
 
@@ -55,4 +56,31 @@ class TestBulkFindingAuthorizationScoping(DojoTestCase):
         self.assertEqual(
             self.other_finding.severity, original_severity,
             msg="scoped user edited a finding outside their authorized products",
+        )
+
+    def test_scoped_user_cannot_add_finding_to_other_products_group(self):
+        # A finding the user is allowed to edit, in their authorized product,
+        # not yet part of any group.
+        my_finding = Finding.objects.filter(
+            test__engagement__product=self.product,
+            finding_group__isnull=True,
+        ).first()
+        self.assertIsNotNone(my_finding)
+        # A group that belongs to a different product.
+        other_test = Test.objects.exclude(
+            engagement__product=self.product,
+        ).first()
+        other_group = Finding_Group.objects.create(
+            name="scoping_regression_group", test=other_test, creator=self.user,
+        )
+        response = self.client.post(reverse("finding_bulk_update_all"), {
+            "finding_to_update": [my_finding.id],
+            "finding_group_add": "true",
+            "add_to_finding_group_id": other_group.id,
+        })
+        self.assertLess(response.status_code, 500)
+        self.assertNotIn(
+            my_finding.id,
+            list(other_group.findings.values_list("id", flat=True)),
+            msg="scoped user added a finding to a group outside their authorized products",
         )

@@ -20,7 +20,15 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict, StreamingHttpResponse
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+    QueryDict,
+    StreamingHttpResponse,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
@@ -1086,6 +1094,7 @@ class ImportScanResultsView(View):
         return self.success_redirect(request, context)
 
 
+@require_POST
 def close_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     close_engagement(eng)
@@ -1130,6 +1139,7 @@ def unlink_jira(request, eid):
         return HttpResponse(status=400)
 
 
+@require_POST
 def reopen_eng(request, eid):
     eng = Engagement.objects.get(id=eid)
     reopen_engagement(eng)
@@ -1438,6 +1448,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
         })
 
 
+@require_POST
 def expire_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     # Validate the engagement ID exists before moving forward
@@ -1448,6 +1459,7 @@ def expire_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
+@require_POST
 def reinstate_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(prefetch_for_expiration(Risk_Acceptance.objects.all()), pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
@@ -1459,6 +1471,7 @@ def reinstate_risk_acceptance(request, eid, raid):
     return redirect_to_return_url_or_else(request, reverse("view_risk_acceptance", args=(eid, raid)))
 
 
+@require_POST
 def delete_risk_acceptance(request, eid, raid):
     risk_acceptance = get_object_or_404(Risk_Acceptance, pk=raid)
     eng = get_object_or_404(Engagement.objects.filter(risk_acceptance=risk_acceptance), pk=eid)
@@ -1478,7 +1491,14 @@ def download_risk_acceptance(request, eid, raid):
     # Ensure the risk acceptance is under the supplied engagement
     if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
         raise PermissionDenied
-    file_handle = (Path(settings.MEDIA_ROOT) / risk_acceptance.path.name).open(mode="rb")
+    # No proof uploaded, or the file is gone from storage. Opening it blindly raises
+    # ValueError/FileNotFoundError, which surfaces as a 500 rather than a missing file.
+    if not risk_acceptance.path:
+        raise Http404
+    proof_path = Path(settings.MEDIA_ROOT) / risk_acceptance.path.name
+    if not proof_path.is_file():
+        raise Http404
+    file_handle = proof_path.open(mode="rb")
     response = StreamingHttpResponse(FileIterWrapper(file_handle))
     if hasattr(response, "_resource_closers"):
         response._resource_closers.append(file_handle.close)
@@ -1604,8 +1624,8 @@ def get_excludes():
 
 
 def get_foreign_keys():
-    return ["build_server", "lead", "orchestration_engine", "preset", "product",
-        "report_type", "requester", "source_code_management_server"]
+    return ["cicd_build_server", "cicd_orchestration_engine", "cicd_scm_server",
+        "lead", "preset", "product", "report_type", "requester"]
 
 
 def csv_export(request):

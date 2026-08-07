@@ -456,16 +456,18 @@
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"edit" %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'touch_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}" role="menuitem">
+                                                                <a href="#" role="menuitem" onclick="this.nextElementSibling.submit(); return false;">
                                                                     <i class="fa-solid fa-clock"></i> {% trans "Touch Finding" %}
                                                                 </a>
+                                                                <form method="post" action="{% url 'touch_finding' finding.id %}">{% csrf_token %}<input type="hidden" name="return_url" value="{{ request.get_full_path }}"></form>
                                                             </li>
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"add" %}
                                                             <li role="presentation">
-                                                                <a href="{% url 'mktemplate' finding.id %}" role="menuitem">
+                                                                <a href="#" role="menuitem" onclick="this.nextElementSibling.submit(); return false;">
                                                                     <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                                 </a>
+                                                                <form method="post" action="{% url 'mktemplate' finding.id %}">{% csrf_token %}</form>
                                                             </li>
                                                         {% endif %}
                                                         {% if finding|has_object_permission:"edit" %}
@@ -484,9 +486,10 @@
                                                                 </li>
                                                             {% else %}
                                                                 <li role="presentation">
-                                                                    <a href="{% url 'reopen_finding' finding.id %}" role="menuitem">
+                                                                    <a href="#" role="menuitem" onclick="this.nextElementSibling.submit(); return false;">
                                                                         <i class="fa-solid fa-bug"></i> {% trans "Open Finding" %}
                                                                     </a>
+                                                                    <form method="post" action="{% url 'reopen_finding' finding.id %}">{% csrf_token %}</form>
                                                                 </li>
                                                             {% endif %}
                                                         {% endif %}
@@ -494,17 +497,19 @@
                                                         {% if finding|has_object_permission:"edit" %}
                                                             {% if finding.risk_accepted %}
                                                                 <li role="presentation">
-                                                                    <a href="{% url 'risk_unaccept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}" role="menuitem">
+                                                                    <a href="#" role="menuitem" onclick="this.nextElementSibling.submit(); return false;">
                                                                         <i class="fa-solid fa-circle-exclamation"></i> {% trans "Unaccept Risk" %}
                                                                     </a>
+                                                                    <form method="post" action="{% url 'risk_unaccept_finding' finding.id %}">{% csrf_token %}<input type="hidden" name="return_url" value="{{ request.get_full_path }}"></form>
                                                                 </li>
                                                             {% else %}
                                                                 {% if not finding.duplicate %}
                                                                     {% if finding.test.engagement.product.enable_simple_risk_acceptance %}
                                                                         <li role="presentation">
-                                                                            <a href="{% url 'simple_risk_accept_finding' finding.id %}?return_url={{ request.get_full_path|urlencode }}" role="menuitem">
+                                                                            <a href="#" role="menuitem" onclick="this.nextElementSibling.submit(); return false;">
                                                                                 <i class="fa-solid fa-circle-exclamation"></i> {% trans "Accept Risk" %}
                                                                             </a>
+                                                                            <form method="post" action="{% url 'simple_risk_accept_finding' finding.id %}">{% csrf_token %}<input type="hidden" name="return_url" value="{{ request.get_full_path }}"></form>
                                                                         </li>
                                                                     {% endif %}
                                                                     {% if finding.test.engagement.product.enable_full_risk_acceptance %}
@@ -529,6 +534,12 @@
                                                                     {% csrf_token %}
                                                                     <input type="hidden" label="return_url" aria-label="return_url" name="return_url" value="{{ request.get_full_path }}"/>
                                                                     <input type="hidden" label="id" aria-label="id" name="id" value="{{ finding.id }}"/>
+                                                                    {% if system_settings.enable_jira and finding.has_jira_issue %}
+                                                                        <label class="small">
+                                                                            <input type="checkbox" name="push_to_jira" value="true"/>
+                                                                            {% trans "Push deletion to JIRA" %}
+                                                                        </label>
+                                                                    {% endif %}
                                                                 </form>
                                                                 <a class="text-danger delete-finding" id="delete-finding-menu-{{ finding.id }}" href="#" role="button" aria-label="Delete finding {{ finding.id }}">
                                                                     <i class="fa-solid fa-trash"></i> {% trans "Delete" %}

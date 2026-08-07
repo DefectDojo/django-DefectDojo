@@ -5,9 +5,7 @@ audience: pro
 aliases:
   - /en/share_your_findings/integrations
 ---
-**Availability:** Integrations is currently in **Beta** and is only available for **Cloud-hosted** DefectDojo Pro instances. On-premise deployments do not yet have the required infrastructure to support Integrations. If you are an on-premise customer interested in this feature, please contact [support@defectdojo.com](mailto:support@defectdojo.com) for updates on availability.
-
-**Enabling Integrations:** On a Cloud instance, a superuser can turn Integrations on from **Settings > Feature Flags**, where it is listed as **Downstream Connections**. See [Feature Flags](/admin/feature_flags/pro__feature_flags/). On an on-premise instance it is shown as **Unavailable on This Deployment**.
+**Availability:** Integrations are generally available and on for every DefectDojo Pro instance, both Cloud and On-Premise. There is nothing to enable, and they are no longer listed on the Feature Flags page.
 
 DefectDojo Pro's Integrations let you push your Findings and Finding Groups to ticket tracking systems to easily integrate security remediation with your teams existing development workflow.
 
@@ -18,9 +16,12 @@ Supported Integrations:
 - GitHub
 - GitLab Boards
 - Jira
+- Linear
+- Opsgenie
 - PagerDuty
 - ServiceDesk Plus
 - ServiceNow
+- ServiceNow SecOps / Vulnerability Response
 - Shortcut
 - Zendesk
 
@@ -57,6 +58,19 @@ Findings can also be pushed automatically, with the **Issue Tracker Assignment**
 - **Automatically Update Existing Link**: When Findings or Finding Groups are **updated** in the assigned Product or Engagement, automatically push the object to the Issue Tracker if an existing link has already been created manually.
 - **Automatically Link New and Update Existing Link**: When Findings or Finding Groups are created **or** updated in the assigned Product or Engagement, automatically push the object to the Issue Tracker.
 
+#### Push Filters
+
+Each Issue Tracker Assignment can optionally narrow which Findings are pushed **automatically**:
+
+- **Minimum Severity**: only automatically create tickets for Findings at or above the selected severity. Leave it blank to include every severity.
+- **Active findings only**: only automatically create tickets for active Findings, skipping ones that are already mitigated, false positive, or risk accepted when the assignment first sees them.
+
+These filters apply to automatic **creation** only. Updates to a Finding that already has a linked ticket are always sent, so status changes (including closures) continue to propagate. A manual **Push to Integrators** always ignores the filters. Leaving both at their defaults preserves the original behavior of pushing every Finding.
+
+#### Assigning multiple Products
+
+An Issue Tracker Assignment targets a single Product or Engagement. To cover several assets, create one Assignment per Product (or Engagement). If you also need vendor fields to differ per asset — for example a distinct ServiceNow **Assignment group** or **Assigned to**, or a different Jira project — create a separate Issue Tracker Mapping (with its own Custom Field Mappings) for each asset and point each Assignment at the matching Mapping.
+
 ## Issue Tracker Ticket Representation
 
 Issue Tracker Tickets are represented by a series of icons under the "Integrator Tickets" column when viewing and listing
@@ -83,9 +97,12 @@ For the complete list of requirements, please open the vendor specific pages bel
 - [GitHub](/issue_tracking/pro_integration/integrations_toolreference/#github)
 - [GitLab Boards](/issue_tracking/pro_integration/integrations_toolreference/#gitlab)
 - [Jira](/issue_tracking/pro_integration/integrations_toolreference/#jira)
+- [Linear](/issue_tracking/pro_integration/integrations_toolreference/#linear)
+- [Opsgenie](/issue_tracking/pro_integration/integrations_toolreference/#opsgenie)
 - [PagerDuty](/issue_tracking/pro_integration/integrations_toolreference/#pagerduty)
 - [ServiceDesk Plus](/issue_tracking/pro_integration/integrations_toolreference/#servicedesk-plus)
 - [ServiceNow](/issue_tracking/pro_integration/integrations_toolreference/#servicenow)
+- [ServiceNow SecOps / Vulnerability Response](/issue_tracking/pro_integration/integrations_toolreference/#servicenow-secops)
 - [Shortcut](/issue_tracking/pro_integration/integrations_toolreference/#shortcut)
 - [Zendesk](/issue_tracking/pro_integration/integrations_toolreference/#zendesk)
 
@@ -100,3 +117,19 @@ These errors can be found by looking at the Issue Tracker Mappings & Assignments
 ![image](images/integrators_4.png)
 
 Clicking on the Total Errors entry will bring you to a page with more detailed descriptions of errors associated with this Integration.
+
+### Seeing every failure in one place
+
+The per-mapping error table covers one Integration. [Diagnostics](/admin/diagnostics/pro__diagnostics/) covers all of them, alongside every other integration attempt on the instance — upstream connectors, imports, Jira, SSO, and the rules engine — with the same filtering and sorting over all of it.
+
+Use it when the question is broader than one mapping:
+
+* an attempt that **never completed** rather than failed, which no error table reports, because nothing errored
+* whether a failure is specific to one integration or is happening across several at once
+* who or what set an attempt off, and against which configuration
+
+Credentials quoted in an error are removed before the row is stored, and the full technical detail is restricted to superusers.
+
+## Downstream Connectors page layout
+
+Integrations are listed in two sections, **Configured Connectors** and **Available Connectors**, each sorted alphabetically with a count of what is shown beside its heading. A tool can hold several configurations; each is its own tile, titled `<Tool> - <label>`, ordered by label. The **Request Downstream Connector** tile on DefectDojo Pro Cloud is not counted.

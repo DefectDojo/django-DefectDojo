@@ -3,7 +3,6 @@ from rest_framework import serializers
 
 from dojo.models import (
     Engagement,
-    Notes,
     Test,
     Test_Import,
     Test_Import_Finding_Action,
@@ -65,11 +64,11 @@ class TestCreateSerializer(serializers.ModelSerializer):
     engagement = serializers.PrimaryKeyRelatedField(
         queryset=Engagement.objects.all(),
     )
+    # notes are added through the notes endpoint, not at create time, so keep
+    # this read-only here (findings already do the same).
     notes = serializers.PrimaryKeyRelatedField(
-        allow_null=True,
-        queryset=Notes.objects.all(),
         many=True,
-        required=False,
+        read_only=True,
     )
 
     class Meta:

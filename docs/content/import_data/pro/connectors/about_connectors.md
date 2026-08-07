@@ -26,24 +26,86 @@ But everyone needs a starting point, and that's where Connectors come in. Connec
 
 We currently support Connectors for the following tools, with more on the way:
 
+* **Acunetix 360**
 * **Akamai API Security**
 * **Anchore**
 * **AWS Security Hub**
-* **Backstage** (asset inventory: builds Product hierarchy and team ownership from the Software Catalog)
+* **Azure DevOps**
+* **Backstage**
+* **Bitbucket**
+* **Black Duck**
+* **Bugcrowd**
 * **BurpSuite**
+* **Censys**
 * **Checkmarx ONE**
+* **Cloudflare**
+* **Cobalt.io**
+* **Contrast**
+* **Coverity**
+* **CrowdStrike Falcon**
 * **Dependency-Track**
+* **Docker Scout**
+* **Edgescan**
+* **Endor Labs**
+* **GitGuardian**
+* **GitHub Advanced Security**
+* **GitLab**
+* **Google Cloud Security Command Center**
 * **Group-IB ASM**
+* **HackerOne**
+* **Harbor**
+* **Have I Been Pwned**
+* **Intigriti**
+* **Intruder**
 * **IriusRisk**
 * **JFrog Xray**
+* **Jira Service Management Assets**
+* **Kubescape**
+* **Mend**
+* **Microsoft Defender**
+* **Microsoft Defender for Cloud**
+* **Nuclei (ProjectDiscovery Cloud)**
+* **OpenVAS / Greenbone**
 * **Probely**
+* **Prowler**
+* **Qualys**
+* **Quay**
+* **Rapid7 InsightAppSec**
+* **Rapid7 InsightVM**
+* **runZero**
 * **Semgrep**
+* **ServiceNow CMDB**
+* **Shodan**
 * **SonarQube**
 * **Snyk**
+* **Sonatype IQ**
+* **Sysdig Secure**
 * **Tenable**
+* **Veracode**
+* **Wazuh**
 * **Wiz**
+* **YesWeHack**
+
+For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../connectors_tool_reference/) reference.
+
+Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitLab**, **Jira Service Management Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
 These Connectors provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
+
+## Finding your way around the Connectors page
+
+Connectors are listed in two sections, each with a count beside its heading and each sorted alphabetically:
+
+* **Configured Connectors** — every connector configuration that exists on this instance. A tool can appear several times, once per configuration, and each tile is titled `<Tool> - <label>` so they can be told apart. Where several configurations share a tool, they are ordered by their label.
+* **Available Connectors** — every supported tool you have not configured yet.
+
+The count next to a heading is the number of connectors currently shown, so it follows the search box and the **Asset / Finding** type filter rather than always reporting the total. On DefectDojo Pro Cloud, the **Request Upstream Connector** tile is not a connector and is not counted.
+
+Both sections have their own search box, matching on the tool name.
+
+![The Connectors page, with a count beside each section heading](images/upstream_counts.png)
+
+The [Downstream Connectors](/issue_tracking/pro_integration/integrations/) and [Authorization Connectors](/admin/sso/pro__authorization_connectors/) pages are laid out the same way.
 
 ## Connectors Quick\-Start
 
@@ -69,7 +131,20 @@ When you're ready to add more tools to DefectDojo, you can easily rearrange your
 
 ## My Connector isn't supported
 
-Fortunately, DefectDojo can still handle manual import for a wide range of security tools. Please see our [Supported Tool List](/supported_tools), as well as our guide to Importing data.
+### Request a connector from the UI (DefectDojo Pro Cloud)
+
+On DefectDojo Pro Cloud, you can ask our team to build a connector for a tool we don't support yet — directly from the UI:
+
+1. Go to **Connectors → Upstream Connectors** (for tools that import data *into* DefectDojo). Issue-tracker and other outbound integrations can be requested the same way under **Connectors → Downstream Connectors**.
+2. In the **Available Connectors** section, click **Request a Connector**.
+3. Fill in the request form. Only the **Tool / Product Name** and **Authentication Type** are required; you can optionally add the vendor website, the tool's API base URL, a link to its API docs, credentials for our team to evaluate against (stored securely), and a note describing your use case.
+4. Click **Submit Request**. You'll see a confirmation that your request was received. Our team reviews each request to evaluate building support — submitting a request is not a guarantee that the connector will be built.
+
+Requesting a connector requires **global Maintainer** permissions and is available on **DefectDojo Pro Cloud only** — the option does not appear on self-hosted (on-premise) instances.
+
+### Manual import
+
+Even without a connector, DefectDojo can still handle manual import for a wide range of security tools. Please see our [Supported Tool List](/supported_tools), as well as our guide to Importing data.
 
 # **Next Steps**
 

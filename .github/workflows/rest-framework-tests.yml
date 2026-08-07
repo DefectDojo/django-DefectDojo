@@ -27,9 +27,26 @@ jobs:
           echo $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      # Computed once, immediately after checkout, and referenced by both the
+      # restore and the save below.
+      #
+      # It has to be computed once rather than written inline in both places,
+      # because hashFiles is evaluated per step and these patterns do not hash to
+      # the same value all job long. `dojo/db_migrations/**` matches whatever is
+      # on disk when it runs, and migrating imports every migration module, which
+      # writes __pycache__/*.pyc into the workspace -- the repository is bind
+      # mounted into the container, so those land here. An inline key therefore
+      # saves under a different key than it restored with, and the entry is one
+      # nothing ever looks up again.
+      #
+      # KEEP IN SYNC with the same block in ci-warm-caches.yml.
+      - name: Compute migrated database snapshot key
+        id: db-key
+        run: echo "key=migrated-db-v1-${{ hashFiles('requirements.txt', 'dojo/db_migrations/**', 'dojo/models.py', 'dojo/base_models/**', 'dojo/pghistory_models.py', 'dojo/settings/settings.dist.py', 'docker-compose.yml', 'docker-compose.override.unit_tests_cicd.yml', 'docker/entrypoint-unit-tests.sh') }}" >> "$GITHUB_OUTPUT"
 
       # load docker images from build jobs
       - name: Load images from artifacts
@@ -53,13 +70,79 @@ jobs:
       - name: Start Postgres and webhook.endpoint
         run: docker compose up --no-deps -d postgres webhook.endpoint
 
+      - name: Wait for Postgres to accept connections
+        run: |
+          for _ in $(seq 1 60); do
+            if docker compose exec -T postgres pg_isready -q -U defectdojo -d test_defectdojo; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Postgres did not become ready in 120s" >&2
+          exit 1
+
+      # Applying 264 migrations takes ~100 seconds and produces the same schema
+      # every time, so restore that result instead of recomputing it. The key is
+      # the migration state: models included, not just migrations, which is what
+      # makes it safe for the entrypoint to skip its makemigrations guard on a
+      # hit (see docker/entrypoint-unit-tests.sh).
+      #
+      # ci-warm-caches.yml is what puts an entry in the base branch's cache scope
+      # for pull requests to find.
+      - name: Restore migrated database snapshot
+        id: db-snapshot
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: migrated-db.dump
+          key: ${{ steps.db-key.outputs.key }}
+
+      # pg_restore runs inside the postgres container because it has to match the
+      # server: this one is 18, and the runner's own client is not guaranteed to
+      # be. --single-transaction makes the restore atomic, so a failure leaves the
+      # database empty rather than half-populated, and the migrate below can then
+      # take over cleanly. That is why this step is allowed to fail.
+      - name: Restore snapshot into Postgres
+        id: db-restore
+        if: steps.db-snapshot.outputs.cache-hit == 'true'
+        continue-on-error: true
+        run: |
+          docker compose exec -T postgres pg_restore \
+            --username defectdojo --dbname test_defectdojo \
+            --no-owner --no-privileges --single-transaction < migrated-db.dump
+
+      - name: Migrate and snapshot the database
+        id: db-prepare
+        if: steps.db-snapshot.outputs.cache-hit != 'true' || steps.db-restore.outcome == 'failure'
+        run: |
+          docker compose run --rm -T --no-deps uwsgi
+          docker compose exec -T postgres pg_dump \
+            --username defectdojo --dbname test_defectdojo --format=custom > migrated-db.dump
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          DD_TEST_DB_MODE: prepare
+
+      # Saving here rather than in a post-job step means a snapshot survives a
+      # test failure: it is a function of the migration state, not of whether the
+      # suite passed. Four matrix jobs race for the same key and three of them
+      # lose, which the action reports as a warning, hence continue-on-error.
+      - name: Save migrated database snapshot
+        if: steps.db-prepare.outcome == 'success'
+        continue-on-error: true
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: migrated-db.dump
+          key: ${{ steps.db-key.outputs.key }}
+
       # no celery or initializer needed for unit tests
+      # The database is migrated by this point on both paths -- restored from the
+      # snapshot, or migrated by the step above -- so the entrypoint reuses it.
       - name: Unit tests
         timeout-minutes: 25
         run: docker compose up --no-deps --exit-code-from uwsgi uwsgi
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           DD_V3_FEATURE_LOCATIONS: ${{ inputs.v3_feature_locations }}
+          DD_TEST_DB_MODE: reuse
 
       - name: Logs
         if: failure()

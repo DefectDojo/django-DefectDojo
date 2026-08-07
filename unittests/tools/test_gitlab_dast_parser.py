@@ -61,6 +61,15 @@ class TestGitlabDastParser(DojoTestCase):
 
             self.assertEqual(359, finding.cwe)
 
+    def test_parse_file_with_multiple_cwe_v15(self):
+        with (get_unit_tests_scans_path("gitlab_dast") / "gitlab_dast_multiple_cwe_fabricated_v15.json").open(encoding="utf-8") as testfile:
+            parser = GitlabDastParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(359, finding.cwe)  # primary is the first CWE identifier
+            self.assertEqual([359, 200], finding.unsaved_cwes)  # both CWE identifiers are kept
+
     def test_parse_file_with_multiple_vuln_has_multiple_findings_v14(self):
         with (get_unit_tests_scans_path("gitlab_dast") / "gitlab_dast_many_vul_v14.json").open(encoding="utf-8") as testfile:
             parser = GitlabDastParser()

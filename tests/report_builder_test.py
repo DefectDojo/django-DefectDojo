@@ -3,6 +3,7 @@ import unittest
 
 from base_test_class import BaseTestCase
 from product_test import ProductTest
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -29,6 +30,40 @@ class ReportBuilderTest(BaseTestCase):
                     field.send_keys("cover words")
             if "wysiwyg-content" in class_names:
                 widget.find_element(By.CLASS_NAME, "editor").send_keys("wysiwyg")
+
+    # Regression guard for the report-chart / table-of-contents race: the
+    # executive-summary charts are rendered from a ready handler, while the
+    # table-of-contents builder runs on window.onload and reassigns
+    # #contents.innerHTML. That reassignment re-parses the subtree and
+    # destroys any chart canvases painted before it (Chart.js in the new UI,
+    # Flot in the classic UI). With executive summary AND table of contents
+    # both enabled, every chart must end up painted once the page settles.
+    def assert_report_charts_painted(self, chart_ids):
+        driver = self.driver
+        charts_painted = (
+            "return arguments[0].map(function (id) {"
+            "  var el = document.getElementById(id);"
+            "  if (!el) { return false; }"
+            "  var canvases = el.querySelectorAll('canvas');"
+            "  for (var i = 0; i < canvases.length; i++) {"
+            "    if (!canvases[i].width || !canvases[i].height) { continue; }"
+            "    var ctx = canvases[i].getContext('2d');"
+            "    var data = ctx.getImageData(0, 0, canvases[i].width, canvases[i].height).data;"
+            "    for (var j = 3; j < data.length; j += 64) {"
+            "      if (data[j] > 0) { return true; }"
+            "    }"
+            "  }"
+            "  return false;"
+            "});"
+        )
+        try:
+            WebDriverWait(driver, 20).until(lambda d: all(d.execute_script(charts_painted, chart_ids)))
+        except TimeoutException:
+            self.fail(
+                "Executive-summary charts were not painted after page load "
+                f"({chart_ids} painted: {driver.execute_script(charts_painted, chart_ids)}); "
+                "the table-of-contents builder likely destroyed them.",
+            )
 
     def generate_HTML_report(self):
         driver = self.driver
@@ -59,6 +94,10 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element(By.NAME, "_generate").click()
 
+        # opened_per_month_2 is only rendered when the product type has
+        # endpoint-per-month data, so only the unconditional chart is asserted.
+        self.assert_report_charts_painted(["open_findings"])
+
     def test_product_report(self):
         driver = self.driver
         self.goto_product_overview(driver)
@@ -76,6 +115,8 @@ class ReportBuilderTest(BaseTestCase):
         my_select.select_by_index(1)
 
         driver.find_element(By.NAME, "_generate").click()
+
+        self.assert_report_charts_painted(["open_findings", "finding_age"])
 
     def test_engagement_report(self):
         driver = self.driver
@@ -97,6 +138,8 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element(By.NAME, "_generate").click()
 
+        self.assert_report_charts_painted(["open_findings", "finding_age"])
+
     def test_test_report(self):
         driver = self.driver
         self.goto_product_overview(driver)
@@ -117,6 +160,8 @@ class ReportBuilderTest(BaseTestCase):
         my_select.select_by_index(1)
 
         driver.find_element(By.NAME, "_generate").click()
+
+        self.assert_report_charts_painted(["open_findings", "finding_age"])
 
     def test_product_endpoint_report(self):
         driver = self.driver
@@ -144,7 +189,14 @@ class ReportBuilderTest(BaseTestCase):
 
         driver.find_element(By.NAME, "_generate").click()
 
+        self.assert_report_charts_painted(["accepted_findings", "open_findings", "closed_findings", "finding_age"])
+
     def test_product_list_report(self):
+        # Unlike the report tests above, this does not call
+        # assert_report_charts_painted(): it generates the Findings Report,
+        # whose view currently errors before the report (and its charts)
+        # render, so there are no chart canvases to assert on. This test only
+        # exercises the generate action until that view is fixed.
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.ID, "dropdownMenu1").click()

@@ -33,7 +33,9 @@ When users are assigned as members to a Product or Product Type, they also recei
 
 ### Role Summaries
 
-Users can be assigned a role of Reader, Writer, Maintainer, Owner or API Importer, either globally or within a Product / Product Type.
+DefectDojo Pro ships five **built-in roles**: Reader, Writer, Maintainer, Owner and API Importer. Any of them can be assigned either globally or within a Product / Product Type.
+
+The built-in roles are locked presets. They cannot be edited or deleted, and their permissions are the same on every DefectDojo Pro instance. If none of them fits how your team works, you can build a role that does, by choosing individual permissions or by cloning a built-in role and adjusting it. See [Custom RBAC Roles](../pro__custom_rbac_roles/).
 
 ‘Underlying data’ refers to all Products, Engagements, Tests, Findings or Endpoints nested under a Product, or Product Type.
 
@@ -47,7 +49,7 @@ Users can be assigned a role of Reader, Writer, Maintainer, Owner or API Importe
 ​
 * **API Importer** **Users** have limited abilities. This Role allows limited API access without exposing the majority of the API endpoints, so is useful for automation or users who are meant to be ‘external’ to DefectDojo. They can view underlying data, Add / Edit Engagements, and Import Scan Data.
 
-For detailed information on Roles, please see our **[Role Permission Chart](../user_permission_chart/)**.
+For detailed information on the built-in Roles, please see our **[Role Permission Chart](../user_permission_chart/)**. For the full list of permissions a role can be given, and how to build your own, see **[Custom RBAC Roles](../pro__custom_rbac_roles/)**.
 
 ### Global Roles
 
@@ -60,6 +62,8 @@ User Groups can be added as Members of a Product or Product Type. Users who are 
 #### Users with multiple roles
 
 * If a User is assigned as a member of a Product, they are not granted any associated Product Type permissions by default.
+
+* If a User ends up with more than one role on the same Product or Product Type (for example one assigned directly and another inherited from a Group), they receive the **combined** permissions of every role they hold there.
 
 * A User's Product Role always supersedes their 'default' Product Type Role.  
 ​

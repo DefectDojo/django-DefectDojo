@@ -22,24 +22,34 @@ window.ddOffcanvas = Offcanvas;
 (() => {
     "use strict";
 
-    // Asset-modelling landing pages per edition. The top nav is otherwise
-    // static, so a single URL can't be correct for both editions: we keep the
-    // "Model Your Assets" nav link in sync with the selected version, and —
-    // when the user is already viewing one of these pages — navigate to the
-    // matching edition's page so the main content follows the toggle.
-    const assetNavUrls = {
-        opensource: "/asset_modelling/engagements_tests/os__assets/",
-        pro: "/asset_modelling/pro_hierarchy/asset_hierarchy/",
+    // Edition-specific landing pages per top-nav tab. The top nav is otherwise
+    // static, so a single URL can't be correct for both editions: we keep these
+    // nav links in sync with the selected version, and — when the user is
+    // already viewing one of these pages — navigate to the matching edition's
+    // page so the main content follows the toggle. Keyed by nav-link label.
+    const editionNavUrls = {
+        "Model Your Assets": {
+            opensource: "/asset_modelling/engagements_tests/os__assets/",
+            pro: "/asset_modelling/pro_hierarchy/asset_hierarchy/",
+        },
+        // Sensei is Pro-only: Open Source shows a short "Pro feature" page,
+        // Pro shows the full guide.
+        "Sensei": {
+            opensource: "/sensei/os__sensei/",
+            pro: "/sensei/about_sensei/",
+        },
     };
 
-    const switchAssetPageForVersion = (version) => {
-        const target = assetNavUrls[version];
-        const other = assetNavUrls[version === "pro" ? "opensource" : "pro"];
-        // Only redirect when currently on the *other* edition's asset page,
-        // so this never fires on unrelated pages or loops on the target page.
-        if (target && location.pathname === other) {
-            location.assign(target);
-        }
+    const switchPageForVersion = (version) => {
+        Object.values(editionNavUrls).forEach((urls) => {
+            const target = urls[version];
+            const other = urls[version === "pro" ? "opensource" : "pro"];
+            // Only redirect when currently on the *other* edition's page, so
+            // this never fires on unrelated pages or loops on the target page.
+            if (target && location.pathname === other) {
+                location.assign(target);
+            }
+        });
     };
 
     const setVersion = (version) => {
@@ -58,11 +68,12 @@ window.ddOffcanvas = Offcanvas;
             btn.setAttribute("aria-checked", btn.dataset.versionValue === version ? "true" : "false");
         });
 
-        // Edition-aware top nav: route "Model Your Assets" to the page that
-        // matches the selected version (see assetNavUrls above).
+        // Edition-aware top nav: route these tabs to the page that matches the
+        // selected version (see editionNavUrls above).
         document.querySelectorAll("a.nav-link").forEach(link => {
-            if (link.textContent.trim() === "Model Your Assets") {
-                link.setAttribute("href", assetNavUrls[version] || assetNavUrls.opensource);
+            const urls = editionNavUrls[link.textContent.trim()];
+            if (urls) {
+                link.setAttribute("href", urls[version] || urls.opensource);
             }
         });
     };
@@ -80,8 +91,8 @@ window.ddOffcanvas = Offcanvas;
         if (btn) {
             setVersion(btn.dataset.versionValue);
             // Only on an explicit user toggle (not on load) follow the page to
-            // the matching edition when viewing an asset-modelling page.
-            switchAssetPageForVersion(btn.dataset.versionValue);
+            // the matching edition when viewing one of the edition-specific pages.
+            switchPageForVersion(btn.dataset.versionValue);
         }
     });
 

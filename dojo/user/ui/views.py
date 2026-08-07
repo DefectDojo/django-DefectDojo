@@ -47,6 +47,7 @@ from dojo.user.ui.forms import (
     EditDojoUserForm,
     UserContactInfoForm,
 )
+from dojo.user.utils import user_may_delete_account
 from dojo.utils import add_breadcrumb, get_page_items, get_setting, get_system_setting
 
 logger = logging.getLogger(__name__)
@@ -442,10 +443,10 @@ def delete_user(request, uid):
         if "id" in request.POST and str(user.id) == request.POST["id"]:
             form = DeleteUserForm(request.POST, instance=user)
             if form.is_valid():
-                if not request.user.is_superuser and user.is_superuser:
+                if not user_may_delete_account(request.user, user):
                     messages.add_message(request,
                                         messages.ERROR,
-                                        _("Only superusers are allowed to delete superusers. User was not removed."),
+                                        _("Only superusers are allowed to delete superusers or staff users. User was not removed."),
                                         extra_tags="alert-danger")
                 else:
                     try:
