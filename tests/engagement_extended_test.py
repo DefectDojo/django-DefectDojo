@@ -29,7 +29,7 @@ class EngagementExtendedTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").send_keys(Keys.TAB, "Extended engagement for testing.")
         Select(driver.find_element(By.ID, "id_lead")).select_by_visible_text("Admin User (admin)")
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully"))
 

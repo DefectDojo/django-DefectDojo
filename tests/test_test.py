@@ -90,7 +90,7 @@ class TestUnitTest(BaseTestCase):
         # Select Testing Environment
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the Test has been added
 
         # Assert on the query to determine success or failure
@@ -111,7 +111,7 @@ class TestUnitTest(BaseTestCase):
         # Change Testing Environment to Staging from Development
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Staging")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the Test has been updated
 
         # Assert ot the query to dtermine status of failure

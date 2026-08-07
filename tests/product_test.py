@@ -166,7 +166,7 @@ class ProductTest(BaseTestCase):
         # engagement status
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
         # "Click" the Done button to Add the engagement
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the product has been added
 
         # Assert of the query to dtermine status of failure

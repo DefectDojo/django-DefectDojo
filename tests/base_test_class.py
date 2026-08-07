@@ -6,7 +6,7 @@ import warnings
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -250,6 +250,23 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element(By.CSS_SELECTOR, f'[data-testid="product-tab-{tab}"]').click()
         return driver
 
+    def click_submit(self, driver, selector="input.btn.btn-primary"):
+        """
+        Click a form's submit button, scrolling it clear of the page chrome first.
+
+        On a long form the button row ends up next to the footer, and the footer
+        wins the click often enough to matter. Selenium sometimes reports that
+        honestly (ElementClickInterceptedException naming #footer-wrapper) and
+        sometimes the click just lands on the footer, in which case the form is
+        never submitted and the test fails much later on a success banner that
+        was never going to appear. Centring the button in the viewport puts it
+        clear of the footer before we click it.
+        """
+        element = driver.find_element(By.CSS_SELECTOR, selector)
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        element.click()
+        return driver
+
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         if not self.is_element_by_id_present(no_content_id):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
@@ -283,7 +300,23 @@ class BaseTestCase(unittest.TestCase):
         return self.is_element_by_css_selector_present(".alert-info", text=text)
 
     def is_success_message_present(self, text=None):
-        return self.is_element_by_css_selector_present(".alert-success", text=text)
+        """
+        Wait for the success banner, rather than sampling for it once.
+
+        Every caller asserts the banner IS there, and it only renders after the
+        redirect that follows a form POST. Sampling once leaves the assertion
+        riding on the 1s implicit wait, which is enough locally and not always
+        enough on a loaded CI runner -- a slow redirect then reads as a missing
+        message. Nothing asserts the banner's absence, so waiting costs nothing
+        on the happy path and only delays a genuine failure.
+        """
+        try:
+            WebDriverWait(self.driver, 10).until(
+                lambda _: self.is_element_by_css_selector_present(".alert-success", text=text),
+            )
+        except TimeoutException:
+            return False
+        return True
 
     def is_error_message_present(self, text=None):
         return self.is_element_by_css_selector_present(".alert-danger", text=text)

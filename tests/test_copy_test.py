@@ -24,11 +24,11 @@ class TestCopyTest(BaseTestCase):
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
         # Click "Add Tests" submit button which creates the engagement and
         # redirects directly to the add tests page
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary[value='Add Tests']").click()
+        self.click_submit(driver, "input.btn.btn-primary[value='Add Tests']")
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully"))
         Select(driver.find_element(By.ID, "id_test_type")).select_by_visible_text("Pen Test")
         Select(driver.find_element(By.ID, "id_environment")).select_by_visible_text("Development")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         self.assertTrue(self.is_success_message_present(text="Test added successfully"))
 
     @on_exception_html_source_logger
