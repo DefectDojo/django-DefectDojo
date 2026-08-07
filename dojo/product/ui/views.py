@@ -1709,7 +1709,7 @@ def delete_product_authorized_user(request, pid, user_id):
 def add_api_scan_configuration(request, pid):
     product = get_object_or_404(Product, id=pid)
     if request.method == "POST":
-        form = Product_API_Scan_ConfigurationForm(request.POST)
+        form = Product_API_Scan_ConfigurationForm(request.POST, user=request.user)
         if form.is_valid():
             product_api_scan_configuration = form.save(commit=False)
             product_api_scan_configuration.product = product
@@ -1736,7 +1736,7 @@ def add_api_scan_configuration(request, pid):
                                      str(e),
                                      extra_tags="alert-danger")
     else:
-        form = Product_API_Scan_ConfigurationForm()
+        form = Product_API_Scan_ConfigurationForm(user=request.user)
 
     product_tab = Product_Tab(product, title=_("Add API Scan Configuration"), tab="settings")
 
@@ -1772,7 +1772,7 @@ def edit_api_scan_configuration(request, pid, pascid):
         raise Http404
 
     if request.method == "POST":
-        form = Product_API_Scan_ConfigurationForm(request.POST, instance=product_api_scan_configuration)
+        form = Product_API_Scan_ConfigurationForm(request.POST, instance=product_api_scan_configuration, user=request.user)
         if form.is_valid():
             try:
                 form_copy = form.save(commit=False)
@@ -1797,7 +1797,7 @@ def edit_api_scan_configuration(request, pid, pascid):
                                      str(e),
                                      extra_tags="alert-danger")
     else:
-        form = Product_API_Scan_ConfigurationForm(instance=product_api_scan_configuration)
+        form = Product_API_Scan_ConfigurationForm(instance=product_api_scan_configuration, user=request.user)
 
     product_tab = Product_Tab(get_object_or_404(Product, id=pid), title=_("Edit API Scan Configuration"), tab="settings")
     return render(request,

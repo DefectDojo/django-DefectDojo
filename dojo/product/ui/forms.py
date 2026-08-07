@@ -13,6 +13,7 @@ from dojo.models import (
 )
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.tool_config.queries import get_authorized_tool_configurations
 from dojo.validators import tag_validator
 
 labels = get_labels()
@@ -132,14 +133,15 @@ class ProductTagCountsForm(ProductCountsFormBase):
 
 class Product_API_Scan_ConfigurationForm(forms.ModelForm):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
     tool_configuration = forms.ModelChoiceField(
         label="Tool Configuration",
-        queryset=Tool_Configuration.objects.all().order_by("name"),
+        queryset=Tool_Configuration.objects.none(),
         required=True,
     )
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["tool_configuration"].queryset = get_authorized_tool_configurations(user)
 
     class Meta:
         model = Product_API_Scan_Configuration

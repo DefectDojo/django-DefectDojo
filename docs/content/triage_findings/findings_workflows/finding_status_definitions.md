@@ -34,7 +34,7 @@ Just because a tool records a problem does not necessarily mean the Finding requ
 
 If you’re able to confirm that the Finding does exist, you can mark it as **Verified**.
 
-Certain DefectDojo functions require Findings to be Active and Verified.  If you don’t need to manually verify each Finding, you can deactivate the Verified requirement for any or all of these functions from the **System Settings** page (**Classic UI: Configuration > System Settings**, **Pro UI: Settings > Pro Settings > System Settings**).
+Certain DefectDojo functions require Findings to be Active and Verified.  If you don’t need to manually verify each Finding, you can deactivate the Verified requirement for any or all of these functions from the **System Settings** page (**Classic UI: Configuration > System Settings**, **Pro UI: Settings > System > System Settings**).
 
 ![image](images/verified_status_toggle.png)
 

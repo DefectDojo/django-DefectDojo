@@ -18,6 +18,9 @@ These tests cover the sites that were guarded/repaired for that:
   carries legacy endpoint rows must not crash.
 * API ``report_generate`` (Product/Engagement) -- ``get_endpoint_ids(Endpoint.objects...)``.
 * API ``metadata/batch`` -- the ``endpoint`` parent fetch.
+* API ``test_imports`` list -- the ``findings_affected__endpoints`` prefetch on the queryset.
+* Batch deduplication -- ``get_finding_models_for_deduplication`` prefetches ``locations``
+  under V3, so ``post_process_findings_batch`` no longer hydrates legacy endpoint rows.
 """
 import logging
 from io import BytesIO
@@ -31,11 +34,14 @@ from openpyxl import load_workbook
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
+from dojo.finding.deduplication import get_finding_models_for_deduplication
+from dojo.finding.helper import post_process_findings_batch
 from dojo.github.services import github_body
 from dojo.jira.helper import jira_description
 from dojo.location.models import LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
+    IMPORT_CREATED_FINDING,
     Endpoint,
     Endpoint_Status,
     Engagement,
@@ -43,6 +49,8 @@ from dojo.models import (
     Product,
     Product_Type,
     Test,
+    Test_Import,
+    Test_Import_Finding_Action,
     Test_Type,
     UserContactInfo,
 )
@@ -231,6 +239,39 @@ class TestEndpointInitV3(DojoTestCase):
         self.assertIn("loc-engrpt.example.com", hosts)
 
     # ------------------------------------------------------------------
+    # API test_imports list
+    # ------------------------------------------------------------------
+    def test_api_test_imports_list_with_legacy_endpoints_under_v3(self):
+        """
+        GET /test_imports/ must not 500 for a test import whose affected findings still carry
+        legacy Endpoint rows.
+
+        Regression: TestImportViewSet.get_queryset() prefetched
+        ``findings_affected__endpoints`` unconditionally. Under V3 the prefetch hydrates the
+        deprecated Endpoint model, so the paginator raised
+        ``NotImplementedError: Endpoint model is deprecated when V3_FEATURE_LOCATIONS is enabled``
+        for every caller of the endpoint.
+        """
+        tree = self._make_tree("test-import")
+        self._add_legacy_endpoint(tree, "legacy-testimport.example.com")
+        self._add_location(tree, "loc-testimport.example.com")
+
+        test_import = Test_Import.objects.create(test=tree.test, type=Test_Import.IMPORT_TYPE)
+        Test_Import_Finding_Action.objects.create(
+            test_import=test_import, finding=tree.finding, action=IMPORT_CREATED_FINDING,
+        )
+
+        response = self.api_client.get(
+            reverse("test_imports-list"), {"test": tree.test.id, "o": "-created", "limit": 1},
+        )
+
+        self.assertEqual(
+            response.status_code, 200,
+            msg=f"expected 200 listing test imports, got {response.status_code}: {response.content[:500]}",
+        )
+        self.assertEqual([row["id"] for row in response.json()["results"]], [test_import.id])
+
+    # ------------------------------------------------------------------
     # API metadata batch
     # ------------------------------------------------------------------
     def test_api_metadata_batch_with_endpoint_under_v3(self):
@@ -249,3 +290,48 @@ class TestEndpointInitV3(DojoTestCase):
         )
 
         self.assertNotEqual(response.status_code, 500)
+
+    # ------------------------------------------------------------------
+    # Batch deduplication
+    # ------------------------------------------------------------------
+    def test_dedupe_batch_loader_prefetches_locations_under_v3(self):
+        """The batch dedupe loader must prefetch locations, never the deprecated endpoints m2m."""
+        tree = self._make_tree("dedupe")
+        self._add_legacy_endpoint(tree, "legacy-dedupe.example.com")  # crash trigger under old code
+        self._add_location(tree, "loc-dedupe.example.com")
+
+        findings = get_finding_models_for_deduplication([tree.finding.id])
+
+        self.assertEqual(len(findings), 1)
+        prefetched = sorted(findings[0]._prefetched_objects_cache)
+        self.assertIn("locations", prefetched, msg=f"expected locations prefetched, got {prefetched}")
+        self.assertNotIn(
+            "endpoints", prefetched,
+            msg=f"the deprecated endpoints m2m must not be prefetched under V3, got {prefetched}",
+        )
+        self.assertEqual(
+            [ref.location.url.host for ref in findings[0].locations.all()],
+            ["loc-dedupe.example.com"],
+        )
+
+    def test_post_process_findings_batch_with_legacy_endpoints_under_v3(self):
+        """
+        The reported crash: post_process_findings_batch loads its findings through the
+        dedupe loader, whose endpoints prefetch hydrated legacy Endpoint rows and raised
+        NotImplementedError for any finding migrated from V2. Reaching the end of the
+        call without an exception is the assertion.
+        """
+        tree = self._make_tree("batch")
+        self._add_legacy_endpoint(tree, "legacy-batch.example.com")
+        self._add_location(tree, "loc-batch.example.com")
+
+        post_process_findings_batch(
+            [tree.finding.id],
+            dedupe_option=False,
+            rules_option=False,
+            product_grading_option=False,
+            issue_updater_option=False,
+            push_to_jira=False,
+        )
+
+        self.assertTrue(Finding.objects.filter(id=tree.finding.id).exists())
