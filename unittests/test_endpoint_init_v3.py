@@ -18,6 +18,7 @@ These tests cover the sites that were guarded/repaired for that:
   carries legacy endpoint rows must not crash.
 * API ``report_generate`` (Product/Engagement) -- ``get_endpoint_ids(Endpoint.objects...)``.
 * API ``metadata/batch`` -- the ``endpoint`` parent fetch.
+* API ``test_imports`` list -- the ``findings_affected__endpoints`` prefetch on the queryset.
 """
 import logging
 from io import BytesIO
@@ -36,6 +37,7 @@ from dojo.jira.helper import jira_description
 from dojo.location.models import LocationFindingReference, LocationProductReference
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import (
+    IMPORT_CREATED_FINDING,
     Endpoint,
     Endpoint_Status,
     Engagement,
@@ -43,6 +45,8 @@ from dojo.models import (
     Product,
     Product_Type,
     Test,
+    Test_Import,
+    Test_Import_Finding_Action,
     Test_Type,
     UserContactInfo,
 )
@@ -229,6 +233,39 @@ class TestEndpointInitV3(DojoTestCase):
         self.assertEqual(response.status_code, 200)
         hosts = [ep.get("host") for ep in response.json()["endpoints"]]
         self.assertIn("loc-engrpt.example.com", hosts)
+
+    # ------------------------------------------------------------------
+    # API test_imports list
+    # ------------------------------------------------------------------
+    def test_api_test_imports_list_with_legacy_endpoints_under_v3(self):
+        """
+        GET /test_imports/ must not 500 for a test import whose affected findings still carry
+        legacy Endpoint rows.
+
+        Regression: TestImportViewSet.get_queryset() prefetched
+        ``findings_affected__endpoints`` unconditionally. Under V3 the prefetch hydrates the
+        deprecated Endpoint model, so the paginator raised
+        ``NotImplementedError: Endpoint model is deprecated when V3_FEATURE_LOCATIONS is enabled``
+        for every caller of the endpoint.
+        """
+        tree = self._make_tree("test-import")
+        self._add_legacy_endpoint(tree, "legacy-testimport.example.com")
+        self._add_location(tree, "loc-testimport.example.com")
+
+        test_import = Test_Import.objects.create(test=tree.test, type=Test_Import.IMPORT_TYPE)
+        Test_Import_Finding_Action.objects.create(
+            test_import=test_import, finding=tree.finding, action=IMPORT_CREATED_FINDING,
+        )
+
+        response = self.api_client.get(
+            reverse("test_imports-list"), {"test": tree.test.id, "o": "-created", "limit": 1},
+        )
+
+        self.assertEqual(
+            response.status_code, 200,
+            msg=f"expected 200 listing test imports, got {response.status_code}: {response.content[:500]}",
+        )
+        self.assertEqual([row["id"] for row in response.json()["results"]], [test_import.id])
 
     # ------------------------------------------------------------------
     # API metadata batch
