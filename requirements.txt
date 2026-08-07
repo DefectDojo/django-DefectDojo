@@ -14,7 +14,7 @@ django-htmx==1.28.0
 django-imagekit==6.1.0
 django-multiselectfield==1.0.1
 django-polymorphic==4.11.7
-django-crispy-forms==2.6
+django-crispy-forms==2.7
 django_extensions==4.1
 django-slack==5.19.0
 django-watson==1.6.3
