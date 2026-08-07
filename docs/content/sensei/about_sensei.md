@@ -16,6 +16,8 @@ weight: 1
 - **Short-lived credentials:** Sensei runs entirely through a GitHub App and uses short-lived installation tokens. There is nothing to paste and nothing to rotate.
 - **Metered and license-gated:** Sensei is a Pro feature with per-instance quotas for fixes and onboarded repositories.
 
+> **🧠 Before the code exists:** Sensei also generates a threat model, attack paths and security requirements from a feature *design*, with no repository involved — see [Threat Modeling](/sensei/threat_modeling/).
+
 > **🔎 BETA:** Sensei is under active development and is labeled **BETA** throughout the UI. Behavior and screens may change between releases.
 
 > **📍 Where to find it:** open **Sensei** from the left-hand navigation.
