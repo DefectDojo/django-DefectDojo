@@ -7,6 +7,14 @@ aliases:
   - /issue_tracking/jira/pro__jira_guide/
   - /en/share_your_findings/jira_guide
 ---
+> **This page documents the legacy Jira integration.** The per\-product Jira integration described here has been superseded by the **[Jira Downstream Connector](/connectors/downstream/about/)**, which is generally available on every DefectDojo Pro instance and is the recommended way to push Findings to Jira. In the Pro sidebar, **Connect > Jira** carries a `LEGACY` badge for this reason — see [Menu Badges](/navigation/pro__menu_badges/).
+>
+> **If you are setting up Jira for the first time, start with the [Downstream Connector](/connectors/downstream/about/) instead of this guide.**
+>
+> **Already using the legacy integration?** DefectDojo Pro includes a built\-in migration that moves an existing classic Jira configuration onto Downstream Connectors, so you do not have to rebuild it by hand.
+>
+> The legacy integration continues to work, and this guide remains accurate for it.
+
 DefectDojo's Jira integration can be used to push Finding data to one or more Jira Spaces.  By doing so, you can integrate DefectDojo into your standard development workflow.  Here are some examples of how this can work:
 
 * The AppSec team can selectively push Findings to a Jira Space used by developers, so that issue remediation can be appropriately prioritized alongside regular development.  Developers on this board don't need to access DefectDojo - they can keep all their work in one place.
