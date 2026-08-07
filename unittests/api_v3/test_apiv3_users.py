@@ -274,6 +274,62 @@ class TestApiV3UsersRbac(ApiV3TestCase):
         self.assertEqual(404, response.status_code, response.content[:300])
 
 
+class TestApiV3UsersDeleteAuthz(ApiV3TestCase):
+
+    """
+    v2-parity port of #15454: a non-superuser holding the user-management configuration
+    permissions must not delete a superuser or a staff account. The write-path guards
+    (_enforce_superuser_staff_rules) do not run on DELETE, so the route carries the same
+    privilege floor via user_may_delete_account.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.delegate = User.objects.create_user(username="v3_del_delegate", password=_PASSWORD)
+        self.delegate.user_permissions.add(
+            Permission.objects.get(codename="view_user", content_type__app_label="auth", content_type__model="user"),
+            Permission.objects.get(codename="delete_user", content_type__app_label="auth", content_type__model="user"),
+        )
+        self.superuser_target = User.objects.create_user(
+            username="v3_del_superuser", password=_PASSWORD, is_superuser=True,
+        )
+        self.staff_target = User.objects.create_user(
+            username="v3_del_staff", password=_PASSWORD, is_staff=True,
+        )
+        self.regular_target = User.objects.create_user(username="v3_del_regular", password=_PASSWORD)
+        # v3 visibility for a non-staff view_user holder is collaborators + superusers (narrower
+        # than v2's "all users"). Make the non-superuser targets collaborators so the DELETE
+        # reaches the privilege-floor guard instead of 404ing on the scoped queryset.
+        product_type = Product_Type.objects.first()
+        # By pk: the M2M targets Dojo_User and create_user returns the plain User proxy base.
+        product_type.authorized_users.add(self.delegate.pk, self.staff_target.pk, self.regular_target.pk)
+        self.client = self.token_client(user=self.delegate)
+
+    def _delete(self, target, client=None):
+        return (client or self.client).delete(self.v3_url(f"users/{target.id}"))
+
+    def test_delegate_cannot_delete_superuser(self):
+        response = self._delete(self.superuser_target)
+        self.assertEqual(403, response.status_code, response.content[:300])
+        self.assertEqual("application/problem+json", response["Content-Type"])
+        self.assertTrue(Dojo_User.objects.filter(pk=self.superuser_target.pk).exists())
+
+    def test_delegate_cannot_delete_staff_user(self):
+        response = self._delete(self.staff_target)
+        self.assertEqual(403, response.status_code, response.content[:300])
+        self.assertTrue(Dojo_User.objects.filter(pk=self.staff_target.pk).exists())
+
+    def test_delegate_can_delete_regular_user(self):
+        response = self._delete(self.regular_target)
+        self.assertEqual(204, response.status_code, response.content[:300])
+        self.assertFalse(Dojo_User.objects.filter(pk=self.regular_target.pk).exists())
+
+    def test_superuser_can_delete_superuser_and_staff(self):
+        admin_client = self.token_client()
+        self.assertEqual(204, self._delete(self.superuser_target, client=admin_client).status_code)
+        self.assertEqual(204, self._delete(self.staff_target, client=admin_client).status_code)
+
+
 class TestApiV3UsersIdentityFieldAuthz(ApiV3TestCase):
 
     """

@@ -52,6 +52,7 @@ from dojo.authorization.authorization import user_has_configuration_permission
 from dojo.models import Dojo_User
 from dojo.user.api_v3.schemas import UserDetail, UserSlim, UserUpdate, UserWrite
 from dojo.user.queries import get_authorized_users
+from dojo.user.utils import user_may_delete_account
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -293,6 +294,11 @@ def build_users_router(
         if request.user.pk == instance.pk:
             # Mirror v2 UsersViewSet.destroy: users may not delete themselves.
             raise validation_problem({"non_field_errors": ["Users may not delete themselves"]})
+        if not user_may_delete_account(request.user, instance):
+            # Mirror v2 (#15454): is_superuser/is_staff are reserved to superusers on the write
+            # path (_enforce_superuser_staff_rules), and the config permission does not run on
+            # DELETE -- deletion honours the same privilege floor.
+            raise PermissionDenied
         instance.delete()
         response = HttpResponse(status=204)
         response["X-API-Status"] = settings.API_V3_STATUS
