@@ -1,6 +1,7 @@
 # #  engagements
 import logging
 
+from crum import get_current_request
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.urls import reverse
@@ -9,10 +10,29 @@ from django.utils.translation import gettext as _
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.jira import services as jira_services
 from dojo.models import Engagement
-from dojo.notifications.helper import create_notification
+from dojo.notifications.helper import create_notification, process_tag_notifications
 from dojo.utils import calculate_grade
 
 logger = logging.getLogger(__name__)
+
+
+def process_note_added(engagement, note, *, user):
+    """
+    Fire the same side-effects as the v2 engagement notes ``@action`` create branch
+    (``dojo/engagement/api/views.py``) after a note is persisted and linked: @mention notifications
+    only -- the engagement @action has **no** JIRA comment sync and **no** ``last_reviewed`` stamping.
+    Reuses the exact v2 parsing/notification helper (``process_tag_notifications``); the request is read
+    from crum (see ``dojo/finding/services.py``), and mentions are skipped with no request. ``user`` is
+    part of the callback contract (I6) but unused here (no side-effect needs it).
+    """
+    request = get_current_request()
+    if request is not None:
+        process_tag_notifications(
+            request=request,
+            note=note,
+            parent_url=request.build_absolute_uri(reverse("view_engagement", args=(engagement.id,))),
+            parent_title=f"Engagement: {engagement.name}",
+        )
 
 
 def close_engagement(eng):
