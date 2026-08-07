@@ -79,6 +79,10 @@ DefectDojo Open Source supports four deduplication algorithms that can be select
 
 **DefectDojo Pro adds more.** Two additional algorithms match across **all Products** in the instance rather than within a single Product or Engagement — **Global Component** (by component name and version) and **Global Vulnerability ID** (by CVE, GHSA, …). Both are off by default and enabled by DefectDojo Support. Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
 
+### An alternative to Deduplication: False Positive History
+
+Instances that deliberately do **not** deduplicate can instead use [False Positive History](/triage_findings/finding_deduplication/false_positive_history/), which automatically marks an incoming Finding as a false positive when a matching Finding in the same Product was already triaged that way. It is **mutually exclusive with Deduplication** — DefectDojo does not allow both to be enabled — and it is still marked experimental.
+
 ## How endpoints are assessed per algorithm
 
 Endpoints can influence deduplication in different ways depending on the algorithm and configuration.
