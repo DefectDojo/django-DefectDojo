@@ -97,6 +97,60 @@ class TestNotifications(DojoTestCase):
         self.assertEqual(len(merged_notifications.other), 3)
         self.assertEqual(merged_notifications.other, {"alert", "mail", "slack"})
 
+    def test_merge_notifications_list_merges_scan_added_empty(self):
+        """
+        scan_added_empty was the one MultiSelectField the merge left out, so it
+        only ever kept the first record's value.
+        """
+        user = User.objects.get(username="admin")
+        global_personal_notifications = Notifications(user=user)
+        global_personal_notifications.scan_added_empty = ["alert"]
+        global_personal_notifications.save()
+        global_personal_notifications = Notifications.objects.get(id=global_personal_notifications.id)
+
+        personal_product_notifications = Notifications(user=user, product=Product.objects.all()[0])
+        personal_product_notifications.scan_added_empty = ["mail"]
+        personal_product_notifications.save()
+        personal_product_notifications = Notifications.objects.get(id=personal_product_notifications.id)
+
+        merged_notifications = Notifications.merge_notifications_list(
+            [global_personal_notifications, personal_product_notifications],
+        )
+
+        self.assertEqual({"alert", "mail"}, set(merged_notifications.scan_added_empty))
+
+    def test_every_multiselect_field_is_merged(self):
+        """
+        Guard against a new notification event being added to the model and not to
+        merge_notifications_list, which is how scan_added_empty was missed.
+        """
+        from multiselectfield import MultiSelectField  # noqa: PLC0415 -- test-only import
+
+        user = User.objects.get(username="admin")
+        first = Notifications(user=user)
+        second = Notifications(user=user, product=Product.objects.all()[0])
+        fields = [
+            f.name for f in Notifications._meta.get_fields()
+            if isinstance(f, MultiSelectField)
+        ]
+        self.assertGreater(len(fields), 0)
+        for name in fields:
+            setattr(first, name, ["alert"])
+            setattr(second, name, ["mail"])
+        first.save()
+        second.save()
+        first = Notifications.objects.get(id=first.id)
+        second = Notifications.objects.get(id=second.id)
+
+        merged = Notifications.merge_notifications_list([first, second])
+
+        for name in fields:
+            with self.subTest(field=name):
+                self.assertEqual(
+                    {"alert", "mail"}, set(getattr(merged, name)),
+                    f"{name} is not merged by merge_notifications_list",
+                )
+
     # @patch("dojo.notifications.helper.AlertNotificationManger.send_alert_notification", wraps=AlertNotificationManger.send_alert_notification)
     @patch("dojo.notifications.helper.NotificationManager._get_manager_instance")
     def test_notifications_system_level_trump(self, mock_get_manager_instance):
