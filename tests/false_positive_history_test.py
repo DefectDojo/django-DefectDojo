@@ -96,7 +96,7 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.ID, "id_bulk_status").click()
         driver.find_element(By.ID, status_id).click()
         # Submit
-        driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
+        self.click_submit(driver, "input[type='submit']")
 
     def test_retroactive_edit_finding(self):
         # Create two equal findings on different engagements

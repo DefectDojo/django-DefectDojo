@@ -34,7 +34,7 @@ class EngagementTest(BaseTestCase):
         driver.find_element(By.ID, "id_test_strategy").clear()
         driver.find_element(By.ID, "id_test_strategy").send_keys("http://localhost:5000")
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
-        driver.find_element(By.CSS_SELECTOR, "input[value='Done']").click()
+        self.click_submit(driver, "input[value='Done']")
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
 
@@ -49,7 +49,7 @@ class EngagementTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("edited test engagement")
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
-        driver.find_element(By.CSS_SELECTOR, "input[value='Done']").click()
+        self.click_submit(driver, "input[value='Done']")
 
         self.assertTrue(self.is_success_message_present(text="Engagement updated successfully."))
 
@@ -90,7 +90,7 @@ class EngagementTest(BaseTestCase):
         driver.find_element(By.ID, "id_name").send_keys("test new ci/cd engagement")
         driver.find_element(By.ID, "id_name").send_keys("\ttest new ci/cd engagement")
         driver.find_element(By.ID, "id_deduplication_on_engagement").get_attribute("checked")
-        driver.find_element(By.CSS_SELECTOR, "input[value='Done']").click()
+        self.click_submit(driver, "input[value='Done']")
 
         self.assertTrue(self.is_success_message_present(text="Engagement added successfully."))
 

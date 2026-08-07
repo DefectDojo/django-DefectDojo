@@ -71,7 +71,7 @@ class EngagementExtendedTest(BaseTestCase):
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Copy Engagement").click()
         driver.find_element(By.ID, "id_done").click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Engagement Copied successfully."))
 

@@ -44,7 +44,7 @@ class TestCopyTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "Copy Test").click()
         # Select the first available engagement in the copy form
         Select(driver.find_element(By.ID, "id_engagement")).select_by_index(1)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Test Copied successfully")
