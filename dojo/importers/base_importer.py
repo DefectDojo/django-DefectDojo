@@ -1080,7 +1080,12 @@ class BaseImporter(ImporterOptions):
             for unsaved_file in finding.unsaved_files:
                 data = base64.b64decode(unsaved_file.get("data"))
                 title = unsaved_file.get("title", "<No title>")
-                file_upload, _ = FileUpload.objects.get_or_create(title=title)
+                # Always a fresh row. Matching on title alone reused whatever
+                # FileUpload already happened to carry that name — including one
+                # attached to a finding in an unrelated product — and the save()
+                # below then repointed it at this scan's content, so the other
+                # finding silently started serving this file instead of its own.
+                file_upload = FileUpload.objects.create(title=title)
                 file_upload.file.save(title, ContentFile(data))
                 file_upload.save()
                 finding.files.add(file_upload)
@@ -1110,7 +1115,10 @@ class BaseImporter(ImporterOptions):
         )
         # Remove risk acceptance if present (vulnerability is now fixed)
         # risk_unaccept will check if finding.risk_accepted is True before proceeding
-        ra_helper.risk_unaccept(self.user, finding, perform_save=False, post_comments=False)
+        ra_helper.risk_unaccept(
+            self.user, finding, perform_save=False, post_comments=False,
+            source="reimport", reason="the scan no longer reports this finding",
+        )
         self.location_handler.record_mitigations_for_finding(finding, self.user)
         # to avoid pushing a finding group multiple times, we push those outside of the loop
         if finding_groups_enabled and finding.finding_group:

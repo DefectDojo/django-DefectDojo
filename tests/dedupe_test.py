@@ -583,6 +583,11 @@ class ImportAsyncWaitApiTest(unittest.TestCase):
         r.raise_for_status()
         return r.json()
 
+    @classmethod
+    def _delete(cls, path):
+        r = requests.delete(cls.api + path, headers=cls.headers, timeout=60)
+        r.raise_for_status()
+
     # --- fixtures ---------------------------------------------------------
     def _make_engagement(self, name):
         """Create a product + dedup-on-engagement engagement, return its id."""
@@ -597,6 +602,15 @@ class ImportAsyncWaitApiTest(unittest.TestCase):
             "description": "async_wait integration test",
             "prod_type": prod_type_id,
         })
+        # Deleting the product cascades the engagement, its tests, and every
+        # imported finding. Without this the ~100 findings these two tests
+        # import outlive the file, and the next file to run in the same stack
+        # inherits them -- test_delete_findings in the close_old files bulk
+        # deletes one page and then asserts the list is empty, so more than a
+        # page of leftovers fails it. These API tests are the only part of
+        # this suite that runs after the suite's own delete_product cleanup.
+        # addCleanup rather than tearDown so a failing test still cleans up.
+        self.addCleanup(self._delete, f"/products/{product['id']}/")
         engagement = self._post("/engagements/", {
             "name": f"async_wait eng {suffix}",
             "product": product["id"],

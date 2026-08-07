@@ -6,6 +6,7 @@ from time import sleep, strftime
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Count
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.db.utils import IntegrityError
@@ -554,6 +555,12 @@ def finding_pre_delete(sender, instance, **kwargs):
     instance.found_by.clear()
     delete_related_notes(instance)
     delete_related_files(instance)
+    # Finding_Group.findings is a M2M, so deleting the last finding in a group only
+    # removes the through row and leaves the group behind. Record the groups here,
+    # while the membership is still readable, and drop the empty ones afterwards.
+    instance._groups_pending_empty_check = list(
+        instance.finding_group_set.values_list("id", flat=True),
+    )
 
 
 def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
@@ -610,6 +617,27 @@ def finding_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with suppress(Finding.DoesNotExist):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
+    delete_emptied_finding_groups(instance)
+
+
+def delete_emptied_finding_groups(finding):
+    """
+    Remove any Finding_Group the given finding was the last member of.
+
+    A group with no findings has nothing left to represent, and leaving it behind
+    kept it in the UI and in JIRA group pushes indefinitely.
+    """
+    group_ids = getattr(finding, "_groups_pending_empty_check", None)
+    if not group_ids:
+        return
+    finding._groups_pending_empty_check = []
+    # Deleting a Test cascades to its groups, so some of these may already be gone.
+    for group in Finding_Group.objects.filter(id__in=group_ids).annotate(
+        remaining=Count("findings"),
+    ):
+        if group.remaining == 0:
+            logger.debug("deleting finding group %d, it has no findings left", group.id)
+            group.delete()
 
 
 def _reassign_jira_issue_to_new_original(deleted_finding, new_original, *, push_to_jira=None):
