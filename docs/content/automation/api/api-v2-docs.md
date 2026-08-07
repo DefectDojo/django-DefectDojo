@@ -264,6 +264,67 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 }
 ```
 
+## Generating Reports
+
+DefectDojo can generate a findings report through the API in **JSON**, **HTML**, **CSV**, or **Excel** format.
+
+A report is generated with a `POST` request to a `generate_report/` action. The findings endpoint reports across your instance, and most other objects expose a per\-object action:
+
+| Endpoint | Scope |
+|---|---|
+| `POST /api/v2/findings/generate_report/` | Every finding you have permission to view |
+| `POST /api/v2/products/{id}/generate_report/` | One product |
+| `POST /api/v2/engagements/{id}/generate_report/` | One engagement |
+| `POST /api/v2/tests/{id}/generate_report/` | One test |
+| `POST /api/v2/product_types/{id}/generate_report/` | One product type |
+| `POST /api/v2/endpoints/{id}/generate_report/` | One endpoint |
+
+The Pro object aliases expose the same action: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/`, and `/api/v2/location/{id}/generate_report/`.
+
+### Request options
+
+All fields are optional — posting an empty body (`{}`) returns a JSON report.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `report_type` | string | `JSON` | One of `JSON`, `HTML`, `CSV`, `Excel`. |
+| `include_finding_notes` | boolean | `false` | Include each finding's notes. |
+| `include_finding_images` | boolean | `false` | Include images attached to findings. |
+| `include_executive_summary` | boolean | `false` | Include an executive summary section. |
+| `include_table_of_contents` | boolean | `false` | Include a table of contents. |
+
+An unsupported `report_type` (for example `PDF`) returns `400 Bad Request` with an error on the `report_type` field.
+
+### Example
+
+Generate a CSV report of all findings you can view, and save it to a file:
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <your-api-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"report_type": "CSV"}' \
+  https://<your-instance>/api/v2/findings/generate_report/ \
+  -o findings.csv
+```
+
+### Response formats
+
+| `report_type` | Content type | Response |
+|---|---|---|
+| `JSON` (default) | `application/json` | Report body in the response |
+| `HTML` | `text/html` | Rendered report page |
+| `CSV` | `text/csv` | File attachment |
+| `Excel` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | `.xlsx` file attachment |
+
+CSV and Excel are returned as file attachments with a `Content-Disposition` header rather than as a JSON body. The filename is derived from the object the report was generated from — for example `product_1_findings.csv` or `test_42_findings.xlsx`. The `/findings/generate_report/` endpoint is not scoped to a single object, so its downloads are named `findings.csv` and `findings.xlsx`.
+
+### Notes and limitations
+
+* The `include_*` options affect the **JSON** and **HTML** reports only. The **CSV** and **Excel** exports always contain the finding rows.
+* Report generation requires **view** permission on the objects involved, and a report only ever contains findings you are authorized to see.
+* **Standard query\-parameter filters are not applied to this action.** Unlike `GET /api/v2/findings/`, the `generate_report/` action does not apply the finding filters, so a request such as `POST /api/v2/findings/generate_report/?severity=High` still reports on every finding you can view. To narrow a report, generate it from a specific product, engagement, or test instead.
+
 ## Asynchronous Deletion Behavior
 
 Deletions in DefectDojo (via both the API and UI) are processed **asynchronously** by Celery background workers. When you delete an Engagement, Test, or other object, the API or UI returns a success response immediately, but the actual deletion runs in the background.
