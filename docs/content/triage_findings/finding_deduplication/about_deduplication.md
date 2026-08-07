@@ -20,6 +20,12 @@ This is where Deduplication comes in, a Smart feature which you can set up to au
 
 By creating and marking Duplicates in this way, DefectDojo ensures that all the work for the ‘original’ vulnerability is centralized on the original Finding page, without creating separate contexts, or giving your team the impression that there are multiple separate vulnerabilities which need to be addressed.
 
+### Which Finding becomes the original
+
+Deduplication always treats the **earliest-created** Finding in a duplicate chain as the canonical original, so a Finding from an earlier import is never demoted to a duplicate of a newer one — an original that is already established does not change hands.
+
+Within a *single* report, the order the scanner happens to list its findings in does not decide the winner. Findings from one import are created in a stable, content-derived order, so a report that contains several findings colliding on the same deduplication key produces the **same original every time it is imported**. Re-scanning and re-importing the same results will not shuffle which Finding your team has been working on.
+
 By default, these Tests would need to be nested under the same Product for Deduplication to be applied. If you wish, you can further limit the Deduplication scope to a single Engagement.
 
 ![Deduplication on product and engagement level](images/deduplication.png)
@@ -64,12 +70,14 @@ However, if DefectDojo is creating excess duplicates, this can also be a sign th
 
 ## Overview
 
-DefectDojo supports four deduplication algorithms that can be selected per parser (test type):
+DefectDojo Open Source supports four deduplication algorithms that can be selected per parser (test type):
 
 - **Unique ID From Tool**: Uses the scanner-provided unique identifier.
 - **Hash Code**: Uses a configured set of fields to compute a hash.
 - **Unique ID From Tool or Hash Code**: Prefer the tool’s unique ID; fall back to hash when no matching unique ID is found.
 - **Legacy**: Historical algorithm with multiple conditions; only available in the Open Source version.
+
+**DefectDojo Pro adds more.** Two additional algorithms match across **all Products** in the instance rather than within a single Product or Engagement — **Global Component** (by component name and version) and **Global Vulnerability ID** (by CVE, GHSA, …). Both are off by default and enabled by DefectDojo Support. Pro also lets the Hash Code algorithm treat a Finding's vulnerability IDs and CWEs as **sets**, matching on the exact set, on any shared value (`_partial`), or on one being a subset of the other (`_subset`). See [Deduplication Tuning (Pro)](/triage_findings/finding_deduplication/pro__deduplication_tuning/) for the full list, the set-matching fields, and the rules governing them.
 
 ## How endpoints are assessed per algorithm
 
