@@ -51,7 +51,8 @@ you may already have triaged.
 
 | Setting | Default | What it catches |
 |---|---|---|
-| Severity tier transitions | on | medium ↔ high ↔ critical |
+| Severity tier transitions | on | moves within medium/high/critical, and any escalation into that set from below |
+| CVE set changes | on | a CVE joining or leaving an advisory |
 | Added to the CISA KEV list | on | a vulnerability now known to be exploited |
 | Removed from the CISA KEV list | **off** | de-listing rarely changes what you must do |
 | EPSS crossing the high boundary | on | exploitation probability crossing your line |
@@ -63,6 +64,12 @@ you may already have triaged.
 The defaults are deliberately asymmetric. Being added to KEV is news; being
 removed from it usually is not, and treating it as material would re-open triaged
 work for a reason nobody needs to act on.
+
+Severity is judged on the tier the feed supplies, so it works even for publishers
+that never provide a CVSS score — which is also why an escalation *into*
+medium/high/critical counts: a feed that only speaks in tiers must not be able to
+raise something to critical without anybody being told. Downgrades out of the set
+are not material; nothing needs re-triage because it got less serious.
 
 Turning things **off** here is how a noisy revision stream gets quieter — but
 every switch you turn off is a class of upstream change you will no longer be told

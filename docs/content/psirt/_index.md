@@ -25,6 +25,18 @@ PSIRT is a Pro feature in beta. It requires the **PSIRT** feature flag (which
 depends on **Locations**) and the **PSIRT Advisory Engine** license
 entitlement.
 
+### If you don't see PSIRT in the menu
+
+The PSIRT flag depends on **Locations**, and a flag with an unmet dependency is
+forced off — so with Locations disabled, PSIRT is off no matter how its own
+switch is set, and none of its pages are reachable. Settings → Feature Flags
+says so on the PSIRT row ("Requires Locations to be enabled"). Enable Locations
+first; it is environment-sourced, so it needs a restart to take effect.
+
+If the entries are visible but locked, that is the other gate: the licence.
+PSIRT needs the **PSIRT Advisory Engine** entitlement, and a locked entry
+explains what to ask for.
+
 ## How it fits together
 
 1. **[Advisory Feeds](feeds/)** — choose which publishers to poll. Every source

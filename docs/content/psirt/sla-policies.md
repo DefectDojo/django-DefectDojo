@@ -46,6 +46,13 @@ Add, edit, disable or delete tiers freely. Durations are entered as days, hours
 and minutes, and the warning must fit inside the deadline — a warning that fires
 after the deadline it warns about has nothing to warn anybody about.
 
+Both boundaries notify. When a running clock crosses its warning threshold you get
+one notification — once, not on every scanner pass — and crossing the deadline
+sends the breach notification. A clock that blows through both between two scanner
+passes reports only the breach: a warning about a deadline already missed would
+just be noise. Paused clocks warn about nothing; their deadline is moving with
+them, which is the point of pausing.
+
 **Tier codes come from the definition's resolver, not from case priority.** The
 form offers the shipped vocabulary and accepts anything you type, but a tier whose
 code the resolver never returns is inert: nothing will ever resolve to it. The

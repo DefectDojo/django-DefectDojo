@@ -50,6 +50,13 @@ the change is worth another round.
 A **rejection needs a reason**. An advisory rejected without one is a reviewer who has
 blocked their colleagues and told them nothing.
 
+**The case list is content too.** The workbench's *Cases covered* section shows which
+cases the advisory speaks for — that set decides which findings publishing will file, so
+it is part of what a reviewer approves. You can attach and detach cases at any point
+before publication, including after approval, because the same binding applies: change
+the set and existing approvals go stale exactly as a text edit would. Once published,
+the covered set is fixed; changing it means a revision.
+
 ## Preflight
 
 **Run preflight** before publishing. Six checks, and only failures block:
@@ -137,6 +144,16 @@ listing — the advisory is flagged as possibly out of date and you get a notifi
 This is separate from the approval question, and it does not invalidate anybody's
 approval. It means what the customer was told may no longer be the whole story, which is
 a judgement for a human, not a gate.
+
+The workbench shows the flag as a banner naming what moved — the feed's own facts, the
+enrichment data, or both. Two honest ways to clear it: **revise** the advisory if the
+published text no longer stands, or **acknowledge** if you have read the change and the
+text still holds. Acknowledging is a recorded statement that somebody looked — it does
+not republish, edit, or touch anybody's approval. If the facts move again later, the
+banner comes back.
+
+Which upstream changes raise the flag at all is yours to tune, in
+[Settings](../settings/).
 
 ## Locks
 

@@ -89,6 +89,13 @@ changes it.
 - On a match: **confirm**, mark **false positive**, or leave notes. Everything
   else on a match is the engine's record of why it exists and is read-only.
 
+**Findings are filed by people, never by the engine.** A structurally-verified
+match — right component, version confirmed in range — still needs an analyst's
+confirm before anything reaches the findings your product teams see. That is
+deliberate: exported findings are where trust in this feature lives, and a false
+positive there costs more than the click it saves. Confirming is one click on the
+match; the export follows from it.
+
 ## Attribution
 
 An advisory's detail shows the credit its publisher requires. Several feed
