@@ -619,9 +619,14 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # for the reference and CWE buffers it shares, then flush_burp_request_response()
     # resolves its own for the request/response rows the ZAP parser attaches. The
     # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
+    # +2 on the V3 paths only: the deduplication loader prefetches
+    # "locations__location__url" (reference + location + url) in place of the single
+    # deprecated "endpoints" query, which under V3 hydrated the deprecated model and raised
+    # on an instance migrated from endpoints. The V2 counts keep the endpoint prefetch and
+    # are unchanged.
     EXPECTED_ZAP_IMPORT_V2 = 293
-    EXPECTED_ZAP_IMPORT_V3 = 316
+    EXPECTED_ZAP_IMPORT_V3 = 318
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 85
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
     EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 158
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 186
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 188
