@@ -4,12 +4,14 @@ Importer service facade (D7 / §6 OS1).
 The current importer returns a 7-tuple and **no service wrapper exists today** -- the v2
 ``ImportScanSerializer`` calls ``DefaultImporter`` directly. This facade is framework-neutral (no
 HTTP/DRF context): it constructs the importer options exactly as the v2 serializers do today
-(``dojo/api_v2/serializers.py:526-903`` are the reference implementations; they are not modified)
-and unpacks the 7-tuple into a structured ``ImportResult``.
+(the ``CommonImportScanSerializer`` / ``ImportScanSerializer`` / ``ReImportScanSerializer`` block
+in ``dojo/api_v2/serializers.py`` is the reference implementation; it is not modified) and unpacks
+the 7-tuple into a structured ``ImportResult``.
 
 The importer 7-tuple is ``(test, updated_count, new, closed, reactivated, untouched,
 test_import)`` for both the importer and the reimporter (the importer always reports
-reactivated/untouched as 0). See ``default_importer.py:165`` / ``default_reimporter.py:165``.
+reactivated/untouched as 0). See ``process_scan()`` in ``default_importer.py`` /
+``default_reimporter.py``.
 
 I6: keyword-only args, explicit ``user``, returns a result dataclass, callable without any HTTP
 context. In the alpha PR only v3 calls this; v2 migrates onto it in the CONV1 convergence track.
