@@ -13,6 +13,7 @@ from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
 from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, report_generate_response, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.engagement.api.filters import ApiEngagementFilter
 from dojo.engagement.api.serializer import (
@@ -23,7 +24,7 @@ from dojo.engagement.api.serializer import (
     EngagementToNotesSerializer,
 )
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.engagement.services import close_engagement, reassign_engagement_product_endpoints, reopen_engagement
 from dojo.jira import services as jira_services
 from dojo.models import (
     Check_List,
@@ -65,6 +66,22 @@ class EngagementViewSet(
     @property
     def risk_application_model_class(self):
         return Engagement
+
+    def perform_update(self, serializer):
+        # Moving an engagement to a different product must re-home its findings'
+        # endpoints/locations onto the new product, mirroring the Classic UI
+        # edit_engagement view. Covers PUT and PATCH (both route through here) and,
+        # via inheritance, the Pro Vue UI which moves engagements over this same path.
+        old_product = serializer.instance.product
+        # validated_data omits "product" on a PATCH that doesn't touch it -> no move.
+        new_product = serializer.validated_data.get("product", old_product)
+        if new_product != old_product:
+            # Destination-product edit check, mirroring the Classic edit_engagement view.
+            user_has_permission_or_403(self.request.user, new_product, "edit")
+        engagement = serializer.save()
+        if new_product != old_product:
+            # calculate_grade for both products is dispatched by the service itself.
+            reassign_engagement_product_endpoints(engagement, old_product, new_product)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
