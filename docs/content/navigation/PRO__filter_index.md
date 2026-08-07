@@ -9,6 +9,12 @@ aliases:
 
 Here is a list of filters that can be applied in the DefectDojo Pro UI to sort lists of Findings.  DefectDojo Filters can be used to assist with navigating through lists of Objects, building custom [dashboards](/metrics_reports/dashboards/custom-dashboards/), or creating automation via [Rules Engine](/automation/rules_engine/about).
 
+## How date filters are evaluated
+
+Filters that take a date or a date range — **Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below — resolve their day boundaries in the **viewing user's timezone**.
+
+In practice, a date range covers midnight to midnight as *you* experience it, rather than in UTC or in the server's timezone. Two people in different timezones can therefore see slightly different results from the same filter for Findings that fall close to a day boundary, and a shared saved filter or dashboard shows each viewer their own day.
+
 ## Findings
 These fields are specific to DefectDojo Findings and are used to organize a Finding.  Each of these filters is a separate column in the All Findings table.
 
