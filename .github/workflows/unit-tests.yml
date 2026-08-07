@@ -14,8 +14,24 @@ on:
   # each be green on their own and broken in combination, and nothing before this
   # point ever evaluates their union.
   #
-  # Inert until a merge queue is configured -- nothing emits merge_group events
-  # otherwise -- so this can land well ahead of the ruleset that enables one.
+  # The queue that emits these events is the "Merge Queue" ruleset (id 20466211),
+  # active on bugfix: SQUASH, ALLGREEN grouping, max 3 entries building, and it
+  # requires `ruff-linting` and `Unit Tests Complete` on the merge group. Two
+  # operational notes recorded here so they survive the people who know them:
+  #
+  #   - The queue applies ONE merge method (squash) to everything it lands.
+  #     Release merge-backs must stay real merge commits, so they go around the
+  #     queue via the ruleset's bypass actors (repo admins + the maintainer
+  #     teams), exactly as they bypass branch protection today. Nothing in this
+  #     repository's automation calls `gh pr merge`, and that is load-bearing:
+  #     on a queue-enabled branch that command can exit 0 WITHOUT merging (it
+  #     arms auto-merge and the queue lands the PR later, with the queue's
+  #     method), so any future script must read the PR's merged state back
+  #     rather than trusting the exit code.
+  #
+  #   - Under the two-tier matrices below, pull requests run the light tier and
+  #     the queue re-runs the full tier on the speculative merge commit, so a
+  #     queued PR's checks taking longer than its own PR run is expected.
   merge_group:
 
 jobs:
@@ -28,7 +44,17 @@ jobs:
     needs: ruff
     strategy:
         matrix:
-          platform: ['linux/amd64', 'linux/arm64']
+          # Two tiers, one workflow. Pull requests build amd64 only; the merge
+          # queue (and manual dispatch) builds both platforms and tests the
+          # speculative merge commit with everything. The queue is the gate, the
+          # pull-request run is feedback -- an arm64-only breakage surfaces when
+          # the queue tests the exact commit that would land, where it costs one
+          # queue ejection instead of a bad merge.
+          #
+          # Tiering must shrink MATRICES, never skip whole jobs: the
+          # unit-tests-complete gate requires every job in its `needs` to report
+          # success, and a skipped job reports skipped. Same jobs, fewer cells.
+          platform: ${{ github.event_name == 'pull_request' && fromJSON('["linux/amd64"]') || fromJSON('["linux/amd64", "linux/arm64"]') }}
         fail-fast: false
     uses: ./.github/workflows/build-docker-images-for-testing.yml
     secrets: inherit
@@ -43,7 +69,12 @@ jobs:
   test-rest-framework:
     strategy:
       matrix:
-        platform: ['linux/amd64', 'linux/arm64']
+        # Light tier drops the arm64 cells, matching the build tiering above (a
+        # pull-request run has no arm64 image artifact to test anyway). Both
+        # v3_feature_locations values stay in BOTH tiers: the flag changes the
+        # API schema and endpoint behaviour, so the two runs are genuinely
+        # different suites, not a platform duplicate.
+        platform: ${{ github.event_name == 'pull_request' && fromJSON('["linux/amd64"]') || fromJSON('["linux/amd64", "linux/arm64"]') }}
         v3_feature_locations: [ false, true ]
       fail-fast: false
     needs: build-docker-containers
