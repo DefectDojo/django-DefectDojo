@@ -231,6 +231,25 @@ class BaseTestCase(unittest.TestCase):
         self.wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
         return driver
 
+    def open_product_tab(self, driver, tab):
+        """
+        Click a tab in the product tab bar, e.g. "findings" or "engagements".
+
+        Do not reach for these tabs with By.LINK_TEXT / By.PARTIAL_LINK_TEXT. The
+        global sidebar repeats every one of these labels ("Engagements",
+        "Findings", "Endpoints", "Components", "Metrics") and renders well before
+        the tab bar, so a link-text lookup resolves to the sidebar entry instead.
+        Those sidebar entries only expand a submenu -- they are bound to Alpine
+        with @click.prevent and never navigate -- so the click silently does the
+        wrong thing and the tab's dropdown stays closed. The failure then surfaces
+        much later, as a NoSuchElementException on the menu item you actually
+        wanted, which is in the DOM but not rendered.
+
+        The data-testid attributes live on the tab bar in dojo/templates/base.html.
+        """
+        driver.find_element(By.CSS_SELECTOR, f'[data-testid="product-tab-{tab}"]').click()
+        return driver
+
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         if not self.is_element_by_id_present(no_content_id):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.

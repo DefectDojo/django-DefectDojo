@@ -15,7 +15,7 @@ class ThreatModelTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         driver.find_element(By.ID, "id_name").clear()
         driver.find_element(By.ID, "id_name").send_keys("Threat Model Engagement")
@@ -30,7 +30,7 @@ class ThreatModelTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.CSS_SELECTOR, ".dropdown-toggle.active").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         driver.find_element(By.LINK_TEXT, "Threat Model Engagement").click()
         # Click the dropdown to find the Upload Threat Model link

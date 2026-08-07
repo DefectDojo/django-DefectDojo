@@ -75,7 +75,7 @@ class ProductTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.LINK_TEXT, "Components").click()
+        # The sidebar's Components entry, which lists components across all products.
         driver.find_element(By.ID, "product_component_view").click()
         self.assertTrue(self.is_element_by_css_selector_present("table"))
 
@@ -146,7 +146,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown option
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on the 'Engagement dropdown button'
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Engagement").click()
+        self.open_product_tab(driver, "engagements")
         # 'click' the Add New Engagement option
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         # Keep a good practice of clearing field before entering value
@@ -256,7 +256,7 @@ class ProductTest(BaseTestCase):
         # Select and click on the particular product to edit
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Click on the 'Finding dropdown button'
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Findings").click()
+        self.open_product_tab(driver, "findings")
         # Click on `Add New Finding`
         driver.find_element(By.LINK_TEXT, "Add New Finding").click()
         # Keep a good practice of clearing field before entering value
@@ -312,7 +312,7 @@ class ProductTest(BaseTestCase):
         # Select and click on the particular product to edit
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Click on the 'Endpoints' dropdown button
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+        self.open_product_tab(driver, "endpoints")
         # 'click' the Add New Endpoint option
         driver.find_element(By.LINK_TEXT, "Add New Endpoint").click()
         # V2 Endpoints
@@ -335,7 +335,7 @@ class ProductTest(BaseTestCase):
             # Assert ot the query to determine status of failure
             self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
             # it was so fun let's do it again!
-            driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+            self.open_product_tab(driver, "endpoints")
             # 'click' the Add New Endpoint option
             driver.find_element(By.LINK_TEXT, "Add New Endpoint").click()
             # Keep a good practice of clearing field before entering value
@@ -464,7 +464,7 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # "Click" the dropdown option
         # driver.find_element(By.XPATH, "//span[contains(., 'Metrics')]").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Metrics").click()
+        self.open_product_tab(driver, "metrics")
 
     @on_exception_html_source_logger
     def test_delete_product(self, name="QA Test"):

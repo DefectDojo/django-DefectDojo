@@ -117,7 +117,7 @@ class FindingExtendedTest(BaseTestCase):
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Click on the Findings dropdown
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Findings").click()
+        self.open_product_tab(driver, "findings")
         driver.find_element(By.LINK_TEXT, "Add New Finding").click()
         # Fill finding form
         driver.find_element(By.ID, "id_title").clear()

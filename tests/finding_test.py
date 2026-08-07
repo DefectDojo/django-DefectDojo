@@ -694,7 +694,7 @@ class FindingTest(BaseTestCase):
         self.assertTrue(self.is_text_present_on_page(text="App Vulnerable to XSS From \\Template"))
 
         # Navigate back to the finding list
-        driver.find_element(By.LINK_TEXT, "Findings").click()
+        self.goto_all_findings_list(driver)
         self.assertNoConsoleErrors()
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS from \\Template").click()
         self.assertNoConsoleErrors()
@@ -725,7 +725,7 @@ class FindingTest(BaseTestCase):
         # Select and click on the particular finding to edit
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         # Click on the 'Finding' dropdown menubar
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Findings").click()
+        self.open_product_tab(driver, "findings")
         # Click on `Import Scan Results` link text
         driver.find_element(By.LINK_TEXT, "Import Scan Results").click()
         # Select `ZAP Scan` as Scan Type

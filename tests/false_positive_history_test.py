@@ -19,7 +19,7 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Select and click on the particular product to create finding for
         driver.find_element(By.LINK_TEXT, product_name).click()
         # Click on the 'Engagement' Dropdown button
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Engagement").click()
+        self.open_product_tab(driver, "engagements")
         # Click on the Add New Engagement option
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         # Fill up engagement name

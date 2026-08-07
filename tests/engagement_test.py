@@ -85,7 +85,7 @@ class EngagementTest(BaseTestCase):
         # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
         driver.find_element(By.ID, "products_wrapper")
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.XPATH, "//a[@class='dropdown-toggle active']//span[@class='hidden-xs']").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "Add New CI/CD Engagement").click()
         driver.find_element(By.ID, "id_name").send_keys("test new ci/cd engagement")
         driver.find_element(By.ID, "id_name").send_keys("\ttest new ci/cd engagement")

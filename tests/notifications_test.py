@@ -3,7 +3,6 @@ import unittest
 
 from base_test_class import BaseTestCase
 from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.ui import WebDriverWait
@@ -127,9 +126,8 @@ class NotificationTest(BaseTestCase):
         driver = self.driver
 
         wait = WebDriverWait(driver, 5)
-        actions = ActionChains(driver)
-        configuration_menu = driver.find_element(By.ID, "menu_configuration")
-        actions.move_to_element(configuration_menu).perform()
+        # The sidebar's Configuration section expands on click, not on hover.
+        driver.find_element(By.ID, "menu_configuration").click()
         wait.until(expected_conditions.visibility_of_element_located((By.LINK_TEXT, "Notifications"))).click()
 
         originally_selected = {

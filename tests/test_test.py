@@ -59,7 +59,7 @@ class TestUnitTest(BaseTestCase):
         # # "Click" the dropdown option
         # driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on the 'Engagement' Dropdown button
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Engagement").click()
+        self.open_product_tab(driver, "engagements")
         # 'click' the Add New Engagement option
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         # Keep a good practice of clearing field before entering value
