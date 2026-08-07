@@ -38,6 +38,9 @@ services:
       DD_CELERY_BROKER_PATH: ''
       DD_JIRA_EXTRA_ISSUE_TYPES: 'Vulnerability' # Shouldn't trigger a migration error
       DD_V3_FEATURE_LOCATIONS: ${DD_V3_FEATURE_LOCATIONS:-False}
+      # full | prepare | reuse -- see docker/entrypoint-unit-tests.sh. CI sets
+      # this to replace the migrate with restoring a snapshot of its result.
+      DD_TEST_DB_MODE: ${DD_TEST_DB_MODE:-full}
       # No Redis/valkey in unit tests -> default django cache is LocMemCache.
       DD_CACHE_URL: ''
       # In-process singleton cache (dojo/caching.py) stays ON: a singleton is read

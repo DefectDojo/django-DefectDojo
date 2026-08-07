@@ -28,7 +28,7 @@ The page lists the features you can choose to adopt. Two kinds of feature are ab
 
 **Always on.** Once a feature reaches general availability it is on for every instance and stops being listed, because there is no longer a decision to make:
 
-* **Downstream Connections** — see [Pro Integrations](/issue_tracking/pro_integration/integrations/)
+* **Downstream Connectors** — see [Downstream Connectors](/connectors/downstream/about/)
 * **Universal Parser** — see [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
 * **Asset Hierarchy** — see [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
 * **Appearance** and **Feature Flags** — the two Settings pages of the same name
