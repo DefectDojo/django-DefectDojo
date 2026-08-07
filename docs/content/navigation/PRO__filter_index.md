@@ -11,9 +11,48 @@ Here is a list of filters that can be applied in the DefectDojo Pro UI to sort l
 
 ## How date filters are evaluated
 
-Filters that take a date or a date range — **Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below — resolve their day boundaries in the **viewing user's timezone**.
+Filters that take a date — **Date Created**, **SLA Expiration Date**, **Last Status Update**, **Planned Remediation Date**, and the Jira date filters listed below — offer five operators:
 
-In practice, a date range covers midnight to midnight as *you* experience it, rather than in UTC or in the server's timezone. Two people in different timezones can therefore see slightly different results from the same filter for Findings that fall close to a day boundary, and a shared saved filter or dashboard shows each viewer their own day.
+| Operator | Matches |
+| --- | --- |
+| **On** | The whole of the named day. |
+| **Before** | Everything up to the start of the named day. The named day itself is **not** included. |
+| **After** | Everything past the start of the named day — so the named day **is** included. |
+| **During** | A start day through an end day, both **inclusive**. |
+| **Within** | A rolling window ending now: Past 7, 14, 30, 90 or 180 Days, or Past Year. |
+
+Note that **Before** and **After** are deliberately not mirror images of each other: *Before 8 August* excludes 8 August, while *After 8 August* includes it.
+
+### Day boundaries and your timezone
+
+**On**, **Before**, **After** and **During** resolve their day boundaries in **your own timezone**, detected from your browser. A date range therefore covers midnight to midnight as *you* experience it, rather than in UTC or in the server's timezone. Two people in different timezones can see slightly different results from the same filter for Findings falling close to a day boundary.
+
+**Within** is unaffected — it is a rolling window measured back from the current moment, so it has no day boundary to resolve.
+
+> **Where this does not apply.** Only requests from the Pro UI carry your timezone. Anything that runs without a browser — the `/api/v2` REST API, scheduled reports, and the Rules Engine — falls back to the server's configured timezone (`DD_TIME_ZONE`, `UTC` unless your administrator changed it). If your browser timezone differs from the server's, a scheduled report and an on-screen filter using the same date can return slightly different rows. Exports started from a filtered table in the UI are not affected — they use your timezone, matching what you were looking at.
+
+## How number filters are evaluated
+
+Numeric filters — including **Age** and **SLA** — offer a match operator alongside the value: **Equals**, **Not Equals**, **Greater Than**, **Greater Than or Equal To**, **Less Than**, **Less Than or Equal To**, **In List**, and **Not In List**. Entering a value without choosing an operator matches on **Equals**.
+
+## SLA filters
+
+Three filters cover SLA, and they answer different questions:
+
+| Filter | Type | What it matches |
+| --- | --- | --- |
+| **SLA Expiration Date** | Date, with the operators above | The date the Finding's SLA runs out. |
+| **SLA** | Number, with operators | **Days remaining** on the SLA clock. Negative values are overdue, so `Less Than 0` finds everything currently past its deadline, and `Less Than 7` finds what is due within the week. |
+| **Mitigated Within SLA** | True / False | Whether a Finding that **has been mitigated** was mitigated before its SLA expired. |
+
+**Mitigated Within SLA is narrower than it sounds, and this catches people out.** Both values only ever match Findings that are **already mitigated** and are **not Info severity**:
+
+* **True** — mitigated on or before the SLA expiration date.
+* **False** — mitigated after the SLA expiration date.
+
+An **open** Finding that is already overdue matches **neither** value, because it has not been mitigated yet. To find those, use **SLA** `Less Than 0` instead. Info-severity Findings are excluded from both sides.
+
+> If a Finding's SLA configuration has **Cap SLA by CISA KEV Due Date** enabled, both **SLA** and **SLA Expiration Date** reflect the tightened, KEV-capped deadline rather than the plain severity-based window. There is no separate indicator for this in the filters — see [EPSS / KEV](/triage_findings/finding_scoring/epss_kev/).
 
 ## Findings
 These fields are specific to DefectDojo Findings and are used to organize a Finding.  Each of these filters is a separate column in the All Findings table.
@@ -36,8 +75,9 @@ These Filters are assigned at the time of issue creation, and cannot be directly
 * Test Version
 * Date Created
 * Age (Finding age in days)
-* SLA Expiration Date
-* Mitigated Within SLA (True or False value: was the Finding Mitigated within SLA or not?)
+* SLA (days remaining on the SLA clock — negative means overdue; see [SLA filters](#sla-filters))
+* SLA Expiration Date (see [SLA filters](#sla-filters))
+* Mitigated Within SLA (True or False — note this only matches Findings that have already been Mitigated; see [SLA filters](#sla-filters))
 * Reporter (user or service who created the Finding)
 * Found by (refers to the Tool)
 

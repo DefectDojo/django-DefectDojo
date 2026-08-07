@@ -887,13 +887,33 @@ Required token scopes for JFrog Xray:
 
 By default, DefectDojo maps each Artifactory **repository** as a separate Record. Each Sync generates a complete vulnerability report per repository via Xray, so finding statuses in DefectDojo always reflect the current state of the repository.
 
-#### Scoping discovery to specific repositories (optional)
+#### Repository Filter (optional)
 
-By default the connector discovers **every** repository in your JFrog instance. On instances with a large number of repositories — many of which may not be relevant to security review — discovery can be narrowed with the optional `repository_filter` setting on the connector configuration.
+By default the connector discovers **every** repository in your JFrog instance. On instances with a large number of repositories — many of which may not be relevant to security review — discovery can be narrowed with the optional **Repository Filter** field, under **Import Filters** on the connector form.
 
-`repository_filter` is applied during discovery, **before any per\-repository work is done**. A repository excluded by the filter costs nothing: no Xray report is generated for it and, in artifact mode, none of its artifacts are enumerated. This makes it the most effective way to cut both Sync time and the load DefectDojo places on your JFrog instance — more so than any setting applied later in the Sync.
+The filter is applied during discovery, **before any per\-repository work is done**. A repository outside the filter costs nothing: no Xray report is generated for it and, in artifact mode, none of its first\-level artifacts are enumerated. This makes it the most effective way to cut both Sync time and the load DefectDojo places on your JFrog instance — more so than any setting applied later in the Sync. It is especially recommended alongside **Artifact\-Level Records** on large instances.
 
-Leave it unset to discover every repository.
+**Syntax:** a comma\-separated list of repository keys. Each entry may use `*` wildcards:
+
+* An entry containing `*` is matched as a pattern — `releases-*` matches every repository key beginning `releases-`, and `*docker-pr-local*` matches any key containing `docker-pr-local`. A `*` matches any run of characters, including `/`.
+* An entry with no `*` must match a repository key **exactly**.
+* A repository is discovered if it matches **any** entry in the list. Spaces around commas are ignored.
+
+```
+releases-*, snapshots
+```
+
+The example above discovers every repository whose key starts with `releases-`, plus the single repository named exactly `snapshots`.
+
+Notes:
+
+* The filter is an **allow\-list** — a match selects a repository. There is no exclusion or negation syntax, so you cannot express "everything except X" directly.
+* Matching is **case\-sensitive**, for both exact entries and wildcards. `*` is the only wildcard character; `?` and character ranges are not supported.
+* **Leave it blank to discover every repository.** A value that is only spaces or commas is treated as blank.
+* A filter that matches nothing simply discovers nothing — there is no error. If a Sync unexpectedly finds no repositories, check the connector log for the `repository filter scoped discovery` entry, which reports how many of the total repositories matched.
+* The field can be changed after the connection is created.
+
+**Changing the filter later:** repositories that a newly narrowed filter now excludes are no longer discovered, and their existing Records follow the normal lifecycle for products the tool no longer reports — **mapped** Records are flagged `MISSING` on the next Sync, and unmapped `NEW` Records are removed. Findings already imported into DefectDojo are not deleted; the filter governs discovery only.
 
 #### Artifact-Level Records
 

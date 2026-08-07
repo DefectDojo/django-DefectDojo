@@ -11,7 +11,7 @@ aliases:
 >
 > **If you are setting up Jira for the first time, start with the [Downstream Connector](/connectors/downstream/about/) instead of this guide.**
 >
-> **Already using the legacy integration?** DefectDojo Pro includes a built\-in migration that moves an existing classic Jira configuration onto Downstream Connectors, so you do not have to rebuild it by hand.
+> **Already using the legacy integration?** DefectDojo Pro includes a built\-in migration that moves your existing classic Jira configuration onto Downstream Connectors, including the tickets you have already pushed — see [Migrating to the Jira Downstream Connector](#migrating-to-the-jira-downstream-connector) below.
 >
 > The legacy integration continues to work, and this guide remains accurate for it.
 
@@ -20,6 +20,56 @@ DefectDojo's Jira integration can be used to push Finding data to one or more Ji
 * The AppSec team can selectively push Findings to a Jira Space used by developers, so that issue remediation can be appropriately prioritized alongside regular development.  Developers on this board don't need to access DefectDojo - they can keep all their work in one place.
 * DefectDojo can push ALL Findings to a bidirectional Jira Space which the AppSec team uses, which allows them to split up issue validation.  This board keeps in sync with DefectDojo and allows for complex remediation workflows.
 * DefectDojo can selectively push Findings from separate Products &/or Engagements to separate Jira Spaces, to keep things in their proper context.
+
+## Migrating to the Jira Downstream Connector
+
+DefectDojo Pro can convert an existing classic Jira setup into Downstream Connector configuration for you, rather than making you rebuild it by hand.
+
+**Where to find it:** go to **Connect \> Downstream** to open the **Downstream Connectors** page, and use the **Classic Jira Migration** card. Click **Migrate from classic Jira**, then confirm.
+
+The card only appears if there is classic Jira configuration to migrate, or a previous run to report — so an instance that never used classic Jira will not see it. Once everything has been migrated the card remains but the button is disabled, because there is nothing left to do.
+
+Running the migration requires **global Maintainer-level permissions** (specifically, permission to edit integrations), and it must be run from a logged-in browser session — it cannot be driven with an API token.
+
+### What happens to tickets you have already pushed
+
+**Your existing Jira tickets are kept and re-linked — they are not orphaned, and the connector does not open duplicates.** Every Finding that classic Jira had already pushed keeps its ticket, and the connector takes over updating that same ticket in place. Links on Finding Groups carry over the same way.
+
+The one exception is **Engagement epics**. The Downstream Connector has no concept of epics, so epic issues are reported in the migration's warnings and left untouched.
+
+### What gets migrated
+
+* Your Jira **instance** connection — URL and credentials — becomes a Downstream Connector integration instance, keeping its name.
+* **Severity mappings** and **status mappings** (your open and close transition keys) are carried across.
+* Each **Jira Project** configuration becomes an issue tracker mapping, keeping its project key and issue type, and stays assigned to the same Product or Engagement.
+* **Push All Issues** is preserved: projects that had it enabled keep pushing automatically.
+* **Custom fields**, **close/reopen transition fields**, **component**, **default assignee**, and **labels** are converted to field mappings. Where you used *Add Vulnerability Id as a Jira label*, that becomes a label mapping too.
+* A **custom issue template** directory becomes a ticket template. The stock templates are not copied, because the connector already ships equivalents.
+
+### What does not carry over
+
+These are reported as warnings on the migration run — they do not stop it. Look for the *"things the connector cannot carry over"* list in the results.
+
+* **Jira → DefectDojo reverse sync.** This is the important one. The Downstream Connector does not sync changes *back* from Jira, so resolution mappings that apply Risk Acceptance or False Positive from a Jira resolution are not migrated. **If you rely on reverse sync, leave the classic Jira instance configured** — the migration does not remove it.
+* **Engagement Epic Mapping** — the connector has no epic concept.
+* **Push Notes**, **SLA notification comments**, and **risk acceptance expiration comments** — the connector does not post these to Jira.
+* Custom fields named `summary`, `description`, `project`, `issuetype` or `status` — these are reserved by the connector, and a field mapping using one is skipped.
+* Custom field values longer than 512 characters — skipped rather than truncated.
+* A Jira Project attached to neither a Product nor an Engagement produces no assignment.
+
+### What happens to the classic integration afterward
+
+**Nothing pushes twice.** For each project it migrates, the migration switches the classic Jira project off, so only the connector pushes from that point on. You do not need to disable anything manually.
+
+Your classic configuration is **kept, not deleted** — the instance, project and issue records all remain, with only the push settings turned off. That is deliberate: it is what makes the change reversible, and it is what keeps reverse sync working if you depend on it.
+
+**To roll back**, re-enable the classic Jira project settings and remove the connector configuration the migration created. There is no one-click undo.
+
+**Re-running is safe.** The migration records what it has already converted and skips it on a second run, so nothing is duplicated. If a project or instance fails, the rest still migrates — a failed project is left running on the classic integration rather than being switched off, so it keeps working while you investigate.
+
+### While it runs
+
+The migration runs in the background and reports progress as it goes. When it finishes you get a summary — how many connectors, mappings, assignments, templates and ticket links were created, how many classic projects were switched off, and anything skipped — along with the warnings described above. Only one migration runs at a time.
 
 # Setting Up Jira
 

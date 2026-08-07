@@ -118,10 +118,17 @@ Every other optional feature is toggled directly on the Feature Flags page on bo
 
 You do not have to open the Feature Flags page to find out which features are enabled — flag state can also be read programmatically, which is useful when automation needs to check that a capability is available before depending on it.
 
-* **REST API (v2)** — feature flag state is exposed through the v2 API. Because the available flags change from release to release, check your own instance's interactive API documentation at `/api/v2/oa3/swagger-ui/` for the current endpoint and response shape; it is generated from the running version, so it always matches what your instance actually serves. See the [API v2 documentation](/automation/api/api-v2-docs/).
-* **MCP** — the DefectDojo Pro [MCP Server](/metrics_reports/ai/mcp_server_pro/) can also read flag state, so an AI assistant connected to your instance can take account of which optional features are turned on.
+```
+GET /api/v2/defectdojo_information/feature_flags/
+```
 
-Both surfaces are **read-only**. Turning a feature on or off is still done from the Feature Flags page, or — for the deployment-configured features noted above — in your deployment settings.
+This returns a JSON array with one object per feature flag. Alongside the flag's `key`, `title` and `description`, each object reports the values automation usually wants: `effective` (whether the feature is actually on for this instance), `default`, `application_value` (the instance's own setting, or `null` if unset), `editable`, and `locked_reason` where a flag cannot be changed. Flags retired from the product are omitted.
+
+Any **authenticated** user can read it — no superuser role is required. For the exact response schema on your version, see your instance's interactive API documentation at `/api/v2/oa3/swagger-ui/`, which is generated from the running build. See also the [API v2 documentation](/automation/api/api-v2-docs/).
+
+The same read-only listing is also published on the instance's `/api/mcp/` surface, at `/api/mcp/defectdojo_information/feature_flags/`.
+
+This endpoint is **read-only**. Turning a feature on or off is still done from the Feature Flags page, or — for the deployment-configured features noted above — in your deployment settings.
 
 ## Frequently asked questions
 
