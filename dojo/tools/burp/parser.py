@@ -98,7 +98,12 @@ class BurpParser:
         items = {}
         for node in tree.findall("issue"):
             item = get_item(node, test)
-            dupe_key = item.vuln_id_from_tool
+            # Burp's <type> is 1:1 with the issue name for its own checks, but every
+            # extension-generated issue shares the single type 0x08000000, so keying
+            # on type alone merged unrelated extension findings into one. Include the
+            # title to keep those apart; for native issues the pair is equivalent to
+            # the type on its own.
+            dupe_key = (item.vuln_id_from_tool, item.title)
             if dupe_key in items:
                 if settings.V3_FEATURE_LOCATIONS:
                     items[dupe_key].unsaved_locations += item.unsaved_locations

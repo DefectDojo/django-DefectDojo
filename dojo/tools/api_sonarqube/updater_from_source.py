@@ -74,7 +74,7 @@ class SonarQubeApiUpdaterFromSource:
             finding.false_p = False
             finding.mitigated = None
             finding.is_mitigated = False
-            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+            ra_helper.remove_from_any_risk_acceptance(finding)
 
         elif sonarqube_status == "CONFIRMED":
             finding.active = True
@@ -82,7 +82,7 @@ class SonarQubeApiUpdaterFromSource:
             finding.false_p = False
             finding.mitigated = None
             finding.is_mitigated = False
-            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+            ra_helper.remove_from_any_risk_acceptance(finding)
 
         elif sonarqube_status == "FIXED":
             finding.active = False
@@ -90,7 +90,7 @@ class SonarQubeApiUpdaterFromSource:
             finding.false_p = False
             finding.mitigated = timezone.now()
             finding.is_mitigated = True
-            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+            ra_helper.remove_from_any_risk_acceptance(finding)
 
         elif sonarqube_status == "WONTFIX":
             finding.active = False
@@ -98,9 +98,16 @@ class SonarQubeApiUpdaterFromSource:
             finding.false_p = False
             finding.mitigated = None
             finding.is_mitigated = False
-            Risk_Acceptance.objects.create(
+            finding.risk_accepted = True
+            risk_acceptance = Risk_Acceptance.objects.create(
+                name=f"SonarQube: {finding.title}"[:300],
                 owner=finding.reporter,
-            ).accepted_findings.set([finding])
+                decision=Risk_Acceptance.TREATMENT_ACCEPT,
+                decision_details="Automatically created from the SonarQube issue status WONTFIX.",
+                expiration_date=ra_helper.default_expiration_date(),
+            )
+            finding.test.engagement.risk_acceptance.add(risk_acceptance)
+            risk_acceptance.accepted_findings.set([finding])
 
         elif sonarqube_status == "FALSE-POSITIVE":
             finding.active = False
@@ -108,6 +115,6 @@ class SonarQubeApiUpdaterFromSource:
             finding.false_p = True
             finding.mitigated = None
             finding.is_mitigated = False
-            ra_helper.remove_finding.from_any_risk_acceptance(finding)
+            ra_helper.remove_from_any_risk_acceptance(finding)
 
         finding.save(issue_updater_option=False, dedupe_option=False)
