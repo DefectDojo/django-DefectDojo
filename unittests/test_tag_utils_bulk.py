@@ -1,3 +1,6 @@
+from operator import itemgetter
+from unittest.mock import patch
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -5,7 +8,12 @@ from django.utils import timezone
 
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.tags.utils import bulk_add_tag_mapping, bulk_add_tags_to_instances, bulk_apply_parser_tags
+from dojo.tags.utils import (
+    bulk_add_tag_mapping,
+    bulk_add_tags_to_instances,
+    bulk_apply_parser_tags,
+    bulk_remove_all_tags,
+)
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
@@ -483,3 +491,61 @@ class BulkTagUtilsInheritanceTest(DojoAPITestCase):
             self.assertIn("custom-bulk", tags)
             # Ensure inherited tags did not get polluted by the new tag
             self.assertNotIn("custom-bulk", self._inherited_tags_list(f))
+
+
+class BulkRemoveAllTagsLockOrderTest(TestCase):
+
+    # Regression: bulk_remove_all_tags decremented tag counts one row per UPDATE in
+    # unordered aggregation order, so two concurrent cascade deletes touching an
+    # overlapping tag set could take the same row locks in opposite orders and deadlock
+    # (Postgres 40P01). The decrements must be issued in a deterministic tag-id order.
+
+    def setUp(self):
+        self.product_type = Product_Type.objects.create(name="PT-Lock-Order")
+        self.products = [
+            Product.objects.create(
+                name=f"Lock Order Product {i}", description="test", prod_type=self.product_type,
+            )
+            for i in range(3)
+        ]
+
+    def test_tag_count_decrements_are_issued_in_ascending_tag_id_order(self):
+        """
+        The decrement UPDATEs must be ordered, because their order is the lock order.
+
+        Tags are attached in an order unrelated to their ids so that "whatever order the
+        aggregate happens to return" and "ascending id" cannot coincide by luck.
+        """
+        for product in self.products:
+            product.tags = ["zeta-tag", "alpha-tag", "mid-tag"]
+            product.save()
+
+        tag_model = Product.tags.tag_model
+        tag_ids_by_name = dict(
+            tag_model.objects.filter(
+                name__in=["zeta-tag", "alpha-tag", "mid-tag"],
+            ).values_list("name", "pk"),
+        )
+        self.assertEqual(len(tag_ids_by_name), 3, "expected the three tags to exist")
+
+        locked_order = []
+        original_filter = tag_model.objects.filter
+
+        def record_filter(*args, **kwargs):
+            if "pk" in kwargs:
+                locked_order.append(kwargs["pk"])
+            return original_filter(*args, **kwargs)
+
+        with patch.object(tag_model.objects, "filter", side_effect=record_filter):
+            bulk_remove_all_tags(Product, Product.objects.filter(prod_type=self.product_type))
+
+        self.assertEqual(
+            len(locked_order), 3,
+            msg=f"expected one decrement per tag, got {locked_order}",
+        )
+        self.assertEqual(
+            locked_order, sorted(locked_order),
+            msg="tag rows must be locked in ascending id order so concurrent removals "
+                f"cannot deadlock; got {locked_order} "
+                f"(tag ids: {sorted(tag_ids_by_name.items(), key=itemgetter(1))})",
+        )
