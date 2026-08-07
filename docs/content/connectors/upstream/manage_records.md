@@ -65,6 +65,8 @@ To learn more about Products, Engagements and Tests, see our [Product Hierarchy 
 
 Each Record has an associated state to communicate how the Record is working.
 
+The records list can be **filtered by state**. This is the fastest way to answer the two questions that come up most often on a large connector fleet — *what is waiting for me to map?* (**New**) and *what has stopped reporting?* (**Missing**) — without reading through every Record.
+
 ### New
 
 A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to a Product or Ignored. To Map a new Record to a Product, see our guide on [Editing Records]().
