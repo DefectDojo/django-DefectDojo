@@ -329,3 +329,53 @@ def paginate(
     if meta:
         envelope["meta"] = meta
     return envelope
+
+
+# --- List envelope schema (I1 + I4) -----------------------------------------------------------
+
+_LIST_ENVELOPES: dict[type, type] = {}
+
+
+def list_envelope(row_schema: type, *, name: str | None = None) -> type:
+    """
+    Build the OpenAPI documentation schema for a list envelope wrapping ``row_schema``.
+
+    The envelope must be *derived* from the row schema rather than pinned to a literal, or the
+    documented list shape silently stops matching the served one. That failure mode is invisible at
+    runtime: list routes return a pre-built response from ``json_response()``, which ninja passes
+    through without validating it against the declared ``response=``, so the declaration is pure
+    documentation and can drift with nothing to catch it.
+
+    Concretely, this is what makes invariant I4 ("subclass a schema and get correct OpenAPI") hold
+    for list routes as well as detail routes: a downstream distribution that calls a router factory
+    with ``schema=ProFindingSlim`` gets ``results: list[ProFindingSlim]`` in its published spec
+    instead of the OS ``FindingSlim``, so generated clients keep the added fields.
+
+    Cached per row schema so repeated factory calls reuse one class -- two classes of the same name
+    would collide in the OpenAPI component registry.
+    """
+    cached = _LIST_ENVELOPES.get(row_schema)
+    if cached is not None:
+        return cached
+
+    from ninja import Schema  # noqa: PLC0415 -- avoids a kernel-level import cycle
+    from pydantic import create_model  # noqa: PLC0415
+
+    # "FindingSlim" -> "FindingListResponse"; "ProFindingSlim" -> "ProFindingListResponse".
+    envelope_name = name or f"{row_schema.__name__.removesuffix('Slim')}ListResponse"
+    model = create_model(
+        envelope_name,
+        __base__=Schema,
+        # ``count`` is null in cursor mode (D4), so the documented type must admit it.
+        count=(int | None, ...),
+        next=(str | None, ...),
+        previous=(str | None, ...),
+        results=(list[row_schema], ...),
+        meta=(dict | None, None),
+    )
+    model.__doc__ = (
+        f"List envelope for {row_schema.__name__} (I1). Runtime serialization is manual so "
+        f"``?expand=``/``?fields=`` can reshape ``results`` dynamically; this documents the base shape."
+    )
+    _LIST_ENVELOPES[row_schema] = model
+    return model
