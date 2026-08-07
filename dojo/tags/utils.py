@@ -496,11 +496,18 @@ def bulk_remove_all_tags(model_class, instance_ids_qs):
         if not source_field_name or not target_field_name:
             continue
 
-        # Get affected tag IDs and their counts before deletion
+        # Get affected tag IDs and their counts before deletion.
+        # order_by(tag id) is load-bearing, not cosmetic: the loop below locks one tag
+        # row per UPDATE, and two callers removing tags from an overlapping tag set
+        # would otherwise take those row locks in unrelated orders and deadlock
+        # (Postgres 40P01). Sorting makes the lock sequence identical for every caller,
+        # so the cycle cannot form. It also pins the GROUP BY to this one column, which
+        # a model's default Meta.ordering would otherwise silently widen.
         affected_tags = (
             through_model.objects.filter(**{f"{source_field_name}__in": instance_ids_qs})
             .values(target_field_name)
             .annotate(num=models.Count("id"))
+            .order_by(target_field_name)
         )
 
         # Decrement tag counts. Tag counts are not used in DefectDojo but we

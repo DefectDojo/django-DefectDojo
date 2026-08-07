@@ -16,8 +16,8 @@ from datetime import date, datetime, timedelta
 from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
+from urllib.parse import urlparse
 
-import bleach
 import crum
 import cvss
 import redis as redis_lib
@@ -42,7 +42,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import OperationalError, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
@@ -51,11 +51,13 @@ from django.http import FileResponse, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
 from django.urls import get_resolver, reverse
 from django.utils import timezone
+from django.utils.html import escape, format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from kombu import Connection
 
 from dojo.celery import app
+from dojo.db_utils import is_transient_db_conflict
 from dojo.finding.queries import get_authorized_findings
 from dojo.github.services import (
     add_external_issue_github,
@@ -1531,15 +1533,18 @@ def get_current_request():
     return crum.get_current_request()
 
 
+ALLOWED_LINK_SCHEMES = {"http", "https", "mailto"}
+
+
 def create_bleached_link(url, title):
-    link = '<a href="'
-    link += url
-    link += '" target="_blank" title="'
-    link += title
-    link += '">'
-    link += title
-    link += "</a>"
-    return bleach.clean(link, tags={"a"}, attributes={"a": ["href", "target", "title"]})
+    # format_html escapes the values but does not block a javascript:/data: href.
+    scheme = urlparse(url).scheme.lower()
+    if scheme and scheme not in ALLOWED_LINK_SCHEMES:
+        return escape(title)
+    return format_html(
+        '<a href="{}" target="_blank" rel="noopener noreferrer" title="{}">{}</a>',
+        url, title, title,
+    )
 
 
 def get_object_or_none(klass, *args, **kwargs):
@@ -1812,8 +1817,7 @@ def _get_object_name(obj):
     return obj.__class__.__name__
 
 
-@app.task
-def async_delete_task(model_label, pk, **kwargs):
+def _async_delete_object(model_label, pk, *, is_retry=False):
     """
     Delete an object and all its related objects using the SQL cascade walker.
 
@@ -1825,8 +1829,11 @@ def async_delete_task(model_label, pk, **kwargs):
     efficient bottom-up SQL deletion of all FK-related tables. The top-level
     object is deleted via ORM obj.delete() to fire Django signals.
 
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    Steps 1-4 refetch or re-filter what they delete, so calling this again after a
+    failure in one of them resumes from whatever is left. Steps 5 and 6 are NOT
+    resumable: once the top-level obj.delete() commits, a re-invocation finds nothing
+    and returns early, so any post-delete work is skipped rather than redone. Pass
+    ``is_retry=True`` on a re-invocation so that case is logged as the anomaly it is.
     """
     from django.apps import apps  # noqa: PLC0415
 
@@ -1839,7 +1846,17 @@ def async_delete_task(model_label, pk, **kwargs):
     Model = apps.get_model(model_label)
     obj = Model.objects.filter(pk=pk).first()
     if obj is None:
-        logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
+        if is_retry:
+            # The top-level delete committed and the conflict came after it, so the
+            # object is gone and step 6 never ran. Louder than the first-call case:
+            # nothing is broken, but a product grade may now be stale.
+            logger.warning(
+                "ASYNC_DELETE: %s pk=%s already gone on a retry -- the delete itself "
+                "completed, but post-delete work (product grading) was not redone",
+                model_label, pk,
+            )
+        else:
+            logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
         return
 
     logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
@@ -1902,6 +1919,65 @@ def async_delete_task(model_label, pk, **kwargs):
         perform_product_grading(product)
 
     logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)
+
+
+# Seconds before the first retry; doubled on each subsequent attempt.
+ASYNC_DELETE_RETRY_DELAY = 5
+# How often to retry before reporting the conflict as a failure.
+ASYNC_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
+@app.task(bind=True)
+def async_delete_task(self, model_label, pk, **kwargs):
+    """
+    Celery entry point for cascade deletion, retrying transient DB conflicts.
+
+    Deterministic lock ordering in the tag bookkeeping (see
+    ``dojo.tags.utils.bulk_remove_all_tags``) is what stops these deletes deadlocking
+    against each other. This retry is the backstop for the conflicts that ordering
+    cannot rule out -- a delete overlapping an import, say -- because the aborted
+    transaction's work is not wrong, only rolled back, and failing here would leave the
+    object partly deleted.
+
+    Only applies to background execution: under eager execution Celery re-runs the body
+    inline and ignores ``countdown``, which would retry into an unfinished conflicting
+    transaction, so eager callers get the error instead.
+
+    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
+    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    """
+    retries = self.request.retries
+    try:
+        _async_delete_object(model_label, pk, is_retry=retries > 0)
+    except OperationalError as exc:
+        if not is_transient_db_conflict(exc):
+            raise
+        if self.request.is_eager:
+            # Verified against celery 5.6.3: under apply() retry re-invokes the body
+            # immediately and drops countdown, so retrying would just re-run the whole
+            # delete inside the caller's request while the winner may still be open.
+            logger.warning(
+                "ASYNC_DELETE: transient DB conflict on %s pk=%s running eagerly; "
+                "not retrying because eager retries ignore the backoff: %s",
+                model_label, pk, exc,
+            )
+            raise
+        if retries >= ASYNC_DELETE_MAX_CONFLICT_RETRIES:
+            logger.error(
+                "ASYNC_DELETE: giving up on %s pk=%s after %s transient DB conflict(s): %s",
+                model_label, pk, retries, exc,
+            )
+            raise
+        # Stagger tasks that deadlocked against each other so they do not collide
+        # again on the retry. The pk is a stable per-task offset, so no randomness
+        # is needed to spread them out.
+        backoff = ASYNC_DELETE_RETRY_DELAY * (2 ** retries)
+        countdown = backoff + backoff * (pk % 100) / 100
+        logger.warning(
+            "ASYNC_DELETE: transient DB conflict on %s pk=%s, retry %s/%s in %.1fs: %s",
+            model_label, pk, retries + 1, ASYNC_DELETE_MAX_CONFLICT_RETRIES, countdown, exc,
+        )
+        raise self.retry(exc=exc, countdown=countdown, max_retries=ASYNC_DELETE_MAX_CONFLICT_RETRIES)
 
 
 class async_delete:

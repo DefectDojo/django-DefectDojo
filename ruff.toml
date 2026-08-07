@@ -118,8 +118,20 @@ preview = true
     "S105",  # hardcoded passwords in tests are fine
     "S108",  # tmp paths mentioned in tests are fine
 ]
+# Scan targets, not project code. These files exist so a scanner has something to find, so the
+# weaknesses in them are the point - a target that lints clean would produce an empty fixture.
+"unittests/scans/**" = [
+    "INP001",   # sample sources are not a package
+    "FURB118",  # deliberately naive helpers
+    "S311",     # non-cryptographic randomness is what the scanner is meant to flag
+    "S324",     # ditto for weak hashes
+]
 "dojo/filters.py" = [
     "A003",  # ruff upgrade to 0.13.3
+]
+"scripts/check_migration_leaves.py" = [
+    "T201",   # print statements are fine for console output scripts
+    "EXE001", # git won't commit the executable flag I don't know why
 ]
 "scripts/update_performance_test_counts.py" = [
     "S603",  # subprocess.run without shell=True is safe for this script

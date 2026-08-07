@@ -1,0 +1,14 @@
+[
+  {
+    "category": "file",
+    "severity": "INFO",
+    "description": "Please confirm and investigate the API key to determine its severity.",
+    "name": "Potential API Key found",
+    "line_number": [
+      11,
+      0
+    ],
+    "file_object": "/qark/b_single/qark/META-INF/A.RSA",
+    "apk_exploit_dict": null
+  }
+]

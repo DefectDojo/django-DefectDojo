@@ -1,0 +1,6 @@
+Hardcoded_Placeholder_Credential /scan/targets/app.conf
+Debug_Endpoint_Left_Enabled /scan/targets/app.conf
+Awkward_Metadata_Values /scan/targets/awkward.txt
+Unrated_Marker_String /scan/targets/build.txt
+Rule_With_No_Metadata_At_All /scan/targets/build.txt
+Suspicious_Reverse_Shell_Command /scan/targets/helper.sh

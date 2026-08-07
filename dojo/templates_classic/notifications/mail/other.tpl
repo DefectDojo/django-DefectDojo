@@ -8,7 +8,7 @@
                 {% trans "Hello" %},
             </p>
             <p>
-                {{ description|safe }}
+                {{ description }}
             </p>
             {% if url is not None %}
                 <br/>
