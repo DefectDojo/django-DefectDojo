@@ -138,7 +138,7 @@ On DefectDojo Pro Cloud, you can ask our team to build a connector for a tool we
 
 1. Go to **Connectors → Upstream Connectors** (for tools that import data *into* DefectDojo). Issue-tracker and other outbound integrations can be requested the same way under **Connectors → Downstream Connectors**.
 2. In the **Available Connectors** section, click **Request a Connector**.
-3. Fill in the request form. Only the **Tool / Product Name** and **Authentication Type** are required; you can optionally add the vendor website, the tool's API base URL, a link to its API docs, credentials for our team to evaluate against (stored securely), and a note describing your use case.
+3. Fill in the request form. The **Tool / Product Name**, the **Tool API Base URL**, the **Authentication Type** and the credentials for that authentication type are all required, because our team needs a reachable address and a working credential to build a connector and confirm it works against your tool. Credentials are stored securely. You can optionally add the vendor website, a link to the tool's API docs, and a note describing your use case.
 4. Click **Submit Request**. You'll see a confirmation that your request was received. Our team reviews each request to evaluate building support — submitting a request is not a guarantee that the connector will be built.
 
 Requesting a connector requires **global Maintainer** permissions and is available on **DefectDojo Pro Cloud only** — the option does not appear on self-hosted (on-premise) instances.
