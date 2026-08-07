@@ -3,9 +3,11 @@ from unittest.mock import patch
 
 from dojo.engagement.services import copy_engagement, reassign_engagement_product_endpoints
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
+from dojo.location.status import ProductLocationStatus
 from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
 from dojo.test.services import copy_test
 from dojo.url.models import URL
+from dojo.utils import calculate_grade
 
 from .dojo_test_case import DojoTestCase, skip_unless_v2, skip_unless_v3
 
@@ -526,3 +528,44 @@ class TestMoveEngagementProduct(DojoTestCase):
         # old-product association is removed since no finding there references it
         self.assertTrue(LocationProductReference.objects.filter(location=location, product=product_b).exists())
         self.assertFalse(LocationProductReference.objects.filter(location=location, product=product_a).exists())
+
+    @patch("dojo.engagement.services.dojo_dispatch_task")
+    def test_move_engagement_recomputes_grade_for_both_products(self, mock_dispatch):
+        # Moving findings between products changes both products' aggregate grade, so the
+        # move must recompute the grade for the source and destination product.
+        _user, product_a, product_b, engagement, _finding = self._setup()
+        self._move(engagement, product_a, product_b)
+        graded_product_ids = {
+            call.args[1]
+            for call in mock_dispatch.call_args_list
+            if call.args and call.args[0] is calculate_grade
+        }
+        self.assertIn(product_a.id, graded_product_ids)
+        self.assertIn(product_b.id, graded_product_ids)
+
+    @skip_unless_v3
+    def test_move_engagement_reassesses_shared_old_product_location_status(self):
+        # A location shared with another finding that stays in the old product must keep
+        # its old-product association, but its status must be reassessed: moving the only
+        # active finding out flips the old product's location status to Mitigated.
+        user, product_a, product_b, engagement, active_finding = self._setup()
+        # A second, mitigated finding in the old product (different engagement) sharing the location
+        other_engagement = self.create_engagement("mv_eng_other", product_a)
+        other_test = self.create_test(engagement=other_engagement, scan_type="NPM Audit Scan", title="mv_test2")
+        mitigated_finding = Finding.objects.create(test=other_test, reporter=user, active=False, is_mitigated=True)
+        url = URL(host="host-a.example.com")
+        url.save()
+        location = url.location
+        location.associate_with_finding(finding=active_finding)
+        location.associate_with_finding(finding=mitigated_finding)
+        # Before the move the old product's location status is Active (the active finding)
+        old_ref = LocationProductReference.objects.get(location=location, product=product_a)
+        self.assertEqual(ProductLocationStatus.Active, old_ref.status)
+        # Move the engagement holding the active finding to product B
+        self._move(engagement, product_a, product_b)
+        # Old product keeps the association (mitigated finding still references it) but is reassessed
+        old_ref.refresh_from_db()
+        self.assertEqual(ProductLocationStatus.Mitigated, old_ref.status)
+        # New product now carries the active status
+        new_ref = LocationProductReference.objects.get(location=location, product=product_b)
+        self.assertEqual(ProductLocationStatus.Active, new_ref.status)
