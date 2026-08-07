@@ -349,7 +349,7 @@ class BaseTestCase(unittest.TestCase):
             # driver.find_element(By.XPATH, '//*[@id=' + setting_id + ']').click()
             driver.find_element(By.ID, setting_id).click()
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check if it's enabled after reload
 
         is_enabled = driver.find_element(By.ID, setting_id).is_selected()
@@ -392,7 +392,7 @@ class BaseTestCase(unittest.TestCase):
         ):
             driver.find_element(By.XPATH, '//*[@id="id_block_execution"]').click()
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check if it's enabled after reload
             self.assertEqual(
                 driver.find_element(By.ID, "id_block_execution").is_selected(),
@@ -417,7 +417,7 @@ class BaseTestCase(unittest.TestCase):
         if select.first_selected_option.get_attribute("value") != mode:
             select.select_by_value(mode)
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check it persisted after reload
             driver.get(self.base_url + "profile")
             select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
