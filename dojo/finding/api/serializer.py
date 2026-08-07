@@ -340,7 +340,14 @@ class VulnerabilityIdsField(serializers.Field):
                 if "vulnerability_id" not in item:
                     msg = 'Each vulnerability id object requires a "vulnerability_id" key.'
                     raise serializers.ValidationError(msg)
-                parsed.append(item["vulnerability_id"])
+                value = item["vulnerability_id"]
+                if not isinstance(value, str):
+                    # Everything downstream (save_vulnerability_ids -> the entity store, and the
+                    # cve mirror) assumes strings, so a non-string here has to be a 400 rather
+                    # than an AttributeError 500 further down.
+                    msg = 'Each "vulnerability_id" value must be a string.'
+                    raise serializers.ValidationError(msg)
+                parsed.append(value)
             elif isinstance(item, str):
                 parsed.append(item)
             else:

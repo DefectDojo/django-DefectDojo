@@ -527,7 +527,10 @@ class WebhookNotificationManger(NotificationManagerHelpers):
             "X-DefectDojo-Instance": settings.SITE_URL,
             "Accept": "application/json",
         }
-        if endpoint.header_name is not None:
+        # The model default for header_name is "" (not None), so endpoints created
+        # without a custom header via the API/ORM would add a header with an empty
+        # name here, which requests rejects with InvalidHeader.
+        if endpoint.header_name:
             headers[endpoint.header_name] = endpoint.header_value
         yaml_data = self._create_notification_message(
             event,
