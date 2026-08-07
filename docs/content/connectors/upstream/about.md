@@ -35,6 +35,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Backstage**
 * **Bitbucket**
 * **Black Duck**
+* **Bright Security**
 * **Bugcrowd**
 * **BurpSuite**
 * **Censys**
@@ -44,11 +45,16 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Contrast**
 * **Coverity**
 * **CrowdStrike Falcon**
+* **Deepfence ThreatMapper**
 * **Dependency-Track**
 * **Docker Scout**
 * **Edgescan**
 * **Endor Labs**
+* **Escape**
+* **Fairwinds Insights**
+* **Fortify**
 * **GitGuardian**
+* **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
 * **Google Cloud Security Command Center**
@@ -56,15 +62,19 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **HackerOne**
 * **Harbor**
 * **Have I Been Pwned**
+* **HCL AppScan**
 * **Intigriti**
 * **Intruder**
 * **IriusRisk**
 * **JFrog Xray**
 * **Jira Service Management Assets**
 * **Kubescape**
+* **Lacework / FortiCNAPP**
 * **Mend**
 * **Microsoft Defender**
 * **Microsoft Defender for Cloud**
+* **MobSF**
+* **NeuVector**
 * **Nuclei (ProjectDiscovery Cloud)**
 * **OpenVAS / Greenbone**
 * **Probely**
@@ -77,11 +87,13 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Semgrep**
 * **ServiceNow CMDB**
 * **Shodan**
-* **SonarQube**
 * **Snyk**
+* **Socket**
+* **SonarQube**
 * **Sonatype IQ**
 * **Sysdig Secure**
 * **Tenable**
+* **Tenable Web App Scanning**
 * **Veracode**
 * **Wazuh**
 * **Wiz**
@@ -89,7 +101,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 
 For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
 
-Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitLab**, **Jira Service Management Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
+Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
 These connections provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 

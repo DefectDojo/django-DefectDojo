@@ -1,5 +1,5 @@
 ---
-title: "Troubleshooting Jira errors"
+title: "Troubleshooting Jira errors (Legacy)"
 description: "Fixing issues with a Jira integration"
 weight: 2
 aliases:
@@ -110,6 +110,18 @@ This error message can appear when attempting to add a created Jira configuratio
 * If you're trying to push status changes, confirm that Jira transition mappings are set up correctly (Reopen / Close Transition IDs).
 
 * [Test](https://support.atlassian.com/jira/kb/testing-webhooks-in-jira-cloud/) your JIRA webhook using a public endpoint such as Pipedream or Beeceptor:
+
+* Confirm the Finding is actually linked to the Jira issue. If the issue isn't linked to a DefectDojo Finding, the webhook request is still accepted (HTTP `200`) but no Finding is updated.
+
+* Remember that the endpoint **always returns HTTP `200`**, whether or not an update was applied. A `200` on the sender side (a system webhook or a Jira Automation rule) does not confirm the change reached a Finding — check the response body and the DefectDojo logs to see the actual outcome.
+
+* If you're using **Jira Automation** (*Send web request*) instead of a system webhook, check the following:
+    * The request **Body** is set to **Custom data** and includes a top-level `webhookEvent` of either `"jira:issue_updated"` or `"comment_created"`. The **Empty** and **Jira issue data** body options omit this field, and DefectDojo ignores any request whose `webhookEvent` it doesn't recognize.
+    * `Content-Type: application/json` is set on the request — DefectDojo rejects any other content type.
+    * For issue updates, `issue.id` is the **numeric** Jira issue ID (`{{issue.id}}`), not the issue key, and the `resolution` and `updated` fields are both present (`resolution` may be `null`). Missing `resolution`/`updated` causes the request to be silently skipped.
+    * For comments, the `comment.self` URL contains the numeric `{{issue.id}}` in its `.../issue/<id>/comment/...` segment, and both `body` and `updateAuthor` are present.
+    * If comments aren't appearing, check **loop prevention**: DefectDojo skips a comment when its author matches the Jira account DefectDojo uses to post comments. Run the Automation rule as a different Jira user if you want those comments ingested.
+    * Use Automation's payload preview to confirm the smart values resolve as expected — their names can vary between Jira instances.
 
 ## Jira Epics aren't being created
 
