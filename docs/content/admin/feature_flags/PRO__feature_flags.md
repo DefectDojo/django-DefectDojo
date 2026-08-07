@@ -110,9 +110,18 @@ Most features are available on both installation types. The exceptions are:
 | --- | --- | --- |
 | Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
 | Locations | Both | Feature Flags page. Note that Locations cannot be turned back off once it is enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
-| Organization / Asset Relabeling | Both | Deployment configuration: `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`. |
+| Organization / Asset Relabeling | Both | Feature Flags page for the Pro UI; the Classic UI, its URLs and generated reports follow the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting. See [above](#organization--asset-relabeling). |
 
 Every other optional feature is toggled directly on the Feature Flags page on both Cloud and On-Premise instances.
+
+## Reading feature flags outside the UI
+
+You do not have to open the Feature Flags page to find out which features are enabled — flag state can also be read programmatically, which is useful when automation needs to check that a capability is available before depending on it.
+
+* **REST API (v2)** — feature flag state is exposed through the v2 API. Because the available flags change from release to release, check your own instance's interactive API documentation at `/api/v2/oa3/swagger-ui/` for the current endpoint and response shape; it is generated from the running version, so it always matches what your instance actually serves. See the [API v2 documentation](/automation/api/api-v2-docs/).
+* **MCP** — the DefectDojo Pro [MCP Server](/metrics_reports/ai/mcp_server_pro/) can also read flag state, so an AI assistant connected to your instance can take account of which optional features are turned on.
+
+Both surfaces are **read-only**. Turning a feature on or off is still done from the Feature Flags page, or — for the deployment-configured features noted above — in your deployment settings.
 
 ## Frequently asked questions
 
