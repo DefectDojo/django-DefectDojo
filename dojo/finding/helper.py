@@ -1152,7 +1152,17 @@ def removeLoop(finding_id, counter):
     # in bulk, but loops are rare (only from past bugs or high parallel load) so the
     # current implementation is acceptable.
     # get latest status
-    finding = Finding.objects.get(id=finding_id)
+    #
+    # Every id reaching this function was read earlier -- fix_loop_duplicates streams candidate
+    # ids through a cursor, and the recursion below walks ids off a queryset -- so the row can
+    # already be deleted by the time it is fetched. Callers run alongside deletes (the delete
+    # path itself calls in through prepare_duplicates_for_delete), so get() turned that ordinary
+    # race into a Finding.DoesNotExist that aborted the caller. A row that is gone has no loop
+    # left to repair, so skip it and let the run continue with the remaining candidates.
+    finding = Finding.objects.filter(id=finding_id).first()
+    if finding is None:
+        deduplicationLogger.debug("removeLoop: finding %s no longer exists, skipping", finding_id)
+        return
     real_original = finding.duplicate_finding
 
     if not real_original or real_original is None:
@@ -1172,8 +1182,15 @@ def removeLoop(finding_id, counter):
         # If not, swap them around
         tmp = finding_id
         finding_id = real_original.id
-        real_original = Finding.objects.get(id=tmp)
-        finding = Finding.objects.get(id=finding_id)
+        # Same race as the fetch above: both rows were read moments ago, but nothing holds
+        # them, so re-read defensively rather than letting one vanish take out the caller.
+        real_original = Finding.objects.filter(id=tmp).first()
+        finding = Finding.objects.filter(id=finding_id).first()
+        if real_original is None or finding is None:
+            deduplicationLogger.debug(
+                "removeLoop: finding %s or %s no longer exists, skipping", tmp, finding_id,
+            )
+            return
 
     if real_original in finding.original_finding.all():
         # remove the original from the duplicate list if it is there
