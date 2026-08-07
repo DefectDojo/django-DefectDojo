@@ -144,6 +144,14 @@ def import_scan(
     scan_file: UploadedFile | None,
     scan_type: str,
     engagement: Engagement,
+    # The importer to drive. Parameterized (I5) so a downstream distribution can substitute its own
+    # -- e.g. an async importer that defers finding creation -- WITHOUT re-implementing this
+    # service. That distinction matters: ``auto_import_scan`` below owns import-vs-reimport
+    # resolution and the "brand new test means close_old_findings=False" guard, so a caller that
+    # re-owns the decision in order to pick its own importer also re-owns that guard, and dropping
+    # it silently closes findings belonging to sibling tests. Passing the class through ``**extra``
+    # cannot work: ``_build_options`` folds ``extra`` into the importer's constructor kwargs.
+    importer_class: type = DefaultImporter,
     environment: str | None = "Development",
     auto_create_context: bool = False,
     minimum_severity: str = "Info",
@@ -184,7 +192,7 @@ def import_scan(
         extra=extra,
     )
     options["engagement"] = engagement
-    importer = DefaultImporter(**options)
+    importer = importer_class(**options)
     result_tuple = importer.process_scan(scan_file)
     return _unpack(result_tuple, mode="import", close_old_findings=close_old_findings, do_not_reactivate=do_not_reactivate)
 
@@ -195,6 +203,8 @@ def reimport_scan(
     scan_file: UploadedFile | None,
     test: Test,
     scan_type: str | None = None,
+    # See ``import_scan`` for why this is a parameter rather than a hardcoded class.
+    reimporter_class: type = DefaultReImporter,
     environment: str | None = "Development",
     auto_create_context: bool = False,
     minimum_severity: str = "Info",
@@ -236,7 +246,7 @@ def reimport_scan(
     )
     options["test"] = test
     options["engagement"] = test.engagement
-    reimporter = DefaultReImporter(**options)
+    reimporter = reimporter_class(**options)
     result_tuple = reimporter.process_scan(scan_file)
     return _unpack(result_tuple, mode="reimport", close_old_findings=close_old_findings, do_not_reactivate=do_not_reactivate)
 
@@ -255,12 +265,19 @@ def auto_import_scan(
     auto_create_context: bool = False,
     close_old_findings: bool | None = None,
     do_not_reactivate: bool = False,
+    importer_class: type = DefaultImporter,
+    reimporter_class: type = DefaultReImporter,
     **kwargs: Any,
 ) -> ImportResult:
     """
     Resolve the target test via ``AutoCreateContextManager`` and dispatch to reimport (existing
     test) or import (new). Mirrors ``ReImportScanSerializer`` auto-create semantics: when a brand
     new test is created, ``close_old_findings`` is forced False (nothing to compare against).
+
+    ``importer_class`` / ``reimporter_class`` let a downstream distribution supply its own importers
+    while this function keeps ownership of the resolution and of the ``close_old_findings`` guard
+    above -- which is the whole point, since re-implementing the resolution in order to swap the
+    importer is exactly how that guard gets dropped.
     """
     auto = AutoCreateContextManager()
     context: dict[str, Any] = {
@@ -291,6 +308,7 @@ def auto_import_scan(
             do_not_reactivate=do_not_reactivate,
             auto_create_context=auto_create_context,
             test_title=test_title,
+            reimporter_class=reimporter_class,
             **kwargs,
         )
 
@@ -306,6 +324,7 @@ def auto_import_scan(
             do_not_reactivate=do_not_reactivate,
             auto_create_context=auto_create_context,
             test_title=test_title,
+            importer_class=importer_class,
             **kwargs,
         )
 
