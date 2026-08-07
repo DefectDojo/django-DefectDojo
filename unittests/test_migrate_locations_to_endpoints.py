@@ -5,7 +5,7 @@ Locations store, erase the legacy rows, and prove the reverse command reconstruc
 including mitigation state and first-seen dates — without ever touching rows that already exist.
 """
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from django.conf import settings
 from django.core.management import call_command
@@ -87,7 +87,9 @@ class TestMigrateLocationsToEndpoints(TestCase):
         self.assertEqual(Endpoint_Status.objects.count(), 2)
         active = Endpoint_Status.objects.get(endpoint__host="active.example.com")
         self.assertFalse(active.mitigated)
-        self.assertEqual(active.date, self.first_seen, "first-seen history must survive the round trip")
+        # Endpoint_Status.date is a DateField, so the time component of first_seen is dropped on
+        # write; compare against the date part or this can never match.
+        self.assertEqual(active.date, self.first_seen.date(), "first-seen history must survive the round trip")
         mitigated = Endpoint_Status.objects.get(endpoint__host="mitigated.example.com")
         self.assertTrue(mitigated.mitigated)
         # The finding<->endpoint association is the status row itself (through-model M2M).
@@ -96,7 +98,9 @@ class TestMigrateLocationsToEndpoints(TestCase):
     def test_rerun_is_a_no_op_and_existing_rows_are_never_modified(self):
         self._forward_then_erase_legacy()
         call_command("migrate_locations_to_endpoints", "--apply")
-        sentinel = datetime(2020, 1, 1, tzinfo=UTC)
+        # A date, not a datetime: Endpoint_Status.date is a DateField, so a datetime sentinel comes
+        # back as a date and the comparison below would fail even on a correct no-op re-run.
+        sentinel = date(2020, 1, 1)
         Endpoint_Status.objects.all().update(date=sentinel)
 
         call_command("migrate_locations_to_endpoints", "--apply")
