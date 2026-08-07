@@ -189,7 +189,9 @@ Unknown filter params, unknown `?fields=`, and unknown/over-budget `?expand=` al
 ```
 
 `401` unauthenticated · `403` forbidden · `404` unknown **or unauthorized** object (existence is
-never leaked) · `400` validation/expand/filter errors.
+never leaked) · `400` validation/expand/filter errors · `409` conflict (a unique field value —
+an organization or asset name, for example — already exists; retrieve or update the existing
+record instead of creating a new one).
 
 ## v2 → v3 mapping
 

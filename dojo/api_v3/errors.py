@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.utils import IntegrityError
 from django.http import Http404, JsonResponse
 from ninja.errors import AuthenticationError, ValidationError
 
@@ -199,6 +200,35 @@ def _handle_not_found(request: HttpRequest, exc: Http404) -> JsonResponse:
     )
 
 
+def _handle_integrity_error(request: HttpRequest, exc: IntegrityError) -> JsonResponse:
+    """
+    409 for unique-constraint violations (v2 parity, #15407): the pre-INSERT uniqueness checks
+    are check-then-insert, so of two concurrent writers the loser reaches the database constraint
+    -- a conflict the caller can act on, not a server fault. Every other IntegrityError (foreign
+    key, not-null, check constraint) points at a defect on our side and must keep surfacing as a
+    500, so it is re-raised (ninja's production default for unhandled exceptions is the same
+    re-raise into Django's 500 path).
+    """
+    # v2's handler module is the canonical home of the detection predicate and the deliberately
+    # generic response wording (driver messages carry constraint/table/value -- none belong on the
+    # wire). Localized import: the v2 module pulls in dojo.models at import time.
+    from dojo.api_v2.exception_handler import (  # noqa: PLC0415 -- boundary adapter (see comment)
+        UNIQUE_VIOLATION_RESPONSE_MESSAGE,
+        _is_unique_violation,
+    )
+    if not _is_unique_violation(exc):
+        raise exc
+    # Info, not error: an expected outcome of concurrent writers, not an outage (mirrors v2).
+    logger.info("unique constraint violation on %s: %s", request.path, exc)
+    return problem_response(
+        request,
+        status=409,
+        error_type="conflict",
+        title="Conflict",
+        detail=UNIQUE_VIOLATION_RESPONSE_MESSAGE,
+    )
+
+
 # Why DRF constants in a ninja API: v3 deliberately REUSES v2's battle-tested internals -- the
 # import permission helpers, check_auto_create_permission, and dojo/finding/services.py all raise
 # rest_framework exceptions (the finding services do so intentionally: it is the exact exception
@@ -206,12 +236,13 @@ def _handle_not_found(request: HttpRequest, exc: Http404) -> JsonResponse:
 # adapter below they would surface as 500s instead of problem+json. These two maps translate a DRF
 # exception's status code onto the closed v3 error contract (I9). DRF itself stays installed
 # regardless -- all of v2 runs on it and v3's tokens live in rest_framework.authtoken.
-_DRF_ERROR_TYPES = {400: "validation", 401: "unauthorized", 403: "forbidden", 404: "not-found"}
+_DRF_ERROR_TYPES = {400: "validation", 401: "unauthorized", 403: "forbidden", 404: "not-found", 409: "conflict"}
 _DRF_ERROR_TITLES = {
     400: "Validation failed",
     401: "Authentication required",
     403: "Permission denied",
     404: "Not found",
+    409: "Conflict",
 }
 
 
@@ -241,4 +272,5 @@ def register_exception_handlers(api: NinjaAPI) -> None:
     api.add_exception_handler(AuthenticationError, _handle_auth_error)
     api.add_exception_handler(PermissionDenied, _handle_permission_denied)
     api.add_exception_handler(Http404, _handle_not_found)
+    api.add_exception_handler(IntegrityError, _handle_integrity_error)
     api.add_exception_handler(APIException, _handle_drf_api_exception)
