@@ -53,9 +53,23 @@ Because the second stage is driven by what changed, a quiet day is cheap: if nei
 
 A few consequences worth understanding:
 
-- **Imports are not enriched at import time.** A CVE Finding imported today will show EPSS/KEV values after the next enrichment cycle, not the instant it lands. If you do not want to wait, you can [run a sync on demand](#running-a-sync-on-demand).
+- **Findings are usually enriched as they are imported.** Since **v3.2.0**, EPSS/KEV enrichment is applied at import time, so a newly imported CVE Finding does not normally have to wait for the next daily cycle to show values. How immediate that is depends on whether DefectDojo has already looked the CVE up — see [What "enriched at import time" covers](#what-enriched-at-import-time-covers) below. The daily run still runs on top of this, keeping those values current as EPSS scores move and the KEV catalog changes. If a Finding you expect to be enriched is not, you can [run a sync on demand](#running-a-sync-on-demand).
 - **Values are kept current, not frozen.** A CVE that gets added to the KEV catalog will flip an existing Finding to **Known Exploited** on the next run — no re-import required.
 - **KEV removals are respected.** If a Finding's CVEs are no longer KEV-listed, the run clears the stale **Known Exploited** / **Ransomware Used** / **KEV Date** values rather than leaving them set.
+
+### What "enriched at import time" covers
+
+Because enrichment data is stored once per vulnerability, an import can only apply instantly what DefectDojo has already looked up. There are three cases:
+
+| At import, the CVE is… | When the Finding shows EPSS/KEV |
+| --- | --- |
+| **Already enriched** — DefectDojo has looked this CVE up before, for any Finding in any Product | **Immediately**, as part of the import. This is the common case: CVEs recur across scans and across teams, so most CVEs on a typical import are already known. |
+| **New to DefectDojo**, and the import brings in only a modest number of new CVEs | **Shortly after the import**, in the background. There is nothing stored to apply yet, so the import requests a lookup for just those CVEs and applies the results when it returns. |
+| **New to DefectDojo**, and the import brings in a very large number of new CVEs — a first import, or a bulk backfill | **On the next daily run**, or on the next [on-demand sync](#running-a-sync-on-demand). Looking up thousands of brand-new CVEs while the import is still running would duplicate the daily run's work, so it is deliberately left to that run. |
+
+In every case the values arrive without a re-import, and the daily run remains the backstop — nothing is skipped permanently.
+
+> **Connector syncs are enriched the same way**, with one exception: a **very large connector sync is imported in chunks**, and chunked syncs do not enrich at import time. Those Findings get their EPSS/KEV values from the next daily run, or from an on-demand sync.
 
 ## Viewing KEV/EPSS in the Vulnerability Explorer
 
@@ -98,7 +112,7 @@ While a sync is running, the button is disabled and a progress bar appears in it
 
 Only one sync runs at a time. Pressing the button while one is already in progress simply attaches to the run that is already going rather than starting a second one, so it is safe to press if you are not sure whether a sync is underway. A sync is also safe to repeat: if nothing has changed since the last run, it rewrites nothing.
 
-This is the fastest way to fill in Findings that were imported since the last daily cycle.
+This is the fastest way to pull in EPSS and KEV changes published since the last daily cycle, and to fill in any Findings that are still showing no enrichment data.
 
 ## How it impacts priority and risk
 
