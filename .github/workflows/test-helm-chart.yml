@@ -8,6 +8,9 @@ on:
       - release/**
       - hotfix/**
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     name: Lint chart (version)
@@ -109,6 +112,8 @@ jobs:
   docs_generation:
     name: Update documentation
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -117,27 +122,27 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
   
       - name: Update values in HELM chart
-        if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
+        if: github.actor == 'renovate[bot]' || github.actor == 'dependabot[bot]'
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          title='${{ github.event.pull_request.title }}'
-          chars='{}:[],&*#?|-<>=!%@'
-          for c in $(echo "$chars" | grep -o .); do
-            title="${title//"$c"/_}"
-          done
-          yq -i '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: '"$title"'\n"' helm/defectdojo/Chart.yaml
+          title="$(printf '%s' "$PR_TITLE" | tr -c '[:alnum:] ._()/-' '_')"
+          TITLE="$title" yq -i \
+            '.annotations."artifacthub.io/changes" += "- kind: changed\n  description: " + strenv(TITLE) + "\n"' \
+            helm/defectdojo/Chart.yaml
           git add helm/defectdojo/Chart.yaml
           git commit -m "ci: update Chart annotations from PR #${{ github.event.pull_request.number }}" || echo "No changes to commit"
 
       - name: Run helm-docs (update)
         uses: losisin/helm-docs-github-action@3a4528e97c49a5e83de6b78c50c61c8ee5c9f944 # v2
-        if: startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')
+        if: github.actor == 'renovate[bot]' || github.actor == 'dependabot[bot]'
         with:
           chart-search-root: "helm/defectdojo"
           git-push: true
 
       - name: Run helm-docs (check)
         uses: losisin/helm-docs-github-action@3a4528e97c49a5e83de6b78c50c61c8ee5c9f944 # v2
-        if: ${{ !(startsWith(github.head_ref, 'renovate/') || startsWith(github.head_ref, 'dependabot/')) }}
+        if: ${{ !(github.actor == 'renovate[bot]' || github.actor == 'dependabot[bot]') }}
         with:
           fail-on-diff: true
           chart-search-root: "helm/defectdojo"

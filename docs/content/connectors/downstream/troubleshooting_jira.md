@@ -3,7 +3,8 @@ title: "Troubleshooting Jira errors (Legacy)"
 description: "Fixing issues with a Jira integration"
 weight: 2
 aliases:
-   - /en/share_your_findings/troubleshooting_jira/
+  - /issue_tracking/jira/troubleshooting_jira/
+  - /en/share_your_findings/troubleshooting_jira/
 ---
 
 Here are some common issues with the Jira integration, and ways to address them.
@@ -14,8 +15,8 @@ If there is no Jira menu in the sidebar, no Jira section on the Product / Engage
 
 Check **Enable Jira Integration** on the System Settings page:
 
-* Open Source: ⚙️ **Configuration \> System Settings**, then check **Enable JIRA integration**.  A **Jira webhook secret** is also required before the form will save, so click the 🔄 icon to generate one.  See the [Jira Integration Guide](/issue_tracking/jira/os__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
-* Pro: **\<Your Edition\> Settings \> System Settings**, then check **Enable Jira Integration** under **Jira Integration Settings**.  See the [Jira Integration Guide](/issue_tracking/jira/pro__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
+* Open Source: ⚙️ **Configuration \> System Settings**, then check **Enable JIRA integration**.  A **Jira webhook secret** is also required before the form will save, so click the 🔄 icon to generate one.  See the [Jira Integration Guide](/connectors/os_jira/os__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
+* Pro: **\<Your Edition\> Settings \> System Settings**, then check **Enable Jira Integration** under **Jira Integration Settings**.  See the [Jira Integration Guide](/connectors/downstream/pro__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
 
 If the setting is already enabled and you still can't see the Jira menu, your user may be missing the **View Jira Instance** Configuration Permission, which is also required for the menu to appear.  It can be assigned directly on the User page or through a User Group.  See [About Permissions and Roles](/admin/user_management/about_perms_and_roles/#configuration-permissions).
 

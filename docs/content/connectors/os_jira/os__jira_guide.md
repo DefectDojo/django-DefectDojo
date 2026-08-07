@@ -1,8 +1,10 @@
 ---
-title: "Jira Integration Guide"
+title: "Jira"
 description: "Work with the Jira integration"
 weight: 2
 audience: opensource
+aliases:
+  - /issue_tracking/jira/os__jira_guide/
 ---
 DefectDojo's Jira integration can be used to push Finding data to one or more Jira Spaces.  By doing so, you can integrate DefectDojo into your standard development workflow.  Here are some examples of how this can work:
 

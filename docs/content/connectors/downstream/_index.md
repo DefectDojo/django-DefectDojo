@@ -1,5 +1,5 @@
 ---
-title: "Intro"
+title: "Downstream Connectors"
 description: ""
 summary: ""
 date: 2023-09-07T16:06:50+02:00
@@ -13,4 +13,7 @@ seo:
   canonical: "" # custom canonical URL (optional)
   robots: "" # custom robot tags (optional)
 exclude_search: true
+audience: pro
+aliases:
+  - /issue_tracking/pro_integration/
 ---

@@ -7,7 +7,7 @@ toc_hide: true
 The Burp Suite DAST Scan parser processes HTML reports from Burp Suite DAST and imports the findings into DefectDojo. The parser extracts vulnerability details, severity ratings, descriptions, remediation steps, and other metadata from the HTML report.
 
 ## Supported File Types
-The parser accepts a Standard Report as an HTML file. To parse an XML file instead, use the [Burp XML parser](https://docs.defectdojo.com/supported_tools/parsers/file/burp/).
+The parser accepts a Standard Report as an HTML file. To parse an XML file instead, use the [Burp XML parser](/supported_tools/parsers/file/burp/).
 
 See the Burp documentation for information on how to export a Standard Report: [Burp Suite DAST Downloading reports](https://portswigger.net/burp/documentation/dast/user-guide/work-with-scan-results/generate-reports)
 
@@ -107,7 +107,7 @@ Sample Burp Suite DAST Scan scans can be found [here](https://github.com/DefectD
 [Burp Suite DAST](https://portswigger.net/burp/dast)
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - severity
