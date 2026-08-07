@@ -5,7 +5,7 @@ toc_hide: true
 
 The [Wiz](https://www.wiz.io/) parser for DefectDojo supports imports from both Wiz Scanner Standard and SCA (Software Composition Analysis) .csv output from Wiz.io. This document details the parsing of both formats into DefectDojo field mappings, unmapped fields, and location of each field's parsing code for easier troubleshooting and analysis.
 
-<span style="background-color:rgba(242, 86, 29, 0.3)">⚠️ **DefectDojo Pro**</span> Users can also automatically create Findings directly from Wiz using the Wiz Connector.  See our [Connectors documentation](/import_data/pro/connectors/about_connectors/) for more details.
+<span style="background-color:rgba(242, 86, 29, 0.3)">⚠️ **DefectDojo Pro**</span> Users can also automatically create Findings directly from Wiz using the Wiz Connector.  See our [Connectors documentation](/connectors/upstream/about/) for more details.
 
 ## Link To Tool
 
@@ -29,7 +29,7 @@ To generate these files, export the findings from the Wiz platform by:
 Sample Wiz Scanner scans can be found in the [sample scan data folder](https://github.com/DefectDojo/django-DefectDojo/tree/master/unittests/scans/wiz).
 
 ### Default Deduplication Hashcode Fields
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - description

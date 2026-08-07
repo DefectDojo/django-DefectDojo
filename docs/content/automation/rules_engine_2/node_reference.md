@@ -239,7 +239,7 @@ The summary, description and priority come from the product's JIRA configuration
 
 `ticket.downstream`
 
-Creates or updates a ticket through a [Downstream Connector](/issue_tracking/pro_integration/integrations/).
+Creates or updates a ticket through a [Downstream Connector](/connectors/downstream/about/).
 
 | Setting | Default | Notes |
 |---------|---------|-------|

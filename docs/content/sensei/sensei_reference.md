@@ -3,7 +3,7 @@ title: "Sensei Reference"
 description: "Statuses, row actions, quotas, and troubleshooting"
 draft: false
 audience: pro
-weight: 4
+weight: 5
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Sensei is a DefectDojo Pro-only feature and is currently in BETA.</span>
 
