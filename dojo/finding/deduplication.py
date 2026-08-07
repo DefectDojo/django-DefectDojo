@@ -32,12 +32,18 @@ def get_finding_models_for_deduplication(finding_ids):
         logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
+    # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
+    # endpoints m2m hydrates legacy rows and crashes the batch. are_locations_duplicates()
+    # reads ref.location.url, which is what the locations prefetch has to reach.
+    # TODO: Delete the endpoints branch after the move to Locations
+    location_prefetch = "locations__location__url" if settings.V3_FEATURE_LOCATIONS else "endpoints"
+
     return list(
         Finding.objects.filter(id__in=finding_ids)
         .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
-            "endpoints",
+            location_prefetch,
             # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
             Prefetch(
                 "original_finding",
