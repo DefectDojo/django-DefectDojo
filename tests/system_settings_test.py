@@ -25,8 +25,17 @@ class SystemSettingsTest(BaseTestCase):
     def test_toggle_false_positive_history(self):
         # Disable then re-enable to test both states
         # (always end with disabled since that's the default)
+        #
+        # False positive history and deduplication are mutually exclusive: the
+        # settings view refuses the save outright with "Deduplicate findings and
+        # False positive history can not be set at the same time", and the
+        # deduplication toggle above deliberately ends with deduplication ON. So
+        # turn deduplication off for the duration and put it back afterwards,
+        # the way dedupe_test.py expects to find it.
+        self.disable_system_setting("id_enable_deduplication")
         self.enable_system_setting("id_false_positive_history")
         self.disable_system_setting("id_false_positive_history")
+        self.enable_system_setting("id_enable_deduplication")
 
     @on_exception_html_source_logger
     def test_toggle_jira_integration(self):
