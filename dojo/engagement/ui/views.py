@@ -45,6 +45,7 @@ from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import (
     close_engagement,
+    reassign_engagement_product_endpoints,
     reopen_engagement,
 )
 from dojo.engagement.services import (
@@ -291,13 +292,16 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get("status")
-            if form.cleaned_data.get("product") != engagement.product:
+            old_product = engagement.product
+            new_product = form.cleaned_data.get("product")
+            product_changed = new_product != old_product
+            if product_changed:
                 user_has_permission_or_403(
                     request.user,
-                    form.cleaned_data.get("product"),
+                    new_product,
                     "edit",
                 )
-            engagement.product = form.cleaned_data.get("product")
+            engagement.product = new_product
             engagement = form.save(commit=False)
             if (new_status in {"Cancelled", "Completed"}):
                 engagement.active = False
@@ -305,6 +309,10 @@ def edit_engagement(request, eid):
                 engagement.active = True
             engagement.save()
             form.save_m2m()
+            # When the engagement moves to a different product, re-home its findings'
+            # endpoints/locations onto the new product so they no longer reference the old one.
+            if product_changed:
+                reassign_engagement_product_endpoints(engagement, old_product, new_product)
 
             messages.add_message(
                 request,

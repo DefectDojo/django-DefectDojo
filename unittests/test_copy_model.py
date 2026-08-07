@@ -1,8 +1,8 @@
 
 from unittest.mock import patch
 
-from dojo.engagement.services import copy_engagement
-from dojo.location.models import Location, LocationFindingReference
+from dojo.engagement.services import copy_engagement, reassign_engagement_product_endpoints
+from dojo.location.models import Location, LocationFindingReference, LocationProductReference
 from dojo.models import Endpoint, Endpoint_Status, Engagement, Finding, Product, Test, User
 from dojo.test.services import copy_test
 from dojo.url.models import URL
@@ -419,3 +419,110 @@ class TestCopyEngagementService(DojoTestCase):
         mock_dispatch.assert_called_once()
         mock_notification.assert_called_once()
         self.assertEqual(mock_notification.call_args.kwargs["event"], "engagement_copied")
+
+
+class TestCopyFindingCrossProduct(DojoTestCase):
+
+    """
+    Copying a finding into a test in a different product must re-home the finding's
+    endpoints/locations onto the destination product, not leave them pointing at the
+    source product.
+    """
+
+    def _two_products(self):
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("xprod_type")
+        product_a = self.create_product("xprod_a", prod_type=product_type)
+        product_b = self.create_product("xprod_b", prod_type=product_type)
+        engagement_a = self.create_engagement("xeng_a", product_a)
+        engagement_b = self.create_engagement("xeng_b", product_b)
+        test_a = self.create_test(engagement=engagement_a, scan_type="NPM Audit Scan", title="test_a")
+        test_b = self.create_test(engagement=engagement_b, scan_type="NPM Audit Scan", title="test_b")
+        return user, product_a, product_b, test_a, test_b
+
+    # TODO: Delete this after the move to Locations
+    @skip_unless_v2
+    def test_copy_finding_to_other_product_rehomes_endpoint(self):
+        user, product_a, product_b, test_a, test_b = self._two_products()
+        endpoint = Endpoint.from_uri("host-a.example.com")
+        endpoint.product = product_a
+        endpoint.save()
+        finding = Finding.objects.create(test=test_a, reporter=user)
+        Endpoint_Status.objects.create(finding=finding, endpoint=endpoint)
+        # Copy the finding into product B's test
+        finding_copy = finding.copy(test=test_b)
+        # The copied finding's endpoint must belong to the destination product
+        copied_status = finding_copy.status_finding.all().first()
+        self.assertIsNotNone(copied_status)
+        self.assertEqual(product_b, copied_status.endpoint.product)
+        # The original endpoint (and finding) is untouched
+        endpoint.refresh_from_db()
+        self.assertEqual(product_a, endpoint.product)
+
+    @skip_unless_v3
+    def test_copy_finding_to_other_product_rehomes_location(self):
+        user, product_a, product_b, test_a, test_b = self._two_products()
+        finding = Finding.objects.create(test=test_a, reporter=user)
+        url = URL(host="host-a.example.com")
+        url.save()
+        location = url.location
+        location.associate_with_finding(finding=finding)
+        # Sanity: the location is associated with product A only
+        self.assertTrue(LocationProductReference.objects.filter(location=location, product=product_a).exists())
+        self.assertFalse(LocationProductReference.objects.filter(location=location, product=product_b).exists())
+        # Copy the finding into product B's test
+        finding.copy(test=test_b)
+        # The shared location is now also associated with the destination product
+        self.assertTrue(LocationProductReference.objects.filter(location=location, product=product_b).exists())
+
+
+class TestMoveEngagementProduct(DojoTestCase):
+
+    """
+    Moving an engagement to a different product must re-home the endpoints/locations of
+    that engagement's findings onto the new product.
+    """
+
+    def _setup(self):
+        user, _ = User.objects.get_or_create(username="admin")
+        product_type = self.create_product_type("mv_prod_type")
+        product_a = self.create_product("mv_prod_a", prod_type=product_type)
+        product_b = self.create_product("mv_prod_b", prod_type=product_type)
+        engagement = self.create_engagement("mv_eng", product_a)
+        test = self.create_test(engagement=engagement, scan_type="NPM Audit Scan", title="mv_test")
+        finding = Finding.objects.create(test=test, reporter=user)
+        return user, product_a, product_b, engagement, finding
+
+    def _move(self, engagement, old_product, new_product):
+        engagement.product = new_product
+        engagement.save()
+        reassign_engagement_product_endpoints(engagement, old_product, new_product)
+
+    # TODO: Delete this after the move to Locations
+    @skip_unless_v2
+    def test_move_engagement_rehomes_endpoints(self):
+        _user, product_a, product_b, engagement, finding = self._setup()
+        endpoint = Endpoint.from_uri("host-a.example.com")
+        endpoint.product = product_a
+        endpoint.save()
+        endpoint_status = Endpoint_Status.objects.create(finding=finding, endpoint=endpoint)
+        # Move the engagement to product B
+        self._move(engagement, product_a, product_b)
+        # The finding's endpoint status now points at an endpoint in the new product
+        endpoint_status.refresh_from_db()
+        self.assertEqual(product_b, endpoint_status.endpoint.product)
+
+    @skip_unless_v3
+    def test_move_engagement_rehomes_locations(self):
+        _user, product_a, product_b, engagement, finding = self._setup()
+        url = URL(host="host-a.example.com")
+        url.save()
+        location = url.location
+        location.associate_with_finding(finding=finding)
+        self.assertTrue(LocationProductReference.objects.filter(location=location, product=product_a).exists())
+        # Move the engagement to product B
+        self._move(engagement, product_a, product_b)
+        # The location is now associated with the new product, and the stale
+        # old-product association is removed since no finding there references it
+        self.assertTrue(LocationProductReference.objects.filter(location=location, product=product_b).exists())
+        self.assertFalse(LocationProductReference.objects.filter(location=location, product=product_a).exists())
