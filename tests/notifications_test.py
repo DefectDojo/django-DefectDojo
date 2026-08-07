@@ -20,8 +20,8 @@ class NotificationTest(BaseTestCase):
         driver.get(self.base_url + "system_settings")
         mail_control = driver.find_element(By.ID, f"id_enable_{self.type}_notifications")
         if not mail_control.is_selected():
-            mail_control.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_centered(driver, mail_control)
+        self.click_submit(driver)
 
     def disable_notification(self):
         driver = self.driver
@@ -29,8 +29,8 @@ class NotificationTest(BaseTestCase):
         driver.get(self.base_url + "system_settings")
         mail_control = driver.find_element(By.ID, f"id_enable_{self.type}_notifications")
         if mail_control.is_selected():
-            mail_control.click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_centered(driver, mail_control)
+        self.click_submit(driver)
 
     def test_disable_personal_notification(self):
         # Login to the site. Password will have to be modified
@@ -136,10 +136,10 @@ class NotificationTest(BaseTestCase):
             "scan_added": driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").is_selected(),
         }
 
-        driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']").click()
-        driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']").click()
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='product_added' and @value='mail']"))
+        self.click_centered(driver, driver.find_element(By.XPATH, "//input[@name='scan_added' and @value='mail']"))
 
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="Settings saved"))
         self.assertNotEqual(originally_selected["product_added"],

@@ -250,22 +250,30 @@ class BaseTestCase(unittest.TestCase):
         driver.find_element(By.CSS_SELECTOR, f'[data-testid="product-tab-{tab}"]').click()
         return driver
 
-    def click_submit(self, driver, selector="input.btn.btn-primary"):
+    def click_centered(self, driver, element):
         """
-        Click a form's submit button, scrolling it clear of the page chrome first.
+        Click an element after centring it in the viewport.
 
-        On a long form the button row ends up next to the footer, and the footer
-        wins the click often enough to matter. Selenium sometimes reports that
-        honestly (ElementClickInterceptedException naming #footer-wrapper) and
-        sometimes the click just lands on the footer, in which case the form is
-        never submitted and the test fails much later on a success banner that
-        was never going to appear. Centring the button in the viewport puts it
-        clear of the footer before we click it.
+        Anything near the bottom of a long form competes with the footer, and
+        the footer wins the click often enough to matter. Selenium sometimes
+        reports that honestly (ElementClickInterceptedException naming
+        #footer-wrapper) and sometimes the click simply lands on the footer and
+        is lost, which is the dangerous case: nothing raises, and the test fails
+        later somewhere that looks unrelated. Centring the element first puts it
+        clear of the footer.
+
+        This bites both kinds of click. A lost click on a submit button leaves
+        the form unsubmitted. A lost click on a checkbox is worse: the submit
+        still happens, so the form saves with the checkbox in its old state and
+        the setting silently does not change.
         """
-        element = driver.find_element(By.CSS_SELECTOR, selector)
         driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
         element.click()
         return driver
+
+    def click_submit(self, driver, selector="input.btn.btn-primary"):
+        """Click a form's submit button, clear of the footer. See click_centered()."""
+        return self.click_centered(driver, driver.find_element(By.CSS_SELECTOR, selector))
 
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         if not self.is_element_by_id_present(no_content_id):
@@ -347,7 +355,7 @@ class BaseTestCase(unittest.TestCase):
         is_enabled = driver.find_element(By.ID, setting_id).is_selected()
         if (enable and not is_enabled) or (not enable and is_enabled):
             # driver.find_element(By.XPATH, '//*[@id=' + setting_id + ']').click()
-            driver.find_element(By.ID, setting_id).click()
+            self.click_centered(driver, driver.find_element(By.ID, setting_id))
             # save settings
             self.click_submit(driver)
             # check if it's enabled after reload
@@ -390,7 +398,7 @@ class BaseTestCase(unittest.TestCase):
             driver.find_element(By.ID, "id_block_execution").is_selected()
             != block_execution
         ):
-            driver.find_element(By.XPATH, '//*[@id="id_block_execution"]').click()
+            self.click_centered(driver, driver.find_element(By.ID, "id_block_execution"))
             # save settings
             self.click_submit(driver)
             # check if it's enabled after reload
