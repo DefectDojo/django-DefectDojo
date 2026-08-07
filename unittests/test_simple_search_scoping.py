@@ -1,7 +1,15 @@
 from django.test import override_settings
 from django.urls import reverse
 
-from dojo.models import Dojo_User, Language_Type, Languages, Product, Product_Type, System_Settings
+from dojo.models import (
+    Dojo_User,
+    Finding_Template,
+    Language_Type,
+    Languages,
+    Product,
+    Product_Type,
+    System_Settings,
+)
 from unittests.dojo_test_case import DojoTestCase
 
 
@@ -43,3 +51,33 @@ class TestSimpleSearchProductScoping(DojoTestCase):
             {row.product_id for row in response.context["languages"]},
             {self.my_product.id},
         )
+
+
+@override_settings(SECURE_SSL_REDIRECT=False, V3_FEATURE_LOCATIONS=False, WATSON_SEARCH_ENABLED=True)
+class TestSimpleSearchFindingTemplateScoping(DojoTestCase):
+
+    def setUp(self):
+        System_Settings.objects.get_or_create(id=1)
+        super().setUp()
+        self.template = Finding_Template.objects.create(
+            title="TemplateScopingTitle", description="TemplateScopingBody")
+
+    def _search(self, user):
+        self.client.force_login(user)
+        # Operator-only query: no keywords means no watson filter, so this covers the seed.
+        return self.client.get(reverse("simple_search"), {"query": "template:any"})
+
+    def test_finding_templates_hidden_without_global_permission(self):
+        user = Dojo_User.objects.create(username="template-scoping-nobody", is_active=True)
+        response = self._search(user)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["finding_templates"]), [])
+        self.assertNotContains(response, "TemplateScopingBody")
+
+    def test_finding_templates_visible_with_global_permission(self):
+        user = Dojo_User.objects.create(
+            username="template-scoping-staff", is_active=True, is_staff=True)
+        response = self._search(user)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [row.id for row in response.context["finding_templates"]], [self.template.id])

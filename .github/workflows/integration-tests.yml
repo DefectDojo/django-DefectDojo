@@ -136,7 +136,20 @@ jobs:
           NGINX_VERSION: alpine
 
       - name: Start Dojo
-        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey webhook.endpoint
+        timeout-minutes: 10
+        # image pulls from Docker Hub time out every so often, so retry before failing the job
+        run: |-
+             RETRY=0
+             until docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey webhook.endpoint
+               do
+               if [[ $RETRY -gt 2 ]]; then
+                 echo "ERROR: could not start Dojo after $RETRY retries"
+                 exit 1
+               fi
+               RETRY=$((RETRY+1))
+               echo "Attempt $RETRY to start Dojo"
+               sleep 15
+             done
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: alpine

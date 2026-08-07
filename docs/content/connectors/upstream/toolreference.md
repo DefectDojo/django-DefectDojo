@@ -1,10 +1,11 @@
 ---
-title: "Tool-Specific Connector Setup"
+title: "Upstream Connectors Tool Reference"
 description: "Our list of supported Connector tools, and how to set them up with DefectDojo"
 aliases:
+  - /import_data/pro/connectors/connectors_tool_reference/
   - /en/connecting_your_tools/connectors/connectors_tool_reference
 ---
-<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Connectors are a DefectDojo Pro-only feature.</span>
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: Upstream Connectors are a DefectDojo Pro-only feature.</span>
 
 When setting up a Connector for a supported tool, you'll need to give DefectDojo specific information related to the tool's API. At a base level, you'll need:
 
@@ -221,6 +222,8 @@ A Black Duck **API token** for a user that can see the projects you want to impo
 
 Each Black Duck project becomes a Record. By default the connector imports the project's **released** version (falling back to its first version); each vulnerable BOM component of that version becomes a finding, titled `{vulnerability} in {component}:{version}`.
 
+This connector is distinct from the file-based Black Duck parsers — its findings use the dedicated **Black Duck - Connectors Import** scan type.
+
 ## **Bitbucket**
 
 The Bitbucket connector is an **Asset Connector**: it enumerates the repositories in the Bitbucket Cloud workspaces you name and creates a DefectDojo Asset for each repository, grouped into Organizations by Bitbucket project. No findings are imported.
@@ -242,18 +245,6 @@ Only Bitbucket Cloud (bitbucket.org) is supported. Bitbucket Server reached end 
 4. Enter one or more workspace slugs (comma-separated) in the **Workspace Slugs** field. This field is required: Bitbucket's scoped API tokens cannot list workspaces automatically, so DefectDojo needs to be told which workspaces to read.
 
 Each repository becomes a Record named after the repository, grouped by its Bitbucket **project**.
-
-## **Black Duck**
-
-The Black Duck connector uses the Black Duck API to import findings from your Black Duck server. DefectDojo creates a Record for each Black Duck **project**.
-
-#### Connector Mappings
-
-1. Enter your Black Duck server base URL in the **Location** field.
-2. Enter a valid **API token** in the **Secret** field.
-3. Optionally, set a **Minimum Severity** to limit which findings are imported.
-
-This connector is distinct from the file-based Black Duck parsers — its findings use the dedicated **Black Duck - Connectors Import** scan type.
 
 ## **Bugcrowd**
 
@@ -778,21 +769,6 @@ You will need a Harbor account (or a **robot account**) with pull/read access to
 
 Each Harbor project becomes a Record. For every artifact that has a completed scan, its vulnerabilities are imported as findings; the affected package/version, a CVSS\-derived severity, the CVE, the CWE, and a remediation (fixed version) are included where Harbor provides them. Only scanned artifacts are imported — trigger a scan in Harbor for images that have not been scanned yet.
 
-## **Harbor**
-
-The Harbor connector imports **container image vulnerability findings** from your Harbor registry. DefectDojo creates a Record for each Harbor **project**.
-
-#### Prerequisites
-
-A Harbor user or **robot account** with pull/read access to the projects you want to import.
-
-#### Connector Mappings
-
-1. Enter your Harbor instance base URL in the **Location** field.
-2. Enter the Harbor username in the **Username** field. For a robot account, enter the name exactly as Harbor shows it — `robot$<name>` by default (the robot prefix is configurable per instance).
-3. Enter the password for the user, or the robot account secret, in the **Password** field.
-4. Optionally, set a **Minimum Severity** to limit which findings are imported.
-
 ## **Have I Been Pwned**
 
 The Have I Been Pwned (HIBP) connector uses the HIBP REST API to report which accounts on your organization's own domains have appeared in known data breaches. DefectDojo discovers each domain you have verified with HIBP and imports one finding per breach affecting that domain.
@@ -849,22 +825,6 @@ You will need an Intigriti **company API token**. In the Intigriti company porta
 DefectDojo maps each Intigriti **program** to a Record and each **submission** to a finding, keyed by the submission code. The finding severity follows Intigriti's rating (Exceptional/Critical → Critical, then High/Medium/Low, otherwise Informational), and the submission's lifecycle state maps to the finding's status: open/triage submissions are active, accepted submissions are verified, and closed submissions become mitigated, a duplicate, out-of-scope, false-positive or risk-accepted according to their close reason. The finding description carries the report's vulnerability type, affected asset, proof of concept and the researcher's answers.
 
 See the [Intigriti API documentation](https://kb.intigriti.com/en/articles/6117846-intigriti-api) for more information.
-
-## **Intigriti**
-
-The Intigriti connector uses the Intigriti company API to import submissions as findings. DefectDojo creates a Record for each **program**.
-
-#### Prerequisites
-
-You will need an Intigriti **company API access token**, generated under **Company Settings > API**. Read access to submissions is sufficient. We recommend a dedicated service account so automated activity is easy to distinguish from manual team actions.
-
-#### Connector Mappings
-
-1. Enter the Intigriti API base URL in the **Location** field.
-2. Enter your company API access token in the **API Token** field. It is sent as a Bearer token.
-3. Optionally, set a **Minimum Severity** to limit which findings are imported.
-
-Each Intigriti program becomes a Record, and its submissions are imported as findings.
 
 ## **Intruder**
 
@@ -1504,19 +1464,3 @@ You will need a YesWeHack **Personal Access Token (PAT)**. Read access to your p
 3. Optionally, set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity will not be imported.
 
 DefectDojo creates a separate Record for each program your token can access, and imports each report as a finding. The finding's severity is taken from the report's CVSS rating (falling back to the triage priority), and its status reflects the report's workflow state — for example, resolved reports are imported as mitigated, and reports marked invalid or out of scope are imported as inactive.
-
-## **YesWeHack**
-
-The YesWeHack connector uses the YesWeHack API to import bug bounty reports as findings. DefectDojo creates a Record for each **program**.
-
-#### Prerequisites
-
-You will need a YesWeHack API token. We recommend a dedicated service account so automated activity is easy to distinguish from manual team actions.
-
-#### Connector Mappings
-
-1. Enter the YesWeHack API base URL in the **Location** field.
-2. Enter your API token in the **Secret** field.
-3. Optionally, set a **Minimum Severity** to limit which findings are imported.
-
-Each YesWeHack program becomes a Record, and its reports are imported as findings.
