@@ -100,6 +100,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
 from dojo.product_announcements import (
@@ -498,7 +499,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -579,7 +580,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -1433,7 +1434,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "engagement": eng,
             "product_tab": product_tab,
             "accepted_findings": fpage,
-            "notes": risk_acceptance.notes.all(),
+            "notes": visible_notes(risk_acceptance.notes.all(), request.user),
             "eng": eng,
             "edit_mode": edit_mode,
             "risk_acceptance_form": risk_acceptance_form,

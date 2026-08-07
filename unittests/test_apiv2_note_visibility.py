@@ -1,12 +1,17 @@
 """
-Regression tests for private note visibility on the API.
+Regression tests for private note visibility.
 
-The ``notes`` relation used to be serialized straight off the parent object,
-so any user who could read a Finding, Test, Engagement or Risk Acceptance
-received every note attached to it, including notes another user had marked
-private. ``NoteSerializer`` now filters through ``VisibleNotesSerializer``.
+The ``notes`` relation used to be serialized and rendered straight off the
+parent object, so any user who could read a Finding, Test, Engagement or Risk
+Acceptance received every note attached to it, including notes another user had
+marked private. Every read path now goes through ``visible_notes``.
 """
 
+import datetime
+
+from django.test import Client
+from django.urls import reverse
+from django.utils import timezone
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 
@@ -21,14 +26,18 @@ from dojo.models import (
     Test,
     Test_Type,
 )
+from dojo.notes.helper import visible_notes
 
 from .dojo_test_case import DojoAPITestCase
 
 PRIVATE = "INTERNAL: note visibility private entry"
 PUBLIC = "note visibility public entry"
 
+START = datetime.date(2026, 1, 1)
+END = datetime.date(2026, 1, 2)
 
-class NoteVisibilityAPITest(DojoAPITestCase):
+
+class NoteVisibilityTest(DojoAPITestCase):
 
     """A private note reaches its author and no other member of the product."""
 
@@ -42,7 +51,7 @@ class NoteVisibilityAPITest(DojoAPITestCase):
 
         product_type, _ = Product_Type.objects.get_or_create(name="note-visibility")
         self.product, _ = Product.objects.get_or_create(
-            name="NoteVisibilityAPITest", description="Test", prod_type=product_type,
+            name="NoteVisibilityTest", description="Test", prod_type=product_type,
         )
         for user in (self.author, self.colleague):
             self.product.authorized_users.add(user)
@@ -52,12 +61,12 @@ class NoteVisibilityAPITest(DojoAPITestCase):
 
         self.engagement = Engagement.objects.create(
             name="note visibility", product=self.product,
-            target_start="2026-01-01", target_end="2026-01-02",
+            target_start=START, target_end=END,
         )
         test_type, _ = Test_Type.objects.get_or_create(name="note-visibility-tt")
         self.test = Test.objects.create(
             engagement=self.engagement, test_type=test_type,
-            target_start="2026-01-01", target_end="2026-01-02",
+            target_start=self._aware(START), target_end=self._aware(END),
         )
         self.finding = Finding.objects.create(
             title="note visibility finding", test=self.test, reporter=self.author,
@@ -67,6 +76,10 @@ class NoteVisibilityAPITest(DojoAPITestCase):
         for parent in (self.finding, self.test, self.engagement):
             parent.notes.add(Notes.objects.create(entry=PRIVATE, author=self.author, private=True))
             parent.notes.add(Notes.objects.create(entry=PUBLIC, author=self.author, private=False))
+
+    @staticmethod
+    def _aware(day):
+        return timezone.make_aware(datetime.datetime.combine(day, datetime.time()))
 
     def _member(self, username):
         user, _ = Dojo_User.objects.get_or_create(
@@ -95,6 +108,11 @@ class NoteVisibilityAPITest(DojoAPITestCase):
         self.assertEqual(200, response.status_code, f"{path}: {response.content[:300]}")
         return response.content.decode()
 
+    def _entries(self, user):
+        return {n.entry for n in visible_notes(self.finding.notes.all(), user)}
+
+    # ---- the API -----------------------------------------------------------
+
     def test_colleague_does_not_receive_another_members_private_note(self):
         for path in self._paths():
             body = self._body(self.colleague, path)
@@ -118,3 +136,26 @@ class NoteVisibilityAPITest(DojoAPITestCase):
         )
         self.assertEqual(200, response.status_code, response.content[:300])
         self.assertNotIn(PRIVATE, response.content.decode())
+
+    # ---- the rule the UI shares with the serializer ------------------------
+
+    def test_helper_gives_the_author_both(self):
+        self.assertEqual({PRIVATE, PUBLIC}, self._entries(self.author))
+
+    def test_helper_gives_a_colleague_only_the_public_one(self):
+        self.assertEqual({PUBLIC}, self._entries(self.colleague))
+
+    def test_helper_gives_a_superuser_both(self):
+        self.assertEqual({PRIVATE, PUBLIC}, self._entries(self.superuser))
+
+    def test_helper_without_a_user_gives_only_the_public_one(self):
+        self.assertEqual({PUBLIC}, self._entries(None))
+
+    def test_finding_page_context_is_filtered(self):
+        client = Client()
+        client.force_login(self.colleague)
+        response = client.get(reverse("view_finding", args=(self.finding.id,)))
+        self.assertEqual(200, response.status_code)
+        entries = {n.entry for n in response.context["notes"]}
+        self.assertNotIn(PRIVATE, entries)
+        self.assertIn(PUBLIC, entries)

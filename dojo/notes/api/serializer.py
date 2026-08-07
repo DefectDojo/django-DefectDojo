@@ -1,9 +1,9 @@
 from django.db import models
-from django.db.models import Q
 from django.utils import timezone
 from rest_framework import serializers
 
 from dojo.note_type.api.serializer import NoteTypeSerializer
+from dojo.notes.helper import visible_notes
 from dojo.notes.models import NoteHistory, Notes
 from dojo.user.api.serializer import UserStubSerializer
 
@@ -24,12 +24,7 @@ class VisibleNotesSerializer(serializers.ListSerializer):
     def to_representation(self, data):
         notes = data.all() if isinstance(data, models.Manager) else data
         user = getattr(self.context.get("request"), "user", None)
-        if user is None:
-            # No requester to compare against, so keep private notes out.
-            notes = notes.filter(private=False)
-        elif not user.is_superuser:
-            notes = notes.filter(Q(private=False) | Q(author=user))
-        return super().to_representation(notes)
+        return super().to_representation(visible_notes(notes, user))
 
 
 class NoteSerializer(serializers.ModelSerializer):
