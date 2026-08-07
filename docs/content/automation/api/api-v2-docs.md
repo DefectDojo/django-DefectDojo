@@ -292,6 +292,50 @@ When importing scan results at scale (e.g., SBOM pipelines with thousands of com
 - **Add delays between consecutive API calls** to avoid worker pool exhaustion, which causes HTTP 502 errors.
 - **Use Reimport** (`/api/v2/reimport-scan/`) for recurring scans to update existing findings rather than creating duplicates.
 
+## Background import responses (API: `background_import`)
+
+A background import returns as soon as the uploaded report has been parsed, before any
+findings have been written. Its response therefore describes *scheduled* work, and it is
+shaped differently from a synchronous one. This applies to `/api/v2/import-scan/` and
+`/api/v2/reimport-scan/` whenever `background_import` is `true`, or whenever the
+`api_async_import` system setting turns it on for every import.
+
+A background response contains:
+
+- `background_import` — `true`. This is the field to branch on.
+- `status` — the lifecycle status of the test at the moment the response was produced:
+  `Processing`, `Post Processing - Deduplication`,
+  `Post Processing - False Positive History`, `Processed` or `Failed`.
+- `findings_parsed` — how many findings were read out of the report. This is a parse
+  count, not a created count: deduplication and the import options you supplied decide
+  how many findings are actually written.
+- `test_id` (and `engagement_id`, `product_id`, `product_type_id`) — the identifiers to
+  poll.
+- `message` — the same information as `status` and `findings_parsed`, in prose. Prefer
+  the structured fields.
+
+It does **not** contain `statistics`, and it does not contain `deduplication_complete`.
+Those keys are absent rather than zero, because at that point no findings have been
+created and reporting zeros would misdescribe the import. A client that reads
+`response["statistics"]` unconditionally will fail on a background import — read
+`background_import` first, or use `statistics` only on the synchronous path.
+
+To follow a background import to completion, poll the test:
+
+```
+POST /api/v2/import-scan/        (background_import=true)  -> test_id, status, findings_parsed
+GET  /api/v2/tests/{test_id}/                              -> status, processing
+```
+
+Repeat the `GET` until `status` is `Processed` (the import finished, and the test's
+finding counts are now meaningful) or `Failed` (the import did not complete). While the
+import is running, `processing` is `true` and `status` reports which phase it is in. Use
+a few seconds between polls; a large report can spend minutes in post-processing.
+
+A synchronous import (`background_import` omitted or `false`) is unchanged: it returns
+once the findings have been written, includes `statistics`, and does not include `status`
+or `findings_parsed`.
+
 ## Using the Scan Completion Date (API: `scan_date`) field
 
 DefectDojo offers a plethora of supported scanner reports, but not all of them contain the
