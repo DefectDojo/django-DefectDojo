@@ -885,14 +885,25 @@ Required token scopes for JFrog Xray:
 
 By default, DefectDojo maps each Artifactory **repository** as a separate Record. Each Sync generates a complete vulnerability report per repository via Xray, so finding statuses in DefectDojo always reflect the current state of the repository.
 
+#### Scoping discovery to specific repositories (optional)
+
+By default the connector discovers **every** repository in your JFrog instance. On instances with a large number of repositories — many of which may not be relevant to security review — discovery can be narrowed with the optional `repository_filter` setting on the connector configuration.
+
+`repository_filter` is applied during discovery, **before any per\-repository work is done**. A repository excluded by the filter costs nothing: no Xray report is generated for it and, in artifact mode, none of its artifacts are enumerated. This makes it the most effective way to cut both Sync time and the load DefectDojo places on your JFrog instance — more so than any setting applied later in the Sync.
+
+Leave it unset to discover every repository.
+
 #### Artifact-Level Records
 
-Enabling the **Artifact-Level Records** toggle on the connection changes discovery to one level below the repository: every first-level entry under a repository root (for Docker repositories, each image; for generic repositories, each top-level file or folder) becomes its own Record. Each Sync still generates a single Xray report per repository — DefectDojo attributes each vulnerability to the artifacts it impacts, so the load on your JFrog instance does not increase.
+The **Artifact-Level Records** toggle changes discovery to one level below the repository: every first-level entry under a repository root (for Docker repositories, each image; for generic repositories, each top-level file or folder) becomes its own Record. Each Sync still generates a single Xray report per repository — DefectDojo attributes each vulnerability to the artifacts it impacts, so the load on your JFrog instance does not increase.
+
+> **Check which mode you are in before your first Sync.** Artifact\-Level Records is **on by default for new installations**. Installations that predate the feature keep their existing repository\-level layout, so the toggle is off for them until someone turns it on. In both cases the toggle can be changed at any time — see *Switching an existing connection* below.
 
 With Artifact-Level Records enabled:
 
 * Repositories remain as Records and become **parent assets**: they carry no findings themselves, but when the Asset Hierarchy feature is enabled, DefectDojo automatically relates each artifact asset to its repository asset with a `parent` relationship. Assets can then be filtered by parent/child, and findings roll up the hierarchy.
 * A vulnerability that impacts several artifacts is imported into each affected artifact's asset, so every asset shows the complete set of findings that affect it.
+* Findings are scoped to each artifact's **latest build**, so an artifact's findings describe its current build rather than accumulating results from every build Xray has ever scanned.
 * Hierarchy relationships created by the connector never overwrite relationships you created by hand. If an asset already has a parent you assigned, the connector leaves it alone.
 * The token additionally needs read access to the Artifactory storage API (included in the scopes above).
 
