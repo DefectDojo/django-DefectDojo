@@ -471,7 +471,7 @@ class FindingViewSet(
         notes = finding.notes.all()
 
         serialized_notes = FindingToNotesSerializer(
-            {"finding_id": finding, "notes": notes},
+            {"finding_id": finding, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 

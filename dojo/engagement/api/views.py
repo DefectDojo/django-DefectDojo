@@ -220,7 +220,7 @@ class EngagementViewSet(
         notes = engagement.notes.all()
 
         serialized_notes = EngagementToNotesSerializer(
-            {"engagement_id": engagement, "notes": notes},
+            {"engagement_id": engagement, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 

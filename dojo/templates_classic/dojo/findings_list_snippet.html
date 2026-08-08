@@ -1,5 +1,6 @@
 {% load navigation_tags %}
 {% load display_tags %}
+{% load get_note_status %}
 {% load authorization_tags %}
 
 {% load static %}
@@ -598,20 +599,22 @@
                                                 data-original-title="Component"
                                                 title=""></i>
                                             {% endif %}
-                                            {% if finding.notes.all %}
+                                            {% with visible_notes=finding.notes.all|visible_to:request.user %}
+                                            {% if visible_notes %}
                                                 <i class="glyphicon glyphicon-comment has-popover dojo-sup"
                                                 data-trigger="hover"
-                                                data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"
+                                                data-content="{{ visible_notes.0.author }} at {{ visible_notes.0.date }}: {{ visible_notes.0 }}"
                                                 data-placement="left"
                                                 data-container="body"
-                                                data-original-title="Most Recent Note ({{ finding.notes.count }} total)"
+                                                data-original-title="Most Recent Note ({{ visible_notes.count }} total)"
                                                 title=""></i>
                                                 <a href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                     class="dojo-sup"
-                                                    alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
-                                                        ({{ finding.notes.count }})
+                                                    alt="{{ visible_notes.count }} note{{ visible_notes.count|pluralize }}">
+                                                        ({{ visible_notes.count }})
                                                 </a>
                                             {% endif %}
+                                            {% endwith %}
                                             {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                         </td>
                                         <td class="nowrap">

@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 
 from dojo.notes.models import NoteHistory, Notes
 
@@ -21,6 +21,21 @@ def notes_prefetch(lookup="notes"):
             Prefetch("history", queryset=NoteHistory.objects.select_related("current_editor", "note_type")),
         ),
     )
+
+
+def visible_notes(notes, user):
+    """
+    The notes ``user`` may see: non-private, or ones they wrote themselves.
+
+    Every read path goes through here, so the API and the UI cannot drift apart
+    on what ``private`` means. A caller with no user (report rendering) gets the
+    non-private notes only.
+    """
+    if user is None:
+        return notes.filter(private=False)
+    if user.is_superuser:
+        return notes
+    return notes.filter(Q(private=False) | Q(author=user))
 
 
 def delete_related_notes(obj):
