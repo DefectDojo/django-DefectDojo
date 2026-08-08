@@ -1337,6 +1337,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Quark-Engine Scan": ["title", "component_name", "vuln_id_from_tool"],
     "ScubaGoggles Scan": ["vuln_id_from_tool", "component_name"],
     "ScubaGear Scan": ["vuln_id_from_tool", "severity"],
+    "kubesec Scan": ["vuln_id_from_tool", "component_name", "file_path"],
+    "Cloudsplaining Scan": ["vuln_id_from_tool", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1734,6 +1736,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Quark-Engine Scan": DEDUPE_ALGO_HASH_CODE,
     "ScubaGoggles Scan": DEDUPE_ALGO_HASH_CODE,
     "ScubaGear Scan": DEDUPE_ALGO_HASH_CODE,
+    "kubesec Scan": DEDUPE_ALGO_HASH_CODE,
+    "Cloudsplaining Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
