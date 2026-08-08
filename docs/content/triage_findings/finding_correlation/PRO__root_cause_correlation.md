@@ -101,6 +101,35 @@ Query strings, fragments and ports are ignored when comparing URLs, so `/search?
 > findings identify a URL; mapping between the two requires a route map DefectDojo does not have.
 > Endpoint matching relates dynamic findings to each other.
 
+### When a CVE is already covered by a component
+
+A Finding joins its component cause *and* each of its CVE causes, so an SCA Finding for
+`log4j-core 2.14.1` carrying two CVEs produces three Root Causes. Left alone, all three compete
+for the top of the ranked list — but only one of them is a piece of work. Bumping `log4j-core`
+to a fixed version clears both CVEs outright; there is no separate "fix CVE-2021-44228" action.
+
+So a CVE Root Cause is marked **covered** when *every* one of its active member Findings is also
+an active member of a single component or resource cause. Covered causes are hidden from the
+Root Causes page by default, keeping the list to things you can actually act on.
+
+The moment **one** member sits outside that component, the CVE stands on its own again. That is
+the container-image Finding that reports only a CVE with no component attached: no component fix
+reaches it, so the CVE is genuinely separate work. This is exactly the cross-domain case
+correlation exists to surface, and it is never hidden.
+
+Turn on **Show covered CVEs** above the table to see them. Each one is labelled with the cause
+that covers it, so it is clear which fix clears it. Covered causes are only hidden from the
+default list — they keep their members, evidence and feedback, they remain reachable from a
+Finding's Root Causes panel, and a saved link to one still opens.
+
+Coverage is re-evaluated on every run, in both directions: a CVE stops being covered as soon as
+an uncovered Finding appears, and becomes covered again once that Finding is fixed or triaged
+away. Rejecting a link takes that member out of the calculation too, since you have said it does
+not belong.
+
+Component and resource causes are never marked covered, even when their members overlap
+another's. Each one has its own version to bump, so each is real work.
+
 ### Which Findings are eligible
 
 Only live, actionable Findings are correlated. A Finding is excluded while it is inactive,
@@ -122,6 +151,10 @@ you have access to, ranked so the largest, riskiest ones come first.
 | **Products** | Blast radius — how many Products are affected |
 | **Risk** | Aggregate risk, summed from the severities of the active members |
 | **Muted** | Whether the cluster has been muted |
+
+CVE causes that a component or resource cause already covers entirely are hidden unless
+**Show covered CVEs** is on; see
+[When a CVE is already covered by a component](#when-a-cve-is-already-covered-by-a-component).
 
 Selecting a row opens the cluster, listing each member Finding with its severity, Product,
 domain, **match** type, and the **evidence** that links it. Evidence is recorded per link, so a
