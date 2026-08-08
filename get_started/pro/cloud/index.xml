@@ -19,4 +19,9 @@
  id="h-rh-i-0"
 &gt;&lt;/p&gt;</description></item><item><title>Set up an additional Cloud instance</title><link>https://docs.defectdojo.com/get_started/pro/cloud/additional-cloud-instance/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/pro/cloud/additional-cloud-instance/</guid><description>&lt;p&gt;The process for adding a second Cloud instance is more or less the same as adding your first instance. This guide assumes you&amp;rsquo;ve already set up your initial DefectDojo server, and have an agreement with our Sales team to add another instance.&lt;/p&gt;</description></item><item><title>Cloud Architecture</title><link>https://docs.defectdojo.com/get_started/pro/cloud/cloud-architecture/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/pro/cloud/cloud-architecture/</guid><description>&lt;p&gt;DefectDojo Cloud is a multi-tenant SaaS platform running on &lt;strong&gt;Google Kubernetes
 Engine (GKE)&lt;/strong&gt; in Google Cloud. This page describes how the platform is
-structured and how customer environments are kept separate.&lt;/p&gt;</description></item></channel></rss>
+structured and how customer environments are kept separate.&lt;/p&gt;</description></item><item><title>Egress IP Addresses</title><link>https://docs.defectdojo.com/get_started/pro/cloud/egress-ip-addresses/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://docs.defectdojo.com/get_started/pro/cloud/egress-ip-addresses/</guid><description>&lt;p&gt;When DefectDojo Cloud reaches out to your systems — Connectors syncing a scanner&amp;rsquo;s
+API, pushing issues to Jira or ServiceNow, sending notification webhooks, or
+delivering email over SMTP — those connections are &lt;strong&gt;initiated outbound&lt;/strong&gt; from
+your DefectDojo environment. If the system on the other end sits behind a
+firewall, you&amp;rsquo;ll need to allow DefectDojo&amp;rsquo;s outbound (egress) IP addresses so
+those connections aren&amp;rsquo;t blocked.&lt;/p&gt;</description></item></channel></rss>
