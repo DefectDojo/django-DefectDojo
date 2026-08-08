@@ -196,12 +196,19 @@ class DojoMeta(models.Model):
                                  null=True,
                                  editable=False,
                                  related_name="location_meta")
+    # Scopes location metadata per product, since a Location row is shared by every product
+    # that references it. Not a parent relation, so clean() below does not count it.
+    location_product = models.ForeignKey("Product",
+                                 on_delete=models.CASCADE,
+                                 null=True,
+                                 editable=False,
+                                 related_name="location_meta_scope")
 
     class Meta:
         unique_together = (("product", "name"),
                            ("endpoint", "name"),
                            ("finding", "name"),
-                           ("location", "name"))
+                           ("location", "location_product", "name"))
 
     def __str__(self):
         return f"{self.name}: {self.value}"
