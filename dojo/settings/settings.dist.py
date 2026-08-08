@@ -1344,6 +1344,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Pluto Scan": ["vuln_id_from_tool", "component_name", "file_path"],
     "GuardDog Scan": ["vuln_id_from_tool", "component_name", "file_path", "line"],
     "kubent Scan": ["vuln_id_from_tool", "component_name"],
+    "OpenSSF Scorecard": ["vuln_id_from_tool", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1748,6 +1749,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Pluto Scan": DEDUPE_ALGO_HASH_CODE,
     "GuardDog Scan": DEDUPE_ALGO_HASH_CODE,
     "kubent Scan": DEDUPE_ALGO_HASH_CODE,
+    "OpenSSF Scorecard": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

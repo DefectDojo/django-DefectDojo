@@ -1,0 +1,180 @@
+{
+  "date": "2026-08-08T02:15:39Z",
+  "repo": {
+    "name": "github.com/ossf/scorecard",
+    "commit": "40c1e35996730d4fdcbdb2e6a23917a2467e29b7"
+  },
+  "scorecard": {
+    "version": "v5.5.0",
+    "commit": "c395761df6afe1a69e476bc60a013a94bcbc153f"
+  },
+  "score": 9,
+  "checks": [
+    {
+      "name": "Maintained",
+      "score": 10,
+      "reason": "14 commit(s) and 0 issue activity found in the last 90 days -- score normalized to 10",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project is \"actively maintained\".",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#maintained"
+      }
+    },
+    {
+      "name": "Dependency-Update-Tool",
+      "score": 10,
+      "reason": "update tool detected",
+      "details": [
+        "Info: detected update tool: Dependabot: .github/dependabot.yml:1"
+      ],
+      "documentation": {
+        "short": "Determines if the project uses a dependency update tool.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#dependency-update-tool"
+      }
+    },
+    {
+      "name": "Dangerous-Workflow",
+      "score": 10,
+      "reason": "no dangerous workflow patterns detected",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project's GitHub Action workflows avoid dangerous patterns.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#dangerous-workflow"
+      }
+    },
+    {
+      "name": "Code-Review",
+      "score": 10,
+      "reason": "all changesets reviewed",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project requires human code review before pull requests (aka merge requests) are merged.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#code-review"
+      }
+    },
+    {
+      "name": "Security-Policy",
+      "score": 10,
+      "reason": "security policy file detected",
+      "details": [
+        "Info: security policy file detected: SECURITY.md:1",
+        "Info: Found linked content: SECURITY.md:1",
+        "Info: Found disclosure, vulnerability, and/or timelines in security policy: SECURITY.md:1",
+        "Info: Found text in security policy: SECURITY.md:1"
+      ],
+      "documentation": {
+        "short": "Determines if the project has published a security policy.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#security-policy"
+      }
+    },
+    {
+      "name": "Binary-Artifacts",
+      "score": 10,
+      "reason": "no binaries found in the repo",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project has generated executable (binary) artifacts in the source repository.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#binary-artifacts"
+      }
+    },
+    {
+      "name": "Packaging",
+      "score": 10,
+      "reason": "packaging workflow detected",
+      "details": [
+        "Info: Project packages its releases by way of GitHub Actions.: .github/workflows/goreleaser.yaml:29"
+      ],
+      "documentation": {
+        "short": "Determines if the project is published as a package that others can easily download, install, easily update, and uninstall.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#packaging"
+      }
+    },
+    {
+      "name": "License",
+      "score": 10,
+      "reason": "license file detected",
+      "details": [
+        "Info: project has a license file: LICENSE:0",
+        "Info: FSF or OSI recognized license: Apache License 2.0: LICENSE:0"
+      ],
+      "documentation": {
+        "short": "Determines if the project has defined a license.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#license"
+      }
+    },
+    {
+      "name": "SAST",
+      "score": 10,
+      "reason": "SAST tool is run on all commits",
+      "details": [
+        "Info: SAST configuration detected: CodeQL",
+        "Info: all commits (30) are checked with a SAST tool"
+      ],
+      "documentation": {
+        "short": "Determines if the project uses static code analysis.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#sast"
+      }
+    },
+    {
+      "name": "Fuzzing",
+      "score": 10,
+      "reason": "project is fuzzed",
+      "details": [
+        "Info: OSSFuzz integration found",
+        "Info: GoBuiltInFuzzer integration found: checks/raw/fuzzing_test.go:177"
+      ],
+      "documentation": {
+        "short": "Determines if the project uses fuzzing.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#fuzzing"
+      }
+    },
+    {
+      "name": "Signed-Releases",
+      "score": 10,
+      "reason": "5 out of the last 5 releases have a total of 5 signed artifacts.",
+      "details": [
+        "Info: provenance for release artifact: multiple.intoto.jsonl: https://github.com/ossf/scorecard/releases/tag/v5.5.0",
+        "Info: provenance for release artifact: multiple.intoto.jsonl: https://github.com/ossf/scorecard/releases/tag/v5.4.0",
+        "Info: provenance for release artifact: multiple.intoto.jsonl: https://github.com/ossf/scorecard/releases/tag/v5.3.0",
+        "Info: provenance for release artifact: multiple.intoto.jsonl: https://github.com/ossf/scorecard/releases/tag/v5.2.1",
+        "Info: provenance for release artifact: multiple.intoto.jsonl: https://github.com/ossf/scorecard/releases/tag/v5.2.0"
+      ],
+      "documentation": {
+        "short": "Determines if the project cryptographically signs release artifacts.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#signed-releases"
+      }
+    },
+    {
+      "name": "CI-Tests",
+      "score": 10,
+      "reason": "30 out of 30 merged PRs checked by a CI test -- score normalized to 10",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the project runs tests before pull requests are merged.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#ci-tests"
+      }
+    },
+    {
+      "name": "Contributors",
+      "score": 10,
+      "reason": "project has 73 contributing companies or organizations",
+      "details": [
+        "Info: found contributions from: App-vNext, Azure, Conservatory, Hack42, HackerHotel, IBM, Lind-Project, NixOS, OpenLabTools, adam@adalogics.com, amazon, apache, arnhem-air, aspnet-contrib, astropy, bibliotheekdeventer, bloomberg, bomctl, bomfather, chainguard, chainguard-dev, chainguard-images, copenhagenjs, costellorg, dependabot, dexidp, distroless, dotnet, dotnet-foundation, eicas-nl, falcosecurity, fosdem-testingautomation, google, googlers, grafana, helm, honk-ci, ibm, inclusivenaming, inkcut, jaegertracing, ko-build, kubeflow, kubernetes, kubernetes-nightly, kubernetes-sigs, lfai, linux foundation, lockheed martin, metamath, microsoft, msmvps, multi-factor-auth-users, nix-community, notionwm, octokit, open-feature, open-telemetry, openvex, ossf, owncloud-community, playframework, protobom, scala-labs, scalacommunitybuild, scalapenos, self-employed apache software foundation, sigstore, slsa-framework, todogroup, uwu-tools, w3c, wolfi-dev"
+      ],
+      "documentation": {
+        "short": "Determines if the project has a set of contributors from multiple organizations (e.g., companies).",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#contributors"
+      }
+    },
+    {
+      "name": "Branch-Protection",
+      "score": -1,
+      "reason": "internal error: error during branchesHandler.setup: internal error: some github tokens can't read classic branch protection rules: https://github.com/ossf/scorecard-action/blob/main/docs/authentication/fine-grained-auth-token.md",
+      "details": null,
+      "documentation": {
+        "short": "Determines if the default and release branches are protected with GitHub's branch protection settings.",
+        "url": "https://github.com/ossf/scorecard/blob/c395761df6afe1a69e476bc60a013a94bcbc153f/docs/checks.md#branch-protection"
+      }
+    }
+  ]
+}
