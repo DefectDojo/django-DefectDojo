@@ -1333,6 +1333,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "ModelScan Scan": ["title", "file_path", "vuln_id_from_tool"],
     "TFLint Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Kingfisher Scan": ["title", "file_path", "line"],
+    "2ms Scan": ["title", "file_path", "line", "description"],
+    "Quark-Engine Scan": ["title", "component_name", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1726,6 +1728,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "ModelScan Scan": DEDUPE_ALGO_HASH_CODE,
     "TFLint Scan": DEDUPE_ALGO_HASH_CODE,
     "Kingfisher Scan": DEDUPE_ALGO_HASH_CODE,
+    "2ms Scan": DEDUPE_ALGO_HASH_CODE,
+    "Quark-Engine Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
