@@ -49,6 +49,7 @@ from dojo.api_v3.filtering import (
 )
 from dojo.api_v3.include import apply_includes
 from dojo.api_v3.pagination import list_envelope, paginate
+from dojo.api_v3.writes import bind_payload, split_extras
 from dojo.authorization.authorization import user_has_permission
 from dojo.authorization.roles_permissions import Permissions
 from dojo.finding.api_v3.schemas import (
@@ -151,6 +152,15 @@ def build_findings_router(
     detail_schema: type = FindingDetail,
     filter_spec: FilterSpec = FINDING_FILTER_SPEC,
     queryset_hook: Callable | None = None,
+    # Write payload schemas, parameterized for the same reason the read schemas are (I4): a
+    # downstream distribution subclasses them to accept its own fields. Anything the subclass adds
+    # beyond ``FindingWrite``/``FindingUpdate``/``FindingReplace`` is split out of the payload and
+    # handed to ``on_write`` instead of the service, so the service is never passed a field it does
+    # not own. See dojo/api_v3/writes.py.
+    create_schema: type = FindingWrite,
+    update_schema: type = FindingUpdate,
+    replace_schema: type = FindingReplace,
+    on_write: Callable | None = None,
     auth=NOT_SET,
 ) -> Router:
     """Build the findings router (I5)."""
@@ -225,8 +235,9 @@ def build_findings_router(
         return json_response(data)
 
     @router.post("/findings", response=detail_schema, url_name="findings_create")
-    def create_finding_route(request: HttpRequest, payload: FindingWrite):
-        data = payload.dict()
+    @bind_payload(create_schema)
+    def create_finding_route(request: HttpRequest, payload):
+        data, extras = split_extras(payload.dict(), FindingWrite)
         test_id = data.pop("test")
         push_to_jira = data.pop("push_to_jira")
         vulnerability_ids = data.pop("vulnerability_ids")
@@ -243,11 +254,14 @@ def build_findings_router(
             test=test, data=data, user=request.user,
             push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
         )
+        if on_write is not None:
+            on_write(finding, extras, user=request.user, created=True)
         obj = _detail_object(request, queryset_hook, detail_schema, finding.pk) or finding
         return json_response(serialize(obj, detail_schema, {}), status=201)
 
     @router.patch("/findings/{int:finding_id}", response=detail_schema, url_name="findings_update")
-    def update_finding_route(request: HttpRequest, finding_id: int, payload: FindingUpdate):
+    @bind_payload(update_schema)
+    def update_finding_route(request: HttpRequest, finding_id: int, payload):
         finding = _base_queryset(request, queryset_hook).filter(pk=finding_id).first()
         if finding is None:
             msg = f"Finding {finding_id} not found"
@@ -255,7 +269,7 @@ def build_findings_router(
         if not user_has_permission(request.user, finding, Permissions.Finding_Edit):
             raise PermissionDenied  # 403: visible but not editable
 
-        changes = payload.dict(exclude_unset=True)
+        changes, extras = split_extras(payload.dict(exclude_unset=True), FindingUpdate)
         push_to_jira = changes.pop("push_to_jira", False)
         vulnerability_ids = changes.pop("vulnerability_ids", None)
         cwes = changes.pop("cwes", None)
@@ -268,11 +282,14 @@ def build_findings_router(
             finding, changes=changes, user=request.user,
             push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
         )
+        if on_write is not None:
+            on_write(finding, extras, user=request.user, created=False)
         obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
         return json_response(serialize(obj, detail_schema, {}))
 
     @router.put("/findings/{int:finding_id}", response=detail_schema, url_name="findings_replace")
-    def replace_finding_route(request: HttpRequest, finding_id: int, payload: FindingReplace):
+    @bind_payload(replace_schema)
+    def replace_finding_route(request: HttpRequest, finding_id: int, payload):
         # Full replace (PUT). Validates against the create-shaped FindingReplace (required fields,
         # extra="forbid") and applies payload.dict() WITHOUT exclude_unset, so omitted optionals
         # reset to their schema defaults -- a true full replace, mirroring v2's update(partial=False)
@@ -287,7 +304,7 @@ def build_findings_router(
         if not user_has_permission(request.user, finding, Permissions.Finding_Edit):
             raise PermissionDenied  # 403: visible but not editable
 
-        changes = payload.dict()
+        changes, extras = split_extras(payload.dict(), FindingReplace)
         push_to_jira = changes.pop("push_to_jira", False)
         vulnerability_ids = changes.pop("vulnerability_ids", None)
         cwes = changes.pop("cwes", None)
@@ -300,6 +317,8 @@ def build_findings_router(
             finding, changes=changes, user=request.user,
             push_to_jira=push_to_jira, vulnerability_ids=vulnerability_ids, cwes=cwes,
         )
+        if on_write is not None:
+            on_write(finding, extras, user=request.user, created=False)
         obj = _detail_object(request, queryset_hook, detail_schema, finding_id) or finding
         return json_response(serialize(obj, detail_schema, {}))
 
