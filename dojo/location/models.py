@@ -537,6 +537,10 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
         copy.finding = finding
         copy.location = self.location
         copy.save()
+        # Re-home the shared location onto the copied finding's product. Without this a
+        # finding copied/moved into a different product keeps a location that is only
+        # associated with the source product. Mirrors associate_with_finding().
+        copy.location.associate_with_product(finding.test.engagement.product)
         return copy
 
     def set_status(self, status: FindingLocationStatus, auditor: Dojo_User, audit_time: datetime) -> None:

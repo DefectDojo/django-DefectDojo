@@ -1,0 +1,15 @@
+{
+  "info": {
+    "args": "/usr/local/bin/dirsearch -u http://wave3target/ -w /work/one-wordlist.txt --format=json -o /work/out_single.json -q --no-color",
+    "time": "Fri Jul 31 06:22:14 2026"
+  },
+  "results": [
+    {
+      "content-length": 169,
+      "content-type": "text/html",
+      "redirect": "http://wave3target/admin/",
+      "status": 301,
+      "url": "http://wave3target/admin"
+    }
+  ]
+}

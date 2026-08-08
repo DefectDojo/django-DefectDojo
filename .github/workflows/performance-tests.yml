@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set-platform
         run: |
@@ -36,7 +36,20 @@ jobs:
         run: docker/setEnv.sh unit_tests_cicd
 
       - name: Start Postgres and webhook.endpoint
-        run: docker compose up --no-deps -d postgres webhook.endpoint
+        timeout-minutes: 10
+        # image pulls from Docker Hub time out every so often, so retry before failing the job
+        run: |
+          RETRY=0
+          until docker compose up --no-deps -d postgres webhook.endpoint
+            do
+            if [[ $RETRY -gt 2 ]]; then
+              echo "ERROR: could not start Postgres and webhook.endpoint after $RETRY retries"
+              exit 1
+            fi
+            RETRY=$((RETRY+1))
+            echo "Attempt $RETRY to start Postgres and webhook.endpoint"
+            sleep 15
+          done
 
       - name: Start uwsgi (idle)
         timeout-minutes: 5

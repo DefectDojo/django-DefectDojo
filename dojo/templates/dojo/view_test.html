@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load get_note_status %}
 {% load authorization_tags %}
 
 {% load static %}
@@ -1062,9 +1063,10 @@
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"add" %}
                                                         <li role="presentation">
-                                                            <a href="{% url 'mktemplate' finding.id %}">
+                                                            <a href="#" onclick="this.nextElementSibling.submit(); return false;">
                                                                 <i class="fa-solid fa-copy"></i> {% trans "Make Finding a Template" %}
                                                             </a>
+                                                            <form method="post" action="{% url 'mktemplate' finding.id %}">{% csrf_token %}</form>
                                                         </li>
                                                     {% endif %}
                                                     {% if finding|has_object_permission:"edit" %}
@@ -1133,6 +1135,12 @@
                                                                 {% csrf_token %}
                                                                 <input type="hidden" name="return_url" value="{{ request.get_full_path }}" />
                                                                 <input type="hidden" name="id" value="{{ finding.id }}"/>
+                                                                {% if system_settings.enable_jira and finding.has_jira_issue %}
+                                                                    <label class="small">
+                                                                        <input type="checkbox" name="push_to_jira" value="true"/>
+                                                                        {% trans "Push deletion to JIRA" %}
+                                                                    </label>
+                                                                {% endif %}
                                                             </form>
                                                             <a class="text-danger delete-finding"
                                                             id="delete-finding-menu-{{ finding.id }}"
@@ -1195,15 +1203,17 @@
                                             <i class="fa-solid fa-file has-popover dojo-sup"
                                             data-content="{{ finding.component_name }} - {{ finding.component_version }}"></i>
                                         {% endif %}
-                                        {% if finding.notes.all %}
+                                        {% with visible_notes=finding.notes.all|visible_to:request.user %}
+                                        {% if visible_notes %}
                                             <i class="fa-solid fa-comment has-popover dojo-sup"
-                                            data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"></i>
+                                            data-content="{{ visible_notes.0.author }} at {{ visible_notes.0.date }}: {{ visible_notes.0 }}"></i>
                                             <a href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                 class="dojo-sup"
-                                                alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
-                                                    ({{ finding.notes.count }})
+                                                alt="{{ visible_notes.count }} note{{ visible_notes.count|pluralize }}">
+                                                    ({{ visible_notes.count }})
                                             </a>
                                         {% endif %}
+                                        {% endwith %}
                                         {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                     </td>
                                     <td class="nowrap">

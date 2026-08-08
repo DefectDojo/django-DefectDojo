@@ -71,7 +71,7 @@ To remove a Finding from a Full Risk Acceptance, click the **Remove** button wit
 
 The Full Risk Acceptance's view also includes a table at the bottom for all other Findings from Tests within that Engagement. From there, you may select additional Findings and add them to that Full Risk Acceptance. 
 
-Additionally, there is a Notes function that allows Users to include additional context to the Full Risk Acceptance. All public notes will appear in any Reports that are generated for the Full Risk Acceptance, whereas notes that are toggled as **Private** will not appear in reports. 
+Additionally, there is a Notes function that allows Users to include additional context to the Full Risk Acceptance. All public notes will appear in any Reports that are generated for the Full Risk Acceptance. Notes toggled as **Private** are visible only to their author and to superusers, and are left out of reports. 
 
 Importantly, if a Full Risk Acceptance is deleted entirely, the Findings within will have their status automatically reverted to “Active.”
 
@@ -114,17 +114,24 @@ If the Risk Acceptance has **already expired** — meaning the periodic expirati
 - Every Finding linked to the Risk Acceptance that is currently Active is re-accepted (set back to Risk Accepted / Inactive).
 - A comment is posted to any linked Jira issues recording the reinstate.
 
-> **Important — your chosen date may be overridden.** When a previously-expired Risk Acceptance is reinstated, the expiration date that actually gets saved is **today + N days**, where `N` is the system setting **Risk Acceptance Form Default Days** (default: 90).  This means the date you typed into the edit form will be replaced during the reinstate.  If you need a specific future expiration date on a reinstated Risk Acceptance, edit the Risk Acceptance a second time after the reinstate completes.
+The date you enter is the date that is saved.  The system setting **Risk Acceptance Form Default Days** (default: 180) is only used when you did not ask for a particular date — for example when you use the **Reinstate** action, which reinstates the Risk Acceptance without editing its expiration date, and therefore sets it to today + N days.
 
 ### Moving the date backwards or to a date still in the past
 
 Moving the expiration date to an earlier-but-still-future date has no special behavior — the Risk Acceptance stays active and the new date is saved.
 
-Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior.
+Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior.  That holds for an **already-expired** Risk Acceptance too: a past date is still the date you chose, so it is saved as-is and the next expiration run lapses the Risk Acceptance again.
 
 ### What the API exposes
 
-API consumers can observe expiration state on the Risk Acceptance object via the `expiration_date`, `expiration_date_handled`, and `expiration_date_warned` fields.  A Risk Acceptance is "expired" precisely when `expiration_date_handled` is non-null.  When a reinstate happens, both `expiration_date_handled` and `expiration_date_warned` are cleared back to `null`, and `expiration_date` is updated to the reinstate target.
+API consumers can observe expiration state on the Risk Acceptance object via the `expiration_date`, `expiration_date_handled`, and `expiration_date_warned` fields.  A Risk Acceptance is "expired" precisely when `expiration_date_handled` is non-null.  When a reinstate happens, both `expiration_date_handled` and `expiration_date_warned` are cleared back to `null`, and `expiration_date` holds the date you sent — or today + N days when no date was requested.
+
+Expiring and reinstating are also available directly, so you do not have to drive them by editing `expiration_date`:
+
+- `POST /api/v2/risk_acceptance/{id}/expire/` expires it now.  Returns `400` if it has already expired.
+- `POST /api/v2/risk_acceptance/{id}/reinstate/` reinstates an expired one, re-accepting the Findings it covers.  Returns `400` if it has not expired.  Send `expiration_date` to choose how long for; omit it to use today + N days.
+
+Both accept an optional `reason`, which is recorded as a note on the Risk Acceptance along with who performed the action.  Both require the same permission as editing the Risk Acceptance.
 
 ## Risk Acceptance Best Practices 
 

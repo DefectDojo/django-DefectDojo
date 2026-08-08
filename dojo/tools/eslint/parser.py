@@ -1,6 +1,9 @@
 import json
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class ESLintParser:
@@ -59,6 +62,11 @@ class ESLintParser:
                     mitigation="N/A",
                     impact="N/A",
                 )
+
+                if settings.V3_FEATURE_LOCATIONS and item["filePath"]:
+                    find.unsaved_locations.append(
+                        LocationData.code(file_path=item["filePath"], line=message["line"]),
+                    )
 
                 items.append(find)
         return items

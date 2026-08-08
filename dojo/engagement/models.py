@@ -85,10 +85,10 @@ class Engagement(BaseModel):
                                    null=True, blank=True, help_text=_("Commit hash from repo"), verbose_name=_("Commit Hash"))
     branch_tag = models.CharField(editable=True, max_length=150,
                                    null=True, blank=True, help_text=_("Tag or branch of the product the engagement tested."), verbose_name=_("Branch/Tag"))
-    build_server = models.ForeignKey("dojo.Tool_Configuration", verbose_name=_("Build Server"), help_text=_("Build server responsible for CI/CD test"), null=True, blank=True, related_name="build_server", on_delete=models.CASCADE)
-    source_code_management_server = models.ForeignKey("dojo.Tool_Configuration", null=True, blank=True, verbose_name=_("SCM Server"), help_text=_("Source code server for CI/CD test"), related_name="source_code_management_server", on_delete=models.CASCADE)
     source_code_management_uri = models.URLField(max_length=600, null=True, blank=True, editable=True, verbose_name=_("Repo"), help_text=_("Resource link to source code"))
-    orchestration_engine = models.ForeignKey("dojo.Tool_Configuration", verbose_name=_("Orchestration Engine"), help_text=_("Orchestration service responsible for CI/CD test"), null=True, blank=True, related_name="orchestration", on_delete=models.CASCADE)
+    cicd_scm_server = models.ForeignKey("dojo.CICDInfrastructure", null=True, blank=True, related_name="engagements_as_scm_server", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "scm_server"}, verbose_name=_("SCM Server"), help_text=_("Source code management server used for this CI/CD engagement"))
+    cicd_build_server = models.ForeignKey("dojo.CICDInfrastructure", null=True, blank=True, related_name="engagements_as_build_server", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "build_server"}, verbose_name=_("Build Server"), help_text=_("Build server used for this CI/CD engagement"))
+    cicd_orchestration_engine = models.ForeignKey("dojo.CICDInfrastructure", null=True, blank=True, related_name="engagements_as_orchestration", on_delete=models.SET_NULL, limit_choices_to={"infrastructure_type": "orchestration"}, verbose_name=_("Orchestration Engine"), help_text=_("Orchestration engine used for this CI/CD engagement"))
     deduplication_on_engagement = models.BooleanField(default=False, verbose_name=_("Deduplication within this engagement only"), help_text=_("If enabled deduplication will only mark a finding in this engagement as duplicate of another finding if both findings are in this engagement. If disabled, deduplication is on the product level."))
 
     tags = TagField(blank=True, force_lowercase=True, help_text=_("Add tags that help describe this engagement. Choose from the list or add new tags. Press Enter key to add."))
@@ -106,6 +106,29 @@ class Engagement(BaseModel):
             ),
             GinIndex(fields=["name"], opclasses=["gin_trgm_ops"], name="dojo_engagement_name_trgm"),
         ]
+
+    def pre_save_logic(self):
+        """
+        Fall back to the declared default when the status is empty.
+
+        `status` is nullable and carries a default, but it is not `blank=True`, so the
+        `full_clean()` the base model runs on every save rejects both `None` and `""` with
+        "This field cannot be blank." Rows with an empty status exist all the same -- writes
+        made before the base model validated, and DefectDojo's own sample data -- and could
+        then never be saved again.
+
+        That took down imports: the importer's closing write-back saves the test's engagement
+        on every run, and the only engagement field an import ever sets is `target_end` (CI/CD
+        engagements). A scan therefore failed, and imported nothing, over a field it had not
+        touched.
+
+        An empty value is not one of ENGAGEMENT_STATUS_CHOICES, so there is nothing to
+        preserve. Applying the default here -- before the validation step, and regardless of
+        whether validation is enabled -- lets the save proceed and heals the row on its next
+        write, instead of leaving a row that no code path can save.
+        """
+        if not self.status:
+            self.status = self._meta.get_field("status").default
 
     def __str__(self):
         return "Engagement {}: {} ({})".format(self.id if id else 0, self.name or "",

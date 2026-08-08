@@ -9,19 +9,15 @@ aliases:
 ---
 DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.
 
-Currently, this feature is in Beta.
-
 ## Enabling the Hierarchy Feature
 
-Hierarchy features ship with new versions of DefectDojo Pro by default, but existing customers who wish to migrate these features can do so using the following methods
-
-The two pieces are enabled separately, and by different means.
+The two pieces below are separate, and are controlled by different means.
 
 ### Asset Hierarchy
 
-**Asset Hierarchy** enables parent/child relationships between Assets. Once enabled, the hierarchy can be viewed and managed from the **Product** tab in the navigation.
+**Asset Hierarchy** enables parent/child relationships between Assets. The hierarchy is viewed and managed from the **Product** tab in the navigation.
 
-A superuser can turn it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Asset Hierarchy is generally available and on for every instance, Cloud and On-Premise. There is nothing to enable, and it is no longer listed on the Feature Flags page.
 
 ### Label Changes (optional)
 
@@ -91,7 +87,7 @@ Core Application [Organization]
     └── nginx
 ```
 
-In this diagram, every element under "Core Application" could be recorded as a separate Asset, with unique business criticality (see: [Priority & Risk](/asset_modelling/pro_hierarchy/priority_sla/#prioritization-engines/)), RBAC, and corresponding Engagements and Tests.  You could continue to test, and store results, on the parent Asset (for example, `webapp-backend`), but you could also run isolated testing on a particular child Asset (for example, `database`).
+In this diagram, every element under "Core Application" could be recorded as a separate Asset, with unique business criticality (see: [Priority & Risk](/asset_modelling/pro_hierarchy/priority_sla/#prioritization-engines)), RBAC, and corresponding Engagements and Tests.  You could continue to test, and store results, on the parent Asset (for example, `webapp-backend`), but you could also run isolated testing on a particular child Asset (for example, `database`).
 
 ### Pen Tests: Isolated RBAC
 

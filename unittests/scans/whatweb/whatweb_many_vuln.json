@@ -1,0 +1,127 @@
+[
+  {
+    "target": "http://wave3target/",
+    "http_status": 200,
+    "request_config": {
+      "headers": {
+        "User-Agent": "WhatWeb/0.5.5"
+      }
+    },
+    "plugins": {
+      "Country": {
+        "string": [
+          "RESERVED"
+        ],
+        "module": [
+          "ZZ"
+        ]
+      },
+      "HTML5": {},
+      "HTTPServer": {
+        "string": [
+          "nginx/1.31.3"
+        ]
+      },
+      "IP": {
+        "string": [
+          "172.29.0.2"
+        ]
+      },
+      "MetaGenerator": {
+        "string": [
+          "generic-app 1.4.2"
+        ]
+      },
+      "nginx": {
+        "version": [
+          "1.31.3"
+        ]
+      },
+      "Title": {
+        "string": [
+          "generic-app"
+        ]
+      }
+    }
+  },
+  {
+    "target": "http://wave3target/admin/",
+    "http_status": 200,
+    "request_config": {
+      "headers": {
+        "User-Agent": "WhatWeb/0.5.5"
+      }
+    },
+    "plugins": {
+      "Country": {
+        "string": [
+          "RESERVED"
+        ],
+        "module": [
+          "ZZ"
+        ]
+      },
+      "HTML5": {},
+      "HTTPServer": {
+        "string": [
+          "nginx/1.31.3"
+        ]
+      },
+      "IP": {
+        "string": [
+          "172.29.0.2"
+        ]
+      },
+      "nginx": {
+        "version": [
+          "1.31.3"
+        ]
+      },
+      "Title": {
+        "string": [
+          "generic-app admin"
+        ]
+      }
+    }
+  },
+  {
+    "target": "http://wave3target/robots.txt",
+    "http_status": 200,
+    "request_config": {
+      "headers": {
+        "User-Agent": "WhatWeb/0.5.5"
+      }
+    },
+    "plugins": {
+      "Country": {
+        "string": [
+          "RESERVED"
+        ],
+        "module": [
+          "ZZ"
+        ]
+      },
+      "HTTPServer": {
+        "string": [
+          "nginx/1.31.3"
+        ]
+      },
+      "IP": {
+        "string": [
+          "172.29.0.2"
+        ]
+      },
+      "nginx": {
+        "version": [
+          "1.31.3"
+        ]
+      },
+      "robots_txt": {
+        "string": [
+          "/admin",
+          "/backup"
+        ]
+      }
+    }
+  }
+]

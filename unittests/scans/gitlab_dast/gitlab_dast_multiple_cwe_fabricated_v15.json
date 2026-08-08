@@ -1,0 +1,48 @@
+{
+    "__comment__": "Minimal DAST report with a single vulnerability that has more than one CWE identifier",
+    "vulnerabilities": [
+        {
+            "cve": "10062",
+            "description": "The response contains Personally Identifiable Information, such as CC number, SSN and similar sensitive data.",
+            "discovered_at": "2021-04-23T15:46:40.615",
+            "evidence": [],
+            "id": "5ec00bbc-2e53-44cb-83e9-3d35365277e3",
+            "identifiers": [
+                {
+                    "name": "PII Disclosure",
+                    "type": "ZAProxy_PluginId",
+                    "url": "https://github.com/zaproxy/zaproxy/blob/w2019-01-14/docs/scanners.md",
+                    "value": "10062"
+                },
+                {
+                    "name": "CWE-359",
+                    "type": "CWE",
+                    "url": "https://cwe.mitre.org/data/definitions/359.html",
+                    "value": "359"
+                },
+                {
+                    "name": "CWE-200",
+                    "type": "CWE",
+                    "url": "https://cwe.mitre.org/data/definitions/200.html",
+                    "value": "200"
+                }
+            ],
+            "links": [],
+            "location": {
+                "hostname": "http://api-server",
+                "method": "GET",
+                "param": "",
+                "path": "/v1/trees"
+            },
+            "severity": "High",
+            "solution": ""
+        }
+    ],
+    "scan": {
+        "scanner": {
+            "id": "zaproxy",
+            "name": "ZAProxy",
+            "version": "1.0.0"
+        }
+    }
+}

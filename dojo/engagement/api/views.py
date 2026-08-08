@@ -11,8 +11,9 @@ from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
 from dojo.api_v2.prefetch.prefetcher import _Prefetcher
-from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, report_generate, schema_with_prefetch
+from dojo.api_v2.views import DojoModelViewSet, PrefetchDojoModelViewSet, report_generate_response, schema_with_prefetch
 from dojo.authorization import api_permissions as permissions
+from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.engagement.api.filters import ApiEngagementFilter
 from dojo.engagement.api.serializer import (
@@ -23,7 +24,7 @@ from dojo.engagement.api.serializer import (
     EngagementToNotesSerializer,
 )
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.engagement.services import close_engagement, reopen_engagement
+from dojo.engagement.services import close_engagement, reassign_engagement_product_endpoints, reopen_engagement
 from dojo.jira import services as jira_services
 from dojo.models import (
     Check_List,
@@ -33,6 +34,7 @@ from dojo.models import (
     NoteHistory,
     Notes,
 )
+from dojo.notes.helper import notes_prefetch
 from dojo.product.queries import get_authorized_engagement_presets
 from dojo.risk_acceptance import api as ra_api
 from dojo.utils import (
@@ -65,6 +67,22 @@ class EngagementViewSet(
     def risk_application_model_class(self):
         return Engagement
 
+    def perform_update(self, serializer):
+        # Moving an engagement to a different product must re-home its findings'
+        # endpoints/locations onto the new product, mirroring the Classic UI
+        # edit_engagement view. Covers PUT and PATCH (both route through here) and,
+        # via inheritance, the Pro Vue UI which moves engagements over this same path.
+        old_product = serializer.instance.product
+        # validated_data omits "product" on a PATCH that doesn't touch it -> no move.
+        new_product = serializer.validated_data.get("product", old_product)
+        if new_product != old_product:
+            # Destination-product edit check, mirroring the Classic edit_engagement view.
+            user_has_permission_or_403(self.request.user, new_product, "edit")
+        engagement = serializer.save()
+        if new_product != old_product:
+            # calculate_grade for both products is dispatched by the service itself.
+            reassign_engagement_product_endpoints(engagement, old_product, new_product)
+
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         if get_setting("ASYNC_OBJECT_DELETE"):
@@ -77,7 +95,7 @@ class EngagementViewSet(
     def get_queryset(self):
         return (
             get_authorized_engagements("view")
-            .prefetch_related("notes", "risk_acceptance", "files")
+            .prefetch_related(notes_prefetch(), "risk_acceptance", "files")
             .distinct()
         )
 
@@ -131,14 +149,13 @@ class EngagementViewSet(
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, engagement, options)
-        report = api_v2_serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, engagement, options)
 
     @extend_schema(
         methods=["GET"],
@@ -203,7 +220,7 @@ class EngagementViewSet(
         notes = engagement.notes.all()
 
         serialized_notes = EngagementToNotesSerializer(
-            {"engagement_id": engagement, "notes": notes},
+            {"engagement_id": engagement, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 
@@ -219,7 +236,7 @@ class EngagementViewSet(
         responses={status.HTTP_201_CREATED: api_v2_serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=[IsAuthenticated, permissions.UserHasEngagementRelatedObjectPermission],
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=[IsAuthenticated, permissions.UserHasEngagementFilePermission],
     )
     def files(self, request, pk=None):
         engagement = self.get_object()

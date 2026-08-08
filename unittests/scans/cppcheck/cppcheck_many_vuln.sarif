@@ -1,0 +1,333 @@
+{
+  "$schema": "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 11,
+                  "endLine": 12,
+                  "startColumn": 11,
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Array 'values[4]' accessed at index 4, which is out of bounds."
+          },
+          "ruleId": "arrayIndexOutOfBounds"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 1,
+                  "endLine": 8,
+                  "startColumn": 1,
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Memory leak: buffer"
+          },
+          "ruleId": "memleak"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 26,
+                  "endLine": 6,
+                  "startColumn": 26,
+                  "startLine": 6
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 26,
+                  "endLine": 6,
+                  "startColumn": 26,
+                  "startLine": 6
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 12,
+                  "endLine": 7,
+                  "startColumn": 12,
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "If memory allocation fails, then there is a possible null pointer dereference: buffer"
+          },
+          "ruleId": "nullPointerOutOfMemory"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 21,
+                  "endLine": 21,
+                  "startColumn": 21,
+                  "startLine": 21
+                }
+              }
+            },
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 6,
+                  "endLine": 22,
+                  "startColumn": 6,
+                  "startLine": 22
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Null pointer dereference: pointer"
+          },
+          "ruleId": "nullPointer"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 12,
+                  "endLine": 17,
+                  "startColumn": 12,
+                  "startLine": 17
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Uninitialized variable: total"
+          },
+          "ruleId": "uninitvar"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 15,
+                  "endLine": 12,
+                  "startColumn": 15,
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Variable 'values[4]' is assigned a value that is never used."
+          },
+          "ruleId": "unreadVariable"
+        },
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cc_many.c"
+                },
+                "region": {
+                  "endColumn": 9,
+                  "endLine": 16,
+                  "startColumn": 9,
+                  "startLine": 16
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "Variable 'total' is not assigned a value."
+          },
+          "ruleId": "unassignedVariable"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "informationUri": "https://cppcheck.sourceforge.io",
+          "name": "Cppcheck",
+          "rules": [
+            {
+              "fullDescription": {
+                "text": "Array 'values[4]' accessed at index 4, which is out of bounds."
+              },
+              "help": {
+                "text": "Array 'values[4]' accessed at index 4, which is out of bounds."
+              },
+              "id": "arrayIndexOutOfBounds",
+              "properties": {
+                "precision": "high",
+                "security-severity": 9.9,
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Array 'values[4]' accessed at index 4, which is out of bounds."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Memory leak: buffer"
+              },
+              "help": {
+                "text": "Memory leak: buffer"
+              },
+              "id": "memleak",
+              "properties": {
+                "precision": "high",
+                "security-severity": 9.9,
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Memory leak: buffer"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "If memory allocation fails, then there is a possible null pointer dereference: buffer"
+              },
+              "help": {
+                "text": "If memory allocation fails, then there is a possible null pointer dereference: buffer"
+              },
+              "id": "nullPointerOutOfMemory",
+              "properties": {
+                "precision": "high"
+              },
+              "shortDescription": {
+                "text": "If memory allocation fails, then there is a possible null pointer dereference: buffer"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Null pointer dereference: pointer"
+              },
+              "help": {
+                "text": "Null pointer dereference: pointer"
+              },
+              "id": "nullPointer",
+              "properties": {
+                "precision": "high",
+                "security-severity": 9.9,
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Null pointer dereference: pointer"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Uninitialized variable: total"
+              },
+              "help": {
+                "text": "Uninitialized variable: total"
+              },
+              "id": "uninitvar",
+              "properties": {
+                "precision": "high",
+                "security-severity": 9.9,
+                "tags": [
+                  "security"
+                ]
+              },
+              "shortDescription": {
+                "text": "Uninitialized variable: total"
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Variable 'values[4]' is assigned a value that is never used."
+              },
+              "help": {
+                "text": "Variable 'values[4]' is assigned a value that is never used."
+              },
+              "id": "unreadVariable",
+              "properties": {
+                "precision": "high"
+              },
+              "shortDescription": {
+                "text": "Variable 'values[4]' is assigned a value that is never used."
+              }
+            },
+            {
+              "fullDescription": {
+                "text": "Variable 'total' is not assigned a value."
+              },
+              "help": {
+                "text": "Variable 'total' is not assigned a value."
+              },
+              "id": "unassignedVariable",
+              "properties": {
+                "precision": "high"
+              },
+              "shortDescription": {
+                "text": "Variable 'total' is not assigned a value."
+              }
+            }
+          ],
+          "semanticVersion": "2.17.1"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

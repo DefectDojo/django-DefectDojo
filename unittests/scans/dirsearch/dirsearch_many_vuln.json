@@ -1,0 +1,36 @@
+{
+  "info": {
+    "args": "/usr/local/bin/dirsearch -u http://wave3target/ -w /work/wordlist.txt --format=json -o /work/out_many.json -q --no-color",
+    "time": "Fri Jul 31 06:22:16 2026"
+  },
+  "results": [
+    {
+      "content-length": 49,
+      "content-type": "text/plain",
+      "redirect": "",
+      "status": 200,
+      "url": "http://wave3target/robots.txt"
+    },
+    {
+      "content-length": 169,
+      "content-type": "text/html",
+      "redirect": "http://wave3target/backup/",
+      "status": 301,
+      "url": "http://wave3target/backup"
+    },
+    {
+      "content-length": 169,
+      "content-type": "text/html",
+      "redirect": "http://wave3target/admin/",
+      "status": 301,
+      "url": "http://wave3target/admin"
+    },
+    {
+      "content-length": 169,
+      "content-type": "text/html",
+      "redirect": "http://wave3target/.git/",
+      "status": 301,
+      "url": "http://wave3target/.git"
+    }
+  ]
+}

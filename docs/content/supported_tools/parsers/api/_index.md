@@ -7,6 +7,14 @@ sidebar:
   collapsed: true
 exclude_search: true
 ---
+> **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
+>
+> The API-based (pull) parsers described here, and the **Tool Type** / **Tool Configuration** feature they depend on, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. These pull integrations are being consolidated into DefectDojo Pro's no-code [Connectors](/connectors/upstream/about/).
+>
+> If you use the setup below, plan your migration before 3.5.0 — after that release these parsers and the API-pull import path no longer function, and imports that rely on a Tool Configuration stop working. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/) for the full list and timeline.
+>
+> Importing these tools' reports as **files** is not affected by this deprecation.
+
 All parsers that use API pull have common basic configuration steps, but with different values.
 
 Follow these steps to set up API importing:

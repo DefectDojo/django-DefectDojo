@@ -4,11 +4,13 @@ from operator import attrgetter
 
 import hyperlink
 from django.conf import settings
+from django.db import transaction
 from django.db.models import Prefetch
 from django.db.models.query_utils import Q
 
 from dojo.celery import app
 from dojo.models import Endpoint_Status, Finding, System_Settings
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -30,12 +32,18 @@ def get_finding_models_for_deduplication(finding_ids):
         logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
+    # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
+    # endpoints m2m hydrates legacy rows and crashes the batch. are_locations_duplicates()
+    # reads ref.location.url, which is what the locations prefetch has to reach.
+    # TODO: Delete the endpoints branch after the move to Locations
+    location_prefetch = "locations__location__url" if settings.V3_FEATURE_LOCATIONS else "endpoints"
+
     return list(
         Finding.objects.filter(id__in=finding_ids)
         .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
-            "endpoints",
+            location_prefetch,
             # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
             Prefetch(
                 "original_finding",
@@ -340,11 +348,11 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
         queryset = Finding.objects.filter(scope_q)
 
     if settings.V3_FEATURE_LOCATIONS:
-        prefetch_list = ["locations__location__url", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
     else:
         # TODO: Delete this after the move to Locations
         # Base prefetches for both modes
-        prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["endpoints", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
@@ -544,11 +552,47 @@ def find_candidates_for_reimport_legacy(test, findings, service=None):
     return existing_by_key
 
 
+def deduplication_ordering_key(finding):
+    """
+    Stable, content-derived sort key used by the reimporter to decide the order
+    findings from one report are created (and therefore get their ids) in.
+
+    Deduplication itself always picks the lowest-id finding as the canonical
+    "original". Because the reimporter sorts a report's findings by this key
+    BEFORE saving them, "lowest id" among findings created by one reimport
+    equals "canonical by content", so the winner among findings that collide
+    on the deduplication key is reproducible across re-scans regardless of the
+    order the scanner exports its findings in. Findings from earlier imports
+    always have smaller ids, so an already-established original never flips.
+
+    id is the final tiebreak and is only reached when two findings are
+    identical across every content field in the key (in which case the choice
+    is immaterial because the findings are interchangeable).
+
+    All fields referenced here are part of ``Finding.DEDUPLICATION_FIELDS``, so
+    building this key never triggers extra database queries during dedupe.
+    """
+    return (
+        finding.hash_code or "",
+        finding.unique_id_from_tool or "",
+        finding.file_path or "",
+        finding.line if finding.line is not None else -1,
+        finding.title or "",
+        finding.id or 0,
+    )
+
+
 def _is_candidate_older(new_finding, candidate):
     # Unsaved findings (e.g. preview mode) have no PK — all DB candidates are older by definition
     if new_finding.pk is None:
         return True
-    # Ensure the newer finding is marked as duplicate of the older finding
+    # Ensure the newer finding is marked as duplicate of the older finding.
+    # This comparison must stay a pure id comparison: it is evaluated
+    # independently from concurrent dedupe batches (and from the `dedupe`
+    # management command over pre-existing findings), so it has to be globally
+    # antisymmetric — for any pair, exactly one side may see the other as
+    # "older". Content-stable winner selection is achieved by the reimporter
+    # creating a report's findings in deduplication_ordering_key order instead.
     is_older = candidate.id < new_finding.id
     if not is_older:
         deduplicationLogger.debug(f"candidate is newer than or equal to new finding: {new_finding.id} and candidate {candidate.id}")
@@ -717,15 +761,61 @@ def _flush_duplicate_changes(modified_new_findings):
     Bulk-updates all modified new findings in one round-trip instead of one
     save() call per finding.  Uses bulk_update to bypass Django signals.
 
-    Returns the list of modified findings so callers can perform any follow-up
-    processing (e.g. triggering prioritization) on the affected findings.
+    Originals are matched near the start of a batch and written at the end of it, so
+    one can be deleted in between -- the excess-duplicate delete task runs on its own
+    schedule. The duplicate_finding FK is DEFERRABLE INITIALLY DEFERRED, so such a link
+    is only rejected at COMMIT, which rolls back the whole batch: every other finding
+    in it loses its deduplication too, and the post-processing task fails. Links whose
+    original no longer exists are therefore dropped here, immediately before the write
+    and in the same transaction, leaving those findings exactly as they were for the
+    next import to match again.
+
+    Returns the list of findings actually written so callers perform follow-up
+    processing (e.g. triggering prioritization) only on findings that were persisted.
     """
-    if modified_new_findings:
-        Finding.objects.bulk_update(
-            modified_new_findings,
-            ["duplicate", "active", "verified", "duplicate_finding"],
-        )
-    return modified_new_findings
+    if not modified_new_findings:
+        return modified_new_findings
+
+    with transaction.atomic():
+        findings_to_write = _drop_links_to_deleted_originals(modified_new_findings)
+        if findings_to_write:
+            Finding.objects.bulk_update(
+                findings_to_write,
+                ["duplicate", "active", "verified", "duplicate_finding"],
+            )
+    return findings_to_write
+
+
+def _drop_links_to_deleted_originals(modified_new_findings):
+    """Return the subset of ``modified_new_findings`` whose duplicate_finding still exists."""
+    referenced_original_ids = {
+        finding.duplicate_finding_id
+        for finding in modified_new_findings
+        if finding.duplicate_finding_id
+    }
+    if not referenced_original_ids:
+        return modified_new_findings
+
+    live_original_ids = set(
+        Finding.objects.filter(id__in=referenced_original_ids).values_list("id", flat=True),
+    )
+    deleted_original_ids = referenced_original_ids - live_original_ids
+    if not deleted_original_ids:
+        return modified_new_findings
+
+    findings_to_write = [
+        finding
+        for finding in modified_new_findings
+        if finding.duplicate_finding_id not in deleted_original_ids
+    ]
+    deduplicationLogger.warning(
+        "dedupe: dropping %d duplicate link(s) to %d original(s) deleted while the batch "
+        "was being processed; %d finding(s) still written",
+        len(modified_new_findings) - len(findings_to_write),
+        len(deleted_original_ids),
+        len(findings_to_write),
+    )
+    return findings_to_write
 
 
 # ---------------------------------------------------------------------------
@@ -1098,6 +1188,13 @@ def do_false_positive_history_batch(findings):
     # Fetch all candidate existing findings with one DB query
     candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg)
 
+    # Optional plugin hook: refine the per-finding candidate list after it is resolved by
+    # deduplication_algorithm. Lets a plugin (e.g. Pro) narrow candidates by fields that are
+    # excluded from the hash string but compared per pair (set-match tokens on
+    # vulnerability_ids / CWEs). Resolved once; a no-op when unset. See get_custom_method.
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+    fp_candidate_filter = get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD")
+
     to_mark_as_fp_ids: set = set()
 
     for finding in findings:
@@ -1120,6 +1217,9 @@ def do_false_positive_history_batch(findings):
             existing = candidates.get(key, []) if key else []
         else:
             existing = []
+
+        if fp_candidate_filter:
+            existing = fp_candidate_filter(finding, existing)
 
         existing_fps = [ef for ef in existing if ef.false_p]
 

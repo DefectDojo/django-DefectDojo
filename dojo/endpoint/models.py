@@ -73,6 +73,21 @@ class Endpoint_Status(models.Model):
         current_endpoint = self.endpoint
         if finding:
             copy.finding = finding
+            # Re-home the endpoint onto the copied finding's product. An Endpoint carries
+            # its own product FK, so reusing the source endpoint would leave a finding
+            # copied/moved into another product pointing at the source product's endpoint.
+            new_product = finding.test.engagement.product
+            if current_endpoint.product_id is not None and current_endpoint.product_id != new_product.id:
+                from dojo.endpoint.utils import endpoint_get_or_create  # noqa: PLC0415 -- avoid import cycle
+                current_endpoint, _ = endpoint_get_or_create(
+                    protocol=current_endpoint.protocol,
+                    host=current_endpoint.host,
+                    port=current_endpoint.port,
+                    path=current_endpoint.path,
+                    query=current_endpoint.query,
+                    fragment=current_endpoint.fragment,
+                    product=new_product,
+                )
         copy.endpoint = current_endpoint
         copy.save()
 
@@ -187,7 +202,7 @@ class Endpoint(models.Model):
                 return clean_url
             msg = "Missing host"
             raise ValueError(msg)
-        except:
+        except (ValueError, ValidationError):
             url = ""
             if self.protocol:
                 url += f"{self.protocol}://"
@@ -303,7 +318,7 @@ class Endpoint(models.Model):
     def is_broken(self):
         try:
             self.clean()
-        except:
+        except (ValueError, ValidationError):
             return True
         else:
             return not self.product

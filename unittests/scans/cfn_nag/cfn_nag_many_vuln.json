@@ -1,0 +1,148 @@
+[
+  {
+    "filename": "./many.yaml",
+    "file_results": {
+      "failure_count": 2,
+      "violations": [
+        {
+          "id": "F38",
+          "name": "IamRolePassRoleWildcardResourceRule",
+          "type": "FAIL",
+          "message": "IAM role should not allow * resource with PassRole action on its permissions policy",
+          "logical_resource_ids": [
+            "PermissiveRole"
+          ],
+          "line_numbers": [
+            18
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "F3",
+          "name": "IamRoleWildcardActionOnPermissionsPolicyRule",
+          "type": "FAIL",
+          "message": "IAM role should not allow * action on its permissions policy",
+          "logical_resource_ids": [
+            "PermissiveRole"
+          ],
+          "line_numbers": [
+            18
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "W11",
+          "name": "IamRoleWildcardResourceOnPermissionsPolicyRule",
+          "type": "WARN",
+          "message": "IAM role should not allow * resource on its permissions policy",
+          "logical_resource_ids": [
+            "PermissiveRole"
+          ],
+          "line_numbers": [
+            18
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "W40",
+          "name": "SecurityGroupEgressAllProtocolsRule",
+          "type": "WARN",
+          "message": "Security Groups egress with an IpProtocol of -1 found",
+          "logical_resource_ids": [
+            "OpenSecurityGroup"
+          ],
+          "line_numbers": [
+            5
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "W5",
+          "name": "SecurityGroupEgressOpenToWorldRule",
+          "type": "WARN",
+          "message": "Security Groups found with cidr open to world on egress",
+          "logical_resource_ids": [
+            "OpenSecurityGroup"
+          ],
+          "line_numbers": [
+            5
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "W9",
+          "name": "SecurityGroupIngressCidrNon32Rule",
+          "type": "WARN",
+          "message": "Security Groups found with ingress cidr that is not /32",
+          "logical_resource_ids": [
+            "OpenSecurityGroup"
+          ],
+          "line_numbers": [
+            5
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "W2",
+          "name": "SecurityGroupIngressOpenToWorldRule",
+          "type": "WARN",
+          "message": "Security Groups found with cidr open to world on ingress.  This should never be true on instance.  Permissible on ELB",
+          "logical_resource_ids": [
+            "OpenSecurityGroup"
+          ],
+          "line_numbers": [
+            5
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "W36",
+          "name": "SecurityGroupRuleDescriptionRule",
+          "type": "WARN",
+          "message": "Security group rules without a description obscure their purpose and may lead to bad practices in ensuring they only allow traffic from the ports and sources/destinations required.",
+          "logical_resource_ids": [
+            "OpenSecurityGroup"
+          ],
+          "line_numbers": [
+            5
+          ],
+          "element_types": [
+            "resource"
+          ]
+        },
+        {
+          "id": "W48",
+          "name": "SqsQueueKmsMasterKeyIdRule",
+          "type": "WARN",
+          "message": "SQS Queue should specify KmsMasterKeyId property",
+          "logical_resource_ids": [
+            "ApplicationQueue",
+            "SecondQueue"
+          ],
+          "line_numbers": [
+            36,
+            40
+          ],
+          "element_types": [
+            "resource",
+            "resource"
+          ]
+        }
+      ]
+    }
+  }
+]

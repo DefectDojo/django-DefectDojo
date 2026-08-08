@@ -230,6 +230,122 @@ class RiskAcceptanceTestUI(DojoTestCase):
         # findings remain in (expired) risk acceptance
         self.assertTrue(all(finding in ra.accepted_findings.all() for finding in findings))
 
+    def test_reinstate_risk_acceptance_keeps_requested_expiration_date(self):
+        """Extending an expired risk acceptance to a specific future date keeps that date."""
+        self.test_expire_risk_acceptance_findings_active()
+        ra = Risk_Acceptance.objects.last()
+        findings = ra.accepted_findings.all()
+
+        # The edit form and the API serializer both save the new date before calling reinstate,
+        # so reinstate sees the requested date on the instance and the previous one as argument.
+        old_expiration_date = ra.expiration_date
+        requested_expiration_date = timezone.now() + relativedelta(days=30)
+        ra.expiration_date = requested_expiration_date
+        ra.save()
+
+        ra_helper.reinstate(ra, old_expiration_date)
+
+        ra.refresh_from_db()
+        self.assertEqual(ra.expiration_date.date(), requested_expiration_date.date())
+        # and it is genuinely reinstated, not merely re-dated
+        self.assertIsNone(ra.expiration_date_handled)
+        self.assertIsNone(ra.expiration_date_warned)
+        self.assertTrue(self.assert_all_inactive_risk_accepted(findings))
+
+    def test_reinstate_risk_acceptance_defaults_when_no_date_requested(self):
+        """The Reinstate action edits no date, so the configured window applies."""
+        self.test_expire_risk_acceptance_findings_active()
+        ra = Risk_Acceptance.objects.last()
+
+        # what reinstate_risk_acceptance() passes: the date the risk acceptance already carries
+        ra_helper.reinstate(ra, ra.expiration_date)
+
+        ra.refresh_from_db()
+        expected = timezone.now() + relativedelta(days=ra_helper.expiration_days())
+        self.assertEqual(ra.expiration_date.date(), expected.date())
+
+    def test_reinstate_risk_acceptance_honors_a_past_date_the_caller_chose(self):
+        """
+        Any date the caller supplied is kept, including one in the past.
+
+        The fallback exists for the Reinstate action, which supplies no date at all. A past
+        date is still a deliberate choice, so it is stored as-is and the next expiration run
+        simply lapses the risk acceptance again - the alternative would be silently
+        overriding the user's input, which is the behaviour this whole path removed.
+        """
+        self.test_expire_risk_acceptance_findings_active()
+        ra = Risk_Acceptance.objects.last()
+
+        old_expiration_date = ra.expiration_date
+        requested_expiration_date = timezone.now() - relativedelta(days=3)
+        ra.expiration_date = requested_expiration_date
+        ra.save()
+
+        ra_helper.reinstate(ra, old_expiration_date)
+
+        ra.refresh_from_db()
+        self.assertEqual(ra.expiration_date.date(), requested_expiration_date.date())
+
+    def test_audit_note_links_to_the_risk_acceptance(self):
+        """The note written when a finding is accepted carries a usable link, not empty parens."""
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        finding = ra.accepted_findings.first()
+
+        entries = [note.entry for note in finding.notes.all()]
+        self.assertTrue(entries, "accepting a finding should leave a note")
+        self.assertTrue(
+            any(f"/engagement/1/risk_acceptance/{ra.id}" in entry for entry in entries),
+            f"no note links to the risk acceptance: {entries}",
+        )
+        self.assertFalse(any("()" in entry for entry in entries), f"empty link in note: {entries}")
+
+    def test_get_view_risk_acceptance_without_an_engagement_link(self):
+        """A risk acceptance reachable only through its findings still resolves a URL."""
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        for engagement in ra.engagement_set.all():
+            engagement.risk_acceptance.remove(ra)
+
+        self.assertIn(f"/engagement/1/risk_acceptance/{ra.id}", ra_helper.get_view_risk_acceptance(ra))
+
+    def test_get_view_risk_acceptance_with_nothing_to_link_to(self):
+        ra = Risk_Acceptance.objects.create(name="empty", owner=self.get_test_admin())
+
+        self.assertEqual("", ra_helper.get_view_risk_acceptance(ra))
+
+    def test_breadcrumbs_use_the_engagement(self):
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+
+        crumbs = ra.get_breadcrumbs()
+
+        self.assertEqual(f"/engagement/1/risk_acceptance/{ra.id}", crumbs[-1]["url"])
+
+    def test_breadcrumbs_without_an_engagement(self):
+        ra = Risk_Acceptance.objects.create(name="empty", owner=self.get_test_admin())
+
+        self.assertEqual([{"title": str(ra), "url": None}], ra.get_breadcrumbs())
+
+    def test_download_proof_without_a_proof_is_not_found(self):
+        self.test_add_risk_acceptance_multiple_findings_accepted()
+        ra = Risk_Acceptance.objects.last()
+        self.assertFalse(ra.path, "this risk acceptance is expected to have no proof")
+
+        response = self.client.get(reverse("download_risk_acceptance", args=(1, ra.id)))
+
+        self.assertEqual(404, response.status_code)
+
+    def test_expiration_days_falls_back_when_setting_is_cleared(self):
+        """The setting is nullable and get_system_setting() passes None straight through."""
+        system_settings = System_Settings.objects.get(no_cache=True)
+        system_settings.risk_acceptance_form_default_days = None
+        system_settings.save()
+
+        self.assertEqual(ra_helper.expiration_days(), ra_helper.DEFAULT_RISK_ACCEPTANCE_EXPIRATION_DAYS)
+        # and the derived date is a real datetime rather than an arithmetic error
+        self.assertGreater(ra_helper.default_expiration_date(), timezone.now())
+
     def create_multiple_ras(self):
         ra_data = copy.copy(self.data_risk_accceptance)
         ra_data["accepted_findings"] = [2]
@@ -253,7 +369,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
 
     def test_expiration_handler(self):
         ra1, ra2, ra3 = self.create_multiple_ras()
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.risk_acceptance_notify_before_expiration = 10
         system_settings.save()
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
@@ -323,7 +439,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     # batch was left unhandled and the job failed again on every subsequent run.
     def test_expiration_handler_warns_via_findings_when_engagement_link_is_missing(self):
         ra1, ra2, ra3 = self.create_multiple_ras()
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.risk_acceptance_notify_before_expiration = 10
         system_settings.save()
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
@@ -367,7 +483,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     # the heads-up query while having neither an engagement nor anything to derive one from.
     def test_expiration_handler_skips_risk_acceptance_with_no_engagement_and_no_findings(self):
         ra1, ra2, ra3 = self.create_multiple_ras()
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.risk_acceptance_notify_before_expiration = 10
         system_settings.save()
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration
@@ -411,7 +527,7 @@ class RiskAcceptanceTestUI(DojoTestCase):
     # Regression: same root cause, on the expiry half of the job.
     def test_expiration_handler_expires_risk_acceptance_without_engagement_link(self):
         ra1, ra2, ra3 = self.create_multiple_ras()
-        system_settings = System_Settings.objects.get()
+        system_settings = System_Settings.objects.get(no_cache=True)
         system_settings.risk_acceptance_notify_before_expiration = 10
         system_settings.save()
         heads_up_days = system_settings.risk_acceptance_notify_before_expiration

@@ -17,12 +17,13 @@ The original Endpoints model was built around URLs and IP addresses — it carri
 2. **Performance ceiling.** Per-Finding Endpoint_Status rows and the URL-shaped schema did not scale well at large customer volumes.
 3. **Components were second-class.** Software libraries lived only as denormalised fields on a Finding, so a library could not exist independently of a vulnerability — making true SBOM management impossible.
 
-Locations fix all three by introducing a **base `Location` object** with a typed payload, plus dedicated **subtypes** for each asset shape. The MVP ships two subtypes:
+Locations fix all three by introducing a **base `Location` object** with a typed payload, plus dedicated **subtypes** for each asset shape:
 
 - **URL Locations** — functional equivalent of the old Endpoints, with the same protocol/host/port/path/query/fragment fields.
 - **Dependency Locations** — software libraries identified by [Package URL (pURL)](https://github.com/package-url/purl-spec), used to model SBOM contents.
+- **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
 
-Future Location types under consideration include cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name), container images (registry/repository:tag and SHA256 fingerprints), and code repositories.
+Future Location types under consideration include cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) and container images (registry/repository:tag and SHA256 fingerprints).
 
 ## Key Concepts
 

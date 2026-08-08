@@ -98,6 +98,10 @@ The list of supported fields in JSON format:
 - fix_available: Bool
 - fix_version: String
 
+A numeric field may be given as a number or as a quoted number. A value that holds no
+number at all, such as a `"N/A"` placeholder for a line number the tool could not
+determine, is ignored and the field keeps its default.
+
 ### Example JSON
 
 ```JSON
@@ -236,7 +240,7 @@ Sample Generic Findings Import scans can be found [here](https://github.com/Defe
 
 ### Default Deduplication Hashcode Fields
 
-By default, DefectDojo identifies duplicate Findings using these [hashcode fields](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/):
+By default, DefectDojo identifies duplicate Findings using these [hashcode fields](/en/working_with_findings/finding_deduplication/about_deduplication/):
 
 - title
 - cwe

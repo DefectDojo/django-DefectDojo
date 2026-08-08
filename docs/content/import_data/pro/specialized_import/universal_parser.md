@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Universal Parser is only available in DefectDojo Pro.</span>
 
-The Universal Parser is currently in Beta.  See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
+The Universal Parser is on for every DefectDojo Pro instance; there is nothing to enable. See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
 
 ## About Universal Parser
 DefectDojo has a large, regularly updated library of parsers to help security teams ingest data.  However, sometimes users have a tool that's unsupported by the parsers, or they may want to import data into the DefectDojo model differently from the way the parser does.
@@ -84,6 +84,45 @@ If you've uploaded a scan file in JSON format that looks like this:
 You'll see a hierarchical representation of the unique fields we detected based on the structure of the input file, with icons indicating the type of each field (if we can determine this). You can then select the "title" input field in the drop-down menu that populates the "Title" output field, the "description" input field can go with the "Description" output field, and so on. 
 
 Input field names don't have to match the names of output fields, and your scan file may not have an equivalent to all DefectDojo output fields.
+
+### Mappable finding fields
+
+The table below lists every DefectDojo finding field (output field) you can map an input field to. Your scan file won't necessarily have an equivalent for all of them — map only what's present.
+
+* **Required** — this output field must have at least one input field mapped before you can save the parser.
+* **Accepts multiple inputs** — this output field can be populated from more than one input field. When you map several, each value is presented under a header named for its input field (see [Multi-select fields](#multi-select-fields)).
+
+| Output field | Required | Accepts multiple inputs | Description |
+|---|:---:|:---:|---|
+| Title | ✅ | | A short description of the flaw. |
+| Severity | ✅ | | The severity level of this flaw (Critical, High, Medium, Low, Info). Defaults to "Info" if unknown. |
+| Description | ✅ | ✅ | Longer, more descriptive information about the flaw. |
+| Date | | | The date the flaw was discovered. |
+| CWE | | | The CWE number associated with this flaw. |
+| CVSS v3 Vector | | | Common Vulnerability Scoring System version 3 (CVSSv3) vector associated with this flaw. |
+| CVSS v4 Vector | | | Common Vulnerability Scoring System version 4 (CVSSv4) vector associated with this flaw. |
+| Mitigation | | ✅ | Text describing how to best fix the flaw. |
+| Impact | | ✅ | Text describing the impact this flaw has on systems, products, enterprise, etc. |
+| References | | ✅ | The external documentation available for this flaw. |
+| Severity Justification | | ✅ | Text describing why a certain severity was associated with this flaw. |
+| Steps to Reproduce | | ✅ | Text describing the steps that must be followed in order to reproduce the flaw / bug. |
+| Component Name | | | Name of the affected component (library name, part of a system, ...). |
+| Component Version | | | Version of the affected component. |
+| File Path | | | Identified file(s) containing the flaw. |
+| Line Number | | | Source line number of the attack vector. |
+| Active | | | Denotes if this flaw is active or not. Defaults to true. |
+| Verified | | | Denotes if this flaw has been manually verified by the tester. Defaults to false. |
+| False Positive | | | Denotes if this flaw has been deemed a false positive by the tester. Defaults to false. |
+| Duplicate | | | Denotes if this flaw is a duplicate of other flaws reported. Defaults to false. |
+| EPSS Score | | | EPSS score for the CVE — how likely it is the vulnerability will be exploited in the next 30 days. Value must be between 0.0 and 1.0. |
+| EPSS Percentile | | | EPSS percentile for the CVE — how many CVEs are scored at or below this one. Value must be between 0.0 and 1.0. |
+| Unique ID From Tool | | | Vulnerability technical ID from the source tool. Allows tracking of unique vulnerabilities. |
+| Vuln ID from Tool | | | Non-unique technical ID from the source tool associated with the vulnerability type. |
+| Tags | | | String tags that help describe this finding. |
+| Endpoints | | | The hosts/URLs within the product that are susceptible to this flaw. |
+| Vulnerability IDs | | | One or more vulnerability advisory identifiers associated with this finding (most commonly, CVEs). |
+
+> **Note:** In the example above, a `CVE` input field would be mapped to the **Vulnerability IDs** output field — DefectDojo does not have a finding field literally named "CVE".
 
 ### Required fields
 The following output fields require an input field mapping:
