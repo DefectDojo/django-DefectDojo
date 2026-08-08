@@ -1341,6 +1341,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Cloudsplaining Scan": ["vuln_id_from_tool", "component_name"],
     "bomber Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "sbomqs Scan": ["vuln_id_from_tool", "component_name"],
+    "Pluto Scan": ["vuln_id_from_tool", "component_name", "file_path"],
+    "GuardDog Scan": ["vuln_id_from_tool", "component_name", "file_path", "line"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1742,6 +1744,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Cloudsplaining Scan": DEDUPE_ALGO_HASH_CODE,
     "bomber Scan": DEDUPE_ALGO_HASH_CODE,
     "sbomqs Scan": DEDUPE_ALGO_HASH_CODE,
+    "Pluto Scan": DEDUPE_ALGO_HASH_CODE,
+    "GuardDog Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
