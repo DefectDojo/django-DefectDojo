@@ -5,8 +5,10 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 from dojo.models import Dojo_User, UserContactInfo
+from dojo.user.authentication import token_expires_at
 from dojo.user.utils import get_configuration_permissions_codenames
 
 User = get_user_model()
@@ -63,9 +65,6 @@ class UserSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_token_expiry(self, instance):
         """Effective expiry, including the instance-wide default, not just an explicit override."""
-        from rest_framework.authtoken.models import Token
-
-        from dojo.user.authentication import token_expires_at
         token = Token.objects.filter(user=instance).first()
         return token_expires_at(token) if token else None
 
