@@ -19,7 +19,7 @@ class FalsePositiveHistoryTest(BaseTestCase):
         # Select and click on the particular product to create finding for
         driver.find_element(By.LINK_TEXT, product_name).click()
         # Click on the 'Engagement' Dropdown button
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Engagement").click()
+        self.open_product_tab(driver, "engagements")
         # Click on the Add New Engagement option
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         # Fill up engagement name
@@ -96,7 +96,7 @@ class FalsePositiveHistoryTest(BaseTestCase):
         driver.find_element(By.ID, "id_bulk_status").click()
         driver.find_element(By.ID, status_id).click()
         # Submit
-        driver.find_element(By.CSS_SELECTOR, "input[type='submit']").click()
+        self.click_submit(driver, "input[type='submit']")
 
     def test_retroactive_edit_finding(self):
         # Create two equal findings on different engagements

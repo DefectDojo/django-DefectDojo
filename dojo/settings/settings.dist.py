@@ -745,44 +745,42 @@ if not env("DD_DEFAULT_SWAGGER_UI"):
 # TEMPLATES
 # ------------------------------------------------------------------------------
 
-# Two parallel template trees coexist on this branch: the new Tailwind v4 UI at
-# dojo/templates/ (the default Django app dir) and the classic Bootstrap 3 / SB
-# Admin 2 UI at dojo/templates_classic/. Per-user resolution is handled by
-# UIPreferenceLoader; see dojo/template_loaders.py.
-_DOJO_TAILWIND_TEMPLATES_DIR = root("dojo/templates")
-_DOJO_CLASSIC_TEMPLATES_DIR = root("dojo/templates_classic")
-# Sub-package template dirs (dojo/notifications, dojo/github, ...) share a
-# single list that the FilesystemLoader below reads by reference, so any
+# The UI lives in a single tree at dojo/templates/, searched ahead of the
+# sub-package template dirs (dojo/auditlog, dojo/notifications, dojo/github).
+# The list is shared by reference with the FilesystemLoader entry below, so any
 # late-binding settings can append a template dir at startup and have it
 # picked up at render time.
-_DOJO_EXTRA_TEMPLATE_DIRS = [
+_DOJO_TEMPLATE_DIRS = [
+    root("dojo/templates"),
     root("dojo/auditlog/templates"),
     root("dojo/notifications/templates"),
     root("dojo/github/templates"),
 ]
 
+# Mirrors what APP_DIRS=True would build, except that the filesystem dirs above
+# are searched first and the whole chain is wrapped in the cached loader outside
+# of debug mode.
+_DOJO_TEMPLATE_LOADERS = [
+    ("django.template.loaders.filesystem.Loader", _DOJO_TEMPLATE_DIRS),
+    "django.template.loaders.app_directories.Loader",
+]
+if not env("DD_DEBUG"):
+    _DOJO_TEMPLATE_LOADERS = [
+        ("django.template.loaders.cached.Loader", _DOJO_TEMPLATE_LOADERS),
+    ]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # DIRS shares the _DOJO_EXTRA_TEMPLATE_DIRS list reference with the
+        # DIRS shares the _DOJO_TEMPLATE_DIRS list reference with the
         # FilesystemLoader entry below; later append()s land in both places.
-        "DIRS": _DOJO_EXTRA_TEMPLATE_DIRS,
-        # APP_DIRS is False because dojo's templates are loaded explicitly via
-        # UIPreferenceLoader; the FilesystemLoader entry below picks up
-        # template dirs from the dojo/auditlog, dojo/notifications and
-        # dojo/github consolidations; other apps' templates are loaded via the
-        # app_directories.Loader entry.
+        "DIRS": _DOJO_TEMPLATE_DIRS,
+        # APP_DIRS must stay False whenever "loaders" is set explicitly; the
+        # app_directories.Loader entry below covers the same ground.
         "APP_DIRS": False,
         "OPTIONS": {
             "debug": env("DD_DEBUG"),
-            "loaders": [
-                ("dojo.template_loaders.UIPreferenceLoader",
-                 _DOJO_TAILWIND_TEMPLATES_DIR,
-                 _DOJO_CLASSIC_TEMPLATES_DIR),
-                ("django.template.loaders.filesystem.Loader",
-                 _DOJO_EXTRA_TEMPLATE_DIRS),
-                "django.template.loaders.app_directories.Loader",
-            ],
+            "loaders": _DOJO_TEMPLATE_LOADERS,
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",

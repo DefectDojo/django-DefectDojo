@@ -616,9 +616,17 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # for the reference and CWE buffers it shares, then flush_burp_request_response()
     # resolves its own for the request/response rows the ZAP parser attaches. The
     # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
+    # -2 on the V3 reimport paths: LocationManager.persist() used to open
+    # transaction.atomic() even with nothing buffered, and inside the test's outer
+    # atomic block that empty transaction is a SAVEPOINT/RELEASE pair. Both steps
+    # inside it already short-circuit on empty accumulators, so persist() now returns
+    # before opening it. A reimport calls persist() at the batch boundary and again
+    # from close_old_findings; the one with nothing to write is the pair that goes.
+    # V2 is unaffected -- EndpointManager.persist() opens no transaction -- which is
+    # why only the V3 constants move.
     EXPECTED_ZAP_IMPORT_V2 = 301
     EXPECTED_ZAP_IMPORT_V3 = 325
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 94
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 92
     EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 195
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 193

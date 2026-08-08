@@ -19,7 +19,7 @@ class FindingExtendedTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "App Vulnerable to XSS").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
         driver.find_element(By.LINK_TEXT, "Copy Finding").click()
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Finding Copied successfully")
@@ -104,7 +104,7 @@ class FindingExtendedTest(BaseTestCase):
         driver.find_element(By.ID, "id_planned_remediation_date").send_keys("2030-12-31")
         # Dismiss the datepicker overlay before clicking submit
         driver.find_element(By.ID, "id_planned_remediation_date").send_keys(Keys.ESCAPE)
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Remediation date")
@@ -117,7 +117,7 @@ class FindingExtendedTest(BaseTestCase):
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Click on the Findings dropdown
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Findings").click()
+        self.open_product_tab(driver, "findings")
         driver.find_element(By.LINK_TEXT, "Add New Finding").click()
         # Fill finding form
         driver.find_element(By.ID, "id_title").clear()
