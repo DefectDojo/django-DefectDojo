@@ -32,7 +32,9 @@ under it, so you can see what a change is about to affect.
 Each definition has a ladder of tiers. A tier says: for work that resolves to
 *this* severity, allow this long, and start warning this far before the deadline.
 
-The shipped triage ladder:
+Three clock definitions ship, each with a default ladder you can edit freely.
+
+**Triage** — from an in-scope advisory arriving to a triage decision:
 
 | Tier | Deadline | Warns |
 |---|---|---|
@@ -41,6 +43,35 @@ The shipped triage ladder:
 | `high` | 3 days | 12 hours before |
 | `medium` | 10 days | 2 days before |
 | `low` | 30 days | 5 days before |
+
+**Publication** — from an advisory being drafted over publication-worthy findings
+(high/critical, or known-exploited whatever the label) to it being published. This
+clock may be paused: publishing genuinely waits on the outside world — embargoes,
+vendor coordination, counsel — in a way triage never does. Its tier can also rise
+while it runs, so a finding escalating under a draft shortens the deadline:
+
+| Tier | Deadline | Warns |
+|---|---|---|
+| `critical_exploited` | 1 day | 4 hours before |
+| `critical` | 3 days | 12 hours before |
+| `high` | 7 days | 1 day before |
+| `medium` | 21 days | 3 days before |
+| `low` | 60 days | 7 days before |
+
+**Revision** — from a material change on already-published content to a revision
+going out, *or* to the recorded judgement that the published wording still stands
+(acknowledging the change stops this clock — a breach should mean silence, not
+disagreement). Its tiers are keyed by the **kind of change** that armed it, not by
+severity:
+
+| Tier | Deadline | Warns |
+|---|---|---|
+| `exploitation_flip_active` | 4 hours | 1 hour before |
+| `severity_raised_to_critical` | 1 day | 4 hours before |
+| `scope_expanded` | 3 days | 12 hours before |
+| `severity_raised_to_high` | 7 days | 1 day before |
+| `mitigation_available` | 7 days | 1 day before |
+| `severity_lowered` | 21 days | 3 days before |
 
 Add, edit, disable or delete tiers freely. Durations are entered as days, hours
 and minutes, and the warning must fit inside the deadline — a warning that fires

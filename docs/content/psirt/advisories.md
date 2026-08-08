@@ -152,6 +152,12 @@ text still holds. Acknowledging is a recorded statement that somebody looked —
 not republish, edit, or touch anybody's approval. If the facts move again later, the
 banner comes back.
 
+A material change on published content also arms the **Revision SLA clock**, tiered by
+the kind of change (an active-exploitation flip is hours; a severity downgrade is
+weeks — see [SLA policies](../sla-policies/)). Either exit stops it: publishing a
+revision, or acknowledging. A clock that kept running after a recorded "no revision
+needed" would report disagreement as lateness.
+
 Which upstream changes raise the flag at all is yours to tune, in
 [Settings](../settings/).
 

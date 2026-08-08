@@ -40,8 +40,13 @@ is what is in force.
 
 ## "New" item window
 
-How far back "new" reaches, for the RECENT counts on the feeds page and the "new"
-badge. One of 7, 14, 30 or 90 days.
+How far back "new" reaches. One of 7, 14, 30 or 90 days.
+
+This window is what the dashboard's **"Am I affected?"** widget counts by default —
+the widget and this page always agree on what "new" means, because the widget reads
+this setting rather than carrying its own number. A dashboard can still override the
+window per-widget in the widget's own settings, and that override wins for that
+widget alone.
 
 ## Material-change policy
 
