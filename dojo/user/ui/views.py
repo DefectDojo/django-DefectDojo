@@ -38,7 +38,7 @@ from dojo.forms import (
 )
 from dojo.labels import get_labels
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
-from dojo.user.authentication import reset_token_for_user
+from dojo.user.authentication import reset_token_for_user, token_expires_at
 from dojo.user.ui.filters import UserFilter
 from dojo.user.ui.forms import (
     AddDojoUserForm,
@@ -108,11 +108,16 @@ def api_v2_key(request):
             api_key = Token.objects.create(user=request.user)
     add_breadcrumb(title=_("API Key"), top_level=True, request=request)
 
+    # Show the effective expiry (explicit override, else the instance-wide default measured from
+    # the token's creation), so the page never claims a token is permanent when it is not.
+    token_expiry = token_expires_at(api_key) if isinstance(api_key, Token) else None
+
     return render(request, "dojo/api_v2_key.html",
                   {"name": _("API v2 Key"),
                    "metric": False,
                    "user": request.user,
                    "key": api_key,
+                   "token_expiry": token_expiry,
                    "form": form,
                    })
 
