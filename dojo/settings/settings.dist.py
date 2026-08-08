@@ -1339,6 +1339,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "ScubaGear Scan": ["vuln_id_from_tool", "severity"],
     "kubesec Scan": ["vuln_id_from_tool", "component_name", "file_path"],
     "Cloudsplaining Scan": ["vuln_id_from_tool", "component_name"],
+    "bomber Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "sbomqs Scan": ["vuln_id_from_tool", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1738,6 +1740,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "ScubaGear Scan": DEDUPE_ALGO_HASH_CODE,
     "kubesec Scan": DEDUPE_ALGO_HASH_CODE,
     "Cloudsplaining Scan": DEDUPE_ALGO_HASH_CODE,
+    "bomber Scan": DEDUPE_ALGO_HASH_CODE,
+    "sbomqs Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
