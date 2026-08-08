@@ -99,6 +99,10 @@ A per-user `token_expiry` takes precedence over this default, in either directio
 
 Resetting or revoking a token clears the per-user override, because that value described the token being replaced. The instance default still applies to the new token, measured from its creation.
 
+**Switching this setting on is retroactive.** Because expiry is evaluated when a token is used rather than recorded when it is issued, raising the value above `0` immediately invalidates every token on the instance that is already older than the window. That includes your own API token and any token driving a CI/CD pipeline.
+
+Plan the change before making it: pick a window, ask token owners to rotate first, then enable the setting. If you do lock yourself out of the API, the UI is unaffected because it uses session authentication, and you can issue a new token from `/api/key-v2`.
+
 ## Sample Code
 
 Here are some simple python examples and their results produced against

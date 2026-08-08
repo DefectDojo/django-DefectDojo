@@ -22,6 +22,11 @@ class ApiTokenTest(APITestCase):
 
     def setUp(self):
         token = Token.objects.get(user__username="admin")
+        # The fixture's admin token was created long ago. Any test that switches on a default
+        # lifetime would otherwise expire it and fail during setup rather than at its assertion
+        # -- see test_enabling_the_default_expires_pre_existing_tokens, which pins that behaviour
+        # deliberately instead of tripping over it.
+        Token.objects.filter(pk=token.pk).update(created=timezone.now())
         self.client = APIClient()
         self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
 
@@ -139,6 +144,31 @@ class ApiTokenTest(APITestCase):
         expected = token.created + timedelta(days=30)
         self.assertEqual(token_expires_at(token), expected)
 
+    def test_enabling_the_default_expires_pre_existing_tokens(self):
+        """
+        Turning the default on is retroactive, and that is deliberate.
+
+        Expiry is evaluated when a token is used, not stamped when it is issued, which is what
+        makes the control impossible to sidestep by choosing a different minting path. The
+        consequence is that switching the setting on immediately invalidates every token already
+        older than the window, including the operator's own. Recovery is via the UI (session
+        auth), which is unaffected, and the key page issues a fresh token.
+        """
+        _user, token, _ = self._create_user("api-token-preexisting")
+        self._set_created(token, timezone.now() - timedelta(days=200))
+
+        # Before the policy exists, an old token is perfectly valid.
+        self.assertFalse(token_is_expired(token))
+        r = self._client_for(token.key).get(reverse("user_profile"))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+
+        with override_settings(API_TOKEN_DEFAULT_EXPIRY_DAYS=90):
+            token.refresh_from_db()
+            self.assertTrue(token_is_expired(token))
+            r = self._client_for(token.key).get(reverse("user_profile"))
+            self.assertEqual(r.status_code, 403, r.content[:1000])
+            self.assertIn("API token has expired.", r.content.decode("utf-8"))
+
     @override_settings(API_TOKEN_DEFAULT_EXPIRY_DAYS=30)
     def test_default_expiry_rejects_a_token_older_than_the_window(self):
         _user, token, _ = self._create_user("api-token-default-aged")
@@ -236,7 +266,11 @@ class ApiTokenTest(APITestCase):
             }
             bound = UserContactInfoForm(data=posted, instance=uci, user=user)
             bound.is_valid()
-            self.assertEqual(bound.cleaned_data.get("token_expiry"), original)
+            # A disabled field falls back to its initial value; the form round trip drops
+            # microseconds, so compare to the second and assert the posted value was ignored.
+            cleaned = bound.cleaned_data.get("token_expiry")
+            self.assertIsNotNone(cleaned)
+            self.assertLess(abs((cleaned - original).total_seconds()), 1)
 
         uci.refresh_from_db()
         self.assertEqual(uci.token_expiry, original)
