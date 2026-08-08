@@ -1,0 +1,29 @@
+{
+  "MetaData": {
+    "TenantId": "ABCDEFG",
+    "DisplayName": "Cool Example Org",
+    "DomainName": "example.org",
+    "ProductSuite": "Google Workspace"
+  },
+  "Results": {
+    "calendar": [
+      {
+        "GroupName": "External Invitations Warnings",
+        "GroupNumber": "2",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#2-external-invitations-warnings",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.2.1v1",
+            "Requirement": "External invitations warnings SHALL be enabled to prompt users before sending invitations.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- Cool Example Org (group karen47@example.com): External Sharing Guest Prompt is disabled",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Cool Example Org (group karen47@example.com): External Sharing Guest Prompt is disabled",
+            "ResolutionDate": null
+          }
+        ]
+      }
+    ]
+  }
+}

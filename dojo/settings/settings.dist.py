@@ -1335,6 +1335,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Kingfisher Scan": ["title", "file_path", "line"],
     "2ms Scan": ["title", "file_path", "line", "description"],
     "Quark-Engine Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "ScubaGoggles Scan": ["vuln_id_from_tool", "component_name"],
+    "ScubaGear Scan": ["vuln_id_from_tool", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1730,6 +1732,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Kingfisher Scan": DEDUPE_ALGO_HASH_CODE,
     "2ms Scan": DEDUPE_ALGO_HASH_CODE,
     "Quark-Engine Scan": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGoggles Scan": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGear Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

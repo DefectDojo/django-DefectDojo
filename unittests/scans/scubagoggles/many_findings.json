@@ -1,0 +1,374 @@
+{
+  "MetaData": {
+    "TenantId": "ABCDEFG",
+    "DisplayName": "Cool Example Org",
+    "DomainName": "example.org",
+    "ProductSuite": "Google Workspace"
+  },
+  "Results": {
+    "calendar": [
+      {
+        "GroupName": "External Sharing Options",
+        "GroupNumber": "1",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#1-external-sharing-options",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.1.1v1",
+            "Requirement": "External sharing options for primary calendars SHALL be configured to &quot;Only free/busy information (hide event details).&quot;<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.CALENDAR.1.2v1",
+            "Requirement": "External sharing options for secondary calendars SHALL be configured to &quot;Only free/busy information (hide event details).&quot;<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "External Invitations Warnings",
+        "GroupNumber": "2",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#2-external-invitations-warnings",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.2.1v1",
+            "Requirement": "External invitations warnings SHALL be enabled to prompt users before sending invitations.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- Cool Example Org (group karen47@example.com): External Sharing Guest Prompt is disabled",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Cool Example Org (group karen47@example.com): External Sharing Guest Prompt is disabled",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Calendar Interop Management",
+        "GroupNumber": "3",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#3-calendar-interop-management",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.3.1v1",
+            "Requirement": "Calendar Interop SHOULD be disabled.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Should",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Paid Appointments",
+        "GroupNumber": "4",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/calendar.md#4-paid-appointments",
+        "Controls": [
+          {
+            "Control ID": "GWS.CALENDAR.4.1v1",
+            "Requirement": "&quot;Appointment Schedule with Payments&quot; SHOULD be disabled.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Should",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      }
+    ],
+    "chat": [
+      {
+        "GroupName": "Chat History",
+        "GroupNumber": "1",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/chat.md#1-chat-history",
+        "Controls": [
+          {
+            "Control ID": "GWS.CHAT.1.1v1",
+            "Requirement": "Chat history SHALL be enabled for information traceability.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.CHAT.1.2v1",
+            "Requirement": "Users SHALL NOT be allowed to change their history setting.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "External File Sharing",
+        "GroupNumber": "2",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/chat.md#2-external-file-sharing",
+        "Controls": [
+          {
+            "Control ID": "GWS.CHAT.2.1v1",
+            "Requirement": "External file sharing SHALL be disabled to protect sensitive information from unauthorized or accidental sharing.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "History for Spaces",
+        "GroupNumber": "3",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/chat.md#3-history-for-spaces",
+        "Controls": [
+          {
+            "Control ID": "GWS.CHAT.3.1v1",
+            "Requirement": "Space history SHOULD be enabled for information traceability.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Warning",
+            "Criticality": "Should",
+            "Details": "The following OUs are non-compliant: \n- Cool Example Org: Conversation history settings for spaces is set to: ON by default (expected: ALWAYS ON)",
+            "OriginalResult": "Warning",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Cool Example Org: Conversation history settings for spaces is set to: ON by default (expected: ALWAYS ON)",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "External Chat Messaging",
+        "GroupNumber": "4",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/chat.md#4-external-chat-messaging",
+        "Controls": [
+          {
+            "Control ID": "GWS.CHAT.4.1v1",
+            "Requirement": "External chat messaging SHALL be restricted to allowlisted domains only.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Content Reporting",
+        "GroupNumber": "5",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/chat.md#5-content-reporting",
+        "Controls": [
+          {
+            "Control ID": "GWS.CHAT.5.1v1",
+            "Requirement": "Chat content reporting SHALL be enabled for all conversation types.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span>\n<span class=\"indicator-badge\" style=\"background-color: #F6E8E5; color: black;\" title=\"Requires log-based verification\">Log-Based Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.<br>WARNING: from the log events alone, it is not possible to distinguish between an OU inheriting settings from its parent and content reporting being disabled entirely. It's possible this tool classified some child OUs as compliant due to this limitation; manual check recommended for child OUs due to this edge case.<br><br>",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.<br>WARNING: from the log events alone, it is not possible to distinguish between an OU inheriting settings from its parent and content reporting being disabled entirely. It's possible this tool classified some child OUs as compliant due to this limitation; manual check recommended for child OUs due to this edge case.<br><br>",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.CHAT.5.2v1",
+            "Requirement": "All reporting message categories SHOULD be selected.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span>\n<span class=\"indicator-badge\" style=\"background-color: #F6E8E5; color: black;\" title=\"Requires log-based verification\">Log-Based Check</span></div>",
+            "Result": "Warning",
+            "Criticality": "Should",
+            "Details": "The following OUs are non-compliant: \n- Cool Example Org: The following reporting types are disabled: confidential information, discrimination, explicit content, harassment, other, sensitive information, spam \n- Christopher Shaw's OU: The following reporting types are disabled: confidential information, discrimination, explicit content, harassment, other, sensitive information, spam",
+            "OriginalResult": "Warning",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Cool Example Org: The following reporting types are disabled: confidential information, discrimination, explicit content, harassment, other, sensitive information, spam \n- Christopher Shaw's OU: The following reporting types are disabled: confidential information, discrimination, explicit content, harassment, other, sensitive information, spam",
+            "ResolutionDate": null
+          }
+        ]
+      }
+    ],
+    "drive": [
+      {
+        "GroupName": "Sharing Outside the Organization",
+        "GroupNumber": "1",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/drive.md#1-sharing-outside-the-organization",
+        "Controls": [
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.1v1",
+            "Requirement": "External sharing SHALL be restricted to allowlisted domains.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Warning",
+            "Criticality": "Should",
+            "Details": "The following OUs are non-compliant: \n- Laura Forbes's OU: Files owned by users or shared drives can be shared with Google accounts in compatible allowlisted domains \n- Cool Example Org: Files owned by users or shared drives can be shared with Google accounts in compatible allowlisted domains",
+            "OriginalResult": "Warning",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Laura Forbes's OU: Files owned by users or shared drives can be shared with Google accounts in compatible allowlisted domains \n- Cool Example Org: Files owned by users or shared drives can be shared with Google accounts in compatible allowlisted domains",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.2v1",
+            "Requirement": "Receiving files from non-allowlisted domains SHOULD be disabled.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Warning",
+            "Criticality": "Should",
+            "Details": "The following OUs are non-compliant: \n- Laura Forbes's OU: File sharing with allowlisted domains, receiving files permitted. \n- Cool Example Org: File sharing with allowlisted domains, receiving files permitted.",
+            "OriginalResult": "Warning",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Laura Forbes's OU: File sharing with allowlisted domains, receiving files permitted. \n- Cool Example Org: File sharing with allowlisted domains, receiving files permitted.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.3v1",
+            "Requirement": "Warnings SHALL be enabled when a user is attempting to share with someone in a non-allowlisted domain.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.4v1",
+            "Requirement": "If sharing outside of the organization, agencies SHOULD disable sharing of files with individuals who are not using a Google account.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- Laura Forbes's OU: File sharing with allowlisted domains, with non-Google users. \n- Cool Example Org: File sharing with allowlisted domains, with non-Google users.",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Laura Forbes's OU: File sharing with allowlisted domains, with non-Google users. \n- Cool Example Org: File sharing with allowlisted domains, with non-Google users.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.5v1",
+            "Requirement": "Any Organizational Units that allow external sharing SHOULD disable content availability to &quot;anyone with the link.&quot;<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- Laura Forbes's OU: Published web content can be made visible to anyone with a link \n- Cool Example Org: Published web content can be made visible to anyone with a link",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Laura Forbes's OU: Published web content can be made visible to anyone with a link \n- Cool Example Org: Published web content can be made visible to anyone with a link",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.6v1",
+            "Requirement": "Agencies SHALL set access checking to &quot;recipients only.&quot;<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- William Orozco's OU: Access Checker allows users to share files to recipients only, suggested target audience, or public (no Google account required) \n- Cool Example Org: Access Checker allows users to share files to recipients only, suggested target audience, or public (no Google account required)",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- William Orozco's OU: Access Checker allows users to share files to recipients only, suggested target audience, or public (no Google account required) \n- Cool Example Org: Access Checker allows users to share files to recipients only, suggested target audience, or public (no Google account required)",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.7v1",
+            "Requirement": "Users SHOULD NOT be allowed to upload or move content to shared drives owned by another organization.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- Laura Forbes's OU: Anyone can distribute content outside of the organization",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Laura Forbes's OU: Anyone can distribute content outside of the organization",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.8v1",
+            "Requirement": "&quot;Private to owner&quot; SHALL be the default access level for newly created items.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- William Orozco's OU: When users create items, the default access is set to: the primary target audience can search and find the item.",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- William Orozco's OU: When users create items, the default access is set to: the primary target audience can search and find the item.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.1.9v1",
+            "Requirement": "Out-of-Domain file-level warnings SHALL be enabled.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Shall",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Shared Drive Creation",
+        "GroupNumber": "2",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/drive.md#2-shared-drive-creation",
+        "Controls": [
+          {
+            "Control ID": "GWS.DRIVEDOCS.2.1v1",
+            "Requirement": "Agencies SHOULD NOT allow members with manager access to override shared Google Drive creation settings.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Warning",
+            "Criticality": "Should",
+            "Details": "The following OUs are non-compliant: \n- Laura Forbes's OU: Members with manager access can override shared drive settings.",
+            "OriginalResult": "Warning",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Laura Forbes's OU: Members with manager access can override shared drive settings.",
+            "ResolutionDate": null
+          },
+          {
+            "Control ID": "GWS.DRIVEDOCS.2.2v1",
+            "Requirement": "Agencies SHALL allow users who are not members of a shared Google Drive to be added to files.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- Laura Forbes's OU: Users who aren't shared drive members are not allowed to be added to files.",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Laura Forbes's OU: Users who aren't shared drive members are not allowed to be added to files.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Security Updates for Files",
+        "GroupNumber": "3",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/drive.md#3-security-updates-for-files",
+        "Controls": [
+          {
+            "Control ID": "GWS.DRIVEDOCS.3.1v1",
+            "Requirement": "Agencies SHALL enable the security update for Google Drive files.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Fail",
+            "Criticality": "Shall",
+            "Details": "The following OUs are non-compliant: \n- Cool Example Org: Users are allowed to remove/apply the security update for files they own or manage.",
+            "OriginalResult": "Fail",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Cool Example Org: Users are allowed to remove/apply the security update for files they own or manage.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Drive SDK",
+        "GroupNumber": "4",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/drive.md#4-drive-sdk",
+        "Controls": [
+          {
+            "Control ID": "GWS.DRIVEDOCS.4.1v1",
+            "Requirement": "Agencies SHOULD disable Google Drive SDK access.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Pass",
+            "Criticality": "Should",
+            "Details": "Requirement met.",
+            "OriginalResult": "Pass",
+            "OriginalDetails": "Requirement met.",
+            "ResolutionDate": null
+          }
+        ]
+      },
+      {
+        "GroupName": "Drive for Desktop",
+        "GroupNumber": "5",
+        "GroupReferenceURL": "https://github.com/cisagov/scubagoggles/blob/v1.0.0/scubagoggles/baselines/drive.md#5-drive-for-desktop",
+        "Controls": [
+          {
+            "Control ID": "GWS.DRIVEDOCS.5.1v1",
+            "Requirement": "Google Drive for Desktop SHALL be enabled for authorized devices only.<div class=\"badges\">\n<span class=\"indicator-badge\" style=\"background-color: #C41230; color: white;\" title=\"Required by CISA BOD 25-01\">BOD 25-01 Requirement</span>\n<span class=\"indicator-badge\" style=\"background-color: #5E9732; color: black;\" title=\"Automatically verified by ScubaGoggles\">Automated Check</span></div>",
+            "Result": "Warning",
+            "Criticality": "Should",
+            "Details": "The following OUs are non-compliant: \n- Cool Example Org (group user@example.org): Drive for Desktop is enabled and can be used on any device. \n- Cool Example Org (group user@example.org): Drive for Desktop is enabled and can be used on any device. \n- Cool Example Org (group user@example.org): Drive for Desktop is enabled and can be used on any device.",
+            "OriginalResult": "Warning",
+            "OriginalDetails": "The following OUs are non-compliant: \n- Cool Example Org (group lisacooper@example.org): Drive for Desktop is enabled and can be used on any device. \n- Cool Example Org (group lisacooper@example.org): Drive for Desktop is enabled and can be used on any device. \n- Cool Example Org (group lisacooper@example.org): Drive for Desktop is enabled and can be used on any device.",
+            "ResolutionDate": null
+          }
+        ]
+      }
+    ]
+  }
+}
