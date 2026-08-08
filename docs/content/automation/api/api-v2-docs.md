@@ -63,7 +63,7 @@ Content-Type: application/json
 {"key": "<token_to_revoke>"}
 ```
 
-Returns 204 on success. The token is immediately revoked and the expiry date is cleared. The owner will need to generate a new token via the UI (`/api/key-v2`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
+Returns 204 on success. The token is deleted, any per-user expiry override is cleared, and the owner is notified that their token was revoked. The owner will need to generate a new token via the UI (`/api/key-v2`) or via `POST /api/v2/users/{id}/reset_api_token/` before they can authenticate again.
 
 Returns 404 if no token matches the supplied key, 400 if `key` is missing, and 403 for non-superusers.
 
@@ -81,7 +81,9 @@ Content-Type: application/json
 
 Once set, any request using that user's token after the expiry datetime will receive a `403 Forbidden` response with `{"detail": "API token has expired."}`. The user must generate a new token to regain access.
 
-To remove an expiry and make a token permanent again, set `token_expiry` to `null`.
+To clear a per-user expiry, set `token_expiry` to `null`. The token then falls back to the instance-wide default described below, so this makes a token permanent only when that default is `0`.
+
+Setting this field is restricted to superusers. It is not editable from the user profile page, and an expired token is rejected rather than deleted, so raising the expiry restores access without forcing a rotation.
 
 #### Default token lifetime
 
@@ -91,9 +93,11 @@ To enforce a maximum token lifetime across all users, set the environment variab
 DD_API_TOKEN_DEFAULT_EXPIRY_DAYS=90
 ```
 
-When set to a value greater than `0`, every token rotation (via `POST /api/v2/users/{id}/reset_api_token/` or the UI) will automatically set `token_expiry` to the current time plus the configured number of days. The default is `0`, meaning tokens do not expire unless explicitly set.
+When set to a value greater than `0`, every token expires that many days after it was created. This is measured from the token's own creation time and is evaluated when the token is used, so it applies to every token on the instance, including ones that already exist and ones obtained through `POST /api/v2/api-token-auth/` or the UI key page. The default is `0`, meaning tokens do not expire unless a per-user expiry is set.
 
-Note: resetting a token always snaps the expiry back to the instance default. Per-user expiry overrides set via `user_contact_infos` do not persist across token resets.
+A per-user `token_expiry` takes precedence over this default, in either direction: it can pin a shorter life for one user, or grant a longer one.
+
+Resetting or revoking a token clears the per-user override, because that value described the token being replaced. The instance default still applies to the new token, measured from its creation.
 
 ## Sample Code
 

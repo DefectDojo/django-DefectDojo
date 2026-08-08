@@ -1,5 +1,7 @@
+import inspect
 import logging
 from collections.abc import Iterator
+from dataclasses import dataclass
 from operator import attrgetter
 
 import hyperlink
@@ -9,6 +11,7 @@ from django.db.models.query_utils import Q
 
 from dojo.celery import app
 from dojo.models import Endpoint_Status, Finding, System_Settings
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -340,11 +343,11 @@ def build_candidate_scope_queryset(test, mode="deduplication", service=None):
         queryset = Finding.objects.filter(scope_q)
 
     if settings.V3_FEATURE_LOCATIONS:
-        prefetch_list = ["locations__location__url", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["locations__location__url", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
     else:
         # TODO: Delete this after the move to Locations
         # Base prefetches for both modes
-        prefetch_list = ["endpoints", "vulnerability_id_set", "found_by"]
+        prefetch_list = ["endpoints", vulnerability_id_prefetch(), "finding_cwe_set", "found_by"]
 
         # Prefetch all endpoint statuses with their endpoint for reimport mode.
         # The non-special filtering (excluding false_positive, out_of_scope, risk_accepted)
@@ -544,11 +547,47 @@ def find_candidates_for_reimport_legacy(test, findings, service=None):
     return existing_by_key
 
 
+def deduplication_ordering_key(finding):
+    """
+    Stable, content-derived sort key used by the reimporter to decide the order
+    findings from one report are created (and therefore get their ids) in.
+
+    Deduplication itself always picks the lowest-id finding as the canonical
+    "original". Because the reimporter sorts a report's findings by this key
+    BEFORE saving them, "lowest id" among findings created by one reimport
+    equals "canonical by content", so the winner among findings that collide
+    on the deduplication key is reproducible across re-scans regardless of the
+    order the scanner exports its findings in. Findings from earlier imports
+    always have smaller ids, so an already-established original never flips.
+
+    id is the final tiebreak and is only reached when two findings are
+    identical across every content field in the key (in which case the choice
+    is immaterial because the findings are interchangeable).
+
+    All fields referenced here are part of ``Finding.DEDUPLICATION_FIELDS``, so
+    building this key never triggers extra database queries during dedupe.
+    """
+    return (
+        finding.hash_code or "",
+        finding.unique_id_from_tool or "",
+        finding.file_path or "",
+        finding.line if finding.line is not None else -1,
+        finding.title or "",
+        finding.id or 0,
+    )
+
+
 def _is_candidate_older(new_finding, candidate):
     # Unsaved findings (e.g. preview mode) have no PK — all DB candidates are older by definition
     if new_finding.pk is None:
         return True
-    # Ensure the newer finding is marked as duplicate of the older finding
+    # Ensure the newer finding is marked as duplicate of the older finding.
+    # This comparison must stay a pure id comparison: it is evaluated
+    # independently from concurrent dedupe batches (and from the `dedupe`
+    # management command over pre-existing findings), so it has to be globally
+    # antisymmetric — for any pair, exactly one side may see the other as
+    # "older". Content-stable winner selection is achieved by the reimporter
+    # creating a report's findings in deduplication_ordering_key order instead.
     is_older = candidate.id < new_finding.id
     if not is_older:
         deduplicationLogger.debug(f"candidate is newer than or equal to new finding: {new_finding.id} and candidate {candidate.id}")
@@ -1026,6 +1065,39 @@ def _fp_candidates_qs(scope_filter, dedup_alg, findings, exclude_ids=None):
     return Finding.objects.none()
 
 
+@dataclass(frozen=True)
+class FalsePositiveCandidateContext:
+
+    """
+    Scope a false-positive-history candidate hook must respect if it adds candidates.
+
+    Passed to hooks that accept a ``context`` argument so they can honor the product scope and
+    the batch exclusion without re-deriving either. See the hook comment in
+    ``do_false_positive_history_batch``.
+    """
+
+    product: object
+    algorithm: str
+    excluded_finding_ids: frozenset
+
+
+def _accepts_candidate_context(hook) -> bool:
+    """
+    Whether ``hook`` takes a ``context`` argument.
+
+    Lets the contract grow without breaking a plugin written against the two-argument form. A
+    hook whose signature cannot be read (a builtin, or an object with a ``__call__`` that hides
+    it) is treated as not accepting it, which is the behavior that existed before.
+    """
+    try:
+        parameters = inspect.signature(hook).parameters
+    except (TypeError, ValueError):
+        return False
+    if "context" in parameters:
+        return True
+    return any(p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values())
+
+
 def _fetch_fp_candidates_for_batch(findings, product, dedup_alg):
     """
     Fetch all existing findings in the product that could be FP matches for a batch,
@@ -1098,6 +1170,34 @@ def do_false_positive_history_batch(findings):
     # Fetch all candidate existing findings with one DB query
     candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg)
 
+    # Optional plugin hook: resolve the per-finding candidate list after deduplication_algorithm
+    # has produced it. A plugin may narrow the list -- e.g. by fields excluded from the hash
+    # string but compared per pair, such as set-match tokens on vulnerability_ids / CWEs -- and
+    # it may also return candidates that were not in the list, which is how a plugin can match on
+    # an identity this function's algorithm does not know about. The return value replaces the
+    # list; it is not intersected with it. Resolved once; a no-op when unset.
+    #
+    # A plugin that adds candidates owns three obligations, because this function cannot check
+    # them without undoing the single-query fetch above:
+    #   * Stay inside `product`. False-positive history is product-scoped, and a candidate from
+    #     another product would replicate a false-positive verdict across a boundary the user
+    #     never crossed.
+    #   * Exclude the findings being processed. They are already excluded from the fetch, and a
+    #     finding that reaches its own candidate list can mark itself false-positive.
+    #   * Have `id`, `false_p` and `active` loaded. Candidates are fetched with `.only(...)`, so
+    #     a deferred field read here costs a query per candidate.
+    # `context` carries what a plugin needs to satisfy the first two without re-querying. It is
+    # passed only to hooks that accept it, so existing two-argument hooks keep working.
+    from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
+    fp_candidate_filter = get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD")
+    fp_candidate_context = None
+    if fp_candidate_filter and _accepts_candidate_context(fp_candidate_filter):
+        fp_candidate_context = FalsePositiveCandidateContext(
+            product=product,
+            algorithm=dedup_alg,
+            excluded_finding_ids=frozenset(f.id for f in findings if f.id),
+        )
+
     to_mark_as_fp_ids: set = set()
 
     for finding in findings:
@@ -1120,6 +1220,12 @@ def do_false_positive_history_batch(findings):
             existing = candidates.get(key, []) if key else []
         else:
             existing = []
+
+        if fp_candidate_filter:
+            if fp_candidate_context is not None:
+                existing = fp_candidate_filter(finding, existing, context=fp_candidate_context)
+            else:
+                existing = fp_candidate_filter(finding, existing)
 
         existing_fps = [ef for ef in existing if ef.false_p]
 
@@ -1216,3 +1322,40 @@ def match_finding_to_existing_findings(finding, product=None, engagement=None, t
         deduplicationLogger.debug(qs.query)
 
     return qs
+
+
+def hashcode_values_writer(model_type, batch, fields):
+    """
+    mass_model_updater ``writer`` for the hash-recompute paths (dedupe command + tuner
+    async tasks). The hash fields are text columns, so write the whole batch with one
+    ``UPDATE t SET f = v.f FROM (VALUES (pk, f...), ...) WHERE t.pk = v.pk`` instead of
+    bulk_update's per-row CASE/WHEN. Values are bound as parameters and cast to text
+    (which also resolves the type of an all-NULL column). PostgreSQL only; falls back
+    to bulk_update on other backends.
+    """
+    from django.db import connection  # noqa: PLC0415
+
+    if not batch:
+        return
+    if connection.vendor != "postgresql":
+        model_type.objects.bulk_update(batch, fields)
+        return
+
+    meta = model_type._meta
+    columns = [meta.get_field(name).column for name in fields]
+    row_placeholder = "(" + ",".join(["%s"] * (1 + len(fields))) + ")"
+    placeholders = ",".join([row_placeholder] * len(batch))
+    params = []
+    for obj in batch:
+        params.append(obj.pk)
+        params.extend(getattr(obj, name) for name in fields)
+    value_cols = ", ".join(f"c{idx}" for idx in range(1 + len(fields)))
+    set_clause = ", ".join(f'"{col}" = v.c{idx + 1}::text' for idx, col in enumerate(columns))
+    sql = (
+        f'UPDATE "{meta.db_table}" AS t '
+        f"SET {set_clause} "
+        f"FROM (VALUES {placeholders}) AS v({value_cols}) "
+        f'WHERE t."{meta.pk.column}" = v.c0'
+    )
+    with connection.cursor() as cursor:
+        cursor.execute(sql, params)

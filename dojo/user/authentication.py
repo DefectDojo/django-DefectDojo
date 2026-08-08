@@ -12,11 +12,51 @@ from dojo.models import Dojo_User, UserContactInfo
 from dojo.notifications.helper import create_notification
 
 
+def default_expiry_days() -> int:
+    """Instance-wide token lifetime in days. 0 (the default) means tokens never expire."""
+    try:
+        days = int(getattr(settings, "API_TOKEN_DEFAULT_EXPIRY_DAYS", 0) or 0)
+    except (TypeError, ValueError):
+        return 0
+    return max(days, 0)
+
+
+def token_expires_at(token: Token):
+    """
+    Effective expiry for a token, or None when it never expires.
+
+    An explicit ``token_expiry`` on the owner's contact info wins, so a superuser can pin or
+    extend a single user. Otherwise the instance-wide default is measured from the token's own
+    ``created`` timestamp.
+
+    Deriving the default from ``created`` rather than stamping an expiry at creation time is
+    deliberate: tokens are minted by three separate paths (``reset_token_for_user``, the lazy
+    create on the UI key page, and DRF's ``api-token-auth`` endpoint), and a stamping approach
+    silently grants an unexpiring token to anyone who uses a path that forgot to stamp.
+    Computing it here covers every path, including any added later.
+    """
+    uci = getattr(token.user, "usercontactinfo", None)
+    explicit = getattr(uci, "token_expiry", None)
+    if explicit:
+        return explicit
+    days = default_expiry_days()
+    if days and token.created:
+        return token.created + timedelta(days=days)
+    return None
+
+
+def token_is_expired(token: Token) -> bool:
+    expires_at = token_expires_at(token)
+    return expires_at is not None and expires_at <= timezone.now()
+
+
 class ExpiringTokenAuthentication(TokenAuthentication):
+
+    """Token auth that additionally rejects tokens past their effective expiry."""
+
     def authenticate_credentials(self, key):
         user, token = super().authenticate_credentials(key)
-        uci = getattr(user, "usercontactinfo", None)
-        if uci and uci.token_expiry and uci.token_expiry < timezone.now():
+        if token_is_expired(token):
             msg = "API token has expired."
             raise AuthenticationFailed(msg)
         return user, token
@@ -44,10 +84,12 @@ def reset_token_for_user(*, acting_user: Dojo_User, target_user: Dojo_User, allo
     Token.objects.filter(user=target_user).delete()
     Token.objects.create(user=target_user)
 
-    expiry_days = getattr(settings, "API_TOKEN_DEFAULT_EXPIRY_DAYS", 0)
+    # Clear any explicit expiry: it belonged to the token just replaced, and a past datetime
+    # left behind would expire the new token immediately. The instance-wide default still
+    # applies, measured from the new token's creation time.
     uci, _ = UserContactInfo.objects.get_or_create(user=target_user)
     uci.token_last_reset = timezone.now()
-    uci.token_expiry = timezone.now() + timedelta(days=expiry_days) if expiry_days else None
+    uci.token_expiry = None
     uci.save(update_fields=["token_last_reset", "token_expiry"])
 
     # Send notification to the target user

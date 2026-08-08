@@ -33,20 +33,13 @@ from rest_framework.mixins import (
 )
 from rest_framework.test import APIClient
 
+from dojo.announcement.api.views import AnnouncementViewSet
 from dojo.api_v2.mixins import DeletePreviewModelMixin
 from dojo.api_v2.prefetch import PrefetchListMixin, PrefetchRetrieveMixin
 from dojo.api_v2.prefetch.utils import get_prefetchable_fields
 from dojo.api_v2.views import (
-    AnnouncementViewSet,
     AppAnalysisViewSet,
-    BurpRawRequestResponseViewSet,
     ConfigurationPermissionViewSet,
-    DevelopmentEnvironmentViewSet,
-    EndpointStatusViewSet,
-    EndPointViewSet,
-    EngagementViewSet,
-    FindingTemplatesViewSet,
-    FindingViewSet,
     ImportLanguagesView,
     ImportScanView,
     JiraInstanceViewSet,
@@ -56,24 +49,21 @@ from dojo.api_v2.views import (
     LanguageViewSet,
     NotesViewSet,
     NoteTypeViewSet,
-    ProductAPIScanConfigurationViewSet,
-    ProductTypeViewSet,
-    ProductViewSet,
-    RiskAcceptanceViewSet,
     SonarqubeIssueViewSet,
-    TestsViewSet,
-    TestTypesViewSet,
-    ToolConfigurationsViewSet,
-    ToolProductSettingsViewSet,
-    ToolTypesViewSet,
-    UserContactInfoViewSet,
-    UsersViewSet,
 )
 from dojo.asset.api.views import (
     AssetAPIScanConfigurationViewSet,
     AssetViewSet,
 )
 from dojo.authorization.roles_permissions import Permissions, permission_to_action
+from dojo.development_environment.api.views import DevelopmentEnvironmentViewSet
+from dojo.endpoint.api.views import EndpointStatusViewSet, EndPointViewSet
+from dojo.engagement.api.views import EngagementViewSet
+from dojo.finding.api.views import (
+    BurpRawRequestResponseViewSet,
+    FindingTemplatesViewSet,
+    FindingViewSet,
+)
 from dojo.location.api.endpoint_compat import V3EndpointCompatibleViewSet, V3EndpointStatusCompatibleViewSet
 from dojo.location.api.views import LocationFindingReferenceViewSet, LocationProductReferenceViewSet, LocationViewSet
 from dojo.location.models import Location, LocationFindingReference, LocationProductReference
@@ -82,6 +72,7 @@ from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
     Development_Environment,
+    Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -116,8 +107,16 @@ from dojo.notifications.api.views import NotificationsViewSet, NotificationWebho
 from dojo.organization.api.views import (
     OrganizationViewSet,
 )
+from dojo.product.api.views import ProductAPIScanConfigurationViewSet, ProductViewSet
+from dojo.product_type.api.views import ProductTypeViewSet
+from dojo.risk_acceptance.api.views import RiskAcceptanceViewSet
+from dojo.test.api.views import TestsViewSet, TestTypesViewSet
+from dojo.tool_config.api.views import ToolConfigurationsViewSet
+from dojo.tool_product.api.views import ToolProductSettingsViewSet
+from dojo.tool_type.api.views import ToolTypesViewSet
 from dojo.url.api.views import URLViewSet
 from dojo.url.models import URL
+from dojo.user.api.views import UserContactInfoViewSet, UsersViewSet
 
 from .dojo_test_case import (
     DojoAPITestCase,
@@ -1021,6 +1020,77 @@ class FindingVerifyAPITest(DojoAPITestCase):
 
 
 @versioned_fixtures
+class ReportGenerateFormatAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+    def _product_report_url(self):
+        return "/api/v2/products/1/generate_report/"
+
+    def test_generate_report_defaults_to_json(self):
+        response = self.client.post(self._product_report_url(), {}, format="json")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("findings", response.data)
+
+    def test_generate_report_returns_html(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "HTML"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("text/html", response["Content-Type"])
+
+    def test_generate_report_returns_csv(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "CSV"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("text/csv", response["Content-Type"])
+        self.assertIn(
+            "attachment; filename=product_1_findings.csv",
+            response["Content-Disposition"],
+        )
+
+    def test_generate_report_returns_excel(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "Excel"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response["Content-Type"],
+        )
+        self.assertIn(
+            "attachment; filename=product_1_findings.xlsx",
+            response["Content-Disposition"],
+        )
+
+    def test_generate_report_rejects_unknown_report_type(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "PDF"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:1000])
+        self.assertIn("report_type", response.data)
+
+
+@versioned_fixtures
 class EngagementCloseReopenAPITest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1224,6 +1294,75 @@ class EndpointStatusTest(BaseClass.BaseClassTest):
         logger.debug(response.data)
         self.assertEqual(400, response.status_code, response.content[:1000])
         self.assertIn("This endpoint-finding relation already exists", response.content.decode("utf-8"))
+
+    def test_update(self):
+        # Override the base-class PATCH+PUT cycle: PUT must preserve the row's
+        # endpoint/finding because the serializer freezes them after creation.
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        relative_url = self.url + "{}/".format(first["id"])
+
+        response = self.client.patch(relative_url, self.update_fields)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.check_schema_response("patch", "200", response, detail=True)
+
+        put_payload = self.payload.copy()
+        put_payload["endpoint"] = first["endpoint"]
+        put_payload["finding"] = first["finding"]
+        response = self.client.put(relative_url, put_payload)
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.check_schema_response("put", "200", response, detail=True)
+
+    def test_patch_endpoint_change_rejected(self):
+        # Pick the first existing row, find a different endpoint in the same
+        # product, and confirm PATCH refuses to re-point the row.
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        row = Endpoint_Status.objects.get(pk=first["id"])
+        other_endpoint = Endpoint.objects.filter(
+            product_id=row.endpoint.product_id,
+        ).exclude(pk=row.endpoint_id).first()
+        self.assertIsNotNone(other_endpoint, "fixture needs >1 endpoint per product")
+
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {"endpoint": other_endpoint.id},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("endpoint cannot be changed after creation", response.content.decode("utf-8"))
+
+    def test_patch_finding_change_rejected(self):
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        row = Endpoint_Status.objects.get(pk=first["id"])
+        other_finding = Finding.objects.filter(
+            test__engagement__product_id=row.endpoint.product_id,
+        ).exclude(pk=row.finding_id).first()
+        self.assertIsNotNone(other_finding, "fixture needs >1 finding per product")
+
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {"finding": other_finding.id},
+            format="json",
+        )
+        self.assertEqual(400, response.status_code, response.content[:1000])
+        self.assertIn("finding cannot be changed after creation", response.content.decode("utf-8"))
+
+    def test_patch_same_endpoint_and_finding_succeeds(self):
+        # PATCH that re-sends the existing FK values (no change) must still pass.
+        current_objects = self.client.get(self.url, format="json").data
+        first = current_objects["results"][0]
+        response = self.client.patch(
+            self.url + f"{first['id']}/",
+            {
+                "endpoint": first["endpoint"],
+                "finding": first["finding"],
+                "false_positive": not first.get("false_positive", False),
+            },
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content[:1000])
 
     def test_create_minimal(self):
         # This call should not fail even if there is not date defined
@@ -2449,6 +2588,69 @@ class JiraIssuesTest(BaseClass.BaseClassTest):
 
 
 @versioned_fixtures
+class JiraIssueProjectScopingTest(DojoAPITestCase):
+
+    """
+    The jira project on a jira finding mapping is writable, so a caller may only
+    reference a project they are allowed to edit. A member of one product must
+    not be able to attach or repoint a mapping to another product's project.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        pt_a = self.create_product_type("scoping-pt-a")
+        pt_b = self.create_product_type("scoping-pt-b")
+        self.product_a = self.create_product("scoping-prod-a", prod_type=pt_a)
+        self.product_b = self.create_product("scoping-prod-b", prod_type=pt_b)
+
+        self.user = Dojo_User.objects.create(username="jira-scoping-user", is_staff=False, is_superuser=False)
+        self.product_a.authorized_users.add(self.user)
+
+        Test_Type.objects.get_or_create(name="scoping-tt")
+        engagement = self.create_engagement("scoping-eng", self.product_a)
+        test = self.create_test(engagement=engagement, scan_type="scoping-tt", title="scoping-test")
+        self.finding = Finding.objects.create(
+            title="scoping-finding", test=test, severity="Low",
+            numerical_severity="S3", reporter=self.user,
+        )
+
+        # jira_instance is nullable; the scoping check only needs the projects to exist.
+        self.project_a = JIRA_Project.objects.create(product=self.product_a, project_key="AAA")
+        self.project_b = JIRA_Project.objects.create(product=self.product_b, project_key="BBB")
+
+        token = Token.objects.create(user=self.user)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.url = reverse("jira_issue-list")
+
+    def test_create_rejects_unauthorized_jira_project(self):
+        before = JIRA_Issue.objects.count()
+        response = self.client.post(self.url, {
+            "jira_project": self.project_b.id, "jira_id": "1", "jira_key": "BBB-1",
+            "finding": self.finding.id,
+        }, format="json")
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:500])
+        self.assertEqual(before, JIRA_Issue.objects.count())
+
+    def test_create_allows_authorized_jira_project(self):
+        response = self.client.post(self.url, {
+            "jira_project": self.project_a.id, "jira_id": "1", "jira_key": "AAA-1",
+            "finding": self.finding.id,
+        }, format="json")
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.content[:500])
+        self.assertEqual(self.project_a.id, JIRA_Issue.objects.get(id=response.data["id"]).jira_project_id)
+
+    def test_update_rejects_unauthorized_jira_project(self):
+        issue = JIRA_Issue.objects.create(jira_project=self.project_a, jira_id="1", jira_key="AAA-1", finding=self.finding)
+        response = self.client.patch(f"{self.url}{issue.id}/", {"jira_project": self.project_b.id}, format="json")
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:500])
+        issue.refresh_from_db()
+        self.assertEqual(self.project_a.id, issue.jira_project_id)
+
+
+@versioned_fixtures
 class JiraProjectTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2539,6 +2741,15 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
@@ -2562,6 +2773,15 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
 
 
 @versioned_fixtures
@@ -2680,6 +2900,17 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0. The DeprecationNoticeMixin
+        # must run in finalize_response, which only happens if it precedes the base
+        # viewset in the MRO (see dojo/api_v2/views.py:DeprecationNoticeMixin).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class ToolProductSettingsTest(BaseClass.BaseClassTest):
@@ -2725,6 +2956,15 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         self.test_type = TestType.CONFIGURATION_PERMISSIONS
         self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
 
 
 @versioned_fixtures
@@ -4101,3 +4341,35 @@ class BurpRawRequestResponseTest(BaseClass.BaseClassTest):
         self.test_type = TestType.STANDARD
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+
+class OpenAPISchemaGenerationTest(DojoAPITestCase):
+
+    """
+    Render the full OpenAPI v3 schema and gate that generation is error-free.
+
+    drf-spectacular does not raise when it fails to introspect a view or
+    serializer -- it logs an error and drops the operation from the schema, so a
+    broken endpoint (e.g. a serializer whose field querysets raise for the
+    unauthenticated request used at schema time) silently ships incomplete API
+    docs and can trip downstream postprocessing. Fail the build if schema
+    generation produces any error.
+    """
+
+    def test_schema_generation_produces_no_errors(self):
+        GENERATOR_STATS.reset()
+        generator = spectacular_settings.DEFAULT_GENERATOR_CLASS()
+        schema = generator.get_schema(request=None, public=True)
+
+        # Structurally valid per the OpenAPI 3 spec ...
+        validate_schema(schema)
+
+        # ... and generated without drf-spectacular logging any error (a logged
+        # error means an operation was silently dropped from the schema).
+        errors = list(GENERATOR_STATS._error_cache)
+        self.assertEqual(
+            errors,
+            [],
+            f"OpenAPI schema generation produced {len(errors)} error(s):\n"
+            + "\n".join(str(error) for error in errors),
+        )

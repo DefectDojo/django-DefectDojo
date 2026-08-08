@@ -1,4 +1,5 @@
 {% load event_tags %}
+{% load display_tags %}
 {% block css %}
     {{ form.media.css }}
 {% endblock %}
@@ -16,6 +17,16 @@
 {% for field in form.hidden_fields %}
     {{ field }}
 {% endfor %}
+
+{% if form|has_required_field and SHOW_A11Y_REQUIRED_FIELDS_NOTICE %}
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <p class="help-block">
+                <em>Required fields are marked with an asterisk</em><sup>*</sup>
+            </p>
+        </div>
+    </div>
+{% endif %}
 
 {% for field in form.visible_fields %}
     <div class="form-group{% if field.errors %} has-error{% endif %}">
@@ -84,7 +95,7 @@
 {% endfor %}
 
 {% if form.disclaimer %}
-    <div class="form-group" style="background-color:#DADCE2; border:1px #003333; padding:.8em; margin:.8em; ">
+    <div class="form-group" style="background-color:#DADCE2; border:1px solid #003333; padding:.8em; margin:.8em; ">
         <div class="col-sm-2" style="color:#ff0000;">Disclaimer</div>
         <div class="col-sm-10">{{ form.disclaimer }}</div>
     </div>

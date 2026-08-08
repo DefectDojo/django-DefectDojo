@@ -40,6 +40,19 @@ class TestNpmAudit7PlusParser(DojoTestCase):
             self.assertGreater(len(finding.description), 0)
             self.assertEqual("@vercel/fun", finding.title)
 
+    def test_npm_audit_7_plus_parser_multiple_cwes_per_finding(self):
+        # a single via entry can report multiple CWEs, e.g. "cwe": ["CWE-400","CWE-1333"]
+        testfile = (get_unit_tests_scans_path("npm_audit_7_plus") / "multiple_cwes_fabricated.json").open(encoding="utf-8")
+        parser = NpmAudit7PlusParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        with self.subTest(i=0):
+            finding = findings[0]
+            self.assertEqual("High", finding.severity)
+            self.assertEqual(400, finding.cwe)
+            self.assertEqual([400, 1333], finding.unsaved_cwes)
+
     def test_npm_audit_7_plus_parser_issue_10801(self):
         testfile = (get_unit_tests_scans_path("npm_audit_7_plus") / "issue_10801.json").open(encoding="utf-8")
         parser = NpmAudit7PlusParser()

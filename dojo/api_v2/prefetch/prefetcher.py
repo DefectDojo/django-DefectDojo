@@ -4,7 +4,11 @@ import sys
 from django.conf import settings
 from rest_framework.serializers import ModelSerializer
 
+from dojo.api_v2.prefetch import (
+    registrations as _registrations,  # noqa: F401 -- side-effect import populates the RBAC registry
+)
 from dojo.api_v2.prefetch import utils
+from dojo.api_v2.prefetch.authorized_querysets import get_authorized_queryset
 from dojo.location.api.serializers import LocationFindingReferenceSerializer, LocationSerializer
 from dojo.location.models import Location, LocationFindingReference
 from dojo.models import FileUpload, Finding
@@ -36,7 +40,8 @@ class _Prefetcher:
         # We process all the serializers found in the module SERIALIZER_DEFS_MODULE. We restrict the scope to avoid
         # processing all the classes in the symbol table
         available_serializers = inspect.getmembers(
-            sys.modules[SERIALIZER_DEFS_MODULE], _is_model_serializer,
+            sys.modules[SERIALIZER_DEFS_MODULE],
+            _is_model_serializer,
         )
 
         for _, serializer in available_serializers:
@@ -51,9 +56,10 @@ class _Prefetcher:
 
         return serializers
 
-    def __init__(self):
+    def __init__(self, request=None):
         self._serializers = _Prefetcher._build_serializers()
         self._prefetch_data = {}
+        self._request = request
 
     def _find_serializer(self, field_type):
         """
@@ -136,6 +142,8 @@ class _Prefetcher:
             field_to_fetch (list[string]): fields to prefetch
 
         """
+        user = getattr(self._request, "user", None) if self._request else None
+
         for field_to_fetch in fields_to_fetch:
             # Get the field from the instance
             field_value, many = self.get_field_value(entry, field_to_fetch)
@@ -148,16 +156,42 @@ class _Prefetcher:
             if extra_serializer is None:
                 continue
 
-            field_data = extra_serializer(many=many).to_representation(
+            # Authorization gate: only serialize objects from the requester's
+            # authorized queryset for this model. Deny-by-default -- models
+            # with no registered policy are omitted from the prefetch payload.
+            authorized_qs = get_authorized_queryset(model_type, user)
+            if authorized_qs is None:
+                continue
+
+            # Match the legacy contract: the field key always appears in the
+            # prefetch payload (possibly empty) once we have a policy. Tests
+            # and clients can rely on the key being present whenever the
+            # primary field is non-null on the entry.
+            self._prefetch_data.setdefault(field_to_fetch, {})
+
+            # Check related object authorizations
+            if many:
+                related_qs = field_value.all() if hasattr(field_value, "all") else field_value
+                related_ids = list(related_qs.values_list("pk", flat=True))
+                if not related_ids:
+                    continue
+                # Set `field_value` (what will be serialized later) to the set of objects the user has permission to
+                field_value = authorized_qs.filter(pk__in=related_ids)
+                if not field_value.exists():
+                    continue
+            # Only a single related item; check it's in the set of authorized objects. If not, skip it.
+            elif not authorized_qs.filter(pk=field_value.pk).exists():
+                continue
+
+            serializer_kwargs = {"many": many}
+            if self._request is not None:
+                # Add in the request for the serializers to use if they want
+                serializer_kwargs["context"] = {"request": self._request}
+            field_data = extra_serializer(**serializer_kwargs).to_representation(
                 field_value,
             )
             # For convenience in processing we store the field data in a list
-            field_data_list = (
-                field_data if isinstance(field_data, list) else [field_data]
-            )
-
-            if field_to_fetch not in self._prefetch_data:
-                self._prefetch_data[field_to_fetch] = {}
+            field_data_list = field_data if isinstance(field_data, list) else [field_data]
 
             # Should not fail as django always generate an id field
             for data in field_data_list:

@@ -294,15 +294,56 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         self.assertFalse(dupe_of_b.duplicate)
         self.assertIsNone(dupe_of_b.duplicate_finding)
 
-    def test_original_status_copied_to_new_original(self):
-        """New original inherits active/is_mitigated status from deleted original."""
+    def test_original_status_copied_to_new_original_active_verified(self):
+        """
+        New original inherits active/verified/is_mitigated from deleted original.
+
+        Positive case: original is an open, verified, not-mitigated finding.
+        Duplicate starts with the opposite of each field so every copy is observable.
+
+        Regression test for issue #14911: promoted duplicates kept verified=False
+        even when the original was verified, blocking Jira "Push All Issues".
+        """
+        original = self._create_finding(self.test1, "Original")
+        original.active = True
+        original.verified = True
+        original.is_mitigated = False
+        super(Finding, original).save(skip_validation=True)
+
+        outside_dupe = self._create_finding(self.test2, "Outside Dupe")
+        outside_dupe.is_mitigated = True
+        super(Finding, outside_dupe).save(skip_validation=True)
+        self._make_duplicate(outside_dupe, original)  # forces active=False, verified default False
+
+        with impersonate(self.testuser):
+            prepare_duplicates_for_delete(self.test1)
+
+        outside_dupe.refresh_from_db()
+        self.assertFalse(outside_dupe.duplicate)
+        self.assertTrue(outside_dupe.active)
+        self.assertTrue(outside_dupe.verified)
+        self.assertFalse(outside_dupe.is_mitigated)
+
+    def test_original_status_copied_to_new_original_inactive_mitigated(self):
+        """
+        New original inherits active/verified/is_mitigated from deleted original.
+
+        Negative case: original is closed, unverified, mitigated.
+        Duplicate starts with the opposite of each field so every copy is observable.
+        """
         original = self._create_finding(self.test1, "Original")
         original.active = False
+        original.verified = False
         original.is_mitigated = True
         super(Finding, original).save(skip_validation=True)
 
         outside_dupe = self._create_finding(self.test2, "Outside Dupe")
+        outside_dupe.verified = True
+        super(Finding, outside_dupe).save(skip_validation=True)
         self._make_duplicate(outside_dupe, original)
+        # _make_duplicate forces active=False; flip to True so the copy is observable
+        outside_dupe.active = True
+        super(Finding, outside_dupe).save(skip_validation=True)
 
         with impersonate(self.testuser):
             prepare_duplicates_for_delete(self.test1)
@@ -310,6 +351,7 @@ class TestPrepareDuplicatesForDelete(DojoTestCase):
         outside_dupe.refresh_from_db()
         self.assertFalse(outside_dupe.duplicate)
         self.assertFalse(outside_dupe.active)
+        self.assertFalse(outside_dupe.verified)
         self.assertTrue(outside_dupe.is_mitigated)
 
     def test_found_by_copied_to_new_original(self):

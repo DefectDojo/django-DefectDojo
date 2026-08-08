@@ -12,6 +12,9 @@ from django.utils.functional import SimpleLazyObject
 
 from dojo.jira.services import get_instance as get_jira_instance
 from dojo.models import (
+    DEDUPLICATION_EXECUTION_MODE_ASYNC,
+    DEDUPLICATION_EXECUTION_MODE_SYNC,
+    DEDUPLICATION_EXECUTION_MODES,
     Development_Environment,
     Dojo_User,
     Endpoint,
@@ -68,6 +71,7 @@ class ImporterOptions:
         self.engagement: Engagement | None = self.validate_engagement(*args, **kwargs)
         self.environment: Development_Environment | None = self.validate_environment(*args, **kwargs)
         self.group_by: str = self.validate_group_by(*args, **kwargs)
+        self.deduplication_execution_mode: str = self.validate_deduplication_execution_mode(*args, **kwargs)
         self.import_type: str = self.validate_import_type(*args, **kwargs)
         self.lead: Dojo_User | None = self.validate_lead(*args, **kwargs)
         self.minimum_severity: str = self.validate_minimum_severity(*args, **kwargs)
@@ -344,6 +348,25 @@ class ImporterOptions:
             default=False,
             **kwargs,
         )
+
+    def validate_deduplication_execution_mode(
+        self,
+        *args: list,
+        **kwargs: dict,
+    ) -> str:
+        mode = self.validate(
+            "deduplication_execution_mode",
+            expected_types=[str],
+            required=False,
+            default=DEDUPLICATION_EXECUTION_MODE_ASYNC,
+            **kwargs,
+        )
+        if mode not in DEDUPLICATION_EXECUTION_MODES:
+            mode = DEDUPLICATION_EXECUTION_MODE_ASYNC
+        # An explicit force_sync from a non-serializer caller still wins.
+        if kwargs.get("force_sync"):
+            mode = DEDUPLICATION_EXECUTION_MODE_SYNC
+        return mode
 
     def validate_commit_hash(
         self,

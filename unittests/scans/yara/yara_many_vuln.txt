@@ -1,0 +1,13 @@
+Hardcoded_Placeholder_Credential [description="Credential assigned inline in a configuration file",severity="medium",author="generic-ruleset"] /scan/targets/app.conf
+0x0:$a: password = "CHANGEME"
+0x16:$b: api_key = "AKIAPLACEHOLDER"
+Debug_Endpoint_Left_Enabled [description="Debug endpoint reachable in a shipped configuration",severity="low"] /scan/targets/app.conf
+0x32:$: debug_endpoint=enabled
+Awkward_Metadata_Values [description="Matches a marker, then reports it as \"awkward\"",severity="critical",confidence =90,experimental=true] /scan/targets/awkward.txt
+0x0:$: AWKWARD-MARKER
+Unrated_Marker_String [description="Marker with no severity recorded in the rule"] /scan/targets/build.txt
+0xd:$: GENERIC-MARKER-9F2A
+Rule_With_No_Metadata_At_All [] /scan/targets/build.txt
+0x21:$: NO-METADATA-MARKER
+Suspicious_Reverse_Shell_Command [description="Shell command that reconnects to an attacker-controlled host",severity="high",author="generic-ruleset",reference="https://example.com/rules/reverse-shell",date="2026-07-31"] /scan/targets/helper.sh
+0x1f:$bash: bash -i >& /dev/tcp/

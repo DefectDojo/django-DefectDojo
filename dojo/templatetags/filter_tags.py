@@ -59,6 +59,26 @@ FINDING_FIELD_GROUPS = OrderedDict([
 # Categories that should be expanded by default
 DEFAULT_OPEN_GROUPS = {"Search", "Severity & Risk", "Status"}
 
+# Query param that django_filters' OrderingFilter uses for column sorting.
+# Sorting is not filtering, so it must not auto-expand the filter panel.
+ORDERING_PARAM = "o"
+
+
+@register.filter
+def has_active_filters(form):
+    """
+    Return True only if a real *filter* is applied to a bound filter form.
+
+    Like Django's ``form.has_changed()`` but ignores the ordering field (``o``).
+    Column-header sort links write ``?o=...`` into the same filter form, so
+    plain ``has_changed`` treats sorting as filtering and auto-opens the filter
+    panel even though the user only sorted a column. Ignoring ``o`` keeps the
+    panel closed unless an actual filter value changed.
+    """
+    if form is None:
+        return False
+    return bool(set(form.changed_data) - {ORDERING_PARAM})
+
 
 def _is_finding_filter(form):
     """Check if a form is a Finding-related filter."""
@@ -80,7 +100,15 @@ def get_filter_groups(form):
         {% for group in filter_groups %}
             {{ group.name }} — {{ group.fields }}
         {% endfor %}
+
+    Pages that render a filter panel without having a filter form -- the search page
+    does that for an ``id:`` query -- resolve ``form`` to the empty string, so return
+    no groups rather than raising. The classic templates looped over
+    ``form.visible_fields`` directly, which failed silently the same way.
     """
+    if not hasattr(form, "visible_fields"):
+        return []
+
     visible_fields = list(form.visible_fields())
 
     if not _is_finding_filter(form):

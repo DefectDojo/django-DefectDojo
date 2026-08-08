@@ -12,68 +12,48 @@ jobs:
       matrix:
         test-case: [
           "openapi-validatator",
-          "tests/action_history_test.py",
-          "tests/alerts_test.py",
-          "tests/announcement_banner_test.py",
-          "tests/banner_test.py",
-          "tests/base_test_class.py",
-          "tests/benchmark_test.py",
-          "tests/calendar_test.py",
-          "tests/check_various_pages.py",
-          "tests/close_old_findings_dedupe_test.py",
-          "tests/close_old_findings_test.py",
-          "tests/dashboard_test.py",
-          "tests/dedupe_test.py",
-          "tests/endpoint_extended_test.py",
+          # endpoint_test.py stays alone so the v3 exclude below still matches it.
           "tests/endpoint_test.py",
-          "tests/engagement_checklist_test.py",
-          "tests/engagement_export_test.py",
-          "tests/engagement_extended_test.py",
-          "tests/engagement_presets_test.py",
-          "tests/engagement_test.py",
-          "tests/environment_test.py",
-          "tests/false_positive_history_test.py",
-          "tests/file_test.py",
-          "tests/finding_extended_test.py",
-          "tests/finding_group_test.py",
-          "tests/finding_test.py",
-          "tests/login_test.py",
-          "tests/metrics_extended_test.py",
-          "tests/note_type_test.py",
-          "tests/notes_test.py",
-          "tests/notification_webhook_test.py",
-          "tests/notifications_test.py",
-          "tests/object_test.py",
-          "tests/product_member_test.py",
-          "tests/product_metadata_test.py",
-          "tests/product_tag_metrics_test.py",
-          "tests/product_test.py",
-          "tests/product_type_member_test.py",
-          "tests/product_type_test.py",
-          "tests/questionnaire_advanced_test.py",
-          "tests/questionnaire_test.py",
-          "tests/regulations_test.py",
-          "tests/reimport_scan_test.py",
-          "tests/report_builder_test.py",
-          "tests/risk_acceptance_test.py",
-          "tests/search_test.py",
-          "tests/sla_configuration_test.py",
-          "tests/system_settings_test.py",
-          "tests/test_copy_test.py",
-          "tests/test_test.py",
-          "tests/test_type_test.py",
-          "tests/threat_model_test.py",
-          "tests/tool_config.py",
-          "tests/tool_product_test.py",
-          "tests/tool_type_test.py",
-          "tests/user_profile_test.py",
-          "tests/user_test.py",
-          # "tests/zap.py",
+          # Each entry below is a GROUP of test files, run sequentially in one
+          # compose stack by docker/entrypoint-integration-tests.sh. The groups
+          # are contiguous slices of the order the entrypoint's legacy no-filter
+          # branch has always run -- every adjacency here has years of history
+          # running back-to-back in ONE stack, and each group gets a FRESH stack,
+          # so this is strictly more isolation than the legacy path, not less.
+          # Do not reorder files across groups without that history in mind;
+          # appending a NEW file to the last group (or its own group) is safe.
+          # tests/zap.py stays disabled, as it was in the per-file matrix.
+          # group 01
+          "tests/finding_test.py tests/report_builder_test.py tests/notes_test.py tests/regulations_test.py tests/product_type_test.py tests/product_test.py",
+          # group 02
+          "tests/engagement_test.py tests/environment_test.py tests/test_test.py tests/user_test.py tests/product_member_test.py tests/product_type_member_test.py",
+          # group 03
+          "tests/search_test.py tests/file_test.py tests/dedupe_test.py tests/announcement_banner_test.py tests/close_old_findings_dedupe_test.py tests/close_old_findings_test.py",
+          # group 04
+          "tests/false_positive_history_test.py tests/check_various_pages.py tests/notifications_test.py tests/note_type_test.py tests/sla_configuration_test.py tests/dashboard_test.py",
+          # group 05
+          "tests/login_test.py tests/alerts_test.py tests/system_settings_test.py tests/engagement_extended_test.py tests/finding_extended_test.py tests/test_copy_test.py",
+          # group 06
+          "tests/endpoint_extended_test.py tests/calendar_test.py tests/finding_group_test.py tests/engagement_presets_test.py tests/questionnaire_test.py tests/benchmark_test.py",
+          # group 07
+          "tests/notification_webhook_test.py tests/threat_model_test.py tests/product_tag_metrics_test.py tests/object_test.py tests/tool_type_test.py tests/tool_product_test.py",
+          # group 08
+          "tests/risk_acceptance_test.py tests/product_metadata_test.py tests/test_type_test.py tests/user_profile_test.py tests/engagement_checklist_test.py tests/questionnaire_advanced_test.py",
+          # group 09
+          "tests/engagement_export_test.py tests/action_history_test.py tests/reimport_scan_test.py tests/banner_test.py tests/metrics_extended_test.py tests/tool_config.py",
+          # group 10
+          "tests/base_test_class.py",
         ]
         os: [debian]
-        v3_feature_locations: [true, false]
+        # Two tiers: pull requests run the UI suite once, with the flag in its
+        # default (false) position; the merge queue and manual dispatch run both
+        # values against the exact commit that will land. github.event_name is
+        # the CALLING workflow's event -- workflow_call inherits the caller's
+        # context -- so this follows unit-tests.yml's tiering automatically.
+        v3_feature_locations: ${{ github.event_name == 'pull_request' && fromJSON('[false]') || fromJSON('[true, false]') }}
         exclude:
-          # standalone create endpoint page is gone in v3
+          # standalone create endpoint page is gone in v3. On the light tier
+          # v3=true is absent and this exclude simply matches nothing.
           - v3_feature_locations: true
             test-case: "tests/endpoint_test.py"
       fail-fast: false
@@ -82,7 +62,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # load docker images from build jobs
       - name: Load images from artifacts
@@ -103,8 +83,39 @@ jobs:
       - name: Set integration-test mode
         run: ln -s docker-compose.override.integration_tests.yml docker-compose.override.yml
 
+      # mailhog and webhook.endpoint are the only two images this job fetches from
+      # Docker Hub; django, nginx and integration-tests all arrive as artifacts
+      # from the build job. Pulling those two is the single most common cause of a
+      # red check here -- four runs on one branch failed as
+      #
+      #   mailhog Error Get "https://registry-1.docker.io/v2/": context deadline exceeded
+      #
+      # with no test failure anywhere in the log. `docker compose up` gives a pull
+      # exactly one attempt, so a transient timeout takes the whole job with it,
+      # and this matrix plays that lottery 113 times per pull request.
+      #
+      # Retrying here rather than adding a step to fetch them as artifacts: this is
+      # three lines and fixes the observed failure, where plumbing two more images
+      # through the build-and-upload path touches four workflows. If Docker Hub
+      # rate limits become the problem rather than timeouts, the artifact route is
+      # the better answer.
+      - name: Pull external images
+        run: |
+          for attempt in 1 2 3; do
+            if docker compose pull --quiet mailhog webhook.endpoint; then
+              exit 0
+            fi
+            echo "::warning::pull attempt ${attempt} failed; retrying in 15s"
+            sleep 15
+          done
+          echo "::error::could not pull mailhog / webhook.endpoint after 3 attempts"
+          exit 1
+        env:
+          DJANGO_VERSION: ${{ matrix.os }}
+          NGINX_VERSION: alpine
+
       - name: Start Dojo
-        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey
+        run: docker compose up --no-deps -d postgres nginx celerybeat celeryworker mailhog uwsgi valkey webhook.endpoint
         env:
           DJANGO_VERSION: ${{ matrix.os }}
           NGINX_VERSION: alpine
@@ -117,7 +128,11 @@ jobs:
           NGINX_VERSION: alpine
 
       - name: Integration tests
-        timeout-minutes: 10
+        # 30 rather than 10: a grouped entry runs up to six files sequentially,
+        # and the largest groups sum to ~11 minutes of test time on a warm stack
+        # before any slowness. Single-file entries are unaffected by the higher
+        # ceiling -- it is a backstop, not a target.
+        timeout-minutes: 30
         run: docker compose up --no-deps --exit-code-from integration-tests integration-tests
         env:
           DD_INTEGRATION_TEST_FILENAME: ${{ matrix.test-case }}

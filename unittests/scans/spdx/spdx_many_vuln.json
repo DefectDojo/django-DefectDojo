@@ -1,0 +1,152 @@
+{
+  "SPDXID": "SPDXRef-DOCUMENT",
+  "spdxVersion": "SPDX-2.3",
+  "name": "generic-image",
+  "dataLicense": "CC0-1.0",
+  "documentNamespace": "https://example.com/spdx/generic-image-1.0-0000000000",
+  "creationInfo": {
+    "licenseListVersion": "3.28",
+    "creators": [
+      "Organization: Anchore, Inc",
+      "Tool: syft-1.50.0"
+    ],
+    "created": "2026-07-29T00:00:00Z"
+  },
+  "packages": [
+    {
+      "SPDXID": "SPDXRef-Package-apk-alpine-baselayout-d4c11d42e7429ff9",
+      "name": "alpine-baselayout",
+      "versionInfo": "3.1.2-r0",
+      "downloadLocation": "https://git.alpinelinux.org/cgit/aports/tree/main/alpine-baselayout",
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "GPL-2.0-only",
+      "supplier": "Person: Natanael Copa (ncopa@alpinelinux.org)",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:alpine-baselayout:alpine-baselayout:3.1.2-r0:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:alpine-baselayout:alpine_baselayout:3.1.2-r0:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:apk/alpine/alpine-baselayout@3.1.2-r0?arch=x86_64&distro=alpine-3.10.9"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "advisory",
+          "referenceLocator": "https://example.com/advisories/CVE-2024-10001"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "fix",
+          "referenceLocator": "https://example.com/fixes/CVE-2024-10001",
+          "comment": "Fixed upstream"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-apk-alpine-keys-195dde4e4d4f924b",
+      "name": "alpine-keys",
+      "versionInfo": "2.1-r2",
+      "downloadLocation": "https://alpinelinux.org",
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "MIT",
+      "supplier": "Person: Natanael Copa (ncopa@alpinelinux.org)",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:alpine-keys:alpine-keys:2.1-r2:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:alpine-keys:alpine_keys:2.1-r2:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:apk/alpine/alpine-keys@2.1-r2?arch=x86_64&distro=alpine-3.10.9"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "advisory",
+          "referenceLocator": "https://example.com/advisories/CVE-2024-10002"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "url",
+          "referenceLocator": "https://example.com/advisories/GHSA-jfh8-c2jp-5v3q"
+        }
+      ],
+      "checksums": [
+        {
+          "algorithm": "SHA256",
+          "checksumValue": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-apk-apk-tools-d4f773b96f8dcf5f",
+      "name": "apk-tools",
+      "versionInfo": "2.10.6-r0",
+      "downloadLocation": "https://gitlab.alpinelinux.org/alpine/apk-tools",
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "GPL-2.0-only",
+      "supplier": "Person: Natanael Copa (ncopa@alpinelinux.org)",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:apk-tools:apk-tools:2.10.6-r0:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:apk-tools:apk_tools:2.10.6-r0:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:apk/alpine/apk-tools@2.10.6-r0?arch=x86_64&distro=alpine-3.10.9"
+        },
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "advisory",
+          "referenceLocator": "https://example.com/advisories/no-identifier-here"
+        }
+      ]
+    },
+    {
+      "SPDXID": "SPDXRef-Package-apk-busybox-f1ec2a2b4c8b3f3f",
+      "name": "busybox",
+      "versionInfo": "1.30.1-r5",
+      "downloadLocation": "https://busybox.net/",
+      "filesAnalyzed": true,
+      "licenseConcluded": "NOASSERTION",
+      "licenseDeclared": "GPL-2.0-only",
+      "supplier": "Person: Natanael Copa (ncopa@alpinelinux.org)",
+      "externalRefs": [
+        {
+          "referenceCategory": "SECURITY",
+          "referenceType": "cpe23Type",
+          "referenceLocator": "cpe:2.3:a:busybox:busybox:1.30.1-r5:*:*:*:*:*:*:*"
+        },
+        {
+          "referenceCategory": "PACKAGE-MANAGER",
+          "referenceType": "purl",
+          "referenceLocator": "pkg:apk/alpine/busybox@1.30.1-r5?arch=x86_64&distro=alpine-3.10.9"
+        }
+      ]
+    }
+  ]
+}

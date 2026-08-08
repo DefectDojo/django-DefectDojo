@@ -8,6 +8,25 @@ aliases:
 
 Here are some common issues with the Jira integration, and ways to address them.
 
+## I can't find any Jira settings in DefectDojo
+
+If there is no Jira menu in the sidebar, no Jira section on the Product / Engagement forms, and no **Push to Jira** option on Findings, the Jira integration is most likely still disabled in System Settings.  DefectDojo hides every Jira control until it is turned on.
+
+Check **Enable Jira Integration** on the System Settings page:
+
+* Open Source: ⚙️ **Configuration \> System Settings**, then check **Enable JIRA integration**.  A **Jira webhook secret** is also required before the form will save, so click the 🔄 icon to generate one.  See the [Jira Integration Guide](/issue_tracking/jira/os__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
+* Pro: **\<Your Edition\> Settings \> System Settings**, then check **Enable Jira Integration** under **Jira Integration Settings**.  See the [Jira Integration Guide](/issue_tracking/jira/pro__jira_guide/#step-1-enable-the-jira-integration-in-system-settings).
+
+If the setting is already enabled and you still can't see the Jira menu, your user may be missing the **View Jira Instance** Configuration Permission, which is also required for the menu to appear.  It can be assigned directly on the User page or through a User Group.  See [About Permissions and Roles](/admin/user_management/about_perms_and_roles/#configuration-permissions).
+
+## DefectDojo cannot reach Jira (or other outbound services) at all
+
+If DefectDojo's Jira integration fails with connection errors that look like "connection refused", "no route to host", or generic TLS handshake failures — and the credentials themselves are valid — your DefectDojo instance may be behind a firewall that requires outbound traffic to go through a forward HTTPS proxy.
+
+For on-prem Pro deployments, set the `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` environment variables on the deployment.  `dojo-compose-cli` propagates these to the `uwsgi`, `celeryworker`, and Connector containers automatically.  See [Running DefectDojo Behind a Forward HTTPS Proxy](/onprem_deployment/forward_proxy/) for the full configuration walkthrough.
+
+> Note: setting `HTTPS_PROXY` configures **outbound** traffic from DefectDojo only.  It does not affect Jira's ability to deliver **inbound** webhooks to DefectDojo — see [Changes made to Jira issues are not updating Findings in DefectDojo](#changes-made-to-jira-issues-are-not-updating-findings-in-defectdojo) below for that case.
+
 ## Unable to setup Jira configuration in DefectDojo due to 404, 401 or 403 errors
 Jira Cloud:
 - Consult the Jira Cloud REST API documentation on authentication: https://developer.atlassian.com/cloud/jira/software/basic-auth-for-rest-apis/

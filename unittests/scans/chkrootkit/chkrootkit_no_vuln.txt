@@ -1,0 +1,2 @@
+ROOTDIR is `/'
+Checking `basename'...                                      not infected

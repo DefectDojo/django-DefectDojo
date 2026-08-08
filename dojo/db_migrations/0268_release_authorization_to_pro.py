@@ -56,7 +56,37 @@ reads (no DDL on the eight shared tables); the new ``authorized_users``
 M2M and the dropped ``default_group`` columns issue real DDL.
 """
 
+import logging
+from collections import defaultdict
+
 from django.db import migrations, models
+
+logger = logging.getLogger(__name__)
+
+# Number of through rows per bulk_create INSERT. Mirrors the batching used by
+# the other large data migrations (0082, 0201).
+BATCH_SIZE = 1000
+
+
+def _bulk_insert_pairs(through_model, obj_field, pairs, label):
+    """Insert ``(obj_id, user_id)`` pairs into an authorized_users through table.
+
+    ``pairs`` is a set of ``(obj_id, user_id)`` tuples, so it is already
+    deduplicated within this run. ``ignore_conflicts=True`` makes a re-run (or
+    any pre-existing row) a no-op against the table's unique constraint —
+    preserving the idempotency the previous ``get_or_create`` provided.
+    Inserts in ``BATCH_SIZE`` slices so progress is logged for large datasets.
+    """
+    ordered = list(pairs)
+    total = len(ordered)
+    logger.info("0268 backfill: inserting %s %s authorized_user pair(s)", total, label)
+    for start in range(0, total, BATCH_SIZE):
+        chunk = ordered[start:start + BATCH_SIZE]
+        through_model.objects.bulk_create(
+            [through_model(**{obj_field: obj_id, "dojo_user_id": user_id}) for obj_id, user_id in chunk],
+            ignore_conflicts=True,
+        )
+        logger.info("0268 backfill: %s/%s %s pairs inserted", min(start + BATCH_SIZE, total), total, label)
 
 
 def backfill_authorized_users(apps, schema_editor):
@@ -101,64 +131,61 @@ def backfill_authorized_users(apps, schema_editor):
         # Models already released from the dojo app state. Nothing to do.
         return
 
-    # 1. Direct per-product / per-product-type memberships.
+    logger.info("0268 backfill: RBAC tables detected, backfilling authorized_users")
+
+    # Flatten Dojo_Group_Member into a group_id -> [user_id, ...] map in a
+    # single pass. Reused by the group-grant expansion below and by the
+    # Global_Role flag updates, so each group's membership is read once.
+    group_members = defaultdict(list)
+    for group_id, user_id in Dojo_Group_Member.objects.values_list("group_id", "user_id"):
+        group_members[group_id].append(user_id)
+
+    # 1 + 2. Collect (obj_id, user_id) pairs from direct memberships and from
+    # group grants (flattened through group_members), deduplicating in memory
+    # before a single batched bulk_create per through table.
+    product_pairs = set()
     for product_id, user_id in Product_Member.objects.values_list("product_id", "user_id"):
-        Product.authorized_users.through.objects.get_or_create(
-            product_id=product_id,
-            dojo_user_id=user_id,
-        )
-    for product_type_id, user_id in Product_Type_Member.objects.values_list("product_type_id", "user_id"):
-        Product_Type.authorized_users.through.objects.get_or_create(
-            product_type_id=product_type_id,
-            dojo_user_id=user_id,
-        )
-
-    # 2. Group memberships: flatten Dojo_Group_Member.user into authorized_users.
+        product_pairs.add((product_id, user_id))
     for product_id, group_id in Product_Group.objects.values_list("product_id", "group_id"):
-        member_user_ids = Dojo_Group_Member.objects.filter(group_id=group_id).values_list("user_id", flat=True)
-        for user_id in member_user_ids:
-            Product.authorized_users.through.objects.get_or_create(
-                product_id=product_id,
-                dojo_user_id=user_id,
-            )
-    for product_type_id, group_id in Product_Type_Group.objects.values_list("product_type_id", "group_id"):
-        member_user_ids = Dojo_Group_Member.objects.filter(group_id=group_id).values_list("user_id", flat=True)
-        for user_id in member_user_ids:
-            Product_Type.authorized_users.through.objects.get_or_create(
-                product_type_id=product_type_id,
-                dojo_user_id=user_id,
-            )
+        for user_id in group_members.get(group_id, ()):
+            product_pairs.add((product_id, user_id))
+    _bulk_insert_pairs(Product.authorized_users.through, "product_id", product_pairs, "product")
 
-    # 3. Global_Role -> is_superuser / is_staff flags.
-    owner_user_ids = list(
+    product_type_pairs = set()
+    for product_type_id, user_id in Product_Type_Member.objects.values_list("product_type_id", "user_id"):
+        product_type_pairs.add((product_type_id, user_id))
+    for product_type_id, group_id in Product_Type_Group.objects.values_list("product_type_id", "group_id"):
+        for user_id in group_members.get(group_id, ()):
+            product_type_pairs.add((product_type_id, user_id))
+    _bulk_insert_pairs(Product_Type.authorized_users.through, "product_type_id", product_type_pairs, "product_type")
+
+    # 3. Global_Role -> is_superuser / is_staff flags. Group-held global roles
+    # expand through the same in-memory group_members map.
+    owner_user_ids = set(
         Global_Role.objects.filter(role__name="Owner", user__isnull=False).values_list("user_id", flat=True),
     )
-    owner_group_ids = list(
-        Global_Role.objects.filter(role__name="Owner", group__isnull=False).values_list("group_id", flat=True),
-    )
-    owner_user_ids.extend(
-        Dojo_Group_Member.objects.filter(group_id__in=owner_group_ids).values_list("user_id", flat=True),
-    )
+    for group_id in Global_Role.objects.filter(role__name="Owner", group__isnull=False).values_list("group_id", flat=True):
+        owner_user_ids.update(group_members.get(group_id, ()))
     if owner_user_ids:
         Dojo_User.objects.filter(id__in=owner_user_ids).update(is_superuser=True)
+        logger.info("0268 backfill: set is_superuser on %s user(s)", len(owner_user_ids))
 
-    elevated_user_ids = list(
+    elevated_user_ids = set(
         Global_Role.objects.filter(
             role__name__in=("Writer", "Maintainer", "API_Importer"),
             user__isnull=False,
         ).values_list("user_id", flat=True),
     )
-    elevated_group_ids = list(
-        Global_Role.objects.filter(
-            role__name__in=("Writer", "Maintainer", "API_Importer"),
-            group__isnull=False,
-        ).values_list("group_id", flat=True),
-    )
-    elevated_user_ids.extend(
-        Dojo_Group_Member.objects.filter(group_id__in=elevated_group_ids).values_list("user_id", flat=True),
-    )
+    for group_id in Global_Role.objects.filter(
+        role__name__in=("Writer", "Maintainer", "API_Importer"),
+        group__isnull=False,
+    ).values_list("group_id", flat=True):
+        elevated_user_ids.update(group_members.get(group_id, ()))
     if elevated_user_ids:
         Dojo_User.objects.filter(id__in=elevated_user_ids).update(is_staff=True)
+        logger.info("0268 backfill: set is_staff on %s user(s)", len(elevated_user_ids))
+
+    logger.info("0268 backfill: complete")
 
 
 def reverse_noop(apps, schema_editor):  # noqa: ARG001

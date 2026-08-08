@@ -1,0 +1,46 @@
+import logging
+
+from django.contrib import messages
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
+
+from dojo.banner.models import BannerConf
+from dojo.banner.ui.forms import LoginBanner
+from dojo.utils import add_breadcrumb
+
+logger = logging.getLogger(__name__)
+
+
+def configure_banner(request):
+    banner_config = get_object_or_404(BannerConf, id=1)
+    if request.method == "POST":
+        form = LoginBanner(request.POST)
+        if form.is_valid():
+            banner_config.banner_enable = form.cleaned_data["banner_enable"]
+            banner_config.banner_message = form.cleaned_data["banner_message"]
+            banner_config.save()
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                "Banner updated successfully.",
+                extra_tags="alert-success",
+            )
+            return HttpResponseRedirect(reverse("configure_banner"))
+    else:
+        # List the banner configuration
+        form = LoginBanner(
+            initial={
+                "banner_enable": banner_config.banner_enable,
+                "banner_message": banner_config.banner_message,
+            },
+        )
+
+    add_breadcrumb(
+        title="Banner Configuration", top_level=True, request=request,
+    )
+    return render(
+        request,
+        "dojo/banner.html",
+        {"form": form, "banner_message": banner_config.banner_message},
+    )

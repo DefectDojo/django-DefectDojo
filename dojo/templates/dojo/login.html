@@ -11,12 +11,12 @@
         align-items: center;
         justify-content: center;
         padding: 2rem 1rem;
-        background: linear-gradient(135deg, #e8f3fb 0%, #f7f8f9 50%, #fff 100%);
+        background: linear-gradient(135deg, var(--color-dd-primary-50) 0%, var(--color-surface-2) 50%, var(--color-surface) 100%);
     }
     .login-card {
         width: 100%;
         max-width: 26rem;
-        background: white;
+        background: var(--color-surface);
         border-radius: 0.75rem;
         box-shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 10px 15px -3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.03);
         padding: 2.5rem 2rem;
@@ -33,14 +33,14 @@
         text-align: center;
         font-size: 1.375rem;
         font-weight: 600;
-        color: #191919;
+        color: var(--color-text);
         margin-bottom: 0.25rem;
         letter-spacing: -0.01em;
     }
     .login-card .login-subtitle {
         text-align: center;
         font-size: 0.875rem;
-        color: #666666;
+        color: var(--color-text-muted);
         margin-bottom: 1.75rem;
     }
     .login-card .form-group {
@@ -55,12 +55,12 @@
     .login-card .form-control {
         height: 2.75rem;
         font-size: 0.9375rem;
-        border-color: #DCDCDC;
+        border-color: var(--color-border);
         border-radius: 0.5rem;
         transition: border-color 150ms, box-shadow 150ms;
     }
     .login-card .form-control:focus {
-        border-color: #1779C5;
+        border-color: var(--color-dd-primary-500);
         box-shadow: 0 0 0 3px rgba(23, 121, 197, 0.12);
     }
     .login-btn {
@@ -69,13 +69,13 @@
         font-size: 0.9375rem;
         font-weight: 600;
         border-radius: 0.5rem;
-        background: #1779C5;
+        background: var(--color-dd-primary-500);
         color: white;
         border: none;
         transition: background-color 150ms, transform 100ms, box-shadow 150ms;
     }
     .login-btn:hover {
-        background: #204D87;
+        background: var(--color-dd-primary-700);
         box-shadow: 0 2px 8px rgba(0, 56, 100, 0.2);
     }
     .login-btn:active {
@@ -89,11 +89,11 @@
         font-size: 0.8125rem;
     }
     .login-links a {
-        color: #1779C5;
+        color: var(--color-dd-primary-500);
         font-weight: 500;
     }
     .login-links a:hover {
-        color: #204D87;
+        color: var(--color-dd-primary-700);
         text-decoration: underline;
     }
 {% endblock %}

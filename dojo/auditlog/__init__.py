@@ -14,6 +14,7 @@ _LAZY_EXPORTS = {  # noqa: RUF067 -- table backs the PEP 562 __getattr__ re-expo
     "configure_pghistory_triggers":     "dojo.auditlog.services",
     "register_django_pghistory_models": "dojo.auditlog.services",
     "process_events_for_display":       "dojo.auditlog.helpers",
+    "TAG_MODEL_MAPPING":                "dojo.auditlog.helpers",
     "get_tracked_models":               "dojo.auditlog.backfill",
     "process_model_backfill":           "dojo.auditlog.backfill",
 }

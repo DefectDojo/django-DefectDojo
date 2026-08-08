@@ -307,6 +307,45 @@ class TestPerProductTagInheritance(DojoTestCase):
         self.assertEqual(sorted(t.name for t in eng_with.tags.all()), ["inherit-me"])
         self.assertEqual(list(eng_without.tags.all()), [])
 
+    def test_finding_created_with_own_tag_keeps_it_and_inherits(self):
+        """
+        Regression test for #15092.
+
+        Assigning tags to an unsaved finding and then saving it (the UI
+        "add finding" flow: ``finding.tags = [...]; finding.save()``) must keep
+        the user's own tags *and* merge the inherited product tags. Previously
+        the inheritance post_save handler ran before tagulous persisted the
+        pre-save tags and silently dropped them.
+        """
+        product = self.create_product("Inherit On Create", tags=["product-tag"])
+        product.enable_product_tag_inheritance = True
+        product.save()
+        engagement = self.create_engagement("Eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan")
+
+        finding = Finding(test=test, title="With own tag", severity="Medium", reporter=self.get_test_admin())
+        finding.tags = ["my-own-tag"]
+        finding.save()
+        finding.refresh_from_db()
+
+        self.assertEqual(sorted(t.name for t in finding.tags.all()), ["my-own-tag", "product-tag"])
+        self.assertEqual([t.name for t in finding.inherited_tags.all()], ["product-tag"])
+
+    def test_finding_created_without_own_tag_still_inherits(self):
+        """A finding created with no tags must still receive the product's inherited tags (#15092 guard)."""
+        product = self.create_product("Inherit No Own Tag", tags=["product-tag"])
+        product.enable_product_tag_inheritance = True
+        product.save()
+        engagement = self.create_engagement("Eng", product)
+        test = self.create_test(engagement=engagement, scan_type="ZAP Scan")
+
+        finding = Finding(test=test, title="No own tag", severity="Medium", reporter=self.get_test_admin())
+        finding.save()
+        finding.refresh_from_db()
+
+        self.assertEqual([t.name for t in finding.tags.all()], ["product-tag"])
+        self.assertEqual([t.name for t in finding.inherited_tags.all()], ["product-tag"])
+
 
 # ---------------------------------------------------------------------------
 # Integration tests — endpoint inheritance (v2 only)

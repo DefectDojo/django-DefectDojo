@@ -16,15 +16,18 @@ from dojo.authorization.authorization import (
     user_has_permission,
     user_is_superuser_or_global_owner,
 )
+from dojo.authorization.roles_permissions import Permissions
 from dojo.importers.auto_create_context import AutoCreateContextManager
 from dojo.location.models import Location
 from dojo.models import (
+    CICDInfrastructure,
     Development_Environment,
     Endpoint,
     Engagement,
     Finding,
     Finding_Group,
     Product,
+    Product_API_Scan_Configuration,
     Product_Type,
     Regulation,
     SLA_Configuration,
@@ -32,14 +35,74 @@ from dojo.models import (
 )
 
 
-def check_post_permission(request: Request, post_model: Model, post_pk: str | list[str], post_permission: int) -> bool:
-    if request.method == "POST":
-        if request.data.get(post_pk) is None:
-            msg = f"Unable to check for permissions: Attribute '{post_pk}' is required"
-            raise ParseError(msg)
-        obj = get_object_or_404(post_model, pk=request.data.get(post_pk))
-        return user_has_permission(request.user, obj, post_permission)
-    return True
+def check_post_permission(
+    request: Request,
+    post_model: Model,
+    post_pk: str | list[str],
+    post_permission: int,
+    *,
+    required: bool = True,
+) -> bool:
+    """
+    On POST, require ``post_permission`` on the destination object
+    referenced by ``post_pk`` in the request body.
+
+    ``required=True`` (default) fails closed with a ParseError when the
+    field is absent — used by the perm class's primary parent FK, which
+    is essential to determining authorization.
+
+    ``required=False`` no-ops when the field is absent — used for
+    sibling FKs in the same payload where the field is optional but,
+    when present, points at a tenant-bound destination that must be
+    authorized.
+    """
+    if request.method != "POST":
+        return True
+    pk = request.data.get(post_pk)
+    if pk is None:
+        if not required:
+            return True
+        msg = f"Unable to check for permissions: Attribute '{post_pk}' is required"
+        raise ParseError(msg)
+    obj = get_object_or_404(post_model, pk=pk)
+    return user_has_permission(request.user, obj, post_permission)
+
+
+def check_update_permission(
+    request: Request,
+    instance: Model,
+    permission: str,
+    request_field: str,
+    model_field: str | None = None,
+) -> bool:
+    """
+    PUT/PATCH companion to ``check_post_permission``. Enforces that a user
+    reassigning a foreign-key field on an existing object has ``permission``
+    on the destination, mirroring the create-time destination check.
+
+    ``request_field`` is the key as it appears in ``request.data``;
+    ``model_field`` defaults to it and is the attribute on the existing
+    instance. The destination model class is read from the FK descriptor
+    on ``instance`` via ``_meta``.
+
+    No-ops on non-PUT/PATCH, when the field is absent from the payload,
+    or when the submitted value matches the current value (replay-safe).
+    """
+    if request.method not in {"PUT", "PATCH"}:
+        return True
+    if request_field not in request.data:
+        return True
+    new_pk = request.data.get(request_field)
+    if new_pk is None:
+        return True
+    if model_field is None:
+        model_field = request_field
+    current_pk = getattr(instance, f"{model_field}_id", None)
+    if str(new_pk) == str(current_pk):
+        return True
+    field_model = type(instance)._meta.get_field(model_field).related_model
+    new_obj = get_object_or_404(field_model, pk=new_pk)
+    return user_has_permission(request.user, new_obj, permission)
 
 
 def check_object_permission(
@@ -134,12 +197,17 @@ class UserHasAppAnalysisPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj.product,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj.product,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "product",
+            )
         )
 
 
@@ -189,6 +257,8 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
             "GET": "get_permission",
             "POST": "post_permission",
             # PATCH is generally not used here, but this endpoint is sorta odd...
+            # ...it accepts PUT and PATCH alike, so both must authorize the target.
+            "PUT": "put_permission",
             "PATCH": "put_permission",
         }
         for request_method, permission_type in method_to_permission_map.items():
@@ -235,12 +305,17 @@ class UserHasToolProductSettingsPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj.product,
-            "view",
-            "edit",
-            "edit",
+        return (
+            check_object_permission(
+                request,
+                obj.product,
+                "view",
+                "edit",
+                "edit",
+            )
+            and check_update_permission(
+                request, obj, "edit", "product",
+            )
         )
 
 
@@ -252,29 +327,51 @@ class UserHasEndpointPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "product",
+            )
         )
 
 
 # TODO: Delete this after the move to Locations
 class UserHasEndpointStatusPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(
-            request, Endpoint, "endpoint", "edit",
+        # Check the user can edit both the Endpoint and Finding that the Endpoint_Status will link to
+        return (
+            check_post_permission(request, Endpoint, "endpoint", "edit")
+            and check_post_permission(request, Finding, "finding", "edit")
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj.endpoint,
-            "view",
-            "edit",
-            "edit",
+        return (
+            check_object_permission(
+                request,
+                obj.endpoint,
+                "view",
+                "edit",
+                "edit",
+            )
+            and check_object_permission(
+                request,
+                obj.finding,
+                "view",
+                "edit",
+                "edit",
+            )
+            and check_update_permission(
+                request, obj, "edit", "endpoint",
+            )
+            and check_update_permission(
+                request, obj, "edit", "finding",
+            )
         )
 
 
@@ -285,12 +382,17 @@ class UserHasEngagementPermission(permissions.BasePermission):
             )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "product",
+            )
         )
 
 
@@ -300,6 +402,15 @@ class UserHasEngagementRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasEngagementFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -364,6 +475,15 @@ class UserHasFindingRelatedObjectPermission(BaseRelatedObjectPermission):
     }
 
 
+class UserHasFindingFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
+    }
+
+
 class UserHasFindingNotePermission(BaseRelatedObjectPermission):
     permission_map = {
         "get_permission": "view",
@@ -381,12 +501,17 @@ class UserHasBurpRawRequestResponsePermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj.finding,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj.finding,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "finding",
+            )
         )
 
 
@@ -491,12 +616,17 @@ class UserHasProductPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "prod_type",
+            )
         )
 
 
@@ -510,12 +640,17 @@ class UserHasAssetPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "organization", "prod_type",
+            )
         )
 
 
@@ -631,17 +766,28 @@ class UserHasReimportPermission(permissions.BasePermission):
 
 class UserHasTestPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return check_post_permission(
-            request, Engagement, "engagement", "add",
+        return (
+            check_post_permission(
+                request, Engagement, "engagement", "add",
+            )
+            and check_post_permission(
+                request, Product_API_Scan_Configuration,
+                "api_scan_configuration", "view", required=False,
+            )
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "view", "api_scan_configuration",
+            )
         )
 
 
@@ -651,6 +797,15 @@ class UserHasTestRelatedObjectPermission(BaseRelatedObjectPermission):
         "put_permission": "edit",
         "delete_permission": "edit",
         "post_permission": "edit",
+    }
+
+
+class UserHasTestFilePermission(BaseRelatedObjectPermission):
+    permission_map = {
+        "get_permission": Permissions.Product_Tracking_Files_View,
+        "put_permission": Permissions.Product_Tracking_Files_Edit,
+        "delete_permission": Permissions.Product_Tracking_Files_Delete,
+        "post_permission": Permissions.Product_Tracking_Files_Add,
     }
 
 
@@ -686,12 +841,17 @@ class UserHasLanguagePermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "product",
+            )
         )
 
 
@@ -705,12 +865,17 @@ class UserHasProductAPIScanConfigurationPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "product",
+            )
         )
 
 
@@ -724,12 +889,17 @@ class UserHasAssetAPIScanConfigurationPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj,
-            "view",
-            "edit",
-            "delete",
+        return (
+            check_object_permission(
+                request,
+                obj,
+                "view",
+                "edit",
+                "delete",
+            )
+            and check_update_permission(
+                request, obj, "add", "asset", "product",
+            )
         )
 
 
@@ -784,7 +954,17 @@ class UserHasJiraProductPermission(permissions.BasePermission):
                     "edit",
                 )
             )
-        return has_permission_result
+        # Destination-perm check for PUT/PATCH FK reassignment (mirrors the
+        # POST logic above for create-time symmetry).
+        return (
+            has_permission_result
+            and check_update_permission(
+                request, obj, "edit", "engagement",
+            )
+            and check_update_permission(
+                request, obj, "edit", "product",
+            )
+        )
 
 
 class UserHasJiraIssuePermission(permissions.BasePermission):
@@ -859,7 +1039,20 @@ class UserHasJiraIssuePermission(permissions.BasePermission):
                     "edit",
                 )
             )
-        return has_permission_result
+        # Destination-perm check for PUT/PATCH FK reassignment (mirrors the
+        # POST logic above for create-time symmetry).
+        return (
+            has_permission_result
+            and check_update_permission(
+                request, obj, "edit", "engagement",
+            )
+            and check_update_permission(
+                request, obj, "edit", "finding",
+            )
+            and check_update_permission(
+                request, obj, "edit", "finding_group",
+            )
+        )
 
 
 class IsSuperUser(permissions.BasePermission):
@@ -879,13 +1072,18 @@ class UserHasEngagementPresetPermission(permissions.BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj.product,
-            "view",
-            "edit",
-            "edit",
-            "edit",
+        return (
+            check_object_permission(
+                request,
+                obj.product,
+                "view",
+                "edit",
+                "edit",
+                "edit",
+            )
+            and check_update_permission(
+                request, obj, "edit", "product",
+            )
         )
 
 
@@ -911,6 +1109,18 @@ class UserHasRegulationPermission(BaseDjangoModelPermission):
     # https://github.com/DefectDojo/django-DefectDojo/blob/963d4a35bfd8f5138330f0d70595a755fa4999b0/dojo/user/utils.py#L104
     # It looks like view permission was explicitly not supported, so I assume
     # reading these endpoints are not necessarily restricted (unless you're auth'd of course)
+    request_method_permission_map = {
+        "POST": "add",
+        "PUT": "change",
+        "PATCH": "change",
+        "DELETE": "delete",
+    }
+
+
+class UserHasCICDInfrastructurePermission(BaseDjangoModelPermission):
+    django_model = CICDInfrastructure
+    # Reads are open to any authenticated user (engagement views surface CICD
+    # references and need to render them). Writes require elevated privileges.
     request_method_permission_map = {
         "POST": "add",
         "PUT": "change",
@@ -1084,37 +1294,73 @@ class UserHasConfigurationPermissionSuperuser(
 
 class LocationFindingReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the finding the reference is attached to and
+        # the location it points at. Authorizing only the finding would let a
+        # user attach a location they cannot otherwise see to their own finding.
         return check_post_permission(
             request,
             Finding,
             "finding",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj.finding,
-            "view",
-            "edit",
-            "edit",
+        return (
+            check_object_permission(
+                request,
+                obj.finding,
+                "view",
+                "edit",
+                "edit",
+            )
+            and check_update_permission(
+                request, obj, "edit", "finding",
+            )
+            and check_update_permission(
+                request, obj, "view", "location",
+            )
         )
 
 
 class LocationProductReferencePermission(permissions.BasePermission):
     def has_permission(self, request, view):
+        # Both foreign keys in the payload point at tenant-bound objects, so
+        # both must be authorized: the product the reference is attached to and
+        # the location it points at. Authorizing only the product would let a
+        # user attach a location they cannot otherwise see to their own product.
         return check_post_permission(
             request,
             Product,
             "product",
             "edit",
+        ) and check_post_permission(
+            request,
+            Location,
+            "location",
+            "view",
+            required=False,
         )
 
     def has_object_permission(self, request, view, obj):
-        return check_object_permission(
-            request,
-            obj.product,
-            "view",
-            "edit",
-            "edit",
+        return (
+            check_object_permission(
+                request,
+                obj.product,
+                "view",
+                "edit",
+                "edit",
+            )
+            and check_update_permission(
+                request, obj, "edit", "product",
+            )
+            and check_update_permission(
+                request, obj, "view", "location",
+            )
         )

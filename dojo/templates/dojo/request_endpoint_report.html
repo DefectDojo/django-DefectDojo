@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load humanize %}
 {% block content %}
     {{ block.super }}
@@ -13,7 +14,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if filtered.form|has_active_filters %}in{% endif %}">
                     <div class="dojo-filter-heading">Filters</div>
                     <div class="filter-set">
 

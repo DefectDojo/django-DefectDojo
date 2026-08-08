@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 
 import pghistory
 from celery import Task
@@ -39,6 +40,74 @@ def async_dupe_delete(*args, **kwargs):
     # Wrap with pghistory context for audit trail
     with pghistory.context(source="dupe_delete_task"):
         _async_dupe_delete_impl()
+
+
+def _repoint_chained_duplicates(ids_to_delete):
+    """
+    Break inbound duplicate_finding references from findings that survive this run.
+
+    Chained duplicates (A -> B -> C, from past bugs or high parallel load - see
+    fix_loop_duplicates) can leave a SURVIVING finding pointing at an excess duplicate
+    that is about to be deleted. The duplicate_finding self-FK is ON DELETE DO_NOTHING,
+    so deleting while such references exist raises IntegrityError, rolls the chunk
+    back, and the task retries forever without ever making progress (observed in
+    production: the same finding id failing every run).
+
+    Survivors are re-pointed at their chain's root outside the delete set; when the
+    chain dead-ends or loops inside the delete set they are promoted to originals,
+    mirroring how fix_loop_duplicates handles parentless duplicates.
+    """
+    delete_set = set(ids_to_delete)
+
+    # Each deleted finding's own parent lets us walk chains that pass through the
+    # delete set: id -> duplicate_finding_id.
+    parent_of_deleted = dict(
+        Finding.objects.filter(id__in=delete_set).values_list("id", "duplicate_finding_id"),
+    )
+
+    def resolve_surviving_root(start_id):
+        seen = set()
+        current = start_id
+        while current in parent_of_deleted:
+            if current in seen:
+                # Defensive: a reference loop entirely inside the delete set.
+                return None
+            seen.add(current)
+            current = parent_of_deleted[current]
+        return current  # A surviving finding id, or None when the chain dead-ends.
+
+    survivors = (
+        Finding.objects
+        .filter(duplicate_finding_id__in=delete_set)
+        .exclude(id__in=delete_set)
+        .values_list("id", "duplicate_finding_id")
+    )
+
+    repoint_groups = defaultdict(list)  # surviving root id -> [survivor ids]
+    promote_ids = []
+
+    for survivor_id, parent_id in survivors:
+        root_id = resolve_surviving_root(parent_id)
+        if root_id is None or root_id == survivor_id:
+            # No surviving root (or the chain circles back to the survivor
+            # itself): promote to original rather than fabricate a self-loop.
+            promote_ids.append(survivor_id)
+        else:
+            repoint_groups[root_id].append(survivor_id)
+
+    if not repoint_groups and not promote_ids:
+        return
+
+    deduplicationLogger.warning(
+        "dupe delete: re-pointing %d chained duplicate reference(s) (promoting %d to original) before deleting %d findings",
+        sum(len(ids) for ids in repoint_groups.values()), len(promote_ids), len(delete_set),
+    )
+
+    for root_id, survivor_ids in repoint_groups.items():
+        Finding.objects.filter(id__in=survivor_ids).update(duplicate_finding_id=root_id)
+
+    if promote_ids:
+        Finding.objects.filter(id__in=promote_ids).update(duplicate_finding=None, duplicate=False)
 
 
 def _async_dupe_delete_impl():
@@ -115,6 +184,8 @@ def _async_dupe_delete_impl():
     logger.info("total number of excess duplicates to delete: %s", len(ids_to_delete))
 
     if ids_to_delete:
+        _repoint_chained_duplicates(ids_to_delete)
+
         # order_desc=True deletes higher ids before lower ids, consistent with how
         # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
         bulk_delete_findings(Finding.objects.filter(id__in=ids_to_delete), order_desc=True)
@@ -182,6 +253,8 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
     """
     from watson.search import SearchContextManager, default_search_engine  # noqa: PLC0415 circular import
 
+    from dojo.utils_watson_prefetch import build_indexing_queryset  # noqa: PLC0415 circular import
+
     logger.debug(f"Starting async watson index update for {len(pk_list)} {model_name} instances")
 
     try:
@@ -194,11 +267,19 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
         app_label, model_name = model_name.split(".")
         model_class = apps.get_model(app_label, model_name)
 
-        # Bulk load instances and add them to the context
-        instances = model_class.objects.filter(pk__in=pk_list)
+        # Bulk load instances and add them to the context. The queryset auto-derives
+        # select_related/prefetch_related from the adapter's fields/store paths to
+        # avoid N+1 queries during indexing. Disable via DD_WATSON_INDEX_PREFETCH_ENABLED=False.
+        adapter = engine.get_adapter(model_class)
+        instances = build_indexing_queryset(model_class, pk_list, adapter)
         instances_added = 0
         instances_skipped = 0
 
+        # This task IS the terminal drain: it accumulates one already-bounded batch (<= 1000
+        # PKs) into its own local SearchContextManager and bulk-saves it once via end(). The
+        # intermediate size-flush hook is bound to the global singleton instance only, so
+        # this private context keeps the stock add_to_context, never re-triggers the flush,
+        # and cannot re-dispatch itself.
         for instance in instances:
             try:
                 # Add to watson context (this will trigger indexing on end())

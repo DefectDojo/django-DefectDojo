@@ -57,3 +57,14 @@ class TestWapitiParser(DojoTestCase):
             self.assertEqual("Cross Site Request Forgery: CSP is not set", finding.title)
             self.assertEqual("Low", finding.severity)
             self.assertEqual(352, finding.cwe)
+
+    def test_parse_cwe_multi_cwe_fabricated_copy(self):
+        """Fabricated copy: a single Wapiti vulnerability references multiple CWEs (first is primary)"""
+        with (get_unit_tests_scans_path("wapiti") / "cwe_multi_cwe_fabricated.xml").open(encoding="utf-8") as testfile:
+            parser = WapitiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.validate_locations(findings)
+            weak_creds = findings[0]
+            self.assertEqual("Weak credentials: Weak credentials detected", weak_creds.title)
+            self.assertEqual(798, weak_creds.cwe)
+            self.assertEqual([798, 521], weak_creds.unsaved_cwes)

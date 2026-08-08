@@ -1,7 +1,10 @@
 import hashlib
 import re
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class MobSFjsonreport:
@@ -63,6 +66,10 @@ class MobSFjsonreport:
                     finding.file_path = file_path
                     finding.line = line
                     finding.description = f"{description}\n**Snippet:** `{snippet}`"
+                    if settings.V3_FEATURE_LOCATIONS:
+                        finding.unsaved_locations.append(
+                            LocationData.code(file_path=file_path, line=line, snippet=snippet),
+                        )
 
                 dupe_key = hashlib.sha256(
                     (key + str(cwe) + masvs + owasp_mobile + file_path).encode("utf-8"),

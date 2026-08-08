@@ -17,9 +17,23 @@ $dd-dojo-hue-02:  #B3B3B3;
 $dd-dojo-hue-03:  #666666;
 $dd-dojo-hue-04:  #333333;
 
+// Navy surfaces shared with trust.defectdojo.com (brand bookends)
+$dd-navy:    #0a1628;
+$dd-navy-2:  #0e2440;
+
+// Cool neutrals for the reading canvas
+$dd-ink:     #17222f;
+$dd-muted:   #5a6b80;
+$dd-border:  #e3e9f1;
+
 // Bootstrap variable overrides
 $primary:   $dd-fuji-blue;
 $secondary: $dd-fuji-hue-04;
+
+$border-radius:     0.5rem;
+$border-radius-sm:  0.375rem;
+$border-radius-lg:  0.75rem;
+$border-radius-xl:  1rem;
 
 // Typography
 $font-family-sans-serif:
@@ -44,12 +58,12 @@ $font-weight-medium:   500;
 $font-weight-semibold: 600;
 
 // Body
-$body-color: $dd-dojo-black;
+$body-color: $dd-ink;
 
 // Links
-$link-color:       $dd-fuji-blue;
-$link-hover-color: $dd-fuji-hue-03;
+$link-color:       #0f5e9e;
+$link-hover-color: $dd-fuji-blue;
 
 // Headings
 $headings-font-weight: 600;
-$headings-color:       $dd-dojo-black;
+$headings-color:       null; // resolved per-theme via CSS custom properties

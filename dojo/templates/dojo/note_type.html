@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load navigation_tags %}
 {% load authorization_tags %}
 {% block content %}
@@ -29,7 +30,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if ntl.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if ntl.form|has_active_filters %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=ntl.form %}
                 </div>
             </div>

@@ -99,6 +99,8 @@ def _make_locations(product: Product, n: int) -> None:
 @override_settings(
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 class TagInheritancePerfBaselines(DojoTestCase):
 
@@ -135,7 +137,7 @@ class TagInheritancePerfBaselines(DojoTestCase):
         # Per-product flag is also set in _make_product_with_findings as a
         # belt-and-braces measure (tests should not be flag-coupled).
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 
@@ -405,10 +407,10 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 53
     EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 53
 
-    EXPECTED_CREATE_ONE_FINDING_V2 = 55
-    EXPECTED_CREATE_ONE_FINDING_V3 = 55
-    EXPECTED_CREATE_100_FINDINGS_V2 = 3124
-    EXPECTED_CREATE_100_FINDINGS_V3 = 3124
+    EXPECTED_CREATE_ONE_FINDING_V2 = 56
+    EXPECTED_CREATE_ONE_FINDING_V3 = 56
+    EXPECTED_CREATE_100_FINDINGS_V2 = 3224
+    EXPECTED_CREATE_100_FINDINGS_V3 = 3224
 
     EXPECTED_FINDING_ADD_USER_TAG_V2 = 17
     EXPECTED_FINDING_ADD_USER_TAG_V3 = 17
@@ -433,6 +435,8 @@ class TagInheritancePerfBaselines(DojoTestCase):
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
     SECURE_SSL_REDIRECT=False,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 @versioned_fixtures
 class TagInheritanceImportPerfBaselines(DojoAPITestCase):
@@ -457,7 +461,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     @classmethod
     def setUpTestData(cls):
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 
@@ -585,9 +589,44 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # import path because the previous process-global signal-disconnect was
     # narrower in scope (Location.tags.through only). Net-positive trade for
     # eliminating the threading bug; full Phase B reductions land in Stage 2.
-    EXPECTED_ZAP_IMPORT_V2 = 420
-    EXPECTED_ZAP_IMPORT_V3 = 444
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 69
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 81
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 169
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 198
+    # perf/watson-index-prefetch on top of upstream batch_mode baseline:
+    # -52 import queries (adapter-derived select_related/prefetch_related in
+    # the async watson indexer, executed inline under CELERY_TASK_ALWAYS_EAGER);
+    # +5 reimport (no-change + with-new) queries from removal of
+    # WATSON_ASYNC_INDEX_UPDATE_THRESHOLD making async dispatch unconditional.
+    # Multiple-CWEs feature: +2 import / +2 reimport-no-change (Finding_CWE
+    # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
+    # existing Finding_CWE rows for each changed finding).
+    # Vulnerability id writes (entity-only cutover): only the Vulnerability entity +
+    # FindingVulnerabilityReference bulk writes remain (batched, not per-finding). Removing the
+    # legacy Vulnerability_Id dual-write drops the reimport counts by its delete+bulk_insert:
+    # -12 reimport-no-change, -6 reimport-with-new. Import counts are unchanged.
+    # +3 on every path from save_without_resurrecting(): the importer confirms its
+    # test and engagement rows still exist before writing them back, instead of
+    # letting Model.save() fall back to an INSERT that re-creates a row deleted
+    # mid-import. One primary-key lookup per guarded save (test, engagement, and
+    # the closing update_test_progress), so the cost is constant rather than
+    # per-finding — which is why the delta is +3 on import and reimport alike.
+    # +2 on the paths that buffer child rows: the batch flush confirms the buffered
+    # findings still exist before inserting their vulnerability id references, CWE rows
+    # and request/response rows, instead of letting a finding deleted mid-batch turn the
+    # bulk insert into a dangling foreign key that PostgreSQL only rejects at COMMIT.
+    # One primary-key lookup per flush method that has something to insert, and a ZAP
+    # batch boundary runs two of them: flush_vulnerability_ids() resolves the set once
+    # for the reference and CWE buffers it shares, then flush_burp_request_response()
+    # resolves its own for the request/response rows the ZAP parser attaches. The
+    # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
+    # -2 on the V3 reimport paths: LocationManager.persist() used to open
+    # transaction.atomic() even with nothing buffered, and inside the test's outer
+    # atomic block that empty transaction is a SAVEPOINT/RELEASE pair. Both steps
+    # inside it already short-circuit on empty accumulators, so persist() now returns
+    # before opening it. A reimport calls persist() at the batch boundary and again
+    # from close_old_findings; the one with nothing to write is the pair that goes.
+    # V2 is unaffected -- EndpointManager.persist() opens no transaction -- which is
+    # why only the V3 constants move.
+    EXPECTED_ZAP_IMPORT_V2 = 301
+    EXPECTED_ZAP_IMPORT_V3 = 325
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 92
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 193

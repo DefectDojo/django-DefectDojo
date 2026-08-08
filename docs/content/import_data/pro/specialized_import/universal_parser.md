@@ -9,7 +9,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The Universal Parser is only available in DefectDojo Pro.</span>
 
-The Universal Parser is currently in Beta.  See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
+The Universal Parser is on for every DefectDojo Pro instance; there is nothing to enable. See our [announcement presentation](https://community.defectdojo.com/universalparser) for more information.
 
 ## About Universal Parser
 DefectDojo has a large, regularly updated library of parsers to help security teams ingest data.  However, sometimes users have a tool that's unsupported by the parsers, or they may want to import data into the DefectDojo model differently from the way the parser does.
@@ -161,3 +161,84 @@ You can edit the Test_Type associated with your Universal Parser to change:
 * Whether it is "active" or not. If not, it will not appear as an option in the "Scan Type" drop-down on the "Add Findings" page
 * Whether its findings should be marked "static" or "dynamic"
 * You can tweak the same-tool and cross-tool deduplication hash codes, as well as the reimport hash codes, for your Universal Parser under "Enterprise Settings". By default, only same-tool deduplication and reimport hash codes are populated, with the required values Title, Severity, and Description.
+
+## Lifecycle: create, edit, deactivate, reactivate
+
+What you can do from the UI:
+
+* **Deactivate** a parser to hide it from the "Scan Type" drop-down on import. Open **Import → Universal Parser** in the sidebar to see all of your Universal Parsers, and toggle "Active" off. (Alternatively, you can edit the underlying Test_Type and uncheck "active".) Deactivated parsers no longer appear as a Scan Type option on the **Add Findings** page, but existing Tests that were imported with this parser are unaffected and continue to work.
+* **Reactivate** a parser from the same screen by toggling "Active" back on.
+* **Edit the Test_Type fields** described in the section above (active/inactive, static/dynamic, deduplication hash codes).
+
+Deleting a parser configuration is still not possible, because Universal Parser configurations are tied to Test_Type records that existing Findings, Tests and import history reference. If you need one permanently removed (for example, because it contains sensitive field names), contact [DefectDojo Support](mailto:support@defectdojo.com).
+
+## Editing a Universal Parser's field mappings
+
+Field mappings can be changed after a parser has been created, through the API. Each edit is recorded as a numbered revision, so you can see what changed, when, and who changed it.
+
+Some mapping edits are riskier than others, and DefectDojo classifies each edit before applying it:
+
+* A **presentation-only** edit changes a field that does not take part in matching — `references`, `mitigation`, `impact` and similar. It applies immediately with no further consequences.
+* An **identity-relevant** edit changes a field that your deduplication configuration hashes. By default that is Title, Severity and Description, so remapping any of those falls in this category, as does mapping a vendor's own identifier into `unique_id_from_tool`. These edits change what a finding's identity is built from, which is why the configuration used to be frozen.
+
+Which fields count as identity-relevant depends on your own deduplication settings for that scan type, not on a fixed list, so it follows any change you make under **Enterprise Settings**.
+
+### Checking an edit before you make it
+
+`POST` your proposed mappings to the `impact` endpoint to see how they will be classified, without applying anything:
+
+```
+POST /api/vue/universal_parser/{id}/impact/
+{"mappings": [ ... ]}
+```
+
+The response tells you whether the edit is identity-relevant, which fields moved, which of those reach identity, and how many findings currently exist under this parser's scan type.
+
+### Making the edit
+
+```
+PATCH /api/vue/universal_parser/{id}/
+{"mappings": [ ... ], "acknowledge_identity_change": true}
+```
+
+`acknowledge_identity_change` is required only for an identity-relevant edit, and the request is rejected without it. A presentation-only edit does not need it.
+
+### What happens to findings you have already imported
+
+An identity-relevant edit opens a **transition window**. During the window, an import re-derives its findings under the previous mappings as well as the current ones, and carries both identities. Findings imported before the edit are matched on the identity they were stored with, so a reimport updates them instead of closing them and creating duplicates.
+
+Two limits are worth knowing:
+
+* Only the **immediately previous** identity generation is bridged. If you make two identity-relevant edits without importing in between, findings imported before the first edit will not be matched.
+* The bridge pairs findings by position in the report. If your edit changes **how many findings the report yields** — for example by repointing the query at a different array — the pairing cannot be established and the bridge declines rather than risk attaching one finding's history to another. In that case, roll forward to a new parser instead.
+
+### Viewing the history
+
+```
+GET /api/vue/universal_parser/{id}/revisions/
+```
+
+Each revision records the full mapping set in force at that point, which fields the edit changed, whether it was identity-relevant, and who made it.
+
+### Changing mappings through the Django admin
+
+Editing a `FieldMapping` directly in the Django admin bypasses all of the above: no revision is recorded, no version is bumped, and no transition window opens, so findings imported before that change become unreachable from findings imported after it. Use the API instead.
+
+### Rolling forward to a new parser
+
+Editing is not always the right answer. If your scanner's report format changes so substantially that the new report yields a different set of findings, prefer creating a second parser:
+
+1. **Create a new Universal Parser** using a sample of the new report format (see Step 1). Give it a distinct name — e.g. append `v2` or a date to the original name.
+2. **Switch new imports** in your CI/CD pipeline or UI workflow to use the new parser's scan type.
+3. **Deactivate the old parser** once you've confirmed the new one is producing the findings you expect. Tests already imported under the old parser remain in DefectDojo and can still be triaged; only new imports route to the new parser.
+
+## A note about severity mapping
+
+The Universal Parser does **not** have a configurable severity-mapping field. Severity is mapped automatically with these rules:
+
+* Any case variation of a DefectDojo severity is accepted — `CRITICAL`, `Critical`, `cRiTiCaL`, `critical` all map to **Critical**. The same applies to `High`, `Medium`, `Low`, and `Info`.
+* Any value that does **not** match one of DefectDojo's five severities is mapped to **Info**.
+
+This behavior is the same for all parsers in DefectDojo (built-in parsers, Connectors, and Universal Parsers).
+
+If a scanner you're trying to ingest uses severity labels that don't line up with DefectDojo's (e.g. "warning", "note", or numeric CVSS scores), the Universal Parser will map all of those non-matching values to Info. If you need a different mapping, the best workaround today is to **transform the severity values upstream** — for example, in your CI pipeline before uploading — so the values DefectDojo receives are already one of the five DefectDojo severity names.

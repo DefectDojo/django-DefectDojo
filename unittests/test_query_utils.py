@@ -1,6 +1,6 @@
 from django.db.models import Count
 
-from dojo.engagement.views import prefetch_for_view_tests
+from dojo.engagement.ui.views import prefetch_for_view_tests
 from dojo.models import Finding, Test
 from unittests.dojo_test_case import DojoTestCase, versioned_fixtures
 

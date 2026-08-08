@@ -31,6 +31,15 @@ class TestNucleiParser(DojoTestCase):
             finding = findings[-1]
             self.assertEqual("example.com", self.get_unsaved_locations(finding)[0].host)
 
+    def test_parse_multi_cwe(self):
+        with (get_unit_tests_scans_path("nuclei") / "multi_cwe_fabricated.json").open(encoding="utf-8") as testfile:
+            parser = NucleiParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(79, finding.cwe)
+            self.assertEqual(["cwe-79", "cwe-89"], finding.unsaved_cwes)
+
     def test_parse_many_findings(self):
         with (get_unit_tests_scans_path("nuclei") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = NucleiParser()

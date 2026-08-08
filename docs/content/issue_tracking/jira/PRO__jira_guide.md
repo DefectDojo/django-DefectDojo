@@ -13,14 +13,46 @@ DefectDojo's Jira integration can be used to push Finding data to one or more Ji
 * DefectDojo can selectively push Findings from separate Products &/or Engagements to separate Jira Spaces, to keep things in their proper context.
 
 # Setting Up Jira
+
 Setting Up Jira requires the following steps:
-1. Connect a Jira Instance, either with a username / password or an API token.  Multiple instances can be linked.
-2. Add that Jira Instance to one or more Products or Engagements within DefectDojo.
-3. If you wish to use bidirectional sync, create a Jira Webhook which will send updates to DefectDojo.
+1. Enable the Jira integration in System Settings.  Until you do, the rest of the Jira settings are hidden throughout DefectDojo.
+2. Connect a Jira Instance, either with a username / password or an API token.  Multiple instances can be linked.
+3. Add that Jira Instance to one or more Products or Engagements within DefectDojo.
+4. If you wish to use bidirectional sync, create a Jira Webhook which will send updates to DefectDojo.
 
-## Step 1: Connect a Jira Instance
+## Step 1: Enable the Jira integration in System Settings
 
-Connecting a Jira Instance is the first step to take when setting up DefectDojo's Jira integration.  Please note Jira Service Management is currently not supported.
+The Jira integration is off by default, and while it is off DefectDojo hides every other Jira control in the interface.  This is the first thing to configure: none of the steps below are available until it is enabled.
+
+While the integration is disabled, there is no **Jira Instances** entry in the sidebar, so there is nowhere to add a Jira Instance:
+
+![image](images/jira-menu-hidden-pro.png)
+
+### Enable the integration
+
+1. Navigate to **Settings \> System \> System Settings** from the DefectDojo sidebar. On instances still using the previous menu layout this sits under a group named after your license package — **Pro Settings** or **Enterprise Settings**. See [The Settings Menu](/navigation/pro__settings_menu/).
+​
+2. In the **Jira Integration Settings** section, check **Enable Jira Integration**.
+​
+3. Click **Submit**.  **Jira Instances** appears in the sidebar immediately, without reloading the page:
+
+![image](images/jira-enable-system-settings-pro.png)
+
+### What the setting controls
+
+Enabling **Enable Jira Integration** is what makes the rest of the Jira interface appear.  With it turned on you get:
+
+* the **Jira Instances** menu, where Jira Instances are added and edited
+* the **Jira Project Settings** page on the Asset ⚙️ menu, and the Jira settings on Engagements
+* the **Push to Jira** actions on Findings and Finding Groups, the Jira fields on the Finding and bulk edit forms, and the Jira columns on the Asset, Engagement, Finding and Finding Group lists (including CSV exports)
+
+The setting also gates the integration outside the UI: while it is off, DefectDojo will not push Findings to Jira (including `push_to_jira` requests sent through the API), and incoming Jira webhooks are ignored.
+
+The remaining Jira fields in **Jira Integration Settings** (**Add Vulnerability ID as Jira Label**, **Enable Jira Web Hook**, **Disable Jira Web Hook Secret**, **Jira Web Hook Secret**, **Jira Minimum Severity**) stay visible whether the integration is on or off, but they have no effect until it is enabled.
+
+## Step 2: Connect a Jira Instance
+
+With the integration enabled, connecting a Jira Instance is the next step in setting up DefectDojo's Jira integration.  Please note Jira Service Management is currently not supported.
 
 #### Required information from Jira
 
@@ -46,7 +78,7 @@ Multiple Jira Spaces can be handled by a single Jira Instance connection, as lon
 
 ### Add a Jira Instance
 
-1. If you have not already done so, navigate to the System Settings page and check the box on **Enable Jira Integration**.
+1. Make sure **Enable Jira Integration** is checked in System Settings, as described in [Step 1](#step-1-enable-the-jira-integration-in-system-settings).  The **Jira Instances** menu does not appear on the sidebar until it is.
 
 2. Navigate to the  **Enterprise Settings \> Jira Instances \> + New Jira Instance**  page from the DefectDojo sidebar.
 
@@ -82,7 +114,7 @@ If you leave this field blank, it will default to **Jira\_full.**  If you need a
 
 The form can be submitted from here.  If you wish, you can further customize your Jira integration under Optional Fields.  Clicking this button will allow you to apply generic text to Jira Issues or change the mapping of Jira Severity Mappings.
 
-## Step 2: Connect a Product or Engagement to Jira
+## Step 3: Connect a Product or Engagement to Jira
 
 Each Product or Engagement in DefectDojo has its own settings which govern how Findings are converted to JIRA Issues. From here, you can decide the associated Jira Space and set the default behaviour for creating Issues, Epics, Labels and other JIRA metadata.
 
@@ -126,7 +158,7 @@ Here is an example of a **jira\_full** Issue:
 
 #### Component
 
-If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here.
+If you manage your Jira Space using Components, you can assign the appropriate Component for DefectDojo here. To assign more than one Component, enter a comma-separated list (for example, `Security, DevSecOps`); each value is sent to Jira as a separate component.
 
 #### Custom fields
 
@@ -137,6 +169,38 @@ However, if your Jira Space Settings **require you** to use Custom Fields on new
 Note that DefectDojo cannot send any Issue\-specific metadata as Custom Fields, only a default value. This section should only be set up if your Jira Space **requires that these Custom Fields exist** in every Issue in your Space.
 
 Follow **[this guide](#custom-fields-in-jira)** to get started working with Custom Fields.
+
+#### Close / Reopen Transition fields
+
+Some Jira workflows **require** certain fields to be set as part of a transition — for example, a workflow that refuses to close an Issue unless a Resolution and a Justification field are provided on the close screen. The Custom fields setting above only applies when an Issue is *created*, so it cannot satisfy these workflows.
+
+Without these settings, DefectDojo sends close / reopen transitions with no fields. A workflow that requires fields will reject that transition, and the Finding and the Jira Issue fall out of sync: the Finding shows as Mitigated in DefectDojo while the Issue remains open in Jira.
+
+The **Close Transition fields** and **Reopen Transition fields** settings accept a JSON object that is sent as the `fields` payload of the close / reopen transition call. For example, to close Issues with a Resolution of *Won't Fix* plus a justification value:
+
+```json
+{
+    "resolution": {"name": "Won't Fix"},
+    "customfield_10200": "Risk accepted by security team #report-false-positive"
+}
+```
+
+Leave these settings as 'null' if your Jira workflow does not require fields on transitions.
+
+**Which fields do you need?**
+
+* Ask your Jira admin which fields are on the close / reopen **transition screens**, and which of them are enforced by a validator. The configured JSON must satisfy **every** required field: if any required field is missing from the payload, Jira rejects the whole transition and sets nothing — supplying only some of the required fields does not help.
+* Conversely, fields must be present **on the transition screen** to be sent at all: Jira rejects transitions that attempt to set fields that are not on the screen for that transition.
+* On workflows built with Jira Cloud's current workflow editor, Jira automatically fills in the site's default Resolution when an Issue moves to a done-category status.  So, a required Resolution alone will not block a bare transition there, and the practical use of `"resolution"` in this payload is choosing a *meaningful* value (for example *False Positive*) instead of the site default. Workflows built with the classic editor, or with marketplace validator apps, can still hard-require Resolution.
+* Reopen transitions typically clear the Resolution via the workflow itself, so **Reopen Transition fields** usually only needs the custom fields your workflow requires.
+
+**Notes:**
+
+* The same JSON is sent for *every* close (or reopen) transition for the Product or Engagement — the values are static and do not vary per Finding. If you need different fields per disposition (for example, a different Resolution for False Positive findings than for remediated findings), use the DefectDojo Pro Jira Integrator, which supports per-status transition field mappings.
+* Values use the same format as Jira's REST API: strings for text fields, `{"name": ...}` for resolutions, `[{"name": ...}]` for multi-select fields, and so on.
+* If transitions were rejected while these settings were missing or incomplete, correcting the settings repairs the drift: the next status push for the Finding retries the transition with the configured fields.
+* Both settings are also available on the `/api/v2/jira_projects/` REST endpoint (`close_transition_fields` / `reopen_transition_fields`), so they can be managed via the API.
+* These fields are also applied when DefectDojo closes an Issue because its Finding was **deleted** — the values are captured at the moment the close is queued.
 
 #### Jira labels
 
@@ -203,13 +267,15 @@ Note that once an Engagement has its own Jira project assigned, it can no longer
 
 ![image](images/Creating_Issues_in_Jira_5.png)
 
-## Step 3: Configure Bidirectional Sync: Jira Webhook
+## Step 4: Configure Bidirectional Sync: Jira Webhook
 
 The Jira integration allows for bidirectional sync via webhook. DefectDojo receives Jira notifications at a unique address, which can allow for Jira comments to be received on Findings, or for Findings to be resolved via Jira depending on your configuration.
 
 ### Locating your Jira Webhook URL
 
 Your Jira Webhook is located on the System Settings form under **Jira Integration Settings**: **Enterprise Settings \> System Settings** from the sidebar.
+
+You also need to check **Enable Jira Web Hook** on the same page before DefectDojo will process incoming Jira notifications.  Incoming webhooks are ignored if either that box or **Enable Jira Integration** (see [Step 1](#step-1-enable-the-jira-integration-in-system-settings)) is unchecked.
 
 ![image](images/Configuring_the_Jira_DefectDojo_Webhook.png)
 
@@ -223,7 +289,7 @@ Your Jira Webhook is located on the System Settings form under **Jira Integratio
 
 Note that you do not need to create a Secret within Jira to use this webhook. The Secret is built into DefectDojo's URL, so simply adding the complete URL to the Jira Webhook form is sufficient.
 
-DefectDojo's Jira Webhook only accepts requests from the Jira API.
+Incoming webhook requests are authenticated by the secret in that URL, so treat the full URL as a credential and keep it private.
 
 #### Testing the Webhook
 
@@ -358,6 +424,23 @@ The Jira Instance configuration has entries for two Jira Transitions which will 
 ![image](images/Creating_Issues_in_Jira_3.png)
 
 * When the **'Reopen' Transition** is performed on the Jira Issue, the associated Finding will be set as **Active** on DefectDojo, and will lose its **Mitigated** status.
+
+## Mapping Jira Resolutions to Risk Acceptance / False Positive
+
+The Jira Instance configuration includes two optional fields that let you map a Jira **Resolution** to a DefectDojo Finding status:
+
+* **Risk Accepted Finding Mapping Resolution** — when a Jira issue is closed with this Resolution, the linked Finding becomes Risk Accepted in DefectDojo.
+* **False Positive Finding Mapping Resolution** — when a Jira issue is closed with this Resolution, the linked Finding becomes False Positive in DefectDojo.
+
+### Status vs Resolution: A Common Point of Confusion
+
+These fields map the Jira **Resolution**, not the Jira **Status**.  Status and Resolution are two independent Jira concepts: Status describes where the issue is in the workflow (Open, In Progress, Done), while Resolution describes how it was resolved (Fixed, Won't Do, Duplicate, False Positive, etc.).
+
+### Prerequisite: A "Set issue resolution" post-function on the Jira workflow transition
+
+Jira's workflow engine does not populate the Resolution field automatically.  Each transition that should close an issue with a specific Resolution needs a **Set issue resolution** post-function configured on the transition itself.  Without that post-function, the issue moves to the new Status but the Resolution stays blank, and DefectDojo's mapping has nothing to match against.
+
+A Jira admin can add this post-function from **Project Settings → Workflows → (edit workflow) → (select the closing transition) → Post Functions → Add post function → Set issue resolution**.
 
 # Custom Fields in Jira
 

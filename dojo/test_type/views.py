@@ -7,9 +7,9 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
-from dojo.filters import TestTypeFilter
 from dojo.forms import Test_TypeForm
 from dojo.models import Test_Type
+from dojo.test.ui.filters import TestTypeFilter
 from dojo.utils import add_breadcrumb, get_page_items
 
 logger = logging.getLogger(__name__)

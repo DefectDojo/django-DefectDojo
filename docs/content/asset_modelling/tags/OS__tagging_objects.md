@@ -7,12 +7,12 @@ exclude_search: false
 audience: opensource
 ---
 
-Tags are ideal for grouping objects in a manner that can be filtered out into smaller, more digestible chunks.  They can be used to denote status, or to create custom sets of Product Type, Products, Engagements or Findings across the data model.
+Tags are ideal for grouping objects in a manner that can be filtered out into smaller, more digestible chunks.  They can be used to denote status, or to create custom sets of Organizations, Assets, Engagements or Findings across the data model.
 
 In DefectDojo, tags are a first class citizen and are recognized as the facilitators
 of organization within each level of the data model.
 
-Here is an example with a Product with two tags and four findings each with a single tag:
+Here is an example with an Asset with two tags and four findings each with a single tag:
 
 ![High level example of usage with tags](images/tags-high-level-example.png)
 
@@ -35,7 +35,7 @@ Tags can be managed in the following ways:
    When a new object is created or edited through the UI or API, there is a field for specifying
    the tags to be set on a given object. This field is a multiselect field that also has
    auto completion to make searching and adding existing tags a breeze. Here is what the field 
-   looks like on the Product from the screenshot in the previous section:
+   looks like on the Asset from the screenshot in the previous section:
 
    ![Tag management on an object](images/tags-management-on-object.png)
 
@@ -71,17 +71,17 @@ Tags can be managed in the following ways:
 
 ## Tag Inheritance
 
-When Tag Inheritance is enabled, tags applied to a given Product will automatically be applied to all objects under Products in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/).
+When Tag Inheritance is enabled, tags applied to a given Asset will automatically be applied to all objects under Assets in the [Asset Hierarchy](/asset_modelling/os_hierarchy/os__asset_hierarchy/).
 
 ### Configuration
 
 Tag Inheritance can be enabled at the following scope levels:
 - Global Scope
-  - Every Product system wide will begin applying tags to all children objects (Engagements, Tests and Findings)
+  - Every Asset system wide will begin applying tags to all children objects (Engagements, Tests and Findings)
   - This is set within the System Settings
-- Product Scope
-  - Only the selected Product will begin applying tags to all children objects (Engagements, Tests and Findings)
-  - This is set at the Product creation/edit page
+- Asset Scope
+  - Only the selected Asset will begin applying tags to all children objects (Engagements, Tests and Findings)
+  - This is set at the Asset creation/edit page
 
 ### Behaviors
 
@@ -91,7 +91,7 @@ See the following example of adding a tag "test_only_tag" to the Test object and
 
 ![Example of inherited tags](images/tags-inherit-exmaple.png)
 
-When updates are made to the tag list on a Product, the same changes are made to all objects within the Product asynchronously. The duration of this task directly correlates to the number the objects contained within a finding.
+When updates are made to the tag list on an Asset, the same changes are made to all objects within the Asset asynchronously. The duration of this task directly correlates to the number the objects contained within a finding.
 
 **Open-Source:** If Tag changes are not observed within a reasonable time period, consult the celery worker logs to identify where any problems might have arisen.
 
@@ -145,5 +145,5 @@ but at different levels in the data model:
  - Not Tags (Test): filter on any tags that are *not* attached to the Test of a given Finding
  - Tags (Engagement): filter on any tags that are attached to the Engagement of a given Finding
  - Not Tags (Engagement): filter on any tags that are *not* attached to the Engagement of a given Finding
- - Tags (Product): filter on any tags that are attached to the Product of a given Finding
- - Not Tags (Product): filter on any tags that are *not* attached to the Product of a given Finding
+ - Tags (Asset): filter on any tags that are attached to the Asset of a given Finding
+ - Not Tags (Asset): filter on any tags that are *not* attached to the Asset of a given Finding

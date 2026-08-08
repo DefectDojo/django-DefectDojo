@@ -90,6 +90,7 @@ class OSVScannerParser:
                     vulnerabilitydetails = vulnerability.get("details", "")
                     vulnerabilitypackagepurl = ""
                     cwe = None
+                    unsaved_cwes = []
                     mitigations_by_type = {}  # Dictionary to store corrected versions by type
 
                     # Make sure we have an affected section to work with
@@ -100,6 +101,7 @@ class OSVScannerParser:
                                 vulnerabilitypackagepurl = vulnerabilitypackage.get("purl", "")
                             # Extract the CWE
                             if (cwe := affected[0].get("database_specific", {}).get("cwes", None)) is not None:
+                                unsaved_cwes = [entry["cweId"] for entry in cwe if entry.get("cweId")]
                                 cwe = cwe[0]["cweId"]
                             # Extraction of corrected versions by type
                             ranges = affected[0].get("ranges", [])
@@ -157,6 +159,8 @@ class OSVScannerParser:
 
                     if vulnerabilityid:
                         finding.unsaved_vulnerability_ids = [vulnerabilityid]
+                    if unsaved_cwes:
+                        finding.unsaved_cwes = unsaved_cwes
                     if settings.V3_FEATURE_LOCATIONS and (dep := self.get_dependency_info(package_ecosystem, package_name, package_version)):
                         finding.unsaved_locations.append(dep)
                     findings.append(finding)

@@ -43,7 +43,10 @@ class AuthorizationMiddleware:
                 _, model, permission, arg_name = check
                 lookup_value = view_kwargs.get(arg_name)
                 if lookup_value is None:
-                    continue  # kwarg not present, skip this check
+                    # The URL pattern and the URL_PERMISSIONS entry have drifted
+                    # apart on the kwarg name. Treat as a configuration error
+                    # and deny rather than silently allowing the request.
+                    raise PermissionDenied
                 obj = get_object_or_404(model, pk=lookup_value)
                 user_has_permission_or_403(request.user, obj, permission)
 

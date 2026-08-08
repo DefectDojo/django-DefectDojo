@@ -14,7 +14,9 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_permission_or_403
+from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_meta_import
+from dojo.finding.queries import get_authorized_findings_for_queryset
 from dojo.forms import (
     DeleteEndpointForm,
     DojoMetaFormSet,
@@ -24,7 +26,8 @@ from dojo.location.models import Location, LocationFindingReference, LocationPro
 from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
-from dojo.reports.views import generate_report
+from dojo.product.queries import get_authorized_products
+from dojo.reports.ui.views import generate_report
 from dojo.url.filters import URLFilter
 from dojo.url.models import URL
 from dojo.url.queries import annotate_host_contents
@@ -41,6 +44,20 @@ from dojo.utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def _get_location_or_404(request, location_id, permission):
+    """
+    Resolve a Location for the endpoint views via the shared authorized queryset.
+
+    Keeps object retrieval in these views consistent with the list/host views, which
+    already scope Location lookups through ``get_authorized_locations``. A lookup that
+    falls outside the queryset returns 404, matching object retrieval elsewhere.
+    """
+    return get_object_or_404(
+        get_authorized_locations(permission, Location.objects.all(), request.user),
+        id=location_id,
+    )
 
 
 def view_endpoint(request: HttpRequest, location_id: int):
@@ -95,7 +112,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         - host_view: Boolean indicating if host view is enabled.
 
     """
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     if location.location_type != URL.get_location_type():
         messages.add_message(
             request,
@@ -108,20 +125,26 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
     locations = None
     metadata = None
     status = "No relationships defined"
-    base_findings = Finding.objects.only(
-        "id",
-        "title",
-        "severity",
-        "epss_score",
-        "epss_percentile",
-        "date",
-        "found_by",
-        "active",
-        "out_of_scope",
-        "mitigated",
-        "false_p",
-        "duplicate",
-        "found_by",
+    # A Location is shared by every product that references it, so an authorized
+    # Location does not imply its findings are authorized.
+    base_findings = get_authorized_findings_for_queryset(
+        Permissions.Finding_View,
+        Finding.objects.only(
+            "id",
+            "title",
+            "severity",
+            "epss_score",
+            "epss_percentile",
+            "date",
+            "found_by",
+            "active",
+            "out_of_scope",
+            "mitigated",
+            "false_p",
+            "duplicate",
+            "found_by",
+        ),
+        user=request.user,
     ).prefetch_related("locations__location", "found_by")
 
     if host_view:
@@ -288,7 +311,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
 
 def edit_endpoint(request, location_id):
     # Retrieve the Location object by ID and add breadcrumb for editing
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "edit")
     add_breadcrumb(parent=location, title="Edit", top_level=False, request=request)
     # Initialize the URLForm with the current URL instance for editing
     form = URLForm(instance=location.url)
@@ -366,7 +389,7 @@ def add_endpoint_to_finding(request, finding_id):
 
 def delete_endpoint(request, location_id):
     # Retrieve the Location object by primary key and initialize the delete form
-    location = get_object_or_404(Location, pk=location_id)
+    location = _get_location_or_404(request, location_id, "delete")
     form = DeleteEndpointForm(instance=location)
     # Handle POST request for deleting an endpoint and its relationships
     if request.method == "POST":
@@ -399,7 +422,7 @@ def delete_endpoint(request, location_id):
 
 def manage_meta_data(request, location_id):
     # Retrieve the Location object by ID and filter its associated metadata
-    location = Location.objects.get(id=location_id)
+    location = _get_location_or_404(request, location_id, "edit")
     meta_data_query = DojoMeta.objects.filter(location=location)
     # Map the foreign key for the formset to the location
     form_mapping = {"location": location}
@@ -522,13 +545,26 @@ def endpoint_bulk_update_all(request, product_id=None):
                     f"Skipped mitigation of {skipped_location_count} locations because you are not authorized.",
                 )
 
+            # Scope the reference updates to the acting product (or, on the all-products
+            # route, the products the user may edit); get_authorized_locations above scopes
+            # only the Location rows, not their references.
+            if product_id is not None:
+                reference_products = Product.objects.filter(id=product_id)
+            else:
+                reference_products = get_authorized_products(Permissions.Product_Edit, request.user)
             # Bulk update the status of related FindingLocationStatus and ProductLocationStatus objects to 'Mitigated'
-            finding_update_counts = LocationFindingReference.objects.filter(location__in=locations).update(
+            finding_update_counts = LocationFindingReference.objects.filter(
+                location__in=locations,
+                finding__test__engagement__product__in=reference_products,
+            ).update(
                 status=FindingLocationStatus.Mitigated,
                 auditor=request.user,
                 audit_time=timezone.now(),
             )
-            product_update_counts = LocationProductReference.objects.filter(location__in=locations).update(
+            product_update_counts = LocationProductReference.objects.filter(
+                location__in=locations,
+                product__in=reference_products,
+            ).update(
                 status=ProductLocationStatus.Mitigated,
             )
             # Total number of updated statuses for reporting
@@ -624,10 +660,10 @@ def migrate_endpoints_view(request):
 
 
 def endpoint_report(request, location_id):
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     return generate_report(request, location, host_view=False)
 
 
 def endpoint_host_report(request, location_id):
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     return generate_report(request, location, host_view=True)

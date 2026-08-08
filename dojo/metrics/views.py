@@ -19,7 +19,6 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_cookie
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.filters import UserFilter
 from dojo.forms import ProductTagCountsForm, ProductTypeCountsForm, SimpleMetricsForm
 from dojo.labels import get_labels
 from dojo.metrics.utils import (
@@ -35,6 +34,7 @@ from dojo.metrics.utils import (
 from dojo.models import Dojo_User, Finding, Product_Type, Risk_Acceptance
 from dojo.product.queries import get_authorized_products
 from dojo.product_type.queries import get_authorized_product_types
+from dojo.user.ui.filters import UserFilter
 from dojo.utils import (
     add_breadcrumb,
     count_findings,

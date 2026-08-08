@@ -38,10 +38,11 @@
         <script src="{% static "moment/min/moment.min.js" %}"></script>
         <script src="{% static "fullcalendar/dist/fullcalendar.min.js" %}"></script>
         <!-- DataTables -->
+        <!-- Core DataTables only — the Bootstrap styling integrations were
+             dropped; markup is styled by datatables-dd.css against DataTables'
+             own dt-* classes. -->
         <script src="{% static 'datatables.net/js/dataTables.min.js' %}"></script>
-        <script src="{% static 'datatables.net-bs/js/dataTables.bootstrap.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/dataTables.buttons.min.js' %}"></script>
-        <script src="{% static 'datatables.net-buttons-bs/js/buttons.bootstrap.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/buttons.html5.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/buttons.colVis.min.js' %}"></script>
         <script src="{% static 'datatables.net-buttons/js/buttons.print.min.js' %}"></script>
@@ -88,7 +89,7 @@
             #dd-sidebar {
                 scrollbar-width: thin;
                 scrollbar-color: rgba(255,255,255,0.2) transparent;
-                background: #003864;  /* Fuji Blue Hue 04 — deepest brand blue */
+                background: var(--color-dd-primary-900);  /* Fuji Blue Hue 04 — deepest brand blue */
             }
             /* Override dojo.css 'a' color inside sidebar */
             #dd-sidebar a,
@@ -103,7 +104,7 @@
             }
             /* Sub-nav items (inside expandable sections) */
             #dd-sidebar div[x-data] > div a {
-                color: #82B0D9;  /* Fuji Blue Hue 02 — medium light */
+                color: var(--color-dd-primary-200);  /* Fuji Blue Hue 02 — medium light */
                 font-size: 0.875rem;
             }
             #dd-sidebar div[x-data] > div a:hover {
@@ -196,7 +197,7 @@
                         </div>
                     </div>
 
-                    <!-- Findings -->
+                    <!-- Findings (Finding Groups folded in) -->
                     <div x-data="{ open: false }">
                         <a href="{% url 'open_findings' %}" @click.prevent="open = !open"
                            class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
@@ -212,18 +213,7 @@
                             {% if "view"|has_global_permission %}
                                 <a href="{% url 'templates' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Finding Templates" %}</a>
                             {% endif %}
-                        </div>
-                    </div>
-
-                    <!-- Finding Groups -->
-                    <div x-data="{ open: false }">
-                        <a href="{% url 'all_finding_groups' %}" @click.prevent="open = !open"
-                           class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
-                            <i class="fa-solid fa-triangle-exclamation w-5 text-center flex-shrink-0"></i>
-                            <span class="flex-1 truncate">{% trans "Finding Groups" %}</span>
-                            <i :class="open && 'rotate-90'" class="fa-solid fa-chevron-right text-xs transition-transform duration-200"></i>
-                        </a>
-                        <div x-show="open" x-transition.duration.200ms x-cloak class="overflow-hidden bg-black/10">
+                            <div style="margin:.25rem 1rem; border-top:1px solid rgba(255,255,255,0.1);"></div>
                             <a href="{% url 'open_finding_groups' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Open Findings Groups" %}</a>
                             <a href="{% url 'all_finding_groups' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "All Findings Groups" %}</a>
                             <a href="{% url 'closed_finding_groups' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Closed Findings Groups" %}</a>
@@ -231,7 +221,7 @@
                     </div>
 
                     <!-- Components -->
-                    <a href="{% url 'components' %}" class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                    <a href="{% url 'components' %}" id="product_component_view" class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
                         <i class="fa-solid fa-table-cells-large w-5 text-center flex-shrink-0"></i>
                         <span class="truncate">{% trans "Components" %}</span>
                     </a>
@@ -292,7 +282,7 @@
                     <!-- Users -->
                     {% if "auth.view_user"|has_configuration_permission:request %}
                     <div x-data="{ open: false }">
-                        <a href="{% url 'users' %}" @click.prevent="open = !open"
+                        <a href="{% url 'users' %}" @click.prevent="open = !open" id="id_user_menu"
                            class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
                             <i class="fa-solid fa-user w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Users" %}</span>
@@ -340,7 +330,7 @@
 
                     <!-- Configuration -->
                     <div x-data="{ open: false }">
-                        <a href="#" @click.prevent="open = !open"
+                        <a href="#" @click.prevent="open = !open" id="menu_configuration"
                            class="flex items-center gap-3 px-4 py-2 text-gray-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer">
                             <i class="fa-solid fa-gear w-5 text-center flex-shrink-0"></i>
                             <span class="flex-1 truncate">{% trans "Configuration" %}</span>
@@ -380,6 +370,9 @@
                             {% if "dojo.view_tool_type"|has_configuration_permission:request %}
                                 <a href="{% url 'tool_type' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "Tool Type" %}</a>
                             {% endif %}
+                            {% if "dojo.view_cicdinfrastructure"|has_configuration_permission:request %}
+                                <a href="{% url 'cicd_infrastructure' %}" class="block py-1.5 pl-12 pr-4 text-sm text-gray-400 hover:text-white hover:bg-white/10">{% trans "CI/CD Infrastructure" %}</a>
+                            {% endif %}
                         </div>
                     </div>
 
@@ -413,7 +406,7 @@
                         <input id="simple_search" type="text" name="query" value="{{ clean_query }}"
                                class="flex-1 rounded-l-md border border-r-0 border-gray-300 px-3 py-1.5 text-sm focus:border-dd-primary-400 focus:ring-dd-primary-400"
                                placeholder="{% trans "Search" %}..." aria-label="Search">
-                        <button type="submit" class="btn btn-primary rounded-l-none" aria-label="Search">
+                        <button id="simple_search_submit" type="submit" class="btn btn-primary rounded-l-none" aria-label="Search">
                             <i class="fa-solid fa-magnifying-glass"></i>
                         </button>
                     </div>
@@ -514,6 +507,13 @@
                 {% for banner in additional_banners %}
                     <div role="alert" class="announcement-banner alert alert-{{ banner.style }} show"
                          data-source="{{ banner.source }}">
+                        {% if banner.dismissible %}
+                            <form method="post" action="{% url 'dismiss_os_message' %}" class="os-message-dismiss-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="token" value="{{ banner.dismiss_token }}">
+                                <button type="submit" class="os-message-dismiss" aria-label="Dismiss" title="Dismiss this message">&times;</button>
+                            </form>
+                        {% endif %}
                         {{ banner.message|safe }}{% if banner.url %} <a href="{{ banner.url }}">{{ banner.link_text }}</a>{% endif %}
                         {% if banner.expanded_html %}
                             <button type="button" class="banner-toggle collapsed"
@@ -552,26 +552,26 @@
                                     </h3>
                                     <ul class="nav nav-tabs horizontal-bar in">
                                         <li role="presentation"{% if product_tab.tab == 'overview' %} class="active"{% endif %}>
-                                            <a href="{% url 'view_product' product_tab.product.id %}">
+                                            <a href="{% url 'view_product' product_tab.product.id %}" data-testid="product-tab-overview">
                                                 <span class="fa-solid fa-earth-americas" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Overview" %}</span>
                                             </a>
                                         </li>
                                         <li role="presentation"{% if product_tab.tab == 'components' %} class="active"{% endif %}>
-                                            <a href="{% url 'view_product_components' product_tab.product.id %}">
+                                            <a href="{% url 'view_product_components' product_tab.product.id %}" data-testid="product-tab-components">
                                                 <span class="fa-solid fa-table-cells-large" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Components" %}</span>
                                             </a>
                                         </li>
                                         <li role="presentation"{% if product_tab.tab == 'metrics' %} class="active"{% endif %}>
-                                            <a href="{% url 'view_product_metrics' product_tab.product.id %}">
+                                            <a href="{% url 'view_product_metrics' product_tab.product.id %}" data-testid="product-tab-metrics">
                                                 <span class="fa-solid fa-chart-column" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Metrics" %}</span>
                                             </a>
                                         </li>
                                         <!-- Engagements Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'engagements' %} active active-color{% endif %}">
-                                            <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                            <a class="dropdown-toggle" data-toggle="dropdown" href="" data-testid="product-tab-engagements">
                                                 <span class="fa-solid fa-calendar-days" aria-hidden="true"></span>
                                                 <span class="hidden-xs">{% trans "Engagements" %}
                                                     {% if product_tab.engagements > 0 %}
@@ -606,7 +606,7 @@
                                         </li>
                                         <!-- Findings Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'findings' %} active active-color{% endif %}">
-                                            <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                            <a class="dropdown-toggle" data-toggle="dropdown" href="" data-testid="product-tab-findings">
                                                 <span class="fa-solid fa-bug" aria-hidden="true"></span>
                                                 <span class="hidden-xs">
                                                     {% trans "Findings" %}
@@ -681,7 +681,7 @@
                                         </li>
                                         <!-- Endpoints Tab -->
                                         <li role="presentation" class="dropdown{% if product_tab.tab == 'endpoints' %} active active-color{% endif %}">
-                                            <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                            <a class="dropdown-toggle" data-toggle="dropdown" href="" data-testid="product-tab-endpoints">
                                                 <span class="fa-solid fa-sitemap" aria-hidden="true"></span>
                                                 <span class="hidden-xs">
                                                     {% trans "Hosts / Endpoints" %}
@@ -744,7 +744,7 @@
                                         {% if system_settings.enable_benchmark %}
                                             {% if product_tab.product|has_object_permission:"edit" %}
                                                 <li role="presentation" class="dropdown{% if product_tab.tab == 'benchmarks' %} active{% endif %}">
-                                                    <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                                    <a class="dropdown-toggle" data-toggle="dropdown" href="" data-testid="product-tab-benchmarks">
                                                         <span class="fa-solid fa-scale-balanced" aria-hidden="true"></span>
                                                         <span class="hidden-xs">{% trans "Benchmarks" %}</span>
                                                         <span class="caret"></span>
@@ -765,7 +765,7 @@
                                         <!-- Product Settings Tab -->
                                         {% if product_tab.product|has_object_permission:"edit" or product_tab.product|has_object_permission:"delete" %}
                                             <li role="presentation" class="dropdown{% if product_tab.tab == 'settings' %} active{% endif %}">
-                                                <a class="dropdown-toggle" data-toggle="dropdown" href="">
+                                                <a class="dropdown-toggle" data-toggle="dropdown" href="" data-testid="product-tab-settings">
                                                     <span class="fa-solid fa-gears" aria-hidden="true"></span>
                                                     <span class="hidden-xs">{% trans "Settings" %}</span>
                                                     <span class="caret"></span></a>
@@ -960,7 +960,7 @@
         <!-- end #wrapper -->
 
         <!-- our JS -->
-        <script src="{% static "dojo/js/index.js" %}"></script>
+        <script src="{% static "dojo/js/index.js" %}?v={% static_v "dojo/js/index.js" %}"></script>
 
         <!-- CVSS -->
         <script src="{% static "dojo/js/cvsscalc31_helptext.js" %}"></script>

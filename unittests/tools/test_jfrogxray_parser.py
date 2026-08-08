@@ -60,6 +60,16 @@ class TestJfrogJFrogXrayParser(DojoTestCase):
         self.assertEqual(787, item.cwe)
         self.assertEqual("CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H", item.cvssv3)
 
+    def test_parse_file_with_multi_cwe(self):
+        testfile = (get_unit_tests_scans_path("jfrogxray") / "multi_cwe_fabricated.json").open(encoding="utf-8")
+        parser = JFrogXrayParser()
+        findings = parser.get_findings(testfile, Test())
+        testfile.close()
+        self.assertEqual(1, len(findings))
+        item = findings[0]
+        self.assertEqual(787, item.cwe)
+        self.assertEqual([787, 119], item.unsaved_cwes)
+
     def test_decode_cwe_number(self):
         with self.subTest(val="CWE-1234"):
             self.assertEqual(1234, decode_cwe_number("CWE-1234"))

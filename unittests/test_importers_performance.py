@@ -20,7 +20,6 @@ Always verify updated counts by:
 
 import logging
 from contextlib import contextmanager
-from unittest import skip
 from unittest.mock import patch
 
 from crum import impersonate
@@ -41,16 +40,16 @@ from dojo.models import (
     Endpoint_Status,
     Engagement,
     Finding,
+    FindingVulnerabilityReference,
     Product,
     Product_Type,
     Test,
     User,
     UserContactInfo,
-    Vulnerability_Id,
 )
 from dojo.tools.stackhawk.parser import StackHawkParser
 
-from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path, skip_unless_v2
+from .dojo_test_case import DojoTestCase, get_unit_tests_scans_path
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +77,7 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         # As part of the test suite the ContentTYpe ids will already be cached and won't affect the query count.
         # But if we run the test in isolation, the ContentType ids will not be cached and will result in more queries.
         # By warming up the cache here, these queries are executed before we start counting queries
-        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test, Vulnerability_Id]:
+        for model in [Development_Environment, Dojo_User, Endpoint, Endpoint_Status, Engagement, Finding, Product, Product_Type, User, Test, FindingVulnerabilityReference]:
             ContentType.objects.get_for_model(model)
 
     @contextmanager
@@ -275,13 +274,8 @@ class TestDojoImporterPerformanceBase(DojoTestCase):
         self.assertGreater(len_closed_findings4, 0, "Step 4 (empty reimport with close_old_findings=True) should close findings")
 
 
-@skip("Re-baseline pending: Track B legacy authorization reduces auth-layer query "
-      "overhead (no per-action role-permission lookups, simpler permission_to_action "
-      "dispatch). Expected query counts here were calibrated under RBAC and are "
-      "consistently 1-7 queries higher than legacy actual. Re-baseline with a fresh "
-      "calibration run after the upstream merge.")
 @tag("performance")
-@skip_unless_v2
+@override_settings(V3_FEATURE_LOCATIONS=False, SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
 
     """Performance tests using small sample files (StackHawk, ~6 findings)."""
@@ -349,13 +343,13 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=171,
+            expected_num_queries1=166,
             expected_num_async_tasks1=2,
-            expected_num_queries2=124,
+            expected_num_queries2=133,
             expected_num_async_tasks2=1,
-            expected_num_queries3=29,
+            expected_num_queries3=33,
             expected_num_async_tasks3=1,
-            expected_num_queries4=100,
+            expected_num_queries4=109,
             expected_num_async_tasks4=0,
         )
 
@@ -373,13 +367,13 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=187,
+            expected_num_queries1=185,
             expected_num_async_tasks1=2,
-            expected_num_queries2=132,
+            expected_num_queries2=143,
             expected_num_async_tasks2=1,
-            expected_num_queries3=37,
+            expected_num_queries3=43,
             expected_num_async_tasks3=1,
-            expected_num_queries4=100,
+            expected_num_queries4=109,
             expected_num_async_tasks4=0,
         )
 
@@ -398,18 +392,18 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=197,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=142,
-            expected_num_async_tasks2=3,
-            expected_num_queries3=44,
+            expected_num_queries1=195,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=153,
+            expected_num_async_tasks2=4,
+            expected_num_queries3=52,
             expected_num_async_tasks3=3,
-            expected_num_queries4=109,
-            expected_num_async_tasks4=2,
+            expected_num_queries4=118,
+            expected_num_async_tasks4=3,
         )
 
     # Deduplication is enabled in the tests above, but to properly test it we must run the same import twice and capture the results.
-    def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
+    def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True, dedup_mode=None):
         """
         Test method to measure deduplication performance by importing the same scan twice.
         The second import should result in all findings being marked as duplicates.
@@ -450,6 +444,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
                                     "verified": True,
                                     "scan_type": STACK_HAWK_SCAN_TYPE,
                                     "engagement": engagement,
+                                    **({"deduplication_execution_mode": dedup_mode} if dedup_mode else {}),
                                 }
                                 importer = DefaultImporter(**import_options)
                                 _, _, len_new_findings1, len_closed_findings1, _, _, _ = importer.process_scan(scan)
@@ -477,6 +472,7 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
                                     "verified": True,
                                     "scan_type": STACK_HAWK_SCAN_TYPE,
                                     "engagement": engagement,
+                                    **({"deduplication_execution_mode": dedup_mode} if dedup_mode else {}),
                                 }
                                 importer = DefaultImporter(**import_options)
                                 _, _, len_new_findings2, len_closed_findings2, _, _, _ = importer.process_scan(scan)
@@ -530,9 +526,9 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=110,
+            expected_num_queries1=102,
             expected_num_async_tasks1=2,
-            expected_num_queries2=90,
+            expected_num_queries2=80,
             expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -551,18 +547,50 @@ class TestDojoImporterPerformanceSmall(TestDojoImporterPerformanceBase):
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=126,
+            expected_num_queries1=121,
             expected_num_async_tasks1=2,
-            expected_num_queries2=107,
+            expected_num_queries2=100,
             expected_num_async_tasks2=2,
         )
 
+    @override_settings(ENABLE_AUDITLOG=True)
+    def test_deduplication_performance_pghistory_async_wait(self):
+        """
+        Deduplication performance in the 'async_wait' execution mode: post-processing is
+        dispatched to a background worker, then the request joins on the result before
+        responding. The dedup queries run in the worker (a separate connection), NOT in
+        the web request, so the only web-side cost over the plain async path is +2: the
+        post-dedup notification refresh SELECT, plus one result-backend write from the
+        per-dispatch ignore_result=False that lets the request join via AsyncResult.get().
+
+        We do not use CELERY_TASK_ALWAYS_EAGER here — that would run the dispatched task
+        inline on the request's connection and wrongly count the worker's dedup queries.
+        Instead the dedup batch is dispatched async (not executed in-process) and the join
+        (AsyncResult.get) is mocked to return immediately, simulating a worker that has
+        finished. deduplication_complete is therefore True (so the refresh runs), but the
+        findings are not actually deduplicated in-test, so check_duplicates is False.
+        """
+        configure_audit_system()
+        configure_pghistory_triggers()
+
+        # Enable deduplication
+        self.system_settings(enable_deduplication=True)
+
+        # Simulate the background worker's post-processing having completed so the join
+        # returns instantly without executing dedup on the request's DB connection.
+        with patch("celery.result.AsyncResult.get", return_value=None):
+            self._deduplication_performance(
+                expected_num_queries1=103,
+                expected_num_async_tasks1=2,
+                expected_num_queries2=81,
+                expected_num_async_tasks2=2,
+                dedup_mode="async_wait",
+                check_duplicates=False,
+            )
+
 
 @tag("performance")
-@override_settings(V3_FEATURE_LOCATIONS=True)
-@skip("Re-baseline pending: same RBAC→legacy query-count drift as "
-      "TestDojoImporterPerformanceSmall. See that class's skip note for the "
-      "rationale.")
+@override_settings(V3_FEATURE_LOCATIONS=True, SETTINGS_CACHE_L1_TTL=30, SETTINGS_CACHE_L2_TTL=-1)
 class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase):
 
     r"""
@@ -642,13 +670,13 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         configure_pghistory_triggers()
 
         self._import_reimport_performance(
-            expected_num_queries1=178,
+            expected_num_queries1=173,
             expected_num_async_tasks1=2,
-            expected_num_queries2=133,
+            expected_num_queries2=142,
             expected_num_async_tasks2=1,
-            expected_num_queries3=37,
+            expected_num_queries3=41,
             expected_num_async_tasks3=1,
-            expected_num_queries4=101,
+            expected_num_queries4=110,
             expected_num_async_tasks4=0,
         )
 
@@ -666,13 +694,13 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._import_reimport_performance(
-            expected_num_queries1=196,
+            expected_num_queries1=194,
             expected_num_async_tasks1=2,
-            expected_num_queries2=143,
+            expected_num_queries2=154,
             expected_num_async_tasks2=1,
-            expected_num_queries3=47,
+            expected_num_queries3=53,
             expected_num_async_tasks3=1,
-            expected_num_queries4=101,
+            expected_num_queries4=110,
             expected_num_async_tasks4=0,
         )
 
@@ -691,14 +719,14 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_product_grade=True)
 
         self._import_reimport_performance(
-            expected_num_queries1=209,
-            expected_num_async_tasks1=4,
-            expected_num_queries2=156,
-            expected_num_async_tasks2=3,
-            expected_num_queries3=54,
+            expected_num_queries1=207,
+            expected_num_async_tasks1=5,
+            expected_num_queries2=167,
+            expected_num_async_tasks2=4,
+            expected_num_queries3=62,
             expected_num_async_tasks3=3,
-            expected_num_queries4=113,
-            expected_num_async_tasks4=2,
+            expected_num_queries4=122,
+            expected_num_async_tasks4=3,
         )
 
     def _deduplication_performance(self, expected_num_queries1, expected_num_async_tasks1, expected_num_queries2, expected_num_async_tasks2, *, check_duplicates=True):
@@ -798,9 +826,9 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         self.system_settings(enable_deduplication=True)
 
         self._deduplication_performance(
-            expected_num_queries1=117,
+            expected_num_queries1=109,
             expected_num_async_tasks1=2,
-            expected_num_queries2=93,
+            expected_num_queries2=83,
             expected_num_async_tasks2=2,
             check_duplicates=False,  # Async mode - deduplication happens later
         )
@@ -818,8 +846,8 @@ class TestDojoImporterPerformanceSmallLocations(TestDojoImporterPerformanceBase)
         testuser.usercontactinfo.save()
 
         self._deduplication_performance(
-            expected_num_queries1=135,
+            expected_num_queries1=130,
             expected_num_async_tasks1=2,
-            expected_num_queries2=218,
+            expected_num_queries2=211,
             expected_num_async_tasks2=2,
         )

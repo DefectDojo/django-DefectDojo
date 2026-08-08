@@ -7,7 +7,7 @@ aliases:
   - /en/customize_dojo/user_management/set_user_permissions
 ---
 
-> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [2.59 upgrade notes](/releases/os_upgrading/2.59/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
+> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
 
 ## Introduction to Permission Types
 

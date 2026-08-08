@@ -1,0 +1,104 @@
+{
+  "count": 4,
+  "results": [
+    {
+      "id": 9001,
+      "severity": "high",
+      "title": "TLS certificate expires in under 14 days",
+      "description": "The certificate presented by the service expires shortly. See CVE-2000-0009 for background.",
+      "remediation": "Renew the certificate and redeploy it to every listener.",
+      "cvss_score": 7.4,
+      "snoozed": false,
+      "snooze_reason": "",
+      "exploit_likelihood": "MEDIUM",
+      "occurrences": "https://api.example.com/v1/issues/9001/occurrences"
+    },
+    {
+      "id": 9002,
+      "severity": "medium",
+      "title": "Outdated web server version",
+      "description": "The service reports a version with published vulnerabilities.",
+      "remediation": "Upgrade the web server.",
+      "cvss_score": 5.3,
+      "snoozed": false,
+      "exploit_likelihood": "LOW"
+    },
+    {
+      "id": 9003,
+      "severity": "not a label",
+      "title": "An issue with an unrecognised severity",
+      "description": "",
+      "remediation": "",
+      "cvss_score": 0
+    },
+    {
+      "id": 9004,
+      "severity": "critical",
+      "title": "An issue with no occurrences",
+      "description": "Nothing is currently affected.",
+      "remediation": "Nothing to do.",
+      "cvss_score": 9.8
+    }
+  ],
+  "occurrences": {
+    "9001": [
+      {
+        "id": 1,
+        "occurrence_id": 500001,
+        "target": "app.example.com",
+        "display_address": "app.example.com (production)",
+        "port": "443",
+        "protocol": "tcp",
+        "first_seen_at": "2024-07-01T12:00:00Z",
+        "target_last_scanned_at": "2024-07-15T12:00:00Z",
+        "snoozed": false,
+        "snooze_reason": "",
+        "exploit_likelihood": "MEDIUM",
+        "cvss_score": 8.1,
+        "cves": ["CVE-2000-0001", "CVE-2000-0001"],
+        "extra_info": {"issuer": "Example CA", "expires": "2024-07-20", "chain": "complete"}
+      },
+      {
+        "id": 2,
+        "occurrence_id": 500002,
+        "target": "10.0.0.11",
+        "port": "8443",
+        "protocol": "tcp",
+        "first_seen_at": "2024-06-01T00:00:00Z",
+        "snoozed": true,
+        "snooze_reason": "FALSE_POSITIVE",
+        "cvss_score": 0
+      }
+    ],
+    "9002": [
+      {
+        "id": 3,
+        "occurrence_id": 500003,
+        "target": "shop.example.com",
+        "port": "0",
+        "protocol": "tcp",
+        "first_seen_at": "not a timestamp",
+        "snoozed": true,
+        "snooze_reason": "ACCEPT_RISK"
+      },
+      {
+        "id": 4,
+        "occurrence_id": 500004,
+        "target": "Reception Desk PC",
+        "port": "80",
+        "snoozed": true,
+        "snooze_reason": "MITIGATING_CONTROLS"
+      }
+    ],
+    "9003": [
+      {
+        "id": 5,
+        "occurrence_id": 500005,
+        "target": "legacy.example.com",
+        "port": "21",
+        "snoozed": true,
+        "snooze_reason": "SOME_FUTURE_REASON"
+      }
+    ]
+  }
+}

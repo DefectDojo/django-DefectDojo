@@ -1,0 +1,16 @@
+from django.urls import re_path
+
+from dojo.system_settings.ui import views
+
+urlpatterns = [
+    re_path(
+        r"^system_settings$",
+        views.SystemSettingsView.as_view(),
+        name="system_settings",
+    ),
+    re_path(
+        r"^celery_status$",
+        views.CeleryStatusView.as_view(),
+        name="celery_status",
+    ),
+]

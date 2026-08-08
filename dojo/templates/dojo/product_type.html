@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load filter_tags %}
 {% load navigation_tags %}
 {% load authorization_tags %}
 {% load display_tags %}
@@ -33,7 +34,7 @@
                         </div>
                     </h3>
                 </div>
-                <div id="the-filters" class="is-filters panel-body collapse {% if ptl.form.has_changed %}in{% endif %}">
+                <div id="the-filters" class="is-filters panel-body collapse {% if ptl.form|has_active_filters %}in{% endif %}">
                     {% include "dojo/filter_snippet.html" with form=ptl.form %}
                 </div>
             </div>
@@ -89,7 +90,7 @@
                                                     <i class="fa-solid fa-chart-line"></i> {% trans "Metrics" %}</a>
                                                 </li>
                                                 <li role="presentation">
-                                                    <a class="" href="{% url 'product_type_report' pt.id %}" role="menuitem">
+                                                    <a class="" href="{% url 'product_type_report' pt.id %}" role="menuitem" data-testid="report-link">
                                                         <i class="fa-solid fa-file-lines"></i>
                                                         {{ labels.ORG_REPORT_LABEL }}
                                                     </a>

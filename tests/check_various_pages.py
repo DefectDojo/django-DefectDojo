@@ -2,7 +2,6 @@ import sys
 import unittest
 
 from base_test_class import BaseTestCase
-from selenium.webdriver.common.by import By
 
 
 class VariousPagesTest(BaseTestCase):
@@ -10,11 +9,15 @@ class VariousPagesTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "user")
 
+    def test_critical_asset_metrics_status(self):
+        driver = self.driver
+        driver.get(self.base_url + "critical_asset_metrics")
+
     def test_calendar_status(self):
         driver = self.driver
         driver.get(self.base_url + "calendar")
         # click apply to see if this helps webdriver to catch the javascript errors we're seeing
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
     def test_finding_group_open_status(self):
         driver = self.driver
@@ -42,6 +45,7 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(BaseTestCase("test_login"))
     suite.addTest(VariousPagesTest("test_user_status"))
+    suite.addTest(VariousPagesTest("test_critical_asset_metrics_status"))
     suite.addTest(VariousPagesTest("test_calendar_status"))
     suite.addTest(VariousPagesTest("test_finding_group_open_status"))
     suite.addTest(VariousPagesTest("test_finding_group_all_status"))

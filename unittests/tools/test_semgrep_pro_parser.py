@@ -27,6 +27,7 @@ class TestSemgrepProParser(TestCase):
             self.assertEqual("frontend/src/corpComponents/Code.tsx", finding.file_path)
             self.assertEqual(120, finding.line)
             self.assertEqual(319, finding.cwe)  # CWE-319: Cleartext Transmission of Sensitive Information
+            self.assertEqual([319], finding.unsaved_cwes)
             self.assertTrue(finding.static_finding)
             self.assertFalse(finding.dynamic_finding)
 
@@ -71,3 +72,14 @@ class TestSemgrepProParser(TestCase):
 
             # Unique identifier
             self.assertEqual("0f8c79a6f7e0ff2f908ff5bc366ae1548465069bae8892088051e1c3b4b12c6b8df37d5bcbb181eb868aa79f81f239d14bf2336d552786ab8ccdc7279adf07a6_1", finding.unique_id_from_tool)
+
+    def test_parse_multiple_cwes(self):
+        path = get_unit_tests_scans_path("semgrep_pro") / "multiple_cwes_fabricated.json"
+        with path.open(encoding="utf-8") as testfile:
+            parser = SemgrepProParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            # primary CWE is the first in cwe_names; the full list is persisted via unsaved_cwes
+            self.assertEqual(319, finding.cwe)
+            self.assertEqual([319, 311], finding.unsaved_cwes)

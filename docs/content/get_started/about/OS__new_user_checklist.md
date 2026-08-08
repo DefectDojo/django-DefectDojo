@@ -16,7 +16,7 @@ The essence of DefectDojo is to import security data, organize it, and present i
 
 2. Now that you have data in DefectDojo, consider expanding your Product layout [Product Hierarchy Overview](/asset_modelling/os_hierarchy/product_hierarchy/). The Product Hierarchy creates a working inventory of your apps, which helps you divide your data up into logical categories. These categories can be used to apply access control rules, or to segment your reports to the correct team.
 
-3. Use the [Report Builder](/metrics_reports/reports/using_the_report_builder/#opening-the-report-builder) to summarize the data you've imported. Reports can be used to quickly share Findings with stakeholders such as Product Owners.
+3. Use the [Report Builder](/metrics_reports/reports/using-the-report-builder/#opening-the-report-builder) to summarize the data you've imported. Reports can be used to quickly share Findings with stakeholders such as Product Owners.
 
 This is the essence of DefectDojo - import security data, organize it, and present it to the folks who need to know.
 

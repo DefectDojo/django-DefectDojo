@@ -1,6 +1,6 @@
 #!/bin/bash
 # called from entrypoint-initializer.sh when no admin user exists (first boot)
-cat <<EOD | python manage.py shell
+cat <<EOD | python manage.py shell --no-imports
 import os
 from django.contrib.auth.models import User
 User.objects.create_superuser(
@@ -27,8 +27,13 @@ EOD
     python3 manage.py loaddata "${i%.*}"
   done
 
-  echo "Installing watson search index"
-  python3 manage.py installwatson
+  watson_enabled=$(echo "${DD_WATSON_SEARCH_ENABLED:-True}" | tr '[:upper:]' '[:lower:]')
+  if [ "$watson_enabled" != "false" ] && [ "$watson_enabled" != "0" ] && [ "$watson_enabled" != "off" ] && [ "$watson_enabled" != "no" ]; then
+    echo "Installing watson search index"
+    python3 manage.py installwatson
+  else
+    echo "Skipping watson search index (DD_WATSON_SEARCH_ENABLED=${DD_WATSON_SEARCH_ENABLED})"
+  fi
 
   # surveys fixture needs to be modified as it contains an instance dependant polymorphic content id
   echo "Migration of textquestions for surveys"

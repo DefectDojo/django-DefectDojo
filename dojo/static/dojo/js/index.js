@@ -63,12 +63,127 @@
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeAllDropdowns(null);
     });
+
+    /* jQuery plugin surface. Templates call $(el).dropdown('toggle') from inline
+       onclick handlers, which bootstrap.min.js used to provide; without it jQuery
+       raises "$(...).dropdown is not a function" and the handler dies. Route the
+       call through the same open/close logic as a real click.
+
+       The receiver differs per call site: the toggle itself (#dropdownMenu2), the
+       .dropdown container (#test-pulldown), or the .dropdown-menu (#related_actions_N).
+       closest() matches the element itself as well as its ancestors, so one lookup
+       resolves all three to the element that carries .open.
+    */
+    if (typeof jQuery !== 'undefined') {
+        jQuery.fn.dropdown = function (action) {
+            return this.each(function () {
+                var parent = this.closest('.dropdown, .btn-group, .dropup');
+                if (!parent) return;
+                var isOpen = parent.classList.contains('open');
+                var open = action === 'show' ? true : (action === 'hide' ? false : !isOpen);
+                if (open === isOpen) return;
+                if (open) {
+                    closeAllDropdowns(parent);
+                    parent.classList.add('open');
+                    fireJQueryEvent(parent, 'show.bs.dropdown');
+                    fireJQueryEvent(parent, 'shown.bs.dropdown');
+                } else {
+                    parent.classList.remove('open');
+                    fireJQueryEvent(parent, 'hide.bs.dropdown');
+                    fireJQueryEvent(parent, 'hidden.bs.dropdown');
+                }
+            });
+        };
+    }
 })();
+
+/* ---- OS promo banner dismiss ----
+   Persist the dismissal per-user (the form carries csrfmiddlewaretoken) and
+   hide the banner instantly. Degrades to a normal form POST when JS is off.
+*/
+document.addEventListener('submit', function (e) {
+    var form = e.target.closest('.os-message-dismiss-form');
+    if (!form) return;
+    e.preventDefault();
+    var banner = form.closest('.announcement-banner');
+    if (banner) {
+        banner.style.transition = 'opacity 0.2s';
+        banner.style.opacity = '0';
+        setTimeout(function () { banner.remove(); }, 200);
+    }
+    fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin',
+    });
+});
 
 /* ---- Collapse shim ----
    Handles [data-toggle="collapse"] by toggling .in on the target element.
    CSS in tailwind.css:  .collapse { display:none }  .collapse.in { display:block }
 */
+/* Animate a collapse target open/closed by sliding its height between 0 and
+   its natural size, then settling to auto (open) or display:none via .in
+   (closed). Falls back to an instant toggle when reduced motion is requested. */
+function animateCollapse(target, toggle) {
+    if (target._ddCollapsing) return;  // ignore clicks while mid-animation
+    var willOpen = !target.classList.contains('in');
+    if (toggle) toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        target.classList.toggle('in', willOpen);
+        return;
+    }
+
+    var DURATION = 250;
+    var finished = false;
+    target._ddCollapsing = true;
+
+    if (willOpen) target.classList.add('in');     // make it measurable / visible
+
+    // Animate height AND vertical padding together, so the panel collapses all
+    // the way to 0 instead of stalling at the panel-body's padding "floor".
+    var cs = getComputedStyle(target);
+    var padTop = cs.paddingTop, padBottom = cs.paddingBottom;
+    // In border-box (Tailwind's default) the height property already includes
+    // padding, so animate to the full scrollHeight; only subtract in content-box.
+    var fullH = cs.boxSizing === 'border-box'
+        ? target.scrollHeight
+        : target.scrollHeight - parseFloat(padTop) - parseFloat(padBottom);
+    var contentH = fullH + 'px';
+    var collapsed = { height: '0px', paddingTop: '0px', paddingBottom: '0px' };
+    var expanded = { height: contentH, paddingTop: padTop, paddingBottom: padBottom };
+    var from = willOpen ? collapsed : expanded;
+    var to = willOpen ? expanded : collapsed;
+
+    target.style.overflow = 'hidden';
+    target.style.height = from.height;
+    target.style.paddingTop = from.paddingTop;
+    target.style.paddingBottom = from.paddingBottom;
+    void target.offsetHeight;                     // force reflow so the transition runs
+    target.style.transition = 'height ' + DURATION + 'ms ease, padding ' + DURATION + 'ms ease';
+    target.style.height = to.height;
+    target.style.paddingTop = to.paddingTop;
+    target.style.paddingBottom = to.paddingBottom;
+
+    function done() {
+        if (finished) return;
+        finished = true;
+        if (!willOpen) target.classList.remove('in');  // hide before clearing styles
+        target.style.transition = '';
+        target.style.height = '';
+        target.style.paddingTop = '';
+        target.style.paddingBottom = '';
+        target.style.overflow = '';
+        target._ddCollapsing = false;
+        target.removeEventListener('transitionend', onEnd);
+    }
+    function onEnd(ev) { if (ev.target === target && ev.propertyName === 'height') done(); }
+    target.addEventListener('transitionend', onEnd);
+    setTimeout(done, DURATION + 80);          // fallback if transitionend doesn't fire
+}
+
 document.addEventListener('click', function (e) {
     var toggle = e.target.closest('[data-toggle="collapse"]');
     if (!toggle) return;
@@ -86,10 +201,7 @@ document.addEventListener('click', function (e) {
         if (!sel) return;
         var target = document.querySelector(sel);
         if (target) {
-            target.classList.toggle('in');
-            // Toggle aria-expanded on the trigger
-            var isOpen = target.classList.contains('in');
-            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            animateCollapse(target, toggle);
         }
     });
 });

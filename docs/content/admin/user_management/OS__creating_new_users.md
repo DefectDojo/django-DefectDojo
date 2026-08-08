@@ -36,6 +36,8 @@ The admin who creates the account is responsible for delivering the initial cred
 
 If your instance is configured with [SSO](../configure_sso/), the workflow is different — users are typically created on first login from the Identity Provider, and you only need to grant them group membership or roles afterwards.
 
+If you have moved to open-source DefectDojo (where SSO is Pro-only) and existing SSO users can no longer log in, see [Re-enabling login for SSO users](../os__sso_user_local_login_fallback/).
+
 ## Recovering from a lost MFA token
 
 If a user loses access to their MFA device, see the [MFA recovery section](/get_started/pro/cloud/connectivity-troubleshooting/#ive-lost-access-to-my-mfa-codes) of the connectivity troubleshooting guide. There is currently no way to remove MFA from an account without an MFA code — the workaround is to create a new account for the user and re-grant the same permissions.
