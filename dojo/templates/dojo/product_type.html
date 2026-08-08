@@ -90,7 +90,7 @@
                                                     <i class="fa-solid fa-chart-line"></i> {% trans "Metrics" %}</a>
                                                 </li>
                                                 <li role="presentation">
-                                                    <a class="" href="{% url 'product_type_report' pt.id %}" role="menuitem">
+                                                    <a class="" href="{% url 'product_type_report' pt.id %}" role="menuitem" data-testid="report-link">
                                                         <i class="fa-solid fa-file-lines"></i>
                                                         {{ labels.ORG_REPORT_LABEL }}
                                                     </a>
