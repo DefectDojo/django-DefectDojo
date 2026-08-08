@@ -45,7 +45,7 @@ def scope_location_meta_to_products(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("dojo", "0288_backfill_vulnerability_id_entities"),
+        ("dojo", "0289_fileupload_title_not_unique"),
     ]
 
     operations = [

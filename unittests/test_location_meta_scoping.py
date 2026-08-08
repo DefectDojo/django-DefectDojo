@@ -139,7 +139,7 @@ class TestSharedLocationMetaScoping(LegacyAuthMirrorMixin, DojoTestCase):
         self.assertNotContains(response, "outside-team")
 
     def test_backfill_copies_an_unscoped_row_to_every_product_on_the_location(self):
-        migration = import_module("dojo.db_migrations.0289_dojometa_location_product")
+        migration = import_module("dojo.db_migrations.0290_dojometa_location_product")
         DojoMeta.objects.create(location=self.location, name="legacy", value="from-endpoints")
         migration.scope_location_meta_to_products(apps, None)
         self.assertEqual(self._meta(self.product_src).get("legacy"), "from-endpoints")
