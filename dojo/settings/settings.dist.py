@@ -1329,6 +1329,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Sqlmap Scan": ["title", "endpoints"],
     "Nettacker Scan": ["title", "endpoints"],
     "httpx Scan": ["title", "endpoints"],
+    "kube-score Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "ModelScan Scan": ["title", "file_path", "vuln_id_from_tool"],
+    "TFLint Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Kingfisher Scan": ["title", "file_path", "line"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1718,6 +1722,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Snyk Code Scan": DEDUPE_ALGO_HASH_CODE,
     "Cycognito Scan": DEDUPE_ALGO_HASH_CODE,
     "n0s1 Scanner": DEDUPE_ALGO_HASH_CODE,
+    "kube-score Scan": DEDUPE_ALGO_HASH_CODE,
+    "ModelScan Scan": DEDUPE_ALGO_HASH_CODE,
+    "TFLint Scan": DEDUPE_ALGO_HASH_CODE,
+    "Kingfisher Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
