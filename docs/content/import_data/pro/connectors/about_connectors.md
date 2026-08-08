@@ -129,6 +129,8 @@ Once your **Record** mappings are set up, DefectDojo will start importing scan d
 
 When you're ready to add more tools to DefectDojo, you can easily rearrange your import mappings to something else. Multiple tools can be set up to import vulnerabilities to the same destination, and you can always reorganize your setup for a better fit without losing any work.
 
+Each Connector also decides how your tool's data becomes a DefectDojo Finding — which value becomes the Title, which becomes the Description, and so on. If you need to change one of those decisions, see [Connector Field Mappings](../connector_field_mappings/).
+
 ## My Connector isn't supported
 
 ### Request a connector from the UI (DefectDojo Pro Cloud)
@@ -151,3 +153,4 @@ Even without a connector, DefectDojo can still handle manual import for a wide r
 * Check out the Connectors page by switching to DefectDojo's **Pro UI**.
 * Follow our guide to [create your first Connector](../add_edit_connectors/).
 * Check out the process of [Running Operations](../manage_operations/) with your Connected security tools and see how they can be configured to import data.
+* Adjust how your tool's data maps onto DefectDojo fields with [Connector Field Mappings](../connector_field_mappings/).
