@@ -64,6 +64,41 @@ The Finding Page contains various components. Each will be populated by the Impo
 	* **Found By:** This will list the scanner used to find this vulnerability.  
 	​
 
+## Notes and @mentions
+
+The **Notes** page on a Finding is where your team records context that isn't part of the imported scan data — mitigation progress, triage decisions, or any other commentary. Notes are DefectDojo-only metadata and are never created at import time.
+
+Notes appear as a feed, newest first, and you can flip the order to oldest first. Each note shows its author, when it was written, its note type, and a **Private** badge when the note is private. A private note is only ever shown to the person who wrote it.
+
+### Writing notes in markdown
+
+Note entries support markdown, so you can use headings, **bold** and *italic* text, bullet and numbered lists, block quotes, tables, links, and fenced code blocks. The note editor is the same one used for a Finding's description, with a toolbar for the common formatting options. To read a note exactly as it was typed rather than as formatted text, use the toggle in the top right of the note body.
+
+### Editing, deleting and history
+
+Every note carries an actions menu with **Edit**, **View History** and **Delete**, and each entry appears only when you are allowed to use it:
+
+* You can always edit, delete and read the history of a note you wrote yourself.
+* To manage someone else's note you need the matching role permission on the object the note belongs to: Note Edit, Note Delete, or Note View History.
+* Adding a note requires Note Add, which every role above Reader holds, and Readers hold as well.
+
+An edited note is labelled **(edited)** and records who changed it and when. **View History** lists every revision of the note, newest first, so nothing is lost when a note is rewritten. Only the entry itself can be changed: a note's type and its private flag are fixed once the note is created.
+
+### Mentioning a user with @
+
+When you add a note, you can **@mention** another DefectDojo user to notify them. Type `@` immediately followed by their username (for example `@alice`) anywhere in the note. When you save the note, each mentioned user receives a **user-mentioned** notification that links back to the note.
+
+A few details worth knowing:
+
+* The `@` must be at the **start of the note or come right after a space**. This is deliberate — it stops email addresses written mid-sentence (like `alice@example.com`) from firing accidental mentions.
+* The name after `@` must match an **existing, active** DefectDojo username. Mentions of unknown or deactivated users are ignored.
+* A trailing period is ignored, so a mention that ends a sentence (`thanks @alice.`) still resolves.
+* You can mention more than one user in a single note.
+
+You can @mention users from the UI in notes on **Findings**, **Tests**, **Engagements** and **Risk Acceptances**. Typing `@` opens a list of matching users; picking one from that list is the reliable way to mention someone, because it inserts the username exactly as the notification lookup expects it.
+
+The mention is delivered through the `user_mentioned` notification event. See [Notifications](/admin/notifications/about_notifications/) for how notifications are delivered and configured — in particular, `user_mentioned` is one of the events a system-level setting can still deliver even when a user has otherwise quieted their notifications (see [Specific overrides](/admin/notifications/about_notifications/#specific-overrides)).
+
 ## Example Finding Workflows
 
 How you work with Findings in DefectDojo depends on your team’s responsibilities within your organization. Here are some examples of these processes, and how DefectDojo can help:

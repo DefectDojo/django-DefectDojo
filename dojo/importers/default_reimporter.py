@@ -1,19 +1,21 @@
+import contextlib
 import logging
 from itertools import batched
 
 from django.conf import settings
+from django.core.exceptions import EmptyResultSet
 from django.core.files.uploadedfile import TemporaryUploadedFile
 from django.db.models.query_utils import Q
 
 import dojo.finding.helper as finding_helper
 from dojo.celery_dispatch import dojo_dispatch_task
 from dojo.finding.deduplication import (
+    deduplication_ordering_key,
     find_candidates_for_deduplication_hash,
     find_candidates_for_deduplication_uid_or_hash,
     find_candidates_for_deduplication_unique_id,
     find_candidates_for_reimport_legacy,
 )
-from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.importers.base_importer import BaseImporter, Parser
 from dojo.importers.base_location_manager import LocationHandler
 from dojo.importers.options import ImporterOptions
@@ -25,7 +27,6 @@ from dojo.models import (
     Notes,
     Test,
     Test_Import,
-    Vulnerability_Id,
 )
 from dojo.tags import inheritance as tag_inheritance
 from dojo.tags.inheritance import apply_inherited_tags_for_findings
@@ -130,8 +131,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Update the test tags
         self.update_test_tags()
         # Save the test and engagement for changes to take affect
-        self.test.save()
-        self.test.engagement.save()
+        self.save_without_resurrecting(self.test)
+        self.save_without_resurrecting(self.test.engagement)
         logger.debug("REIMPORT_SCAN: Updating test tags")
         # Create a test import history object to record the flags sent to the importer
         # This operation will return None if the user does not have the import history
@@ -279,25 +280,44 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         with tag_inheritance.suppress_tag_inheritance():
             return self._process_findings_internal(parsed_findings, **kwargs)
 
+    def get_original_findings(self):
+        """
+        Queryset of findings already in the test that "old finding" bookkeeping runs over.
+
+        Only findings with the same service value (or None) are candidates: even though the
+        service value is part of the hash_code calculation, closing must never touch findings
+        with a different service value.
+        https://github.com/DefectDojo/django-DefectDojo/issues/12754
+
+        This is intentionally a separate method (like get_reimport_match_candidates_for_batch)
+        so downstream editions can override it without copying the full process_findings()
+        implementation: _process_findings_internal materializes this queryset solely to compute
+        to_mitigate/untouched, so an importer that defers close-old bookkeeping to its own
+        sync-wide pass (e.g. Dojo Pro's batched chunk imports) can return Finding.objects.none()
+        to keep a batch's memory bounded by the batch instead of by the whole test.
+        """
+        if self.service is not None:
+            return self.test.finding_set.all().filter(service=self.service)
+        return self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+
     def _process_findings_internal(
         self,
         parsed_findings: list[Finding],
         **kwargs: dict,
     ) -> tuple[list[Finding], list[Finding], list[Finding], list[Finding]]:
         self.deduplication_algorithm = self.determine_deduplication_algorithm()
-        # Only process findings with the same service value (or None)
-        # Even though the service values is used in the hash_code calculation,
-        # we need to make sure there are no side effects such as closing findings
-        # for findings with a different service value
-        # https://github.com/DefectDojo/django-DefectDojo/issues/12754
-        if self.service is not None:
-            original_findings = self.test.finding_set.all().filter(service=self.service)
-        else:
-            original_findings = self.test.finding_set.all().filter(Q(service__isnull=True) | Q(service__exact=""))
+        original_findings = self.get_original_findings()
 
-        logger.debug(f"original_findings_qyer: {original_findings.query}")
+        if logger.isEnabledFor(logging.DEBUG):
+            # Guarded twice over: rendering .query raises EmptyResultSet for a none() queryset
+            # (a legitimate get_original_findings() override), and the original_items render
+            # builds (id, hash) tuples for every finding already in the test — millions on a
+            # large test — even when DEBUG logging is off, because f-strings always evaluate.
+            with contextlib.suppress(EmptyResultSet):
+                logger.debug(f"original_findings_qyer: {original_findings.query}")
         self.original_items = list(original_findings)
-        logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug(f"original_items: {[(item.id, item.hash_code) for item in self.original_items]}")
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
@@ -307,7 +327,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         logger.debug("STEP 1: looping over findings from the reimported report and trying to match them to existing findings")
         deduplicationLogger.debug(f"Algorithm used for matching new findings to existing findings: {self.deduplication_algorithm}")
 
-        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls
+        # Pre-sanitize and filter by minimum severity to avoid loop control pitfalls.
+        # Findings are also fully prepared here (test/service/hash_code) so they can be
+        # sorted by a stable content key below — this makes the "which duplicate becomes
+        # the surviving finding" decision deterministic regardless of the order the
+        # scanner emitted its findings (intra-report duplicates are matched to whichever
+        # is created first; see add_new_finding_to_candidates).
         cleaned_findings = []
         for raw_finding in parsed_findings or []:
             sanitized = self.sanitize_severity(raw_finding)
@@ -319,13 +344,42 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     self.minimum_severity,
                 )
                 continue
+            # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
+            # Finding.mitigated is DateTimeField and it requires timezone
+            if sanitized.mitigated and not sanitized.mitigated.tzinfo:
+                sanitized.mitigated = sanitized.mitigated.replace(tzinfo=self.now.tzinfo)
+            # Override the test if needed
+            if not hasattr(sanitized, "test"):
+                sanitized.test = self.test
+            # Set the service supplied at import time
+            if self.service is not None:
+                sanitized.service = self.service
+            self.location_handler.clean_unsaved(sanitized)
+            # Calculate the hash code to be used to identify duplicates
+            sanitized.hash_code = self.calculate_unsaved_finding_hash_code(sanitized)
+            deduplicationLogger.debug(f"unsaved finding's hash_code: {sanitized.hash_code}")
             cleaned_findings.append(sanitized)
+
+        # Sort by the stable content key so intra-report duplicate resolution is
+        # independent of the scanner's export order. Unsaved findings have no id, so
+        # the id tiebreak is inert here and byte-identical findings keep their relative
+        # (immaterial) order via Python's stable sort.
+        cleaned_findings.sort(key=deduplication_ordering_key)
 
         # Each entry carries the finding's own push_to_jira flag: grouped findings are pushed to
         # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
         # same batch must still be pushed. The batch is partitioned by flag at dispatch time
         # instead of applying one finding's flag to the whole batch.
-        batch_finding_ids: list[tuple[int, bool]] = []
+        #
+        # The finding is held rather than its id, and the id is read at dispatch time below.
+        # Nothing between the append and the dispatch needs the id, and deferring the read
+        # keeps this loop body free of direct primary-key reads -- one less obstacle for an
+        # importer that buffers inserts and writes them at batch boundaries, in the same
+        # spirit as get_original_findings and get_reimport_match_candidates_for_batch, which
+        # exist so downstream editions need not copy this method. (Not the only obstacle:
+        # the batch-boundary block below persists locations and applies tags, which also
+        # require written rows, before the ids are read.)
+        batch_findings_to_dispatch: list[tuple[Finding, bool]] = []
         batch_findings: list[Finding] = []
         # Findings that were newly created (else branch below) — pass these to
         # `apply_inherited_tags_for_findings` instead of `batch_findings` so
@@ -343,26 +397,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         for batch_start in range(0, len(cleaned_findings), match_batch_max_size):
             batch_end = min(batch_start + match_batch_max_size, len(cleaned_findings))
             unsaved_findings_batch = cleaned_findings[batch_start:batch_end]
-            is_final_batch = batch_end == len(cleaned_findings)
 
             logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
 
-            # Prepare findings in batch: set test, service, calculate hash codes
-            for unsaved_finding in unsaved_findings_batch:
-                # Some parsers provide "mitigated" field but do not set timezone (because they are probably not available in the report)
-                # Finding.mitigated is DateTimeField and it requires timezone
-                if unsaved_finding.mitigated and not unsaved_finding.mitigated.tzinfo:
-                    unsaved_finding.mitigated = unsaved_finding.mitigated.replace(tzinfo=self.now.tzinfo)
-                # Override the test if needed
-                if not hasattr(unsaved_finding, "test"):
-                    unsaved_finding.test = self.test
-                # Set the service supplied at import time
-                if self.service is not None:
-                    unsaved_finding.service = self.service
-                self.location_handler.clean_unsaved(unsaved_finding)
-                # Calculate the hash code to be used to identify duplicates
-                unsaved_finding.hash_code = self.calculate_unsaved_finding_hash_code(unsaved_finding)
-                deduplicationLogger.debug(f"unsaved finding's hash_code: {unsaved_finding.hash_code}")
+            # Findings are already prepared (test/service/hash_code) and globally sorted above.
 
             # Fetch all candidates for this batch at once (batch candidate finding)
             candidates_by_hash, candidates_by_uid, candidates_by_key = self.get_reimport_match_candidates_for_batch(
@@ -370,9 +408,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
 
             # Process each finding in the batch using pre-fetched candidates
-            for idx, unsaved_finding in enumerate(unsaved_findings_batch):
-                is_final = is_final_batch and idx == len(unsaved_findings_batch) - 1
-
+            for unsaved_finding in unsaved_findings_batch:
                 # Match any findings to this new one coming in using pre-fetched candidates
                 matched_findings = self.match_finding_to_candidate_reimport(
                     unsaved_finding,
@@ -428,7 +464,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
-                    batch_finding_ids.append((finding.id, push_to_jira))
+                    batch_findings_to_dispatch.append((finding, push_to_jira))
                     batch_findings.append(finding)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
@@ -446,49 +482,31 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Matching batches: optimize candidate fetching (solve 1+N query problem)
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
-                    if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
-                        self.location_handler.persist()
-                        self.flush_vulnerability_ids()
-                        self.flush_burp_request_response()
-                        # Apply parser-supplied tags for this batch before post-processing starts,
-                        # so rules/deduplication tasks see the tags already on the findings.
-                        bulk_apply_parser_tags(findings_with_parser_tags)
-                        findings_with_parser_tags.clear()
-                        # Apply import-time tags before post-processing so rules/deduplication see them.
-                        self.apply_import_tags_for_batch(batch_findings)
-                        # Apply inherited Product tags to NEWLY CREATED findings only
-                        # (and their endpoints/locations) BEFORE post_process_findings_batch
-                        # dispatches, so rules/dedup see inherited tags on .tags.
-                        # Matched/existing findings already have inheritance applied from
-                        # their original creation; re-running it on no-change reimports
-                        # would be ~8 wasted queries per batch.
-                        apply_inherited_tags_for_findings(new_findings_in_batch)
-                        new_findings_in_batch.clear()
-                        batch_findings.clear()
-                        # Partition the batch by each finding's own push_to_jira flag so one
-                        # finding's grouping state is not applied to the whole batch. Uniform
-                        # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
-                        finding_ids_by_push: dict[bool, list[int]] = {}
-                        for finding_id, finding_push_to_jira in batch_finding_ids:
-                            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(finding_id)
-                        batch_finding_ids.clear()
-                        for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
-                            result = dojo_dispatch_task(
-                                finding_helper.post_process_findings_batch,
-                                finding_ids_batch,
-                                dedupe_option=True,
-                                rules_option=True,
-                                product_grading_option=True,
-                                issue_updater_option=True,
-                                push_to_jira=push_to_jira_batch,
-                                jira_instance_id=getattr(self.jira_instance, "id", None),
-                                # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
-                                # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
-                                **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
-                                **self.post_processing_dispatch_kwargs(**kwargs),
-                            )
-                            if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
-                                self.record_post_processing_result(result)
+                    if len(batch_findings_to_dispatch) >= dedupe_batch_max_size:
+                        self._flush_post_processing_batch(
+                            batch_findings_to_dispatch,
+                            batch_findings,
+                            new_findings_in_batch,
+                            findings_with_parser_tags,
+                            **kwargs,
+                        )
+
+        # A final drain instead of an is_final flag inside the loop. The matched branch's
+        # force_continue skips the rest of the loop body, so a report whose last sorted
+        # finding took that path never reached the old in-loop is_final flush -- everything
+        # appended since the previous size-triggered flush was silently dropped: no
+        # deduplication, rules, issue updater or JIRA dispatch, and no parser or inherited
+        # tags for those findings. Draining here runs exactly once however the last
+        # iteration ended. It is deliberately unconditional: matched findings can accumulate
+        # location status updates without appending anything to dispatch, and every step is
+        # a no-op on empty state (close_old_findings already calls persist() the same way).
+        self._flush_post_processing_batch(
+            batch_findings_to_dispatch,
+            batch_findings,
+            new_findings_in_batch,
+            findings_with_parser_tags,
+            **kwargs,
+        )
 
         # No chord: tasks are dispatched immediately above per batch
 
@@ -510,24 +528,88 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
-    def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> None:
+    def _flush_post_processing_batch(
+        self,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+        **kwargs: dict,
+    ) -> None:
+        """
+        Persist and dispatch everything accumulated for one post-processing batch, then
+        clear the accumulators (the passed-in lists are mutated in place).
+
+        Called from the processing loop each time the batch reaches
+        IMPORT_REIMPORT_DEDUPE_BATCH_SIZE, and once after the loop as an unconditional
+        drain, so a report whose final finding never reached the in-loop check (the
+        matched branch's force_continue, or a falsy finding) still gets its tail
+        deduplicated, tagged and dispatched. Every step is safe on empty state, which is
+        what makes the unconditional drain call cheap.
+        """
+        self.location_handler.persist()
+        self.flush_vulnerability_ids()
+        self.flush_burp_request_response()
+        # Apply parser-supplied tags for this batch before post-processing starts,
+        # so rules/deduplication tasks see the tags already on the findings.
+        bulk_apply_parser_tags(findings_with_parser_tags)
+        findings_with_parser_tags.clear()
+        # Apply import-time tags before post-processing so rules/deduplication see them.
+        self.apply_import_tags_for_batch(batch_findings)
+        # Apply inherited Product tags to NEWLY CREATED findings only
+        # (and their endpoints/locations) BEFORE post_process_findings_batch
+        # dispatches, so rules/dedup see inherited tags on .tags.
+        # Matched/existing findings already have inheritance applied from
+        # their original creation; re-running it on no-change reimports
+        # would be ~8 wasted queries per batch.
+        apply_inherited_tags_for_findings(new_findings_in_batch)
+        new_findings_in_batch.clear()
+        batch_findings.clear()
+        # Partition the batch by each finding's own push_to_jira flag so one
+        # finding's grouping state is not applied to the whole batch. Uniform
+        # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
+        finding_ids_by_push: dict[bool, list[int]] = {}
+        for dispatch_finding, finding_push_to_jira in batch_findings_to_dispatch:
+            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(dispatch_finding.id)
+        batch_findings_to_dispatch.clear()
+        for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
+            result = dojo_dispatch_task(
+                finding_helper.post_process_findings_batch,
+                finding_ids_batch,
+                dedupe_option=True,
+                rules_option=True,
+                product_grading_option=True,
+                issue_updater_option=True,
+                push_to_jira=push_to_jira_batch,
+                jira_instance_id=getattr(self.jira_instance, "id", None),
+                # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
+                **self.post_processing_dispatch_kwargs(**kwargs),
+            )
+            if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+                self.record_post_processing_result(result)
+
+    def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> list[Finding]:
         """
         Refresh false_p, risk_accepted, and out_of_scope from the DB for each finding.
 
         These can change during reimport (e.g. false positive) while the in-memory instances
         are stale. Per-finding refresh_from_db in close_old_findings was added in
         https://github.com/DefectDojo/django-DefectDojo/pull/12291. A naive refresh per
-        finding issues one SELECT each; we batch one query per chunk of primary keys and fall
-        back to refresh_from_db only when needed.
+        finding issues one SELECT each; we batch one query per chunk of primary keys instead.
+
+        Returns only the findings that still exist in the database. A candidate collected
+        earlier in the reimport can be gone by the time we get here (a concurrent delete of
+        findings, for example): there is no row to refresh, and such a finding must not be
+        closed either, because saving it would re-insert the deleted row.
 
         This really should be fixed differently, but for now we at least optimize it to be done in bulk.
         """
-        findings_without_pk = [f for f in findings if f.pk is None]
+        # An unsaved finding has no row to refresh from and nothing to close.
         findings_with_pk = [f for f in findings if f.pk is not None]
 
-        for finding in findings_without_pk:
-            finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
-
+        surviving_findings: list[Finding] = []
         for chunk in batched(findings_with_pk, _CLOSE_OLD_FINDINGS_STATUS_FIELDS_CHUNK, strict=False):
             ids = [f.pk for f in chunk]
             fresh_by_id = {
@@ -541,12 +623,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             }
             for finding in chunk:
                 row = fresh_by_id.get(finding.pk)
-                if row is not None:
-                    finding.false_p = row["false_p"]
-                    finding.risk_accepted = row["risk_accepted"]
-                    finding.out_of_scope = row["out_of_scope"]
-                else:
-                    finding.refresh_from_db(fields=["false_p", "risk_accepted", "out_of_scope"])
+                if row is None:
+                    # Deleted after the close old findings candidates were collected
+                    logger.debug("REIMPORT_SCAN: skipping finding %s, it no longer exists", finding.pk)
+                    continue
+                finding.false_p = row["false_p"]
+                finding.risk_accepted = row["risk_accepted"]
+                finding.out_of_scope = row["out_of_scope"]
+                surviving_findings.append(finding)
+
+        return surviving_findings
 
     def close_old_findings(
         self,
@@ -568,7 +654,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # are calculated based from the original values before the reimport, so
         # any updates made during reimport are discarded without first getting the
         # state of the finding as it stands at this moment (django-DefectDojo #12291).
-        self._sync_close_old_finding_status_fields(findings)
+        # This also drops any candidate whose row was deleted in the meantime.
+        findings = self._sync_close_old_finding_status_fields(findings)
         # Determine if pushing to jira or if the finding groups are enabled
         mitigated_findings = []
         for finding in findings:
@@ -990,8 +1077,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # while vulnerability_ids do not, and vice versa).
         self.reconcile_cwes(finding)
 
-        # Use prefetched data directly without triggering queries
-        existing_vuln_ids = {v.vulnerability_id for v in finding.vulnerability_id_set.all()}
+        # Read the existing ids through the entity read helper (not a legacy relation). The prefetch
+        # is matched upstream (the reimport finding query uses vulnerability_id_prefetch()), so this
+        # stays a no-query read.
+        from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
+
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed
@@ -1002,12 +1093,8 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
             return finding
 
-        # Accumulate delete + insert for batch flush
-        self.pending_vuln_id_deletes.append(finding.id)
-        self.pending_vulnerability_ids.extend([
-            Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
-            for vid in vulnerability_ids_to_process
-        ])
+        # Accumulate delete + insert for batch flush (entity references).
+        self.vulnerability_id_manager.record_reconcile(finding, vulnerability_ids_to_process)
         if vulnerability_ids_to_process:
             finding.cve = vulnerability_ids_to_process[0]
         else:

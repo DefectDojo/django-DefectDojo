@@ -1,0 +1,22 @@
+[
+  {
+    "caseId": "case-0010",
+    "caseLabel": "Personal data in an unapproved store",
+    "policyName": "Personal data outside an approved store",
+    "severityLevel": "high",
+    "caseStatus": "open",
+    "dataSourceName": "generic-store",
+    "dataSourceType": "MySQL",
+    "sensitivityGroup": "Restricted",
+    "numberOfAffectedObjects": 9,
+    "remediationSteps": "Move the data to an approved store.",
+    "created_at": "2024-05-01T00:00:00Z",
+    "sampleValues": ["placeholder-not-real-data-1", "placeholder-not-real-data-2"],
+    "preview": "placeholder-not-real-data-3",
+    "matchedValues": ["placeholder-not-real-data-4"],
+    "objectDetails": {
+      "objectName": "placeholder-not-real-data-5",
+      "columnValues": ["placeholder-not-real-data-6"]
+    }
+  }
+]

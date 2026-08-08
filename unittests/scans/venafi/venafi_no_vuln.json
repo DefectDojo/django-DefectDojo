@@ -1,0 +1,22 @@
+{
+  "certificates": [
+    {
+      "id": "cert-0001",
+      "fingerprint": "AA11BB22CC33DD44EE55FF6677889900AABBCCDD",
+      "subjectCN": ["app.example.com"],
+      "subjectDN": "CN=app.example.com,O=Generic Org",
+      "subjectAlternativeNamesByType": {"dNSName": ["app.example.com", "www.example.com"]},
+      "issuerCN": ["Generic Issuing CA"],
+      "issuerDN": "CN=Generic Issuing CA,O=Generic Org",
+      "keyStrength": 4096,
+      "encryptionType": "RSA",
+      "signatureHashAlgorithm": "SHA256",
+      "signatureAlgorithm": "sha256WithRSAEncryption",
+      "validityEnd": "2099-01-01T00:00:00Z",
+      "certificateStatus": "ACTIVE",
+      "selfSigned": false,
+      "applicationIds": ["app-1"]
+    }
+  ],
+  "count": 1
+}

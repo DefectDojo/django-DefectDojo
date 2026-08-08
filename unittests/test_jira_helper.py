@@ -2,8 +2,14 @@ import logging
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from celery.result import AsyncResult
+from django.core.cache import cache
+from django.test import override_settings
+from jira.exceptions import JIRAError
+
 import dojo.finding.helper as finding_helper
 import dojo.jira.helper as jira_helper
+from dojo.jira import services as jira_services
 from dojo.models import Finding, JIRA_Instance, JIRA_Issue, JIRA_Project, Test_Type
 from unittests.dojo_test_case import DojoTestCase
 
@@ -337,6 +343,123 @@ class JIRADeleteCascadeTest(DojoTestCase):
         self.assertFalse(JIRA_Issue.objects.filter(jira_id="10001").exists())
 
 
+class JIRAEpicFormAsyncDispatchTest(TestCase):
+
+    """
+    Regression: saving an engagement with epic mapping enabled raised
+    "TypeError: cannot unpack non-iterable AsyncResult object" from
+    process_jira_epic_form.
+
+    push_to_jira returns whatever dojo_dispatch_task returns: the task's
+    (success, message) tuple when it runs in the foreground, but a Celery
+    AsyncResult when it is dispatched to a worker. process_jira_epic_form
+    unpacked the return value into two names unconditionally, so it only
+    worked on the foreground path -- which is why every existing test for
+    this view sets block_execution=True and never saw the failure.
+    """
+
+    def _form(self, *, push=True, epic_name=None, epic_priority=None):
+        form = Mock()
+        form.is_valid.return_value = True
+        form.cleaned_data = {
+            "push_to_jira": push,
+            "epic_name": epic_name,
+            "epic_priority": epic_priority,
+        }
+        return form
+
+    def _run(self, push_return):
+        """Drive process_jira_epic_form with push_to_jira returning push_return."""
+        form = self._form()
+        engagement = Mock(id=1, name="engagement")
+        with (
+            patch("dojo.jira.helper.get_system_setting", return_value=True),
+            patch("dojo.jira.helper.JIRAEngagementForm", return_value=form),
+            patch("dojo.jira.helper.get_jira_project", return_value=Mock()),
+            patch("dojo.jira.helper.messages") as messages,
+            patch("dojo.jira.helper.push_to_jira", return_value=push_return) as push,
+        ):
+            success, returned_form = jira_helper.process_jira_epic_form(
+                Mock(POST={}), engagement=engagement,
+            )
+        return success, returned_form, push, messages
+
+    def test_async_dispatch_returns_success_without_unpacking(self):
+        """The async path hands back an AsyncResult, which must not be unpacked."""
+        async_result = AsyncResult("11111111-2222-3333-4444-555555555555")
+
+        success, returned_form, push, messages = self._run(async_result)
+
+        self.assertTrue(
+            success,
+            msg=f"expected queued push to report success, got success={success}",
+        )
+        self.assertIsNotNone(returned_form)
+        push.assert_called_once()
+        _args, kwargs = messages.add_message.call_args
+        self.assertEqual("alert-success", kwargs["extra_tags"])
+
+    def test_sync_dispatch_success_tuple_is_still_honoured(self):
+        """Control: the foreground path returns (True, message) and still succeeds."""
+        success, returned_form, push, messages = self._run((True, "pushed"))
+
+        self.assertTrue(
+            success,
+            msg=f"expected foreground success tuple to report success, got success={success}",
+        )
+        self.assertIsNotNone(returned_form)
+        push.assert_called_once()
+        _args, kwargs = messages.add_message.call_args
+        self.assertEqual("alert-success", kwargs["extra_tags"])
+
+    def test_sync_dispatch_failure_tuple_still_surfaces_the_message(self):
+        """Control: a foreground failure must keep reporting the task's message."""
+        success, _returned_form, _push, messages = self._run((False, "jira exploded"))
+
+        self.assertFalse(
+            success,
+            msg=f"expected foreground failure tuple to report failure, got success={success}",
+        )
+        args, kwargs = messages.add_message.call_args
+        self.assertIn("jira exploded", args)
+        self.assertEqual("alert-danger", kwargs["extra_tags"])
+
+
+class JIRAPushResultInterpretationTest(TestCase):
+
+    """
+    Regression: callers tested a push_to_jira return value for truthiness to
+    decide whether the push worked. Both possible shapes -- a populated
+    (success, message) tuple and an AsyncResult -- are truthy, so a failed push
+    was reported to the user as a successful one and the failure branch was
+    unreachable.
+    """
+
+    def test_queued_push_is_success_with_no_message(self):
+        result = AsyncResult("11111111-2222-3333-4444-555555555555")
+        self.assertEqual((True, None), jira_helper.interpret_push_result(result))
+
+    def test_foreground_success_tuple_passes_through(self):
+        self.assertEqual((True, "ok"), jira_helper.interpret_push_result((True, "ok")))
+
+    def test_foreground_failure_tuple_reports_failure(self):
+        success, message = jira_helper.interpret_push_result((False, "jira exploded"))
+        self.assertFalse(
+            success,
+            msg=f"a (False, message) tuple must report failure, got success={success}",
+        )
+        self.assertEqual("jira exploded", message)
+
+    def test_push_succeeded_rejects_a_failure_tuple(self):
+        """The truthiness trap: bool((False, 'msg')) is True, push_succeeded must not be."""
+        self.assertTrue(bool((False, "jira exploded")))
+        self.assertFalse(jira_services.push_succeeded((False, "jira exploded")))
+
+    def test_push_succeeded_accepts_a_queued_push(self):
+        result = AsyncResult("11111111-2222-3333-4444-555555555555")
+        self.assertTrue(jira_services.push_succeeded(result))
+
+
 class JIRAComponentFieldTest(TestCase):
 
     """
@@ -539,3 +662,85 @@ class JIRATransitionFieldsTest(TestCase):
 
         _args, kwargs = requests_post.call_args
         self.assertEqual({"transition": {"id": 41}}, kwargs["json"])
+
+
+class JIRAConfigFailureBreakerTest(TestCase):
+
+    """
+    A misconfigured Jira project (renamed key, revoked Create Issue permission, issue type
+    dropped from the scheme) fails identically for every object in an import. The remembered
+    failure lets the rest of the batch fail fast instead of repeating the same doomed metadata
+    call, error log and notification hundreds of times.
+    """
+
+    def setUp(self):
+        cache.clear()
+        self.jira_instance = Mock(id=7, default_issue_type="Task")
+
+    def tearDown(self):
+        cache.clear()
+
+    def _note(self, exception, message="broken"):
+        jira_helper.note_jira_config_failure(self.jira_instance, "DS", "Task", exception, message)
+
+    def _get(self):
+        return jira_helper.get_jira_config_failure(self.jira_instance, "DS", "Task")
+
+    def test_status_none_failure_is_remembered(self):
+        """A status of None is what DefectDojo raises when Jira returns no matching project."""
+        self._note(JIRAError("Project misconfigured or no permissions in Jira ?"), "no project DS")
+        self.assertEqual("no project DS", self._get())
+
+    def test_permission_and_not_found_failures_are_remembered(self):
+        for status_code in (400, 401, 403, 404):
+            with self.subTest(status_code=status_code):
+                cache.clear()
+                self._note(JIRAError("nope", status_code=status_code))
+                self.assertEqual("broken", self._get())
+
+    def test_transient_failure_is_not_remembered(self):
+        """A Jira-side 5xx or a timeout may well succeed for the next object, so do not skip it."""
+        self._note(JIRAError("server error", status_code=500))
+        self.assertIsNone(self._get())
+
+    def test_failure_is_scoped_to_project_and_issue_type(self):
+        self._note(JIRAError("no project"), "only DS/Task")
+        self.assertIsNone(jira_helper.get_jira_config_failure(self.jira_instance, "OTHER", "Task"))
+        self.assertIsNone(jira_helper.get_jira_config_failure(self.jira_instance, "DS", "Bug"))
+        self.assertIsNone(jira_helper.get_jira_config_failure(Mock(id=8), "DS", "Task"))
+
+    def test_clear_forgets_the_failure(self):
+        self._note(JIRAError("no project"))
+        jira_helper.clear_jira_config_failure(self.jira_instance, "DS", "Task")
+        self.assertIsNone(self._get())
+
+    @override_settings(JIRA_CONFIG_FAILURE_CACHE_TTL=0)
+    def test_ttl_of_zero_disables_the_behavior(self):
+        self._note(JIRAError("no project"))
+        self.assertIsNone(self._get())
+
+    @patch("dojo.jira.helper.get_jira_connection")
+    @patch("dojo.jira.helper.log_jira_alert")
+    @patch("dojo.jira.helper.get_jira_instance")
+    @patch("dojo.jira.helper.get_jira_project")
+    @patch("dojo.jira.helper.is_jira_configured_and_enabled", return_value=True)
+    @patch("dojo.jira.helper.is_jira_enabled", return_value=True)
+    def test_add_jira_issue_skips_without_calling_jira_or_notifying(
+        self,
+        is_jira_enabled,
+        is_jira_configured_and_enabled,
+        get_jira_project,
+        get_jira_instance,
+        log_jira_alert,
+        get_jira_connection,
+    ):
+        get_jira_project.return_value = Mock(project_key="DS")
+        get_jira_instance.return_value = self.jira_instance
+        self._note(JIRAError("no project DS"), "remembered: no project DS")
+
+        success, message = jira_helper.add_jira_issue(Mock(id=42))
+
+        self.assertFalse(success)
+        self.assertEqual("remembered: no project DS", message)
+        get_jira_connection.assert_not_called()
+        log_jira_alert.assert_not_called()

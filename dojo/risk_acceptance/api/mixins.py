@@ -12,8 +12,9 @@ from rest_framework.response import Response
 
 from dojo.authorization.api_permissions import UserHasRiskAcceptanceRelatedObjectPermission
 from dojo.engagement.queries import get_authorized_engagements
-from dojo.models import Engagement, Risk_Acceptance, User, Vulnerability_Id
+from dojo.models import Engagement, Risk_Acceptance, User
 from dojo.risk_acceptance.api.serializer import RiskAcceptanceSerializer
+from dojo.vulnerability.queries import finding_ids_with_vulnerability_ids
 
 AcceptedRisk = NamedTuple("AcceptedRisk", (("vulnerability_id", str), ("justification", str), ("accepted_by", str)))
 
@@ -90,10 +91,8 @@ class AcceptedFindingsMixin(ABC):
 def _accept_risks(accepted_risks: list[AcceptedRisk], base_findings: QuerySet, owner: User):
     accepted = []
     for risk in accepted_risks:
-        vulnerability_ids = Vulnerability_Id.objects \
-            .filter(vulnerability_id=risk.vulnerability_id) \
-            .values("finding")
-        findings = base_findings.filter(id__in=vulnerability_ids)
+        finding_ids = finding_ids_with_vulnerability_ids(risk.vulnerability_id, lookup="exact")
+        findings = base_findings.filter(id__in=finding_ids)
         if findings.exists():
             # TODO: we could use risk.vulnerability_id to name the risk_acceptance, but would need to check for existing risk_acceptances in that case
             # so for now we add some timestamp based suffix

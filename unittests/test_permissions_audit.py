@@ -712,7 +712,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(LegacyAuthMirrorMixin, DojoTestCase)
         url = reverse("expire_risk_acceptance", args=(
             self.engagement_b.id, self.risk_acceptance.id,
         ))
-        response = client.get(url)
+        response = client.post(url)
         self.assertEqual(response.status_code, 404)
 
     def test_reinstate_risk_acceptance_cross_engagement(self):
@@ -721,7 +721,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(LegacyAuthMirrorMixin, DojoTestCase)
         url = reverse("reinstate_risk_acceptance", args=(
             self.engagement_b.id, self.risk_acceptance.id,
         ))
-        response = client.get(url)
+        response = client.post(url)
         self.assertEqual(response.status_code, 404)
 
     def test_delete_risk_acceptance_cross_engagement(self):
@@ -730,7 +730,7 @@ class TestRiskAcceptanceCrossEngagementIDOR(LegacyAuthMirrorMixin, DojoTestCase)
         url = reverse("delete_risk_acceptance", args=(
             self.engagement_b.id, self.risk_acceptance.id,
         ))
-        response = client.get(url)
+        response = client.post(url)
         self.assertEqual(response.status_code, 404)
 
     def test_view_risk_acceptance_same_engagement(self):

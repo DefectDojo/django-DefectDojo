@@ -1,0 +1,9 @@
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://openvex.dev/docs/public/vex-0000000000000000000000000000000000",
+  "author": "Example Org",
+  "role": "Document Creator",
+  "version": 1,
+  "timestamp": "2026-07-29T00:00:00Z",
+  "statements": []
+}

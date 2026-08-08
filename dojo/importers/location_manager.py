@@ -118,6 +118,19 @@ class LocationManager(BaseLocationManager):
 
     def persist(self) -> None:
         """Persist all accumulated location operations to the database."""
+        # Both steps below already short-circuit when their accumulators are empty, so with
+        # nothing buffered the only cost of proceeding is an empty transaction -- inside an
+        # outer atomic block that is a SAVEPOINT/RELEASE pair, i.e. two queries to do
+        # nothing. persist() is called unconditionally at every batch boundary and again by
+        # close_old_findings, so those pairs are paid on imports that touched no location at
+        # all. The condition is the union of the two inner guards.
+        if not (
+            self._product_locations
+            or self._status_updates
+            or self._refs_to_reactivate
+            or self._refs_to_mitigate
+        ):
+            return
         with transaction.atomic():
             self._persist_locations()
             self._persist_status_updates()

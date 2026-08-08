@@ -1,0 +1,15 @@
+[
+  {
+    "filename": "single.yaml",
+    "namespace": "main",
+    "successes": 3,
+    "failures": [
+      {
+        "msg": "Container server must set a memory limit",
+        "metadata": {
+          "query": "data.main.deny"
+        }
+      }
+    ]
+  }
+]

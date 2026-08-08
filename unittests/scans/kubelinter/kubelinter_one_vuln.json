@@ -1,0 +1,437 @@
+{
+  "Checks": [
+    {
+      "name": "dangling-service",
+      "description": "Indicates when services do not have any associated deployments.",
+      "remediation": "Confirm that your service's selector correctly matches the labels on one of your deployments.",
+      "scope": {
+        "objectKinds": [
+          "Service"
+        ]
+      },
+      "template": "dangling-service"
+    },
+    {
+      "name": "deprecated-service-account-field",
+      "description": "Indicates when deployments use the deprecated serviceAccount field.",
+      "remediation": "Use the serviceAccountName field instead. If you must specify serviceAccount, ensure values for serviceAccount and serviceAccountName match.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "deprecated-service-account-field"
+    },
+    {
+      "name": "docker-sock",
+      "description": "Alert on deployments with docker.sock mounted in containers. ",
+      "remediation": "Ensure the Docker socket is not mounted inside any containers by removing the associated  Volume and VolumeMount in deployment yaml specification. If the Docker socket is mounted inside a container it could allow processes running within  the container to execute Docker commands which would effectively allow for full control of the host.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "host-mounts",
+      "params": {
+        "dirs": [
+          "docker.sock$"
+        ]
+      }
+    },
+    {
+      "name": "drop-net-raw-capability",
+      "description": "Indicates when containers do not drop NET_RAW capability",
+      "remediation": "NET_RAW makes it so that an application within the container is able to craft raw packets, use raw sockets, and bind to any address. Remove this capability in the containers under containers security contexts.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "verify-container-capabilities",
+      "params": {
+        "forbiddenCapabilities": [
+          "NET_RAW"
+        ]
+      }
+    },
+    {
+      "name": "duplicate-env-var",
+      "description": "Check that duplicate named env vars aren't passed to a deployment like.",
+      "remediation": "Confirm that your DeploymentLike doesn't have duplicate env vars names.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "duplicate-env-var"
+    },
+    {
+      "name": "env-var-secret",
+      "description": "Indicates when objects use a secret in an environment variable.",
+      "remediation": "Do not use raw secrets in environment variables. Instead, either mount the secret as a file or use a secretKeyRef. Refer to https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets for details.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "env-var",
+      "params": {
+        "name": "(?i).*secret.*",
+        "value": ".+"
+      }
+    },
+    {
+      "name": "host-ipc",
+      "description": "Alert on pods/deployment-likes with sharing host's IPC namespace",
+      "remediation": "Ensure the host's IPC namespace is not shared.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "host-ipc"
+    },
+    {
+      "name": "host-network",
+      "description": "Alert on pods/deployment-likes with sharing host's network namespace",
+      "remediation": "Ensure the host's network namespace is not shared.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "host-network"
+    },
+    {
+      "name": "host-pid",
+      "description": "Alert on pods/deployment-likes with sharing host's process namespace",
+      "remediation": "Ensure the host's process namespace is not shared.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "host-pid"
+    },
+    {
+      "name": "invalid-target-ports",
+      "description": "Indicates when deployments or services are using port names that are violating specifications.",
+      "remediation": "Ensure that port naming is in conjunction with the specification. For more information, please look at the Kubernetes Service specification on this page: https://kubernetes.io/docs/reference/_print/#ServiceSpec. And additional information about IANA Service naming can be found on the following page: https://www.rfc-editor.org/rfc/rfc6335.html#section-5.1.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike",
+          "Service"
+        ]
+      },
+      "template": "target-port"
+    },
+    {
+      "name": "job-ttl-seconds-after-finished",
+      "description": "Indicates when standalone jobs do not set ttlSecondsAfterFinished and when jobs managed by cronjob do set ttlSecondsAfterFinished.",
+      "remediation": "Set Job.spec.ttlSecondsAfterFinished. Unset CronJob.Spec.JobTemplate.Spec.ttlSecondsAfterFinished.",
+      "scope": {
+        "objectKinds": [
+          "JobLike"
+        ]
+      },
+      "template": "job-ttl-seconds-after-finished"
+    },
+    {
+      "name": "latest-tag",
+      "description": "Indicates when a deployment-like object is running a container with an invalid container image",
+      "remediation": "Use a container image with a specific tag other than latest.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "latest-tag",
+      "params": {
+        "BlockList": [
+          ".*:(latest)$",
+          "^[^:]*$",
+          "(.*/[^:]+)$"
+        ]
+      }
+    },
+    {
+      "name": "liveness-port",
+      "description": "Indicates when containers have a liveness probe to a not exposed port.",
+      "remediation": "Check which ports you've exposed and ensure they match what you have specified in the liveness probe.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "liveness-port"
+    },
+    {
+      "name": "mismatching-selector",
+      "description": "Indicates when deployment selectors fail to match the pod template labels.",
+      "remediation": "Confirm that your deployment selector correctly matches the labels in its pod template.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "mismatching-selector"
+    },
+    {
+      "name": "no-anti-affinity",
+      "description": "Indicates when deployments with multiple replicas fail to specify inter-pod anti-affinity, to ensure that the orchestrator attempts to schedule replicas on different nodes.",
+      "remediation": "Specify anti-affinity in your pod specification to ensure that the orchestrator attempts to schedule replicas on different nodes. Using podAntiAffinity, specify a labelSelector that matches pods for the deployment, and set the topologyKey to kubernetes.io/hostname. Refer to https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity for details.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "anti-affinity",
+      "params": {
+        "minReplicas": 2
+      }
+    },
+    {
+      "name": "no-extensions-v1beta",
+      "description": "Indicates when objects use deprecated API versions under extensions/v1beta.",
+      "remediation": "Migrate using the apps/v1 API versions for the objects. Refer to https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/ for details.",
+      "scope": {
+        "objectKinds": [
+          "Any"
+        ]
+      },
+      "template": "disallowed-api-obj",
+      "params": {
+        "group": "extensions",
+        "version": "v1beta.+"
+      }
+    },
+    {
+      "name": "no-read-only-root-fs",
+      "description": "Indicates when containers are running without a read-only root filesystem.",
+      "remediation": "Set readOnlyRootFilesystem to true in the container securityContext.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "read-only-root-fs"
+    },
+    {
+      "name": "non-existent-service-account",
+      "description": "Indicates when pods reference a service account that is not found.",
+      "remediation": "Create the missing service account, or refer to an existing service account.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "non-existent-service-account"
+    },
+    {
+      "name": "pdb-max-unavailable",
+      "description": "Indicates when a PodDisruptionBudget has a maxUnavailable value that will always prevent disruptions of pods created by related deployment-like objects.",
+      "remediation": "Change the PodDisruptionBudget to have maxUnavailable set to a value greater than 0. Refer to https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more information.",
+      "scope": {
+        "objectKinds": [
+          "PodDisruptionBudget"
+        ]
+      },
+      "template": "pdb-max-unavailable"
+    },
+    {
+      "name": "pdb-min-available",
+      "description": "Indicates when a PodDisruptionBudget sets a minAvailable value that will always prevent disruptions of pods created by related deployment-like objects.",
+      "remediation": "Change the PodDisruptionBudget to have minAvailable set to a number lower than the number of replicas in the related deployment-like objects. Refer to https://kubernetes.io/docs/tasks/run-application/configure-pdb/ for more information.",
+      "scope": {
+        "objectKinds": [
+          "PodDisruptionBudget"
+        ]
+      },
+      "template": "pdb-min-available"
+    },
+    {
+      "name": "pdb-unhealthy-pod-eviction-policy",
+      "description": "Indicates when a PodDisruptionBudget does not explicitly set the unhealthyPodEvictionPolicy field.",
+      "remediation": "Set unhealthyPodEvictionPolicy to AlwaysAllow. Refer to https://kubernetes.io/docs/tasks/run-application/configure-pdb/#unhealthy-pod-eviction-policy for more information.",
+      "scope": {
+        "objectKinds": [
+          "PodDisruptionBudget"
+        ]
+      },
+      "template": "pdb-unhealthy-pod-eviction-policy"
+    },
+    {
+      "name": "privilege-escalation-container",
+      "description": "Alert on containers of allowing privilege escalation that could gain more privileges than its parent process.",
+      "remediation": "Ensure containers do not allow privilege escalation by setting allowPrivilegeEscalation=false, privileged=false and removing CAP_SYS_ADMIN capability. See https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ for more details.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "privilege-escalation-container"
+    },
+    {
+      "name": "privileged-container",
+      "description": "Indicates when deployments have containers running in privileged mode.",
+      "remediation": "Do not run your container as privileged unless it is required.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "privileged"
+    },
+    {
+      "name": "readiness-port",
+      "description": "Indicates when containers have a readiness probe to a not exposed port.",
+      "remediation": "Check which ports you've exposed and ensure they match what you have specified in the readiness probe.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "readiness-port"
+    },
+    {
+      "name": "run-as-non-root",
+      "description": "Indicates when containers are not set to runAsNonRoot.",
+      "remediation": "Set runAsUser to a non-zero number and runAsNonRoot to true in your pod or container securityContext. Refer to https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ for details.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "run-as-non-root"
+    },
+    {
+      "name": "sensitive-host-mounts",
+      "description": "Alert on deployments with sensitive host system directories mounted in containers",
+      "remediation": "Ensure sensitive host system directories are not mounted in containers by removing those Volumes and VolumeMounts.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "host-mounts",
+      "params": {
+        "dirs": [
+          "^/$",
+          "^/boot$",
+          "^/dev$",
+          "^/etc$",
+          "^/lib$",
+          "^/proc$",
+          "^/sys$",
+          "^/usr$"
+        ]
+      }
+    },
+    {
+      "name": "ssh-port",
+      "description": "Indicates when deployments expose port 22, which is commonly reserved for SSH access.",
+      "remediation": "Ensure that non-SSH services are not using port 22. Confirm that any actual SSH servers have been vetted.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "ports",
+      "params": {
+        "port": 22,
+        "protocol": "TCP"
+      }
+    },
+    {
+      "name": "startup-port",
+      "description": "Indicates when containers have a startup probe to a not exposed port.",
+      "remediation": "Check which ports you've exposed and ensure they match what you have specified in the startup probe.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "startup-port"
+    },
+    {
+      "name": "unsafe-sysctls",
+      "description": "Alert on deployments specifying unsafe sysctls that may lead to severe problems like wrong behavior of containers",
+      "remediation": "Ensure container does not allow unsafe allocation of system resources by removing unsafe sysctls configurations. For more details see https://kubernetes.io/docs/tasks/administer-cluster/sysctl-cluster/ https://docs.docker.com/engine/reference/commandline/run/#configure-namespaced-kernel-parameters-sysctls-at-runtime.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "unsafe-sysctls",
+      "params": {
+        "unsafeSysCtls": [
+          "kernel.msg",
+          "kernel.sem",
+          "kernel.shm",
+          "fs.mqueue.",
+          "net."
+        ]
+      }
+    },
+    {
+      "name": "unset-cpu-requirements",
+      "description": "Indicates when containers do not have CPU requests and limits set.",
+      "remediation": "Set CPU requests for your container based on its requirements. Refer to https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits for details.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "cpu-requirements",
+      "params": {
+        "lowerBoundMillis": 0,
+        "requirementsType": "request",
+        "upperBoundMillis": 0
+      }
+    },
+    {
+      "name": "unset-memory-requirements",
+      "description": "Indicates when containers do not have memory requests and limits set.",
+      "remediation": "Set memory limits for your container based on its requirements. Refer to https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#requests-and-limits for details.",
+      "scope": {
+        "objectKinds": [
+          "DeploymentLike"
+        ]
+      },
+      "template": "memory-requirements",
+      "params": {
+        "lowerBoundMB": 0,
+        "requirementsType": "limit",
+        "upperBoundMB": 0
+      }
+    }
+  ],
+  "Reports": [
+    {
+      "Diagnostic": {
+        "Message": "container \"server\" does not have a read-only root file system"
+      },
+      "Check": "no-read-only-root-fs",
+      "Remediation": "Set readOnlyRootFilesystem to true in the container securityContext.",
+      "Object": {
+        "Metadata": {
+          "FilePath": "/manifests/single.yaml"
+        },
+        "K8sObject": {
+          "Namespace": "",
+          "Name": "generic-app",
+          "GroupVersionKind": {
+            "Group": "apps",
+            "Version": "v1",
+            "Kind": "Deployment"
+          }
+        }
+      }
+    }
+  ],
+  "Summary": {
+    "ChecksStatus": "Failed",
+    "CheckEndTime": "2026-07-31T04:02:38.760284935Z",
+    "KubeLinterVersion": "0.8.3"
+  }
+}

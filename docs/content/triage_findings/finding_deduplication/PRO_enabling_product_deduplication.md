@@ -10,7 +10,7 @@ Deduplication can be applied at a Product\-wide level, or scoped more narrowly t
 
 ## Deduplication for Products
 
-1. Navigate to the System Settings page: **Settings \> Pro Settings \> ⚙️ System Settings** on the sidebar.
+1. Navigate to the System Settings page: **Settings \> System \> ⚙️ System Settings** on the sidebar (**Settings \> Pro Settings \> System Settings** on instances still using the previous menu layout).
 
 ![image](images/enabling_product-level_deduplication.png)
 

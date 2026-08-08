@@ -155,8 +155,8 @@ class MergeFindings(forms.ModelForm):
     append_description = forms.BooleanField(label="Append Description", initial=True, required=False,
                                             help_text="Description in all findings will be appended into the merged finding.")
 
-    add_endpoints = forms.BooleanField(label="Add Endpoints", initial=True, required=False,
-                                           help_text="Endpoints in all findings will be merged into the merged finding.")
+    add_endpoints = forms.BooleanField(label="Add Endpoints and Locations", initial=True, required=False,
+                                           help_text="Endpoints and locations in all findings will be merged into the merged finding.")
 
     dynamic_raw = forms.BooleanField(label="Dynamic Scanner Raw Requests", initial=True, required=False,
                                            help_text="Dynamic scanner raw requests in all findings will be merged into the merged finding.")

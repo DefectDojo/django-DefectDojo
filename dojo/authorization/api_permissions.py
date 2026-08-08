@@ -257,6 +257,8 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
             "GET": "get_permission",
             "POST": "post_permission",
             # PATCH is generally not used here, but this endpoint is sorta odd...
+            # ...it accepts PUT and PATCH alike, so both must authorize the target.
+            "PUT": "put_permission",
             "PATCH": "put_permission",
         }
         for request_method, permission_type in method_to_permission_map.items():

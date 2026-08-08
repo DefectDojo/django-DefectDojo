@@ -3,11 +3,37 @@ import logging
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 
-from dojo.location.models import AbstractLocation
+from dojo.location.models import AbstractLocation, LocationFindingReference
+from dojo.models import Finding
 from dojo.url.models import URL
 from dojo.url.validators import DEFAULT_PORTS
 
 logger = logging.getLogger(__name__)
+
+
+def copy_location_references(source_finding: Finding, destination_finding: Finding) -> int:
+    """
+    Copy the source finding's location references onto the destination finding.
+
+    Used when consolidating findings, so the destination ends up covering every location the
+    source findings did. Locations the destination already references are skipped: its own
+    status and relationship data win, and the unique (location, finding) constraint holds.
+    The source finding keeps its references; they are copied, not moved.
+
+    Returns the number of references created.
+    """
+    already_referenced = LocationFindingReference.objects.filter(
+        finding=destination_finding,
+    ).values_list("location_id", flat=True)
+    references_to_copy = LocationFindingReference.objects.filter(
+        finding=source_finding,
+    ).exclude(location_id__in=already_referenced)
+
+    copied = 0
+    for reference in references_to_copy:
+        reference.copy(destination_finding)
+        copied += 1
+    return copied
 
 
 def save_location(unsaved_location: AbstractLocation) -> AbstractLocation:

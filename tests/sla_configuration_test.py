@@ -25,7 +25,7 @@ class SLAConfigurationTest(BaseTestCase):
         driver.find_element(By.ID, "id_medium").send_keys("3")
         driver.find_element(By.ID, "id_low").clear()
         driver.find_element(By.ID, "id_low").send_keys("4")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(self.is_success_message_present(text="SLA configuration Successfully Created."))
 

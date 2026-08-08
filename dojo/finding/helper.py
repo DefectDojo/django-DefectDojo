@@ -27,7 +27,6 @@ from dojo.finding.deduplication import (
     do_false_positive_history_batch,
     get_finding_models_for_deduplication,
 )
-from dojo.finding.vulnerability_id import resolve_vulnerability_id_type
 from dojo.jira import services as jira_services
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
@@ -44,7 +43,6 @@ from dojo.models import (
     Notes,
     System_Settings,
     Test,
-    Vulnerability_Id,
 )
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
@@ -57,6 +55,7 @@ from dojo.utils import (
     get_object_or_none,
     to_str_typed,
 )
+from dojo.vulnerability.manager import persist_for_finding
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -804,7 +803,9 @@ def bulk_clear_finding_m2m(finding_qs):
     Bulk-clear M2M through tables for a queryset of findings.
 
     Must be called BEFORE cascade_delete since M2M through tables
-    are not discovered by _meta.related_objects.
+    are not discovered by _meta.related_objects, and inside the same
+    transaction as the delete it clears for -- see
+    _bulk_delete_findings_internal for why the two cannot be separated.
 
     Special handling for FileUpload: deletes via ORM so the custom
     FileUpload.delete() fires and removes files from disk storage.
@@ -876,10 +877,20 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     """
     Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
 
-    Sends the pre_bulk_delete signal, clears M2M through tables (not
-    discovered by _meta.related_objects), then uses cascade_delete for
-    all FK relations via raw SQL.
+    Sends the pre_bulk_delete signal, then per chunk clears the chunk's M2M through
+    tables (not discovered by _meta.related_objects) and uses cascade_delete for all
+    FK relations via raw SQL.
     Chunked with per-chunk transaction.atomic() for crash safety.
+
+    The M2M clear belongs inside the chunk's transaction, next to the delete it
+    protects. Clearing once up front for the whole queryset left every chunk after
+    the first exposed: each chunk commits separately, so a through row written after
+    that one pass -- a note added, a finding re-tagged by a concurrent import --
+    survived into its chunk's COMMIT, where the through table's foreign key rejected
+    it. Django declares those keys DEFERRABLE INITIALLY DEFERRED, so the failure
+    landed at COMMIT rather than at the delete, and the caller saw an opaque
+    constraint error naming an internal table. Per chunk, the through rows and the
+    findings they point at go in one transaction and no such window exists.
 
     When order_desc is True, findings are processed highest id first (matches
     finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
@@ -892,7 +903,6 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     )
 
     pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
-    bulk_clear_finding_m2m(finding_qs)
     ordered_qs = finding_qs.order_by("-id") if order_desc else finding_qs.order_by("id")
     for chunk_num, chunk_ids in enumerate(
         batched(
@@ -904,6 +914,7 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     ):
         chunk_qs = Finding.objects.filter(id__in=chunk_ids)
         with transaction.atomic():
+            bulk_clear_finding_m2m(chunk_qs)
             cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
             execute_delete_sql(chunk_qs)
         logger.info(
@@ -1064,16 +1075,10 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
     vulnerability_ids = sanitize_vulnerability_ids(vulnerability_ids)
 
-    # Remove old vulnerability ids if requested
+    # Persist the Vulnerability entity + FindingVulnerabilityReference rows.
     # Callers can set delete_existing=False when they know there are no existing IDs
-    # to avoid an unnecessary delete query (e.g., for new findings)
-    if delete_existing:
-        Vulnerability_Id.objects.filter(finding=finding).delete()
-
-    Vulnerability_Id.objects.bulk_create([
-        Vulnerability_Id(finding=finding, vulnerability_id=vid, vulnerability_id_type=resolve_vulnerability_id_type(vid))
-        for vid in vulnerability_ids
-    ])
+    # to avoid an unnecessary delete query (e.g., for new findings).
+    persist_for_finding(finding, vulnerability_ids, delete_existing=delete_existing)
 
     # Set CVE
     if vulnerability_ids:
@@ -1359,6 +1364,12 @@ def close_finding(
     finding.out_of_scope = bool(out_of_scope)
     finding.duplicate = bool(duplicate)
     finding.under_review = False
+    # Closing ends any open peer review, so the requester/reviewer record has
+    # to go with it. Leaving them set strands the review: the finding no
+    # longer offers "Clear Review" (that action is gated on under_review), yet
+    # it still reports reviewers, so queue views built on the reviewers M2M
+    # keep surfacing work nobody can act on.
+    finding.review_requested_by = None
     finding.last_reviewed = mitigated_date
     finding.last_reviewed_by = user
 
@@ -1391,6 +1402,10 @@ def close_finding(
     close_external_issue(finding.id, "Closed by defectdojo", "github")
 
     _save_finding_with_jira_sync(finding, new_note=new_note)
+
+    # Cleared after the save: the M2M write hits the DB immediately, so doing
+    # it earlier would drop the reviewers even if the save above raised.
+    finding.reviewers.clear()
 
     # Notification
     create_notification(

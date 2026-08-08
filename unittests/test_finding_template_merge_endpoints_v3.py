@@ -113,7 +113,7 @@ class TestFindingTemplateAndMergeWithEndpointsV3(DojoTestCase):
     def test_mktemplate_with_legacy_endpoints(self):
         """Creating a finding template from a finding with legacy endpoints must not crash."""
         fixture = self._create_finding_with_legacy_endpoint("mktemplate")
-        response = self.ui_client.get(
+        response = self.ui_client.post(
             reverse("mktemplate", kwargs={"fid": fixture.finding.id}),
         )
         self.assertEqual(response.status_code, 302)

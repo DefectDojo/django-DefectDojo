@@ -597,9 +597,36 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # Multiple-CWEs feature: +2 import / +2 reimport-no-change (Finding_CWE
     # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
     # existing Finding_CWE rows for each changed finding).
-    EXPECTED_ZAP_IMPORT_V2 = 294
-    EXPECTED_ZAP_IMPORT_V3 = 318
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 79
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 91
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 161
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 190
+    # Vulnerability id writes (entity-only cutover): only the Vulnerability entity +
+    # FindingVulnerabilityReference bulk writes remain (batched, not per-finding). Removing the
+    # legacy Vulnerability_Id dual-write drops the reimport counts by its delete+bulk_insert:
+    # -12 reimport-no-change, -6 reimport-with-new. Import counts are unchanged.
+    # +3 on every path from save_without_resurrecting(): the importer confirms its
+    # test and engagement rows still exist before writing them back, instead of
+    # letting Model.save() fall back to an INSERT that re-creates a row deleted
+    # mid-import. One primary-key lookup per guarded save (test, engagement, and
+    # the closing update_test_progress), so the cost is constant rather than
+    # per-finding — which is why the delta is +3 on import and reimport alike.
+    # +2 on the paths that buffer child rows: the batch flush confirms the buffered
+    # findings still exist before inserting their vulnerability id references, CWE rows
+    # and request/response rows, instead of letting a finding deleted mid-batch turn the
+    # bulk insert into a dangling foreign key that PostgreSQL only rejects at COMMIT.
+    # One primary-key lookup per flush method that has something to insert, and a ZAP
+    # batch boundary runs two of them: flush_vulnerability_ids() resolves the set once
+    # for the reference and CWE buffers it shares, then flush_burp_request_response()
+    # resolves its own for the request/response rows the ZAP parser attaches. The
+    # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
+    # -2 on the V3 reimport paths: LocationManager.persist() used to open
+    # transaction.atomic() even with nothing buffered, and inside the test's outer
+    # atomic block that empty transaction is a SAVEPOINT/RELEASE pair. Both steps
+    # inside it already short-circuit on empty accumulators, so persist() now returns
+    # before opening it. A reimport calls persist() at the batch boundary and again
+    # from close_old_findings; the one with nothing to write is the pair that goes.
+    # V2 is unaffected -- EndpointManager.persist() opens no transaction -- which is
+    # why only the V3 constants move.
+    EXPECTED_ZAP_IMPORT_V2 = 301
+    EXPECTED_ZAP_IMPORT_V3 = 325
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 92
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 193
