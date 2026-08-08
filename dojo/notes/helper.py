@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Prefetch, Q
+from django.db.models import Manager, Prefetch, Q, QuerySet
 
 from dojo.notes.models import NoteHistory, Notes
 
@@ -30,11 +30,20 @@ def visible_notes(notes, user):
     Every read path goes through here, so the API and the UI cannot drift apart
     on what ``private`` means. A caller with no user (report rendering) gets the
     non-private notes only.
+
+    ``notes`` does not always still carry a query. A DRF list serializer is
+    handed the paginated page, which is a plain list, and a ``to_attr``
+    prefetch yields one too. Those are filtered in Python; a queryset is still
+    narrowed in the database, so callers that go on to count or slice the
+    result keep doing that in one query.
     """
+    if user is not None and user.is_superuser:
+        return notes
+    if not isinstance(notes, (Manager, QuerySet)):
+        author_id = getattr(user, "pk", None)
+        return [note for note in notes if not note.private or note.author_id == author_id]
     if user is None:
         return notes.filter(private=False)
-    if user.is_superuser:
-        return notes
     return notes.filter(Q(private=False) | Q(author=user))
 
 
