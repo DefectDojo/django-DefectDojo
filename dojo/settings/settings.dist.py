@@ -1081,6 +1081,15 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Burp Scan": ["title", "severity", "vuln_id_from_tool"],
     "CargoAudit Scan": ["vulnerability_ids", "severity", "component_name", "component_version", "vuln_id_from_tool"],
     "Checkmarx Scan": ["cwe", "severity", "file_path"],
+    # Same three fields as "Checkmarx CxFlow SAST" below, and for the same reason: the
+    # detailed mode of this parser sets vuln_id_from_tool (queryId), file_path (sinkFilename)
+    # and line (sinkLineNumber) on every finding, so all three are populated and none of them
+    # carries scan text. Without an entry here the scan type fell through to the legacy field
+    # set, which includes `description` -- so a parser change that reworded a finding moved its
+    # hash_code, which is the fragility this list exists to avoid. The algorithm for this scan
+    # type is unique_id_from_tool, so the change moves the stored hash without changing how
+    # candidates are looked up.
+    "Checkmarx Scan detailed": ["vuln_id_from_tool", "file_path", "line"],
     "Checkmarx OSA": ["vulnerability_ids", "component_name"],
     "Cloudsploit Scan": ["title", "description"],
     "Coverity Scan JSON Report": ["title", "cwe", "line", "file_path", "description"],
