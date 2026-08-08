@@ -121,12 +121,15 @@ Mappings are managed through the API, and require the **maintainer** global role
 
 ```
 POST /api/vue/connector_field_mappings/
-{"scan_type": "Snyk Connectors Import", "transforms": []}
+{"scan_type": "Snyk Connectors Import", "transforms": [ ... ]}
 ```
 
-Create it empty, then add your mappings with the `PATCH` below. That routes them through
-validation and through the identity classification described above, which a create does not
-perform.
+Your mappings are checked here exactly as an edit checks them, so a transform set that the
+editor would refuse is refused on creation too.
+
+No `acknowledge_identity_change` is needed on a create: there is no previous generation to move
+away from, so there is nothing to acknowledge. The first mapping set is the baseline that later
+edits are classified against.
 
 ### Check an edit before making it
 
@@ -155,9 +158,9 @@ sends.
 `acknowledge_identity_change` is required **only** for an identity-relevant edit, and the
 request is rejected without it. A presentation-only edit does not need it.
 
-An edit is rejected if it targets something that is not a finding field, if an expression reads
-a field the payload never carries, if `strip_pattern` is not a valid regular expression, or if
-two mappings target the same field.
+A create or an edit is rejected if it targets something that is not a finding field, if an
+expression reads a field the payload never carries, if `strip_pattern` is not a valid regular
+expression, or if two mappings target the same field.
 
 ### View the history
 
