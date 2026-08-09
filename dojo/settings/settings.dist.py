@@ -1134,6 +1134,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "JFrog Xray On Demand Binary Scan": ["title", "component_name", "component_version"],
     "JFrog Xray API Summary Artifact Scan": ["title", "description", "component_name", "component_version"],
     "Scout Suite Scan": ["file_path", "vuln_id_from_tool"],  # for now we use file_path as there is no attribute for "service"
+    # severity is deliberately excluded: the Seal CSV has no severity column today, so
+    # every finding gets the same default, and including it would fork all existing
+    # findings into duplicates once the CLI starts exporting a score
+    "Seal Security Scan": ["vulnerability_ids", "component_name", "component_version"],
     "Meterian Scan": ["cwe", "component_name", "component_version", "description", "severity"],
     "Github SAST Scan": ["vuln_id_from_tool", "severity", "file_path", "line"],
     "Github Vulnerability Scan": ["title", "severity", "component_name", "vulnerability_ids", "file_path"],
@@ -1595,6 +1599,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     # findings mitigated and re-created in one reimport of otherwise unchanged data).
     "JFrog Xray API Summary Artifact Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
     "Scout Suite Scan": DEDUPE_ALGO_HASH_CODE,
+    "Seal Security Scan": DEDUPE_ALGO_HASH_CODE,
     "AWS Security Hub Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Meterian Scan": DEDUPE_ALGO_HASH_CODE,
     "Github SAST Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
