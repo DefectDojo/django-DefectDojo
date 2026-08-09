@@ -113,9 +113,54 @@ Build a **composite** instead, as in the example above. A vulnerability ID toget
 component, its version and the file path is specific to one occurrence, which is what an
 identifier has to be.
 
+## Working with mappings in DefectDojo
+
+Mappings live under **Connect > Field Mappings**. The whole area requires the **maintainer**
+global role for Connectors — viewing included, because a mapping describes how your findings
+are identified.
+
+The list shows every scan type that has mappings, how many it has, which fields they write,
+and two counters worth reading together: **Revision** is how many times the mappings have
+changed, and **Identity Generation** is how many of those changes moved what findings are
+identified by.
+
+### Add mappings to a scan type
+
+Choose **New Field Mapping** and pick a scan type. Only scan types without a configuration are
+offered — if the one you want is missing, it already has mappings, so edit those instead.
+
+The configuration is created empty and opens straight into the editor. An empty configuration
+changes nothing about an import, so there is no identity decision to make yet.
+
+### Edit the mappings
+
+Each row is one mapping: the **Target Field** to write, the **Expression** to write into it,
+and an optional **Strip Pattern**. The target list is the set of finding fields DefectDojo will
+accept, so you cannot select one that would be rejected on save.
+
+Fields that reach identity for this scan type are tagged **identity** as you select them. That
+tag follows your deduplication settings for the scan type, so it reflects what this instance
+actually hashes rather than a fixed list. Two rows may not target the same field, and the
+editor will say so before you continue.
+
+### Review the impact, then save
+
+**Review Impact** classifies the change without applying it, and this is the step the screen
+exists for. It tells you whether the edit is presentation-only or identity-relevant, which
+fields are moving, and how many findings are already stored under this scan type.
+
+An identity-relevant edit cannot be saved until you tick the box confirming you understand it
+opens a transition window. A presentation-only edit saves without that step — the confirmation
+is asked for only where it means something.
+
+If the mappings were previously changed outside DefectDojo, the review says so, and warns that
+findings imported before that change cannot be recovered by this edit. See
+[Changing mappings outside the API](#changing-mappings-outside-the-api).
+
 ## Working with mappings through the API
 
-Mappings are managed through the API, and require the **maintainer** global role.
+Everything above is also available through the API, which requires the same **maintainer**
+global role.
 
 ### Create a configuration for a scan type
 
@@ -200,7 +245,8 @@ open.
 Editing a configuration directly in the Django admin, or in a shell, bypasses all of the
 above: no revision is recorded, no identity generation is bumped, and no transition window
 opens. Findings imported before such a change become unreachable from findings imported after
-it. Use the API.
+it. Use the Field Mappings screen or the API — the screen edits through the same API, so both
+record the change properly.
 
 If it has already happened, the `impact` endpoint reports it, as
 `unmanaged_identity_change`. Findings imported before that change have no recorded identity for
