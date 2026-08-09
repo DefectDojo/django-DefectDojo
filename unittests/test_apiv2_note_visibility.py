@@ -151,6 +151,26 @@ class NoteVisibilityTest(DojoAPITestCase):
     def test_helper_without_a_user_gives_only_the_public_one(self):
         self.assertEqual({PUBLIC}, self._entries(None))
 
+    def test_helper_accepts_an_already_evaluated_list(self):
+        """A paginated notes page arrives as a list, not a queryset.
+
+        DRF pagination evaluates the queryset before serialization, so
+        ``VisibleNotesSerializer.to_representation`` hands ``visible_notes`` a
+        plain ``list``. The non-superuser and no-user branches used to call
+        ``list.filter(...)``, so every paginated notes read 500'd for a
+        non-superuser. The rule must apply identically whether it is given a
+        queryset or an already-evaluated page.
+        """
+        page = list(self.finding.notes.all())  # exactly what DRF pagination passes
+
+        def entries(user):
+            return {n.entry for n in visible_notes(page, user)}
+
+        self.assertEqual({PUBLIC}, entries(self.colleague))
+        self.assertEqual({PRIVATE, PUBLIC}, entries(self.author))
+        self.assertEqual({PRIVATE, PUBLIC}, entries(self.superuser))
+        self.assertEqual({PUBLIC}, entries(None))
+
     def test_finding_page_context_is_filtered(self):
         client = Client()
         client.force_login(self.colleague)
