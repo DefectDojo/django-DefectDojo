@@ -1,0 +1,1038 @@
+{
+  "meta": {
+    "timestamp": "2026-08-08T20:30:07.562894",
+    "version": "9.4.0",
+    "argv": [
+      "-j",
+      "sample.dll"
+    ],
+    "sample": {
+      "md5": "a2bb9d8afe41855f6e6be3a9cd776814",
+      "sha1": "38e090472249f9970f00d7b35691403caee688ea",
+      "sha256": "6ba5df4f5fd3db83402e69ae837b92e5423bbef159381b4449c068109951deee",
+      "path": "samples/sample.dll"
+    },
+    "flavor": "static",
+    "analysis": {
+      "format": "dotnet",
+      "arch": "amd64",
+      "os": "any",
+      "extractor": "DnfileFeatureExtractor",
+      "rules": [
+        "/private/tmp/claude-501/-Users-greg-Claude/9bb6cebc-0188-4651-852a-5e56e1c61912/scratchpad/samples/capa-rules"
+      ],
+      "base_address": {
+        "type": "no address"
+      },
+      "layout": {
+        "functions": [
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663303
+            },
+            "matched_basic_blocks": [
+              {
+                "address": {
+                  "type": "dn token",
+                  "value": 100663303
+                }
+              }
+            ]
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663389
+            },
+            "matched_basic_blocks": [
+              {
+                "address": {
+                  "type": "dn token",
+                  "value": 100663389
+                }
+              }
+            ]
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663390
+            },
+            "matched_basic_blocks": [
+              {
+                "address": {
+                  "type": "dn token",
+                  "value": 100663390
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "feature_counts": {
+        "file": 1155,
+        "functions": [
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663297
+            },
+            "count": 14
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663298
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663299
+            },
+            "count": 23
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663300
+            },
+            "count": 31
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663301
+            },
+            "count": 5
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663302
+            },
+            "count": 6
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663303
+            },
+            "count": 21
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663304
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663305
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663306
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663307
+            },
+            "count": 19
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663308
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663309
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663310
+            },
+            "count": 45
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663311
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663312
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663313
+            },
+            "count": 20
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663314
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663315
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663316
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663317
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663318
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663319
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663320
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663321
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663322
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663323
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663324
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663325
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663326
+            },
+            "count": 16
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663327
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663328
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663329
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663330
+            },
+            "count": 16
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663331
+            },
+            "count": 22
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663332
+            },
+            "count": 11
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663333
+            },
+            "count": 18
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663334
+            },
+            "count": 44
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663335
+            },
+            "count": 70
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663336
+            },
+            "count": 6
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663337
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663338
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663339
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663340
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663341
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663342
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663343
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663344
+            },
+            "count": 27
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663345
+            },
+            "count": 14
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663346
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663347
+            },
+            "count": 14
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663348
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663349
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663350
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663351
+            },
+            "count": 5
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663352
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663353
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663354
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663355
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663356
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663357
+            },
+            "count": 26
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663358
+            },
+            "count": 57
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663359
+            },
+            "count": 24
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663360
+            },
+            "count": 17
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663361
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663362
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663363
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663364
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663365
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663366
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663367
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663368
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663369
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663370
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663371
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663372
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663373
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663374
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663375
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663376
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663377
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663378
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663379
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663380
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663381
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663382
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663383
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663384
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663385
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663386
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663387
+            },
+            "count": 84
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663388
+            },
+            "count": 37
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663389
+            },
+            "count": 20
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663390
+            },
+            "count": 19
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663391
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663392
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663393
+            },
+            "count": 18
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663394
+            },
+            "count": 12
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663395
+            },
+            "count": 17
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663396
+            },
+            "count": 11
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663397
+            },
+            "count": 10
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663398
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663399
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663400
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663401
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663402
+            },
+            "count": 10
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663403
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663404
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663405
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663406
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663407
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663408
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663409
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663410
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663411
+            },
+            "count": 16
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663412
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663413
+            },
+            "count": 22
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663414
+            },
+            "count": 10
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663415
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663416
+            },
+            "count": 5
+          }
+        ]
+      },
+      "library_functions": []
+    }
+  },
+  "rules": {
+    "accept command line arguments": {
+      "meta": {
+        "name": "accept command line arguments",
+        "namespace": "host-interaction/cli",
+        "authors": [
+          "moritz.raabe@mandiant.com",
+          "anushka.virgaonkar@mandiant.com"
+        ],
+        "scopes": {
+          "static": "function",
+          "dynamic": "call"
+        },
+        "attack": [
+          {
+            "parts": [
+              "Execution",
+              "Command and Scripting Interpreter"
+            ],
+            "tactic": "Execution",
+            "technique": "Command and Scripting Interpreter",
+            "subtechnique": "",
+            "id": "T1059"
+          }
+        ],
+        "mbc": [
+          {
+            "parts": [
+              "Execution",
+              "Command and Scripting Interpreter"
+            ],
+            "objective": "Execution",
+            "behavior": "Command and Scripting Interpreter",
+            "method": "",
+            "id": "E1059"
+          }
+        ],
+        "references": [],
+        "examples": [
+          "e5369ac309f1be6d77afeeb3edab0ed8:0x402760"
+        ],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: accept command line arguments\n    namespace: host-interaction/cli\n    authors:\n      - moritz.raabe@mandiant.com\n      - anushka.virgaonkar@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Execution::Command and Scripting Interpreter [T1059]\n    mbc:\n      - Execution::Command and Scripting Interpreter [E1059]\n    examples:\n      - e5369ac309f1be6d77afeeb3edab0ed8:0x402760\n  features:\n    - or:\n      - api: GetCommandLine\n      - api: CommandLineToArgv\n      - api: System.Environment::GetCommandLineArgs\n",
+      "matches": [
+        [
+          {
+            "type": "dn token",
+            "value": 100663300
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "GetCommandLine"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "CommandLineToArgv"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Environment::GetCommandLineArgs"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "dn token offset",
+                    "value": [
+                      100663300,
+                      0
+                    ]
+                  }
+                ],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    }
+  }
+}

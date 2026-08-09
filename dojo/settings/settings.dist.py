@@ -1357,6 +1357,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "pip-licenses Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     "Syft SBOM": ["component_name", "component_version", "vuln_id_from_tool"],
     "ScubaGear Report Scan": ["vuln_id_from_tool", "severity"],
+    "capa Scan": ["vuln_id_from_tool", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1774,6 +1775,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "pip-licenses Scan": DEDUPE_ALGO_HASH_CODE,
     "Syft SBOM": DEDUPE_ALGO_HASH_CODE,
     "ScubaGear Report Scan": DEDUPE_ALGO_HASH_CODE,
+    "capa Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

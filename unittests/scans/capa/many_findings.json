@@ -1,0 +1,1952 @@
+{
+  "meta": {
+    "timestamp": "2026-08-08T20:30:07.562894",
+    "version": "9.4.0",
+    "argv": [
+      "-j",
+      "sample.dll"
+    ],
+    "sample": {
+      "md5": "a2bb9d8afe41855f6e6be3a9cd776814",
+      "sha1": "38e090472249f9970f00d7b35691403caee688ea",
+      "sha256": "6ba5df4f5fd3db83402e69ae837b92e5423bbef159381b4449c068109951deee",
+      "path": "samples/sample.dll"
+    },
+    "flavor": "static",
+    "analysis": {
+      "format": "dotnet",
+      "arch": "amd64",
+      "os": "any",
+      "extractor": "DnfileFeatureExtractor",
+      "rules": [
+        "/private/tmp/claude-501/-Users-greg-Claude/9bb6cebc-0188-4651-852a-5e56e1c61912/scratchpad/samples/capa-rules"
+      ],
+      "base_address": {
+        "type": "no address"
+      },
+      "layout": {
+        "functions": [
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663303
+            },
+            "matched_basic_blocks": [
+              {
+                "address": {
+                  "type": "dn token",
+                  "value": 100663303
+                }
+              }
+            ]
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663389
+            },
+            "matched_basic_blocks": [
+              {
+                "address": {
+                  "type": "dn token",
+                  "value": 100663389
+                }
+              }
+            ]
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663390
+            },
+            "matched_basic_blocks": [
+              {
+                "address": {
+                  "type": "dn token",
+                  "value": 100663390
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "feature_counts": {
+        "file": 1155,
+        "functions": [
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663297
+            },
+            "count": 14
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663298
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663299
+            },
+            "count": 23
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663300
+            },
+            "count": 31
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663301
+            },
+            "count": 5
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663302
+            },
+            "count": 6
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663303
+            },
+            "count": 21
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663304
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663305
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663306
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663307
+            },
+            "count": 19
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663308
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663309
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663310
+            },
+            "count": 45
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663311
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663312
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663313
+            },
+            "count": 20
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663314
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663315
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663316
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663317
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663318
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663319
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663320
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663321
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663322
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663323
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663324
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663325
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663326
+            },
+            "count": 16
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663327
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663328
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663329
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663330
+            },
+            "count": 16
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663331
+            },
+            "count": 22
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663332
+            },
+            "count": 11
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663333
+            },
+            "count": 18
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663334
+            },
+            "count": 44
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663335
+            },
+            "count": 70
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663336
+            },
+            "count": 6
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663337
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663338
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663339
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663340
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663341
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663342
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663343
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663344
+            },
+            "count": 27
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663345
+            },
+            "count": 14
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663346
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663347
+            },
+            "count": 14
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663348
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663349
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663350
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663351
+            },
+            "count": 5
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663352
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663353
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663354
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663355
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663356
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663357
+            },
+            "count": 26
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663358
+            },
+            "count": 57
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663359
+            },
+            "count": 24
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663360
+            },
+            "count": 17
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663361
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663362
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663363
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663364
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663365
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663366
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663367
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663368
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663369
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663370
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663371
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663372
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663373
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663374
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663375
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663376
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663377
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663378
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663379
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663380
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663381
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663382
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663383
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663384
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663385
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663386
+            },
+            "count": 4
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663387
+            },
+            "count": 84
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663388
+            },
+            "count": 37
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663389
+            },
+            "count": 20
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663390
+            },
+            "count": 19
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663391
+            },
+            "count": 13
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663392
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663393
+            },
+            "count": 18
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663394
+            },
+            "count": 12
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663395
+            },
+            "count": 17
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663396
+            },
+            "count": 11
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663397
+            },
+            "count": 10
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663398
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663399
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663400
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663401
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663402
+            },
+            "count": 10
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663403
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663404
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663405
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663406
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663407
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663408
+            },
+            "count": 8
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663409
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663410
+            },
+            "count": 15
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663411
+            },
+            "count": 16
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663412
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663413
+            },
+            "count": 22
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663414
+            },
+            "count": 10
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663415
+            },
+            "count": 9
+          },
+          {
+            "address": {
+              "type": "dn token",
+              "value": 100663416
+            },
+            "count": 5
+          }
+        ]
+      },
+      "library_functions": []
+    }
+  },
+  "rules": {
+    "accept command line arguments": {
+      "meta": {
+        "name": "accept command line arguments",
+        "namespace": "host-interaction/cli",
+        "authors": [
+          "moritz.raabe@mandiant.com",
+          "anushka.virgaonkar@mandiant.com"
+        ],
+        "scopes": {
+          "static": "function",
+          "dynamic": "call"
+        },
+        "attack": [
+          {
+            "parts": [
+              "Execution",
+              "Command and Scripting Interpreter"
+            ],
+            "tactic": "Execution",
+            "technique": "Command and Scripting Interpreter",
+            "subtechnique": "",
+            "id": "T1059"
+          }
+        ],
+        "mbc": [
+          {
+            "parts": [
+              "Execution",
+              "Command and Scripting Interpreter"
+            ],
+            "objective": "Execution",
+            "behavior": "Command and Scripting Interpreter",
+            "method": "",
+            "id": "E1059"
+          }
+        ],
+        "references": [],
+        "examples": [
+          "e5369ac309f1be6d77afeeb3edab0ed8:0x402760"
+        ],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: accept command line arguments\n    namespace: host-interaction/cli\n    authors:\n      - moritz.raabe@mandiant.com\n      - anushka.virgaonkar@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Execution::Command and Scripting Interpreter [T1059]\n    mbc:\n      - Execution::Command and Scripting Interpreter [E1059]\n    examples:\n      - e5369ac309f1be6d77afeeb3edab0ed8:0x402760\n  features:\n    - or:\n      - api: GetCommandLine\n      - api: CommandLineToArgv\n      - api: System.Environment::GetCommandLineArgs\n",
+      "matches": [
+        [
+          {
+            "type": "dn token",
+            "value": 100663300
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "GetCommandLine"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "CommandLineToArgv"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Environment::GetCommandLineArgs"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "dn token offset",
+                    "value": [
+                      100663300,
+                      0
+                    ]
+                  }
+                ],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    },
+    "access .NET resource": {
+      "meta": {
+        "name": "access .NET resource",
+        "namespace": "executable/resource",
+        "authors": [
+          "@mr-tz"
+        ],
+        "scopes": {
+          "static": "function",
+          "dynamic": "span of calls"
+        },
+        "attack": [],
+        "mbc": [],
+        "references": [],
+        "examples": [
+          "387f15043f0198fd3a637b0758c2b6dde9ead795c3ed70803426fc355731b173:0x06000084"
+        ],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: access .NET resource\n    namespace: executable/resource\n    authors:\n      - \"@mr-tz\"\n    scopes:\n      static: function\n      dynamic: span of calls\n    examples:\n      - 387f15043f0198fd3a637b0758c2b6dde9ead795c3ed70803426fc355731b173:0x06000084\n  features:\n    - and:\n      - format: dotnet\n      - or:\n        - api: System.Resources.ResourceManager::ctor\n        - api: System.Reflection.Assembly::GetManifestResourceStream\n",
+      "matches": [
+        [
+          {
+            "type": "dn token",
+            "value": 100663313
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "and"
+              }
+            },
+            "children": [
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "format",
+                    "format": "dotnet"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "no address"
+                  }
+                ],
+                "captures": {}
+              },
+              {
+                "success": true,
+                "node": {
+                  "type": "statement",
+                  "statement": {
+                    "type": "or"
+                  }
+                },
+                "children": [
+                  {
+                    "success": true,
+                    "node": {
+                      "type": "feature",
+                      "feature": {
+                        "type": "api",
+                        "api": "System.Resources.ResourceManager::ctor"
+                      }
+                    },
+                    "children": [],
+                    "locations": [
+                      {
+                        "type": "dn token offset",
+                        "value": [
+                          100663313,
+                          27
+                        ]
+                      }
+                    ],
+                    "captures": {}
+                  },
+                  {
+                    "success": false,
+                    "node": {
+                      "type": "feature",
+                      "feature": {
+                        "type": "api",
+                        "api": "System.Reflection.Assembly::GetManifestResourceStream"
+                      }
+                    },
+                    "children": [],
+                    "locations": [],
+                    "captures": {}
+                  }
+                ],
+                "locations": [],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    },
+    "check if directory exists": {
+      "meta": {
+        "name": "check if directory exists",
+        "namespace": "host-interaction/file-system/exists",
+        "authors": [
+          "michael.hunhoff@mandiant.com"
+        ],
+        "scopes": {
+          "static": "function",
+          "dynamic": "call"
+        },
+        "attack": [
+          {
+            "parts": [
+              "Discovery",
+              "File and Directory Discovery"
+            ],
+            "tactic": "Discovery",
+            "technique": "File and Directory Discovery",
+            "subtechnique": "",
+            "id": "T1083"
+          }
+        ],
+        "mbc": [],
+        "references": [],
+        "examples": [],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: check if directory exists\n    namespace: host-interaction/file-system/exists\n    authors:\n      - michael.hunhoff@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Discovery::File and Directory Discovery [T1083]\n  features:\n    - or:\n      - api: System.IO.Directory::Exists\n",
+      "matches": [
+        [
+          {
+            "type": "dn token",
+            "value": 100663334
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.IO.Directory::Exists"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "dn token offset",
+                    "value": [
+                      100663334,
+                      61
+                    ]
+                  }
+                ],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    },
+    "manipulate console buffer": {
+      "meta": {
+        "name": "manipulate console buffer",
+        "namespace": "host-interaction/console",
+        "authors": [
+          "william.ballenthin@mandiant.com",
+          "michael.hunhoff@mandiant.com"
+        ],
+        "scopes": {
+          "static": "function",
+          "dynamic": "span of calls"
+        },
+        "attack": [],
+        "mbc": [
+          {
+            "parts": [
+              "Operating System",
+              "Console"
+            ],
+            "objective": "Operating System",
+            "behavior": "Console",
+            "method": "",
+            "id": "C0033"
+          }
+        ],
+        "references": [
+          "https://stackoverflow.com/a/15770935/87207"
+        ],
+        "examples": [
+          "3aa7ee4d67f562933bc998f352b1f319:0x705413A0"
+        ],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: manipulate console buffer\n    namespace: host-interaction/console\n    authors:\n      - william.ballenthin@mandiant.com\n      - michael.hunhoff@mandiant.com\n    scopes:\n      static: function\n      dynamic: span of calls\n    mbc:\n      - Operating System::Console [C0033]\n    references:\n      - https://stackoverflow.com/a/15770935/87207\n    examples:\n      - 3aa7ee4d67f562933bc998f352b1f319:0x705413A0\n  features:\n    - or:\n      - and:\n        - or:\n          - api: kernel32.SetConsoleCursorPosition\n          - api: kernel32.ReadConsoleOutputCharacter\n          - api: kernel32.WriteConsoleOutputCharacter\n          - api: kernel32.WriteConsoleOutput\n          - api: kernel32.WriteConsoleInput\n        - optional:\n          - api: kernel32.GetStdHandle\n          - number: 0xfffffff5 = STD_OUTPUT_HANDLE\n      - api: System.Console::Write\n      - api: System.Console::WriteLine\n",
+      "matches": [
+        [
+          {
+            "type": "dn token",
+            "value": 100663335
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Console::Write"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Console::WriteLine"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "dn token offset",
+                    "value": [
+                      100663335,
+                      32
+                    ]
+                  }
+                ],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "statement",
+                  "statement": {
+                    "type": "and"
+                  }
+                },
+                "children": [
+                  {
+                    "success": false,
+                    "node": {
+                      "type": "statement",
+                      "statement": {
+                        "type": "or"
+                      }
+                    },
+                    "children": [
+                      {
+                        "success": false,
+                        "node": {
+                          "type": "feature",
+                          "feature": {
+                            "type": "api",
+                            "api": "SetConsoleCursorPosition"
+                          }
+                        },
+                        "children": [],
+                        "locations": [],
+                        "captures": {}
+                      },
+                      {
+                        "success": false,
+                        "node": {
+                          "type": "feature",
+                          "feature": {
+                            "type": "api",
+                            "api": "ReadConsoleOutputCharacter"
+                          }
+                        },
+                        "children": [],
+                        "locations": [],
+                        "captures": {}
+                      },
+                      {
+                        "success": false,
+                        "node": {
+                          "type": "feature",
+                          "feature": {
+                            "type": "api",
+                            "api": "WriteConsoleOutputCharacter"
+                          }
+                        },
+                        "children": [],
+                        "locations": [],
+                        "captures": {}
+                      },
+                      {
+                        "success": false,
+                        "node": {
+                          "type": "feature",
+                          "feature": {
+                            "type": "api",
+                            "api": "WriteConsoleOutput"
+                          }
+                        },
+                        "children": [],
+                        "locations": [],
+                        "captures": {}
+                      },
+                      {
+                        "success": false,
+                        "node": {
+                          "type": "feature",
+                          "feature": {
+                            "type": "api",
+                            "api": "WriteConsoleInput"
+                          }
+                        },
+                        "children": [],
+                        "locations": [],
+                        "captures": {}
+                      }
+                    ],
+                    "locations": [],
+                    "captures": {}
+                  },
+                  {
+                    "success": true,
+                    "node": {
+                      "type": "statement",
+                      "statement": {
+                        "type": "optional"
+                      }
+                    },
+                    "children": [
+                      {
+                        "success": false,
+                        "node": {
+                          "type": "feature",
+                          "feature": {
+                            "type": "api",
+                            "api": "GetStdHandle"
+                          }
+                        },
+                        "children": [],
+                        "locations": [],
+                        "captures": {}
+                      },
+                      {
+                        "success": false,
+                        "node": {
+                          "type": "feature",
+                          "feature": {
+                            "type": "number",
+                            "number": 4294967285,
+                            "description": "STD_OUTPUT_HANDLE"
+                          }
+                        },
+                        "children": [],
+                        "locations": [],
+                        "captures": {}
+                      }
+                    ],
+                    "locations": [],
+                    "captures": {}
+                  }
+                ],
+                "locations": [],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    },
+    "load .NET assembly": {
+      "meta": {
+        "name": "load .NET assembly",
+        "namespace": "load-code/dotnet",
+        "authors": [
+          "anushka.virgaonkar@mandiant.com"
+        ],
+        "scopes": {
+          "static": "function",
+          "dynamic": "call"
+        },
+        "attack": [
+          {
+            "parts": [
+              "Defense Evasion",
+              "Reflective Code Loading"
+            ],
+            "tactic": "Defense Evasion",
+            "technique": "Reflective Code Loading",
+            "subtechnique": "",
+            "id": "T1620"
+          }
+        ],
+        "mbc": [],
+        "references": [],
+        "examples": [],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: load .NET assembly\n    namespace: load-code/dotnet\n    authors:\n      - anushka.virgaonkar@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Defense Evasion::Reflective Code Loading [T1620]\n  features:\n    - or:\n      - api: System.Reflection.Assembly::Load\n      - api: System.AppDomain::Load\n      - api: System.Reflection.Assembly::LoadFile\n      - api: System.Reflection.Assembly::LoadFrom\n      - api: System.Reflection.Assembly::LoadWithPartialName\n      - api: System.Reflection.Assembly::ReflectionOnlyLoad\n      - api: System.Reflection.Assembly::ReflectionOnlyLoadFrom\n      - api: System.Reflection.Assembly::UnsafeLoadFrom\n",
+      "matches": [
+        [
+          {
+            "type": "dn token",
+            "value": 100663357
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Reflection.Assembly::Load"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.AppDomain::Load"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Reflection.Assembly::LoadFile"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Reflection.Assembly::LoadFrom"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "dn token offset",
+                    "value": [
+                      100663357,
+                      13
+                    ]
+                  }
+                ],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Reflection.Assembly::LoadWithPartialName"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Reflection.Assembly::ReflectionOnlyLoad"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Reflection.Assembly::ReflectionOnlyLoadFrom"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "api",
+                    "api": "System.Reflection.Assembly::UnsafeLoadFrom"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    },
+    "contains PDB path": {
+      "meta": {
+        "name": "contains PDB path",
+        "namespace": "executable/pe/pdb",
+        "authors": [
+          "moritz.raabe@mandiant.com"
+        ],
+        "scopes": {
+          "static": "file",
+          "dynamic": "file"
+        },
+        "attack": [],
+        "mbc": [],
+        "references": [],
+        "examples": [
+          "464EF2CA59782CE697BC329713698CCC"
+        ],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: contains PDB path\n    namespace: executable/pe/pdb\n    authors:\n      - moritz.raabe@mandiant.com\n    scopes:\n      static: file\n      dynamic: file\n    examples:\n      - 464EF2CA59782CE697BC329713698CCC  # level32.exe\n  features:\n    - string: /:\\\\.*\\.pdb/\n",
+      "matches": [
+        [
+          {
+            "type": "no address"
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "feature",
+              "feature": {
+                "type": "regex",
+                "regex": "/:\\\\.*\\.pdb/"
+              }
+            },
+            "children": [],
+            "locations": [
+              {
+                "type": "file",
+                "value": 52760
+              }
+            ],
+            "captures": {
+              "E:\\src\\binskim\\bld\\obj\\AnyCPU\\Release\\netcoreapp2.0\\win-x64\\BinSkim.pdb": [
+                {
+                  "type": "file",
+                  "value": 52760
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    },
+    "compiled to the .NET platform": {
+      "meta": {
+        "name": "compiled to the .NET platform",
+        "namespace": "runtime/dotnet",
+        "authors": [
+          "william.ballenthin@mandiant.com"
+        ],
+        "scopes": {
+          "static": "file",
+          "dynamic": "file"
+        },
+        "attack": [],
+        "mbc": [],
+        "references": [],
+        "examples": [
+          "b9f5bd514485fb06da39beff051b9fdc"
+        ],
+        "description": "",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: compiled to the .NET platform\n    namespace: runtime/dotnet\n    authors:\n      - william.ballenthin@mandiant.com\n    scopes:\n      static: file\n      dynamic: file\n    examples:\n      - b9f5bd514485fb06da39beff051b9fdc\n  features:\n    - or:\n      - format: dotnet\n      - import: mscoree._CorExeMain\n      - import: mscoree._corexemain\n      - import: mscoree._CorDllMain\n      - import: mscoree._cordllmain\n",
+      "matches": [
+        [
+          {
+            "type": "no address"
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "format",
+                    "format": "dotnet"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "no address"
+                  }
+                ],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._CorExeMain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._corexemain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._CorDllMain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._cordllmain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    },
+    "mixed mode": {
+      "meta": {
+        "name": "mixed mode",
+        "namespace": "runtime",
+        "authors": [
+          "michael.hunhoff@mandiant.com"
+        ],
+        "scopes": {
+          "static": "file"
+        },
+        "attack": [],
+        "mbc": [],
+        "references": [],
+        "examples": [],
+        "description": "file contains managed and unmanaged (native) code, often seen in .NET",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: mixed mode\n    namespace: runtime\n    authors:\n      - michael.hunhoff@mandiant.com\n    description: file contains managed and unmanaged (native) code, often seen in .NET\n    scopes:\n      static: file\n      dynamic: unsupported  # requires characteristic features\n  features:\n    - or:\n      - characteristic: mixed mode\n",
+      "matches": [
+        [
+          {
+            "type": "no address"
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "characteristic",
+                    "characteristic": "mixed mode"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "no address"
+                  }
+                ],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    },
+    "(internal) .NET file limitation": {
+      "meta": {
+        "name": "(internal) .NET file limitation",
+        "namespace": "internal/limitation/dynamic",
+        "authors": [
+          "@v1bh475u"
+        ],
+        "scopes": {
+          "static": "file",
+          "dynamic": "file"
+        },
+        "attack": [],
+        "mbc": [],
+        "references": [],
+        "examples": [
+          "2f8a79b12a7a989ac7e5f6ec65050036588a92e65aeb6841e08dc228ff0e21b4_min_archive.zip"
+        ],
+        "description": "This dynamic analysis trace describes a .NET file.\n\ncapa rules are not yet tuned for the .NET runtime, \nso its analysis may be incomplete or misleading.\n",
+        "lib": false,
+        "is_subscope_rule": false,
+        "maec": {}
+      },
+      "source": "rule:\n  meta:\n    name: (internal) .NET file limitation\n    namespace: internal/limitation/dynamic\n    authors:\n      - \"@v1bh475u\"\n    description: |\n      This dynamic analysis trace describes a .NET file.\n\n      capa rules are not yet tuned for the .NET runtime, \n      so its analysis may be incomplete or misleading.\n    scopes:\n      static: file\n      dynamic: file\n    examples:\n      - 2f8a79b12a7a989ac7e5f6ec65050036588a92e65aeb6841e08dc228ff0e21b4_min_archive.zip\n  features:\n    - or:\n      - format: dotnet\n      - import: mscoree._CorExeMain\n      - import: mscoree._corexemain\n      - import: mscoree._CorDllMain\n      - import: mscoree._cordllmain\n",
+      "matches": [
+        [
+          {
+            "type": "no address"
+          },
+          {
+            "success": true,
+            "node": {
+              "type": "statement",
+              "statement": {
+                "type": "or"
+              }
+            },
+            "children": [
+              {
+                "success": true,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "format",
+                    "format": "dotnet"
+                  }
+                },
+                "children": [],
+                "locations": [
+                  {
+                    "type": "no address"
+                  }
+                ],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._CorExeMain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._corexemain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._CorDllMain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              },
+              {
+                "success": false,
+                "node": {
+                  "type": "feature",
+                  "feature": {
+                    "type": "import",
+                    "import_": "mscoree._cordllmain"
+                  }
+                },
+                "children": [],
+                "locations": [],
+                "captures": {}
+              }
+            ],
+            "locations": [],
+            "captures": {}
+          }
+        ]
+      ]
+    }
+  }
+}
