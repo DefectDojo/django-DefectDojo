@@ -33,12 +33,19 @@ def get_finding_models_for_deduplication(finding_ids):
         logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
+    # are_locations_duplicates reads the new finding's locations (V3) or endpoints (V2)
+    # once per candidate pair, so the pair loop N+1s unless the right relation is
+    # prefetched here. The V3 prefetch pulls the reference -> Location -> URL subtype
+    # chain that finding_locations() walks. ("endpoints" is the V2 relation —
+    # TODO: delete it after the move to Locations.)
+    location_prefetch = "locations__location__url" if settings.V3_FEATURE_LOCATIONS else "endpoints"
+
     return list(
         Finding.objects.filter(id__in=finding_ids)
         .only(*Finding.DEDUPLICATION_FIELDS)
         .select_related("test", "test__engagement", "test__engagement__product", "test__test_type")
         .prefetch_related(
-            "endpoints",
+            location_prefetch,
             # Prefetch duplicates of each finding to avoid N+1 when set_duplicate iterates
             Prefetch(
                 "original_finding",
@@ -50,7 +57,13 @@ def get_finding_models_for_deduplication(finding_ids):
 
 @app.task
 def do_dedupe_finding_task(new_finding_id, *args, **kwargs):
-    return do_dedupe_finding_task_internal(Finding.objects.get(id=new_finding_id), *args, **kwargs)
+    # Same loader as the batch task: are_locations_duplicates walks locations (V3) /
+    # endpoints (V2) per candidate pair, which N+1s on an unprefetched instance.
+    findings = get_finding_models_for_deduplication([new_finding_id])
+    if not findings:
+        logger.debug(f"no finding found for deduplication with ID: {new_finding_id}")
+        return None
+    return do_dedupe_finding_task_internal(findings[0], *args, **kwargs)
 
 
 @app.task
@@ -249,8 +262,17 @@ def are_urls_equal(url1, url2, fields):
 
 
 def finding_locations(location_refs):
-    """Extract URLs from a list of location references."""
-    return [ref.location.url for ref in location_refs]
+    """
+    Extract URL subtype rows from a list of LocationFindingReferences.
+
+    Only URL locations participate in the endpoint-fields comparison. Non-URL
+    locations (dependency, code) have no `url` reverse row at all, so touching
+    `.url` on them unconditionally raises RelatedObjectDoesNotExist — a finding
+    with a mixed location set would crash the dedupe task.
+    """
+    from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
+    url_type = URL.get_location_type()
+    return [ref.location.url for ref in location_refs if ref.location.location_type == url_type]
 
 
 def are_location_urls_equal(url1, url2, fields):
@@ -266,6 +288,25 @@ def are_location_urls_equal(url1, url2, fields):
     return True
 
 
+def unsaved_url_locations(finding):
+    """
+    URL AbstractLocation objects from finding.unsaved_locations (preview-mode path,
+    where the finding has no PK and therefore no location references yet). The raw
+    list mixes LocationData and AbstractLocation entries, neither of which can go
+    through finding_locations() — clean them into model instances instead. The
+    per-finding memo makes this free when the import pipeline already cleaned them.
+    """
+    from dojo.importers.location_manager import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
+        LocationManager,
+    )
+    from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+    if not getattr(finding, "unsaved_locations", None):
+        return []
+    url_type = URL.get_location_type()
+    return [loc for loc in LocationManager.cleaned_unsaved_locations(finding) if loc.get_location_type() == url_type]
+
+
 def are_locations_duplicates(new_finding, to_duplicate_finding):
     fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
     if len(fields) == 0:
@@ -274,10 +315,8 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
 
     if settings.V3_FEATURE_LOCATIONS:
         # Use unsaved_locations for unsaved findings (preview mode), saved M2M otherwise
-        locs1 = new_finding.locations.all() if new_finding.pk else getattr(new_finding, "unsaved_locations", [])
-        locs2 = to_duplicate_finding.locations.all() if to_duplicate_finding.pk else getattr(to_duplicate_finding, "unsaved_locations", [])
-        list1 = finding_locations(locs1)
-        list2 = finding_locations(locs2)
+        list1 = finding_locations(new_finding.locations.all()) if new_finding.pk else unsaved_url_locations(new_finding)
+        list2 = finding_locations(to_duplicate_finding.locations.all()) if to_duplicate_finding.pk else unsaved_url_locations(to_duplicate_finding)
 
         deduplicationLogger.debug(
             f"Starting deduplication by location fields for finding {new_finding.id} with locations {list1} and finding {to_duplicate_finding.id} with locations {list2}",
