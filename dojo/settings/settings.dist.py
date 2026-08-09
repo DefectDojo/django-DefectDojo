@@ -1362,6 +1362,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "dockerfile_lint Scan": ["title", "line"],
     "Dodgy Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Licensecheck Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "Noir Scan": ["vuln_id_from_tool", "file_path"],
+    "Grant Scan": ["component_name", "component_version", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1784,6 +1786,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "dockerfile_lint Scan": DEDUPE_ALGO_HASH_CODE,
     "Dodgy Scan": DEDUPE_ALGO_HASH_CODE,
     "Licensecheck Scan": DEDUPE_ALGO_HASH_CODE,
+    "Noir Scan": DEDUPE_ALGO_HASH_CODE,
+    "Grant Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
