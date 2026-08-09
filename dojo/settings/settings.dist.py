@@ -1358,6 +1358,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Syft SBOM": ["component_name", "component_version", "vuln_id_from_tool"],
     "ScubaGear Report Scan": ["vuln_id_from_tool", "severity"],
     "capa Scan": ["vuln_id_from_tool", "component_name"],
+    "ScubaGoggles Action Plan": ["vuln_id_from_tool", "severity"],
+    "dockerfile_lint Scan": ["title", "line"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1776,6 +1778,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Syft SBOM": DEDUPE_ALGO_HASH_CODE,
     "ScubaGear Report Scan": DEDUPE_ALGO_HASH_CODE,
     "capa Scan": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGoggles Action Plan": DEDUPE_ALGO_HASH_CODE,
+    "dockerfile_lint Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

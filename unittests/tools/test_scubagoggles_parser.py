@@ -63,3 +63,36 @@ class TestScubaGogglesParser(DojoTestCase):
         self.assertEqual("High", parser._severity("Fail", "Shall"))
         self.assertEqual("Medium", parser._severity("Fail", "Should"))
         self.assertEqual("Low", parser._severity("Warning", "Should"))
+
+
+class TestScubaGogglesActionPlanParser(DojoTestCase):
+
+    """The ActionPlan CSV, which holds only the controls that did not pass."""
+
+    def _findings(self, name):
+        with (get_unit_tests_scans_path("scubagoggles") / name).open(encoding="utf-8") as testfile:
+            return ScubaGogglesParser().get_findings(testfile, Test())
+
+    def test_parse_no_findings(self):
+        self.assertEqual(0, len(self._findings("actionplan_no_findings.csv")))
+
+    def test_parse_one_finding(self):
+        findings = self._findings("actionplan_one_finding.csv")
+        self.assertEqual(1, len(findings))
+        finding = findings[0]
+        self.assertEqual("GWS.CALENDAR.2.1v1", finding.vuln_id_from_tool)
+        self.assertEqual("High", finding.severity)
+        self.assertNotIn("<", finding.title)
+        self.assertIn("**Result:** Fail", finding.description)
+
+    def test_parse_many_findings(self):
+        findings = self._findings("actionplan_many_findings.csv")
+        self.assertEqual(41, len(findings))
+        self.assertEqual({"High"}, {f.severity for f in findings})
+        self.assertEqual(41, len({f.vuln_id_from_tool for f in findings}))
+
+    def test_both_scan_types_are_registered(self):
+        self.assertEqual(
+            ["ScubaGoggles Scan", "ScubaGoggles Action Plan"],
+            ScubaGogglesParser().get_scan_types(),
+        )

@@ -5,7 +5,13 @@ toc_hide: true
 Import CISA ScubaGoggles reports in JSON format. ScubaGoggles assesses a Google Workspace
 tenant against the CISA SCuBA secure configuration baselines.
 
-Run an assessment and import the resulting `ScubaResults_*.json`:
+Two artifacts are supported, each with its own scan type:
+
+- **ScubaGoggles Scan** — the `ScubaResults_*.json`, holding the full pass and fail set.
+- **ScubaGoggles Action Plan** — the `ActionPlan.csv`, holding only the controls that did not
+  pass.
+
+Run an assessment and import either:
 
 ```
 scubagoggles gws -o output
