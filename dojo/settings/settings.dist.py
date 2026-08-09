@@ -1368,6 +1368,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Grype Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Tartufo Scan": ["unique_id_from_tool"],
     "Prospector Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Gixy Scan": ["vuln_id_from_tool", "file_path", "line"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1796,6 +1797,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Grype Scan": DEDUPE_ALGO_HASH_CODE,
     "Tartufo Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Prospector Scan": DEDUPE_ALGO_HASH_CODE,
+    "Gixy Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
