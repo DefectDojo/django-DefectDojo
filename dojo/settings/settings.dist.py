@@ -1346,6 +1346,9 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "kubent Scan": ["vuln_id_from_tool", "component_name"],
     "OpenSSF Scorecard": ["vuln_id_from_tool", "component_name"],
     "uv audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "Ansible Lint Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "ShellCheck Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Fickling Scan": ["vuln_id_from_tool", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1752,6 +1755,9 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "kubent Scan": DEDUPE_ALGO_HASH_CODE,
     "OpenSSF Scorecard": DEDUPE_ALGO_HASH_CODE,
     "uv audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Ansible Lint Scan": DEDUPE_ALGO_HASH_CODE,
+    "ShellCheck Scan": DEDUPE_ALGO_HASH_CODE,
+    "Fickling Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
