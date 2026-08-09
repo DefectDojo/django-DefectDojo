@@ -1369,6 +1369,7 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Tartufo Scan": ["unique_id_from_tool"],
     "Prospector Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Gixy Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Python Taint Scan": ["vuln_id_from_tool", "file_path", "line"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1798,6 +1799,7 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Tartufo Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Prospector Scan": DEDUPE_ALGO_HASH_CODE,
     "Gixy Scan": DEDUPE_ALGO_HASH_CODE,
+    "Python Taint Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
