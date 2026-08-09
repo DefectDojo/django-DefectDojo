@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import re
 
 from dojo.models import Finding
@@ -7,6 +8,9 @@ from dojo.models import Finding
 # ScubaGear writes the requirement text for its HTML report, so the CSV carries the same
 # markup, including the BOD 25-01 and "Automated Check" badges.
 HTML_TAG = re.compile(r"<[^>]+>")
+
+SCAN_TYPE_ACTION_PLAN = "ScubaGear Scan"
+SCAN_TYPE_REPORT = "ScubaGear Report Scan"
 
 
 def strip_html(value):
@@ -26,18 +30,48 @@ class ScubaGearParser:
     """
 
     def get_scan_types(self):
-        return ["ScubaGear Scan"]
+        return [SCAN_TYPE_ACTION_PLAN, SCAN_TYPE_REPORT]
 
     def get_label_for_scan_types(self, scan_type):
         return scan_type
 
     def get_description_for_scan_types(self, scan_type):
-        return "Import the CISA ScubaGear ActionPlan CSV, assessing Microsoft 365 against the SCuBA baselines."
+        if scan_type == SCAN_TYPE_REPORT:
+            return "Import a CISA ScubaGear per-product JSON report, holding the full pass and fail set."
+        return "Import the CISA ScubaGear ActionPlan CSV, holding the controls that did not pass."
 
     def get_findings(self, filename, test):
-        # ScubaGear writes the action plan with a UTF-8 byte order mark.
+        # ScubaGear writes the action plan as UTF-8 with a byte order mark, and the
+        # per-product JSON reports as UTF-16. Both are detected from the mark itself.
         content = filename.read()
-        content = content.decode("utf-8-sig") if isinstance(content, bytes) else content.lstrip("﻿")
+        if isinstance(content, bytes):
+            utf_16 = content[:2] in {b"\xff\xfe", b"\xfe\xff"}
+            content = content.decode("utf-16") if utf_16 else content.decode("utf-8-sig")
+        else:
+            content = content.lstrip("﻿")
+
+        stripped = content.lstrip()
+        if stripped.startswith(("[", "{")):
+            return self._findings_from_report(json.loads(stripped), test)
+        return self._findings_from_action_plan(content, test)
+
+    def _findings_from_report(self, data, test):
+        """The per-product JSON holds every control, passing ones included."""
+        documents = data if isinstance(data, list) else [data]
+        findings = []
+        for document in documents:
+            for group in document.get("Results") or []:
+                for control in group.get("Controls") or []:
+                    control_id = (control.get("Control ID") or "").strip()
+                    if not control_id:
+                        continue
+                    severity = self._severity(control.get("Result"), control.get("Criticality"))
+                    if severity is None:
+                        continue
+                    findings.append(self._to_finding(control, control_id, severity, test))
+        return findings
+
+    def _findings_from_action_plan(self, content, test):
         reader = csv.DictReader(io.StringIO(content), delimiter=",", quotechar='"')
 
         findings = []

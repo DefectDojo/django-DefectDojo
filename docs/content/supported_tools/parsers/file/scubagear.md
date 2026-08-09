@@ -11,9 +11,16 @@ Run an assessment and import the resulting `ActionPlan.csv`:
 Invoke-SCuBA -ProductNames aad, defender, exo, sharepoint, teams
 ```
 
-The action plan holds the controls that did not pass. ScubaGear also writes per-product JSON
-reports, but those are UTF-16 encoded and hold the full pass/fail set; the action plan is the
-artifact intended for remediation tracking.
+Two artifacts are supported, each with its own scan type:
+
+- **ScubaGear Scan** — the `ActionPlan.csv`, holding only the controls that did not pass.
+  Written as UTF-8 with a byte order mark.
+- **ScubaGear Report Scan** — a per-product JSON report from `IndividualReports/`, holding the
+  full pass and fail set. Written as UTF-16; the encoding is detected from the byte order mark,
+  so no conversion is needed before import.
+
+Both are graded identically; the JSON simply carries more, since passing controls are present
+in the source and dropped on import.
 
 ### Severity Mapping
 ScubaGear reports no severity. Each baseline control carries a criticality — `Shall` is

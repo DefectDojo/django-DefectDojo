@@ -1355,6 +1355,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Slither Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Binwalk Scan": ["title", "file_path"],
     "pip-licenses Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "Syft SBOM": ["component_name", "component_version", "vuln_id_from_tool"],
+    "ScubaGear Report Scan": ["vuln_id_from_tool", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1770,6 +1772,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Slither Scan": DEDUPE_ALGO_HASH_CODE,
     "Binwalk Scan": DEDUPE_ALGO_HASH_CODE,
     "pip-licenses Scan": DEDUPE_ALGO_HASH_CODE,
+    "Syft SBOM": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGear Report Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
