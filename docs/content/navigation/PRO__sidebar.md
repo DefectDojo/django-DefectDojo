@@ -20,7 +20,7 @@ Either way, **every page keeps the same URL**. Bookmarks, saved links and anythi
 | --- | --- |
 | **Overview** | Home, My Work, Insights, Reporting, Calendar |
 | **Sensei + AI** | AppSec, CSPM, Threat Modeling, MCP, AI Model Settings |
-| **PSIRT** | Feed Findings, Cases, Advisories, Feeds, Components, Matching Rules, Import SBOM, SLA Policies, PSIRT Settings |
+| **PSIRT** | Triage, Sources & Inventory, Configuration |
 | **Manage** | Attack Surface, Rules Engine, Root Causes, Vulnerability Explorer, Organizations, Assets, Engagements, Tests, Findings, Surveys |
 | **Connect** | Upstream Connectors, Downstream Connectors, Jira, Authorization, Diagnostics, Import |
 | **Settings** | All Settings, plus the seven groups described under [The Settings section](#the-settings-section) |
@@ -45,9 +45,17 @@ The AI capabilities sit together in their own section rather than being spread t
 
 ## PSIRT
 
-Product Security Incident Response has its own section rather than an entry inside Manage. It is a workflow of its own, with its own licence and its own settings, and its nine pages read in the order you work through them: Feed Findings, Cases and Advisories first, then the setup pages that feed them, then the SLA and configuration pages.
+Product Security Incident Response has its own section rather than an entry inside Manage. It is a workflow of its own, with its own licence and its own settings, and its nine pages sit in three groups:
 
-Every entry carries a `BETA` badge, or a `LOCKED` one if your licence does not include the PSIRT Advisory Engine. See [Menu Badges](/navigation/pro__menu_badges/).
+| Group | Pages |
+| --- | --- |
+| **Triage** | Feed Findings, Cases, Advisories |
+| **Sources & Inventory** | Advisory Feeds, Components, Import SBOM, Matching Rules |
+| **Configuration** | SLA Policies, PSIRT Settings |
+
+Triage leads because that is where the work happens: an advisory arrives, you decide whether it affects you, related matches become a case, and what you publish about your own products comes out the far end. Sources & Inventory is what the queue runs on, and the last two pages are configuration rather than workflow.
+
+Each group carries a `BETA` badge, or a `LOCKED` one if your licence does not include the PSIRT Advisory Engine. See [Menu Badges](/navigation/pro__menu_badges/).
 
 ## Manage
 
@@ -63,7 +71,7 @@ Three entries in the previous layout answered the same question, which is where 
 
 Connect answers what is connected to this instance and whether it is working. **Import** now sits at the bottom of it, holding Add Findings, Smart Upload, Unassigned Findings, the Universal Importer and the Universal Parser. These were previously a separate Import section, which split scanning tools across two places depending on whether findings arrived by connector or by upload. It sits last because the connectors are the standing, automatic path, and a manual upload through the browser is the exception.
 
-**Smart Upload** and **Unassigned Findings** can be removed from this group with the **Smart Upload** feature flag, which is on by default. Turning it off hides both entries and changes nothing else; findings already imported through Smart Upload are unaffected. The **Calendar** entry in Overview is controlled separately, by **Enable Calendar** in System Settings.
+**Smart Upload** and **Unassigned Findings** can be removed from this group with the **Smart Upload** feature flag, which is on by default. Turning it off hides both entries and changes nothing else; findings already imported through Smart Upload are unaffected.
 
 ## The Settings section
 
@@ -129,6 +137,18 @@ If you are used to the previous layout:
 | Settings → License Manager / Version Manager / Contact Support | Settings → License & Support |
 
 The group that was named after your license package, **Pro Settings** on a Pro instance and **Enterprise Settings** on an Enterprise one, no longer exists. Its pages are distributed across System, Finding Workflow, Notifications and Operations.
+
+## Turning entries off
+
+Three sidebar entries can be removed from [Feature Flags](/admin/feature_flags/pro__feature_flags/) by an administrator. All three are on by default, and turning one off removes the entry without changing any data behind it.
+
+| Flag | Removes |
+| --- | --- |
+| **Calendar** | Calendar, from Overview |
+| **Smart Upload** | Smart Upload and Unassigned Findings, from Connect > Import |
+| **PSIRT** | the whole PSIRT section |
+
+The Calendar toggle used to be **Enable Calendar** in System Settings. It moved so that the switches which add or remove a menu entry sit together in one place. Your existing choice is carried across on upgrade: an instance that had the calendar switched off keeps it off, and the System Settings checkbox disappears once the reorganized menu is on. Instances still on the previous layout keep using that checkbox.
 
 ## Switching layouts
 
