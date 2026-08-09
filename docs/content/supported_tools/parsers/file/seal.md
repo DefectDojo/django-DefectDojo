@@ -4,8 +4,18 @@ toc_hide: true
 ---
 CSV report of the [Seal Security](https://www.seal.security) CLI.
 
-Seal Security backports security fixes into "sealed" versions of open-source packages,
-so a vulnerable dependency can be remediated without a major-version upgrade.
+Seal Security remediates vulnerable open-source dependencies without upgrading them to a
+new major version. Rather than pointing at the next fixed release, it backports the
+security fix onto the version already in use and publishes the result as a "sealed"
+version of the same package, such as `lodash@4.17.15-sp1` for npm or `requests@2.19.1+sp1`
+for PyPI. Because only the patch content changes, a sealed version is a drop-in
+replacement, which is what makes it useful for dependencies where the fixed release
+carries breaking changes.
+
+Sealed packages are served through registry proxies, so consuming them is a package
+manager configuration change rather than a code change. The CLI scans a project against
+Seal's vulnerability data and reports, per vulnerable package, whether a sealed version
+exists for the exact version in use.
 
 Generate the report with the `--csv` flag:
 
