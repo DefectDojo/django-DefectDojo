@@ -1360,6 +1360,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "capa Scan": ["vuln_id_from_tool", "component_name"],
     "ScubaGoggles Action Plan": ["vuln_id_from_tool", "severity"],
     "dockerfile_lint Scan": ["title", "line"],
+    "Dodgy Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Licensecheck Scan": ["component_name", "component_version", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1780,6 +1782,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "capa Scan": DEDUPE_ALGO_HASH_CODE,
     "ScubaGoggles Action Plan": DEDUPE_ALGO_HASH_CODE,
     "dockerfile_lint Scan": DEDUPE_ALGO_HASH_CODE,
+    "Dodgy Scan": DEDUPE_ALGO_HASH_CODE,
+    "Licensecheck Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
