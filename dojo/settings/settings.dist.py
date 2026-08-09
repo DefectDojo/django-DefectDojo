@@ -1351,6 +1351,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Fickling Scan": ["vuln_id_from_tool", "severity"],
     "Regula Scan": ["vuln_id_from_tool", "component_name", "file_path"],
     "Threat Dragon Scan": ["title", "component_name", "severity"],
+    "Safety Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "Slither Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Binwalk Scan": ["title", "file_path"],
+    "pip-licenses Scan": ["component_name", "component_version", "vuln_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1762,6 +1766,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Fickling Scan": DEDUPE_ALGO_HASH_CODE,
     "Regula Scan": DEDUPE_ALGO_HASH_CODE,
     "Threat Dragon Scan": DEDUPE_ALGO_HASH_CODE,
+    "Safety Scan": DEDUPE_ALGO_HASH_CODE,
+    "Slither Scan": DEDUPE_ALGO_HASH_CODE,
+    "Binwalk Scan": DEDUPE_ALGO_HASH_CODE,
+    "pip-licenses Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
