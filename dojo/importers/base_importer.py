@@ -889,6 +889,20 @@ class BaseImporter(ImporterOptions):
         # Return the finding if all else is good
         return finding
 
+    def persist_new_findings(self, prepared_findings: list[Finding]) -> list[Finding]:
+        """
+        Persist a batch of new findings that have already been fully prepared
+        (scalar overrides applied, hash_code computed) and have no primary key yet.
+
+        Default: an ordinary per-instance save, in the order given. Exists as an
+        override seam so a downstream edition can swap the write strategy (e.g. a
+        bulk insert) without reimplementing the grouping/tagging/location/
+        vulnerability-id processing that runs on the returned, now-saved findings.
+        """
+        for finding in prepared_findings:
+            finding.save_no_options()
+        return prepared_findings
+
     def process_finding_groups(
         self,
         finding: Finding,
