@@ -1,0 +1,34 @@
+{
+  "exceptions": [],
+  "failures": [
+    {
+      "granularity": "ACTION",
+      "reason": "MyPolicy has blacklisted IAM actions: ['iam:AddUserToGroup', 'iam:AttachGroupPolicy', 'iam:AttachRolePolicy', 'iam:AttachUserPolicy', 'iam:CreateAccessKey', 'iam:CreateLoginProfile', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:PutGroupPolicy', 'iam:PutRolePolicy', 'iam:PutUserPolicy', 'iam:SetDefaultPolicyVersion', 'iam:UpdateAssumeRolePolicy', 'iam:UpdateLoginProfile']",
+      "risk_value": "HIGH",
+      "rule": "PrivilegeEscalationRule",
+      "rule_mode": "BLOCKING",
+      "actions": [
+        "iam:AttachGroupPolicy",
+        "iam:AttachRolePolicy",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:AttachUserPolicy",
+        "iam:CreateAccessKey",
+        "iam:AddUserToGroup",
+        "iam:PutUserPolicy",
+        "iam:CreatePolicy",
+        "iam:UpdateLoginProfile",
+        "iam:SetDefaultPolicyVersion",
+        "iam:CreatePolicyVersion",
+        "iam:PutRolePolicy",
+        "iam:PutGroupPolicy",
+        "iam:CreateLoginProfile"
+      ],
+      "resource_ids": [
+        "MyPolicy"
+      ],
+      "resource_types": [
+        "AWS::IAM::Policy"
+      ]
+    }
+  ]
+}

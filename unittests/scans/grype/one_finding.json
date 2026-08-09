@@ -1,0 +1,503 @@
+{
+  "matches": [
+    {
+      "vulnerability": {
+        "id": "GHSA-x84v-xcm2-53pg",
+        "dataSource": "https://github.com/advisories/GHSA-x84v-xcm2-53pg",
+        "namespace": "github:language:python",
+        "severity": "High",
+        "urls": [
+          "https://nvd.nist.gov/vuln/detail/CVE-2018-18074",
+          "https://github.com/requests/requests/issues/4716",
+          "https://github.com/requests/requests/pull/4718",
+          "https://github.com/requests/requests/commit/c45d7c49ea75133e52ab22a8e9e13173938e36ff",
+          "https://access.redhat.com/errata/RHSA-2019:2035",
+          "https://bugs.debian.org/910766",
+          "http://docs.python-requests.org/en/master/community/updates/#release-and-version-history",
+          "http://lists.opensuse.org/opensuse-security-announce/2019-07/msg00024.html",
+          "https://www.oracle.com/security-alerts/cpujul2022.html",
+          "https://github.com/pypa/advisory-database/tree/main/vulns/requests/PYSEC-2018-28.yaml",
+          "https://usn.ubuntu.com/3790-1",
+          "https://usn.ubuntu.com/3790-2"
+        ],
+        "description": "Insufficiently Protected Credentials in Requests",
+        "cvss": [
+          {
+            "type": "Secondary",
+            "version": "3.1",
+            "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+            "metrics": {
+              "baseScore": 7.5,
+              "exploitabilityScore": 3.9,
+              "impactScore": 3.6
+            },
+            "vendorMetadata": {}
+          }
+        ],
+        "epss": [
+          {
+            "cve": "CVE-2018-18074",
+            "epss": 0.07443,
+            "percentile": 0.93861,
+            "date": "2026-08-08"
+          }
+        ],
+        "cwes": [
+          {
+            "cve": "CVE-2018-18074",
+            "cwe": "CWE-522",
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ],
+        "fix": {
+          "versions": [
+            "2.20.0"
+          ],
+          "state": "fixed",
+          "available": [
+            {
+              "version": "2.20.0",
+              "date": "2021-03-30",
+              "kind": "first-observed"
+            }
+          ]
+        },
+        "advisories": [],
+        "risk": 5.58225
+      },
+      "relatedVulnerabilities": [
+        {
+          "id": "CVE-2018-18074",
+          "dataSource": "https://nvd.nist.gov/vuln/detail/CVE-2018-18074",
+          "namespace": "nvd:cpe",
+          "severity": "High",
+          "urls": [
+            "http://docs.python-requests.org/en/master/community/updates/#release-and-version-history",
+            "http://lists.opensuse.org/opensuse-security-announce/2019-07/msg00024.html",
+            "https://access.redhat.com/errata/RHSA-2019:2035",
+            "https://bugs.debian.org/910766",
+            "https://github.com/requests/requests/commit/c45d7c49ea75133e52ab22a8e9e13173938e36ff",
+            "https://github.com/requests/requests/issues/4716",
+            "https://github.com/requests/requests/pull/4718",
+            "https://usn.ubuntu.com/3790-1/",
+            "https://usn.ubuntu.com/3790-2/",
+            "https://www.oracle.com/security-alerts/cpujul2022.html"
+          ],
+          "description": "The Requests package before 2.20.0 for Python sends an HTTP Authorization header to an http URI upon receiving a same-hostname https-to-http redirect, which makes it easier for remote attackers to discover credentials by sniffing the network.",
+          "cvss": [
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "version": "3.1",
+              "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N",
+              "metrics": {
+                "baseScore": 7.5,
+                "exploitabilityScore": 3.9,
+                "impactScore": 3.6
+              },
+              "vendorMetadata": {}
+            },
+            {
+              "source": "nvd@nist.gov",
+              "type": "Primary",
+              "version": "2.0",
+              "vector": "AV:N/AC:L/Au:N/C:P/I:N/A:N",
+              "metrics": {
+                "baseScore": 5,
+                "exploitabilityScore": 10,
+                "impactScore": 2.9
+              },
+              "vendorMetadata": {}
+            }
+          ],
+          "epss": [
+            {
+              "cve": "CVE-2018-18074",
+              "epss": 0.07443,
+              "percentile": 0.93861,
+              "date": "2026-08-08"
+            }
+          ],
+          "cwes": [
+            {
+              "cve": "CVE-2018-18074",
+              "cwe": "CWE-522",
+              "source": "nvd@nist.gov",
+              "type": "Primary"
+            }
+          ]
+        }
+      ],
+      "matchDetails": [
+        {
+          "type": "exact-direct-match",
+          "matcher": "python-matcher",
+          "searchedBy": {
+            "language": "python",
+            "namespace": "github:language:python",
+            "package": {
+              "name": "requests",
+              "version": "2.19.1"
+            }
+          },
+          "found": {
+            "vulnerabilityID": "GHSA-x84v-xcm2-53pg",
+            "versionConstraint": "<=2.19.1 (python)"
+          },
+          "fix": {
+            "suggestedVersion": "2.20.0"
+          }
+        }
+      ],
+      "artifact": {
+        "id": "20f8c937243ae800",
+        "name": "requests",
+        "version": "2.19.1",
+        "type": "python",
+        "locations": [
+          {
+            "path": "/uv.lock",
+            "accessPath": "/uv.lock",
+            "annotations": {
+              "evidence": "primary"
+            }
+          }
+        ],
+        "language": "python",
+        "licenses": [],
+        "cpes": [
+          "cpe:2.3:a:python:requests:2.19.1:*:*:*:*:*:*:*"
+        ],
+        "purl": "pkg:pypi/requests@2.19.1",
+        "upstreams": []
+      }
+    }
+  ],
+  "source": {
+    "type": "directory",
+    "target": "uvproj"
+  },
+  "distro": {
+    "name": "",
+    "version": "",
+    "idLike": null
+  },
+  "descriptor": {
+    "name": "grype",
+    "version": "[not provided]",
+    "configuration": {
+      "output": [
+        "json"
+      ],
+      "file": "",
+      "pretty": false,
+      "distro": "",
+      "add-cpes-if-none": false,
+      "output-template-file": "",
+      "check-for-app-update": true,
+      "only-fixed": false,
+      "only-notfixed": false,
+      "ignore-wontfix": "",
+      "platform": "",
+      "search": {
+        "scope": "squashed",
+        "unindexed-archives": false,
+        "indexed-archives": true
+      },
+      "ignore": [
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "kernel-headers",
+            "version": "",
+            "language": "",
+            "type": "rpm",
+            "location": "",
+            "upstream-name": "kernel"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux(-.*)?-headers-.*",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux.*"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux-libc-dev",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        },
+        {
+          "vulnerability": "",
+          "include-aliases": false,
+          "reason": "",
+          "namespace": "",
+          "fix-state": "",
+          "package": {
+            "name": "linux-kbuild-.*",
+            "version": "",
+            "language": "",
+            "type": "deb",
+            "location": "",
+            "upstream-name": "linux.*"
+          },
+          "vex-status": "",
+          "vex-justification": "",
+          "match-type": "exact-indirect-match"
+        }
+      ],
+      "exclude": [],
+      "externalSources": {
+        "enable": false,
+        "maven": {
+          "searchUpstreamBySha1": true,
+          "baseUrl": "https://search.maven.org/solrsearch/select",
+          "rateLimit": 300000000
+        }
+      },
+      "match": {
+        "java": {
+          "using-cpes": false
+        },
+        "jvm": {
+          "using-cpes": true
+        },
+        "dotnet": {
+          "using-cpes": false
+        },
+        "golang": {
+          "using-cpes": false,
+          "always-use-cpe-for-stdlib": false,
+          "allow-main-module-pseudo-version-comparison": false
+        },
+        "javascript": {
+          "using-cpes": false
+        },
+        "python": {
+          "using-cpes": false
+        },
+        "ruby": {
+          "using-cpes": false
+        },
+        "rust": {
+          "using-cpes": false
+        },
+        "hex": {
+          "using-cpes": false
+        },
+        "stock": {
+          "using-cpes": true
+        },
+        "dpkg": {
+          "using-cpes": false,
+          "missing-epoch-strategy": "zero",
+          "use-cpes-for-eol": false
+        },
+        "rpm": {
+          "using-cpes": false,
+          "missing-epoch-strategy": "auto",
+          "use-cpes-for-eol": false
+        }
+      },
+      "fail-on-severity": "",
+      "registry": {
+        "insecure-skip-tls-verify": false,
+        "insecure-use-http": false,
+        "ca-cert": ""
+      },
+      "show-suppressed": false,
+      "by-cve": false,
+      "SortBy": {
+        "sort-by": "risk"
+      },
+      "name": "",
+      "default-image-pull-source": "",
+      "from": null,
+      "vex-documents": [],
+      "vex-add": [],
+      "match-upstream-kernel-headers": false,
+      "fix-channel": {
+        "redhat-eus": {
+          "apply": "auto",
+          "versions": ">= 8.0"
+        },
+        "ubuntu-esm": {
+          "apply": "auto",
+          "versions": ""
+        }
+      },
+      "timestamp": true,
+      "alerts": {
+        "enable-eol-distro-warnings": true
+      },
+      "db": {
+        "cache-dir": "/Users/greg/Library/Caches/grype/db",
+        "update-url": "https://grype.anchore.io/databases",
+        "ca-cert": "",
+        "auto-update": true,
+        "validate-by-hash-on-start": true,
+        "validate-age": true,
+        "max-allowed-built-age": 432000000000000,
+        "require-update-check": false,
+        "update-available-timeout": 30000000000,
+        "update-download-timeout": 300000000000,
+        "max-update-check-frequency": 7200000000000
+      },
+      "exp": {},
+      "dev": {
+        "db": {
+          "debug": false
+        }
+      }
+    },
+    "db": {
+      "status": {
+        "schemaVersion": "v6.1.9",
+        "from": "https://grype.anchore.io/databases/v6/vulnerability-db_v6.1.9_2026-08-09T00:20:52Z_1786256586.tar.zst?checksum=sha256%3A92f075ed4bbc2e999d6228da116bec13bcb71cf973868b81c78436fc5bb5dfec",
+        "built": "2026-08-09T06:23:06Z",
+        "path": "/Users/greg/Library/Caches/grype/db/6/vulnerability.db",
+        "valid": true
+      },
+      "providers": {
+        "alma": {
+          "captured": "2026-08-09T00:21:04Z",
+          "input": "xxh64:97e59cd10fe08c12"
+        },
+        "alpine": {
+          "captured": "2026-08-09T00:21:24Z",
+          "input": "xxh64:a400a638dbe47fad"
+        },
+        "amazon": {
+          "captured": "2026-08-09T00:21:03Z",
+          "input": "xxh64:465ef254dc2e4943"
+        },
+        "arch": {
+          "captured": "2026-08-09T00:21:01Z",
+          "input": "xxh64:6d71dfd73ee35ae3"
+        },
+        "bitnami": {
+          "captured": "2026-08-09T00:20:58Z",
+          "input": "xxh64:7abf272a69453d58"
+        },
+        "chainguard": {
+          "captured": "2026-08-09T00:21:11Z",
+          "input": "xxh64:f2f1384c8347affd"
+        },
+        "chainguard-libraries": {
+          "captured": "2026-08-09T00:21:14Z",
+          "input": "xxh64:a126b7ba42db30aa"
+        },
+        "debian": {
+          "captured": "2026-08-09T00:21:13Z",
+          "input": "xxh64:a3445b4246034175"
+        },
+        "echo": {
+          "captured": "2026-08-09T00:21:01Z",
+          "input": "xxh64:00eb323b0f04e091"
+        },
+        "eol": {
+          "captured": "2026-08-09T00:20:59Z",
+          "input": "xxh64:41f48b2a039af6dd"
+        },
+        "epss": {
+          "captured": "2026-08-09T00:21:06Z",
+          "input": "xxh64:0405be1b9c09ccb3"
+        },
+        "fedora": {
+          "captured": "2026-08-09T00:21:28Z",
+          "input": "xxh64:c041b0fe2555d9df"
+        },
+        "github": {
+          "captured": "2026-08-09T00:21:14Z",
+          "input": "xxh64:78de9613dbf8fa54"
+        },
+        "govulndb": {
+          "captured": "2026-08-09T00:21:07Z",
+          "input": "xxh64:8c814ffcea3e954c"
+        },
+        "hummingbird": {
+          "captured": "2026-08-09T00:22:54Z",
+          "input": "xxh64:676c8a7b3706f91c"
+        },
+        "kev": {
+          "captured": "2026-08-09T00:20:52Z",
+          "input": "xxh64:6ebd79f441aa49aa"
+        },
+        "mariner": {
+          "captured": "2026-08-09T00:21:02Z",
+          "input": "xxh64:1a4181f37903cbe2"
+        },
+        "minimos": {
+          "captured": "2026-08-09T00:21:18Z",
+          "input": "xxh64:d7aab92461a3bf88"
+        },
+        "nvd": {
+          "captured": "2026-08-09T00:21:56Z",
+          "input": "xxh64:f1b33e59ca987885"
+        },
+        "oracle": {
+          "captured": "2026-08-09T00:21:03Z",
+          "input": "xxh64:838b404fe2960c49"
+        },
+        "photon": {
+          "captured": "2026-08-09T00:21:07Z",
+          "input": "xxh64:ebce8d9311a9f7e7"
+        },
+        "rhel": {
+          "captured": "2026-08-09T00:22:12Z",
+          "input": "xxh64:b203aa378a5aac4b"
+        },
+        "secureos": {
+          "captured": "2026-08-09T00:21:04Z",
+          "input": "xxh64:971197f739f427ef"
+        },
+        "sles": {
+          "captured": "2026-08-09T00:21:41Z",
+          "input": "xxh64:7e3e7389561ceb96"
+        },
+        "ubuntu": {
+          "captured": "2026-08-09T00:22:55Z",
+          "input": "xxh64:1c2851c96935f78b"
+        },
+        "wolfi": {
+          "captured": "2026-08-09T00:21:01Z",
+          "input": "xxh64:59c485f1624768a0"
+        }
+      }
+    },
+    "timestamp": "2026-08-09T15:22:22.330195-06:00"
+  }
+}

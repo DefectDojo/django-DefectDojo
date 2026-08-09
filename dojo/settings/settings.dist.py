@@ -1364,6 +1364,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Licensecheck Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     "Noir Scan": ["vuln_id_from_tool", "file_path"],
     "Grant Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "CFRipper Scan": ["vuln_id_from_tool", "component_name"],
+    "Grype Scan": ["vuln_id_from_tool", "component_name", "component_version"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1788,6 +1790,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Licensecheck Scan": DEDUPE_ALGO_HASH_CODE,
     "Noir Scan": DEDUPE_ALGO_HASH_CODE,
     "Grant Scan": DEDUPE_ALGO_HASH_CODE,
+    "CFRipper Scan": DEDUPE_ALGO_HASH_CODE,
+    "Grype Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
