@@ -1349,6 +1349,8 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Ansible Lint Scan": ["vuln_id_from_tool", "file_path", "line"],
     "ShellCheck Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Fickling Scan": ["vuln_id_from_tool", "severity"],
+    "Regula Scan": ["vuln_id_from_tool", "component_name", "file_path"],
+    "Threat Dragon Scan": ["title", "component_name", "severity"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1758,6 +1760,8 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Ansible Lint Scan": DEDUPE_ALGO_HASH_CODE,
     "ShellCheck Scan": DEDUPE_ALGO_HASH_CODE,
     "Fickling Scan": DEDUPE_ALGO_HASH_CODE,
+    "Regula Scan": DEDUPE_ALGO_HASH_CODE,
+    "Threat Dragon Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
