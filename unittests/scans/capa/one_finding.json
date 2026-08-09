@@ -19,7 +19,7 @@
       "os": "any",
       "extractor": "DnfileFeatureExtractor",
       "rules": [
-        "/private/tmp/claude-501/-Users-greg-Claude/9bb6cebc-0188-4651-852a-5e56e1c61912/scratchpad/samples/capa-rules"
+        "capa-rules"
       ],
       "base_address": {
         "type": "no address"
@@ -924,8 +924,8 @@
         "name": "accept command line arguments",
         "namespace": "host-interaction/cli",
         "authors": [
-          "moritz.raabe@mandiant.com",
-          "anushka.virgaonkar@mandiant.com"
+          "user@example.org",
+          "user@example.org"
         ],
         "scopes": {
           "static": "function",
@@ -964,7 +964,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: accept command line arguments\n    namespace: host-interaction/cli\n    authors:\n      - moritz.raabe@mandiant.com\n      - anushka.virgaonkar@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Execution::Command and Scripting Interpreter [T1059]\n    mbc:\n      - Execution::Command and Scripting Interpreter [E1059]\n    examples:\n      - e5369ac309f1be6d77afeeb3edab0ed8:0x402760\n  features:\n    - or:\n      - api: GetCommandLine\n      - api: CommandLineToArgv\n      - api: System.Environment::GetCommandLineArgs\n",
+      "source": "rule:\n  meta:\n    name: accept command line arguments\n    namespace: host-interaction/cli\n    authors:\n      - user@example.org\n      - user@example.org\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Execution::Command and Scripting Interpreter [T1059]\n    mbc:\n      - Execution::Command and Scripting Interpreter [E1059]\n    examples:\n      - e5369ac309f1be6d77afeeb3edab0ed8:0x402760\n  features:\n    - or:\n      - api: GetCommandLine\n      - api: CommandLineToArgv\n      - api: System.Environment::GetCommandLineArgs\n",
       "matches": [
         [
           {

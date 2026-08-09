@@ -19,7 +19,7 @@
       "os": "any",
       "extractor": "DnfileFeatureExtractor",
       "rules": [
-        "/private/tmp/claude-501/-Users-greg-Claude/9bb6cebc-0188-4651-852a-5e56e1c61912/scratchpad/samples/capa-rules"
+        "capa-rules"
       ],
       "base_address": {
         "type": "no address"
@@ -924,8 +924,8 @@
         "name": "accept command line arguments",
         "namespace": "host-interaction/cli",
         "authors": [
-          "moritz.raabe@mandiant.com",
-          "anushka.virgaonkar@mandiant.com"
+          "user@example.org",
+          "user@example.org"
         ],
         "scopes": {
           "static": "function",
@@ -964,7 +964,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: accept command line arguments\n    namespace: host-interaction/cli\n    authors:\n      - moritz.raabe@mandiant.com\n      - anushka.virgaonkar@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Execution::Command and Scripting Interpreter [T1059]\n    mbc:\n      - Execution::Command and Scripting Interpreter [E1059]\n    examples:\n      - e5369ac309f1be6d77afeeb3edab0ed8:0x402760\n  features:\n    - or:\n      - api: GetCommandLine\n      - api: CommandLineToArgv\n      - api: System.Environment::GetCommandLineArgs\n",
+      "source": "rule:\n  meta:\n    name: accept command line arguments\n    namespace: host-interaction/cli\n    authors:\n      - user@example.org\n      - user@example.org\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Execution::Command and Scripting Interpreter [T1059]\n    mbc:\n      - Execution::Command and Scripting Interpreter [E1059]\n    examples:\n      - e5369ac309f1be6d77afeeb3edab0ed8:0x402760\n  features:\n    - or:\n      - api: GetCommandLine\n      - api: CommandLineToArgv\n      - api: System.Environment::GetCommandLineArgs\n",
       "matches": [
         [
           {
@@ -1148,7 +1148,7 @@
         "name": "check if directory exists",
         "namespace": "host-interaction/file-system/exists",
         "authors": [
-          "michael.hunhoff@mandiant.com"
+          "user@example.org"
         ],
         "scopes": {
           "static": "function",
@@ -1174,7 +1174,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: check if directory exists\n    namespace: host-interaction/file-system/exists\n    authors:\n      - michael.hunhoff@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Discovery::File and Directory Discovery [T1083]\n  features:\n    - or:\n      - api: System.IO.Directory::Exists\n",
+      "source": "rule:\n  meta:\n    name: check if directory exists\n    namespace: host-interaction/file-system/exists\n    authors:\n      - user@example.org\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Discovery::File and Directory Discovery [T1083]\n  features:\n    - or:\n      - api: System.IO.Directory::Exists\n",
       "matches": [
         [
           {
@@ -1223,8 +1223,8 @@
         "name": "manipulate console buffer",
         "namespace": "host-interaction/console",
         "authors": [
-          "william.ballenthin@mandiant.com",
-          "michael.hunhoff@mandiant.com"
+          "user@example.org",
+          "user@example.org"
         ],
         "scopes": {
           "static": "function",
@@ -1254,7 +1254,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: manipulate console buffer\n    namespace: host-interaction/console\n    authors:\n      - william.ballenthin@mandiant.com\n      - michael.hunhoff@mandiant.com\n    scopes:\n      static: function\n      dynamic: span of calls\n    mbc:\n      - Operating System::Console [C0033]\n    references:\n      - https://stackoverflow.com/a/15770935/87207\n    examples:\n      - 3aa7ee4d67f562933bc998f352b1f319:0x705413A0\n  features:\n    - or:\n      - and:\n        - or:\n          - api: kernel32.SetConsoleCursorPosition\n          - api: kernel32.ReadConsoleOutputCharacter\n          - api: kernel32.WriteConsoleOutputCharacter\n          - api: kernel32.WriteConsoleOutput\n          - api: kernel32.WriteConsoleInput\n        - optional:\n          - api: kernel32.GetStdHandle\n          - number: 0xfffffff5 = STD_OUTPUT_HANDLE\n      - api: System.Console::Write\n      - api: System.Console::WriteLine\n",
+      "source": "rule:\n  meta:\n    name: manipulate console buffer\n    namespace: host-interaction/console\n    authors:\n      - user@example.org\n      - user@example.org\n    scopes:\n      static: function\n      dynamic: span of calls\n    mbc:\n      - Operating System::Console [C0033]\n    references:\n      - https://stackoverflow.com/a/15770935/87207\n    examples:\n      - 3aa7ee4d67f562933bc998f352b1f319:0x705413A0\n  features:\n    - or:\n      - and:\n        - or:\n          - api: kernel32.SetConsoleCursorPosition\n          - api: kernel32.ReadConsoleOutputCharacter\n          - api: kernel32.WriteConsoleOutputCharacter\n          - api: kernel32.WriteConsoleOutput\n          - api: kernel32.WriteConsoleInput\n        - optional:\n          - api: kernel32.GetStdHandle\n          - number: 0xfffffff5 = STD_OUTPUT_HANDLE\n      - api: System.Console::Write\n      - api: System.Console::WriteLine\n",
       "matches": [
         [
           {
@@ -1447,7 +1447,7 @@
         "name": "load .NET assembly",
         "namespace": "load-code/dotnet",
         "authors": [
-          "anushka.virgaonkar@mandiant.com"
+          "user@example.org"
         ],
         "scopes": {
           "static": "function",
@@ -1473,7 +1473,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: load .NET assembly\n    namespace: load-code/dotnet\n    authors:\n      - anushka.virgaonkar@mandiant.com\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Defense Evasion::Reflective Code Loading [T1620]\n  features:\n    - or:\n      - api: System.Reflection.Assembly::Load\n      - api: System.AppDomain::Load\n      - api: System.Reflection.Assembly::LoadFile\n      - api: System.Reflection.Assembly::LoadFrom\n      - api: System.Reflection.Assembly::LoadWithPartialName\n      - api: System.Reflection.Assembly::ReflectionOnlyLoad\n      - api: System.Reflection.Assembly::ReflectionOnlyLoadFrom\n      - api: System.Reflection.Assembly::UnsafeLoadFrom\n",
+      "source": "rule:\n  meta:\n    name: load .NET assembly\n    namespace: load-code/dotnet\n    authors:\n      - user@example.org\n    scopes:\n      static: function\n      dynamic: call\n    att&ck:\n      - Defense Evasion::Reflective Code Loading [T1620]\n  features:\n    - or:\n      - api: System.Reflection.Assembly::Load\n      - api: System.AppDomain::Load\n      - api: System.Reflection.Assembly::LoadFile\n      - api: System.Reflection.Assembly::LoadFrom\n      - api: System.Reflection.Assembly::LoadWithPartialName\n      - api: System.Reflection.Assembly::ReflectionOnlyLoad\n      - api: System.Reflection.Assembly::ReflectionOnlyLoadFrom\n      - api: System.Reflection.Assembly::UnsafeLoadFrom\n",
       "matches": [
         [
           {
@@ -1613,7 +1613,7 @@
         "name": "contains PDB path",
         "namespace": "executable/pe/pdb",
         "authors": [
-          "moritz.raabe@mandiant.com"
+          "user@example.org"
         ],
         "scopes": {
           "static": "file",
@@ -1630,7 +1630,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: contains PDB path\n    namespace: executable/pe/pdb\n    authors:\n      - moritz.raabe@mandiant.com\n    scopes:\n      static: file\n      dynamic: file\n    examples:\n      - 464EF2CA59782CE697BC329713698CCC  # level32.exe\n  features:\n    - string: /:\\\\.*\\.pdb/\n",
+      "source": "rule:\n  meta:\n    name: contains PDB path\n    namespace: executable/pe/pdb\n    authors:\n      - user@example.org\n    scopes:\n      static: file\n      dynamic: file\n    examples:\n      - 464EF2CA59782CE697BC329713698CCC  # level32.exe\n  features:\n    - string: /:\\\\.*\\.pdb/\n",
       "matches": [
         [
           {
@@ -1669,7 +1669,7 @@
         "name": "compiled to the .NET platform",
         "namespace": "runtime/dotnet",
         "authors": [
-          "william.ballenthin@mandiant.com"
+          "user@example.org"
         ],
         "scopes": {
           "static": "file",
@@ -1686,7 +1686,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: compiled to the .NET platform\n    namespace: runtime/dotnet\n    authors:\n      - william.ballenthin@mandiant.com\n    scopes:\n      static: file\n      dynamic: file\n    examples:\n      - b9f5bd514485fb06da39beff051b9fdc\n  features:\n    - or:\n      - format: dotnet\n      - import: mscoree._CorExeMain\n      - import: mscoree._corexemain\n      - import: mscoree._CorDllMain\n      - import: mscoree._cordllmain\n",
+      "source": "rule:\n  meta:\n    name: compiled to the .NET platform\n    namespace: runtime/dotnet\n    authors:\n      - user@example.org\n    scopes:\n      static: file\n      dynamic: file\n    examples:\n      - b9f5bd514485fb06da39beff051b9fdc\n  features:\n    - or:\n      - format: dotnet\n      - import: mscoree._CorExeMain\n      - import: mscoree._corexemain\n      - import: mscoree._CorDllMain\n      - import: mscoree._cordllmain\n",
       "matches": [
         [
           {
@@ -1782,7 +1782,7 @@
         "name": "mixed mode",
         "namespace": "runtime",
         "authors": [
-          "michael.hunhoff@mandiant.com"
+          "user@example.org"
         ],
         "scopes": {
           "static": "file"
@@ -1796,7 +1796,7 @@
         "is_subscope_rule": false,
         "maec": {}
       },
-      "source": "rule:\n  meta:\n    name: mixed mode\n    namespace: runtime\n    authors:\n      - michael.hunhoff@mandiant.com\n    description: file contains managed and unmanaged (native) code, often seen in .NET\n    scopes:\n      static: file\n      dynamic: unsupported  # requires characteristic features\n  features:\n    - or:\n      - characteristic: mixed mode\n",
+      "source": "rule:\n  meta:\n    name: mixed mode\n    namespace: runtime\n    authors:\n      - user@example.org\n    description: file contains managed and unmanaged (native) code, often seen in .NET\n    scopes:\n      static: file\n      dynamic: unsupported  # requires characteristic features\n  features:\n    - or:\n      - characteristic: mixed mode\n",
       "matches": [
         [
           {

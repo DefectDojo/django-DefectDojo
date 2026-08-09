@@ -19,7 +19,7 @@
       "os": "any",
       "extractor": "DnfileFeatureExtractor",
       "rules": [
-        "/private/tmp/claude-501/-Users-greg-Claude/9bb6cebc-0188-4651-852a-5e56e1c61912/scratchpad/samples/capa-rules"
+        "capa-rules"
       ],
       "base_address": {
         "type": "no address"

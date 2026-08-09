@@ -1365,11 +1365,11 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Noir Scan": ["vuln_id_from_tool", "file_path"],
     "Grant Scan": ["component_name", "component_version", "vuln_id_from_tool"],
     "CFRipper Scan": ["vuln_id_from_tool", "component_name"],
-    "Grype Scan": ["vuln_id_from_tool", "component_name", "component_version"],
     "Tartufo Scan": ["unique_id_from_tool"],
     "Prospector Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Gixy Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Python Taint Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Ruff Scan": ["vuln_id_from_tool", "file_path", "line"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1795,11 +1795,11 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Noir Scan": DEDUPE_ALGO_HASH_CODE,
     "Grant Scan": DEDUPE_ALGO_HASH_CODE,
     "CFRipper Scan": DEDUPE_ALGO_HASH_CODE,
-    "Grype Scan": DEDUPE_ALGO_HASH_CODE,
     "Tartufo Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Prospector Scan": DEDUPE_ALGO_HASH_CODE,
     "Gixy Scan": DEDUPE_ALGO_HASH_CODE,
     "Python Taint Scan": DEDUPE_ALGO_HASH_CODE,
+    "Ruff Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
