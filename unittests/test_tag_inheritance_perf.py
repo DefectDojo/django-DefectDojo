@@ -630,9 +630,16 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # relation (1 query). That cost is per post-processing batch — one loader
     # call per import — and is what removes the per-candidate-pair location
     # queries in are_locations_duplicates, so it doesn't scale with findings.
+    # -1 on both reimport-with-new paths: DefaultReImporter now queues a matching
+    # batch's new findings in _pending_new_findings and persists/post-processes them
+    # together via _drain_pending_new_findings once the batch's matching loop finishes,
+    # instead of saving each one inline as soon as it fails to match (see
+    # process_finding_that_was_not_matched and _drain_pending_new_findings). Reimport-
+    # no-change is unaffected because it creates no new findings to defer. This and the
+    # +2 above are independent and both apply, so reimport-with-new-V3 nets +1 (193 -> 194).
     EXPECTED_ZAP_IMPORT_V2 = 301
     EXPECTED_ZAP_IMPORT_V3 = 327
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 94
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 195
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 165
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 194

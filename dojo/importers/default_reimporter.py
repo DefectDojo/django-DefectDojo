@@ -424,6 +424,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 # Determine how to proceed based on whether matches were found or not
                 if matched_findings:
                     existing_finding = matched_findings[0]
+                    if existing_finding.pk is None:
+                        # existing_finding is a same-report duplicate this same matching
+                        # batch queued earlier (add_new_finding_to_candidates) and hasn't
+                        # drained yet. Persist and post-process it now -- process_matched_finding
+                        # and finding_post_processing below both require a real primary key.
+                        self._finalize_specific_pending_new_finding(
+                            existing_finding,
+                            batch_findings_to_dispatch,
+                            batch_findings,
+                            new_findings_in_batch,
+                            findings_with_parser_tags,
+                        )
                     finding, force_continue = self.process_matched_finding(
                         unsaved_finding,
                         existing_finding,
@@ -545,6 +557,72 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
 
+    def _finalize_pending_new_finding(
+        self,
+        finding: Finding,
+        unsaved_finding: Finding,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+        *,
+        finding_will_be_grouped: bool,
+    ) -> None:
+        """
+        Run one now-persisted new finding's post-processing and queue it for dispatch.
+
+        `finding` must already have a primary key (persist_new_findings() has run on it).
+        Shared by _drain_pending_new_findings (the normal per-matching-batch case) and
+        _finalize_specific_pending_new_finding (the on-demand case: a later finding in
+        this report just matched against this one while it was still pending).
+        """
+        self.new_items.append(finding)
+        new_findings_in_batch.append(finding)
+        finding = self.finding_post_processing(
+            finding,
+            unsaved_finding,
+            is_matched_finding=False,
+            tag_accumulator=findings_with_parser_tags,
+        )
+        push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
+        batch_findings_to_dispatch.append((finding, push_to_jira))
+        batch_findings.append(finding)
+
+    def _finalize_specific_pending_new_finding(
+        self,
+        existing_finding: Finding,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+    ) -> None:
+        """
+        Persist and post-process one specific still-pending new finding immediately,
+        out of its normal per-matching-batch drain order.
+
+        Called when a later finding in this report matches `existing_finding` while it
+        is still sitting in `_pending_new_findings` (a same-report duplicate queued by
+        add_new_finding_to_candidates earlier in this same matching batch, per issue
+        #3958): process_matched_finding and finding_post_processing both need a real
+        primary key for `existing_finding` right now, not whenever this batch happens to
+        drain -- see process_matched_active_finding's `.save_no_options()`/`.notes.add()`
+        calls and finding_post_processing's CWE/vulnerability-id reconciliation.
+        """
+        for index, (finding, unsaved_finding, finding_will_be_grouped) in enumerate(self._pending_new_findings):
+            if finding is existing_finding:
+                del self._pending_new_findings[index]
+                (saved_finding,) = self.persist_new_findings([finding])
+                self._finalize_pending_new_finding(
+                    saved_finding,
+                    unsaved_finding,
+                    batch_findings_to_dispatch,
+                    batch_findings,
+                    new_findings_in_batch,
+                    findings_with_parser_tags,
+                    finding_will_be_grouped=finding_will_be_grouped,
+                )
+                return
+
     def _drain_pending_new_findings(
         self,
         batch_findings_to_dispatch: list[tuple[Finding, bool]],
@@ -564,6 +642,10 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         file attachment) cannot run on an unsaved instance at all -- see
         process_finding_that_was_not_matched() and dojo/importers/base_importer.py's
         process_files()/reconcile_cwes() for what would break.
+
+        A finding matched against earlier in this same batch (see
+        _finalize_specific_pending_new_finding) is already gone from
+        `_pending_new_findings` by the time this runs.
         """
         if not self._pending_new_findings:
             return
@@ -571,18 +653,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         prepared_findings = [finding for finding, _unsaved_finding, _grouped in pending]
         saved_findings = self.persist_new_findings(prepared_findings)
         for (_finding, unsaved_finding, finding_will_be_grouped), saved_finding in zip(pending, saved_findings, strict=True):
-            finding = saved_finding
-            self.new_items.append(finding)
-            new_findings_in_batch.append(finding)
-            finding = self.finding_post_processing(
-                finding,
+            self._finalize_pending_new_finding(
+                saved_finding,
                 unsaved_finding,
-                is_matched_finding=False,
-                tag_accumulator=findings_with_parser_tags,
+                batch_findings_to_dispatch,
+                batch_findings,
+                new_findings_in_batch,
+                findings_with_parser_tags,
+                finding_will_be_grouped=finding_will_be_grouped,
             )
-            push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
-            batch_findings_to_dispatch.append((finding, push_to_jira))
-            batch_findings.append(finding)
 
     def _flush_post_processing_batch(
         self,
