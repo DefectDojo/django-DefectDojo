@@ -7,21 +7,22 @@ aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar groups every page in the product into five sections. Which layout you see depends on when your instance was created:
+The DefectDojo Pro sidebar groups every page in the product into six sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit below them. Which layout you see depends on when your instance was created:
 
 - **New installations** open on the reorganized layout described below.
 - **Existing installations** keep the previous layout until an administrator turns on **Menu 2.0** (see [Switching layouts](#switching-layouts)).
 
 Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
 
-## The five sections
+## The six sections
 
 | Section | What it holds |
 | --- | --- |
 | **Overview** | Home, My Work, Insights, Reporting, Calendar |
 | **Sensei + AI** | AppSec, CSPM, Threat Modeling, MCP, AI Model Settings |
-| **Manage** | Organizations, Assets, Engagements, Tests, Findings, Inventory, PSIRT, Rules Engine, Surveys |
-| **Connect** | Import, Upstream Connectors, Downstream Connectors, Jira, Authorization, Diagnostics |
+| **PSIRT** | Feed Findings, Cases, Advisories, Feeds, Components, Matching Rules, Import SBOM, SLA Policies, PSIRT Settings |
+| **Manage** | Attack Surface, Rules Engine, Root Causes, Vulnerability Explorer, Organizations, Assets, Engagements, Tests, Findings, Surveys |
+| **Connect** | Upstream Connectors, Downstream Connectors, Jira, Authorization, Diagnostics, Import |
 | **Settings** | All Settings, plus the seven groups described under [The Settings section](#the-settings-section) |
 
 You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
@@ -30,7 +31,7 @@ Three conventions run through the whole menu:
 
 - **There are no separate "New" entries.** Each list page has a **New** button that opens the create form, so the menu carries one entry per catalog instead of two. If your account can create a record but not list them, the menu entry takes you straight to the create form.
 - **Nothing nests more than one level below a section.** Reaching a page is at most section, group, page.
-- **A feature occupies one entry, not one per screen.** PSIRT is a single entry holding its nine pages rather than nine entries in a row, and the same applies to Inventory and the Rules Engine.
+- **A feature occupies one entry, not one per screen.** Attack Surface and the Rules Engine each hold their pages under a single entry instead of spreading them across the menu.
 
 ## Sensei + AI
 
@@ -42,17 +43,27 @@ The AI capabilities sit together in their own section rather than being spread t
 
 **Threat Modeling**, **MCP** and **AI Model Settings** are unchanged apart from where they live. AI Model Settings appears only on on-premise instances, because DefectDojo manages the model credentials on Cloud.
 
+## PSIRT
+
+Product Security Incident Response has its own section rather than an entry inside Manage. It is a workflow of its own, with its own licence and its own settings, and its nine pages read in the order you work through them: Feed Findings, Cases and Advisories first, then the setup pages that feed them, then the SLA and configuration pages.
+
+Every entry carries a `BETA` badge, or a `LOCKED` one if your licence does not include the PSIRT Advisory Engine. See [Menu Badges](/navigation/pro__menu_badges/).
+
 ## Manage
 
-Four entries in the previous layout answered the same question, which is where a finding lives. **Inventory** now holds them in one place: Components and Root Causes, plus either the endpoint pages or the location pages depending on whether your instance uses Locations.
+Manage leads with the views people open to find work, and keeps the record catalogs below them. **Attack Surface**, the **Rules Engine**, **Root Causes** and the **Vulnerability Explorer** come first; Organizations, Assets, Engagements, Tests and Findings follow. That ordering is deliberate: the Organization to Finding chain is how DefectDojo stores your data, but it is not how most people navigate to the work in front of them.
 
-**Findings** absorbs the pages that describe a finding's state rather than a separate kind of record, so Risk Acceptances and the Vulnerability Explorer are listed there.
+Three entries in the previous layout answered the same question, which is where a finding lives. **Attack Surface** now holds them in one place: Components, plus either the endpoint pages or the location pages depending on whether your instance uses Locations.
+
+**Findings** absorbs the pages that describe a finding's state rather than a separate kind of record, so Risk Acceptances is listed there. The Vulnerability Explorer stays at the top level, because it is somewhere you start rather than a view of a catalog.
 
 **Rules Engine** is one entry covering both engines. When both are turned on, the classic engine's pages appear beneath the Rules Engine 2.0 pages and carry a `LEGACY` badge linking to the conversion guide. When only one engine is on, only its pages are listed, and no badge appears.
 
 ## Connect
 
-Connect answers what is connected to this instance and whether it is working. **Import** now sits at the top of it, holding Add Findings, Smart Upload, Unassigned Findings, the Universal Importer and the Universal Parser. These were previously a separate Import section, which split scanning tools across two places depending on whether findings arrived by connector or by upload.
+Connect answers what is connected to this instance and whether it is working. **Import** now sits at the bottom of it, holding Add Findings, Smart Upload, Unassigned Findings, the Universal Importer and the Universal Parser. These were previously a separate Import section, which split scanning tools across two places depending on whether findings arrived by connector or by upload. It sits last because the connectors are the standing, automatic path, and a manual upload through the browser is the exception.
+
+**Smart Upload** and **Unassigned Findings** can be removed from this group with the **Smart Upload** feature flag, which is on by default. Turning it off hides both entries and changes nothing else; findings already imported through Smart Upload are unaffected. The **Calendar** entry in Overview is controlled separately, by **Enable Calendar** in System Settings.
 
 ## The Settings section
 
@@ -83,15 +94,15 @@ If you are used to the previous layout:
 | Dashboards | Overview |
 | Dashboards → Sensei | Sensei + AI → AppSec |
 | Dashboards → Threat Modeling / MCP / AI Model Settings | Sensei + AI |
-| Dashboards → PSIRT Feeds, and the eight other PSIRT entries | Manage → PSIRT |
+| Dashboards → PSIRT Feeds, and the eight other PSIRT entries | The PSIRT section |
 | Dashboards → Metrics | Overview → Insights |
 | Dashboards → Reporting → Report Templates → All / New | Overview → Reporting → Report Templates |
-| Import → *(whole section)* | Connect → Import |
+| Import → *(whole section)* | Connect → Import *(last entry)* |
 | Import → Smart Upload → Add Findings | Connect → Import → Smart Upload |
 | Connect → Upstream / Downstream | Connect → Upstream Connectors / Downstream Connectors |
-| Manage → Endpoints / Locations / Components / Root Causes | Manage → Inventory |
+| Manage → Endpoints / Locations / Components | Manage → Attack Surface |
 | Manage → Risk Acceptances | Manage → Findings → Risk Acceptances |
-| Manage → Vulnerability Explorer | Manage → Findings → Vulnerability Explorer |
+| Manage → Root Causes / Vulnerability Explorer | Manage → *(unchanged, now near the top)* |
 | Manage → Rules Engine and Rules Engine 2.0 | Manage → Rules Engine |
 | Manage → *(any)* → New *(record)* | The **New** button on the matching list page |
 | Settings → *(top level)* → Feature Flags | Settings → System → Feature Flags |
