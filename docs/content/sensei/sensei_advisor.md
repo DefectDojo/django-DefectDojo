@@ -19,8 +19,14 @@ The first release covers three areas:
   the tools that overlap and proposes one shared field list per group.
 - **Deduplication hygiene.** Deterministic checks (no AI involved) that surface configuration
   that quietly breaks deduplication: a field list that silently falls back to the legacy hash,
-  a dead entry for a tool nothing produces, a field that cannot be declared. These appear as
-  informational cards.
+  a dead entry for a tool nothing produces, a field that cannot be declared. Two of these
+  carry a one-click fix, because they have exactly one correct remediation: a **dead entry**
+  can be removed (nothing produces the tool, so no finding's hash changes), and
+  **undeclarable fields** can be pruned so the rest of the configured list takes effect
+  (this rehashes the affected tool's findings). Both fixes capture the previous
+  configuration and can be reverted in one step, and both require the same permission as
+  editing the deduplication settings by hand. Everything else appears as an informational
+  card.
 - **Prioritization engine.** Given how your findings are distributed across the risk bands and
   which scoring inputs your data actually populates, the Advisor proposes a tuned engine
   configuration.
