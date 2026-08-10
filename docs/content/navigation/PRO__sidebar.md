@@ -7,22 +7,21 @@ aliases:
   - /navigation/pro__settings_menu/
 ---
 
-The DefectDojo Pro sidebar groups every page in the product into six sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit below them. Which layout you see depends on when your instance was created:
+The DefectDojo Pro sidebar groups every page in the product into five sections, ordered by how the product is used rather than by how its data is structured. The views you open to find work come first; the record catalogs you drill into sit behind them. Which layout you see depends on when your instance was created:
 
 - **New installations** open on the reorganized layout described below.
 - **Existing installations** keep the previous layout until an administrator turns on **Menu 2.0** (see [Switching layouts](#switching-layouts)).
 
 Either way, **every page keeps the same URL**. Bookmarks, saved links and anything in your own runbooks continue to work regardless of which layout is active.
 
-## The six sections
+## The five sections
 
 | Section | What it holds |
 | --- | --- |
-| **Overview** | Home, My Work, Insights, Reporting, Calendar |
+| **Overview** | Dashboards, Insights, My Work, Reporting, Calendar |
 | **Sensei + AI** | AppSec, CSPM, Threat Modeling, MCP, AI Model Settings |
-| **PSIRT** | Triage, Sources & Inventory, Configuration |
-| **Manage** | Attack Surface, Rules Engine, Root Causes, Vulnerability Explorer, Organizations, Assets, Engagements, Tests, Findings, Surveys |
-| **Connect** | Upstream Connectors, Downstream Connectors, Jira, Authorization, Diagnostics, Import |
+| **Connect** | Upstream, Downstream, Jira, Authorization, Diagnostics, Import |
+| **Act** | Triage Engine, Vulnerability Explorer, Root Causes, Risk Acceptances, PSIRT, Explore |
 | **Settings** | All Settings, plus the seven groups described under [The Settings section](#the-settings-section) |
 
 You only ever see the entries your account has permission to open, and a group disappears entirely when none of its pages are available to you.
@@ -31,7 +30,8 @@ Three conventions run through the whole menu:
 
 - **There are no separate "New" entries.** Each list page has a **New** button that opens the create form, so the menu carries one entry per catalog instead of two. If your account can create a record but not list them, the menu entry takes you straight to the create form.
 - **Nothing nests more than one level below a section.** Reaching a page is at most section, group, page.
-- **A feature occupies one entry, not one per screen.** Attack Surface and the Rules Engine each hold their pages under a single entry instead of spreading them across the menu.
+- **A feature occupies one entry, not one per screen.** PSIRT's nine pages, the Triage Engine's four and the record catalogs all sit behind a single entry each, instead of spreading across the menu.
+- **An entry is not repeated inside itself.** Where a group already names the thing, its entries do not name it again: **Findings** holds Active, Mitigated and All rather than "All Findings", and **Attack Surface** holds Endpoints and Hosts rather than "All Endpoints".
 
 ## Sensei + AI
 
@@ -43,33 +43,39 @@ The AI capabilities sit together in their own section rather than being spread t
 
 **Threat Modeling**, **MCP** and **AI Model Settings** are unchanged apart from where they live. AI Model Settings appears only on on-premise instances, because DefectDojo manages the model credentials on Cloud.
 
-## PSIRT
+## Act
 
-Product Security Incident Response has its own section rather than an entry inside Manage. It is a workflow of its own, with its own licence and its own settings, and its nine pages sit in three groups:
+Act holds the work: the things you open to decide what matters, and the records behind them. The **Triage Engine**, the **Vulnerability Explorer**, **Root Causes**, **Risk Acceptances** and **PSIRT** come first, and the record catalogs sit behind a single **Explore** entry. That ordering is deliberate: the Organization to Finding chain is how DefectDojo stores your data, but it is not how most people navigate to the work in front of them.
+
+### Triage Engine
+
+One entry covering both rules engines, named for what it does rather than how it does it. It holds Rules, Runs and Deliveries. When both engines are turned on, the classic engine appears as **Classic Rules** with a `LEGACY` badge linking to the conversion guide; when only one is on, only its pages are listed and no badge appears.
+
+### Risk Acceptances
+
+A top-level entry rather than a page inside Findings. A risk acceptance is a decision with an owner, an expiry and an approval trail, so it is a record in its own right. **Risk Accepted**, inside Findings, is the separate thing: the state a finding is in once an acceptance covers it.
+
+### PSIRT
+
+Product Security Incident Response, with its nine pages in three groups, ordered the way the work is done:
 
 | Group | Pages |
 | --- | --- |
+| **Sources & Inventory** | Import SBOM, Advisory Feeds, Components, Matching Rules |
 | **Triage** | Feed Findings, Cases, Advisories |
-| **Sources & Inventory** | Advisory Feeds, Components, Import SBOM, Matching Rules |
 | **Configuration** | SLA Policies, PSIRT Settings |
 
-Triage leads because that is where the work happens: an advisory arrives, you decide whether it affects you, related matches become a case, and what you publish about your own products comes out the far end. Sources & Inventory is what the queue runs on, and the last two pages are configuration rather than workflow.
+Setup leads because nothing reaches the triage queue until there is an inventory to match against: import an SBOM, choose the publishers to poll, look at what came in, then tune matching for advisories that publish nothing machine-readable to compare. The entry carries a `BETA` badge, or a `LOCKED` one if your licence does not include the PSIRT Advisory Engine. See [Menu Badges](/navigation/pro__menu_badges/).
 
-Each group carries a `BETA` badge, or a `LOCKED` one if your licence does not include the PSIRT Advisory Engine. See [Menu Badges](/navigation/pro__menu_badges/).
+### Explore
 
-## Manage
+The record catalogs, behind one entry: **Attack Surface**, Organizations, Assets, Engagements, Tests, Findings and Surveys.
 
-Manage leads with the views people open to find work, and keeps the record catalogs below them. **Attack Surface**, the **Rules Engine**, **Root Causes** and the **Vulnerability Explorer** come first; Organizations, Assets, Engagements, Tests and Findings follow. That ordering is deliberate: the Organization to Finding chain is how DefectDojo stores your data, but it is not how most people navigate to the work in front of them.
-
-Three entries in the previous layout answered the same question, which is where a finding lives. **Attack Surface** now holds them in one place: Components, plus either the endpoint pages or the location pages depending on whether your instance uses Locations.
-
-**Findings** absorbs the pages that describe a finding's state rather than a separate kind of record, so Risk Acceptances is listed there. The Vulnerability Explorer stays at the top level, because it is somewhere you start rather than a view of a catalog.
-
-**Rules Engine** is one entry covering both engines. When both are turned on, the classic engine's pages appear beneath the Rules Engine 2.0 pages and carry a `LEGACY` badge linking to the conversion guide. When only one engine is on, only its pages are listed, and no badge appears.
+**Attack Surface** gathers the three entries that used to answer the same question, which is where a finding lives. It holds Components, plus either the endpoint pages or the location pages depending on whether your instance uses Locations.
 
 ## Connect
 
-Connect answers what is connected to this instance and whether it is working. **Import** now sits at the bottom of it, holding Add Findings, Smart Upload, Unassigned Findings, the Universal Importer and the Universal Parser. These were previously a separate Import section, which split scanning tools across two places depending on whether findings arrived by connector or by upload. It sits last because the connectors are the standing, automatic path, and a manual upload through the browser is the exception.
+Connect answers what is connected to this instance and whether it is working. **Upstream** and **Downstream** are the connectors; **Import** now sits at the bottom, holding Add Findings, Smart Upload, Unassigned Findings, the Universal Importer and the Universal Parser. These were previously a separate Import section, which split scanning tools across two places depending on whether findings arrived by connector or by upload. It sits last because the connectors are the standing, automatic path, and a manual upload through the browser is the exception.
 
 **Smart Upload** and **Unassigned Findings** can be removed from this group with the **Smart Upload** feature flag, which is on by default. Turning it off hides both entries and changes nothing else; findings already imported through Smart Upload are unaffected.
 
@@ -107,12 +113,14 @@ If you are used to the previous layout:
 | Dashboards → Reporting → Report Templates → All / New | Overview → Reporting → Report Templates |
 | Import → *(whole section)* | Connect → Import *(last entry)* |
 | Import → Smart Upload → Add Findings | Connect → Import → Smart Upload |
-| Connect → Upstream / Downstream | Connect → Upstream Connectors / Downstream Connectors |
-| Manage → Endpoints / Locations / Components | Manage → Attack Surface |
-| Manage → Risk Acceptances | Manage → Findings → Risk Acceptances |
-| Manage → Root Causes / Vulnerability Explorer | Manage → *(unchanged, now near the top)* |
-| Manage → Rules Engine and Rules Engine 2.0 | Manage → Rules Engine |
+| Manage | Act |
+| Manage → Endpoints / Locations / Components | Act → Explore → Attack Surface |
+| Manage → Organizations / Assets / Engagements / Tests / Findings / Surveys | Act → Explore |
+| Manage → Risk Acceptances | Act → Risk Acceptances |
+| Manage → Root Causes / Vulnerability Explorer | Act *(unchanged, now near the top)* |
+| Manage → Rules Engine and Rules Engine 2.0 | Act → Triage Engine |
 | Manage → *(any)* → New *(record)* | The **New** button on the matching list page |
+| Dashboards → Home | Overview → Dashboards *(when Dashboards 2.0 is on)* |
 | Settings → *(top level)* → Feature Flags | Settings → System → Feature Flags |
 | Settings → Pro Settings → System Settings | Settings → System → System Settings |
 | Settings → Pro Settings → Appearance | Settings → System → Appearance |
