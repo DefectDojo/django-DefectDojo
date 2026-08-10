@@ -1,7 +1,9 @@
+from django.db import models
 from django.utils import timezone
 from rest_framework import serializers
 
 from dojo.note_type.api.serializer import NoteTypeSerializer
+from dojo.notes.helper import visible_notes
 from dojo.notes.models import NoteHistory, Notes
 from dojo.user.api.serializer import UserStubSerializer
 
@@ -13,6 +15,16 @@ class NoteHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = NoteHistory
         fields = "__all__"
+
+
+class VisibleNotesSerializer(serializers.ListSerializer):
+
+    """Serialize only the notes the requester may see: non-private, or their own."""
+
+    def to_representation(self, data):
+        notes = data.all() if isinstance(data, models.Manager) else data
+        user = getattr(self.context.get("request"), "user", None)
+        return super().to_representation(visible_notes(notes, user))
 
 
 class NoteSerializer(serializers.ModelSerializer):
@@ -39,3 +51,4 @@ class NoteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Notes
         fields = "__all__"
+        list_serializer_class = VisibleNotesSerializer

@@ -181,7 +181,7 @@ class TestsViewSet(
         notes = test.notes.all()
 
         serialized_notes = TestToNotesSerializer(
-            {"test_id": test, "notes": notes},
+            {"test_id": test, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 

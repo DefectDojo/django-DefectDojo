@@ -66,8 +66,10 @@ Mitigation policies can be found and edited in the sidebar under **Configuration
 - **Planned Remediation Date and Version**: The date on which the Finding is planned to be remediated, and the version of the affected component in which the fix will be implemented.
 - **Service**: Connected Services (self-contained pieces of functionality within an Asset) that are affected by the selected Finding. When populated, this field is included in deduplication matching (i.e., Findings with identical Service fields will deduplicate). 
 - **Reporter**: The User who revealed the Finding. 
-- **CWE**: The CWE classification of the Finding.
+- **CWE**: The CWE weakness classification of the Finding. A Finding can carry **multiple CWEs** — a primary CWE, plus any additional CWEs the reporting tool supplied. The primary CWE is the one used for legacy deduplication and hash code calculation; the full CWE set can additionally be used for matching through Pro's set-based Hash Code Fields (see [Deduplication Tuning](/triage_findings/finding_deduplication/pro__deduplication_tuning/#set-based-hash-code-fields-vulnerability-ids-and-cwes)).
+    - A CWE describes a weakness *class* (for example, "SQL Injection"), not a specific vulnerability instance — that is what Vulnerability IDs are for.
 - **Vulnerability IDs**: Publicly recognized vulnerability identifiers associated with the Finding, such as CVE, GHSA, or other standardized advisory references. In DefectDojo Pro, they are also used to perform EPSS and KEV lookups.
+    - Vulnerability IDs are stored as first-class records, so the same CVE is tracked once and shared by every Finding that references it. You can review them — along with their EPSS and KEV values — in the **Vulnerability Explorer**. See [EPSS / KEV](/triage_findings/finding_scoring/epss_kev/#viewing-kevepss-in-the-vulnerability-explorer).
 - **Unique ID From Tool**: A stable identifier assigned by the source tool to a specific Finding instance. Unique IDs are intended to remain consistent across repeated scans, allowing the tool to recognize the same Finding over time. 
     - Unlike Vulnerability IDs, this value is proprietary to the reporting tool and is not a public vulnerability reference.
         - Example: `finding-12345`
@@ -148,6 +150,7 @@ Findings can be manually added by either clicking **New Finding** within the **F
 ### Editing Findings 
 The ⋮ kebab menu next to Findings contains the following functions: 
 - **Edit Finding**: Edit the Finding.
+- **Copy Finding**: Creates a copy of the Finding in another Test. The copy can be saved to any Test within the same Engagement that you have permission to edit. Copying is useful when the same vulnerability needs to be tracked separately in more than one Test context.
 - **Close Finding**: Initiates the process of closing the Finding.
 - **Request Review**: Initiates the Peer Review process and changes the Finding’s status to “Under Review.” More information about Peer Reviews can be found [here](/triage_findings/findings_workflows/finding_status_definitions/#under-review).
 - **Add Risk Acceptance**: Initiates the Risk Acceptance process. More information can be found [here](/triage_findings/findings_workflows/pro__risk_acceptance/).

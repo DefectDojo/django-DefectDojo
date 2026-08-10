@@ -344,12 +344,14 @@ By default, each sync imports the findings of a project's **single most recent c
 Two optional fields control this behavior:
 
 - **Branch**: pins every project to one branch name — only scans of that branch are imported. This is a single global value for the whole connector, so it fits fleets where every project uses the same long-lived branch (e.g. `main`).
+    - A **`*` wildcard** is supported. A Branch value containing `*` selects across *every* matching branch rather than a single one — for example `release/*` imports each release branch, and `*` matches every branch. Combined with **Track Scanned Branches**, this is the way to track a family of branches without tracking all of them.
+    - If a wildcard matches **no** branch within the scan window, that sync is **skipped** rather than treated as "the branch has no findings" — so a pattern that temporarily matches nothing cannot close every finding on the asset.
 - **Track Scanned Branches**: when enabled, each sync finds every branch with a completed scan in the project's recent scan history and imports **the latest completed scan of each branch**, one reimport per branch. Each branch's findings live in their own engagement on the mapped asset, named "\<default engagement\> \- \<branch\>", so closing stale findings is scoped per branch: a fix merged to one branch can never close another branch's findings. The project's primary branch (as reported by Checkmarx) is imported first, so re-occurrences of the same finding on other branches deduplicate against the primary branch's original.
 
 Notes on **Track Scanned Branches**:
 
-- The toggle is **off by default**; existing connector configurations are unaffected until you enable it.
-- When both fields are set, only the pinned **Branch** is tracked.
+- **Check which default applies to you.** Branch tracking is **on by default for new installations**. Installations that predate the change keep their previous behavior, so the toggle is off for them until someone turns it on.
+- When both fields are set, only the pinned **Branch** is tracked — including when that Branch value is a wildcard pattern, in which case every branch matching the pattern is tracked.
 - A branch that stops being scanned (merged or deleted) stops receiving updates: its engagement remains visible with its last-known findings, which you can review and close in bulk.
 - Turning the toggle off later is safe: per-branch engagements simply stop receiving imports and the default engagement resumes on the next sync.
 - Connectors reconcile state on the sync schedule. Branch tracking makes each sync complete across branches; it does not make data real-time between syncs.
@@ -885,14 +887,45 @@ Required token scopes for JFrog Xray:
 
 By default, DefectDojo maps each Artifactory **repository** as a separate Record. Each Sync generates a complete vulnerability report per repository via Xray, so finding statuses in DefectDojo always reflect the current state of the repository.
 
+#### Repository Filter (optional)
+
+By default the connector discovers **every** repository in your JFrog instance. On instances with a large number of repositories — many of which may not be relevant to security review — discovery can be narrowed with the optional **Repository Filter** field, under **Import Filters** on the connector form.
+
+The filter is applied during discovery, **before any per\-repository work is done**. A repository outside the filter costs nothing: no Xray report is generated for it and, in artifact mode, none of its first\-level artifacts are enumerated. This makes it the most effective way to cut both Sync time and the load DefectDojo places on your JFrog instance — more so than any setting applied later in the Sync. It is especially recommended alongside **Artifact\-Level Records** on large instances.
+
+**Syntax:** a comma\-separated list of repository keys. Each entry may use `*` wildcards:
+
+* An entry containing `*` is matched as a pattern — `releases-*` matches every repository key beginning `releases-`, and `*docker-pr-local*` matches any key containing `docker-pr-local`. A `*` matches any run of characters, including `/`.
+* An entry with no `*` must match a repository key **exactly**.
+* A repository is discovered if it matches **any** entry in the list. Spaces around commas are ignored.
+
+```
+releases-*, snapshots
+```
+
+The example above discovers every repository whose key starts with `releases-`, plus the single repository named exactly `snapshots`.
+
+Notes:
+
+* The filter is an **allow\-list** — a match selects a repository. There is no exclusion or negation syntax, so you cannot express "everything except X" directly.
+* Matching is **case\-sensitive**, for both exact entries and wildcards. `*` is the only wildcard character; `?` and character ranges are not supported.
+* **Leave it blank to discover every repository.** A value that is only spaces or commas is treated as blank.
+* A filter that matches nothing simply discovers nothing — there is no error. If a Sync unexpectedly finds no repositories, check the connector log for the `repository filter scoped discovery` entry, which reports how many of the total repositories matched.
+* The field can be changed after the connection is created.
+
+**Changing the filter later:** repositories that a newly narrowed filter now excludes are no longer discovered, and their existing Records follow the normal lifecycle for products the tool no longer reports — **mapped** Records are flagged `MISSING` on the next Sync, and unmapped `NEW` Records are removed. Findings already imported into DefectDojo are not deleted; the filter governs discovery only.
+
 #### Artifact-Level Records
 
-Enabling the **Artifact-Level Records** toggle on the connection changes discovery to one level below the repository: every first-level entry under a repository root (for Docker repositories, each image; for generic repositories, each top-level file or folder) becomes its own Record. Each Sync still generates a single Xray report per repository — DefectDojo attributes each vulnerability to the artifacts it impacts, so the load on your JFrog instance does not increase.
+The **Artifact-Level Records** toggle changes discovery to one level below the repository: every first-level entry under a repository root (for Docker repositories, each image; for generic repositories, each top-level file or folder) becomes its own Record. Each Sync still generates a single Xray report per repository — DefectDojo attributes each vulnerability to the artifacts it impacts, so the load on your JFrog instance does not increase.
+
+> **Check which mode you are in before your first Sync.** Artifact\-Level Records is **on by default for new installations**. Installations that predate the feature keep their existing repository\-level layout, so the toggle is off for them until someone turns it on. In both cases the toggle can be changed at any time — see *Switching an existing connection* below.
 
 With Artifact-Level Records enabled:
 
 * Repositories remain as Records and become **parent assets**: they carry no findings themselves, but when the Asset Hierarchy feature is enabled, DefectDojo automatically relates each artifact asset to its repository asset with a `parent` relationship. Assets can then be filtered by parent/child, and findings roll up the hierarchy.
 * A vulnerability that impacts several artifacts is imported into each affected artifact's asset, so every asset shows the complete set of findings that affect it.
+* Findings are scoped to each artifact's **latest build**, so an artifact's findings describe its current build rather than accumulating results from every build Xray has ever scanned.
 * Hierarchy relationships created by the connector never overwrite relationships you created by hand. If an asset already has a parent you assigned, the connector leaves it alone.
 * The token additionally needs read access to the Artifactory storage API (included in the scopes above).
 

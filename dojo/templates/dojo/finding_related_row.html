@@ -1,4 +1,5 @@
 {% load navigation_tags %}
+{% load get_note_status %}
 {% load display_tags %}
 {% load static %}
 <tr>
@@ -25,7 +26,7 @@
             {% include "dojo/snippets/tags.html" with tags=similar_finding.tags.all %}
         </small>
         {% endif %}
-        {% with similar_finding.notes.count as note_count %}
+        {% with similar_finding.notes.all|visible_to:request.user|length as note_count %}
             ({{ note_count }} note{{ note_count|pluralize }})
         {% endwith %}
     </td>

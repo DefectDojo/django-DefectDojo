@@ -65,6 +65,12 @@ To learn more about Products, Engagements and Tests, see our [Product Hierarchy 
 
 Each Record has an associated state to communicate how the Record is working.
 
+A connector's full records list is reached by opening the connector from **Connect \> Upstream** — the page is titled **All \<Connector\> Records**. Despite the name, it lists every Record belonging to **that one connector**, not every Record on the instance.
+
+That list can be **filtered by state** from the **State** column, and more than one state can be selected at a time. This is the fastest way to answer the questions that come up most often on a large connector fleet — *what is waiting for me to map?* (**New**) and *what has stopped reporting?* (**Missing** or **Error**) — without reading through every Record.
+
+Not every state applies to every connector. **Stale** is set by the findings-import pipeline, so it only occurs on connectors that import findings; **Asset Connectors** never enter it, and it is not offered as a filter option for them.
+
 ### New
 
 A New Record is an Unmapped Record which DefectDojo has Discovered. It can be Mapped to a Product or Ignored. To Map a new Record to a Product, see our guide on [Editing Records]().
@@ -94,6 +100,10 @@ If a Record has been Mapped, but the source data (or Vendor\-Equivalent Product)
 DefectDojo Connectors will adapt to name changes, directory changes and other data shifts, so this is possibly because the related Vendor\-Equivalent Product was deleted from the Tool you’re using.
 
 If you intended to remove the Vendor Equivalent Product from your tool, you can Delete a Missing Record. If not, you'll need to troubleshoot the problem within the Tool so that the source data can be Discovered correctly.
+
+### Error
+
+**Error** indicates that DefectDojo could not process the Record. It is available on every connector type, and can be selected in the **State** filter alongside the states above, which makes it the quickest way to check whether anything on a connector needs attention after a run.
 
 ## Edit Records: Remap, Ignore or Delete
 
