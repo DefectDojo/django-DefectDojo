@@ -60,7 +60,7 @@ Generally, role and permission assignment happens at the [Product Type/Product l
 
 ### What tools are supported by DefectDojo?
 
-DefectDojo supports reports from [over 200](/supported_tools/) commercial and open-source security security tools.
+DefectDojo supports reports from [over 500](/supported_tools/) commercial and open-source security tools.
 
 If you're looking to add a new tool to your suite, we have a list of recommended Open-Source tools which you can check out [here](https://defectdojo.com/blog/announcing-the-defectdojo-open-source-security-awards).
 
