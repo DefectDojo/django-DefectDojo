@@ -2,8 +2,6 @@ import requests
 from django.conf import settings
 from requests.exceptions import JSONDecodeError as RequestsJSONDecodeError
 
-from dojo.utils import prepare_for_view
-
 
 class SonarQubeAPI:
     def __init__(self, tool_config):
@@ -46,10 +44,7 @@ class SonarQubeAPI:
         self.default_headers = {"User-Agent": "DefectDojo"}
         self.sonar_api_url = tool_config.url
         if tool_config.authentication_type == "Password":
-            self.session.auth = (
-                tool_config.username,
-                prepare_for_view(tool_config.password),
-            )
+            self.session.auth = (tool_config.username, tool_config.password)
         elif tool_config.authentication_type == "API":
             self.session.auth = (tool_config.api_key, "")
         else:

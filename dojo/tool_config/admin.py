@@ -21,7 +21,7 @@ class ToolConfigForm_Admin(forms.ModelForm):
             # keep password from db to use if the user entered no password
             self.password_from_db = self.instance.password
             self.ssh_from_db = self.instance.ssh
-            self.api_key = self.instance.api_key
+            self.api_key_from_db = self.instance.api_key
 
     def clean(self):
         cleaned_data = super().clean()

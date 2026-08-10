@@ -8,6 +8,10 @@ from dojo.tool_type.models import Tool_Type
 class ToolConfigForm(forms.ModelForm):
     tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label="Tool Type")
     ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label="SSH Key")
+    # The credential columns are text so ciphertext of any length fits; keep the
+    # single-line inputs a ModelForm would otherwise turn into textareas.
+    password = forms.CharField(widget=forms.TextInput(attrs={}), required=False)
+    api_key = forms.CharField(widget=forms.TextInput(attrs={}), required=False, label="API Key")
 
     class Meta:
         model = Tool_Configuration
