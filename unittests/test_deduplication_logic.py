@@ -112,8 +112,8 @@ deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
 #       engagement 5: April monthly engagement (dedupe_inside: True)
 #               test 55: Checkmarx Scan detailed (algo=unique_id_from_tool, dynamic=False)
 #               findings:
-#                       124 : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: 9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa: eps: 0: notes: []: uid: 12345
-#                       125 : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: None: hash_code: 9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa: eps: 0: notes: []: uid: 12345
+#                       124 : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: False: dup_id: None: hash_code: bc912aacda3a8707cbf94b96e6350a5cc77e7ef4a29a1442cb1a041e4e1f38d8: eps: 0: notes: []: uid: 12345
+#                       125 : "Low Impact Test Find": Low  : act: True : ver: True : mit: False: dup: True : dup_id: None: hash_code: bc912aacda3a8707cbf94b96e6350a5cc77e7ef4a29a1442cb1a041e4e1f38d8: eps: 0: notes: []: uid: 12345
 #               endpoints
 #                       2: ftp://localhost/
 #                       1: http://127.0.0.1/endpoint/420/edit/
