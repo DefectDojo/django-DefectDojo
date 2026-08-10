@@ -14,7 +14,9 @@ from dojo.models import (  # UniqueUploadNameProvider kept in dojo.models for mi
 
 
 class FileUpload(models.Model):
-    title = models.CharField(max_length=100, unique=True)
+    # Not unique: a FileUpload belongs to whichever Engagement/Test/Finding it is
+    # attached to, so the same name has to be usable in more than one of them.
+    title = models.CharField(max_length=100)
     file = models.FileField(upload_to=UniqueUploadNameProvider("uploaded_files"))
 
     def delete(self, *args, **kwargs):

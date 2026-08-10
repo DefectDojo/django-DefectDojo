@@ -99,7 +99,7 @@ def action_history(request, cid, oid):
     if product_id:
         product_tab = Product_Tab(get_object_or_404(Product, id=product_id), title="History", tab=active_tab)
         if active_tab == "engagements":
-            if str(ct) == "engagement":
+            if ct.model == "engagement":
                 product_tab.setEngagement(object_value)
             else:
                 product_tab.setEngagement(object_value.engagement)

@@ -21,7 +21,7 @@ DefectDojo is meant to be the central source of truth for your organization's se
 
 - Allowing users to identify duplicate findings across scans and tools, minimizing alert fatigue.
 - Enforcing SLAs on vulnerabilities, ensuring that your organization handles each Finding within an appropriate timeframe.
-- [Sending tickets](/issue_tracking/intro/intro/) to Jira, ServiceNow or other Project Tracking software, allowing your development team to integrate issue remediation into their standard release process without requiring them to learn another project management tool.
+- [Sending tickets](/connectors/issue_tracking/) to Jira, ServiceNow or other Project Tracking software, allowing your development team to integrate issue remediation into their standard release process without requiring them to learn another project management tool.
 - Integrating into automated [CI/CD pipelines](/import_data/import_scan_files/api_pipeline_modelling/) to automatically ingest report data from repositories, even down to the branch level.
 - Creating [reports](/metrics_reports/reports/) on any set of vulnerabilities or software context, to quickly share scan results or status updates with stakeholders.
 - Establishing acceptance and mitigation workflows, supporting formal risk-management tracking.
@@ -42,7 +42,7 @@ DefectDojo Pro expands on the above workflows further, adding:
   - An optimized upload method which processes Findings in the background.
   - The ability to quickly build a [command-line pipeline](/import_data/pro/specialized_import/external_tools/) using our Universal Importer and DefectDojo CLI apps, allowing you to easily import, reimport, and export data to your DefectDojo Pro instance.
   - A [Universal Parser](/import_data/pro/specialized_import/universal_parser/) to turn any .json or .csv report into an actional set of Findings and have DefectDojo Pro will parse the data however you like.
-  - [Connectors](/import_data/pro/connectors/about_connectors/), which provide an instant connection to supported tools to import new Finding data so you can get an automated Import pipeline established without the need to set up any API calls or cron jobs.
+  - [Connectors](/connectors/upstream/about/), which provide an instant connection to supported tools to import new Finding data so you can get an automated Import pipeline established without the need to set up any API calls or cron jobs.
 
 ### How does DefectDojo handle access control?
 
@@ -75,7 +75,7 @@ To understand the difference, it’s helpful to think of Import as recording a s
 
 Here is an analogy; if you were an accountant, you could use Import to track a single receipt, while you would use Reimport to track a continuous ledger of expenses
 
-Both methods also use Deduplication differently: while two discrete Imported Tests in the same Product will identify and label duplicate Findings separately, Reimport will not create any Findings it identifies as [duplicates](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport/) within the Test.
+Both methods also use Deduplication differently: while two discrete Imported Tests in the same Product will identify and label duplicate Findings separately, Reimport will not create any Findings it identifies as [duplicates](/en/working_with_findings/finding_deduplication/avoiding_duplicates_via_reimport/) within the Test.
 
 Generally speaking, if a point-in-time report is what you need, Import is the best method to use. If you are continuously running and ingesting reports from a tool, Reimport is the better method for keeping things organized.
 
@@ -131,4 +131,4 @@ DefectDojo Pro users also have access to [executive-level Metrics dashboards](/g
 
 In both Pro and Open-Source editions of DefectDojo, Findings in DefectDojo can be pushed to Jira as Issues, which allows you to integrate issue remediation with your development team.
 
-DefectDojo Pro adds support for [Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab.
+DefectDojo Pro adds support for [Additional Project Tracking Integrations](/connectors/issue_tracking/)**: ServiceNow, Azure DevOps, GitHub and GitLab.

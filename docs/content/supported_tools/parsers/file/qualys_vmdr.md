@@ -27,7 +27,7 @@ The parser uses `DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE`, which tries `uni
 
 **Hashcode fields:** `title`, `component_name`, `vuln_id_from_tool`
 
-For more information, see [About Deduplication](https://docs.defectdojo.com/en/working_with_findings/finding_deduplication/about_deduplication/).
+For more information, see [About Deduplication](/en/working_with_findings/finding_deduplication/about_deduplication/).
 
 ### Sample Scan Data
 
