@@ -1,0 +1,22 @@
+[
+  {
+    "type": "issue",
+    "check_name": "name[play]",
+    "categories": [
+      "idiom"
+    ],
+    "url": "https://docs.ansible.com/projects/lint/rules/name/",
+    "severity": "major",
+    "description": "All plays should be named.",
+    "fingerprint": "1f810a635a731ce0ab776f99884ee9ec3bd9a6c8d767039bc23dceae5599bb97",
+    "location": {
+      "path": "playbooks/playbook.yml",
+      "positions": {
+        "begin": {
+          "line": 1,
+          "column": 3
+        }
+      }
+    }
+  }
+]

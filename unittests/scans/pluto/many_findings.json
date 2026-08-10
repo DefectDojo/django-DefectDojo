@@ -1,0 +1,55 @@
+{
+  "items": [
+    {
+      "name": "example-legacy",
+      "filePath": "manifests/deprecated.yaml",
+      "namespace": "example-ns",
+      "api": {
+        "version": "extensions/v1beta1",
+        "kind": "Deployment",
+        "deprecated-in": "v1.9.0",
+        "removed-in": "v1.16.0",
+        "replacement-api": "apps/v1",
+        "replacement-available-in": "v1.9.0",
+        "component": "k8s"
+      },
+      "deprecated": true,
+      "removed": true,
+      "replacementAvailable": true
+    },
+    {
+      "name": "example-pdb",
+      "filePath": "manifests/deprecated.yaml",
+      "namespace": "example-ns",
+      "api": {
+        "version": "policy/v1beta1",
+        "kind": "PodDisruptionBudget",
+        "deprecated-in": "v1.21.0",
+        "removed-in": "v1.25.0",
+        "replacement-api": "policy/v1",
+        "replacement-available-in": "v1.21.0",
+        "component": "k8s"
+      },
+      "deprecated": true,
+      "removed": true,
+      "replacementAvailable": true
+    },
+    {
+      "name": "example-ingress",
+      "filePath": "manifests/deprecated.yaml",
+      "namespace": "example-ns",
+      "api": {
+        "version": "networking.k8s.io/v1beta1",
+        "kind": "Ingress",
+        "deprecated-in": "v1.19.0",
+        "removed-in": "v1.22.0",
+        "replacement-api": "networking.k8s.io/v1",
+        "replacement-available-in": "v1.19.0",
+        "component": "k8s"
+      },
+      "deprecated": true,
+      "removed": false,
+      "replacementAvailable": true
+    }
+  ]
+}

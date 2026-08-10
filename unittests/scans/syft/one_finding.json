@@ -1,0 +1,48 @@
+{
+  "artifacts": [
+    {
+      "id": "94f96c9665535457",
+      "name": "certifi",
+      "version": "2026.7.22",
+      "type": "python",
+      "foundBy": "python-package-cataloger",
+      "locations": [
+        {
+          "path": "app/uv.lock",
+          "accessPath": "/uv.lock",
+          "annotations": {
+            "evidence": "primary"
+          }
+        }
+      ],
+      "licenses": [],
+      "language": "python",
+      "cpes": [
+        {
+          "cpe": "cpe:2.3:a:certifi:certifi:2026.7.22:*:*:*:*:python:*:*",
+          "source": "nvd-cpe-dictionary"
+        }
+      ],
+      "purl": "pkg:pypi/certifi@2026.7.22",
+      "metadataType": "python-uv-lock-entry",
+      "metadata": {
+        "index": "https://pypi.org/simple",
+        "dependencies": null
+      }
+    }
+  ],
+  "source": {
+    "id": "2b2482043d69967e67385987eb23ecae315ba0d2df7e8999b61eaa7d9e8a52d2",
+    "name": "app/",
+    "version": "",
+    "type": "directory",
+    "metadata": {
+      "path": "work/uvproj"
+    }
+  },
+  "descriptor": {
+    "name": "syft",
+    "version": "[not provided]"
+  },
+  "distro": {}
+}
