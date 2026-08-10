@@ -107,29 +107,6 @@ class Engagement(BaseModel):
             GinIndex(fields=["name"], opclasses=["gin_trgm_ops"], name="dojo_engagement_name_trgm"),
         ]
 
-    def pre_save_logic(self):
-        """
-        Fall back to the declared default when the status is empty.
-
-        `status` is nullable and carries a default, but it is not `blank=True`, so the
-        `full_clean()` the base model runs on every save rejects both `None` and `""` with
-        "This field cannot be blank." Rows with an empty status exist all the same -- writes
-        made before the base model validated, and DefectDojo's own sample data -- and could
-        then never be saved again.
-
-        That took down imports: the importer's closing write-back saves the test's engagement
-        on every run, and the only engagement field an import ever sets is `target_end` (CI/CD
-        engagements). A scan therefore failed, and imported nothing, over a field it had not
-        touched.
-
-        An empty value is not one of ENGAGEMENT_STATUS_CHOICES, so there is nothing to
-        preserve. Applying the default here -- before the validation step, and regardless of
-        whether validation is enabled -- lets the save proceed and heals the row on its next
-        write, instead of leaving a row that no code path can save.
-        """
-        if not self.status:
-            self.status = self._meta.get_field("status").default
-
     def __str__(self):
         return "Engagement {}: {} ({})".format(self.id if id else 0, self.name or "",
                                         self.target_start.strftime(
