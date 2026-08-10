@@ -30,14 +30,13 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **AccuKnox**
 * **Action1**
 * **Acunetix 360**
-* **Akamai API Security**
+* **Akamai**
 * **Akto**
 * **Alert Logic**
-* **Anchore**
+* **Anchore Enterprise**
 * **AppCheck**
 * **Aqua Security**
 * **Automox**
-* **AWS Security Hub**
 * **Azure DevOps**
 * **Backstage**
 * **Beagle Security**
@@ -47,10 +46,10 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Black Duck Continuous Dynamic**
 * **Bright Security**
 * **Bugcrowd**
-* **BurpSuite**
+* **Burp Suite Enterprise**
 * **Calico Cloud**
 * **Censys**
-* **Checkmarx ONE**
+* **Checkmarx One**
 * **Chef Automate**
 * **CI Fuzz**
 * **Cloudflare**
@@ -83,7 +82,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **GitHub Advanced Security**
 * **GitLab**
 * **Google Artifact Analysis**
-* **Google Cloud Security Command Center**
+* **Google Cloud SCC**
 * **Group-IB ASM**
 * **HackerOne**
 * **Halo Security**
@@ -97,8 +96,8 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Intigriti**
 * **Intruder**
 * **IriusRisk**
-* **JFrog Xray**
-* **Jira Service Management Assets**
+* **JFrog XRay**
+* **JSM Assets**
 * **Klocwork**
 * **Kubescape**
 * **Lacework / FortiCNAPP**
@@ -129,6 +128,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Red Hat Satellite**
 * **runZero**
 * **Scantist**
+* **Security Hub**
 * **Semgrep**
 * **ServiceNow CMDB**
 * **Shodan**
@@ -138,7 +138,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Sonatype IQ**
 * **SOOS**
 * **Sysdig Secure**
-* **Tenable**
+* **Tenable.io**
 * **Tenable Web App Scanning**
 * **TruffleHog**
 * **Trustwave Fusion**
@@ -156,7 +156,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 
 For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
 
-Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
+Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
 These connections provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 

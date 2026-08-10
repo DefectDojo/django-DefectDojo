@@ -27,7 +27,7 @@ Most Connectors import **findings** from a security tool. **Asset Connectors** w
 * **Discover** and **Sync** both reconcile the asset list. New assets appear as `NEW` Records; once mapped (automatically, if auto-mapping is enabled), DefectDojo creates the Product and groups it under a Product Type derived from the tool — for example, the GitLab namespace or the Azure DevOps project.
 * If an asset is later removed upstream (for example, a repository is deleted), its mapped Record is flagged `MISSING` on the next Sync so your team can triage it. DefectDojo never silently deletes a Product.
 
-Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, Jira Service Management Assets, and ServiceNow CMDB are Asset Connectors. runZero is primarily an Asset Connector but can optionally import vulnerabilities as findings. All other Connectors listed below import findings.
+Azure DevOps, Backstage, Bitbucket, GitHub, GitLab, JSM Assets, and ServiceNow CMDB are Asset Connectors. runZero is primarily an Asset Connector but can optionally import vulnerabilities as findings. All other Connectors listed below import findings.
 
 # **Supported Connectors**
 
@@ -86,7 +86,7 @@ An Acunetix 360 account and an **API credential**: in Acunetix 360, open your ac
 
 Each scanned website becomes a Record. Findings come from the website's latest completed scan; vulnerabilities Acunetix 360 has marked **Accepted Risk** or **False Positive** are still imported but flagged inactive (risk\-accepted or false\-positive) so the DefectDojo product reflects the vendor's triage.
 
-## **Akamai API Security**
+## **Akamai**
 
 The Akamai API Security connector uses an API key to pull security findings from the Akamai API. DefectDojo will discover your Akamai environment and create separate Records for each **Application** and **Host** configured in your account.
 
@@ -135,7 +135,7 @@ An Alert Logic **access key ID and secret key**, created under **Configure \> AP
 
 This connector imports **vulnerability exposures only** — MDR incidents are deliberately out of scope.
 
-## **Anchore**
+## **Anchore Enterprise**
 
 The Anchore connector uses a user's API token to pull data from Anchore Enterprise.  Products will be mapped and discovered based on "Applications", which are composed of multiple Images in Anchore - see [Anchore Enterprise Documentation](https://docs.anchore.com/current/docs/sbom_management/application_groups/application_management_anchorectl/) for more information.
 
@@ -198,56 +198,6 @@ An Automox **API key**, from **Settings \> API** in the Automox console. It is s
 3. Optionally, set a **Minimum Severity** to limit which findings are imported.
 
 Each device group becomes a Record, carrying the patches awaiting installation on the devices in that group.
-
-## **AWS Security Hub**
-
-The AWS Security Hub connector uses an AWS access key to interact with the Security Hub APIs.
-
-#### Prerequisites
-
-Rather than use the AWS access key from a team member, we recommend creating an IAM User in your AWS account specifically for DefectDojo, with that user's permissions limited to those necessary for interacting with Security Hub.
-
-AWS's "**[AWSSecurityHubReadOnlyAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSSecurityHubReadOnlyAccess.html)**policy" provides the required level of access for a connector. If you would like to write a custom policy for a Connector, you will need to include the following permissions:
-
-* [DescribeHub](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_DescribeHub.html)
-* [GetFindingAggregator](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_GetFindingAggregator.html)
-* [GetFindings](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_GetFindings.html)
-* [ListFindingAggregators](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_ListFindingAggregators.html)
-
-A working policy definition might look like the following:
-
-```
-{  
-    "Version": "2012-10-17",  
-    "Statement": [  
-        {  
-            "Sid": "AWSSecurityHubConnectorPerms",  
-            "Effect": "Allow",  
-            "Action": [  
-                "securityhub:DescribeHub",  
-                "securityhub:GetFindingAggregator",  
-                "securityhub:GetFindings",  
-                "securityhub:ListFindingAggregators"  
-            ],  
-            "Resource": "*"  
-        }  
-    ]  
-}
-```
-
-**Please note:** we may need to use additional API actions in the future to provide the best possible experience, which will require updates to this policy.
-
-Once you have created your IAM user and assigned it the necessary permissions using an appropriate policy/role, you will need to generate an access key, which you can then use to create a Connector.
-
-#### Connector Mappings
-
-1. Enter the appropriate [AWS API Endpoint for your region](https://docs.aws.amazon.com/general/latest/gr/sechub.html#sechub_region) in the **Location** field**:**  for example, to retrieve results from the `us-east-1` region, you would supply
-
-`https://securityhub.us-east-1.amazonaws.com`
-2. Enter a valid **AWS Access Key** in the **Access Key** field.
-3. Enter a matching **Secret Key** in the **Secret Key** field.
-
-DefectDojo can pull Findings from more than one region using Security Hub's **cross\-region aggregation** feature. If [cross\-region aggregation](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html) is enabled, you should supply the API endpoint for your "**Aggregation Region**". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account ID and the region name.
 
 ## **Azure DevOps**
 
@@ -457,7 +407,7 @@ DefectDojo maps each completed **scan** to a Record and each **issue** to a find
 
 See the [Bright API documentation](https://docs.brightsec.com/) for more information.
 
-## **BurpSuite**
+## **Burp Suite Enterprise**
 
 DefectDojo’s Burp connector calls Burp’s GraphQL API to fetch data. 
 
@@ -517,13 +467,13 @@ See the [Censys Platform API documentation](https://docs.censys.com/reference/ge
 
 DefectDojo creates a Record for each host and imports its exposed services as findings.
 
-## **Checkmarx ONE**
+## **Checkmarx One**
 
-DefectDojo's Checkmarx ONE connector calls the Checkmarx API to fetch data.
+DefectDojo's Checkmarx One connector calls the Checkmarx API to fetch data.
 
 #### **Connector Mappings**
 
-1. Enter your **Tenant Name** in the **Checkmarx Tenant** field. This name should be visible on the Checkmarx ONE login page in the top\-right hand corner:   
+1. Enter your **Tenant Name** in the **Checkmarx Tenant** field. This name should be visible on the Checkmarx One login page in the top\-right hand corner:   
 " Tenant: \<**your tenant name**\> "  
 ​
 ![image](images/connectors_tool_reference_2.png)
@@ -1161,7 +1111,7 @@ A Google **service account** with the **Container Analysis Occurrences Viewer** 
 
 Each active GCP project becomes a Record, carrying the vulnerability occurrences Artifact Analysis has recorded against its images.
 
-## **Google Cloud Security Command Center**
+## **Google Cloud SCC**
 
 The Google Cloud SCC connector uses the Security Command Center v2 REST API to import active security findings from your Google Cloud organization, folder, or project. DefectDojo creates a Record for each Google Cloud **project** that has open findings.
 
@@ -1432,7 +1382,7 @@ See the [IriusRisk API documentation](https://support.iriusrisk.com/hc/en-us/cat
 2. Enter your **API Token** in the **Secret** field.
 3. Optionally, set a **Minimum Severity** to limit which findings are imported. Findings below the selected severity will not be imported.
 
-## **JFrog Xray**
+## **JFrog XRay**
 
 The JFrog Xray connector uses the JFrog Xray REST API to fetch vulnerability data from your Artifactory repositories. DefectDojo will discover all repositories in your JFrog instance and generate vulnerability reports via Xray, importing findings on a scheduled basis.
 
@@ -1502,7 +1452,7 @@ With Artifact-Level Records enabled:
 
 See the [JFrog Xray REST API documentation](https://jfrog.com/help/r/jfrog-rest-apis/xray-rest-apis) for more information.
 
-## **Jira Service Management Assets**
+## **JSM Assets**
 
 The JSM Assets connector is an **Asset Connector**: it enumerates the objects in your Jira Service Management Assets (formerly Insight) workspace and creates a DefectDojo Asset for each object, grouped into Organizations by object schema. No findings are imported.
 
@@ -2076,6 +2026,56 @@ A Scantist **API token**, generated in the Scantist UI under your account settin
 
 Each project becomes a Record, and its findings come from that project's **most recent completed scan**.
 
+## **Security Hub**
+
+The AWS Security Hub connector uses an AWS access key to interact with the Security Hub APIs.
+
+#### Prerequisites
+
+Rather than use the AWS access key from a team member, we recommend creating an IAM User in your AWS account specifically for DefectDojo, with that user's permissions limited to those necessary for interacting with Security Hub.
+
+AWS's "**[AWSSecurityHubReadOnlyAccess](https://docs.aws.amazon.com/aws-managed-policy/latest/reference/AWSSecurityHubReadOnlyAccess.html)**policy" provides the required level of access for a connector. If you would like to write a custom policy for a Connector, you will need to include the following permissions:
+
+* [DescribeHub](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_DescribeHub.html)
+* [GetFindingAggregator](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_GetFindingAggregator.html)
+* [GetFindings](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_GetFindings.html)
+* [ListFindingAggregators](https://docs.aws.amazon.com/securityhub/1.0/APIReference/API_ListFindingAggregators.html)
+
+A working policy definition might look like the following:
+
+```
+{  
+    "Version": "2012-10-17",  
+    "Statement": [  
+        {  
+            "Sid": "AWSSecurityHubConnectorPerms",  
+            "Effect": "Allow",  
+            "Action": [  
+                "securityhub:DescribeHub",  
+                "securityhub:GetFindingAggregator",  
+                "securityhub:GetFindings",  
+                "securityhub:ListFindingAggregators"  
+            ],  
+            "Resource": "*"  
+        }  
+    ]  
+}
+```
+
+**Please note:** we may need to use additional API actions in the future to provide the best possible experience, which will require updates to this policy.
+
+Once you have created your IAM user and assigned it the necessary permissions using an appropriate policy/role, you will need to generate an access key, which you can then use to create a Connector.
+
+#### Connector Mappings
+
+1. Enter the appropriate [AWS API Endpoint for your region](https://docs.aws.amazon.com/general/latest/gr/sechub.html#sechub_region) in the **Location** field**:**  for example, to retrieve results from the `us-east-1` region, you would supply
+
+`https://securityhub.us-east-1.amazonaws.com`
+2. Enter a valid **AWS Access Key** in the **Access Key** field.
+3. Enter a matching **Secret Key** in the **Secret Key** field.
+
+DefectDojo can pull Findings from more than one region using Security Hub's **cross\-region aggregation** feature. If [cross\-region aggregation](https://docs.aws.amazon.com/securityhub/latest/userguide/finding-aggregation.html) is enabled, you should supply the API endpoint for your "**Aggregation Region**". Additional linked regions will have ProductRecords created for them in DefectDojo based on your AWS account ID and the region name.
+
 ## **Semgrep**
 
 This connector uses the Semgrep REST API to fetch data.
@@ -2226,7 +2226,7 @@ A Sysdig Secure **API token**: in Sysdig Secure, go to **Settings \> Sysdig Secu
 
 Each asset grouping becomes a Record. For each scan result the connector imports every vulnerable package as a finding. **Runtime** findings (deployed workloads) are recorded as dynamic findings and tagged with their Kubernetes cluster / namespace / workload / container context; **registry** and **pipeline** findings are recorded as static image\-scan findings. Sysdig's `NEGLIGIBLE` severity maps to Info.
 
-## Tenable
+## **Tenable.io**
 
 The Tenable connector uses the **Tenable.io** REST API to fetch data.  Scans are pulled from the Tenable VM `/scans` endpoint.
 
