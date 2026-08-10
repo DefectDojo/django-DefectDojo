@@ -31,21 +31,25 @@ def visible_notes(notes, user):
     on what ``private`` means. A caller with no user (report rendering) gets the
     non-private notes only.
 
-    ``notes`` is usually a queryset, but DRF pagination evaluates the queryset
-    before serialization and hands the note serializer the page as a plain
-    ``list``, which has no ``filter``. Apply the same rule to either form so a
-    paginated read does not 500 for a non-superuser.
+    ``notes`` is not always a queryset. ``VisibleNotesSerializer`` filters
+    whatever DRF hands its ``ListSerializer``, and on a list endpoint that is a
+    plain list: ``paginate_queryset`` returns ``list(queryset[offset:limit])``.
+    So the same rule is applied in Python when there is no queryset left to
+    apply it to in SQL. Filtering a page after the fact does shorten it, which
+    is a consequence of choosing to enforce the rule at serialization time; the
+    alternative -- leaking another user's private note -- is worse.
     """
     if user is not None and user.is_superuser:
         return notes
-    if hasattr(notes, "filter"):
-        if user is None:
-            return notes.filter(private=False)
-        return notes.filter(Q(private=False) | Q(author=user))
-    # An already-evaluated collection (e.g. a pagination page): filter in Python.
+    if not hasattr(notes, "filter"):
+        return [
+            note
+            for note in notes
+            if not note.private or (user is not None and note.author_id == user.pk)
+        ]
     if user is None:
-        return [note for note in notes if not note.private]
-    return [note for note in notes if not note.private or note.author_id == user.pk]
+        return notes.filter(private=False)
+    return notes.filter(Q(private=False) | Q(author=user))
 
 
 def delete_related_notes(obj):
