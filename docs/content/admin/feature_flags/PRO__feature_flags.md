@@ -28,7 +28,7 @@ The page lists the features you can choose to adopt. Two kinds of feature are ab
 
 **Always on.** Once a feature reaches general availability it is on for every instance and stops being listed, because there is no longer a decision to make:
 
-* **Downstream Connections** — see [Pro Integrations](/issue_tracking/pro_integration/integrations/)
+* **Downstream Connectors** — see [Downstream Connectors](/connectors/downstream/about/)
 * **Universal Parser** — see [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
 * **Asset Hierarchy** — see [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
 * **Appearance** and **Feature Flags** — the two Settings pages of the same name
@@ -110,9 +110,25 @@ Most features are available on both installation types. The exceptions are:
 | --- | --- | --- |
 | Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
 | Locations | Both | Feature Flags page. Note that Locations cannot be turned back off once it is enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
-| Organization / Asset Relabeling | Both | Deployment configuration: `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`. |
+| Organization / Asset Relabeling | Both | Feature Flags page for the Pro UI; the Classic UI, its URLs and generated reports follow the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting. See [above](#organization--asset-relabeling). |
 
 Every other optional feature is toggled directly on the Feature Flags page on both Cloud and On-Premise instances.
+
+## Reading feature flags outside the UI
+
+You do not have to open the Feature Flags page to find out which features are enabled — flag state can also be read programmatically, which is useful when automation needs to check that a capability is available before depending on it.
+
+```
+GET /api/v2/defectdojo_information/feature_flags/
+```
+
+This returns a JSON array with one object per feature flag. Alongside the flag's `key`, `title` and `description`, each object reports the values automation usually wants: `effective` (whether the feature is actually on for this instance), `default`, `application_value` (the instance's own setting, or `null` if unset), `editable`, and `locked_reason` where a flag cannot be changed. Flags retired from the product are omitted.
+
+Any **authenticated** user can read it — no superuser role is required. For the exact response schema on your version, see your instance's interactive API documentation at `/api/v2/oa3/swagger-ui/`, which is generated from the running build. See also the [API v2 documentation](/automation/api/api-v2-docs/).
+
+The same read-only listing is also published on the instance's `/api/mcp/` surface, at `/api/mcp/defectdojo_information/feature_flags/`.
+
+This endpoint is **read-only**. Turning a feature on or off is still done from the Feature Flags page, or — for the deployment-configured features noted above — in your deployment settings.
 
 ## Frequently asked questions
 

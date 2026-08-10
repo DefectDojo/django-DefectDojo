@@ -111,7 +111,7 @@ The four assignable Risk levels are:
 
 A Finding's EPSS / exploitability is much more emphasized in the Risk calculation.  As a result, a Finding can have both a high priority and a low risk value.
 
-As with Finding Priority, the Risk calculation cannot currently be adjusted.
+The Risk calculation itself cannot currently be adjusted directly. However, if [Threat Intelligence](/asset_modelling/pro_hierarchy/threat_intelligence/) is enabled, the **Actively-Exploited Risk Floor** does let you control the outcome for the case that matters most: a Finding confirmed to be exploited in the wild is lifted to at least a Risk band you choose, rather than being left in a low band because its base severity is Low. It ships set to **Needs Action**, and each Prioritization Engine can raise it, lower it, or clear it to switch the floor off. See [the Actively-Exploited Risk Floor](/asset_modelling/pro_hierarchy/threat_intelligence/#the-actively-exploited-risk-floor).
 
 ## Priority Insights Dashboard
 

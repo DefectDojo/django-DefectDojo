@@ -18,6 +18,22 @@ class RiskAcceptanceProofSerializer(serializers.ModelSerializer):
         fields = ["path"]
 
 
+class RiskAcceptanceExpireSerializer(serializers.Serializer):
+    reason = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+
+class RiskAcceptanceReinstateSerializer(serializers.Serializer):
+    expiration_date = serializers.DateTimeField(
+        required=False,
+        allow_null=True,
+        help_text=(
+            "New expiration date. Omit it to reinstate for the number of days configured in "
+            "the Risk Acceptance Form Default Days system setting."
+        ),
+    )
+    reason = serializers.CharField(required=False, allow_blank=True, max_length=2000)
+
+
 class RiskAcceptanceToNotesSerializer(serializers.Serializer):
     risk_acceptance_id = serializers.PrimaryKeyRelatedField(
         queryset=Risk_Acceptance.objects.all(), many=False, allow_null=True,

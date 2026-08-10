@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
@@ -2158,8 +2157,7 @@ def process_resolution_from_jira(
                     logger.debug(f"Creating risk acceptance for finding linked to {jira_issue.jira_key}.")
                     # loads the expiration from the system setting "Risk acceptance form default days" as otherwise
                     # the acceptance will never expire
-                    risk_acceptance_form_default_days = get_system_setting("risk_acceptance_form_default_days", 90)
-                    expiration_date_from_system_settings = timezone.now() + relativedelta(days=risk_acceptance_form_default_days)
+                    expiration_date_from_system_settings = ra_helper.default_expiration_date()
                     ra = Risk_Acceptance.objects.create(
                         accepted_by=assignee_name,
                         owner=finding.reporter,

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -180,7 +181,7 @@ class TestsViewSet(
         notes = test.notes.all()
 
         serialized_notes = TestToNotesSerializer(
-            {"test_id": test, "notes": notes},
+            {"test_id": test, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 
@@ -291,12 +292,21 @@ class TestImportViewSet(
     )
 
     def get_queryset(self):
+        # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
+        # endpoints m2m hydrates the legacy rows a migrated finding still carries and 500s the
+        # whole list response. Select the prefetch by the flag, as the finding viewset does.
+        # TODO: Delete the endpoints branch after the move to Locations
+        location_prefetch = (
+            "findings_affected__locations__location__url"
+            if settings.V3_FEATURE_LOCATIONS
+            else "findings_affected__endpoints"
+        )
         return get_authorized_test_imports(
             "view",
         ).prefetch_related(
             "test_import_finding_action_set",
             "findings_affected",
-            "findings_affected__endpoints",
+            location_prefetch,
             "findings_affected__status_finding",
             "findings_affected__finding_meta",
             "findings_affected__jira_issue",

@@ -47,7 +47,7 @@ Both badges are links, because a tooltip closes the moment your pointer leaves i
 
 **`LEGACY`**
 
-* **Connect > Jira** — the original per-product Jira integration, superseded by the downstream connector for Jira. See [Pro Integrations](/issue_tracking/pro_integration/integrations/).
+* **Connect > Jira** — the original per-product Jira integration, superseded by the downstream connector for Jira. See [Pro Integrations](/connectors/downstream/about/).
 * **Act > Triage Engine > Classic Rules** is the original Rules Engine, superseded by Rules Engine 2.0. It carries the badge only on instances that have both engines turned on, since there is nothing to move to otherwise. See the [conversion guide](/automation/rules_engine_2/converting_from_rules_engine/).
 
 **`DEPRECATED`**

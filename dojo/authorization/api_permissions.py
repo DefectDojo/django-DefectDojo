@@ -432,9 +432,16 @@ class UserHasRiskAcceptancePermission(permissions.BasePermission):
         return True
 
     def has_object_permission(self, request, view, obj):
+        # The fourth argument is the POST permission, and it has to be given: without it
+        # check_object_permission passes None down to user_has_permission for every POST. This
+        # codebase happens to answer False to an unmapped permission, so it degrades to a 403 --
+        # but an authorization layer that treats "no permission named" as unimplemented raises
+        # instead, turning that into a 500. It went unnoticed because this viewset had no POST
+        # actions until expire and reinstate were added.
         return check_object_permission(
             request,
             obj,
+            "edit",
             "edit",
             "edit",
             "edit",

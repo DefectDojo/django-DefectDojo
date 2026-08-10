@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load display_tags %}
+{% load get_note_status %}
 {% load authorization_tags %}
 
 {% load static %}
@@ -1202,15 +1203,17 @@
                                             <i class="fa-solid fa-file has-popover dojo-sup"
                                             data-content="{{ finding.component_name }} - {{ finding.component_version }}"></i>
                                         {% endif %}
-                                        {% if finding.notes.all %}
+                                        {% with visible_notes=finding.notes.all|visible_to:request.user %}
+                                        {% if visible_notes %}
                                             <i class="fa-solid fa-comment has-popover dojo-sup"
-                                            data-content="{{ finding.notes.all.0.author }} at {{ finding.notes.all.0.date }}: {{ finding.notes.all.0 }}"></i>
+                                            data-content="{{ visible_notes.0.author }} at {{ visible_notes.0.date }}: {{ visible_notes.0 }}"></i>
                                             <a href="{% url 'view_finding' finding.id %}#vuln_notes"
                                                 class="dojo-sup"
-                                                alt="{{ finding.notes.count }} note{{ finding.notes.count|pluralize }}">
-                                                    ({{ finding.notes.count }})
+                                                alt="{{ visible_notes.count }} note{{ visible_notes.count|pluralize }}">
+                                                    ({{ visible_notes.count }})
                                             </a>
                                         {% endif %}
+                                        {% endwith %}
                                         {% include "dojo/snippets/tags.html" with tags=finding.tags.all %}
                                     </td>
                                     <td class="nowrap">
