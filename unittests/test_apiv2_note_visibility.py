@@ -13,8 +13,9 @@ from types import SimpleNamespace
 from django.test import Client
 from django.urls import reverse
 from django.utils import timezone
+from parameterized import parameterized
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APIRequestFactory
 
 from dojo.models import (
     Dojo_User,
@@ -28,7 +29,7 @@ from dojo.models import (
     Test_Type,
 )
 from dojo.notes.api.serializer import NoteSerializer
-from dojo.notes.helper import visible_notes
+from dojo.notes.helper import notes_prefetch, visible_notes
 
 from .dojo_test_case import DojoAPITestCase
 
@@ -217,3 +218,133 @@ class NoteVisibilityTest(DojoAPITestCase):
         )
 
         self.assertEqual({PUBLIC}, {row["entry"] for row in serializer.data})
+
+
+# Regression: visible_notes assumed a queryset and called .filter() on it, so a
+# caller that had already evaluated the notes raised AttributeError instead of
+# filtering. A DRF list serializer is exactly that caller -- it is handed the
+# paginated page, which is a list -- so every notes list request answered 500
+# for a non-superuser, and only for a non-superuser, since a superuser returns
+# early before the .filter().
+class MaterialisedNotesTest(DojoAPITestCase):
+
+    """
+    The rule holds whether the notes still carry a query or not.
+
+    Both shapes reach ``visible_notes`` in production: a queryset from the UI
+    views and the un-prefetched relation, a list from the paginated page a list
+    serializer receives. The parameterisation runs every case through both, so a
+    fix that only narrows a queryset cannot pass.
+    """
+
+    SHAPES = [("queryset",), ("list",)]
+    LOADED = [("prefetched",), ("not prefetched",)]
+
+    def setUp(self):
+        self.author, _ = Dojo_User.objects.get_or_create(
+            username="materialised-notes-author",
+            defaults={"is_superuser": False, "is_staff": False},
+        )
+        self.colleague, _ = Dojo_User.objects.get_or_create(
+            username="materialised-notes-colleague",
+            defaults={"is_superuser": False, "is_staff": False},
+        )
+        self.superuser, _ = Dojo_User.objects.get_or_create(
+            username="materialised-notes-super",
+            defaults={"is_superuser": True, "is_staff": True},
+        )
+
+        product_type, _ = Product_Type.objects.get_or_create(name="materialised-notes")
+        product, _ = Product.objects.get_or_create(
+            name="MaterialisedNotesTest", description="Test", prod_type=product_type,
+        )
+        for user in (self.author, self.colleague):
+            product.authorized_users.add(user)
+            Product_Member.objects.get_or_create(
+                product=product, user=user, defaults={"role_id": 4},
+            )
+
+        engagement = Engagement.objects.create(
+            name="materialised notes", product=product,
+            target_start=START, target_end=END,
+        )
+        test_type, _ = Test_Type.objects.get_or_create(name="materialised-notes-tt")
+        test = Test.objects.create(
+            engagement=engagement, test_type=test_type,
+            target_start=timezone.make_aware(datetime.datetime.combine(START, datetime.time())),
+            target_end=timezone.make_aware(datetime.datetime.combine(END, datetime.time())),
+        )
+        self.finding = Finding.objects.create(
+            title="materialised notes finding", test=test, reporter=self.author,
+            severity="Info", numerical_severity="S4",
+        )
+        self.finding.notes.add(Notes.objects.create(entry=PRIVATE, author=self.author, private=True))
+        self.finding.notes.add(Notes.objects.create(entry=PUBLIC, author=self.author, private=False))
+
+    def _shaped(self, shape):
+        """The notes relation as the two kinds of caller hand it over."""
+        queryset = self.finding.notes.all()
+        return list(queryset) if shape == "list" else queryset
+
+    def _relation(self, loading):
+        """The notes relation off a finding fetched with and without the prefetch."""
+        findings = Finding.objects.filter(pk=self.finding.pk)
+        if loading == "prefetched":
+            findings = findings.prefetch_related(notes_prefetch())
+        return findings.get().notes.all()
+
+    def _serialized(self, notes, user):
+        request = APIRequestFactory().get("/api/v2/notes/")
+        request.user = user
+        return {n["entry"] for n in NoteSerializer(notes, many=True, context={"request": request}).data}
+
+    # ---- the helper --------------------------------------------------------
+
+    @parameterized.expand(SHAPES)
+    def test_helper_gives_the_author_both(self, shape):
+        entries = {n.entry for n in visible_notes(self._shaped(shape), self.author)}
+        self.assertEqual({PRIVATE, PUBLIC}, entries, msg=f"{shape} input gave {entries}")
+
+    @parameterized.expand(SHAPES)
+    def test_helper_gives_a_colleague_only_the_public_one(self, shape):
+        entries = {n.entry for n in visible_notes(self._shaped(shape), self.colleague)}
+        self.assertEqual({PUBLIC}, entries, msg=f"{shape} input gave {entries}")
+
+    @parameterized.expand(SHAPES)
+    def test_helper_gives_a_superuser_both(self, shape):
+        entries = {n.entry for n in visible_notes(self._shaped(shape), self.superuser)}
+        self.assertEqual({PRIVATE, PUBLIC}, entries, msg=f"{shape} input gave {entries}")
+
+    @parameterized.expand(SHAPES)
+    def test_helper_without_a_user_gives_only_the_public_one(self, shape):
+        entries = {n.entry for n in visible_notes(self._shaped(shape), None)}
+        self.assertEqual({PUBLIC}, entries, msg=f"{shape} input gave {entries}")
+
+    # ---- the list serializer, which is what actually 500'd -----------------
+
+    @parameterized.expand(SHAPES)
+    def test_serializing_gives_the_author_both(self, shape):
+        entries = self._serialized(self._shaped(shape), self.author)
+        self.assertEqual({PRIVATE, PUBLIC}, entries, msg=f"{shape} input gave {entries}")
+
+    @parameterized.expand(SHAPES)
+    def test_serializing_gives_a_colleague_only_the_public_one(self, shape):
+        entries = self._serialized(self._shaped(shape), self.colleague)
+        self.assertEqual({PUBLIC}, entries, msg=f"{shape} input gave {entries}")
+
+    @parameterized.expand(SHAPES)
+    def test_serializing_gives_a_superuser_both(self, shape):
+        entries = self._serialized(self._shaped(shape), self.superuser)
+        self.assertEqual({PRIVATE, PUBLIC}, entries, msg=f"{shape} input gave {entries}")
+
+    # ---- the prefetched relation, which the API reads on every parent ------
+
+    @parameterized.expand(LOADED)
+    def test_the_prefetch_does_not_change_what_a_colleague_receives(self, loading):
+        entries = self._serialized(self._relation(loading), self.colleague)
+        self.assertEqual({PUBLIC}, entries, msg=f"{loading} relation gave {entries}")
+
+    @parameterized.expand(LOADED)
+    def test_the_prefetch_does_not_change_what_the_author_receives(self, loading):
+        entries = self._serialized(self._relation(loading), self.author)
+        self.assertEqual({PRIVATE, PUBLIC}, entries, msg=f"{loading} relation gave {entries}")
