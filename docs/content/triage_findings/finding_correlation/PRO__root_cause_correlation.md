@@ -247,6 +247,36 @@ python manage.py recompute_correlations
 python manage.py recompute_correlations --product-id 42
 ```
 
+## What the API exposes
+
+Root Causes are readable over the standard API, so you can pull them into a report, open tickets
+from them, or track them as a metric without going through the UI.
+
+- `GET /api/v2/root_causes/` lists them, ranked the same way the page is.
+- `GET /api/v2/root_causes/{id}/` returns one Root Cause plus its member Findings, each with the
+  evidence that links it and whether the match was exact or heuristic.
+
+Both are read-only. Confirming, rejecting and muting are done from the UI for now; those are
+deliberately not published while the feature is in Beta, so that adding them later cannot break
+anything you have already built against.
+
+Filters on the list: `cause_type` (`exact` or `in`), `muted`, `identity_key` (`exact` or
+`icontains`) and `display_name__icontains`.
+
+Two behaviors worth knowing before you script against it:
+
+- **Counts are scoped to the token's access**, exactly as they are in the UI. Two tokens with
+  different Product access will report different `active_member_count`, `product_count` and
+  `risk_score` for the same Root Cause. This is intended -- the numbers describe what *that*
+  caller can see -- so do not treat them as portfolio-wide totals.
+- **Covered CVE causes are left out of the list** but are always retrievable by id. Pass
+  `?include_subsumed=true` to include them; a Root Cause id you stored earlier keeps working
+  through `GET /api/v2/root_causes/{id}/` even after it becomes covered. Each covered cause
+  carries `subsumed_by_id` and `subsumed_by_name` so you can see which fix clears it.
+
+If the feature flag is off, both endpoints return **403**, not 404 -- the endpoint exists, it is
+simply not enabled.
+
 ## Interaction with Global Component Deduplication
 
 [Global Component Deduplication](/triage_findings/finding_deduplication/pro__global_component_deduplication/)

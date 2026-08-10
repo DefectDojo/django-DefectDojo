@@ -26,7 +26,7 @@ The user record itself is kept. Findings, notes and history reference the people
 
 ## Setup
 
-1. Open **Enterprise Settings > SCIM Provisioning**.
+1. Open **Connect > Authorization** and select **SCIM Provisioning**. SCIM is listed alongside your login providers because it connects to the same identity provider, and is tagged **Provisioning** to distinguish it from the providers that put a button on the login page.
 
 2. Check **Enable SCIM Provisioning** and submit. While this is off, the SCIM endpoints behave as though they do not exist, so a connection test from your identity provider reports the address as not found.
 
@@ -119,7 +119,7 @@ Deleting a group through SCIM removes the group and its memberships. It never de
 
 By default, SCIM will not deactivate a superuser account. The common failure in any provisioning setup is an identity provider scoped more broadly than intended, and superusers are how you get back into DefectDojo when something goes wrong.
 
-If you want your identity provider to manage superusers as well, enable **Allow SCIM to deactivate superusers** in Enterprise Settings. Even then, DefectDojo refuses to deactivate the last remaining active superuser, so provisioning cannot leave the instance without an administrator.
+If you want your identity provider to manage superusers as well, enable **Allow SCIM to deactivate superusers** on the SCIM settings page. Even then, DefectDojo refuses to deactivate the last remaining active superuser, so provisioning cannot leave the instance without an administrator.
 
 ## Limitations
 
@@ -139,6 +139,8 @@ If you want your identity provider to manage superusers as well, enable **Allow 
 **A group fails to push, reporting that a group of that name already exists.** A DefectDojo group with that name was created elsewhere. See [Groups](#groups) above.
 
 **A group member fails to provision.** The person has not been provisioned to DefectDojo yet. Assign them to the application, and the membership succeeds on the next cycle.
+
+**Start with Diagnostics.** Refused SCIM requests are recorded under **Connect > Diagnostics**, with the endpoint, the status and the message DefectDojo sent back. That is usually faster than reading your identity provider's log, and it is the only place that shows both sides of the exchange. Successful provisioning is not recorded there; changes to users and groups appear in the audit history instead.
 
 **Everything reports success, but nothing appears in DefectDojo.** Check that the Tenant URL ends in `/scim/v2` with no trailing slash, and that your identity provider is actually reaching your instance. The **Last Used** column in the SCIM Tokens panel shows whether any request has arrived.
 

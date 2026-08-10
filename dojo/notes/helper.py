@@ -1,6 +1,6 @@
 import logging
 
-from django.db.models import Manager, Prefetch, Q, QuerySet
+from django.db.models import Prefetch, Q
 
 from dojo.notes.models import NoteHistory, Notes
 
@@ -31,17 +31,22 @@ def visible_notes(notes, user):
     on what ``private`` means. A caller with no user (report rendering) gets the
     non-private notes only.
 
-    ``notes`` does not always still carry a query. A DRF list serializer is
-    handed the paginated page, which is a plain list, and a ``to_attr``
-    prefetch yields one too. Those are filtered in Python; a queryset is still
-    narrowed in the database, so callers that go on to count or slice the
-    result keep doing that in one query.
+    ``notes`` is not always a queryset. ``VisibleNotesSerializer`` filters
+    whatever DRF hands its ``ListSerializer``, and on a list endpoint that is a
+    plain list: ``paginate_queryset`` returns ``list(queryset[offset:limit])``.
+    So the same rule is applied in Python when there is no queryset left to
+    apply it to in SQL. Filtering a page after the fact does shorten it, which
+    is a consequence of choosing to enforce the rule at serialization time; the
+    alternative -- leaking another user's private note -- is worse.
     """
     if user is not None and user.is_superuser:
         return notes
-    if not isinstance(notes, (Manager, QuerySet)):
-        author_id = getattr(user, "pk", None)
-        return [note for note in notes if not note.private or note.author_id == author_id]
+    if not hasattr(notes, "filter"):
+        return [
+            note
+            for note in notes
+            if not note.private or (user is not None and note.author_id == user.pk)
+        ]
     if user is None:
         return notes.filter(private=False)
     return notes.filter(Q(private=False) | Q(author=user))

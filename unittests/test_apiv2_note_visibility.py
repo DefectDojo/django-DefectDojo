@@ -8,6 +8,7 @@ marked private. Every read path now goes through ``visible_notes``.
 """
 
 import datetime
+from types import SimpleNamespace
 
 from django.test import Client
 from django.urls import reverse
@@ -161,6 +162,41 @@ class NoteVisibilityTest(DojoAPITestCase):
         entries = {n.entry for n in response.context["notes"]}
         self.assertNotIn(PRIVATE, entries)
         self.assertIn(PUBLIC, entries)
+
+    # ---- the rule when the caller has already materialised the notes -------
+    #
+    # ``VisibleNotesSerializer`` is a ``ListSerializer``, and a list endpoint
+    # hands one a plain list rather than a queryset: DRF's
+    # ``paginate_queryset`` returns ``list(queryset[offset:limit])``. A
+    # queryset-only helper raises ``AttributeError: 'list' object has no
+    # attribute 'filter'`` there, which surfaces as a 500 rather than as a
+    # visibility bug -- and only for non-superusers, because a superuser
+    # returns before any filtering happens.
+
+    def _entries_from_list(self, user):
+        return {n.entry for n in visible_notes(list(self.finding.notes.all()), user)}
+
+    def test_helper_filters_an_already_materialised_list_for_a_colleague(self):
+        self.assertEqual({PUBLIC}, self._entries_from_list(self.colleague))
+
+    def test_helper_filters_an_already_materialised_list_for_the_author(self):
+        self.assertEqual({PRIVATE, PUBLIC}, self._entries_from_list(self.author))
+
+    def test_helper_filters_an_already_materialised_list_for_a_superuser(self):
+        self.assertEqual({PRIVATE, PUBLIC}, self._entries_from_list(self.superuser))
+
+    def test_helper_filters_an_already_materialised_list_without_a_user(self):
+        self.assertEqual({PUBLIC}, self._entries_from_list(None))
+
+    def test_note_serializer_accepts_a_paginated_page(self):
+        """The path that 500s: a page is a list, and the serializer filters it."""
+        page = list(self.finding.notes.all())
+
+        serializer = NoteSerializer(
+            page, many=True, context={"request": SimpleNamespace(user=self.colleague)},
+        )
+
+        self.assertEqual({PUBLIC}, {row["entry"] for row in serializer.data})
 
 
 # Regression: visible_notes assumed a queryset and called .filter() on it, so a
