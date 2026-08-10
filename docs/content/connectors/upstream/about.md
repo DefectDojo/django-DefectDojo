@@ -27,63 +27,108 @@ But everyone needs a starting point, and that's where Upstream Connectors come i
 
 We currently support Upstream Connectors for the following tools, with more on the way:
 
+* **AccuKnox**
+* **Action1**
 * **Acunetix 360**
 * **Akamai API Security**
+* **Akto**
+* **Alert Logic**
 * **Anchore**
+* **AppCheck**
+* **Aqua Security**
+* **Automox**
 * **AWS Security Hub**
 * **Azure DevOps**
 * **Backstage**
+* **Beagle Security**
+* **BigID**
 * **Bitbucket**
 * **Black Duck**
+* **Black Duck Continuous Dynamic**
 * **Bright Security**
 * **Bugcrowd**
 * **BurpSuite**
+* **Calico Cloud**
 * **Censys**
 * **Checkmarx ONE**
+* **Chef Automate**
+* **CI Fuzz**
 * **Cloudflare**
 * **Cobalt.io**
+* **Codacy**
 * **Contrast**
 * **Coverity**
 * **CrowdStrike Falcon**
+* **CyberArk Certificate Manager**
+* **Cyberwatch**
+* **CyCognito**
+* **Datadog**
 * **Deepfence ThreatMapper**
+* **DeepSource**
 * **Dependency-Track**
+* **Detectify**
 * **Docker Scout**
+* **Dragos**
 * **Edgescan**
+* **Elastic Security**
 * **Endor Labs**
 * **Escape**
 * **Fairwinds Insights**
+* **Finite State**
+* **Fleet**
 * **Fortify**
+* **FOSSA**
 * **GitGuardian**
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
+* **Google Artifact Analysis**
 * **Google Cloud Security Command Center**
 * **Group-IB ASM**
 * **HackerOne**
+* **Halo Security**
 * **Harbor**
 * **Have I Been Pwned**
 * **HCL AppScan**
+* **HiddenLayer**
+* **Holm Security**
+* **ImmuniWeb**
+* **InsightCloudSec**
 * **Intigriti**
 * **Intruder**
 * **IriusRisk**
 * **JFrog Xray**
 * **Jira Service Management Assets**
+* **Klocwork**
 * **Kubescape**
 * **Lacework / FortiCNAPP**
 * **Mend**
 * **Microsoft Defender**
 * **Microsoft Defender for Cloud**
 * **MobSF**
+* **NetRise**
 * **NeuVector**
+* **Nightfall AI**
+* **NowSecure**
+* **Nozomi Networks**
 * **Nuclei (ProjectDiscovery Cloud)**
 * **OpenVAS / Greenbone**
+* **Orca Security**
+* **Ostorlab**
+* **Parasoft DTP**
+* **Picus Security**
+* **PingCastle**
 * **Probely**
+* **Promptfoo**
 * **Prowler**
 * **Qualys**
 * **Quay**
+* **Qwiet AI**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Red Hat Satellite**
 * **runZero**
+* **Scantist**
 * **Semgrep**
 * **ServiceNow CMDB**
 * **Shodan**
@@ -91,13 +136,23 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Socket**
 * **SonarQube**
 * **Sonatype IQ**
+* **SOOS**
 * **Sysdig Secure**
 * **Tenable**
 * **Tenable Web App Scanning**
+* **TruffleHog**
+* **Trustwave Fusion**
+* **Uptycs**
+* **Vanta**
 * **Veracode**
+* **Vulnerability Manager Plus**
+* **Wallarm**
 * **Wazuh**
+* **WebInspect Enterprise**
 * **Wiz**
 * **YesWeHack**
+* **Zimperium**
+* **Zora**
 
 For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
 
