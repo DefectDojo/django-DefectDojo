@@ -198,9 +198,13 @@ The full route, for anything the form does not cover.
 
 Nothing is sent when no Findings match the conditions, so a rule filtered to High and above stays quiet on an import that only brought in Low Findings.
 
-### Existing rules keep working
+### Rules written before Messaging Connectors
 
-A message node that names no connection keeps using the instance-wide settings from **Settings > Notifications**, exactly as before. Nothing changes for rules that were configured that way. The connection field is optional, and choosing one is what moves a node onto its own credential and destination.
+A message node sends over a connection, and only over a connection. The Slack, Teams, and email nodes previously fell back to the instance-wide settings under **Settings > Notifications** when no connection was chosen. They no longer do.
+
+A rule written that way keeps running, and its message node records a skipped delivery saying it names no connection. To fix it, open the rule, choose a connection and a destination on the node, and save. A delivery that was already recorded can be replayed from the deliveries list once the node names a connection.
+
+The connection is a required field on every message node, so the rule editor asks for one before the rule can be saved.
 
 ## When a connection stops working
 
@@ -212,7 +216,7 @@ Only credential failures cause this. A message rejected because a Slack channel 
 
 ## Alerts and notifications together
 
-Messaging Connectors are additive. The instance-wide Slack, Teams, and email settings under **Settings > Notifications**, personal notifications, and the notification matrix all keep working exactly as configured.
+Messaging Connectors do not replace notifications. The instance-wide Slack, Teams, and email settings under **Settings > Notifications**, personal notifications, and the notification matrix all keep working exactly as configured. They are what announces DefectDojo's own events; a Messaging Connector is what a rule you wrote sends over.
 
 One thing to watch: if an alert posts to the same channel or address that the instance-wide setting already announces to, that destination receives both messages. Configure one or the other for a given destination.
 
