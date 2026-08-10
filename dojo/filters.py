@@ -510,7 +510,7 @@ def filter_endpoints_host_base(queryset, name, value, statuses=None, endpoint_id
     if statuses:
         filters_kwargs["locations__status__in"] = statuses
 
-    return queryset.filter(**filters_kwargs)
+    return queryset.filter(**filters_kwargs).distinct()
 
 
 class FindingTagFilter(DojoFilter):
