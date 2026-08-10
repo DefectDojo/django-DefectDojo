@@ -1,0 +1,67 @@
+{
+  "kind": "ClusterReport",
+  "apiVersion": "openreports.io/v1alpha1",
+  "metadata": {
+    "name": "merged"
+  },
+  "source": "",
+  "summary": {
+    "pass": 2,
+    "fail": 0,
+    "warn": 0,
+    "error": 0,
+    "skip": 0
+  },
+  "results": [
+    {
+      "source": "kyverno",
+      "policy": "require-pod-hardening",
+      "rule": "require-run-as-non-root",
+      "category": "Pod Security",
+      "severity": "high",
+      "timestamp": {
+        "seconds": 1786377561,
+        "nanos": 0
+      },
+      "result": "pass",
+      "scored": true,
+      "resources": [
+        {
+          "kind": "Pod",
+          "namespace": "sample-ns",
+          "name": "hardened-app",
+          "apiVersion": "v1"
+        }
+      ],
+      "message": "validation rule 'require-run-as-non-root' passed.",
+      "properties": {
+        "process": "background scan"
+      }
+    },
+    {
+      "source": "kyverno",
+      "policy": "require-pod-hardening",
+      "rule": "require-resource-limits",
+      "category": "Pod Security",
+      "severity": "high",
+      "timestamp": {
+        "seconds": 1786377561,
+        "nanos": 0
+      },
+      "result": "pass",
+      "scored": true,
+      "resources": [
+        {
+          "kind": "Pod",
+          "namespace": "sample-ns",
+          "name": "hardened-app",
+          "apiVersion": "v1"
+        }
+      ],
+      "message": "validation rule 'require-resource-limits' passed.",
+      "properties": {
+        "process": "background scan"
+      }
+    }
+  ]
+}

@@ -1370,6 +1370,25 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Gixy Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Python Taint Scan": ["vuln_id_from_tool", "file_path", "line"],
     "Ruff Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "CodeQL Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Psalm Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "PHPStan Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Staticcheck Scan": ["vuln_id_from_tool", "file_path", "line"],
+    # Runtime tools report an event stream. Keying on the rule and the workload rather than the
+    # event's own detail is what folds a rule firing repeatedly into one Finding.
+    "Falco Scan": ["vuln_id_from_tool", "component_name"],
+    "Tracee Scan": ["vuln_id_from_tool", "component_name"],
+    "Kyverno Scan": ["vuln_id_from_tool", "component_name"],
+    "KubeEye Scan": ["vuln_id_from_tool", "component_name"],
+    "Vuls Scan": ["vulnerability_ids", "component_name"],
+    "terraform-compliance Scan": ["vuln_id_from_tool", "component_name"],
+    "CloudFormation Guard Scan": ["vuln_id_from_tool", "file_path", "component_name"],
+    # component_name holds the injectable parameter, so two parameters on one URL stay apart
+    # while the many payloads Dalfox tries against one parameter fold together.
+    "Dalfox Scan": ["vuln_id_from_tool", "component_name", "endpoints"],
+    "PyRIT Scan": ["title", "vuln_id_from_tool"],
+    "debsecan Scan": ["vulnerability_ids", "component_name"],
+    "PMapper Scan": ["vuln_id_from_tool", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1800,6 +1819,23 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Gixy Scan": DEDUPE_ALGO_HASH_CODE,
     "Python Taint Scan": DEDUPE_ALGO_HASH_CODE,
     "Ruff Scan": DEDUPE_ALGO_HASH_CODE,
+    # CodeQL and Psalm both emit SARIF fingerprints, which are more stable across edits than a
+    # file and line, so prefer them and fall back to the hash code when a report has none.
+    "CodeQL Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Psalm Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "PHPStan Scan": DEDUPE_ALGO_HASH_CODE,
+    "Staticcheck Scan": DEDUPE_ALGO_HASH_CODE,
+    "Falco Scan": DEDUPE_ALGO_HASH_CODE,
+    "Tracee Scan": DEDUPE_ALGO_HASH_CODE,
+    "Kyverno Scan": DEDUPE_ALGO_HASH_CODE,
+    "KubeEye Scan": DEDUPE_ALGO_HASH_CODE,
+    "Vuls Scan": DEDUPE_ALGO_HASH_CODE,
+    "terraform-compliance Scan": DEDUPE_ALGO_HASH_CODE,
+    "CloudFormation Guard Scan": DEDUPE_ALGO_HASH_CODE,
+    "Dalfox Scan": DEDUPE_ALGO_HASH_CODE,
+    "PyRIT Scan": DEDUPE_ALGO_HASH_CODE,
+    "debsecan Scan": DEDUPE_ALGO_HASH_CODE,
+    "PMapper Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
