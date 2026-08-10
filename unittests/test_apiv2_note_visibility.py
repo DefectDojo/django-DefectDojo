@@ -152,7 +152,8 @@ class NoteVisibilityTest(DojoAPITestCase):
         self.assertEqual({PUBLIC}, self._entries(None))
 
     def test_helper_accepts_an_already_evaluated_list(self):
-        """A paginated notes page arrives as a list, not a queryset.
+        """
+        A paginated notes page arrives as a list, not a queryset.
 
         DRF pagination evaluates the queryset before serialization, so
         ``VisibleNotesSerializer.to_representation`` hands ``visible_notes`` a
