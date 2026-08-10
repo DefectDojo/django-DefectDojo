@@ -138,7 +138,8 @@ class Command(BaseCommand):
         self.load_initial_fixtures()
         self.persist_jira_webhook_secret()
         self.load_extra_fixtures()
-        self.install_watson()
+        if settings.WATSON_SEARCH_ENABLED:
+            self.install_watson()
         call_command("migrate_textquestions")
 
     def create_admin_user(self) -> None:

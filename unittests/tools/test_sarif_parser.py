@@ -412,6 +412,7 @@ add_core(ptr, offset, val);
                 self.assertEqual("src/common/io.cc", finding.file_path)
                 self.assertEqual(31, finding.line)
                 self.assertEqual(120, finding.cwe)
+                self.assertEqual([120], finding.unsaved_cwes)
                 self.assertEqual("FF1004", finding.vuln_id_from_tool)
                 self.assertEqual(
                     "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda", finding.unique_id_from_tool,
@@ -434,6 +435,10 @@ add_core(ptr, offset, val);
                 self.assertEqual(description, finding.description)
                 self.assertEqual("src/cli_main.cc", finding.file_path)
                 self.assertEqual(482, finding.line)
+                # rule reports two CWEs (CWE-120, CWE-20); primary cwe keeps the existing
+                # last-extracted choice while the full set is persisted via unsaved_cwes
+                self.assertEqual(20, finding.cwe)
+                self.assertEqual([120, 20], finding.unsaved_cwes)
                 self.assertEqual("FF1021", finding.vuln_id_from_tool)
                 self.assertEqual(
                     "ad8408027235170e870e7662751a01386beb2d2ed8beb75dd4ba8e4a70e91d65", finding.unique_id_from_tool,
@@ -579,6 +584,46 @@ add_core(ptr, offset, val);
             {"stableResultHash": {"version": 2, "value": "234567900abcd"}},
             get_fingerprints_hashes(data2["fingerprints"]),
         )
+
+        # some tools (e.g. BlackDuck) wrap the hash as {"value": "<hash>"} instead of a plain string
+        data3 = {"fingerprints": {"csvRowSha256": {"value": "abc123"}}}
+        self.assertEqual(
+            {"csvRowSha256": {"version": 0, "value": "abc123"}},
+            get_fingerprints_hashes(data3["fingerprints"]),
+        )
+
+        # nested dict with no "value" key falls back to empty string rather than raising KeyError
+        data4 = {"fingerprints": {"csvRowSha256": {"other": "data"}}}
+        self.assertEqual(
+            {"csvRowSha256": {"version": 0, "value": ""}},
+            get_fingerprints_hashes(data4["fingerprints"]),
+        )
+
+    def test_blackduck_nested_fingerprints(self):
+        """
+        BlackDuck wraps fingerprint values as {"value": "<hash>"} instead of a plain string.
+        Verify unique_id_from_tool is extracted as a string, not left as a dict.
+        """
+        with (get_unit_tests_scans_path("sarif") / "blackduck_nested_fingerprints.sarif").open(encoding="utf-8") as testfile:
+            parser = SarifParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(5, len(findings))
+            for finding in findings:
+                self.common_checks(finding)
+                self.assertIsInstance(finding.unique_id_from_tool, str)
+                self.assertFalse(finding.unique_id_from_tool.startswith("{"))
+            with self.subTest(i=0):
+                finding = findings[0]
+                self.assertEqual("Medium", finding.severity)
+                self.assertEqual("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", finding.unique_id_from_tool)
+            with self.subTest(i=1):
+                finding = findings[1]
+                self.assertEqual("High", finding.severity)
+                self.assertEqual("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", finding.unique_id_from_tool)
+            with self.subTest(i=3):
+                finding = findings[3]
+                self.assertEqual("Info", finding.severity)
+                self.assertEqual("dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd", finding.unique_id_from_tool)
 
     def test_tags_from_result_properties(self):
         with (get_unit_tests_scans_path("sarif") / "taint-python-report.sarif").open(encoding="utf-8") as testfile:

@@ -16,12 +16,13 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 from vcr_unittest import VCRTestCase
 
+from dojo.caching import invalidate_dojo_settings_cache
 from dojo.importers.location_manager import LocationManager
-from dojo.jira_link import helper as jira_helper
-from dojo.jira_link.views import get_custom_field
+from dojo.jira import helper as jira_helper
+from dojo.jira.views import get_custom_field
 from dojo.location.models import Location, LocationFindingReference
 from dojo.location.status import FindingLocationStatus
-from dojo.middleware import DojoSytemSettingsMiddleware
+from dojo.middleware import SYSTEM_SETTINGS_CACHE_KEY, get_cached_system_settings
 from dojo.models import (
     SEVERITIES,
     DojoMeta,
@@ -44,6 +45,17 @@ from dojo.models import (
 logger = logging.getLogger(__name__)
 
 
+def refresh_system_settings_cache():
+    """
+    Make the next ``System_Settings.objects.get()`` reflect DB changes made in a
+    test. Tests mutate settings via ``.update()`` (which fires no post_save) so
+    the L1/L2 cache isn't auto-busted; drop it and re-warm so a subsequent cached
+    read is served in-process. Replaces the old middleware ``load()``.
+    """
+    invalidate_dojo_settings_cache(SYSTEM_SETTINGS_CACHE_KEY)
+    get_cached_system_settings()
+
+
 def get_unit_tests_path():
     return Path(__file__).parent
 
@@ -61,14 +73,14 @@ def toggle_system_setting_boolean(flag_name, value):
             # Set the flag to the specified value
             System_Settings.objects.update(**{flag_name: value})
             # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-            DojoSytemSettingsMiddleware.load()
+            refresh_system_settings_cache()
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{flag_name: not value})
                 # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-                DojoSytemSettingsMiddleware.load()
+                refresh_system_settings_cache()
         return wrapper
 
     return decorator
@@ -84,14 +96,14 @@ def with_system_setting(field, value):
             # Set the flag to the specified value
             System_Settings.objects.update(**{field: value})
             # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-            DojoSytemSettingsMiddleware.load()
+            refresh_system_settings_cache()
             try:
                 return test_func(*args, **kwargs)
             finally:
                 # Reset the flag to its original state after the test
                 System_Settings.objects.update(**{field: old_value})
                 # Reinitialize middleware with updated settings as this doesn't happen automatically during django tests
-                DojoSytemSettingsMiddleware.load()
+                refresh_system_settings_cache()
 
         return wrapper
 
@@ -126,12 +138,12 @@ class DojoTestUtilsMixin:
         return User.objects.get(username="admin")
 
     def system_settings(self, **kwargs):
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         for key, value in kwargs.items():
             setattr(ss, key, value)
         ss.save()
         # Refresh the cache with the new settings
-        DojoSytemSettingsMiddleware.load()
+        refresh_system_settings_cache()
 
     def create_product_type(self, name, *args, description="dummy description", **kwargs):
         product_type = Product_Type(name=name, description=description)
@@ -346,7 +358,7 @@ class DojoTestUtilsMixin:
         }
 
     def get_expected_redirect_product(self, product):
-        return f"/product/{product.id}"
+        return f"/asset/{product.id}"
 
     def add_product_jira(self, data, expect_redirect_to=None, *, expect_200=False):
         response = self.client.get(reverse("new_product"))
@@ -355,7 +367,7 @@ class DojoTestUtilsMixin:
         # self.log_model_instance(JIRA_Project.objects.last())
 
         if not expect_redirect_to and not expect_200:
-            expect_redirect_to = "/product/%i"
+            expect_redirect_to = "/asset/%i"
 
         response = self.client.post(reverse("new_product"), urlencode(data), content_type="application/x-www-form-urlencoded")
 
@@ -540,17 +552,22 @@ class DojoTestUtilsMixin:
         return model.objects.order_by("id").last()
 
     def get_unsaved_locations(self, finding):
-        if settings.V3_FEATURE_LOCATIONS:
-            return LocationManager.make_abstract_locations(finding.unsaved_locations)
-        # TODO: Delete this after the move to Locations
-        return finding.unsaved_endpoints
+        if not hasattr(finding, "_cached_unsaved_locations"):
+            if settings.V3_FEATURE_LOCATIONS:
+                locations = LocationManager.make_abstract_locations(finding.unsaved_locations)
+            else:
+                # TODO: Delete this after the move to Locations
+                locations = finding.unsaved_endpoints
+            for loc in locations:
+                loc.clean()
+            finding._cached_unsaved_locations = locations
+        return finding._cached_unsaved_locations
 
     def validate_locations(self, findings):
         for finding in findings:
-            # AND SEVERITY HAHAHAHA
             self.assertIn(finding.severity, Finding.SEVERITIES)
-            for location in self.get_unsaved_locations(finding):
-                location.clean()
+            # get_unsaved_locations handles conversion + cleaning + caching
+            self.get_unsaved_locations(finding)
 
 
 class DojoTestCase(TestCase, DojoTestUtilsMixin):
@@ -561,7 +578,7 @@ class DojoTestCase(TestCase, DojoTestUtilsMixin):
     def setUp(self):
         super().setUp()
         # Initialize middleware with fresh settings from db
-        DojoSytemSettingsMiddleware.load()
+        refresh_system_settings_cache()
 
     def common_check_finding(self, finding):
         self.assertIn(finding.severity, SEVERITIES)
@@ -767,8 +784,11 @@ class DojoAPITestCase(APITestCase, DojoTestUtilsMixin):
         self.assertEqual(200, response.status_code, response.content[:1000])
         return response.data
 
-    def delete_finding_api(self, finding_id):
-        response = self.client.delete(reverse("finding-list") + f"{finding_id}/")
+    def delete_finding_api(self, finding_id, push_to_jira=None):
+        url = reverse("finding-list") + f"{finding_id}/"
+        if push_to_jira is not None:
+            url = f"{url}?push_to_jira={str(push_to_jira).lower()}"
+        response = self.client.delete(url)
         self.assertEqual(204, response.status_code, response.content[:1000])
         return response.data
 

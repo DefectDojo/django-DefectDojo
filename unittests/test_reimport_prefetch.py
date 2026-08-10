@@ -118,7 +118,7 @@ class ReimportDuplicateFindingsTestBase(DojoTestCase):
                 minimum_severity="Info",
                 active=True,
                 verified=True,
-                sync=True,
+                force_sync=True,
                 scan_type=SCAN_TYPE,
             )
             return reimporter.process_scan(scan)

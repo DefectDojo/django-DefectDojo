@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<detailedreport xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://www.veracode.com/schema/reports/export/1.0" xsi:schemaLocation="https://www.veracode.com/schema/reports/export/1.0 https://analysiscenter.veracode.com/resource/detailedreport.xsd" report_format_version="1.5" account_id="48767" app_name="data-services" app_id="402332" analysis_id="2335367" static_analysis_unit_id="2351115" sandbox_id="537358" first_build_submitted_date="2018-02-17 00:39:35 UTC" version="2018-05-25-18:00:29" build_id="2348782" submitter="Bob Cratchet" platform="Not Specified" assurance_level="5" business_criticality="5" generation_date="2018-06-25 16:19:28 UTC" veracode_level="VL3" total_flaws="1" flaws_not_mitigated="1" teams="" life_cycle_stage="Not Specified" planned_deployment_date="" last_update_time="2018-05-26 00:06:22 UTC" is_latest_build="false" policy_name="Veracode Recommended Very High" policy_version="1" policy_compliance_status="Did Not Pass" policy_rules_status="Did Not Pass" grace_period_expired="true" scan_overdue="false" business_owner="" business_unit="Not Specified" tags="" legacy_scan_engine="false">
+	<software_composition_analysis third_party_components="1" violate_policy="false" components_violated_policy="0">
+		<vulnerable_components>
+		<component component_id="1793362a-098a-47f2-95e8-0565117aa7fd" file_name="commons-httpclient-3.1.jar" sha1="964cd74171f427720480efdec40a7c7f6e58426a" vulnerabilities="1" max_cvss_score="4.3" version="3.1" library="commons-httpclient" vendor="commons-httpclient" description="The HttpClient  component supports the client-side of RFC 1945 (HTTP/1.0)  and RFC 2616 (HTTP/1.1) , several related specifications (RFC 2109 (Cookies) , RFC 2617 (HTTP Authentication) , etc.), and provides a framework by which new request types (methods) or HTTP extensions can be created easily." added_date="2018-02-17 00:35:59 UTC" component_affects_policy_compliance="false" new="false">
+		<file_paths>
+		<file_path value="bogus-services-1.1.15-SNAPSHOT.war#zip:WEB-INF/lib/commons-httpclient-3.1.jar" />
+		</file_paths>
+	<licenses>
+		<license name="Apache License 2.0" spdx_id="Apache-2.0" license_url="https://spdx.org/licenses/Apache-2.0.html" risk_rating="2" />
+		</licenses>
+	<vulnerabilities>
+		<vulnerability cve_id="CVE-2012-6153" cvss_score="4.3" severity="3" cwe_id="CWE-20 CWE-295" cve_summary="http/conn/ssl/AbstractVerifier.java in Apache Commons HttpClient before 4.2.3 does not properly verify that the server hostname matches a domain name in the subject's Common Name (CN) or subjectAltName field of the X.509 certificate, which allows man-in-the-middle attackers to spoof SSL servers via a certificate with a subject that specifies a common name in a field that is not the CN field.  NOTE: this issue exists because of an incomplete fix for CVE-2012-5783." severity_desc="Medium" mitigation="false" vulnerability_affects_policy_compliance="false" />
+		</vulnerabilities>
+	<violated_policy_rules />
+	</component>
+	</vulnerable_components>
+	</software_composition_analysis>
+	</detailedreport>

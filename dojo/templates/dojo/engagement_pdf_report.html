@@ -158,7 +158,7 @@
             </div>
         {% endif %}
         {% if include_disclaimer%}
-            <div style="background-color:#DADCE2; border:1px #003333; padding:.8em; ">
+            <div style="background-color:#DADCE2; border:1px solid #003333; padding:.8em; ">
                 <span style="font-size:16pt;  font-family: 'Cambria','times new roman','garamond',serif; color:#ff0000;">Disclaimer</span><br/>
                 <p style="font-size:11pt; line-height:10pt; font-family: 'Cambria','times roman',serif;">{{ disclaimer | bleach_with_a_tags }}</p>
             </div>
@@ -414,15 +414,13 @@
 {% block js %}
     {{ block.super }}
     <script src="{{ host }}{% static "jquery/dist/jquery.min.js" %}"></script>
-    <!-- Flot Charts JavaScript -->
-    <script src="{{ host }}{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{{ host }}{% static "flot/jquery.flot.stack.js" %}"></script>
+    <!-- Chart.js -->
+    <script src="{{ host }}{% static "chart.js/dist/chart.umd.js" %}"></script>
+    <script src="{{ host }}{% static "moment/min/moment.min.js" %}"></script>
+    <script src="{{ host }}{% static "chartjs-adapter-moment/dist/chartjs-adapter-moment.js" %}"></script>
     <script src="{{ host }}{% static "dojo/js/metrics.js" %}"></script>
     <script type="text/javascript">
-        $(function () {
+        function renderReportCharts() {
             var data = {};
             var data_1 = [];
             var ticks = [];
@@ -499,7 +497,7 @@
                 opened_per_month_2(critical, high, medium, low);
             {% endif %}
 
-        });
+        }
 
         {% if include_table_of_contents%}
         window.onload = function () {
@@ -571,7 +569,17 @@
             }
 
             document.getElementById("toc").innerHTML += toc;
+
+            // Render the summary charts AFTER the table-of-contents builder has
+            // rewritten #contents.innerHTML. Rendering earlier (on
+            // DOMContentLoaded) means this reassignment re-parses the subtree and
+            // discards the already-painted Chart.js canvases, leaving blank charts.
+            renderReportCharts();
         };
+        {% else %}
+        $(function () {
+            renderReportCharts();
+        });
         {% endif %}
     </script>
 {% endblock %}

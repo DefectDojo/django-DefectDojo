@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load get_banner %}
+{% block content %}
+    {{ block.super }}
+    <h3>{% trans "Login" %}</h3>
+    <form class="form-horizontal" method="POST" autocomplete="off"> {% csrf_token %}
+        <fieldset class="col-md-offset-3 col-md-6">
+            {% if "banner_enable"|get_banner_conf %}
+                <div class="well">
+                    {{ "banner_message"|get_banner_conf }}
+                </div>
+            {% endif %}
+
+            {% include "dojo/form_fields.html" with form=form %}
+
+            <!-- Button -->
+            <div class="form-group">
+                <div class="col-sm-offset-1 col-sm-2">
+                    <button class="btn" id="toggleBox" onclick="togglePassVisibility()" type="button">
+                        <i class="fa-solid fa-eye"></i>
+                        {% trans "Show Password" %}
+                    </button>
+                </div>
+
+                {% if CLASSIC_AUTH_ENABLED %}
+                    <div class="col-sm-offset-1 col-sm-2">
+                        <button class="btn btn-success">{% trans "Login" %}</button>
+                    </div>
+                    {% if FORGOT_PASSWORD or FORGOT_USERNAME %}
+                        <div class="col-sm-4">
+                            <ul style="list-style-type: none">
+                                {% if FORGOT_PASSWORD %}
+                                    <li><a id="reset-password" href="{% url 'password_reset' %}">{% trans "I forgot my password" %}</a></li>
+                                {% endif %}
+                                {% if FORGOT_USERNAME %}
+                                    <li><a id="forgot-username" href="{% url 'forgot_username' %}">{% trans "I forgot my username" %}</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </fieldset>
+    </form>
+{% endblock %}

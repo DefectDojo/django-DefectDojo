@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load event_tags %}
+{% load display_tags %}
+{% load static %}
+{% block add_css %}
+    {{ block.super }}
+
+    <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
+{% endblock %}
+{% block add_styles %}
+    {{ block.super }}
+    .chosen-container {
+    width: 70% !important;
+    }
+    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
+    width: 70% !important;
+    }
+{% endblock %}
+{% block content %}
+    {{ block.super }}
+    <h3> Merge Findings</h3>
+    <div id="merge">
+        <p>
+        </p>
+
+        <form id="add_finding" class="form-horizontal" method="post">
+            {% csrf_token %}
+            {% include "dojo/form_fields.html" with form=form %}
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" type="submit" value="Merge Findings"/>
+                </div>
+            </div>
+            <br/><br/>
+        </form>
+    </div>
+{% endblock %}
+{% block postscript %}
+    {{ block.super }}
+    <script>
+
+        $( document ).ready(function() {
+          var selected = $('#id_finding_to_merge_into').val();
+
+          //Select all value in findings to merge
+          $('#id_findings_to_merge option').prop('selected', true);
+
+          // apart from the select finding we are merging into
+          $("#id_findings_to_merge option[value='" + selected + "']").prop('selected', false);
+        });
+
+        $(function () {
+          $('#id_finding_to_merge_into').change(function(){
+            var selected = $('#id_finding_to_merge_into').val();
+
+            $("#id_findings_to_merge option[value='" + selected + "']").prop('selected', false);
+          });
+        });
+    </script>
+{% endblock %}

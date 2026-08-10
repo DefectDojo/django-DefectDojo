@@ -51,12 +51,13 @@ mainSections = ["docs"]
     "get_started",
     "releases",
     "import_data",
+    "connectors",
     "triage_findings",
     "metrics_reports",
     "admin",
     "automation",
     "asset_modelling",
-    "issue_tracking"] # ["docs"] (default) or list of sections (e.g. ["docs", "guides"])
+    "sensei"] # ["docs"] (default) or list of sections (e.g. ["docs", "guides"])
 
   toTopButton = true # scroll-to-top button
   breadcrumbTrail = true # breadcrumb navigation on doc pages

@@ -109,7 +109,77 @@ Select the Findings you wish to Risk Accept and click the **Bulk Update Actions*
 
 Conversely, if you wish to unaccept the risk for any Findings that had been previously Risk Accepted, select **Unaccept Risk**. If a Finding has been Simple Risk Accepted, the risk must be unaccepted prior to adding it to a Full Risk Acceptance object.
 
-### Risk Acceptance Best Practices 
+## Risk Acceptance Permissions and Visibility
+
+Risk Acceptance visibility is **gated by a distinct minimum permission from Finding visibility**.  A user who can view a Finding does not automatically have permission to view a Risk Acceptance that contains that Finding.
+
+### Minimum role for Risk Acceptance actions
+
+| Action | Minimum role on the parent Asset (Product) |
+| --- | --- |
+| View a Risk Acceptance | Writer |
+| Add or Edit a Risk Acceptance | Writer |
+
+For the complete role-permission chart that lists Risk Acceptance permissions alongside other Asset-level actions, see [Action permission charts](/admin/user_management/user_permission_chart/#role-permission-chart).
+
+## Expiring and Reinstating a Risk Acceptance
+
+A Risk Acceptance that has expired is labelled **Expired** next to its expiration date in the Risk Acceptances table, so you can tell at a glance which ones are no longer suppressing their Findings.
+
+The gear menu on a Risk Acceptance — in the table or on its detail page — offers whichever of these applies:
+
+- **Expire Risk Acceptance**, on one that is still live.  It expires immediately rather than waiting for its expiration date, and its Findings are reactivated according to its **Reactivate Expired Findings** and **Restart SLA Expired** settings.
+- **Reinstate Risk Acceptance**, on one that has expired.  Its Findings are accepted again, and it expires after the number of days in the **Risk Acceptance Form Default Days** setting.
+
+Both require the same permission as editing the Risk Acceptance, and both ask for confirmation first.  To reinstate for a specific length of time instead of the default window, edit the expiration date rather than using the Reinstate action — see below.
+
+## When a Risk Acceptance Expiration Date is Changed
+
+A Risk Acceptance's expiration date can be edited at any time after creation.  How DefectDojo responds depends on whether the Risk Acceptance is currently active or has already expired.
+
+### Editing the date on an active Risk Acceptance
+
+If a Risk Acceptance has not yet expired — its expiration date is in the future, or has just passed but the periodic expiration job has not yet processed it — editing the date is straightforward:
+
+- The new date is saved as-is.  If the user chose `2027-01-15`, the Risk Acceptance stores `2027-01-15`.
+- Linked Findings stay Risk Accepted.
+- The Risk Acceptance object stays active.
+
+### Pushing the date forward on an already-expired Risk Acceptance
+
+If the Risk Acceptance has **already expired** — meaning the periodic job has processed its expiration, the linked Findings have been set back to Active per the Risk Acceptance's expiration settings, and the Risk Acceptance is in the expired state — editing the expiration date to a future value triggers a **reinstate** workflow:
+
+- The Risk Acceptance is reinstated and is no longer in the expired state.
+- Every Finding that was linked to the Risk Acceptance and is currently Active is re-accepted (set back to Risk Accepted / Inactive).
+- Endpoint statuses on those Findings are updated to reflect the re-acceptance.
+- A comment is posted to any linked Jira issues recording the reinstate.
+
+The date you enter is the date that is saved.  The system setting **Risk Acceptance Form Default Days** (default: 180) is only used when you did not ask for a particular date — for example when you use the **Reinstate** action, which reinstates the Risk Acceptance without editing its expiration date, and therefore sets it to today + N days.
+
+### Moving the date backwards or to a date still in the past
+
+Moving the expiration date to an earlier-but-still-future date has no special behavior — the Risk Acceptance stays active and the new date is saved.
+
+Moving the date to a date in the past does not immediately expire the Risk Acceptance from the edit form; the next periodic expiration job will pick it up and apply the standard expiration behavior (Findings reactivated according to the Risk Acceptance's **Reactivate Expired Findings** setting, SLA restart applied if **Restart SLA Expired** is set).
+
+### What the API exposes
+
+API consumers can observe expiration state on the Risk Acceptance object via the `expiration_date`, `expiration_date_handled`, and `expiration_date_warned` fields:
+
+- `expiration_date` is the configured date.
+- `expiration_date_handled` is `null` while the Risk Acceptance is active, and is set to a timestamp when the periodic job has processed the expiration.  A Risk Acceptance is "expired" precisely when `expiration_date_handled` is non-null.
+- `expiration_date_warned` is set when the system has sent the expiration-warning notification.
+
+When a reinstate happens, both `expiration_date_handled` and `expiration_date_warned` are cleared back to `null`, and `expiration_date` holds the date you sent — or today + N days when the reinstate was triggered without a new date.  Tooling that watches Risk Acceptances for state changes can use the `expiration_date_handled` field as the canonical "is this Risk Acceptance currently expired?" flag.
+
+Expiring and reinstating are also available directly, so you do not have to drive them by editing `expiration_date`:
+
+- `POST /api/v2/risk_acceptance/{id}/expire/` expires it now.  Returns `400` if it has already expired.
+- `POST /api/v2/risk_acceptance/{id}/reinstate/` reinstates an expired one, re-accepting the Findings it covers.  Returns `400` if it has not expired.  Send `expiration_date` to choose how long for; omit it to use today + N days.
+
+Both accept an optional `reason`, which is recorded as a note on the Risk Acceptance along with who performed the action.  Both require the same permission as editing the Risk Acceptance.
+
+## Risk Acceptance Best Practices 
 
 While it is possible to affect Findings within Full Risk Acceptance objects using Simple Risk Acceptance workflows (and vice versa), it is generally preferable to default to either process exclusively rather than having both enabled at once. 
 

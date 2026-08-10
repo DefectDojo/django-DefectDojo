@@ -20,16 +20,22 @@ See our [Pro UI Guide](/get_started/about/ui_pro_vs_os/) for more information.
 
 ![image](images/enabling_deduplication_within_an_engagement_2.png)
 
+### Global Search
+
+Find any Finding, Asset, Engagement, and more from a single search box in the topbar. DefectDojo Pro's global search spans your objects with fast, typo-tolerant Postgres full-text search.
+
+See our [Global Search Guide](/navigation/pro__global_search/) for more information.
+
 ### Assets/Organizations
 
-DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/hierarchy/pro__assets_organizations/) for details.
+DefectDojo Pro allows for improved organizational visualization for large lists of repositories or other business structures.  See [Assets/Organizations documentation](/asset_modelling/pro_hierarchy/asset_hierarchy/) for details.
 
 ![image](images/asset_hierarchy_diagram.png)
 
 ### Finding Priority
 
 DefectDojo Pro can pre-triage your Findings by Priority and Risk, allowing your team to identify and fix your most critical issues first.
-See our [Finding Priority Guide](/asset_modelling/hierarchy/pro__priority_sla/) for more details.
+See our [Finding Priority Guide](/asset_modelling/pro_hierarchy/priority_sla/) for more details.
 
 ### Rules Engine
 
@@ -38,6 +44,12 @@ DefectDojo Pro's Rules Engine allows you to script automated bulk actions and bu
 See our [Rules Engine Guide](/automation/rules_engine/about) for more info.
 
 ![image](images/rules_engine_4.png)
+
+### Sensei
+
+DefectDojo Pro's **Sensei** (BETA) is an AI-powered scan-and-fix capability: connect a repository through a GitHub App and Sensei scans it, imports the findings, and opens pull requests that remediate them — with a preview-first workflow, so nothing runs (and no LLM cost is incurred) until you approve.
+
+See our [Sensei Guide](/sensei/about_sensei/) for more info.
 
 ### Pro Dashboards and Reporting
 
@@ -59,7 +71,7 @@ See our [Deduplication Tuning Guide](/triage_findings/finding_deduplication/pro_
 
 ### More Import Options
 
-DefectDojo Pro includes four additional import methods: [Universal Importer](/import_data/pro/specialized_import/external_tools/), [API Connectors](/import_data/pro/connectors/about_connectors/), [Universal Parser](/supported_tools/parsers/universal_parser/), and [Smart Upload](/import_data/pro/specialized_import/smart_upload/).
+DefectDojo Pro includes four additional import methods: [Universal Importer](/import_data/pro/specialized_import/external_tools/), [Upstream Connectors](/connectors/upstream/about/), [Universal Parser](/supported_tools/parsers/universal_parser/), and [Smart Upload](/import_data/pro/specialized_import/smart_upload/).
 
 ![image](images/pro_import_methods.png)
 
@@ -74,15 +86,15 @@ Quickly build a command-line pipeline to import, reimport, and export data to yo
 
 See our [External Tools Guide](/import_data/pro/specialized_import/external_tools/) for more information.
 
-### Connectors
+### Upstream Connectors
 
 DefectDojo can instantly connect to enterprise-level scanning tools to import new Finding data, creating an automated Import pipeline that works out-of-the-box without the need to set up any API calls or cron jobs. 
 
-See our [Connectors Guide](/import_data/pro/connectors/about_connectors/) for more information.
+See our [Upstream Connectors Guide](/connectors/upstream/about/) for more information.
 
 ![image](images/add_edit_connectors_2.png)
 
-Supported tools for Connectors include:
+Supported tools for Upstream Connectors include:
 
 * Anchore
 * AWS Security Hub
@@ -103,6 +115,12 @@ If you’re using an unsupported/customized scanning tool, or just wish that Def
 See our [Universal Parser Guide](/import_data/pro/specialized_import/universal_parser//) for more information.
 
 ![image](images/universal_parser_3.png)
+
+## Managing optional features
+
+Many of the capabilities above are optional and ship behind a feature flag, so you can adopt them when you are ready. A superuser can turn most of them on and off directly from **Settings > Feature Flags**, without contacting support.
+
+See the [Feature Flags](/admin/feature_flags/pro__feature_flags/) guide for how to enable a feature, and for why a feature might be locked or unavailable on your installation type.
 
 ## Support
 

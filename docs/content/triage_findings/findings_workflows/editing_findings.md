@@ -37,6 +37,17 @@ This will open the **Edit Finding** form, where you can edit the metadata, chang
 ​
 * **SAST / DAST** are labels used to organize your Findings into the context they were discovered in. Generally, this label is populated based on the scanning tool used, but you can adjust this to a more accurate level (for example, if the Finding was found by both a SAST and a DAST tool).
 
+### Editing the Mitigated Date and Mitigated By
+
+By default, a Finding's **Mitigated Date** and **Mitigated By** values are **not editable**. These fields are hidden from both the Edit Finding form and the Close Finding dialog, and the Mitigated Date is always set automatically to the moment the Finding is closed. Attempting to set or backdate these values through the API is rejected for the same reason.
+
+Editing can be turned on with the `DD_EDITABLE_MITIGATED_DATA` server setting. When it is enabled, the **Mitigated Date** and **Mitigated By** fields appear in the Edit Finding form and the Close Finding dialog, and can also be set through the API — but only for users with **superuser** status. In other words, editing requires *both* the setting to be enabled *and* the acting user to be a superuser.
+
+* **Why it's off by default:** allowing a mitigation to be backdated can misrepresent SLA compliance — a Finding that was actually remediated *outside* its SLA window could be recorded as though it had been mitigated *within* SLA. Enabling the setting is forward-looking only; it does **not** change the Mitigated Date or age of any existing Findings.
+* **Everything stays auditable:** every change to a Finding, including edits to the Mitigated Date and Mitigated By, is captured in the Finding's history log — who made the change, when, and the previous and new values.
+* **Applying the setting:** `DD_EDITABLE_MITIGATED_DATA` is a server-level environment variable (see [Configuration](/get_started/open_source/configuration/)). Changing it requires a service restart to take effect.
+* **DefectDojo Cloud / Pro:** this setting cannot be changed from the UI. Contact DefectDojo Support to have it enabled for your instance.
+
 ## Bulk Edit Findings
 
 Findings can be edited in bulk from a Finding List, which can be found either on the Findings page itself, or from within a Test. 

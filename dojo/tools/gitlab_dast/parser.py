@@ -112,10 +112,14 @@ class GitlabDastParser:
             vuln.get("name", finding.unique_id_from_tool)
         )
         # cwe
-        for identifier in vuln["identifiers"]:
-            if identifier["type"].lower() == "cwe":
-                finding.cwe = int(identifier["value"])
-                break
+        unsaved_cwes = [
+            int(identifier["value"])
+            for identifier in vuln["identifiers"]
+            if identifier["type"].lower() == "cwe"
+        ]
+        if unsaved_cwes:
+            finding.cwe = unsaved_cwes[0]
+            finding.unsaved_cwes = unsaved_cwes
 
         # references
         if vuln["links"]:

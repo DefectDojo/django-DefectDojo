@@ -1,0 +1,142 @@
+name: "CI: Warm Caches"
+
+# Why this workflow exists at all.
+#
+# GitHub scopes every Actions cache entry to the ref that saved it. A run can
+# restore entries saved by its own ref, by its base branch (pull_request events
+# only), and by the repository's default branch -- nothing else. So a pull
+# request cannot leave behind a cache that any *other* pull request can use: it
+# saves into its own PR scope, and that scope dies with the PR.
+#
+# Without a workflow like this one, caching the migrated database would therefore
+# do nothing at all for the first push of a new branch, which is most branches
+# most of the time. Something has to save an entry into a scope pull requests are
+# allowed to read, and only a run triggered from a release line can do that.
+#
+# Note what is deliberately absent: a `schedule:` trigger. Scheduled workflows
+# only ever run against the default branch, so a cron here would run with ref
+# refs/heads/master and warm the master scope -- not the release-line scopes this
+# is for. Eviction is handled instead by reads: GitHub drops an entry it has not
+# seen used for 7 days, and every pull request based on a release line reads this
+# one, which keeps it alive without a timer.
+#
+# Warming the default-branch scope is worth doing too, since every run can read
+# it regardless of base, but that needs a workflow file on master and is a
+# separate change.
+
+on:
+  push:
+    branches:
+      - bugfix
+      - dev
+    # Exactly the paths the snapshot key hashes -- anything else leaves the key
+    # unchanged, so there would be nothing to warm.
+    paths:
+      - 'requirements.txt'
+      - 'dojo/db_migrations/**'
+      - 'dojo/models.py'
+      - 'dojo/base_models/**'
+      - 'dojo/pghistory_models.py'
+      - 'dojo/settings/settings.dist.py'
+      - 'docker-compose.yml'
+      - 'docker-compose.override.unit_tests_cicd.yml'
+      - 'docker/entrypoint-unit-tests.sh'
+      - '.github/workflows/ci-warm-caches.yml'
+  workflow_dispatch:
+
+concurrency:
+  # Two pushes in quick succession would warm the same key twice.
+  group: warm-caches-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  warm-migrated-db:
+    name: Warm Migrated Database Snapshot
+    # A fork has its own cache scope and its own billing, so there is nothing
+    # here for it to warm. Same guard as release-nightly-dev.yml.
+    if: github.repository == 'DefectDojo/django-DefectDojo'
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_VERSION: debian
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Computed once, before anything runs Python, and referenced by both the
+      # probe and the save. Not written inline in both places: hashFiles is
+      # evaluated per step, and `dojo/db_migrations/**` picks up the
+      # __pycache__/*.pyc that migrating writes into the bind-mounted workspace,
+      # so the save would land under a key the probe will never ask for.
+      #
+      # KEEP IN SYNC with the same block in rest-framework-tests.yml. If they
+      # drift, this job warms an entry nothing reads and every pull request goes
+      # on paying the full migrate, with nothing failing to say so.
+      - name: Compute migrated database snapshot key
+        id: db-key
+        run: echo "key=migrated-db-v1-${{ hashFiles('requirements.txt', 'dojo/db_migrations/**', 'dojo/models.py', 'dojo/base_models/**', 'dojo/pghistory_models.py', 'dojo/settings/settings.dist.py', 'docker-compose.yml', 'docker-compose.override.unit_tests_cicd.yml', 'docker/entrypoint-unit-tests.sh') }}" >> "$GITHUB_OUTPUT"
+
+      - name: Probe for an existing snapshot
+        id: probe
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: migrated-db.dump
+          key: ${{ steps.db-key.outputs.key }}
+          # Do not download it -- whether the key exists is the whole question,
+          # and on most runs the answer is usually yes.
+          lookup-only: true
+
+      - name: Set unit-test mode
+        if: steps.probe.outputs.cache-hit != 'true'
+        run: docker/setEnv.sh unit_tests_cicd
+
+      # Built here rather than pulled from the build job's artifacts: this needs
+      # one image on one platform, and building it directly keeps the job
+      # self-contained instead of coupling it to that job's upload.
+      - name: Build the unit-test image
+        if: steps.probe.outputs.cache-hit != 'true'
+        timeout-minutes: 30
+        run: docker compose build uwsgi
+
+      - name: Start Postgres
+        if: steps.probe.outputs.cache-hit != 'true'
+        run: docker compose up --no-deps -d postgres
+
+      - name: Wait for Postgres to accept connections
+        if: steps.probe.outputs.cache-hit != 'true'
+        run: |
+          for _ in $(seq 1 60); do
+            if docker compose exec -T postgres pg_isready -q -U defectdojo -d test_defectdojo; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Postgres did not become ready in 120s" >&2
+          exit 1
+
+      - name: Migrate and dump
+        if: steps.probe.outputs.cache-hit != 'true'
+        timeout-minutes: 20
+        run: |
+          docker compose run --rm -T --no-deps uwsgi
+          docker compose exec -T postgres pg_dump \
+            --username defectdojo --dbname test_defectdojo --format=custom > migrated-db.dump
+          ls -lh migrated-db.dump
+        env:
+          DD_TEST_DB_MODE: prepare
+
+      - name: Save the snapshot
+        if: steps.probe.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: migrated-db.dump
+          key: ${{ steps.db-key.outputs.key }}
+
+      - name: Logs
+        if: failure()
+        run: docker compose logs --tail="2500"
+
+      - name: Shutdown
+        if: always()
+        run: docker compose down

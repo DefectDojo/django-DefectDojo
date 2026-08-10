@@ -38,8 +38,10 @@ def clean_tags(value: str | list[str], exception_class: Callable = ValidationErr
         return value
 
     if isinstance(value, list):
-        # Replace ALL occurrences of problematic characters in each tag
-        return [TAG_PATTERN.sub("_", tag) for tag in value]
+        # Replace ALL occurrences of problematic characters in each tag.
+        # Parsers can emit None tags (e.g. optional report fields); drop them
+        # instead of crashing the import pipeline (TypeError in re.sub).
+        return [TAG_PATTERN.sub("_", tag) for tag in value if tag is not None]
 
     if isinstance(value, str):
         # Replace ALL occurrences of problematic characters in the tag

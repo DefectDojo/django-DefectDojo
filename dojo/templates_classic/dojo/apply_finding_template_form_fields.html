@@ -1,0 +1,111 @@
+{% load as_json %}
+{% load event_tags %}
+{% load get_attribute %}
+{% block css %}
+    {{ form.media.css }}
+{% endblock %}
+{% block js %}
+    {{ form.media.js }}
+{% endblock %}
+{% if form.non_field_errors %}
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span
+                aria-hidden="true">&times;</span></button>
+        {{ form.non_field_errors }}
+    </div>
+{% endif %}
+<div id="template_set_all_options" class="form-group"><div class="col-sm-offset-2 col-sm-10">
+        <button data-option="Keep" class="btn">Keep all</button>
+        <button data-option="Replace" class="btn">Replace all</button>
+        <button data-option="Combine" class="btn">Combine all</button>
+</div></div>
+{% for field in form.hidden_fields %}
+    {{ field }}
+{% endfor %}
+
+{% for field in form.visible_fields %}
+    {% with template_value=template|get_attribute:field.name|default_if_none:'' %}
+    <div class="form-group{% if field.errors %} has-error{% endif %}">
+        <label class="col-sm-2 control-label">{{ field.label }} Option</label>
+        <div class="col-sm-10 {{ classes.value }}">
+            {% if field.name == 'tags' %}
+                <select class="form-control" data-field-value="{{ finding_tags|as_json }}" data-template-value="{{ field.value|as_json }}" onchange="(function(t){ var field = document.forms['apply_template']['{{ field.name }}']; var fieldValue = ''; switch(t.value.toLowerCase()){ case 'keep': fieldValue=JSON.parse(t.getAttribute('data-field-value')); break; case 'replace': fieldValue= JSON.parse(t.getAttribute('data-template-value')); break; case 'combine': fieldValue= JSON.parse(t.getAttribute('data-field-value')).concat(JSON.parse(t.getAttribute('data-template-value'))); break;  } $(field).val(fieldValue); })(this)">
+            {% else %}
+                <select class="form-control" data-field-value="{{ field.value }}" data-template-value="{{ template_value }}" onchange="(function(t){ var field = document.forms['apply_template']['{{ field.name }}']; var fieldValue = ''; switch(t.value.toLowerCase()){ case 'keep': fieldValue=t.getAttribute('data-field-value'); break; case 'replace': fieldValue= t.getAttribute('data-template-value'); break; case 'combine': fieldValue= t.getAttribute('data-field-value').concat('\r\n').concat(t.getAttribute('data-template-value')); break;  } field.mde === undefined ? field.value = fieldValue : field.mde.value(fieldValue); })(this)">
+            {% endif %}
+                <option value="Keep">Keep</option>
+                <option value="Replace"{% if field.name == 'tags' %} selected{% endif %}>Replace</option>
+                {% if field|is_text or field.name == 'tags' %}
+                    <option value="Combine">Combine</option>
+                {% endif %}
+            </select>
+            <br/>
+        </div>
+        {% endwith %}
+        {% if field|is_checkbox %}
+            <div class="col-sm-offset-2 col-sm-10 {{ classes.single_value }}">
+                <div class="checkbox">
+                    {% if field.auto_id %}
+                        <label {% if field.field.required and form.required_css_class %}class="col-sm-2 control-label"{% endif %}>
+                            {{ field }} <span>{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}</span>
+                        </label>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
+                    {% endfor %}
+
+                    {% if field.help_text %}
+                        <p class="help-block">
+                            {{ field.help_text|safe }}
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        {% elif field|is_radio %}
+            {% if field.auto_id %}
+                <label class="col-sm-2 control-label
+                        {% if field.field.required %}{{ form.required_css_class }}{% endif %}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}</label>
+            {% endif %}
+            <div class="col-sm-offset-2 col-sm-10 {{ classes.value }}">
+                {% for choice in field %}
+                    <div class="radio">
+                        <label>
+                            {{ choice.tag }}
+                            {{ choice.choice_label }}
+                        </label>
+                    </div>
+                {% endfor %}
+
+                {% for error in field.errors %}
+                    <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
+                {% endfor %}
+
+                {% if field.help_text %}
+                    <p class="help-block">
+                        {{ field.help_text|safe }}
+                    </p>
+                {% endif %}
+            </div>
+        {% else %}
+            {% if field.auto_id %}
+                <label class="col-sm-2 control-label
+                        {% if field.field.required %}{{ form.required_css_class }}{% endif %}"
+                       for="{{ field.auto_id }}">{{ field.label }}{% if field.field.required%}<sup>*</sup>{% endif %}</label>
+            {% endif %}
+
+            <div class="col-sm-10 {{ classes.value }} {% if field|is_multiple_checkbox %}multiple-checkbox{% endif %}">
+                {{ field|addcss:"class:form-control" }}
+
+                {% for error in field.errors %}
+                    <span class="help-block {{ form.error_css_class }}">{{ error }}</span>
+                {% endfor %}
+
+                {% if field.help_text %}
+                    <p class="help-block">
+                        {{ field.help_text|safe }}
+                    </p>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+{% endfor %}

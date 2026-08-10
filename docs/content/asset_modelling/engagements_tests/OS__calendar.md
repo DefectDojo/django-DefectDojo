@@ -2,7 +2,7 @@
 title: "Calendar"
 description: "How to use the Calendar in DefectDojo Pro"
 audience: opensource
-weight: 2
+weight: 9
 ---
 
 DefectDojo’s Calendar provides a centralized timeline view of all Engagements and Tests with defined start and end dates, allowing Users to quickly understand testing activity across Products, identify scheduling overlaps, and navigate directly to related objects. 

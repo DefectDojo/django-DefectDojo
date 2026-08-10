@@ -7,7 +7,7 @@
 	<h3>Add Unlinked Questionnaire</h3>
 {% endif %}
 {% if surveys %}
-	<form class="form-horizontal" method="post">{% csrf_token %}
+	<form class="" method="post">{% csrf_token %}
 		{% include "dojo/form_fields.html" with form=form %}
 			<div class="form-group">
 				<div class="col-sm-offset-2 col-sm-10">

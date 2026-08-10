@@ -163,6 +163,21 @@ class TestSnykParser(DojoTestCase):
             self.assertEqual("Critical", finding.severity)
             self.assertIn("target_file:Mobile-Security-Framework-MobSF/requirements.txt", finding.unsaved_tags)
 
+    def test_snykParser_multiple_cwes(self):
+        with (get_unit_tests_scans_path("snyk") / "all_containers_target_output.json").open(encoding="utf-8") as testfile:
+            parser = SnykParser()
+            findings = parser.get_findings(testfile, Test())
+            by_id = {f.vuln_id_from_tool: f for f in findings}
+            # SNYK-PYTHON-NUMPY-2321966 reports identifiers CWE ["CWE-119", "CWE-120"].
+            # primary cwe is the first entry; the full list is persisted via unsaved_cwes
+            finding = by_id["SNYK-PYTHON-NUMPY-2321966"]
+            self.assertEqual(119, finding.cwe)
+            self.assertEqual([119, 120], finding.unsaved_cwes)
+            # SNYK-PYTHON-NUMPY-2321970 reports ["CWE-400", "CWE-1023"]
+            finding = by_id["SNYK-PYTHON-NUMPY-2321970"]
+            self.assertEqual(400, finding.cwe)
+            self.assertEqual([400, 1023], finding.unsaved_cwes)
+
     def test_snykParser_update_libs_tag(self):
         with (get_unit_tests_scans_path("snyk") / "single_project_upgrade_libs.json").open(encoding="utf-8") as testfile:
             parser = SnykParser()

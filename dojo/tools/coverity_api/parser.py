@@ -1,7 +1,10 @@
 import json
 from datetime import datetime
 
+from django.conf import settings
+
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 
 class CoverityApiParser:
@@ -26,8 +29,11 @@ class CoverityApiParser:
 
         items = []
         for issue in tree["viewContentsV1"]["rows"]:
-            # get only security findings
-            if issue.get("displayIssueKind") != "Security":
+            # get security findings and Quality RESOURCE_LEAK findings
+            if not (
+                issue.get("displayIssueKind") == "Security"
+                or (issue.get("displayIssueKind") == "Quality" and issue.get("checker") == "RESOURCE_LEAK")
+            ):
                 continue
 
             description_formated = "\n".join(
@@ -60,6 +66,10 @@ class CoverityApiParser:
 
             if "displayFile" in issue:
                 finding.file_path = issue["displayFile"]
+                if settings.V3_FEATURE_LOCATIONS and finding.file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=finding.file_path, line=None),
+                    )
 
             if "occurrenceCount" in issue:
                 finding.nb_occurences = int(issue["occurrenceCount"])

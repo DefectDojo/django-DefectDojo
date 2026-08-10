@@ -23,6 +23,15 @@ class TestOSVScannerParser(DojoTestCase):
             self.assertEqual(finding.unsaved_vulnerability_ids[0], "MAL-2023-1035")
             self.assertEqual(finding.severity, "Low")
 
+    def test_multi_cwe(self):
+        with (get_unit_tests_scans_path("osv_scanner") / "multi_cwe_fabricated.json").open(encoding="utf-8") as testfile:
+            parser = OSVScannerParser()
+            findings = parser.get_findings(testfile, Test())
+            self.assertEqual(1, len(findings))
+            finding = findings[0]
+            self.assertEqual(finding.cwe, "CWE-79")
+            self.assertEqual(["CWE-79", "CWE-89"], finding.unsaved_cwes)
+
     def test_many_findings(self):
         with (get_unit_tests_scans_path("osv_scanner") / "many_findings.json").open(encoding="utf-8") as testfile:
             parser = OSVScannerParser()

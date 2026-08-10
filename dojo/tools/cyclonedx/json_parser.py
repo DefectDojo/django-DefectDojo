@@ -112,7 +112,7 @@ class CycloneDXJSONParser:
                         rating.get("method") == "CVSSv3"
                         or rating.get("method") == "CVSSv31"
                     ):
-                        raw_vector = rating["vector"]
+                        raw_vector = rating.get("vector", "")
                         cvssv3 = Cyclonedxhelper()._get_cvssv3(raw_vector)
                         severity = rating.get("severity")
                         if cvssv3:
@@ -134,16 +134,17 @@ class CycloneDXJSONParser:
                     finding.unsaved_vulnerability_ids = vulnerability_ids
                 # if there is some CWE
                 cwes = vulnerability.get("cwes")
-                if cwes and len(cwes) > 1:
-                    # TODO: support more than one CWE
-                    LOGGER.debug(
-                        "more than one CWE for a finding %s. NOT supported by parser API", cwes,
-                    )
                 if cwes and len(cwes) > 0:
                     finding.cwe = cwes[0]
+                    finding.unsaved_cwes = cwes
                 # Check for mitigation
                 analysis = vulnerability.get("analysis")
                 if analysis:
+                    # Preserve the raw VEX analysis block on the finding so downstream
+                    # consumers can round-trip state/justification/response/detail. This
+                    # is an inert in-memory attribute; the mapping below is all the OSS
+                    # importer itself does with it.
+                    finding.unsaved_vex = analysis
                     state = analysis.get("state")
                     if state:
                         if state in {"resolved", "resolved_with_pedigree", "not_affected"}:

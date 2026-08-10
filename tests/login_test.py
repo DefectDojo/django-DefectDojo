@@ -15,7 +15,7 @@ class LoginTest(BaseTestCase):
         # Verify login form elements are present
         self.assertTrue(self.is_element_by_id_present("id_username"))
         self.assertTrue(self.is_element_by_id_present("id_password"))
-        self.assertTrue(self.is_element_by_css_selector_present("button.btn.btn-success"))
+        self.assertTrue(self.is_element_by_css_selector_present("button.login-btn, button.btn-success"))
 
     @on_exception_html_source_logger
     def test_login_valid_credentials(self):
@@ -25,7 +25,7 @@ class LoginTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").send_keys(os.environ["DD_ADMIN_USER"])
         driver.find_element(By.ID, "id_password").clear()
         driver.find_element(By.ID, "id_password").send_keys(os.environ["DD_ADMIN_PASSWORD"])
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
         # Should not see error message after successful login
         self.assertFalse(
             self.is_element_by_css_selector_present(
@@ -41,7 +41,7 @@ class LoginTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").send_keys(os.environ["DD_ADMIN_USER"])
         driver.find_element(By.ID, "id_password").clear()
         driver.find_element(By.ID, "id_password").send_keys("wrong_password_12345")
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
         # Should see error message
         self.assertTrue(
             self.is_element_by_css_selector_present(
@@ -57,7 +57,7 @@ class LoginTest(BaseTestCase):
         driver.find_element(By.ID, "id_username").send_keys("nonexistent_user_xyz")
         driver.find_element(By.ID, "id_password").clear()
         driver.find_element(By.ID, "id_password").send_keys("some_password")
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
         # Should see error message
         self.assertTrue(
             self.is_element_by_css_selector_present(
@@ -71,7 +71,7 @@ class LoginTest(BaseTestCase):
         driver.get(self.base_url + "login")
         driver.find_element(By.ID, "id_username").clear()
         driver.find_element(By.ID, "id_password").clear()
-        driver.find_element(By.CSS_SELECTOR, "button.btn.btn-success").click()
+        driver.find_element(By.CSS_SELECTOR, "button.login-btn, button.btn-success").click()
         # Should stay on login page - HTML5 form validation prevents submission
         self.assertTrue(self.is_element_by_id_present("id_username"))
 

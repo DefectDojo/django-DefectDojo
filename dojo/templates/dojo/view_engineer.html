@@ -573,14 +573,9 @@
 {% endblock %}
 {% block postscript %}
     {{ block.super }}
-    <!-- Flot Charts JavaScript -->
-    <script src="{% static "flot/excanvas.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.pie.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.resize.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.time.js" %}"></script>
-    <script src="{% static "jquery.flot.tooltip/js/jquery.flot.tooltip.min.js" %}"></script>
-    <script src="{% static "flot/jquery.flot.stack.js" %}"></script>
+    <!-- Chart.js (moment.js loaded in base.html) -->
+    <script src="{% static "chart.js/dist/chart.umd.js" %}"></script>
+    <script src="{% static "chartjs-adapter-moment/dist/chartjs-adapter-moment.js" %}"></script>
     {% block metrics %}
         <script src="{% static "dojo/js/metrics.js" %}"></script>
     {% endblock metrics %}

@@ -47,13 +47,23 @@ h3. [{{ finding.title|jiraencode}}|{{ finding_url|full_url }}]
 {% if finding.cve %}*CVE:* [{{ finding.cve }}|{{ finding.cve|vulnerability_url }}]{% else %}*CVE:* Unknown{% endif %}
 {% if finding.cvssv3_score %} *CVSSv3 Score:* {{ finding.cvssv3_score }} {% endif %}
 
+{% if V3_FEATURE_LOCATIONS %}
+{% if finding.locations.all %}
+*Systems/Locations*:
+||Location||Status||
+{% for location_ref in finding.locations.all %}|{{ location_ref.location }}|{{ location_ref.get_status_display }}|
+{% endfor %}
+{% endif %}
+{% else %}
+{% comment %} TODO: Delete this after the move to Locations {% endcomment %}
 {% if finding.endpoints.all %}
 *Systems/Endpoints*:
 ||System/Endpoint||Status||
 {% for endpoint in finding|get_vulnerable_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
 {% endfor %}{% for endpoint in finding|get_mitigated_endpoints %}|{{ endpoint }}|{{ endpoint|endpoint_display_status:finding }}|
 {% endfor %}
-{%endif%}
+{% endif %}
+{% endif %}
 
 {% if finding.sast_source_object %}
 *Source Object*: {{ finding.sast_source_object }}

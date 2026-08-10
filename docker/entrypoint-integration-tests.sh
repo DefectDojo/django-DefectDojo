@@ -57,13 +57,27 @@ if [[ -n "$DD_INTEGRATION_TEST_FILENAME" ]]; then
             fail "$test"
         fi
     else
-        test=$DD_INTEGRATION_TEST_FILENAME
-        echo "Running: $test"
-        if python3 "$DD_INTEGRATION_TEST_FILENAME"; then
-            success "$test"
-        else
-            fail "$test"
-        fi
+        # DD_INTEGRATION_TEST_FILENAME may name several files separated by
+        # whitespace; CI passes groups of files that share one compose stack.
+        # The unquoted expansion below is the split, which is safe because
+        # every value is a repo-relative path with no spaces in it.
+        #
+        # Files run in order and the first failure exits (fail() exits 1),
+        # exactly like the full-suite branch below: a test that fails can
+        # leave state behind that would make everything after it fail too,
+        # and one clean failure beats five cascading ones. The log names each
+        # file as it starts, so the failing file is always the last "Running:"
+        # line.
+        # shellcheck disable=SC2086
+        for test_file in $DD_INTEGRATION_TEST_FILENAME; do
+            test=$test_file
+            echo "Running: $test"
+            if python3 "$test_file"; then
+                success "$test"
+            else
+                fail "$test"
+            fi
+        done
     fi
 
 else
@@ -273,13 +287,6 @@ else
 
     # The below tests are commented out because they are still an unstable work in progress
     ## Once Ready they can be uncommented.
-
-    # echo "Import Scanner integration test"
-    # if python3 tests/import_scanner_test.py ; then
-    #     echo "Success: Import Scanner integration tests passed"
-    # else
-    #     echo "Error: Import Scanner integration test failed"; exit 1
-    # fi
 
     # echo "Zap integration test"
     # if python3 tests/zap.py ; then

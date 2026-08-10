@@ -2,7 +2,7 @@
 title: "Calendar"
 description: "How to use the Calendar in DefectDojo Pro"
 audience: pro
-weight: 2
+weight: 9
 ---
 
 DefectDojo features a built-in Calendar so you can track all prior and active Engagements and Tests within your organization. Any time a User creates a new Engagement or Test and establishes the start and end dates, a corresponding entry will automatically be added to the Calendar. 

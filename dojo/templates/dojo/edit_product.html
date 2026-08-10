@@ -5,22 +5,10 @@
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
-{% block add_styles %}
-    {{ block.super }}
-.chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-    .chosen-container.chosen-container-multi {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <h3> Edit {{ product.name }}</h3>
-    <form class="form-horizontal" method="post">{% csrf_token %}
+    <form class="" method="post">{% csrf_token %}
         {% include "dojo/form_fields.html" with form=form %}
         {%  if jform %}
                 <h4> JIRA </h4>

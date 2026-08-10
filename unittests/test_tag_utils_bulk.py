@@ -1,10 +1,19 @@
+from operator import itemgetter
+from unittest.mock import patch
+
 from django.conf import settings
+from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
 
 from dojo.location.models import Location
 from dojo.models import Endpoint, Engagement, Finding, Product, Product_Type, Test, Test_Type
-from dojo.tag_utils import bulk_add_tags_to_instances
+from dojo.tags.utils import (
+    bulk_add_tag_mapping,
+    bulk_add_tags_to_instances,
+    bulk_apply_parser_tags,
+    bulk_remove_all_tags,
+)
 from dojo.url.models import URL
 from unittests.dojo_test_case import DojoAPITestCase, versioned_fixtures
 
@@ -260,6 +269,183 @@ class BulkTagUtilsTest(TestCase):
         self.assertIn("is not a TagField", str(cm.exception))
 
 
+class BulkTagMappingTest(TestCase):
+
+    """Tests for bulk_add_tag_mapping — the multi-tag, ~5-query variant."""
+
+    LOCATION_CLASS = Location if settings.V3_FEATURE_LOCATIONS else Endpoint
+
+    def setUp(self):
+        self.tag_model = self.LOCATION_CLASS.tags.tag_model
+        self.product_type = Product_Type.objects.create(name="PT-Mapping")
+        self.product = Product.objects.create(name="Mapping Product", description="test", prod_type=self.product_type)
+
+    def _make_location(self, hostname):
+        if not settings.V3_FEATURE_LOCATIONS:
+            return Endpoint.objects.create(product=self.product, host=hostname)
+        url = URL.get_or_create_from_values(host=hostname)
+        url.location.associate_with_product(self.product)
+        return url.location
+
+    def _make_locations(self, n):
+        return [self._make_location(f"map-host-{i}.example.com") for i in range(n)]
+
+    def test_basic_different_tags_different_instances(self):
+        a, b, c = self._make_locations(3)
+        created = bulk_add_tag_mapping({"alpha": [a, b], "beta": [b, c], "gamma": [c]})
+
+        self.assertEqual(created, 5)
+        a.refresh_from_db()
+        b.refresh_from_db()
+        c.refresh_from_db()
+        self.assertEqual([t.name for t in a.tags.all()], ["alpha"])
+        self.assertCountEqual([t.name for t in b.tags.all()], ["alpha", "beta"])
+        self.assertCountEqual([t.name for t in c.tags.all()], ["beta", "gamma"])
+
+        self.assertEqual(self.tag_model.objects.get(name="alpha").count, 2)
+        self.assertEqual(self.tag_model.objects.get(name="beta").count, 2)
+        self.assertEqual(self.tag_model.objects.get(name="gamma").count, 1)
+
+    def test_same_tag_across_all_instances(self):
+        instances = self._make_locations(4)
+        created = bulk_add_tag_mapping({"shared": instances})
+
+        self.assertEqual(created, 4)
+        self.assertEqual(self.tag_model.objects.get(name="shared").count, 4)
+
+    def test_skips_existing_relationships(self):
+        a, b, c = self._make_locations(3)
+        a.tags.add("existing")
+        b.tags.add("existing")
+
+        created = bulk_add_tag_mapping({"existing": [a, b, c]})
+
+        self.assertEqual(created, 1)
+        self.assertEqual(self.tag_model.objects.get(name="existing").count, 3)
+
+    def test_empty_dict_returns_zero(self):
+        created = bulk_add_tag_mapping({})
+        self.assertEqual(created, 0)
+
+    def test_empty_instance_lists_returns_zero(self):
+        created = bulk_add_tag_mapping({"tag-a": [], "tag-b": []})
+        self.assertEqual(created, 0)
+        self.assertEqual(self.tag_model.objects.filter(name__in=["tag-a", "tag-b"]).count(), 0)
+
+    def test_case_insensitive_finds_existing_tag(self):
+        # Pre-create tag in lowercase (simulating force_lowercase storage)
+        instances = self._make_locations(2)
+        instances[0].tags.add("mytag")
+
+        # Requesting "MYTAG" should match the existing "mytag" object
+        created = bulk_add_tag_mapping({"MYTAG": [instances[0], instances[1]]})
+
+        self.assertEqual(created, 1)
+        self.assertEqual(self.tag_model.objects.count(), 1)
+
+    def test_creates_new_tags_that_dont_exist(self):
+        instances = self._make_locations(2)
+        created = bulk_add_tag_mapping({"brand-new-a": [instances[0]], "brand-new-b": [instances[1]]})
+
+        self.assertEqual(created, 2)
+        self.assertTrue(self.tag_model.objects.filter(name="brand-new-a").exists())
+        self.assertTrue(self.tag_model.objects.filter(name="brand-new-b").exists())
+
+    def test_clears_prefetch_cache(self):
+        instances = list(self.LOCATION_CLASS.objects.filter(
+            pk__in=[loc.pk for loc in self._make_locations(2)],
+        ).prefetch_related("tags"))
+
+        for inst in instances:
+            self.assertEqual(list(inst.tags.all()), [])
+
+        bulk_add_tag_mapping({"cache-map": instances})
+
+        for inst in instances:
+            self.assertIn("cache-map", [t.name for t in inst.tags.all()])
+
+    def test_product_rejected(self):
+        pt = Product_Type.objects.create(name="PT-Reject")
+        product = Product.objects.create(name="P-Reject", description="x", prod_type=pt)
+        with self.assertRaises(ValueError, msg="Product instances are not supported"):
+            bulk_add_tag_mapping({"tag": [product]})
+
+    def test_batching_creates_all_relationships(self):
+        instances = self._make_locations(15)
+        created = bulk_add_tag_mapping({"batch-tag": instances}, batch_size=4)
+
+        self.assertEqual(created, 15)
+        self.assertEqual(self.tag_model.objects.get(name="batch-tag").count, 15)
+
+
+class BulkApplyParserTagsTest(TestCase):
+
+    """Tests for bulk_apply_parser_tags — the import-loop accumulator path."""
+
+    def setUp(self):
+        self.tag_model = Finding.tags.tag_model
+        self.reporter = User.objects.create_user(username="parser-test-user")
+        pt = Product_Type.objects.create(name="PT-Parser")
+        product = Product.objects.create(name="Parser Product", description="x", prod_type=pt)
+        engagement = Engagement.objects.create(
+            name="E-Parser", product=product,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        tt = Test_Type.objects.create(name="Parser Test Type")
+        test = Test.objects.create(
+            title="T-Parser", engagement=engagement, test_type=tt,
+            target_start=timezone.now(), target_end=timezone.now(),
+        )
+        self.test = test
+
+    def _make_finding(self, title):
+        return Finding.objects.create(title=title, severity="Low", test=self.test, reporter=self.reporter)
+
+    def test_applies_tags_correctly(self):
+        f1 = self._make_finding("F1")
+        f2 = self._make_finding("F2")
+        f3 = self._make_finding("F3")
+
+        bulk_apply_parser_tags([
+            (f1, ["network", "web"]),
+            (f2, ["network"]),
+            (f3, ["pci"]),
+        ])
+
+        f1.refresh_from_db()
+        f2.refresh_from_db()
+        f3.refresh_from_db()
+        self.assertCountEqual([t.name for t in f1.tags.all()], ["network", "web"])
+        self.assertCountEqual([t.name for t in f2.tags.all()], ["network"])
+        self.assertCountEqual([t.name for t in f3.tags.all()], ["pci"])
+
+        self.assertEqual(self.tag_model.objects.get(name="network").count, 2)
+        self.assertEqual(self.tag_model.objects.get(name="web").count, 1)
+        self.assertEqual(self.tag_model.objects.get(name="pci").count, 1)
+
+    def test_empty_list_is_noop(self):
+        bulk_apply_parser_tags([])
+        self.assertEqual(self.tag_model.objects.count(), 0)
+
+    def test_filters_empty_tag_strings(self):
+        f = self._make_finding("F-empty")
+        bulk_apply_parser_tags([(f, ["", "valid", ""])])
+        f.refresh_from_db()
+        self.assertEqual([t.name for t in f.tags.all()], ["valid"])
+
+    def test_dynamic_tags_many_unique_values(self):
+        # Simulate a parser that emits one unique tag per finding (e.g. resource name)
+        findings = [self._make_finding(f"F-dyn-{i}") for i in range(20)]
+        pairs = [(f, [f"resource-{i}"]) for i, f in enumerate(findings)]
+        bulk_apply_parser_tags(pairs)
+
+        for i, f in enumerate(findings):
+            f.refresh_from_db()
+            self.assertEqual([t.name for t in f.tags.all()], [f"resource-{i}"])
+
+        self.assertEqual(self.tag_model.objects.count(), 20)
+
+
 @versioned_fixtures
 class BulkTagUtilsInheritanceTest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
@@ -305,3 +491,61 @@ class BulkTagUtilsInheritanceTest(DojoAPITestCase):
             self.assertIn("custom-bulk", tags)
             # Ensure inherited tags did not get polluted by the new tag
             self.assertNotIn("custom-bulk", self._inherited_tags_list(f))
+
+
+class BulkRemoveAllTagsLockOrderTest(TestCase):
+
+    # Regression: bulk_remove_all_tags decremented tag counts one row per UPDATE in
+    # unordered aggregation order, so two concurrent cascade deletes touching an
+    # overlapping tag set could take the same row locks in opposite orders and deadlock
+    # (Postgres 40P01). The decrements must be issued in a deterministic tag-id order.
+
+    def setUp(self):
+        self.product_type = Product_Type.objects.create(name="PT-Lock-Order")
+        self.products = [
+            Product.objects.create(
+                name=f"Lock Order Product {i}", description="test", prod_type=self.product_type,
+            )
+            for i in range(3)
+        ]
+
+    def test_tag_count_decrements_are_issued_in_ascending_tag_id_order(self):
+        """
+        The decrement UPDATEs must be ordered, because their order is the lock order.
+
+        Tags are attached in an order unrelated to their ids so that "whatever order the
+        aggregate happens to return" and "ascending id" cannot coincide by luck.
+        """
+        for product in self.products:
+            product.tags = ["zeta-tag", "alpha-tag", "mid-tag"]
+            product.save()
+
+        tag_model = Product.tags.tag_model
+        tag_ids_by_name = dict(
+            tag_model.objects.filter(
+                name__in=["zeta-tag", "alpha-tag", "mid-tag"],
+            ).values_list("name", "pk"),
+        )
+        self.assertEqual(len(tag_ids_by_name), 3, "expected the three tags to exist")
+
+        locked_order = []
+        original_filter = tag_model.objects.filter
+
+        def record_filter(*args, **kwargs):
+            if "pk" in kwargs:
+                locked_order.append(kwargs["pk"])
+            return original_filter(*args, **kwargs)
+
+        with patch.object(tag_model.objects, "filter", side_effect=record_filter):
+            bulk_remove_all_tags(Product, Product.objects.filter(prod_type=self.product_type))
+
+        self.assertEqual(
+            len(locked_order), 3,
+            msg=f"expected one decrement per tag, got {locked_order}",
+        )
+        self.assertEqual(
+            locked_order, sorted(locked_order),
+            msg="tag rows must be locked in ascending id order so concurrent removals "
+                f"cannot deadlock; got {locked_order} "
+                f"(tag ids: {sorted(tag_ids_by_name.items(), key=itemgetter(1))})",
+        )

@@ -1,13 +1,10 @@
 {% load navigation_tags %}
 {% load event_tags %}
-{% load static %}
-{% block add_css %}
-    <link rel="stylesheet" href="{% static "chosen-bootstrap/chosen.bootstrap.min.css" %}">
-{% endblock %}
+{% load filter_tags %}
 {% block css %}
     {{ form.media.css }}
 {% endblock %}
-{% block js %}    
+{% block js %}
     {{ form.media.js }}
 {% endblock %}
 <div class="filter-set">
@@ -15,28 +12,38 @@
         {% for field in form.hidden_fields %}
             {{ field }}
         {% endfor %}
-        <div class="container-fluid filter-form-group">
-                {% for field in form.visible_fields %}
-                    <div class="col-lg-3 col-md-4 col-sm-6 col-12">
-                        <div class="filter-form-input" style="min-width: 0;">
-                            <label for="{{ field.auto_id }}" class="form-label mb-1" style="display: block;">
-                                {{ field.label }}
-                                {% if field.help_text %}
-                                    <i class="fa-solid fa-circle-question has-popover" 
-                                    data-trigger="hover" 
-                                    data-content="{{ field.help_text }}" 
-                                    data-placement="right" 
-                                    data-container="body">
-                                    </i>
-                                {% endif %}
-                            </label>
-                            {% with placeholder="placeholder:"|add:field.label %}
-                              {{ field|addcss:"class: form-control filter-form-control"|addcss:placeholder }}
-                            {% endwith %}
+        {% get_filter_groups form as filter_groups %}
+        {% for group in filter_groups %}
+            <div class="filter-category" x-data="{ open: {% if group.open %}true{% else %}false{% endif %} }">
+                <button type="button" class="filter-category-header" @click="open = !open" :aria-expanded="open">
+                    <span class="filter-category-title">{{ group.name }}</span>
+                    <i class="fa-solid fa-chevron-down filter-category-chevron{% if group.open %} is-open{% endif %}" :class="{ 'is-open': open }"></i>
+                </button>
+                <div class="filter-category-content{% if group.open %} is-open{% endif %}" :class="{ 'is-open': open }">
+                    <div class="filter-category-clip">
+                        <div class="container-fluid filter-form-group filter-category-body">
+                            {% for field in group.fields %}
+                                <div class="col-lg-3 col-md-4 col-sm-6 col-12">
+                                    <div class="filter-form-input" style="min-width: 0;">
+                                        <label for="{{ field.auto_id }}" class="form-label mb-1" style="display: block;">
+                                            {{ field.label }}
+                                            {% if field.help_text %}
+                                                <i class="fa-solid fa-circle-question has-popover"
+                                                data-content="{{ field.help_text }}">
+                                                </i>
+                                            {% endif %}
+                                        </label>
+                                        {% with placeholder="placeholder:"|add:field.label %}
+                                          {{ field|addcss:"class: form-control filter-form-control"|addcss:placeholder }}
+                                        {% endwith %}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
-                {% endfor %}
-        </div>
+                </div>
+            </div>
+        {% endfor %}
         <div class="container-fluid">
             <div class="row mt-3">
             <div class="col-12">
@@ -47,18 +54,18 @@
                             <i class="fa-solid fa-file-lines"></i> Generate Report
                         </button>
                     {% else %}
-                        <button id="apply" class="btn btn-secondary me-2">
-                            <i class="fa-solid fa-filter"></i> Apply Filters
+                        <button id="apply" class="btn btn-primary me-2">
+                            <i class="fa-solid fa-filter"></i> Apply
                         </button>
                         {% if clear_js %}
-                            <a class="btn btn-outline-secondary me-2" href="#{{form_id}}" id="clear_js" role="button"> 
-                                <i class="fa-solid fa-remove"></i> Clear Filters
+                            <a class="btn btn-outline-secondary me-2" href="#{{form_id}}" id="clear_js" role="button">
+                                <i class="fa-solid fa-xmark"></i> Clear
                             </a>
                         {% else %}
-                            <a class="btn btn-outline-secondary me-2" href="{{ clear_link|default:request.path }}" id="clear" role="button" >
-                                <i class="fa-solid fa-remove"></i> Clear Filters
+                            <a class="btn btn-outline-secondary me-2" href="{{ clear_link|default:request.path }}" id="clear" role="button">
+                                <i class="fa-solid fa-xmark"></i> Clear
                             </a>
-                        {% endif %}             
+                        {% endif %}
                         {% if restart_link %}
                             <a href="{{ restart_link }}" id="restart" class="btn btn-secondary">
                                 <i class="fa-solid fa-remove"></i> Restart
@@ -69,7 +76,7 @@
                 </div>
             </div>
         </div>
-        
+
     </form>
 </div>
 <script>
@@ -98,7 +105,7 @@
       event.preventDefault();
     });
 
-    // Clear filter logic below should clear filters without reload and 
+    // Clear filter logic below should clear filters without reload and
     // have the button disabled if no filters are active
 
     const clearFilterLink = $("#clear, #clear_js");
@@ -122,7 +129,7 @@
                         // Other input types
                         return value !== null && value !== undefined;
                     }
-                }).length > 0; 
+                }).length > 0;
         };
 
     const updateClearFiltersState = () => {
@@ -148,8 +155,7 @@ $(form).on("input change", updateClearFiltersState);
             const form = $(this).closest(".filter-set").find("form");
             if (form.length) {
                 clear_form(form);
-                // Refresh some UI components to work have cleared form from all respective libraries
-                form.find("select.selectpicker").selectpicker("refresh");
+                // Refresh UI components after clearing all respective libraries
                 form.find(".multi-tag-input").val('').trigger('change');
                 form.find("select.select2-hidden-accessible").val(null).trigger('change');
                 form.find(".select2-selection__choice").remove();

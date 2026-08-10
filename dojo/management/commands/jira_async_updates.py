@@ -3,7 +3,7 @@ import logging
 from django.core.management.base import BaseCommand
 from jira.exceptions import JIRAError
 
-import dojo.jira_link.helper as jira_helper
+import dojo.jira.helper as jira_helper
 from dojo.models import Dojo_User, Finding, Notes, User
 from dojo.utils import get_system_setting, timezone
 

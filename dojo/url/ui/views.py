@@ -14,9 +14,9 @@ from django.urls import reverse
 from django.utils import timezone
 
 from dojo.authorization.authorization import user_has_permission_or_403
-from dojo.authorization.authorization_decorators import user_is_authorized
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_meta_import
+from dojo.finding.queries import get_authorized_findings_for_queryset
 from dojo.forms import (
     DeleteEndpointForm,
     DojoMetaFormSet,
@@ -26,7 +26,8 @@ from dojo.location.models import Location, LocationFindingReference, LocationPro
 from dojo.location.queries import annotate_location_counts_and_status, get_authorized_locations
 from dojo.location.status import FindingLocationStatus, ProductLocationStatus
 from dojo.models import DojoMeta, Finding, Product
-from dojo.reports.views import generate_report
+from dojo.product.queries import get_authorized_products
+from dojo.reports.ui.views import generate_report
 from dojo.url.filters import URLFilter
 from dojo.url.models import URL
 from dojo.url.queries import annotate_host_contents
@@ -45,12 +46,24 @@ from dojo.utils import (
 logger = logging.getLogger(__name__)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
+def _get_location_or_404(request, location_id, permission):
+    """
+    Resolve a Location for the endpoint views via the shared authorized queryset.
+
+    Keeps object retrieval in these views consistent with the list/host views, which
+    already scope Location lookups through ``get_authorized_locations``. A lookup that
+    falls outside the queryset returns 404, matching object retrieval elsewhere.
+    """
+    return get_object_or_404(
+        get_authorized_locations(permission, Location.objects.all(), request.user),
+        id=location_id,
+    )
+
+
 def view_endpoint(request: HttpRequest, location_id: int):
     return process_endpoint_view(request, location_id, host_view=False)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def view_endpoint_host(request: HttpRequest, location_id: int):
     return process_endpoint_view(request, location_id, host_view=True)
 
@@ -99,7 +112,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         - host_view: Boolean indicating if host view is enabled.
 
     """
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     if location.location_type != URL.get_location_type():
         messages.add_message(
             request,
@@ -112,27 +125,33 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
     locations = None
     metadata = None
     status = "No relationships defined"
-    base_findings = Finding.objects.only(
-        "id",
-        "title",
-        "severity",
-        "epss_score",
-        "epss_percentile",
-        "date",
-        "found_by",
-        "active",
-        "out_of_scope",
-        "mitigated",
-        "false_p",
-        "duplicate",
-        "found_by",
+    # A Location is shared by every product that references it, so an authorized
+    # Location does not imply its findings are authorized.
+    base_findings = get_authorized_findings_for_queryset(
+        Permissions.Finding_View,
+        Finding.objects.only(
+            "id",
+            "title",
+            "severity",
+            "epss_score",
+            "epss_percentile",
+            "date",
+            "found_by",
+            "active",
+            "out_of_scope",
+            "mitigated",
+            "false_p",
+            "duplicate",
+            "found_by",
+        ),
+        user=request.user,
     ).prefetch_related("locations__location", "found_by")
 
     if host_view:
         # In host view, aggregate all locations (endpoints) sharing the same host.
         locations = annotate_host_contents(
             get_authorized_locations(
-                permission=Permissions.Location_View,
+                permission="view",
                 queryset=Location.objects.prefetch_related("tags", "url").filter(
                     location_type=URL.LOCATION_TYPE, url__host=host,
                 ),
@@ -147,7 +166,12 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         # In endpoint view, show findings and metadata for the specific location.
         all_findings = base_findings.filter(locations__location=location).distinct()
         # Gather metadata for the location as a dictionary of name/value pairs.
-        metadata = dict(location.location_meta.values_list("name", "value"))
+        metadata = dict(
+            DojoMeta.objects.filter(
+                location=location,
+                location_product__in=get_authorized_products(Permissions.Product_View, request.user),
+            ).values_list("name", "value"),
+        )
 
     # Filter active findings for the location or host, ordered by severity
     active_findings = all_findings.filter(locations__status=FindingLocationStatus.Active).order_by("numerical_severity")
@@ -184,7 +208,7 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         if len(product) == 1:
             # If a single product is selected, get the product and check permissions
             product = get_object_or_404(Product, id=product[0])
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, "view")
             # Create the product tab for the view
             product_tab = Product_Tab(product, "Host" if host_view else "Endpoint", tab="endpoints")
             # Get the status of the location for the selected product
@@ -235,7 +259,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     # Determine the view name and get authorized endpoints
     view_name = "Vulnerable" if vulnerable else "All"
     locations = get_authorized_locations(
-        permission=Permissions.Location_View,
+        permission="view",
         queryset=Location.objects.prefetch_related("tags", "url").filter(location_type=URL.LOCATION_TYPE),
         user=request.user,
     )
@@ -271,7 +295,7 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
         if len(products) == 1:
             # If a single product is selected, get the product and check permissions
             product = get_object_or_404(Product, id=products[0])
-            user_has_permission_or_403(request.user, product, Permissions.Product_View)
+            user_has_permission_or_403(request.user, product, "view")
             # Create the product tab for the view
             product_tab = Product_Tab(product, view_name, tab="endpoints")
 
@@ -290,10 +314,9 @@ def process_endpoints_view(request, *, host_view=False, vulnerable=False):
     )
 
 
-@user_is_authorized(Location, Permissions.Location_Edit, "location_id")
 def edit_endpoint(request, location_id):
     # Retrieve the Location object by ID and add breadcrumb for editing
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "edit")
     add_breadcrumb(parent=location, title="Edit", top_level=False, request=request)
     # Initialize the URLForm with the current URL instance for editing
     form = URLForm(instance=location.url)
@@ -327,7 +350,6 @@ def edit_endpoint(request, location_id):
     )
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "product_id")
 def add_endpoint_to_product(request, product_id):
     # Retrieve the Product object by ID and initialize the URLForm for adding a new endpoint
     product = get_object_or_404(Product, id=product_id)
@@ -349,7 +371,6 @@ def add_endpoint_to_product(request, product_id):
     return render(request, "dojo/url/create.html", {"product_tab": product_tab, "form": form})
 
 
-@user_is_authorized(Product, Permissions.Location_Add, "finding_id")
 def add_endpoint_to_finding(request, finding_id):
     # Retrieve the Finding object by ID and get its associated Product
     finding = get_object_or_404(Finding, id=finding_id)
@@ -371,10 +392,9 @@ def add_endpoint_to_finding(request, finding_id):
     return render(request, "dojo/url/create.html", {"product_tab": product_tab, "form": form})
 
 
-@user_is_authorized(Location, Permissions.Location_Delete, "location_id")
 def delete_endpoint(request, location_id):
     # Retrieve the Location object by primary key and initialize the delete form
-    location = get_object_or_404(Location, pk=location_id)
+    location = _get_location_or_404(request, location_id, "delete")
     form = DeleteEndpointForm(instance=location)
     # Handle POST request for deleting an endpoint and its relationships
     if request.method == "POST":
@@ -405,13 +425,19 @@ def delete_endpoint(request, location_id):
     )
 
 
-@user_is_authorized(Location, Permissions.Location_Edit, "location_id")
 def manage_meta_data(request, location_id):
     # Retrieve the Location object by ID and filter its associated metadata
-    location = Location.objects.get(id=location_id)
-    meta_data_query = DojoMeta.objects.filter(location=location)
-    # Map the foreign key for the formset to the location
-    form_mapping = {"location": location}
+    location = _get_location_or_404(request, location_id, "edit")
+    scoped_products = get_authorized_products(Permissions.Product_Edit, request.user)
+    meta_data_query = DojoMeta.objects.filter(location=location, location_product__in=scoped_products)
+    # The route carries no product, so a new entry is attributed to the caller's first
+    # product on this Location. Any of them is theirs to edit.
+    form_mapping = {
+        "location": location,
+        "location_product": Product.objects.filter(
+            locations__location=location, id__in=scoped_products,
+        ).order_by("id").first(),
+    }
     # Initialize the DojoMetaFormSet with the metadata queryset and mapping
     formset = DojoMetaFormSet(queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
     if request.method == "POST":
@@ -430,7 +456,6 @@ def manage_meta_data(request, location_id):
     )
 
 
-@user_is_authorized(Product, Permissions.Location_Edit, "product_id")
 def import_endpoint_meta(request, product_id):
     # Retrieve the Product object by ID and initialize the import form
     product = get_object_or_404(Product, id=product_id)
@@ -497,9 +522,9 @@ def endpoint_bulk_update_all(request, product_id=None):
             # If a product_id is provided, check user authorization for deletion on that product
             if product_id is not None:
                 product = get_object_or_404(Product, id=product_id)
-                user_has_permission_or_403(request.user, product, Permissions.Location_Delete)
+                user_has_permission_or_403(request.user, product, "delete")
             # Filter locations to only those the user is authorized to delete
-            locations = get_authorized_locations(Permissions.Location_Delete, locations, request.user)
+            locations = get_authorized_locations("delete", locations, request.user)
             skipped_location_count = total_location_count - locations.count()
             deleted_location_count = locations.count()
             # This will also delete related finding and product location references via cascade
@@ -521,9 +546,9 @@ def endpoint_bulk_update_all(request, product_id=None):
             # If a product_id is provided, check user authorization for mitigation on that product
             if product_id is not None:
                 product = get_object_or_404(Product, id=product_id)
-                user_has_permission_or_403(request.user, product, Permissions.Finding_Edit)
+                user_has_permission_or_403(request.user, product, "edit")
             # Filter locations to only those the user is authorized to edit (mitigate)
-            locations = get_authorized_locations(Permissions.Location_Edit, locations, request.user)
+            locations = get_authorized_locations("edit", locations, request.user)
             skipped_location_count = total_location_count - locations.count()
             updated_location_count = locations.count()
             # Notify user if any locations were skipped due to lack of authorization
@@ -532,13 +557,26 @@ def endpoint_bulk_update_all(request, product_id=None):
                     f"Skipped mitigation of {skipped_location_count} locations because you are not authorized.",
                 )
 
+            # Scope the reference updates to the acting product (or, on the all-products
+            # route, the products the user may edit); get_authorized_locations above scopes
+            # only the Location rows, not their references.
+            if product_id is not None:
+                reference_products = Product.objects.filter(id=product_id)
+            else:
+                reference_products = get_authorized_products(Permissions.Product_Edit, request.user)
             # Bulk update the status of related FindingLocationStatus and ProductLocationStatus objects to 'Mitigated'
-            finding_update_counts = LocationFindingReference.objects.filter(location__in=locations).update(
+            finding_update_counts = LocationFindingReference.objects.filter(
+                location__in=locations,
+                finding__test__engagement__product__in=reference_products,
+            ).update(
                 status=FindingLocationStatus.Mitigated,
                 auditor=request.user,
                 audit_time=timezone.now(),
             )
-            product_update_counts = LocationProductReference.objects.filter(location__in=locations).update(
+            product_update_counts = LocationProductReference.objects.filter(
+                location__in=locations,
+                product__in=reference_products,
+            ).update(
                 status=ProductLocationStatus.Mitigated,
             )
             # Total number of updated statuses for reporting
@@ -562,7 +600,6 @@ def endpoint_bulk_update_all(request, product_id=None):
     return HttpResponseRedirect(reverse("endpoint", args=()))
 
 
-@user_is_authorized(Finding, Permissions.Finding_Edit, "finding_id")
 def finding_location_bulk_update(request, finding_id):
     if request.method == "POST":
         # Get the list of endpoint IDs to update and the statuses to enable
@@ -634,13 +671,11 @@ def migrate_endpoints_view(request):
         })
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def endpoint_report(request, location_id):
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     return generate_report(request, location, host_view=False)
 
 
-@user_is_authorized(Location, Permissions.Location_View, "location_id")
 def endpoint_host_report(request, location_id):
-    location = get_object_or_404(Location, id=location_id)
+    location = _get_location_or_404(request, location_id, "view")
     return generate_report(request, location, host_view=True)

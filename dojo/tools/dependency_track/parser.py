@@ -154,6 +154,9 @@ class DependencyTrackParser:
         analysis = dependency_track_finding.get("analysis")
         is_false_positive = bool(analysis is not None and analysis.get("state") == "FALSE_POSITIVE")
 
+        if analysis is not None and analysis.get("detail"):
+            vulnerability_description += f"\nAudit Detail: {analysis['detail']}"
+
         # Get the EPSS details
         epss_percentile = dependency_track_finding["vulnerability"].get("epssPercentile", None)
 

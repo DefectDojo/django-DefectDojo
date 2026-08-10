@@ -43,7 +43,7 @@ For example: :
 
 ### Alternative authentication method
 
-If you use [an alternative authentication method](en/customize_dojo/user_management/configure_sso/ for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
+If you use [an alternative authentication method](/admin/sso/) for users, you may want to disable DefectDojo API tokens because it could bypass your authentication concept. \
 Using of DefectDojo API tokens can be disabled by specifying the environment variable `DD_API_TOKENS_ENABLED` to `False`.
 Or only `api/v2/api-token-auth/` endpoint can be disabled by setting `DD_API_TOKEN_AUTH_ENDPOINT_ENABLED` to `False`.
 
@@ -189,7 +189,7 @@ Some of the api wrappers contain quite a bit of logic to ease scanning and impor
 ## Import
 Importing via the API is performed via the [import-scan](https://demo.defectdojo.org/api/v2/doc/) endpoint.
 
-As described in the [Product Hierarchy](/asset_modelling/hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
+As described in the [Product Hierarchy](/asset_modelling/os_hierarchy/product_hierarchy/), Test gets created inside an Engagement, inside a Product, inside a Product Type.
 
 An import can be performed by specifying the names of these entities in the API request:
 
@@ -264,6 +264,67 @@ A classic way of reimporting a scan is by specifying the ID of the test instead:
 }
 ```
 
+## Generating Reports
+
+DefectDojo can generate a findings report through the API in **JSON**, **HTML**, **CSV**, or **Excel** format.
+
+A report is generated with a `POST` request to a `generate_report/` action. The findings endpoint reports across your instance, and most other objects expose a per\-object action:
+
+| Endpoint | Scope |
+|---|---|
+| `POST /api/v2/findings/generate_report/` | Every finding you have permission to view |
+| `POST /api/v2/products/{id}/generate_report/` | One product |
+| `POST /api/v2/engagements/{id}/generate_report/` | One engagement |
+| `POST /api/v2/tests/{id}/generate_report/` | One test |
+| `POST /api/v2/product_types/{id}/generate_report/` | One product type |
+| `POST /api/v2/endpoints/{id}/generate_report/` | One endpoint |
+
+The Pro object aliases expose the same action: `/api/v2/assets/{id}/generate_report/`, `/api/v2/organizations/{id}/generate_report/`, and `/api/v2/location/{id}/generate_report/`.
+
+### Request options
+
+All fields are optional — posting an empty body (`{}`) returns a JSON report.
+
+| Field | Type | Default | Description |
+|---|---|---|---|
+| `report_type` | string | `JSON` | One of `JSON`, `HTML`, `CSV`, `Excel`. |
+| `include_finding_notes` | boolean | `false` | Include each finding's notes. |
+| `include_finding_images` | boolean | `false` | Include images attached to findings. |
+| `include_executive_summary` | boolean | `false` | Include an executive summary section. |
+| `include_table_of_contents` | boolean | `false` | Include a table of contents. |
+
+An unsupported `report_type` (for example `PDF`) returns `400 Bad Request` with an error on the `report_type` field.
+
+### Example
+
+Generate a CSV report of all findings you can view, and save it to a file:
+
+```bash
+curl -X POST \
+  -H "Authorization: Token <your-api-token>" \
+  -H "Content-Type: application/json" \
+  -d '{"report_type": "CSV"}' \
+  https://<your-instance>/api/v2/findings/generate_report/ \
+  -o findings.csv
+```
+
+### Response formats
+
+| `report_type` | Content type | Response |
+|---|---|---|
+| `JSON` (default) | `application/json` | Report body in the response |
+| `HTML` | `text/html` | Rendered report page |
+| `CSV` | `text/csv` | File attachment |
+| `Excel` | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | `.xlsx` file attachment |
+
+CSV and Excel are returned as file attachments with a `Content-Disposition` header rather than as a JSON body. The filename is derived from the object the report was generated from — for example `product_1_findings.csv` or `test_42_findings.xlsx`. The `/findings/generate_report/` endpoint is not scoped to a single object, so its downloads are named `findings.csv` and `findings.xlsx`.
+
+### Notes and limitations
+
+* The `include_*` options affect the **JSON** and **HTML** reports only. The **CSV** and **Excel** exports always contain the finding rows.
+* Report generation requires **view** permission on the objects involved, and a report only ever contains findings you are authorized to see.
+* **Standard query\-parameter filters are not applied to this action.** Unlike `GET /api/v2/findings/`, the `generate_report/` action does not apply the finding filters, so a request such as `POST /api/v2/findings/generate_report/?severity=High` still reports on every finding you can view. To narrow a report, generate it from a specific product, engagement, or test instead.
+
 ## Asynchronous Deletion Behavior
 
 Deletions in DefectDojo (via both the API and UI) are processed **asynchronously** by Celery background workers. When you delete an Engagement, Test, or other object, the API or UI returns a success response immediately, but the actual deletion runs in the background.
@@ -291,6 +352,50 @@ When importing scan results at scale (e.g., SBOM pipelines with thousands of com
 - **Target payload sizes under 1 MB per import** where possible. Split large SBOMs into smaller files per product or component group.
 - **Add delays between consecutive API calls** to avoid worker pool exhaustion, which causes HTTP 502 errors.
 - **Use Reimport** (`/api/v2/reimport-scan/`) for recurring scans to update existing findings rather than creating duplicates.
+
+## Background import responses (API: `background_import`)
+
+A background import returns as soon as the uploaded report has been parsed, before any
+findings have been written. Its response therefore describes *scheduled* work, and it is
+shaped differently from a synchronous one. This applies to `/api/v2/import-scan/` and
+`/api/v2/reimport-scan/` whenever `background_import` is `true`, or whenever the
+`api_async_import` system setting turns it on for every import.
+
+A background response contains:
+
+- `background_import` — `true`. This is the field to branch on.
+- `status` — the lifecycle status of the test at the moment the response was produced:
+  `Processing`, `Post Processing - Deduplication`,
+  `Post Processing - False Positive History`, `Processed` or `Failed`.
+- `findings_parsed` — how many findings were read out of the report. This is a parse
+  count, not a created count: deduplication and the import options you supplied decide
+  how many findings are actually written.
+- `test_id` (and `engagement_id`, `product_id`, `product_type_id`) — the identifiers to
+  poll.
+- `message` — the same information as `status` and `findings_parsed`, in prose. Prefer
+  the structured fields.
+
+It does **not** contain `statistics`, and it does not contain `deduplication_complete`.
+Those keys are absent rather than zero, because at that point no findings have been
+created and reporting zeros would misdescribe the import. A client that reads
+`response["statistics"]` unconditionally will fail on a background import — read
+`background_import` first, or use `statistics` only on the synchronous path.
+
+To follow a background import to completion, poll the test:
+
+```
+POST /api/v2/import-scan/        (background_import=true)  -> test_id, status, findings_parsed
+GET  /api/v2/tests/{test_id}/                              -> status, processing
+```
+
+Repeat the `GET` until `status` is `Processed` (the import finished, and the test's
+finding counts are now meaningful) or `Failed` (the import did not complete). While the
+import is running, `processing` is `true` and `status` reports which phase it is in. Use
+a few seconds between polls; a large report can spend minutes in post-processing.
+
+A synchronous import (`background_import` omitted or `false`) is unchanged: it returns
+once the findings have been written, includes `statistics`, and does not include `status`
+or `findings_parsed`.
 
 ## Using the Scan Completion Date (API: `scan_date`) field
 

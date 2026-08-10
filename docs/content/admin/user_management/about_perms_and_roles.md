@@ -1,10 +1,14 @@
 ---
 title: "Permissions in DefectDojo"
-description: "Summary of all DefectDojo permission options, in detail"
+description: "Summary of all DefectDojo Pro permission options, in detail"
 weight: 2
+audience: pro
 aliases:
   - /en/customize_dojo/user_management/about_perms_and_roles
 ---
+
+> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
+
 If you have a team of users working in DefectDojo, it's important to set up Role\-Based Access Control (RBAC) appropriately so that users can only access specific data. Security data is highly sensitive, and DefectDojo's options for access control allow you to be specific about each team member’s access to information.
 
 This article is an overview of how permissions in DefectDojo work.  If you would prefer to see a detailed breakdown of **each action** that can be controlled by Permissions, see our **[Permissions Chart](../user_permission_chart/)** article.
@@ -29,7 +33,9 @@ When users are assigned as members to a Product or Product Type, they also recei
 
 ### Role Summaries
 
-Users can be assigned a role of Reader, Writer, Maintainer, Owner or API Importer, either globally or within a Product / Product Type.
+DefectDojo Pro ships five **built-in roles**: Reader, Writer, Maintainer, Owner and API Importer. Any of them can be assigned either globally or within a Product / Product Type.
+
+The built-in roles are locked presets. They cannot be edited or deleted, and their permissions are the same on every DefectDojo Pro instance. If none of them fits how your team works, you can build a role that does, by choosing individual permissions or by cloning a built-in role and adjusting it. See [Custom RBAC Roles](../pro__custom_rbac_roles/).
 
 ‘Underlying data’ refers to all Products, Engagements, Tests, Findings or Endpoints nested under a Product, or Product Type.
 
@@ -43,7 +49,7 @@ Users can be assigned a role of Reader, Writer, Maintainer, Owner or API Importe
 ​
 * **API Importer** **Users** have limited abilities. This Role allows limited API access without exposing the majority of the API endpoints, so is useful for automation or users who are meant to be ‘external’ to DefectDojo. They can view underlying data, Add / Edit Engagements, and Import Scan Data.
 
-For detailed information on Roles, please see our **[Role Permission Chart](../user_permission_chart/)**.
+For detailed information on the built-in Roles, please see our **[Role Permission Chart](../user_permission_chart/)**. For the full list of permissions a role can be given, and how to build your own, see **[Custom RBAC Roles](../pro__custom_rbac_roles/)**.
 
 ### Global Roles
 
@@ -56,6 +62,8 @@ User Groups can be added as Members of a Product or Product Type. Users who are 
 #### Users with multiple roles
 
 * If a User is assigned as a member of a Product, they are not granted any associated Product Type permissions by default.
+
+* If a User ends up with more than one role on the same Product or Product Type (for example one assigned directly and another inherited from a Group), they receive the **combined** permissions of every role they hold there.
 
 * A User's Product Role always supersedes their 'default' Product Type Role.  
 ​
@@ -70,6 +78,7 @@ User Groups can be added as Members of a Product or Product Type. Users who are 
 Superusers (Admins) have no limitations in the system. They can change all settings, manage users and have read / write access to all data. They can also change access rules for all users in DefectDojo. Superusers will also receive notifications for all system issues and alerts.
 
 By default, the first account created on a new DefectDojo instance will have Superuser permissions. That user will be able to edit permissions for all subsequent DefectDojo users. Only an existing Superuser can add another superuser, or add a Global Role to a user. 
+
 
 ## Configuration Permissions
 
@@ -90,3 +99,21 @@ If users are part of a Group, they also have Group Configuration Permissions whi
 If users create a new Group, they will be given the Owner role of the new Group by default.
 
 For more information on Configuration Permissions, see our **[Configuration Permissions Chart](../user_permission_chart/#configuration-permission-chart)**.
+
+## Manage default permissions
+
+When a brand new user is created in DefectDojo — whether manually, via SAML / SSO, or via any social-auth provider — they have **no permissions by default**. They will see zero Product Types, zero Products, and zero Engagements when they first log in. They cannot view or interact with any data until a Superuser grants them access (directly, via a Global Role, via a Product / Product Type membership, or by adding them to a Group).
+
+If you want every newly provisioned user to receive a baseline level of access automatically — for example, "every new SSO user should be a Reader on a particular group" — you can configure a **Default group** on the System Settings page.
+
+1. Open **⚙️ Configuration → System Settings** (Superuser only).
+2. Set **Default group** to the [User Group](../create_user_group/) that newly created users should join.
+3. Set **Default group role** to the role they should hold in that group (e.g. **Reader**).
+4. Optionally set **Default group email pattern** to a regex (e.g. `.*@yourcompany\.com$`) so the default group is only applied to users whose email matches.
+5. Save.
+
+Both **Default group** and **Default group role** must be set — if either is empty, the default group is not applied.
+
+This setting applies to every user-creation path: manual creation, SAML, OAuth, and other social-auth providers. It is not applied retroactively — existing users will keep their current group memberships even if you change this setting later.
+
+For SSO-specific guidance, see [SAML Configuration](/admin/sso/pro__saml/#default-access-for-sso-provisioned-users) or your provider's section under [SSO Configuration](../configure_sso/).

@@ -4,19 +4,22 @@ from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APIClient, APITestCase
 
+from dojo.authorization.models import (
+    Product_Type_Member,
+    Role,
+)
 from dojo.authorization.roles_permissions import Roles
+from dojo.finding.helper import save_vulnerability_ids
 from dojo.models import (
+    Dojo_User,
     Engagement,
     Finding,
     Product,
     Product_Member,
     Product_Type,
-    Product_Type_Member,
-    Role,
     Test,
     Test_Type,
     User,
-    Vulnerability_Id,
 )
 
 
@@ -58,24 +61,24 @@ class TestBulkRiskAcceptanceApi(APITestCase):
         Finding.objects.bulk_create(
             create_finding(cls.test_a, cls.user, f"CVE-1999-{i}") for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_a):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
         Finding.objects.bulk_create(
             create_finding(cls.test_b, cls.user, f"CVE-1999-{i}") for i in range(51, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_b):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
         Finding.objects.bulk_create(
             create_finding(cls.test_c, cls.user, f"CVE-1999-{i}") for i in range(52, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_c):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
 
         Finding.objects.bulk_create(
             create_finding(cls.test_d, cls.user, f"CVE-2000-{i}") for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_d):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
         Finding.objects.bulk_create(
             create_finding(cls.test_e, cls.user, f"CVE-1999-{i}") for i in range(50, 150, 3))
         for finding in Finding.objects.filter(test=cls.test_e):
-            Vulnerability_Id.objects.get_or_create(finding=finding, vulnerability_id=finding.cve)
+            save_vulnerability_ids(finding, [finding.cve])
 
     def setUp(self) -> None:
         self.client = APIClient()
@@ -164,8 +167,9 @@ class TestBulkRiskAcceptanceRbac(APITestCase):
             target_end=datetime.datetime(2000, 2, 1, tzinfo=datetime.UTC),
         )
 
-        # Writer user: has Risk_Acceptance permission, NOT is_staff
-        cls.writer = User.objects.create(username="rbac_writer", is_staff=False)
+        # Writer user: a member of both products (legacy: any member of
+        # authorized_users can perform risk acceptance).
+        cls.writer = Dojo_User.objects.create(username="rbac_writer", is_staff=False)
         cls.writer_token = Token.objects.create(user=cls.writer)
         Product_Member.objects.create(
             product=cls.product_enabled, user=cls.writer,
@@ -175,9 +179,13 @@ class TestBulkRiskAcceptanceRbac(APITestCase):
             product=cls.product_disabled, user=cls.writer,
             role=Role.objects.get(id=Roles.Writer),
         )
+        cls.product_enabled.authorized_users.add(cls.writer)
+        cls.product_disabled.authorized_users.add(cls.writer)
 
-        # Reader user: does NOT have Risk_Acceptance permission, NOT is_staff
-        cls.reader = User.objects.create(username="rbac_reader", is_staff=False)
+        # Reader user: NOT in authorized_users — under legacy this is the
+        # only way to deny access (Reader/Writer/Maintainer/Owner are all
+        # the same bit). The Product_Member row is informational only.
+        cls.reader = Dojo_User.objects.create(username="rbac_reader", is_staff=False)
         cls.reader_token = Token.objects.create(user=cls.reader)
         Product_Member.objects.create(
             product=cls.product_enabled, user=cls.reader,
@@ -196,13 +204,13 @@ class TestBulkRiskAcceptanceRbac(APITestCase):
         Finding.objects.bulk_create(
             create_finding(cls.test_enabled, cls.writer, f"CVE-2024-{i}") for i in range(10))
         for f in Finding.objects.filter(test=cls.test_enabled):
-            Vulnerability_Id.objects.get_or_create(finding=f, vulnerability_id=f.cve)
+            save_vulnerability_ids(f, [f.cve])
 
         # Findings on the disabled product
         Finding.objects.bulk_create(
             create_finding(cls.test_disabled, cls.writer, f"CVE-2024-{i + 100}") for i in range(5))
         for f in Finding.objects.filter(test=cls.test_disabled):
-            Vulnerability_Id.objects.get_or_create(finding=f, vulnerability_id=f.cve)
+            save_vulnerability_ids(f, [f.cve])
 
     def _client_for(self, token):
         client = APIClient()
@@ -241,25 +249,28 @@ class TestBulkRiskAcceptanceRbac(APITestCase):
         )
         self.assertEqual(result.status_code, 201)
 
-    # --- Reader (no Risk_Acceptance) is forbidden ---
+    # --- Non-member (reader is not in product.authorized_users under
+    # legacy) sees the object as not-found because get_authorized_*
+    # filters return an empty queryset, hiding existence rather than
+    # leaking it via 403. ---
 
-    def test_reader_forbidden_on_engagement(self):
+    def test_non_member_not_found_on_engagement(self):
         client = self._client_for(self.reader_token)
         result = client.post(
             reverse("engagement-accept-risks", kwargs={"pk": self.engagement_enabled.id}),
             data=self._accepted_risks(["CVE-2024-3"]),
             format="json",
         )
-        self.assertEqual(result.status_code, 403)
+        self.assertEqual(result.status_code, 404)
 
-    def test_reader_forbidden_on_test(self):
+    def test_non_member_not_found_on_test(self):
         client = self._client_for(self.reader_token)
         result = client.post(
             reverse("test-accept-risks", kwargs={"pk": self.test_enabled.id}),
             data=self._accepted_risks(["CVE-2024-4"]),
             format="json",
         )
-        self.assertEqual(result.status_code, 403)
+        self.assertEqual(result.status_code, 404)
 
     def test_reader_gets_empty_result_on_findings(self):
         client = self._client_for(self.reader_token)

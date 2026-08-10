@@ -240,3 +240,80 @@ class TestEditFindingEndpointView(TestCase):
         self.finding.refresh_from_db()
         self.assertIn(self.endpoint, self.finding.endpoints.all())
         self.assertIn(endpoint2, self.finding.endpoints.all())
+
+
+@override_settings(V3_FEATURE_LOCATIONS=False)
+class TestEditFindingComponentView(TestCase):
+
+    """
+    Regression tests for SC-13073: editing a finding to remove its component must
+    store NULL (not an empty string) so the finding groups with other component-less
+    findings instead of landing in a separate "None" group.
+    """
+
+    def _minimal_post_data(self, **overrides):
+        data = {
+            "title": self.finding.title,
+            "date": "2024-01-01",
+            "severity": "High",
+            "description": "Test description",
+            "active": "on",
+            "verified": "",
+            "false_p": "",
+            "duplicate": "",
+            "out_of_scope": "",
+            "endpoints": [],
+            "endpoints_to_add": "",
+            "vulnerability_ids": "",
+            "references": "",
+            "mitigation": "",
+            "impact": "",
+            "steps_to_reproduce": "",
+            "severity_justification": "",
+        }
+        data.update(overrides)
+        return data
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="tester", password="pass",  # noqa: S106
+            is_staff=True, is_superuser=True,
+        )
+        self.client.force_login(self.user)
+        product_type = Product_Type.objects.create(name="PT")
+        self.product = Product.objects.create(name="P", prod_type=product_type, description="Test product")
+        engagement = Engagement.objects.create(
+            name="E", product=self.product, target_start=now(), target_end=now(),
+        )
+        test_type = Test_Type.objects.create(name="TT")
+        self.test_obj = Test.objects.create(
+            engagement=engagement, test_type=test_type,
+            target_start=now(), target_end=now(),
+        )
+        self.finding = Finding.objects.create(
+            title="Component Test Finding",
+            severity="High",
+            test=self.test_obj,
+            reporter=self.user,
+            component_name="django",
+            component_version="4.2",
+        )
+        self.url = reverse("edit_finding", args=[self.finding.id])
+
+    def test_clearing_component_stores_null(self):
+        """Submitting blank component fields stores NULL rather than an empty string."""
+        response = self.client.post(self.url, self._minimal_post_data(component_name="", component_version=""))
+
+        self.assertIn(response.status_code, [200, 302])
+        self.finding.refresh_from_db()
+        self.assertIsNone(self.finding.component_name)
+        self.assertIsNone(self.finding.component_version)
+
+    def test_setting_component_persists(self):
+        """A non-empty component value is still saved as-is."""
+        response = self.client.post(self.url, self._minimal_post_data(component_name="requests", component_version="2.0"))
+
+        self.assertIn(response.status_code, [200, 302])
+        self.finding.refresh_from_db()
+        self.assertEqual(self.finding.component_name, "requests")
+        self.assertEqual(self.finding.component_version, "2.0")

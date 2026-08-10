@@ -3,17 +3,16 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
-from dojo.api_v2.permissions import IsSuperUser
 from dojo.api_v2.views import PrefetchDojoModelViewSet
-from dojo.authorization.roles_permissions import Permissions
+from dojo.authorization.api_permissions import (
+    IsSuperUser,
+    LocationFindingReferencePermission,
+    LocationProductReferencePermission,
+)
 from dojo.location.api.filters import (
     LocationFilter,
     LocationFindingReferenceFilter,
     LocationProductReferenceFilter,
-)
-from dojo.location.api.permissions import (
-    LocationFindingReferencePermission,
-    LocationProductReferencePermission,
 )
 from dojo.location.api.serializers import (
     LocationFindingReferenceSerializer,
@@ -61,7 +60,7 @@ class LocationFindingReferenceViewSet(PrefetchDojoModelViewSet):
 
     def get_queryset(self) -> QuerySet[LocationFindingReference]:
         """Return the queryset of LocationFindingReferences."""
-        return get_authorized_location_finding_reference(Permissions.Location_View)
+        return get_authorized_location_finding_reference("view")
 
 
 class LocationProductReferenceViewSet(PrefetchDojoModelViewSet):
@@ -79,4 +78,4 @@ class LocationProductReferenceViewSet(PrefetchDojoModelViewSet):
 
     def get_queryset(self) -> QuerySet[LocationProductReference]:
         """Return the queryset of LocationProductReferences."""
-        return get_authorized_location_product_reference(Permissions.Location_View)
+        return get_authorized_location_product_reference("view")

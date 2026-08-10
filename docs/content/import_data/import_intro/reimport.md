@@ -59,6 +59,22 @@ If you’re using a triage\-less scanner, or you don’t otherwise want Closed F
 * Set **do\_not\_reactivate** to **True** if using the API
 * Check the **Do Not Reactivate** checkbox if using the UI
 
+### Force Active and Force Verified behavior
+
+Setting `active=true` (UI: **Force Active**) or `verified=true` (UI: **Force Verified**) on a Reimport will set the corresponding status on every matched Finding, **including findings that would otherwise be Inactive because they were Mitigated**. This is the same reactivation behavior described above, just made explicit on every incoming Finding.
+
+Force Active and Force Verified do **not** override statuses that represent an explicit user or system decision about why a Finding should not be Active:
+
+| Status | Does Force Active reactivate it? | Why |
+|---|---|---|
+| Mitigated / Closed | Yes | Same as the default reactivation behavior |
+| Risk Accepted | No | The Finding is Inactive because a user explicitly accepted the risk; reimport must not silently revoke that decision |
+| Duplicate | No | The Finding is Inactive because deduplication marked it as a duplicate of another Finding; the original Finding (not the duplicate) is what should be active |
+| False Positive | No | Same reasoning as Risk Accepted — an explicit triage decision |
+| Out of Scope | No | Same reasoning as Risk Accepted — an explicit triage decision |
+
+If you want a Risk Accepted or Duplicate Finding to become Active again, you need to remove the Risk Acceptance or the Duplicate marker first. Force Active alone will not do it.
+
 ## Opening the Reimport form
 
 The **Re\-Import Findings** form can be accessed on any Test page, under the **⚙️Gear** drop\-down menu.
@@ -89,6 +105,8 @@ This header indicates the actions taken by an Import/Reimport.
 Reimport decides whether an incoming item matches an existing Finding using **[Reimport Deduplication](/triage_findings/finding_deduplication/about_deduplication/)** settings. This is separate from “Same Tool Deduplication” and “Cross Tool Deduplication,” which operate after Findings exist.
 
 If you are seeing Reimport close old Findings and create new Findings when only a minor attribute changes (for example, a line number shift), tune **Reimport Deduplication** for that tool to use stable identifiers that ignore those attributes (such as Unique ID From Tool).
+
+**DefectDojo Pro** can solve this directly for tools without reliable unique IDs: enabling **[Location Drift Matching](/triage_findings/finding_deduplication/pro__location_drift_matching/)** makes Reimport recognize a Finding whose location moved — a line shift, file rename, URL move, or dependency version bump — as the *same* Finding, updating it in place and preserving its location history.
 
 ## Reimport via API - special note
 

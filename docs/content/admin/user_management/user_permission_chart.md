@@ -1,13 +1,19 @@
 ---
 title: "Action permission charts"
-description: "All user permissions in detail"
+description: "All DefectDojo Pro user permissions in detail"
 weight: 4
+audience: pro
 aliases:
   - /en/customize_dojo/user_management/user_permission_chart
 ---
+
+> **DefectDojo Pro feature.** The Members / Groups / Global Roles RBAC system described on this page is part of DefectDojo Pro. Open-source DefectDojo uses the [Authorized Users](../os__authorized_users/) model — see that page for open-source access control, and the [3.0 upgrade notes](/releases/os_upgrading/3.0/#authorized-users-panel-replaces-membersgroups-under-legacy-authorization) if you're moving between editions.
+
 ## Role Permission Chart
 
 This chart is intended to list all permissions related to a Product or Product Type, as well as which permissions are available to each role.
+
+The five roles below are DefectDojo Pro's **built-in roles**. They are locked presets: their permissions are the same on every instance and cannot be changed. If you have built your own roles, this chart describes the built-ins they were cloned from rather than the roles themselves. For the full catalog of permissions a role can be given, see [Custom RBAC Roles](../pro__custom_rbac_roles/#choosing-permissions).
 
 | **Section** | **Permission** | Reader | Writer | Maintainer | Owner | API Importer |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -23,6 +29,7 @@ This chart is intended to list all permissions related to a Product or Product T
 |  | Edit an associated Product/Product Type Membership within a Group³ |  |  |  | ☑️ |  |
 |  | Delete an associated Product/Product Type Membership within a Group³ |  |  |  |  |  |
 | **Engagements** (Within a Product) | Add, Edit Engagements |  | ☑️ | ☑️ | ☑️ | ☑️ |
+|  | View Risk Acceptances ⁴ |  | ☑️ | ☑️ | ☑️ |  |
 |  | Add, Edit Risk Acceptances |  | ☑️ | ☑️ | ☑️ |  |
 |  | Delete Engagements |  |  | ☑️ | ☑️ |  |
 | **Tests** (Within a Product) | Add Tests |  | ☑️ | ☑️ | ☑️ |  |
@@ -45,6 +52,7 @@ This chart is intended to list all permissions related to a Product or Product T
 1. A user who is assigned permissions at the Product level only cannot view the Product Type it is contained in.
 2. When a new Product is added underneath a Product Type, all Product Type\-level Users will be added as Members of the new Product with their Product Type\-level Role.
 3. The user who wishes to make changes to a Group must also have **Edit Group** **Configuration Permissions**, and a **Maintainer or Owner** **Group Configuration Role** in the Group they wish to edit.
+4. Risk Acceptance visibility is gated by a distinct minimum permission from Finding visibility — a Reader on the Product can view the underlying Findings but **cannot** view Risk Acceptances those Findings belong to.  For details on Risk Acceptance permissions, expiration-date behavior, and reinstate workflows, see [Risk Acceptances (Pro)](/triage_findings/findings_workflows/pro__risk_acceptance/#risk-acceptance-permissions-and-visibility).
 
 ## Configuration Permission Chart
 

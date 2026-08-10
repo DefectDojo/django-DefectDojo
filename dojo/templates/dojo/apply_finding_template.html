@@ -6,19 +6,10 @@
 
     <link rel="stylesheet" href="{% static "easymde/dist/easymde.min.css" %}">
 {% endblock %}
-{% block add_styles %}
-    {{ block.super }}
-    .chosen-container {
-    width: 70% !important;
-    }
-    .editor-toolbar, .editor-statusbar, .editor-preview-side, .CodeMirror {
-    width: 70% !important;
-    }
-{% endblock %}
 {% block content %}
     {{ block.super }}
     <h3> Apply template to a Finding</h3>
-    <form id="add_finding" class="form-horizontal" name="apply_template"
+    <form id="add_finding" class="" name="apply_template"
           action="{% url 'apply_template_to_finding' finding.id template.id %}" method="post">
         {% csrf_token %}
         {% include "dojo/apply_finding_template_form_fields.html" with form=form template=template %}

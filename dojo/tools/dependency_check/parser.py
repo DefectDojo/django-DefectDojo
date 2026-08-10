@@ -86,8 +86,62 @@ class DependencyCheckParser:
         if key not in dupes:
             dupes[key] = finding
 
+    def build_related_dependencies_block(self, dependency, namespace):
+        """
+        Return a markdown block listing related dependencies, or ''.
+
+        Dependency-Check's DependencyBundlingAnalyzer merges co-grouped artifacts
+        into one main dependency and lists the others under <relatedDependencies>.
+        The vulnerability is attached only to the main dependency in the XML; the
+        related entries are metadata pointing to other files in the same logical
+        component. Previously we emitted one finding per related entry, which
+        multiplied a single CVE into N findings sharing the same title and CVE
+        with only the file_path differing — pure noise for the user. Instead we
+        keep one finding for the main dependency and surface the related file
+        paths in its description.
+
+        DC bundles dependencies under five scenarios (see
+        DependencyBundlingAnalyzer.evaluateDependencies):
+
+        1. hashesMatch — identical content (same sha1) found at multiple paths,
+           e.g. the same jar packaged into multiple ear/war archives.
+        2. isShadedJar — a .jar and a pom.xml extracted from inside it share the
+           same CPE; the pom.xml is recorded as related to the jar.
+        3. isWebJar — a .js file extracted from a WebJar matches the jar's CPE
+           (mapped via pkg:maven/org.webjars/<name>@<version>); the js is
+           related to the jar.
+        4. CPE + base path + vulnerabilities + filename match — sibling artifacts
+           in the same project that share a CPE (e.g. spring-boot,
+           spring-boot-actuator, spring-boot-starter all map to the
+           spring_boot CPE).
+        5. NPM same name + version — the same npm package discovered via
+           different resolution paths (e.g. package-lock.json + node_modules).
+
+        Scenario 1 is the only case where the related entries are genuinely
+        separate vulnerable locations; scenarios 2-5 are different files
+        representing one logical component. Listing all related paths in the
+        description preserves the per-location information for scenario 1 while
+        removing the noise from scenarios 2-5.
+        """
+        related = dependency.find(namespace + "relatedDependencies")
+        if related is None:
+            return ""
+        entries = []
+        for rd in related.findall(namespace + "relatedDependency"):
+            file_name = rd.findtext(f"{namespace}fileName")
+            if not file_name:
+                continue
+            file_path = (rd.findtext(f"{namespace}filePath") or "").strip()
+            entries.append(f"- {file_name} ({file_path})" if file_path else f"- {file_name}")
+        if not entries:
+            return ""
+        return "\n**Related Filepaths:**\n" + "\n".join(entries)
+
     def get_filename_and_path_from_dependency(
-        self, dependency, related_dependency, namespace,
+        self,
+        dependency,
+        related_dependency,
+        namespace,
     ):
         if related_dependency is None:
             return dependency.findtext(
@@ -104,7 +158,10 @@ class DependencyCheckParser:
         return None, None
 
     def get_component_name_and_version_from_dependency(
-        self, dependency, related_dependency, namespace,
+        self,
+        dependency,
+        related_dependency,
+        namespace,
     ):
         identifiers_node = dependency.find(namespace + "identifiers")
         if identifiers_node is not None:
@@ -116,20 +173,13 @@ class DependencyCheckParser:
                 purl_parts = purl.to_dict()
                 component_name = (
                     purl_parts["namespace"] + ":"
-                    if purl_parts["namespace"]
-                    and len(purl_parts["namespace"]) > 0
+                    if purl_parts["namespace"] and len(purl_parts["namespace"]) > 0
                     else ""
                 )
-                component_name += (
-                    purl_parts["name"]
-                    if purl_parts["name"] and len(purl_parts["name"]) > 0
-                    else ""
-                )
+                component_name += purl_parts["name"] if purl_parts["name"] and len(purl_parts["name"]) > 0 else ""
                 component_name = component_name or None
                 component_version = (
-                    purl_parts["version"]
-                    if purl_parts["version"] and len(purl_parts["version"]) > 0
-                    else ""
+                    purl_parts["version"] if purl_parts["version"] and len(purl_parts["version"]) > 0 else ""
                 )
                 return component_name, component_version, pck_id
 
@@ -149,20 +199,10 @@ class DependencyCheckParser:
             if cpe_node:
                 cpe_id = cpe_node.findtext(f"{namespace}name")
                 cpe = CPE(cpe_id)
-                component_name = (
-                    cpe.get_vendor()[0] + ":"
-                    if len(cpe.get_vendor()) > 0
-                    else ""
-                )
-                component_name += (
-                    cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
-                )
+                component_name = cpe.get_vendor()[0] + ":" if len(cpe.get_vendor()) > 0 else ""
+                component_name += cpe.get_product()[0] if len(cpe.get_product()) > 0 else ""
                 component_name = component_name or None
-                component_version = (
-                    cpe.get_version()[0]
-                    if len(cpe.get_version()) > 0
-                    else None
-                )
+                component_version = cpe.get_version()[0] if len(cpe.get_version()) > 0 else None
                 return component_name, component_version, None
 
             maven_node = identifiers_node.find(
@@ -251,7 +291,8 @@ class DependencyCheckParser:
         if severity:
             if severity.strip().lower() not in self.SEVERITY_MAPPING:
                 logger.warning(
-                    "Warning: Unknow severity value detected '%s'. Bypass to 'Medium' value", severity,
+                    "Warning: Unknow severity value detected '%s'. Bypass to 'Medium' value",
+                    severity,
                 )
                 severity = "Medium"
             else:
@@ -266,13 +307,20 @@ class DependencyCheckParser:
         }
 
     def get_finding_from_vulnerability(
-        self, dependency, related_dependency, vulnerability, test, namespace,
+        self,
+        dependency,
+        related_dependency,
+        vulnerability,
+        test,
+        namespace,
     ):
         (
             dependency_filename,
             dependency_filepath,
         ) = self.get_filename_and_path_from_dependency(
-            dependency, related_dependency, namespace,
+            dependency,
+            related_dependency,
+            namespace,
         )
         # logger.debug('dependency_filename: %s', dependency_filename)
 
@@ -283,12 +331,16 @@ class DependencyCheckParser:
         mitigated = None
         is_Mitigated = False
         name = vulnerability.findtext(f"{namespace}name")
-        if vulnerability.find(f"{namespace}cwes") is not None:
-            cwe_field = vulnerability.find(f"{namespace}cwes").findtext(
-                f"{namespace}cwe",
-            )
+        cwe_fields = []
+        if (cwes_node := vulnerability.find(f"{namespace}cwes")) is not None:
+            cwe_fields = [
+                cwe_node.text for cwe_node in cwes_node.findall(f"{namespace}cwe") if cwe_node.text
+            ]
+            cwe_field = cwe_fields[0] if cwe_fields else None
         else:
             cwe_field = vulnerability.findtext(f"{namespace}cwe")
+            if cwe_field:
+                cwe_fields = [cwe_field]
 
         description = vulnerability.findtext(f"{namespace}description")
 
@@ -308,23 +360,30 @@ class DependencyCheckParser:
 
         # Use CWE-1035 as fallback
         cwe = 1035  # Vulnerable Third Party Component
-        if cwe_field:
-            m = re.match(r"^(CWE-)?(\d+)", cwe_field)
+        parsed_cwes = []
+        for cwe_value in cwe_fields:
+            m = re.match(r"^(CWE-)?(\d+)", cwe_value)
             if m:
-                cwe = int(m.group(2))
+                parsed_cwes.append(int(m.group(2)))
+        if parsed_cwes:
+            cwe = parsed_cwes[0]
 
         (
             component_name,
             component_version,
             component_purl,
         ) = self.get_component_name_and_version_from_dependency(
-            dependency, related_dependency, namespace,
+            dependency,
+            related_dependency,
+            namespace,
         )
 
         stripped_name = name
         # startswith CVE-XXX-YYY
         stripped_name = re.sub(
-            r"^CVE-\d{4}-\d{4,7}", "", stripped_name,
+            r"^CVE-\d{4}-\d{4,7}",
+            "",
+            stripped_name,
         ).strip()
         # startswith CWE-XXX:
         stripped_name = re.sub(r"^CWE-\d+\:", "", stripped_name).strip()
@@ -333,7 +392,8 @@ class DependencyCheckParser:
 
         if component_name is None:
             logger.warning(
-                "component_name was None for File: %s, using dependency file name instead.", dependency_filename,
+                "component_name was None for File: %s, using dependency file name instead.",
+                dependency_filename,
             )
             component_name = dependency_filename
 
@@ -352,15 +412,9 @@ class DependencyCheckParser:
                 ref_url = reference_node.findtext(f"{namespace}url")
                 ref_name = reference_node.findtext(f"{namespace}name")
                 if ref_url == ref_name:
-                    reference_detail += (
-                        f"**Source:** {ref_source}\n**URL:** {ref_url}\n\n"
-                    )
+                    reference_detail += f"**Source:** {ref_source}\n**URL:** {ref_url}\n\n"
                 else:
-                    reference_detail += (
-                        f"**Source:** {ref_source}\n"
-                        f"**URL:** {ref_url}\n"
-                        f"**Name:** {ref_name}\n\n"
-                    )
+                    reference_detail += f"**Source:** {ref_source}\n**URL:** {ref_url}\n**Name:** {ref_name}\n\n"
 
         if related_dependency is not None:
             tags.append("related")
@@ -370,14 +424,18 @@ class DependencyCheckParser:
                 notes = "Document on why we are suppressing this vulnerability is missing!"
                 tags.append("no_suppression_document")
             mitigation = f"**This vulnerability is mitigated and/or suppressed:** {notes}\n"
-            mitigation += f"Update {component_name}:{component_version} to at least the version recommended in the description"
+            mitigation += (
+                f"Update {component_name}:{component_version} to at least the version recommended in the description"
+            )
             mitigated = datetime.datetime.now(datetime.UTC)
             is_Mitigated = True
             active = False
             tags.append("suppressed")
 
         else:
-            mitigation = f"Update {component_name}:{component_version} to at least the version recommended in the description"
+            mitigation = (
+                f"Update {component_name}:{component_version} to at least the version recommended in the description"
+            )
             description += "\n**Filepath:** " + str(dependency_filepath)
             active = True
 
@@ -398,6 +456,9 @@ class DependencyCheckParser:
             component_version=component_version,
             **self.get_severity_and_cvss_meta(vulnerability, namespace),
         )
+
+        if parsed_cwes:
+            finding.unsaved_cwes = parsed_cwes
 
         finding.unsaved_tags = tags
 
@@ -448,6 +509,7 @@ class DependencyCheckParser:
                     namespace + "vulnerabilities",
                 )
                 if vulnerabilities is not None:
+                    related_block = self.build_related_dependencies_block(dependency, namespace)
                     for vulnerability in vulnerabilities.findall(
                         namespace + "vulnerability",
                     ):
@@ -459,32 +521,11 @@ class DependencyCheckParser:
                                 test,
                                 namespace,
                             )
+                            if related_block:
+                                finding.description += related_block
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
-
-                            relatedDependencies = dependency.find(
-                                namespace + "relatedDependencies",
-                            )
-                            if relatedDependencies is not None:
-                                for (
-                                    relatedDependency
-                                ) in relatedDependencies.findall(
-                                    namespace + "relatedDependency",
-                                ):
-                                    finding = (
-                                        self.get_finding_from_vulnerability(
-                                            dependency,
-                                            relatedDependency,
-                                            vulnerability,
-                                            test,
-                                            namespace,
-                                        )
-                                    )
-                                    if finding:  # could be None
-                                        if scan_date:
-                                            finding.date = scan_date
-                                        self.add_finding(finding, dupes)
 
                     for suppressedVulnerability in vulnerabilities.findall(
                         namespace + "suppressedVulnerability",
@@ -497,13 +538,17 @@ class DependencyCheckParser:
                                 test,
                                 namespace,
                             )
+                            if related_block:
+                                finding.description += related_block
                             if scan_date:
                                 finding.date = scan_date
                             self.add_finding(finding, dupes)
                 elif settings.V3_FEATURE_LOCATIONS:
                     # Collect product-level dependency locations
                     _, _, component_purl = self.get_component_name_and_version_from_dependency(
-                        dependency, None, namespace,
+                        dependency,
+                        None,
+                        namespace,
                     )
                     if component_purl:
                         test.unsaved_metadata.append(

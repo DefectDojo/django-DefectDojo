@@ -1,0 +1,12 @@
+{
+  "spdxVersion": "SPDX-3.0",
+  "@context": "https://spdx.org/rdf/3.0.0/spdx-context.jsonld",
+  "@graph": [
+    {
+      "type": "software_Package",
+      "spdxId": "https://example.com/spdx3/package/generic-app",
+      "name": "generic-app",
+      "software_packageVersion": "1.0.0"
+    }
+  ]
+}

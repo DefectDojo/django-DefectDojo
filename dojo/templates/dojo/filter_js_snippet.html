@@ -3,16 +3,8 @@
 <script type="application/javascript">
     $(function () {
         $(function () {
-
-        })
-
-        $(function () {
             $('.similar-filters select[multiple]').not('[data-tagulous]').each(function () {
-                // Removing bootstrap-select class and replacing with select2 to avoid library conflicts
-                // leading to visually unappealing dropdowns
-                $(this).removeClass('selectpicker').closest('.bootstrap-select').replaceWith($(this));
-                $(this).select2(
-                )
+                $(this).select2();
             })
             $('input[data-tagulous]').each(function () {
                 Tagulous.select2($(this))

@@ -101,6 +101,7 @@ def get_item(item_node, tree, test):
     unique_id_from_tool = ""
     cvssv3 = ""
     cwe = ""
+    cwes = []
 
     if item_node["severity"] == "low":
         severity = "Low"
@@ -122,7 +123,9 @@ def get_item(item_node, tree, test):
     elif item_node["via"] and isinstance(item_node["via"][0], dict):
         title = item_node["via"][0]["title"]
         component_name = item_node["nodes"][0]
-        cwe = item_node["via"][0]["cwe"][0] if len(item_node["via"][0]["cwe"]) > 0 else None
+        via_cwes = item_node["via"][0]["cwe"]
+        cwe = via_cwes[0] if len(via_cwes) > 0 else None
+        cwes = [int(c.split("-")[1]) for c in via_cwes if c]
         references.append(item_node["via"][0]["url"])
         unique_id_from_tool = str(item_node["via"][0]["source"])
         cvssv3 = item_node["via"][0]["cvss"]["vectorString"]
@@ -165,6 +168,9 @@ def get_item(item_node, tree, test):
     if cwe is not None:
         cwe = int(cwe.split("-")[1])
         dojo_finding.cwe = cwe
+
+    if cwes:
+        dojo_finding.unsaved_cwes = cwes
 
     if (cvssv3 is not None) and (len(cvssv3) > 0):
         cvss_data = parse_cvss_data(cvssv3)

@@ -37,9 +37,22 @@ audience: opensource
 
 ## Unit tests for docs
 
-DefectDojo's docs use Lychee to check for 404s and other link errors.  To run this test locally, you can run this command from the root of the repo.  This will delete anything in Hugo's `/public/` folder and then rebuild.
+DefectDojo's docs use Lychee to check for 404s and other link errors.  CI runs two checks: the rendered docs site, and any `docs.defectdojo.com` URLs hardcoded into the Django app (templates and settings).  Both use a `--remap` so absolute `docs.defectdojo.com` URLs resolve against the freshly built site.  To run both locally from the root of the repo:
 
-`cd docs && rm -rf public/ && hugo --minify --gc --config config/production/hugo.toml && lychee --offline --no-progress --root-dir public './public/**/*.html'`
+```
+cd docs && rm -rf public/ && hugo --minify --gc --config config/production/hugo.toml && cd ..
+
+lychee --offline --no-progress \
+  --root-dir "$PWD/docs/public" \
+  --remap "https://docs.defectdojo.com file://$PWD/docs/public" \
+  './docs/public/**/*.html'
+
+lychee --offline --no-progress \
+  --root-dir "$PWD/docs/public" \
+  --remap "https://docs.defectdojo.com file://$PWD/docs/public" \
+  --exclude '%7[BD]' \
+  $(grep -rl 'docs\.defectdojo\.com' dojo/ --include='*.html' --include='*.py' --include='*.tpl')
+```
 
 ### Theme overrides
 

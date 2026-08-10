@@ -3,13 +3,9 @@ import json
 import logging
 import zipfile
 
-logger = logging.getLogger(__name__)
+from django.conf import settings
 
-# Zip bomb protection limits
-MAX_ZIP_MEMBERS = 1000
-MAX_ZIP_MEMBER_SIZE = 512 * 1024 * 1024  # 512 MB per member (uncompressed)
-MAX_ZIP_TOTAL_SIZE = 1 * 1024 * 1024 * 1024  # 1 GB total (uncompressed)
-MAX_ZIP_RATIO = 100  # max compression ratio (uncompressed / compressed)
+logger = logging.getLogger(__name__)
 
 
 def safe_open_zip(file):
@@ -32,32 +28,32 @@ def safe_open_zip(file):
 
     infos = zf.infolist()
 
-    if len(infos) > MAX_ZIP_MEMBERS:
+    if len(infos) > settings.MAX_ZIP_MEMBERS:
         zf.close()
-        msg = f"Zip file contains {len(infos)} members, exceeding the limit of {MAX_ZIP_MEMBERS}."
+        msg = f"Zip file contains {len(infos)} members, exceeding the limit of {settings.MAX_ZIP_MEMBERS}."
         raise ValueError(msg)
 
     total_size = 0
     for info in infos:
-        if info.file_size > MAX_ZIP_MEMBER_SIZE:
+        if info.file_size > settings.MAX_ZIP_MEMBER_SIZE:
             zf.close()
             msg = (
                 f"Zip member '{info.filename}' has uncompressed size {info.file_size} bytes, "
-                f"exceeding the per-member limit of {MAX_ZIP_MEMBER_SIZE} bytes."
+                f"exceeding the per-member limit of {settings.MAX_ZIP_MEMBER_SIZE} bytes."
             )
             raise ValueError(msg)
-        if info.compress_size > 0 and (info.file_size / info.compress_size) > MAX_ZIP_RATIO:
+        if info.compress_size > 0 and (info.file_size / info.compress_size) > settings.MAX_ZIP_RATIO:
             zf.close()
             ratio = info.file_size / info.compress_size
             msg = (
                 f"Zip member '{info.filename}' has a compression ratio of "
-                f"{ratio:.1f}:1, exceeding the limit of {MAX_ZIP_RATIO}:1."
+                f"{ratio:.1f}:1, exceeding the limit of {settings.MAX_ZIP_RATIO}:1."
             )
             raise ValueError(msg)
         total_size += info.file_size
-        if total_size > MAX_ZIP_TOTAL_SIZE:
+        if total_size > settings.MAX_ZIP_TOTAL_SIZE:
             zf.close()
-            msg = f"Zip file total uncompressed size exceeds the limit of {MAX_ZIP_TOTAL_SIZE} bytes."
+            msg = f"Zip file total uncompressed size exceeds the limit of {settings.MAX_ZIP_TOTAL_SIZE} bytes."
             raise ValueError(msg)
 
     return zf
@@ -79,26 +75,46 @@ def safe_read_all_zip(file):
         zf.close()
 
 
+def get_npm_cwes(item_node):
+    """
+    Return the full list of CWE integers for an npm/yarn advisory node.
+
+    Possible input values for item_node["cwe"]:
+        "cwe": null
+        "cwe": ["CWE-173", "CWE-200","CWE-601"]  (or [])
+        "cwe": "CWE-1234"
+        "cwe": '["CWE-173","CWE-200","CWE-601"]' (or "[]")
+
+    Returns a list of ints (may be empty when no CWE is present).
+    """
+    cwe_node = item_node.get("cwe")
+    if cwe_node:
+        if isinstance(cwe_node, list):
+            return [int(cwe[4:]) for cwe in cwe_node if cwe]
+        if cwe_node.startswith("CWE-"):
+            cwe_string = cwe_node[4:]
+            if cwe_string:
+                return [int(cwe_string)]
+        elif cwe_node.startswith("["):
+            cwe = json.loads(cwe_node)
+            if cwe:
+                return [int(c[4:]) for c in cwe if c]
+    return []
+
+
 def get_npm_cwe(item_node):
     """
+    Return the primary (first) CWE integer for an npm/yarn advisory node.
+
     Possible values:
         "cwe": null
         "cwe": ["CWE-173", "CWE-200","CWE-601"]  (or [])
         "cwe": "CWE-1234"
         "cwe": '["CWE-173","CWE-200","CWE-601"]' (or "[]")
     """
-    cwe_node = item_node.get("cwe")
-    if cwe_node:
-        if isinstance(cwe_node, list):
-            return int(cwe_node[0][4:])
-        if cwe_node.startswith("CWE-"):
-            cwe_string = cwe_node[4:]
-            if cwe_string:
-                return int(cwe_string)
-        elif cwe_node.startswith("["):
-            cwe = json.loads(cwe_node)
-            if cwe:
-                return int(cwe[0][4:])
+    cwes = get_npm_cwes(item_node)
+    if cwes:
+        return cwes[0]
 
     # Use CWE-1035 as fallback (vulnerable third party component)
     return 1035

@@ -19,14 +19,13 @@
                         {{ benchmark_summary_form.benchmark_type.as_hidden }}
                         {{ benchmark_summary_form.product.as_hidden }}
                         <label for="target">{% trans "Target Level" %}
-                            <span class="fa-solid fa-question-circle has-popover" data-trigger="hover"
+                            <span class="fa-solid fa-question-circle has-popover"
                                 data-content="{% trans "Target ASVS Level for this application." %}"></span>
                         </label>
                         {{ benchmark_summary_form.desired_level }}
                         {{ benchmark_summary_form.score.as_hidden }}
                         <label for="publish">{% trans "Publish" %}
                             <span class="fa-solid fa-question-circle has-popover"
-                                 data-trigger="hover"
                                  data-content="{% trans "Publish will display the ASVS Level on the product and other areas in DefectDojo. Check this once you have completed the assessment." %}"></span>
                         </label>
                         {{ benchmark_summary_form.publish }}
@@ -92,8 +91,7 @@
                                    name="form-{{ benchmark.id }}-pass_fail" id="id_form-{{ benchmark.id }}-pass_fail"/>
                         </td>
                         <td align="center">
-                            <a href="#" onclick="BenchNote.getBenchNotes(this)" data-toggle="modal"
-                               data-target="#notesModal"
+                            <a href="#" onclick="BenchNote.getBenchNotes(this); document.getElementById('notesModal').showModal(); return false;"
                                class="fa-solid {% if benchmark.noted %}fa-file-lines{% else %}fa-plus{% endif %}"
                                id="id_form-{{ benchmark.id }}-notes">
                             </a>
@@ -114,30 +112,28 @@
     </div>
 
     {# Modal #}
-    <div class="modal fade" id="notesModal" tabindex="-1" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="{% trans "Close" %}"><span
-                            aria-hidden="true">&times;</span></button>
-                    <h4 id="modal-title" class="modal-title">{% trans "Benchmark Notes" %}</h4>
+    <dialog class="modal" id="notesModal" aria-labelledby="modal-title">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="this.closest('dialog').close()" aria-label="{% trans "Close" %}"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 id="modal-title" class="modal-title">{% trans "Benchmark Notes" %}</h4>
+            </div>
+            <div class="modal-body">
+                <div id="benchNotes"></div>
+                <div class="no-notes text-center" style="display: none;">{% trans "There is no notes yet." %}</div>
+                <label for="id_entry">{% trans "Notes:" %}<sup>*</sup></label>
+                <div>
+                    <textarea name="entry" cols="15" rows="4" maxlength="2400" required="" id="id_entry"
+                              style="width: 100%"></textarea>
                 </div>
-                <div class="modal-body">
-                    <div id="benchNotes"></div>
-                    <div class="no-notes text-center" style="display: none;">{% trans "There is no notes yet." %}</div>
-                    <label for="id_entry">{% trans "Notes:" %}<sup>*</sup></label>
-                    <div>
-                        <textarea name="entry" cols="15" rows="4" maxlength="2400" required="" id="id_entry"
-                                  style="width: 100%"></textarea>
-                    </div>
-                    <div>
-                        <input class="btn btn-primary" onclick="BenchNote.sendBenchNotes()" type="button"
-                               value="{% trans "Add Note" %}" id="id_send_notes">
-                    </div>
+                <div>
+                    <input class="btn btn-primary" onclick="BenchNote.sendBenchNotes()" type="button"
+                           value="{% trans "Add Note" %}" id="id_send_notes">
                 </div>
             </div>
         </div>
-    </div>
+    </dialog>
 
 {% endblock %}
 {% block postscript %}
@@ -385,7 +381,7 @@
     }
 
     td p a {
-        color: #337ab7;
+        color: var(--color-dd-primary-500);
     }
 
     .table>tbody>tr>td,

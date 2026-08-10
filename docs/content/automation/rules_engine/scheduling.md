@@ -8,6 +8,8 @@ audience: pro
 
 Rules can be scheduled to run automatically rather than triggered manually each time.  A scheduled rule will execute against all Findings that match its filter conditions at the configured time.
 
+Scheduling is off by default and is enabled per instance by DefectDojo rather than from the Feature Flags page. Contact [DefectDojo Support](mailto:support@defectdojo.com) to have the **Scheduling Service** turned on; the **Schedule Rule** option appears once it is. See [Feature Flags](/admin/feature_flags/pro__feature_flags/) for how features DefectDojo manages centrally are shown.
+
 The user setting up the schedule must have the **Change Scheduling Service Schedule** configuration permission.
 
 ## Schedule Types

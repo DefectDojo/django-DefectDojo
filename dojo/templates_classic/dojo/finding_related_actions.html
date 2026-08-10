@@ -1,0 +1,38 @@
+{% load navigation_tags %}
+{% load display_tags %}
+{% load authorization_tags %}
+{% load static %}
+
+{% if finding|has_object_permission:"Finding_Edit" %}
+    {% comment %} {{ similar_finding.related_actions }} {% endcomment %}
+    {% if similar_finding.related_actions.0.action == 'None'%}
+        <span title="{{similar_finding.related_actions.0.reason}}">None</span>
+    {% else %}
+    <div class="dropdown">
+        {{ intro }}
+        <a href="#" data-toggle="dropdown">&nbsp;<i class="fa-solid fa-ellipsis-vertical"></i>&nbsp;</a>
+        <ul class="dropdown-menu dropdown-menu-right" role="menu" id="related_actions_{{similar_finding.id}}">
+        {% for action in similar_finding.related_actions %}
+            <li role="presentation">
+                {% if action.action == 'reset_finding_duplicate_status' %}
+                    <a href="#" onclick="submit_related_action('{% url 'reset_finding_duplicate_status' similar_finding.id %}'); $('#related_actions_{{similar_finding.id}}').dropdown('toggle')">
+                {% elif action.action == 'set_finding_as_original' %}
+                    <a href="#" onclick="submit_related_action('{% url 'set_finding_as_original' finding_id=finding_context.id new_original_id=similar_finding.id %}'); $('#related_actions_{{similar_finding.id}}').dropdown('toggle')">
+                {% elif action.action == 'mark_finding_duplicate' %}
+                    <a href="#" onclick="submit_related_action('{% url 'mark_finding_duplicate' duplicate_id=similar_finding.id original_id=finding_context.id %}'); $('#related_actions_{{similar_finding.id}}').dropdown('toggle')">
+                {% endif %}
+                    <i class="{{ action.action|finding_related_action_classes }}"></i>
+                    <span title="{{ action.reason }}">
+                        {{ action.action|finding_related_action_title }}
+                    </span>
+                </a>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+{% else %}
+    <span title="You're not authorized to edit this finding">None</span>
+{% endif %}
+
+

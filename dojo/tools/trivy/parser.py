@@ -344,7 +344,12 @@ class TrivyParser:
                     service=service_name,
                     **status_fields,
                 )
-                finding.unsaved_tags = [vul_type, target_class]
+                finding.unsaved_tags = [tag for tag in (vul_type, target_class) if tag]
+
+                # Persist the full list of CWEs via the Finding_CWE relation
+                cwe_ids = vuln.get("CweIDs", [])
+                if cwe_ids:
+                    finding.unsaved_cwes = [int(c.split("-")[1]) for c in cwe_ids]
 
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
@@ -405,7 +410,11 @@ class TrivyParser:
                 if misc_avdid:
                     finding.unsaved_vulnerability_ids = []
                     finding.unsaved_vulnerability_ids.append(misc_avdid)
-                finding.unsaved_tags = [target_type, target_class]
+                finding.unsaved_tags = [tag for tag in (target_type, target_class) if tag]
+                if settings.V3_FEATURE_LOCATIONS and file_path:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=file_path),
+                    )
                 items.append(finding)
 
             secrets = target_data.get("Secrets", [])
@@ -436,7 +445,11 @@ class TrivyParser:
                     fix_available=True,
                     service=service_name,
                 )
-                finding.unsaved_tags = [target_class]
+                finding.unsaved_tags = [tag for tag in (target_class,) if tag]
+                if settings.V3_FEATURE_LOCATIONS and target_target:
+                    finding.unsaved_locations.append(
+                        LocationData.code(file_path=target_target, line=secret_start_line),
+                    )
                 items.append(finding)
 
             licenses = target_data.get("Licenses", [])
@@ -470,7 +483,7 @@ class TrivyParser:
                     fix_available=True,
                     service=service_name,
                 )
-                finding.unsaved_tags = [target_class]
+                finding.unsaved_tags = [tag for tag in (target_class,) if tag]
                 items.append(finding)
 
         return items

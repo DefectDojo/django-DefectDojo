@@ -113,6 +113,13 @@ class WizcliParsers:
                     mitigation=None,
                     test=test,
                 )
+                if settings.V3_FEATURE_LOCATIONS and file_name:
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=file_name,
+                            line=line_number if isinstance(line_number, int) else None,
+                        ),
+                    )
                 findings.append(finding)
         return findings
 
@@ -160,6 +167,13 @@ class WizcliParsers:
                             mitigation=None,
                             test=test,
                         )
+                        if settings.V3_FEATURE_LOCATIONS and file_name:
+                            finding.unsaved_locations.append(
+                                LocationData.code(
+                                    file_path=file_name,
+                                    line=line_number if isinstance(line_number, int) else None,
+                                ),
+                            )
                         findings.append(finding)
         return findings
 

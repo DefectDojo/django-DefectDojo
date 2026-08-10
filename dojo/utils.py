@@ -16,15 +16,25 @@ from datetime import date, datetime, timedelta
 from functools import cached_property
 from math import pi, sqrt
 from pathlib import Path
+from urllib.parse import urlparse
 
-import bleach
 import crum
 import cvss
 import redis as redis_lib
 import vobject
 from amqp.exceptions import ChannelError
+from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+# OFB powers the legacy "AES.1" decryption path only. It has been moved to the
+# "decrepit" module and is being removed from primitives.ciphers.modes; import
+# it from its new home when available, falling back for older cryptography.
+try:
+    from cryptography.hazmat.decrepit.ciphers.modes import OFB
+except ImportError:  # cryptography that predates the decrepit modes module
+    from cryptography.hazmat.primitives.ciphers.modes import OFB
 from cvss import CVSS2, CVSS3, CVSS4
 from dateutil.parser import parse
 from dateutil.relativedelta import MO, SU, relativedelta
@@ -32,23 +42,24 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
 from django.core.paginator import Paginator
-from django.db import transaction
+from django.db import OperationalError, transaction
 from django.db.models import Case, Count, F, IntegerField, Q, Sum, Value, When
 from django.db.models.query import QuerySet
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.http import FileResponse, HttpResponseRedirect
 from django.shortcuts import redirect as django_redirect
-from django.urls import get_resolver, get_script_prefix, reverse
+from django.urls import get_resolver, reverse
 from django.utils import timezone
+from django.utils.html import escape, format_html
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from kombu import Connection
 
-from dojo.authorization.roles_permissions import Permissions
 from dojo.celery import app
+from dojo.db_utils import is_transient_db_conflict
 from dojo.finding.queries import get_authorized_findings
-from dojo.github import (
+from dojo.github.services import (
     add_external_issue_github,
     close_external_issue_github,
     reopen_external_issue_github,
@@ -60,7 +71,6 @@ from dojo.location.status import ProductLocationStatus
 from dojo.models import (
     NOTIFICATION_CHOICES,
     Benchmark_Type,
-    Dojo_Group_Member,
     Dojo_User,
     Endpoint,
     Engagement,
@@ -70,7 +80,6 @@ from dojo.models import (
     Finding_Template,
     Language_Type,
     Languages,
-    Notifications,
     Product,
     Product_Type,
     System_Settings,
@@ -78,7 +87,6 @@ from dojo.models import (
     Test_Type,
     User,
 )
-from dojo.notifications.helper import create_notification
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -533,7 +541,7 @@ def get_period_counts(findings,
         try:
             closed_in_range_count = findings_closed.filter(
                 mitigated__date__range=[new_date, end_date]).count()
-        except:
+        except Exception:
             closed_in_range_count = findings_closed.filter(
                 mitigated_time__range=[new_date, end_date]).count()
 
@@ -544,7 +552,7 @@ def get_period_counts(findings,
             ]
             try:
                 risks_a = accepted_findings.filter(risk_acceptance__created__date__range=date_range)
-            except:
+            except Exception:
                 risks_a = accepted_findings.filter(date__range=date_range)
         else:
             risks_a = None
@@ -564,14 +572,14 @@ def get_period_counts(findings,
                 severity = finding.severity
                 active = finding.active
 #                risk_accepted = finding.risk_accepted TODO: in future release
-            except:
+            except Exception:
                 severity = finding.finding.severity
                 active = finding.finding.active
 #                risk_accepted = finding.finding.risk_accepted
 
             try:
                 f_time = datetime.combine(finding.date, datetime.min.time()).replace(tzinfo=tz)
-            except:
+            except Exception:
                 f_time = finding.date
 
             if f_time <= end_date:
@@ -600,7 +608,7 @@ def get_period_counts(findings,
             for finding in risks_a:
                 try:
                     severity = finding.severity
-                except:
+                except Exception:
                     severity = finding.finding.severity
                 if severity == "Critical":
                     ra_crit_count += 1
@@ -961,37 +969,34 @@ def reopen_external_issue(finding_id, note, external_issue_provider, **kwargs):
         reopen_external_issue_github(finding, note, prod, eng)
 
 
-def process_tag_notifications(request, note, parent_url, parent_title):
-    regex = re.compile(r"(?:\A|\s)@(\w+)\b")
-
-    usernames_to_check = set(un.lower() for un in regex.findall(note.entry))  # noqa: C401
-
-    users_to_notify = [
-        User.objects.filter(username=username).get()
-        for username in usernames_to_check
-        if User.objects.filter(is_active=True, username=username).exists()
-    ]
-
-    if len(note.entry) > 200:
-        note.entry = note.entry[:200]
-        note.entry += "..."
-
-    create_notification(
-        event="user_mentioned",
-        section=parent_title,
-        note=note,
-        title=f"{request.user} jotted a note",
-        url=parent_url,
-        icon="commenting",
-        recipients=users_to_notify,
-        requested_by=get_current_user())
+from dojo.notifications.helper import process_tag_notifications  # noqa: E402, F401  -- backward compat
 
 
+# ---------------------------------------------------------------------------
+# Legacy "AES.1" credential encryption: AES-256-OFB with null-byte padding.
+# Retained for backward-compatible decryption of values already stored in the
+# database. New values are written with the "AES.2" (AES-256-GCM) scheme below
+# via dojo_crypto_encrypt(); existing "AES.1" values upgrade lazily the next
+# time they are saved.
+#
+# REMOVAL TRACKING (legacy OFB path):
+# Migration 0272_reencrypt_tool_config_credentials_aes_gcm eagerly re-encrypts
+# every stored Tool_Configuration credential to "AES.2", so after it has run in
+# every environment there should be no "AES.1" values left in the database.
+# Once that migration is squashed/baked into the release floor (i.e. no upgrade
+# path can skip it) and any external integrations have been confirmed not to
+# persist their own "AES.1" values, the entire legacy path can be deleted:
+#   - encrypt() / decrypt() / _pad_string() / _unpad_string() below
+#   - the OFB import at the top of this module
+#   - the "AES.1" else-branch in prepare_for_view()
+#   - prepare_for_save() (only ever produced the "AES.1" format)
+# Do NOT remove any of the above until all stored secrets have been re-encrypted.
+# ---------------------------------------------------------------------------
 def encrypt(key, iv, plaintext):
     text = ""
     if plaintext and plaintext is not None:
         backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
+        cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
         encryptor = cipher.encryptor()
         plaintext = _pad_string(plaintext)
         encrypted_text = encryptor.update(plaintext) + encryptor.finalize()
@@ -1001,7 +1006,7 @@ def encrypt(key, iv, plaintext):
 
 def decrypt(key, iv, encrypted_text):
     backend = default_backend()
-    cipher = Cipher(algorithms.AES(key), modes.OFB(iv), backend=backend)
+    cipher = Cipher(algorithms.AES(key), OFB(iv), backend=backend)
     encrypted_text_bytes = binascii.a2b_hex(encrypted_text)
     decryptor = cipher.decryptor()
     decrypted_text = decryptor.update(encrypted_text_bytes) + decryptor.finalize()
@@ -1021,14 +1026,18 @@ def _unpad_string(value):
 
 
 def dojo_crypto_encrypt(plaintext):
+    # New values are encrypted with the modern "AES.2" (AES-256-GCM) scheme.
+    # AESGCM provides authenticated encryption (no separate padding needed) and
+    # uses the same key derived by get_db_key(), so it stays interoperable with
+    # the legacy "AES.1" decryption path. See prepare_for_view() for reads.
     data = None
     if plaintext:
-        key = None
         key = get_db_key()
-
-        iv = os.urandom(16)
-        data = prepare_for_save(
-            iv, encrypt(key, iv, plaintext.encode("utf-8")))
+        # GCM standard nonce length is 96 bits (12 bytes); never reuse a nonce
+        # with the same key, hence a fresh random nonce per encryption.
+        nonce = os.urandom(12)
+        ciphertext = AESGCM(key).encrypt(nonce, plaintext.encode("utf-8"), None)
+        data = "AES.2:" + binascii.b2a_hex(nonce).decode("utf-8") + ":" + binascii.b2a_hex(ciphertext).decode("utf-8")
 
     return data
 
@@ -1053,7 +1062,10 @@ def get_db_key():
 
 
 def prepare_for_view(encrypted_value):
-
+    # Reads both the modern "AES.2" (AES-256-GCM) format written by
+    # dojo_crypto_encrypt() and the legacy "AES.1" (AES-256-OFB) format. Any
+    # unrecognized prefix falls through to the legacy path so that values
+    # already stored in the database continue to decrypt unchanged.
     key = None
     decrypted_value = ""
     if encrypted_value is not NotImplementedError and encrypted_value is not None:
@@ -1061,13 +1073,19 @@ def prepare_for_view(encrypted_value):
         encrypted_values = encrypted_value.split(":")
 
         if len(encrypted_values) > 1:
-            iv = binascii.a2b_hex(encrypted_values[1])
-            value = encrypted_values[2]
-
+            scheme = encrypted_values[0]
             try:
-                decrypted_value = decrypt(key, iv, value)
-                decrypted_value = decrypted_value.decode("utf-8")
-            except UnicodeDecodeError:
+                iv = binascii.a2b_hex(encrypted_values[1])
+                value = encrypted_values[2]
+                if scheme == "AES.2":
+                    decrypted_value = AESGCM(key).decrypt(iv, binascii.a2b_hex(value), None).decode("utf-8")
+                else:
+                    # Legacy "AES.1" (AES-256-OFB) read path. Removable once
+                    # migration 0272 is guaranteed to have run everywhere and no
+                    # "AES.1" values remain -- see the REMOVAL TRACKING note on
+                    # the encrypt()/decrypt() block above.
+                    decrypted_value = decrypt(key, iv, value).decode("utf-8")
+            except (UnicodeDecodeError, InvalidTag, ValueError, IndexError):
                 decrypted_value = ""
 
     return decrypted_value
@@ -1424,33 +1442,10 @@ def get_site_url():
 @receiver(post_save, sender=User)
 @receiver(post_save, sender=Dojo_User)
 def user_post_save(sender, instance, created, **kwargs):
-    # For new users we create a Notifications object so the default 'alert' notifications work and
-    # assign them to a default group if specified in the system settings.
-    # This needs to be a signal to make it also work for users created via ldap, oauth and other
-    # authentication backends
-    if created:
-        try:
-            notifications = Notifications.objects.get(template=True)
-            notifications.pk = None
-            notifications.template = False
-            notifications.user = instance
-            logger.info("creating default set (from template) of notifications for: " + str(instance))
-        except Exception:
-            notifications = Notifications(user=instance)
-            logger.info("creating default set of notifications for: " + str(instance))
-
-        notifications.save()
-
-        system_settings = System_Settings.objects.get()
-        if system_settings.default_group and system_settings.default_group_role:
-            if (system_settings.default_group_email_pattern and re.fullmatch(system_settings.default_group_email_pattern, instance.email)) or \
-               not system_settings.default_group_email_pattern:
-                logger.info("setting default group for: " + str(instance))
-                dojo_group_member = Dojo_Group_Member(
-                    group=system_settings.default_group,
-                    user=instance,
-                    role=system_settings.default_group_role)
-                dojo_group_member.save()
+    # Default-Notifications row creation for new users lives in
+    # dojo.notifications.signals.create_default_notifications.
+    # Default-group Dojo_Group_Member bootstrapping lives in
+    # pro.authorization.signals (RBAC ownership is Pro's responsibility).
 
     # Superusers shall always be staff
     if instance.is_superuser and not instance.is_staff:
@@ -1509,224 +1504,14 @@ def queryset_check(query):
     return query if isinstance(query, QuerySet) else query.qs
 
 
-def sla_compute_and_notify(*args, **kwargs):
-    """
-    The SLA computation and notification will be disabled if the user opts out
-    of the Findings SLA on the System Settings page.
-
-    Notifications are managed the usual way, so you'd have to opt-in.
-    Exception is for JIRA issues, which would get a comment anyways.
-    """
-    import dojo.jira_link.helper as jira_helper  # noqa: PLC0415 circular import
-
-    class NotificationEntry:
-        def __init__(self, finding=None, jira_issue=None, *, do_jira_sla_comment=False):
-            self.finding = finding
-            self.jira_issue = jira_issue
-            self.do_jira_sla_comment = do_jira_sla_comment
-
-    def _add_notification(finding, kind):
-        # jira_issue, do_jira_sla_comment are taken from the context
-        # kind can be one of: breached, prebreach, breaching
-        if finding.test.engagement.product.disable_sla_breach_notifications:
-            return
-
-        notification = NotificationEntry(finding=finding,
-                                         jira_issue=jira_issue,
-                                         do_jira_sla_comment=do_jira_sla_comment)
-
-        pt = finding.test.engagement.product.prod_type.name
-        p = finding.test.engagement.product.name
-
-        if pt in combined_notifications:
-            if p in combined_notifications[pt]:
-                if kind in combined_notifications[pt][p]:
-                    combined_notifications[pt][p][kind].append(notification)
-                else:
-                    combined_notifications[pt][p][kind] = [notification]
-            else:
-                combined_notifications[pt][p] = {kind: [notification]}
-        else:
-            combined_notifications[pt] = {p: {kind: [notification]}}
-
-    def _notification_title_for_finding(finding, kind, sla_age):
-        title = f"Finding {finding.id} - "
-        if kind == "breached":
-            abs_sla_age = abs(sla_age)
-            period = "day"
-            if abs_sla_age > 1:
-                period = "days"
-            title += f"SLA breached by {abs_sla_age} {period}! Overdue notice"
-        elif kind == "prebreach":
-            title += f"SLA pre-breach warning - {sla_age} day(s) left"
-        elif kind == "breaching":
-            title += "SLA is breaching today"
-
-        return title
-
-    def _create_notifications():
-        for prodtype, comb_notif_prodtype in combined_notifications.items():
-            for prod, comb_notif_prod in comb_notif_prodtype.items():
-                for kind, comb_notif_kind in comb_notif_prod.items():
-                    # creating notifications on per-finding basis
-
-                    # we need this list for combined notification feature as we
-                    # can not supply references to local objects as
-                    # create_notification() arguments
-                    findings_list = []
-
-                    for n in comb_notif_kind:
-                        sla_age = n.finding.sla_days_remaining()
-                        title = _notification_title_for_finding(n.finding, kind, sla_age)
-                        create_notification(
-                            event="sla_breach",
-                            title=title,
-                            finding=n.finding,
-                            sla_age=sla_age,
-                            url=reverse("view_finding", args=(n.finding.id,)),
-                        )
-
-                        if n.do_jira_sla_comment:
-                            logger.info("Creating JIRA comment to notify of SLA breach information.")
-                            jira_helper.add_simple_jira_comment(jira_instance, n.jira_issue, title)
-
-                        findings_list.append(n.finding)
-
-                    # producing a "combined" SLA breach notification
-                    title_combined = f"SLA alert ({kind}): " + labels.ORG_WITH_NAME_LABEL % {"name": prodtype} + ", " + labels.ASSET_WITH_NAME_LABEL % {"name": prod}
-                    product = comb_notif_kind[0].finding.test.engagement.product
-                    create_notification(
-                        event="sla_breach_combined",
-                        title=title_combined,
-                        product=product,
-                        findings=findings_list,
-                        breach_kind=kind,
-                        base_url=get_script_prefix(),
-                    )
-
-    # exit early on flags
-    system_settings = System_Settings.objects.get()
-    if not system_settings.enable_notify_sla_active and not system_settings.enable_notify_sla_active_verified:
-        logger.info("Will not notify on SLA breach per user configured settings")
-        return
-
-    jira_issue = None
-    jira_instance = None
-    # notifications list per product per product type
-    combined_notifications = {}
-    try:
-        if system_settings.enable_finding_sla:
-            logger.info("About to process findings for SLA notifications.")
-            logger.debug(f"Active {system_settings.enable_notify_sla_active}, Verified {system_settings.enable_notify_sla_active_verified}, Has JIRA {system_settings.enable_notify_sla_jira_only}, pre-breach {settings.SLA_NOTIFY_PRE_BREACH}, post-breach {settings.SLA_NOTIFY_POST_BREACH}")
-
-            query = None
-            if system_settings.enable_notify_sla_active_verified:
-                query = Q(active=True, verified=True, is_mitigated=False, duplicate=False)
-            elif system_settings.enable_notify_sla_active:
-                query = Q(active=True, is_mitigated=False, duplicate=False)
-            logger.debug("My query: %s", query)
-
-            no_jira_findings = {}
-            if system_settings.enable_notify_sla_jira_only:
-                logger.debug("Ignoring findings that are not linked to a JIRA issue")
-                no_jira_findings = Finding.objects.exclude(jira_issue__isnull=False)
-
-            total_count = 0
-            pre_breach_count = 0
-            post_breach_count = 0
-            post_breach_no_notify_count = 0
-            jira_count = 0
-            at_breach_count = 0
-
-            # Taking away for now, since the prefetch is not efficient
-            # .select_related('jira_issue') \
-            # .prefetch_related(Prefetch('test__engagement__product__jira_project_set__jira_instance')) \
-            # A finding with 'Info' severity will not be considered for SLA notifications (not in model)
-            findings = Finding.objects \
-                .filter(query) \
-                .exclude(severity="Info") \
-                .exclude(id__in=no_jira_findings)
-
-            for finding in findings:
-                total_count += 1
-                sla_age = finding.sla_days_remaining()
-
-                # get the sla enforcement for the severity and, if the severity setting is not enforced, do not notify
-                # resolves an issue where notifications are always sent for the severity of SLA that is not enforced
-                severity, enforce = finding.get_sla_period()
-                if not enforce:
-                    logger.debug(f"SLA is not enforced for Finding {finding.id} of {severity} severity, skipping notification.")
-                    continue
-
-                # if SLA is set to 0 in settings, it's a null. And setting at 0 means no SLA apparently.
-                if sla_age is None:
-                    sla_age = 0
-
-                if (sla_age < 0) and (abs(sla_age) > settings.SLA_NOTIFY_POST_BREACH):
-                    post_breach_no_notify_count += 1
-                    # Skip finding notification if breached for too long
-                    logger.debug(f"Finding {finding.id} breached the SLA {abs(sla_age)} days ago. Skipping notifications.")
-                    continue
-
-                do_jira_sla_comment = False
-                jira_issue = None
-                if finding.has_jira_issue:
-                    jira_issue = finding.jira_issue
-                elif finding.has_jira_group_issue:
-                    jira_issue = finding.finding_group.jira_issue
-
-                if jira_issue:
-                    jira_count += 1
-                    jira_instance = jira_helper.get_jira_instance(finding)
-                    if jira_instance is not None:
-                        logger.debug("JIRA config for finding is %s", jira_instance)
-                        # global config or product config set, product level takes precedence
-                        try:
-                            # TODO: see new property from #2649 to then replace, somehow not working with prefetching though.
-                            product_jira_sla_comment_enabled = jira_helper.get_jira_project(finding).product_jira_sla_notification
-                        except Exception as e:
-                            logger.error("The product is not linked to a JIRA configuration! Something is weird here.")
-                            logger.error("Error is: %s", e)
-
-                        jiraconfig_sla_notification_enabled = jira_instance.global_jira_sla_notification
-
-                        if jiraconfig_sla_notification_enabled or product_jira_sla_comment_enabled:
-                            logger.debug("Global setting %s -- Product setting %s", jiraconfig_sla_notification_enabled, product_jira_sla_comment_enabled)
-                            do_jira_sla_comment = True
-                            logger.debug(f"JIRA issue is {jira_issue.jira_key}")
-
-                logger.debug(f"Finding {finding.id} has {sla_age} days left to breach SLA.")
-                if (sla_age < 0):
-                    post_breach_count += 1
-                    logger.info(f"Finding {finding.id} has breached by {abs(sla_age)} days.")
-                    abs_sla_age = abs(sla_age)
-                    if not system_settings.enable_notify_sla_exponential_backoff or abs_sla_age == 1 or (abs_sla_age & (abs_sla_age - 1) == 0):
-                        _add_notification(finding, "breached")
-                    else:
-                        logger.info("Skipping notification as exponential backoff is enabled and the SLA is not a power of two")
-                # The finding is within the pre-breach period
-                elif (sla_age > 0) and (sla_age <= settings.SLA_NOTIFY_PRE_BREACH):
-                    pre_breach_count += 1
-                    logger.info(f"Security SLA pre-breach warning for finding ID {finding.id}. Days remaining: {sla_age}")
-                    _add_notification(finding, "prebreach")
-                # The finding breaches the SLA today
-                elif (sla_age == 0):
-                    at_breach_count += 1
-                    logger.info(f"Security SLA breach warning. Finding ID {finding.id} breaching today ({sla_age})")
-                    _add_notification(finding, "breaching")
-
-            _create_notifications()
-            logger.info("SLA run results: Pre-breach: %s, at-breach: %s, post-breach: %s, post-breach-no-notify: %s, with-jira: %s, TOTAL: %s", pre_breach_count, at_breach_count, post_breach_count, post_breach_no_notify_count, jira_count, total_count)
-
-    except System_Settings.DoesNotExist:
-        logger.info("Findings SLA is not enabled.")
+from dojo.notifications.helper import sla_compute_and_notify  # noqa: E402, F401  -- backward compat
 
 
 def get_words_for_field(model, fieldname):
     max_results = getattr(settings, "MAX_AUTOCOMPLETE_WORDS", 20000)
     models = None
     if model == Finding:
-        models = get_authorized_findings(Permissions.Finding_View, user=get_current_user())
+        models = get_authorized_findings("view", user=get_current_user())
     elif model == Finding_Template:
         models = Finding_Template.objects.all()
 
@@ -1748,15 +1533,18 @@ def get_current_request():
     return crum.get_current_request()
 
 
+ALLOWED_LINK_SCHEMES = {"http", "https", "mailto"}
+
+
 def create_bleached_link(url, title):
-    link = '<a href="'
-    link += url
-    link += '" target="_blank" title="'
-    link += title
-    link += '">'
-    link += title
-    link += "</a>"
-    return bleach.clean(link, tags={"a"}, attributes={"a": ["href", "target", "title"]})
+    # format_html escapes the values but does not block a javascript:/data: href.
+    scheme = urlparse(url).scheme.lower()
+    if scheme and scheme not in ALLOWED_LINK_SCHEMES:
+        return escape(title)
+    return format_html(
+        '<a href="{}" target="_blank" rel="noopener noreferrer" title="{}">{}</a>',
+        url, title, title,
+    )
 
 
 def get_object_or_none(klass, *args, **kwargs):
@@ -1837,7 +1625,21 @@ def add_field_errors_to_response(form):
             add_error_message_to_response(error)
 
 
-def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix=""):
+def default_mass_model_writer(model_type, batch, fields):
+    """Default mass_model_updater ``writer``: persist a batch via Django's bulk_update."""
+    if not batch:
+        return
+    model_type.objects.bulk_update(batch, fields)
+
+
+def _flush_mass_update(model_type, batch, fields, writer):
+    """Persist a batch via the supplied writer, else the default writer."""
+    if not batch:
+        return
+    (writer or default_mass_model_writer)(model_type, batch, fields)
+
+
+def mass_model_updater(model_type, models, function, fields, page_size=1000, order="asc", log_prefix="", *, skip_unchanged=True, writer=None):
     """
     Using the default for model in queryset can be slow for large querysets. Even
     when using paging as LIMIT and OFFSET are slow on database. In some cases we can optimize
@@ -1846,6 +1648,16 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     was processed and continue from there on the next page. This is fast because
     it results in an index seek instead of executing the whole query again and skipping
     the first X items.
+
+    When ``fields`` is given:
+      - skip_unchanged (default True): rows whose tracked ``fields`` were not changed by
+        ``function`` are not written. The pre-``function`` value of each tracked field is
+        read with normal attribute access, so callers must ensure the tracked ``fields``
+        are loaded by the queryset (i.e. not excluded via ``.only()``/``.defer()``);
+        otherwise accessing a deferred tracked field issues a per-row query.
+      - writer (optional): a callable ``writer(model_type, batch, fields)`` used to persist
+        each batch instead of Django's ``bulk_update`` (e.g. a backend-specific fast path).
+        Defaults to ``bulk_update``.
     """
     # force ordering by id to make our paging work
     last_id = 0
@@ -1868,6 +1680,7 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
     logger.debug("%s found %d models for mass update:", log_prefix, total_count)
 
     i = 0
+    written = 0
     batch = []
     total_pages = (total_count // page_size) + 2
     # logger.debug("pages to process: %d", total_pages)
@@ -1883,22 +1696,41 @@ def mass_model_updater(model_type, models, function, fields, page_size=1000, ord
             i += 1
             last_id = model.id
 
+            # snapshot tracked fields before mutation; used to skip no-op writes.
+            # Read via normal attribute access so the real persisted value is compared
+            # (callers must load the tracked fields; see docstring).
+            before = None
+            if fields and skip_unchanged:
+                before = [getattr(model, f) for f in fields]
+
             function(model)
 
-            batch.append(model)
+            if fields and skip_unchanged and before is not None and all(
+                getattr(model, f) == old for f, old in zip(fields, before, strict=True)
+            ):
+                # nothing changed for this row -> no write needed
+                pass
+            else:
+                batch.append(model)
 
-            if (i > 0 and i % page_size == 0):
-                if fields:
-                    model_type.objects.bulk_update(batch, fields)
+            if fields and len(batch) >= page_size:
+                _flush_mass_update(model_type, batch, fields, writer)
+                written += len(batch)
                 batch = []
+            elif not fields and len(batch) >= page_size:
+                # function has side effects only; keep memory bounded
+                batch = []
+
+            if i > 0 and i % page_size == 0:
                 logger.debug("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
         logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
 
-    if fields:
-        model_type.objects.bulk_update(batch, fields)
+    if fields and batch:
+        _flush_mass_update(model_type, batch, fields, writer)
+        written += len(batch)
     batch = []
-    logger.info("%s%s out of %s models processed ...", log_prefix, i, total_count)
+    logger.info("%s%s out of %s models processed (%s written) ...", log_prefix, i, total_count, written)
 
 
 def to_str_typed(obj):
@@ -1985,24 +1817,47 @@ def _get_object_name(obj):
     return obj.__class__.__name__
 
 
-@app.task
-def async_delete_task(obj, **kwargs):
+def _async_delete_object(model_label, pk, *, is_retry=False):
     """
     Delete an object and all its related objects using the SQL cascade walker.
+
+    Takes ``(model_label, pk)`` (e.g. ``("dojo.product", 42)``) so the task
+    arguments are JSON-serializable. The instance is refetched in the worker.
 
     Handles Python-level concerns (duplicates, integrators, M2M, file cleanup,
     product grading) explicitly, then uses cascade_delete_related_objects() for
     efficient bottom-up SQL deletion of all FK-related tables. The top-level
     object is deleted via ORM obj.delete() to fire Django signals.
 
-    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
-    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    Steps 1-4 refetch or re-filter what they delete, so calling this again after a
+    failure in one of them resumes from whatever is left. Steps 5 and 6 are NOT
+    resumable: once the top-level obj.delete() commits, a re-invocation finds nothing
+    and returns early, so any post-delete work is skipped rather than redone. Pass
+    ``is_retry=True`` on a re-invocation so that case is logged as the anomaly it is.
     """
+    from django.apps import apps  # noqa: PLC0415
+
     from dojo.finding.helper import (  # noqa: PLC0415 circular import
         bulk_delete_findings,
         prepare_duplicates_for_delete,
     )
     from dojo.utils_cascade_delete import cascade_delete_related_objects  # noqa: PLC0415 circular import
+
+    Model = apps.get_model(model_label)
+    obj = Model.objects.filter(pk=pk).first()
+    if obj is None:
+        if is_retry:
+            # The top-level delete committed and the conflict came after it, so the
+            # object is gone and step 6 never ran. Louder than the first-call case:
+            # nothing is broken, but a product grade may now be stale.
+            logger.warning(
+                "ASYNC_DELETE: %s pk=%s already gone on a retry -- the delete itself "
+                "completed, but post-delete work (product grading) was not redone",
+                model_label, pk,
+            )
+        else:
+            logger.info("ASYNC_DELETE: %s pk=%s already gone, nothing to do", model_label, pk)
+        return
 
     logger.debug("ASYNC_DELETE: Deleting %s: %s", _get_object_name(obj), obj)
     if not isinstance(obj, ASYNC_DELETE_SUPPORTED_TYPES):
@@ -2016,7 +1871,9 @@ def async_delete_task(obj, **kwargs):
     # Capture product reference before deletion for product grading at the end
     product = None
     with suppress(Product.DoesNotExist, Engagement.DoesNotExist, Test.DoesNotExist):
-        if isinstance(obj, Engagement):
+        if isinstance(obj, Product):
+            product = obj
+        elif isinstance(obj, Engagement):
             product = obj.product
         elif isinstance(obj, Test):
             product = obj.engagement.product
@@ -2025,30 +1882,23 @@ def async_delete_task(obj, **kwargs):
     scope_field = FINDING_SCOPE_FILTERS.get(type(obj))
     if scope_field:
         finding_qs = Finding.objects.filter(**{scope_field: obj})
+        # cascade_root is some context we provide to the bulk_delete_findings function
+        cascade_root = {"model": obj._meta.label_lower, "pk": obj.pk}
 
         # Step 2: Prepare duplicate clusters (must happen before any deletion)
         # When CASCADE_DELETE=True, reconfigure_duplicate_cluster skips reconfiguration —
-        # we handle that below by expanding scope to include outside duplicates.
+        # and deletes any outside scope duplicates to avoid FK violations during chunked deletion.
         prepare_duplicates_for_delete(obj)
 
-        # Step 3: Delete outside-scope duplicates first — these point to findings
-        # in the main scope via duplicate_finding FK, so they must be removed before
-        # the originals to avoid FK violations during chunked deletion.
-        scope_ids = finding_qs.values_list("id", flat=True)
-        outside_dupes_qs = (
-            Finding.objects.filter(duplicate_finding_id__in=scope_ids)
-            .exclude(id__in=scope_ids)
-        )
+        # Step 3: Delete the main scope findings
         chunk_size = get_setting("ASYNC_OBEJECT_DELETE_CHUNK_SIZE")
-        outside_count = outside_dupes_qs.count()
-        if outside_count:
-            logger.info("ASYNC_DELETE: Deleting %d outside-scope duplicates first", outside_count)
-            bulk_delete_findings(outside_dupes_qs, chunk_size=chunk_size)
+        bulk_delete_findings(
+            finding_qs,
+            chunk_size=chunk_size,
+            cascade_root=cascade_root,
+        )
 
-        # Step 4: Delete the main scope findings
-        bulk_delete_findings(finding_qs, chunk_size=chunk_size)
-
-    # Step 5: Delete all remaining related objects (Tests, Engagements,
+    # Step 4: Delete all remaining related objects (Tests, Engagements,
     # Endpoints, etc.) via SQL cascade. Findings are already gone, so
     # skip_relations={Finding} avoids walking empty relations.
     # Single transaction is fine here — the heavy relations (Findings,
@@ -2057,16 +1907,77 @@ def async_delete_task(obj, **kwargs):
     with transaction.atomic():
         cascade_delete_related_objects(type(obj), pk_query, skip_relations={Finding})
 
-    # Step 6: Delete the top-level object via ORM to fire Django signals
+    # Step 5: Delete the top-level object via ORM to fire Django signals
     # (post_delete notifications, pghistory audit, Pro signals).
     # All children are already gone so this is a single-row DELETE.
     obj.delete()
 
-    # Step 7: Recalculate product grade once (not per-object)
-    if product:
+    # Step 6: Recalculate product grade once (Engagement/Test deletes only). Skip when the
+    # deleted object is the Product itself — it is removed in step 6 and grading is pointless.
+    # For Product TYpe deletiongs we don't have a product instance, so this never fires.
+    if product and not isinstance(obj, Product):
         perform_product_grading(product)
 
     logger.info("ASYNC_DELETE: Successfully deleted %s: %s", obj_name, obj)
+
+
+# Seconds before the first retry; doubled on each subsequent attempt.
+ASYNC_DELETE_RETRY_DELAY = 5
+# How often to retry before reporting the conflict as a failure.
+ASYNC_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
+@app.task(bind=True)
+def async_delete_task(self, model_label, pk, **kwargs):
+    """
+    Celery entry point for cascade deletion, retrying transient DB conflicts.
+
+    Deterministic lock ordering in the tag bookkeeping (see
+    ``dojo.tags.utils.bulk_remove_all_tags``) is what stops these deletes deadlocking
+    against each other. This retry is the backstop for the conflicts that ordering
+    cannot rule out -- a delete overlapping an import, say -- because the aborted
+    transaction's work is not wrong, only rolled back, and failing here would leave the
+    object partly deleted.
+
+    Only applies to background execution: under eager execution Celery re-runs the body
+    inline and ignores ``countdown``, which would retry into an unfinished conflicting
+    transaction, so eager callers get the error instead.
+
+    Accepts **kwargs for _pgh_context injected by dojo_dispatch_task.
+    Uses PgHistoryTask base class (default) to preserve pghistory context for audit trail.
+    """
+    retries = self.request.retries
+    try:
+        _async_delete_object(model_label, pk, is_retry=retries > 0)
+    except OperationalError as exc:
+        if not is_transient_db_conflict(exc):
+            raise
+        if self.request.is_eager:
+            # Verified against celery 5.6.3: under apply() retry re-invokes the body
+            # immediately and drops countdown, so retrying would just re-run the whole
+            # delete inside the caller's request while the winner may still be open.
+            logger.warning(
+                "ASYNC_DELETE: transient DB conflict on %s pk=%s running eagerly; "
+                "not retrying because eager retries ignore the backoff: %s",
+                model_label, pk, exc,
+            )
+            raise
+        if retries >= ASYNC_DELETE_MAX_CONFLICT_RETRIES:
+            logger.error(
+                "ASYNC_DELETE: giving up on %s pk=%s after %s transient DB conflict(s): %s",
+                model_label, pk, retries, exc,
+            )
+            raise
+        # Stagger tasks that deadlocked against each other so they do not collide
+        # again on the retry. The pk is a stable per-task offset, so no randomness
+        # is needed to spread them out.
+        backoff = ASYNC_DELETE_RETRY_DELAY * (2 ** retries)
+        countdown = backoff + backoff * (pk % 100) / 100
+        logger.warning(
+            "ASYNC_DELETE: transient DB conflict on %s pk=%s, retry %s/%s in %.1fs: %s",
+            model_label, pk, retries + 1, ASYNC_DELETE_MAX_CONFLICT_RETRIES, countdown, exc,
+        )
+        raise self.retry(exc=exc, countdown=countdown, max_retries=ASYNC_DELETE_MAX_CONFLICT_RETRIES)
 
 
 class async_delete:
@@ -2091,7 +2002,7 @@ class async_delete:
         """
         from dojo.celery_dispatch import dojo_dispatch_task  # noqa: PLC0415 circular import
 
-        dojo_dispatch_task(async_delete_task, obj, **kwargs)
+        dojo_dispatch_task(async_delete_task, obj._meta.label_lower, obj.pk, **kwargs)
 
     @staticmethod
     def get_object_name(obj):
