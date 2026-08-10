@@ -86,7 +86,7 @@ from dojo.tool_type.ui.urls import urlpatterns as tool_type_urls
 from dojo.url.api.urls import add_url_urls
 from dojo.url.ui.urls import urlpatterns as url_patterns
 from dojo.user.api.urls import add_user_urls
-from dojo.user.api.views import UserProfileView
+from dojo.user.api.views import RevokeApiTokenView, UserProfileView
 from dojo.user.ui.urls import urlpatterns as user_urls
 from dojo.utils import get_system_setting
 
@@ -202,6 +202,7 @@ api_v2_urls = [
     #  Django Rest Framework API v2
     re_path(r"^{}api/v2/".format(get_system_setting("url_prefix")), include(v2_api.urls)),
     re_path(r"^{}api/v2/user_profile/".format(get_system_setting("url_prefix")), UserProfileView.as_view(), name="user_profile"),
+    re_path(r"^{}api/v2/api-tokens/revoke/$".format(get_system_setting("url_prefix")), RevokeApiTokenView.as_view(), name="api-token-revoke"),
 ]
 
 if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH_ENDPOINT_ENABLED"):

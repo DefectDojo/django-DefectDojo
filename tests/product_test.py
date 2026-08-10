@@ -54,7 +54,7 @@ class ProductTest(BaseTestCase):
         # some wild guess to print some debug info
         Select(driver.find_element(By.ID, "id_prod_type")).select_by_visible_text("Research and Development")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
@@ -75,7 +75,7 @@ class ProductTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.LINK_TEXT, "Components").click()
+        # The sidebar's Components entry, which lists components across all products.
         driver.find_element(By.ID, "product_component_view").click()
         self.assertTrue(self.is_element_by_css_selector_present("table"))
 
@@ -98,7 +98,7 @@ class ProductTest(BaseTestCase):
         # Edit product description
         driver.find_element(By.ID, "id_name").send_keys(Keys.TAB, "Updated Desription: ")
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
@@ -126,7 +126,7 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.XPATH, '//*[@id="id_enable_simple_risk_acceptance"]').click()
 
         # "Click" the submit button to complete the transaction
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the product has been added
 
         # Assert ot the query to dtermine status of failure
@@ -146,7 +146,7 @@ class ProductTest(BaseTestCase):
         # "Click" the dropdown option
         driver.find_element(By.ID, "dropdownMenu1").click()
         # Click on the 'Engagement dropdown button'
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Engagement").click()
+        self.open_product_tab(driver, "engagements")
         # 'click' the Add New Engagement option
         driver.find_element(By.LINK_TEXT, "Add New Interactive Engagement").click()
         # Keep a good practice of clearing field before entering value
@@ -166,7 +166,7 @@ class ProductTest(BaseTestCase):
         # engagement status
         Select(driver.find_element(By.ID, "id_status")).select_by_visible_text("In Progress")
         # "Click" the Done button to Add the engagement
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the product has been added
 
         # Assert of the query to dtermine status of failure
@@ -191,7 +191,7 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.ID, "id_version").clear()
         driver.find_element(By.ID, "id_version").send_keys("2.1.0-RELEASE")
         # "Click" the Submit button to Add the technology
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Assert of the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Technology added successfully"))
         # Query the site to determine if the member has been added
@@ -218,7 +218,7 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.ID, "id_version").clear()
         driver.find_element(By.ID, "id_version").send_keys("2.2.0-RELEASE")
         # "Click" the Submit button to change the technology
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Assert of the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Technology changed successfully"))
         # Query the site to determine if the member has been added
@@ -240,7 +240,7 @@ class ProductTest(BaseTestCase):
         driver.find_elements(By.NAME, "dropdownManageTechnologies")[0].click()
         driver.find_elements(By.NAME, "deleteTechnology")[0].click()
         # "Click" the Submit button to delete the technology
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-danger").click()
+        self.click_submit(driver, "input.btn.btn-danger")
         # Assert of the query to dtermine status of failure
         self.assertTrue(self.is_success_message_present(text="Technology deleted successfully"))
         # Query the site to determine if the technology has been deleted
@@ -256,7 +256,7 @@ class ProductTest(BaseTestCase):
         # Select and click on the particular product to edit
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Click on the 'Finding dropdown button'
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Findings").click()
+        self.open_product_tab(driver, "findings")
         # Click on `Add New Finding`
         driver.find_element(By.LINK_TEXT, "Add New Finding").click()
         # Keep a good practice of clearing field before entering value
@@ -312,7 +312,7 @@ class ProductTest(BaseTestCase):
         # Select and click on the particular product to edit
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # Click on the 'Endpoints' dropdown button
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+        self.open_product_tab(driver, "endpoints")
         # 'click' the Add New Endpoint option
         driver.find_element(By.LINK_TEXT, "Add New Endpoint").click()
         # V2 Endpoints
@@ -323,7 +323,7 @@ class ProductTest(BaseTestCase):
             driver.find_element(By.ID, "id_endpoint").clear()
             driver.find_element(By.ID, "id_endpoint").send_keys("strange.prod.dev\n123.45.6.30")
             # submit
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
         # V3 Locations -- the freeform text box is gone, need to add each individually
         else:
             # Keep a good practice of clearing field before entering value
@@ -331,18 +331,18 @@ class ProductTest(BaseTestCase):
             driver.find_element(By.ID, "id_host").clear()
             driver.find_element(By.ID, "id_host").send_keys("strange.prod.dev")
             # submit
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # Assert ot the query to determine status of failure
             self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
             # it was so fun let's do it again!
-            driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+            self.open_product_tab(driver, "endpoints")
             # 'click' the Add New Endpoint option
             driver.find_element(By.LINK_TEXT, "Add New Endpoint").click()
             # Keep a good practice of clearing field before entering value
             driver.find_element(By.ID, "id_host").clear()
             driver.find_element(By.ID, "id_host").send_keys("123.45.6.30")
             # submit
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
         # Query the site to determine if the finding has been added
         # Assert ot the query to determine status of failure
         self.assertTrue(self.is_success_message_present(text="Endpoint added successfully"))
@@ -422,7 +422,7 @@ class ProductTest(BaseTestCase):
         # REview Status
         Select(driver.find_element(By.ID, "id_review_status")).select_by_visible_text("Untracked")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the finding has been added
 
         # Assert ot the query to dtermine status of failure
@@ -448,7 +448,7 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.ID, "id_path").clear()
         driver.find_element(By.ID, "id_path").send_keys("/unknown/folder/")
         # submit
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
         # Query the site to determine if the Tracking file has been updated
 
         # Assert ot the query to dtermine status of failure
@@ -464,7 +464,7 @@ class ProductTest(BaseTestCase):
         driver.find_element(By.LINK_TEXT, "QA Test").click()
         # "Click" the dropdown option
         # driver.find_element(By.XPATH, "//span[contains(., 'Metrics')]").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Metrics").click()
+        self.open_product_tab(driver, "metrics")
 
     @on_exception_html_source_logger
     def test_delete_product(self, name="QA Test"):
@@ -535,7 +535,7 @@ class ProductTest(BaseTestCase):
         my_select = Select(driver.find_element(By.ID, "id_product_type"))
         my_select.select_by_index(1)
 
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
     def test_simple_metrics(self):
         # Test To Edit Product Tracking Files

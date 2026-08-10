@@ -79,7 +79,7 @@ class ReportBuilderTest(BaseTestCase):
         driver = self.driver
         driver.get(self.base_url + "product/type")
         driver.find_element(By.ID, "dropdownMenuProductType").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Report").click()
+        driver.find_element(By.CSS_SELECTOR, '[data-testid="report-link"]').click()
         my_select = Select(driver.find_element(By.ID, "id_include_finding_notes"))
         my_select.select_by_index(1)
 
@@ -122,11 +122,11 @@ class ReportBuilderTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Engagements").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         driver.find_element(By.LINK_TEXT, "Ad Hoc Engagement").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Report").click()
+        driver.find_element(By.CSS_SELECTOR, '[data-testid="report-link"]').click()
         my_select = Select(driver.find_element(By.ID, "id_include_finding_notes"))
         my_select.select_by_index(1)
 
@@ -144,12 +144,12 @@ class ReportBuilderTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Engagements").click()
+        self.open_product_tab(driver, "engagements")
         driver.find_element(By.LINK_TEXT, "View Engagements").click()
         driver.find_element(By.LINK_TEXT, "Ad Hoc Engagement").click()
         driver.find_element(By.LINK_TEXT, "Pen Test").click()
         driver.find_element(By.ID, "dropdownMenu1").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Report").click()
+        driver.find_element(By.CSS_SELECTOR, '[data-testid="report-link"]').click()
         my_select = Select(driver.find_element(By.ID, "id_include_finding_notes"))
         my_select.select_by_index(1)
 
@@ -167,7 +167,7 @@ class ReportBuilderTest(BaseTestCase):
         driver = self.driver
         self.goto_product_overview(driver)
         driver.find_element(By.LINK_TEXT, "QA Test").click()
-        driver.find_element(By.PARTIAL_LINK_TEXT, "Endpoints").click()
+        self.open_product_tab(driver, "endpoints")
         driver.find_element(By.LINK_TEXT, "Endpoint Report").click()
 
         # extra dropdown click

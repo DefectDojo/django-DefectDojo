@@ -1,8 +1,0 @@
-{% extends "base.html" %}
-{% load navigation_tags %}
-{% load display_tags %}
-{% load static %}
-{% block content %}
-    {% comment %} include inherits the current context so findings, filtered and other variables {% endcomment %}
-    {% include "dojo/findings_list_snippet.html" %}
-{% endblock %}

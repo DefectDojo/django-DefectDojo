@@ -1,0 +1,193 @@
+{
+  "totalItemsScanned": 4,
+  "totalSecretsFound": 9,
+  "results": {
+    "46b5d33e444dbaa9053eceec4f3a91a1798d1d75": [
+      {
+        "id": "46b5d33e444dbaa9053eceec4f3a91a1798d1d75",
+        "source": "testData/secrets/generic-api-keys.txt",
+        "ruleId": "16be2682-51ee-44f5-82dc-695f4d1eda45",
+        "ruleName": "Mock-Custom-Rule",
+        "ruleCategory": "",
+        "startLine": 1,
+        "endLine": 1,
+        "lineContent": "mock_secret:=very_secret_value",
+        "startColumn": 14,
+        "endColumn": 30,
+        "value": "very_secret_value",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Rule that checks for a very specific string",
+        "severity": "Low",
+        "cvssScore": 1
+      }
+    ],
+    "5c27b555f2e14a8f4f9fdeda124f7332dd9835d9": [
+      {
+        "id": "5c27b555f2e14a8f4f9fdeda124f7332dd9835d9",
+        "source": "testData/secrets/generic-api-keys.txt",
+        "ruleId": "b47a1995-6572-41bb-b01d-d215b43ab089",
+        "ruleName": "Generic-Api-Key-Completely-New",
+        "ruleCategory": "General",
+        "startLine": 1,
+        "endLine": 1,
+        "lineContent": "mock_secret:=very_secret_value",
+        "startColumn": 1,
+        "endColumn": 30,
+        "value": "very_secret_value",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Custom Generic Api key with different ruleId, should be considered different from the default one and should take priority if both rules run",
+        "severity": "Low",
+        "cvssScore": 8.2
+      }
+    ],
+    "63139b45c38f502bbbe15115a7995003d76b2a81": [
+      {
+        "id": "63139b45c38f502bbbe15115a7995003d76b2a81",
+        "source": "testData/secrets/github-pat.txt",
+        "ruleId": "9f24ac30-9e04-4dc2-bc32-26da201f87e5",
+        "ruleName": "Github-Pat-Custom",
+        "ruleCategory": "Package Management",
+        "startLine": 0,
+        "endLine": 0,
+        "lineContent": "TextExampleghp_1234567890abcdefghijklmnopqrstuvwxyzTextExampleghp_abcdefghijklmnopqrstuvwxyz1234567890TextExample",
+        "startColumn": 12,
+        "endColumn": 51,
+        "value": "ghp_1234567890abcdefghijklmnopqrstuvwxyz",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Github-Pat with DisableValidation set to true to test if validation is correctly disabled, resulting in Unknown validity instead of Invalid",
+        "severity": "Low",
+        "cvssScore": 7
+      }
+    ],
+    "9346cf95d4513bb2861d1ecfc3e82421bd14cbd8": [
+      {
+        "id": "9346cf95d4513bb2861d1ecfc3e82421bd14cbd8",
+        "source": "testData/secrets/jwt.txt",
+        "ruleId": "37dfe666-1961-48f8-b618-fa6321c216d1",
+        "ruleName": "Jwt",
+        "ruleCategory": "General",
+        "startLine": 0,
+        "endLine": 0,
+        "lineContent": "TextExample eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMSIsIm5hbWUiOiJtb2NrTmFtZTEifQ.dummysignature1 TextExample eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMiIsIm5hbWUiOiJtb2NrTmFtZTIifQ.dummysignature2 TextExample",
+        "startColumn": 13,
+        "endColumn": 116,
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMSIsIm5hbWUiOiJtb2NrTmFtZTEifQ.dummysignature1",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Uncovered a JSON Web Token, which may lead to unauthorized access to web applications and sensitive user data.",
+        "extraDetails": {
+          "secretDetails": {
+            "name": "mockName1",
+            "sub": "mockSub1"
+          }
+        },
+        "severity": "High",
+        "cvssScore": 8.2
+      }
+    ],
+    "993b789425c810d4956c5ed8c84f02f90b0531ee": [
+      {
+        "id": "993b789425c810d4956c5ed8c84f02f90b0531ee",
+        "source": "testData/secrets/github-pat.txt",
+        "ruleId": "9f24ac30-9e04-4dc2-bc32-26da201f87e5",
+        "ruleName": "Github-Pat-Custom",
+        "ruleCategory": "Package Management",
+        "startLine": 1,
+        "endLine": 1,
+        "lineContent": "           Text_Example =                                     ghp_9876543210zyxwvutsrqponmlkjihgfedcba",
+        "startColumn": 63,
+        "endColumn": 102,
+        "value": "ghp_9876543210zyxwvutsrqponmlkjihgfedcba",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Github-Pat with DisableValidation set to true to test if validation is correctly disabled, resulting in Unknown validity instead of Invalid",
+        "severity": "Low",
+        "cvssScore": 7
+      }
+    ],
+    "ab72977b91e213ab4d91eaa2dc89e0b5d54856d5": [
+      {
+        "id": "ab72977b91e213ab4d91eaa2dc89e0b5d54856d5",
+        "source": "testData/secrets/generic-api-keys.txt",
+        "ruleId": "b47a1995-6572-41bb-b01d-d215b43ab089",
+        "ruleName": "Generic-Api-Key-Completely-New",
+        "ruleCategory": "General",
+        "startLine": 0,
+        "endLine": 0,
+        "lineContent": "client_secret=6da89121079f83b2eb6acccf8219ea982c3d79bccc3e9c6a85856480661f8fde",
+        "startColumn": 1,
+        "endColumn": 78,
+        "value": "6da89121079f83b2eb6acccf8219ea982c3d79bccc3e9c6a85856480661f8fde",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Custom Generic Api key with different ruleId, should be considered different from the default one and should take priority if both rules run",
+        "severity": "Low",
+        "cvssScore": 8.2
+      }
+    ],
+    "c31705d99e835e4ac7bc3f688bd9558309e056ed": [
+      {
+        "id": "c31705d99e835e4ac7bc3f688bd9558309e056ed",
+        "source": "testData/secrets/github-pat.txt",
+        "ruleId": "9f24ac30-9e04-4dc2-bc32-26da201f87e5",
+        "ruleName": "Github-Pat-Custom",
+        "ruleCategory": "Package Management",
+        "startLine": 0,
+        "endLine": 0,
+        "lineContent": "TextExampleghp_1234567890abcdefghijklmnopqrstuvwxyzTextExampleghp_abcdefghijklmnopqrstuvwxyz1234567890TextExample",
+        "startColumn": 63,
+        "endColumn": 102,
+        "value": "ghp_abcdefghijklmnopqrstuvwxyz1234567890",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Github-Pat with DisableValidation set to true to test if validation is correctly disabled, resulting in Unknown validity instead of Invalid",
+        "severity": "Low",
+        "cvssScore": 7
+      }
+    ],
+    "efc9a9ee89f1d732c7321067eb701b9656e91f15": [
+      {
+        "id": "efc9a9ee89f1d732c7321067eb701b9656e91f15",
+        "source": "testData/secrets/jwt.txt",
+        "ruleId": "37dfe666-1961-48f8-b618-fa6321c216d1",
+        "ruleName": "Jwt",
+        "ruleCategory": "General",
+        "startLine": 0,
+        "endLine": 0,
+        "lineContent": "TextExample eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMSIsIm5hbWUiOiJtb2NrTmFtZTEifQ.dummysignature1 TextExample eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMiIsIm5hbWUiOiJtb2NrTmFtZTIifQ.dummysignature2 TextExample",
+        "startColumn": 129,
+        "endColumn": 232,
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMiIsIm5hbWUiOiJtb2NrTmFtZTIifQ.dummysignature2",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Uncovered a JSON Web Token, which may lead to unauthorized access to web applications and sensitive user data.",
+        "extraDetails": {
+          "secretDetails": {
+            "name": "mockName2",
+            "sub": "mockSub2"
+          }
+        },
+        "severity": "High",
+        "cvssScore": 8.2
+      },
+      {
+        "id": "efc9a9ee89f1d732c7321067eb701b9656e91f15",
+        "source": "testData/secrets/jwt.txt",
+        "ruleId": "37dfe666-1961-48f8-b618-fa6321c216d1",
+        "ruleName": "Jwt",
+        "ruleCategory": "General",
+        "startLine": 1,
+        "endLine": 1,
+        "lineContent": "           Text_Example =                                     eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMiIsIm5hbWUiOiJtb2NrTmFtZTIifQ.dummysignature2",
+        "startColumn": 63,
+        "endColumn": 165,
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtb2NrU3ViMiIsIm5hbWUiOiJtb2NrTmFtZTIifQ.dummysignature2",
+        "validationStatus": "Unknown",
+        "ruleDescription": "Uncovered a JSON Web Token, which may lead to unauthorized access to web applications and sensitive user data.",
+        "extraDetails": {
+          "secretDetails": {
+            "name": "mockName2",
+            "sub": "mockSub2"
+          }
+        },
+        "severity": "High",
+        "cvssScore": 8.2
+      }
+    ]
+  }
+}

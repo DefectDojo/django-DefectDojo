@@ -1,0 +1,77 @@
+{
+  "data": [
+    {
+      "id": "AAAAA-BBBB-CCCC-0001",
+      "type": "finding",
+      "attributes": {
+        "tags": [
+          "service:payments-api",
+          "env:prod",
+          "team:platform"
+        ],
+        "timestamp": 1719792000000,
+        "attributes": {
+          "finding_id": "finding-0001",
+          "finding_type": "vulnerability",
+          "title": "openssl 3.0.2 is affected by CVE-2000-0001",
+          "description": "The installed openssl build is affected by a memory-safety flaw.",
+          "severity": "critical",
+          "base_severity": "high",
+          "status": "open",
+          "resource_id": "i-0000000000000001",
+          "resource_name": "web-node-1",
+          "resource_type": "aws_ec2_instance",
+          "first_seen_at": 1719792000000,
+          "detection_changed_at": 1721001600000,
+          "rule": {
+            "id": "rule-0001",
+            "name": "Vulnerable library detected",
+            "type": "vulnerability",
+            "version": 3
+          },
+          "advisory": {
+            "cve": "CVE-2000-0001",
+            "aliases": [
+              "GHSA-aaaa-bbbb-cccc",
+              "CVE-2000-0001"
+            ],
+            "id": "adv-1",
+            "summary": "Memory-safety flaw in openssl.",
+            "type": "cve"
+          },
+          "severity_details": {
+            "base": {
+              "score": 9.8,
+              "vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+              "value": "critical"
+            },
+            "adjusted": {
+              "score": 7.2,
+              "vector": "CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H",
+              "value": "high"
+            }
+          },
+          "package": {
+            "name": "openssl",
+            "version": "3.0.2",
+            "manager": "deb"
+          },
+          "cloud_resource": {
+            "cloud_provider": "AWS",
+            "region": "us-east-1",
+            "account": {
+              "account_id": "acct-1234",
+              "name": "example-account"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "meta": {
+    "page": {
+      "after": ""
+    },
+    "status": "done"
+  }
+}

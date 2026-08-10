@@ -13,8 +13,8 @@ django-filter==26.1
 django-htmx==1.28.0
 django-imagekit==6.1.0
 django-multiselectfield==1.0.1
-django-polymorphic==4.11.6
-django-crispy-forms==2.6
+django-polymorphic==4.11.7
+django-crispy-forms==2.7
 django_extensions==4.1
 django-slack==5.19.0
 django-watson==1.6.3
@@ -28,13 +28,13 @@ humanize==4.16.0
 jira==3.10.5
 PyGithub==2.9.1
 lxml==6.1.1
-Markdown==3.10.2
+Markdown==3.10.3
 openpyxl==3.1.5
 Pillow==12.3.0  # required by django-imagekit
 psycopg[c]==3.3.4
 cryptography==50.0.0
 python-dateutil==2.9.0.post0
-redis==8.0.1
+redis==8.1.0
 requests==2.34.2
 sqlalchemy==2.0.51  # Required by Celery broker transport
 urllib3==2.7.0
@@ -57,7 +57,7 @@ cvss==3.6
 django-fieldsignals==0.8.0
 hyperlink==21.0.0
 drf-spectacular==0.30.0
-drf-spectacular-sidecar==2026.7.1
+drf-spectacular-sidecar==2026.8.1
 django-ratelimit==4.1.0
 argon2-cffi==25.1.0
 blackduck==1.1.3

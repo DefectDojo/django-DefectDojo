@@ -555,21 +555,49 @@ class Finding(BaseModel):
     def __str__(self):
         return self.title
 
-    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
-             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
-        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
-        from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
+    @classmethod
+    def persisted_title(cls, title: str | None) -> str:
+        """
+        Return a title in the exact form a persisted finding carries.
 
-        is_new_finding = self.pk is None
+        The single source of truth for the title transform. Anything that needs to know
+        what a title *will* look like once stored -- notably a hash computed before the
+        row is written, which must match the hash computed after -- calls this instead of
+        repeating the transform.
 
-        # if not isinstance(self.date, (datetime, date)):
-        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
+        Note that ``titlecase()`` is not merely a case change: it also normalizes
+        whitespace, collapsing consecutive newlines and turning tabs into spaces. A
+        reimplementation that truncated but did not titlecase therefore diverged for any
+        multi-line title, which is a bug that has already been paid for once.
+        """
+        return titlecase((title or "")[:cls._meta.get_field("title").max_length])
 
-        if not user:
-            from dojo.utils import get_current_user  # noqa: PLC0415 -- lazy import, avoids circular dependency
-            user = get_current_user()
+    def derive_persisted_fields(self, *, dedupe_option: bool = True, is_new_finding: bool = False) -> None:
+        """
+        Normalize and derive the fields that must hold for any persisted finding.
+
+        This is the transform ``save()`` applies to a finding's own columns before the row
+        is written: title casing/truncation, blank-component normalization, the date
+        default, numerical severity, CVSS vector parsing, and the same-tool hash. It reads
+        configuration but performs no writes, touches no relations, and dispatches nothing,
+        so it is safe to call on an unsaved instance and on many instances in a loop.
+
+        It exists as a separate method so that batched writers -- anything using
+        ``bulk_create``/``bulk_update``, which bypass ``save()`` and its signals entirely --
+        can produce rows identical to the ones ``save()`` produces, by calling this rather
+        than reimplementing it. A second copy of this logic is not a hypothetical risk: Pro's
+        reimport hashing previously re-derived only the title truncation, and the missing
+        ``titlecase()`` (which also collapses whitespace) made the pre-save lookup hash and
+        the stored hash diverge for any multi-line title, so those findings were closed and
+        recreated on every single reimport.
+
+        Anything requiring a primary key -- ``found_by``, location/endpoint queries, SLA
+        expiry, status bookkeeping, post-save dispatch -- deliberately stays in ``save()``,
+        because a batched writer needs a genuinely different (set-based) implementation of
+        those rather than a shared one.
+        """
         # Title Casing
-        self.title = titlecase(self.title[:511])
+        self.title = Finding.persisted_title(self.title)
         # Normalize blank component fields to NULL so that findings without a component
         # group together. An empty string is treated as a distinct value from NULL by the
         # database, which would otherwise produce a separate "None" component group (SC-13073).
@@ -615,6 +643,10 @@ class Finding(BaseModel):
         self.set_hash_code(dedupe_option)
 
         if is_new_finding:
+            # A new finding's static/dynamic flags come from file_path plus the locations
+            # the parser attached, both of which are in memory -- no row required. The
+            # equivalent branch for an *existing* finding queries self.locations/endpoints
+            # and so stays in save().
             if settings.V3_FEATURE_LOCATIONS:
                 if (self.file_path is not None) and (len(self.unsaved_locations) == 0):
                     self.static_finding = True
@@ -628,6 +660,22 @@ class Finding(BaseModel):
             elif (self.file_path is not None):
                 self.static_finding = True
 
+    def save(self, dedupe_option=True, rules_option=True, product_grading_option=True,  # noqa: FBT002
+             issue_updater_option=True, push_to_jira=False, user=None, *args, **kwargs):  # noqa: FBT002 - this is bit hard to fix nice have this universally fixed
+        logger.debug("Start saving finding of id " + str(self.id) + " dedupe_option:" + str(dedupe_option) + " (self.pk is %s)", "None" if self.pk is None else "not None")
+        from dojo.finding import helper as finding_helper  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+        is_new_finding = self.pk is None
+
+        # if not isinstance(self.date, (datetime, date)):
+        #     raise ValidationError(_("The 'date' field must be a valid date or datetime object."))
+
+        if not user:
+            from dojo.utils import get_current_user  # noqa: PLC0415 -- lazy import, avoids circular dependency
+            user = get_current_user()
+        self.derive_persisted_fields(dedupe_option=dedupe_option, is_new_finding=is_new_finding)
+
+        if is_new_finding:
             # because we have reduced the number of (super()).save() calls, the helper is no longer called for new findings
             # so we call it manually
             finding_helper.update_finding_status(self, user, changed_fields={"id": (None, None)})
@@ -916,7 +964,7 @@ class Finding(BaseModel):
                     LocationManager,
                 )
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
+                unsaved_locations = LocationManager.cleaned_unsaved_locations(finding)
                 # Only URL locations feed the "endpoints" hash ingredient — the
                 # saved path below filters to URL references, and hashing other
                 # location types here would make a finding's hash change between

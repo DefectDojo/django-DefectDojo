@@ -1,5 +1,7 @@
+import inspect
 import logging
 from collections.abc import Iterator
+from dataclasses import dataclass
 from operator import attrgetter
 
 import hyperlink
@@ -32,10 +34,13 @@ def get_finding_models_for_deduplication(finding_ids):
         logger.debug("get_finding_models_for_deduplication called with no finding_ids")
         return []
 
-    # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
-    # endpoints m2m hydrates legacy rows and crashes the batch. are_locations_duplicates()
-    # reads ref.location.url, which is what the locations prefetch has to reach.
-    # TODO: Delete the endpoints branch after the move to Locations
+    # are_locations_duplicates reads the new finding's locations (V3) or endpoints (V2)
+    # once per candidate pair, so the pair loop N+1s unless the right relation is
+    # prefetched here. The V3 prefetch pulls the reference -> Location -> URL subtype
+    # chain that finding_locations() walks. Prefetching the endpoints m2m under V3 is
+    # not an option either: the Endpoint model is deprecated there and its __init__
+    # raises, so hydrating legacy rows would crash the batch. ("endpoints" is the V2
+    # relation — TODO: delete it after the move to Locations.)
     location_prefetch = "locations__location__url" if settings.V3_FEATURE_LOCATIONS else "endpoints"
 
     return list(
@@ -55,7 +60,13 @@ def get_finding_models_for_deduplication(finding_ids):
 
 @app.task
 def do_dedupe_finding_task(new_finding_id, *args, **kwargs):
-    return do_dedupe_finding_task_internal(Finding.objects.get(id=new_finding_id), *args, **kwargs)
+    # Same loader as the batch task: are_locations_duplicates walks locations (V3) /
+    # endpoints (V2) per candidate pair, which N+1s on an unprefetched instance.
+    findings = get_finding_models_for_deduplication([new_finding_id])
+    if not findings:
+        logger.debug(f"no finding found for deduplication with ID: {new_finding_id}")
+        return None
+    return do_dedupe_finding_task_internal(findings[0], *args, **kwargs)
 
 
 @app.task
@@ -254,8 +265,17 @@ def are_urls_equal(url1, url2, fields):
 
 
 def finding_locations(location_refs):
-    """Extract URLs from a list of location references."""
-    return [ref.location.url for ref in location_refs]
+    """
+    Extract URL subtype rows from a list of LocationFindingReferences.
+
+    Only URL locations participate in the endpoint-fields comparison. Non-URL
+    locations (dependency, code) have no `url` reverse row at all, so touching
+    `.url` on them unconditionally raises RelatedObjectDoesNotExist — a finding
+    with a mixed location set would crash the dedupe task.
+    """
+    from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
+    url_type = URL.get_location_type()
+    return [ref.location.url for ref in location_refs if ref.location.location_type == url_type]
 
 
 def are_location_urls_equal(url1, url2, fields):
@@ -271,6 +291,25 @@ def are_location_urls_equal(url1, url2, fields):
     return True
 
 
+def unsaved_url_locations(finding):
+    """
+    URL AbstractLocation objects from finding.unsaved_locations (preview-mode path,
+    where the finding has no PK and therefore no location references yet). The raw
+    list mixes LocationData and AbstractLocation entries, neither of which can go
+    through finding_locations() — clean them into model instances instead. The
+    per-finding memo makes this free when the import pipeline already cleaned them.
+    """
+    from dojo.importers.location_manager import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
+        LocationManager,
+    )
+    from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
+
+    if not getattr(finding, "unsaved_locations", None):
+        return []
+    url_type = URL.get_location_type()
+    return [loc for loc in LocationManager.cleaned_unsaved_locations(finding) if loc.get_location_type() == url_type]
+
+
 def are_locations_duplicates(new_finding, to_duplicate_finding):
     fields = settings.DEDUPE_ALGO_ENDPOINT_FIELDS
     if len(fields) == 0:
@@ -279,10 +318,8 @@ def are_locations_duplicates(new_finding, to_duplicate_finding):
 
     if settings.V3_FEATURE_LOCATIONS:
         # Use unsaved_locations for unsaved findings (preview mode), saved M2M otherwise
-        locs1 = new_finding.locations.all() if new_finding.pk else getattr(new_finding, "unsaved_locations", [])
-        locs2 = to_duplicate_finding.locations.all() if to_duplicate_finding.pk else getattr(to_duplicate_finding, "unsaved_locations", [])
-        list1 = finding_locations(locs1)
-        list2 = finding_locations(locs2)
+        list1 = finding_locations(new_finding.locations.all()) if new_finding.pk else unsaved_url_locations(new_finding)
+        list2 = finding_locations(to_duplicate_finding.locations.all()) if to_duplicate_finding.pk else unsaved_url_locations(to_duplicate_finding)
 
         deduplicationLogger.debug(
             f"Starting deduplication by location fields for finding {new_finding.id} with locations {list1} and finding {to_duplicate_finding.id} with locations {list2}",
@@ -1116,6 +1153,39 @@ def _fp_candidates_qs(scope_filter, dedup_alg, findings, exclude_ids=None):
     return Finding.objects.none()
 
 
+@dataclass(frozen=True)
+class FalsePositiveCandidateContext:
+
+    """
+    Scope a false-positive-history candidate hook must respect if it adds candidates.
+
+    Passed to hooks that accept a ``context`` argument so they can honor the product scope and
+    the batch exclusion without re-deriving either. See the hook comment in
+    ``do_false_positive_history_batch``.
+    """
+
+    product: object
+    algorithm: str
+    excluded_finding_ids: frozenset
+
+
+def _accepts_candidate_context(hook) -> bool:
+    """
+    Whether ``hook`` takes a ``context`` argument.
+
+    Lets the contract grow without breaking a plugin written against the two-argument form. A
+    hook whose signature cannot be read (a builtin, or an object with a ``__call__`` that hides
+    it) is treated as not accepting it, which is the behavior that existed before.
+    """
+    try:
+        parameters = inspect.signature(hook).parameters
+    except (TypeError, ValueError):
+        return False
+    if "context" in parameters:
+        return True
+    return any(p.kind is inspect.Parameter.VAR_KEYWORD for p in parameters.values())
+
+
 def _fetch_fp_candidates_for_batch(findings, product, dedup_alg):
     """
     Fetch all existing findings in the product that could be FP matches for a batch,
@@ -1188,12 +1258,33 @@ def do_false_positive_history_batch(findings):
     # Fetch all candidate existing findings with one DB query
     candidates = _fetch_fp_candidates_for_batch(findings, product, dedup_alg)
 
-    # Optional plugin hook: refine the per-finding candidate list after it is resolved by
-    # deduplication_algorithm. Lets a plugin (e.g. Pro) narrow candidates by fields that are
-    # excluded from the hash string but compared per pair (set-match tokens on
-    # vulnerability_ids / CWEs). Resolved once; a no-op when unset. See get_custom_method.
+    # Optional plugin hook: resolve the per-finding candidate list after deduplication_algorithm
+    # has produced it. A plugin may narrow the list -- e.g. by fields excluded from the hash
+    # string but compared per pair, such as set-match tokens on vulnerability_ids / CWEs -- and
+    # it may also return candidates that were not in the list, which is how a plugin can match on
+    # an identity this function's algorithm does not know about. The return value replaces the
+    # list; it is not intersected with it. Resolved once; a no-op when unset.
+    #
+    # A plugin that adds candidates owns three obligations, because this function cannot check
+    # them without undoing the single-query fetch above:
+    #   * Stay inside `product`. False-positive history is product-scoped, and a candidate from
+    #     another product would replicate a false-positive verdict across a boundary the user
+    #     never crossed.
+    #   * Exclude the findings being processed. They are already excluded from the fetch, and a
+    #     finding that reaches its own candidate list can mark itself false-positive.
+    #   * Have `id`, `false_p` and `active` loaded. Candidates are fetched with `.only(...)`, so
+    #     a deferred field read here costs a query per candidate.
+    # `context` carries what a plugin needs to satisfy the first two without re-querying. It is
+    # passed only to hooks that accept it, so existing two-argument hooks keep working.
     from dojo.utils import get_custom_method  # noqa: PLC0415 -- circular import
     fp_candidate_filter = get_custom_method("FINDING_FALSE_POSITIVE_HISTORY_CANDIDATE_FILTER_METHOD")
+    fp_candidate_context = None
+    if fp_candidate_filter and _accepts_candidate_context(fp_candidate_filter):
+        fp_candidate_context = FalsePositiveCandidateContext(
+            product=product,
+            algorithm=dedup_alg,
+            excluded_finding_ids=frozenset(f.id for f in findings if f.id),
+        )
 
     to_mark_as_fp_ids: set = set()
 
@@ -1219,7 +1310,10 @@ def do_false_positive_history_batch(findings):
             existing = []
 
         if fp_candidate_filter:
-            existing = fp_candidate_filter(finding, existing)
+            if fp_candidate_context is not None:
+                existing = fp_candidate_filter(finding, existing, context=fp_candidate_context)
+            else:
+                existing = fp_candidate_filter(finding, existing)
 
         existing_fps = [ef for ef in existing if ef.false_p]
 

@@ -376,7 +376,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # JIRA as a group, so their individual push is suppressed while ungrouped findings in the
         # same batch must still be pushed. The batch is partitioned by flag at dispatch time
         # instead of applying one finding's flag to the whole batch.
-        batch_finding_ids: list[tuple[int, bool]] = []
+        #
+        # The finding is held rather than its id, and the id is read at dispatch time below.
+        # Nothing between the append and the dispatch needs the id, and deferring the read
+        # keeps this loop body free of direct primary-key reads -- one less obstacle for an
+        # importer that buffers inserts and writes them at batch boundaries, in the same
+        # spirit as get_original_findings and get_reimport_match_candidates_for_batch, which
+        # exist so downstream editions need not copy this method. (Not the only obstacle:
+        # the batch-boundary block below persists locations and applies tags, which also
+        # require written rows, before the ids are read.)
+        batch_findings_to_dispatch: list[tuple[Finding, bool]] = []
         batch_findings: list[Finding] = []
         # Findings that were newly created (else branch below) — pass these to
         # `apply_inherited_tags_for_findings` instead of `batch_findings` so
@@ -394,7 +403,6 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         for batch_start in range(0, len(cleaned_findings), match_batch_max_size):
             batch_end = min(batch_start + match_batch_max_size, len(cleaned_findings))
             unsaved_findings_batch = cleaned_findings[batch_start:batch_end]
-            is_final_batch = batch_end == len(cleaned_findings)
 
             logger.debug(f"Processing reimport batch {batch_start}-{batch_end} of {len(cleaned_findings)} findings")
 
@@ -406,9 +414,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             )
 
             # Process each finding in the batch using pre-fetched candidates
-            for idx, unsaved_finding in enumerate(unsaved_findings_batch):
-                is_final = is_final_batch and idx == len(unsaved_findings_batch) - 1
-
+            for unsaved_finding in unsaved_findings_batch:
                 # Match any findings to this new one coming in using pre-fetched candidates
                 matched_findings = self.match_finding_to_candidate_reimport(
                     unsaved_finding,
@@ -464,7 +470,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     )
                     # all data is already saved on the finding, we only need to trigger post processing in batches
                     push_to_jira = self.push_to_jira and ((not self.findings_groups_enabled or not self.group_by) or not finding_will_be_grouped)
-                    batch_finding_ids.append((finding.id, push_to_jira))
+                    batch_findings_to_dispatch.append((finding, push_to_jira))
                     batch_findings.append(finding)
 
                     # Post-processing batches (deduplication, rules, etc.) are separate from matching batches.
@@ -482,49 +488,31 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     # - Matching batches: optimize candidate fetching (solve 1+N query problem)
                     # - Deduplication batches: optimize bulk operations (larger batches = fewer queries)
                     # They don't need to be aligned since they optimize different operations.
-                    if len(batch_finding_ids) >= dedupe_batch_max_size or is_final:
-                        self.location_handler.persist()
-                        self.flush_vulnerability_ids()
-                        self.flush_burp_request_response()
-                        # Apply parser-supplied tags for this batch before post-processing starts,
-                        # so rules/deduplication tasks see the tags already on the findings.
-                        bulk_apply_parser_tags(findings_with_parser_tags)
-                        findings_with_parser_tags.clear()
-                        # Apply import-time tags before post-processing so rules/deduplication see them.
-                        self.apply_import_tags_for_batch(batch_findings)
-                        # Apply inherited Product tags to NEWLY CREATED findings only
-                        # (and their endpoints/locations) BEFORE post_process_findings_batch
-                        # dispatches, so rules/dedup see inherited tags on .tags.
-                        # Matched/existing findings already have inheritance applied from
-                        # their original creation; re-running it on no-change reimports
-                        # would be ~8 wasted queries per batch.
-                        apply_inherited_tags_for_findings(new_findings_in_batch)
-                        new_findings_in_batch.clear()
-                        batch_findings.clear()
-                        # Partition the batch by each finding's own push_to_jira flag so one
-                        # finding's grouping state is not applied to the whole batch. Uniform
-                        # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
-                        finding_ids_by_push: dict[bool, list[int]] = {}
-                        for finding_id, finding_push_to_jira in batch_finding_ids:
-                            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(finding_id)
-                        batch_finding_ids.clear()
-                        for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
-                            result = dojo_dispatch_task(
-                                finding_helper.post_process_findings_batch,
-                                finding_ids_batch,
-                                dedupe_option=True,
-                                rules_option=True,
-                                product_grading_option=True,
-                                issue_updater_option=True,
-                                push_to_jira=push_to_jira_batch,
-                                jira_instance_id=getattr(self.jira_instance, "id", None),
-                                # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
-                                # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
-                                **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
-                                **self.post_processing_dispatch_kwargs(**kwargs),
-                            )
-                            if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
-                                self.record_post_processing_result(result)
+                    if len(batch_findings_to_dispatch) >= dedupe_batch_max_size:
+                        self._flush_post_processing_batch(
+                            batch_findings_to_dispatch,
+                            batch_findings,
+                            new_findings_in_batch,
+                            findings_with_parser_tags,
+                            **kwargs,
+                        )
+
+        # A final drain instead of an is_final flag inside the loop. The matched branch's
+        # force_continue skips the rest of the loop body, so a report whose last sorted
+        # finding took that path never reached the old in-loop is_final flush -- everything
+        # appended since the previous size-triggered flush was silently dropped: no
+        # deduplication, rules, issue updater or JIRA dispatch, and no parser or inherited
+        # tags for those findings. Draining here runs exactly once however the last
+        # iteration ended. It is deliberately unconditional: matched findings can accumulate
+        # location status updates without appending anything to dispatch, and every step is
+        # a no-op on empty state (close_old_findings already calls persist() the same way).
+        self._flush_post_processing_batch(
+            batch_findings_to_dispatch,
+            batch_findings,
+            new_findings_in_batch,
+            findings_with_parser_tags,
+            **kwargs,
+        )
 
         # No chord: tasks are dispatched immediately above per batch
 
@@ -545,6 +533,68 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         perform_product_grading(self.test.engagement.product)
 
         return self.new_items, self.reactivated_items, self.to_mitigate, self.untouched
+
+    def _flush_post_processing_batch(
+        self,
+        batch_findings_to_dispatch: list[tuple[Finding, bool]],
+        batch_findings: list[Finding],
+        new_findings_in_batch: list[Finding],
+        findings_with_parser_tags: list[tuple],
+        **kwargs: dict,
+    ) -> None:
+        """
+        Persist and dispatch everything accumulated for one post-processing batch, then
+        clear the accumulators (the passed-in lists are mutated in place).
+
+        Called from the processing loop each time the batch reaches
+        IMPORT_REIMPORT_DEDUPE_BATCH_SIZE, and once after the loop as an unconditional
+        drain, so a report whose final finding never reached the in-loop check (the
+        matched branch's force_continue, or a falsy finding) still gets its tail
+        deduplicated, tagged and dispatched. Every step is safe on empty state, which is
+        what makes the unconditional drain call cheap.
+        """
+        self.location_handler.persist()
+        self.flush_vulnerability_ids()
+        self.flush_burp_request_response()
+        # Apply parser-supplied tags for this batch before post-processing starts,
+        # so rules/deduplication tasks see the tags already on the findings.
+        bulk_apply_parser_tags(findings_with_parser_tags)
+        findings_with_parser_tags.clear()
+        # Apply import-time tags before post-processing so rules/deduplication see them.
+        self.apply_import_tags_for_batch(batch_findings)
+        # Apply inherited Product tags to NEWLY CREATED findings only
+        # (and their endpoints/locations) BEFORE post_process_findings_batch
+        # dispatches, so rules/dedup see inherited tags on .tags.
+        # Matched/existing findings already have inheritance applied from
+        # their original creation; re-running it on no-change reimports
+        # would be ~8 wasted queries per batch.
+        apply_inherited_tags_for_findings(new_findings_in_batch)
+        new_findings_in_batch.clear()
+        batch_findings.clear()
+        # Partition the batch by each finding's own push_to_jira flag so one
+        # finding's grouping state is not applied to the whole batch. Uniform
+        # batches (grouping disabled, or push_to_jira off) stay a single dispatch.
+        finding_ids_by_push: dict[bool, list[int]] = {}
+        for dispatch_finding, finding_push_to_jira in batch_findings_to_dispatch:
+            finding_ids_by_push.setdefault(finding_push_to_jira, []).append(dispatch_finding.id)
+        batch_findings_to_dispatch.clear()
+        for push_to_jira_batch, finding_ids_batch in finding_ids_by_push.items():
+            result = dojo_dispatch_task(
+                finding_helper.post_process_findings_batch,
+                finding_ids_batch,
+                dedupe_option=True,
+                rules_option=True,
+                product_grading_option=True,
+                issue_updater_option=True,
+                push_to_jira=push_to_jira_batch,
+                jira_instance_id=getattr(self.jira_instance, "id", None),
+                # 'async_wait' joins on this dispatch via AsyncResult.get(), so its
+                # result must be stored despite the global CELERY_TASK_IGNORE_RESULT.
+                **({"ignore_result": False} if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT else {}),
+                **self.post_processing_dispatch_kwargs(**kwargs),
+            )
+            if self.deduplication_execution_mode == DEDUPLICATION_EXECUTION_MODE_ASYNC_WAIT:
+                self.record_post_processing_result(result)
 
     def _sync_close_old_finding_status_fields(self, findings: list[Finding]) -> list[Finding]:
         """

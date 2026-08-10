@@ -1,0 +1,55 @@
+{
+  "vulnerabilities": [
+    {
+      "resource_id": "301",
+      "resource_name": "generic-host-01",
+      "ip_address": "10.20.0.11",
+      "vulnerabilityid": "50123",
+      "vulnerabilityname": "Remote code execution in the example office suite",
+      "cveids": "CVE-2000-0002, CVE-2000-0001",
+      "severity": "Important",
+      "cvss_2_score": 9.3,
+      "cvss_3_score": 8.8,
+      "patch_description": "Example Office Suite security update 2024-06",
+      "patchid": "77001",
+      "vulnerability_status": "Open",
+      "updatedtime": 1717322400000
+    },
+    {
+      "resource_id": 302,
+      "fqdn_name": "generic-host-02.corp.example.com",
+      "ip_address": "10.20.0.12",
+      "vulnerabilityid": 50124,
+      "vulnerabilityname": "Elevation of privilege in the example service",
+      "cveids": "CVE-2000-0003",
+      "severity": "Moderate",
+      "cvss_2_score": 6.8,
+      "cvss_3_score": 0,
+      "vulnerability_status": "Closed",
+      "updatedtime": "1717408800000"
+    },
+    {
+      "resource_id": "303",
+      "ip_address": "10.20.0.13",
+      "vulnerabilityid": "50125",
+      "vulnerabilityname": "",
+      "cveids": "CVE-2000-0004",
+      "severity": "Unrated",
+      "cvss_2_score": 0,
+      "cvss_3_score": 0,
+      "vulnerability_status": "Mitigated",
+      "updatedtime": 0
+    },
+    {
+      "resource_id": "304",
+      "resource_name": "generic-host-04",
+      "vulnerabilityid": "50126",
+      "vulnerabilityname": "",
+      "cveids": "",
+      "severity": "critical",
+      "cvss_3_score": 9.9,
+      "vulnerability_status": "Fixed"
+    }
+  ],
+  "metadata": {"cursor": "c4", "isNextPageAvailable": false, "totalRecords": 4}
+}

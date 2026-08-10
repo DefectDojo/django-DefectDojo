@@ -5,8 +5,10 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
+from rest_framework.authtoken.models import Token
 
 from dojo.models import Dojo_User, UserContactInfo
+from dojo.user.authentication import token_expires_at
 from dojo.user.utils import get_configuration_permissions_codenames
 
 User = get_user_model()
@@ -17,6 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)
     email = serializers.EmailField(required=True)
     token_last_reset = serializers.SerializerMethodField()
+    token_expiry = serializers.SerializerMethodField()
     password_last_reset = serializers.SerializerMethodField()
     password = serializers.CharField(
         write_only=True,
@@ -48,6 +51,7 @@ class UserSerializer(serializers.ModelSerializer):
             "is_staff",
             "is_superuser",
             "token_last_reset",
+            "token_expiry",
             "password_last_reset",
             "password",
             "configuration_permissions",
@@ -57,6 +61,12 @@ class UserSerializer(serializers.ModelSerializer):
     def get_token_last_reset(self, instance):
         uci = getattr(instance, "usercontactinfo", None)
         return getattr(uci, "token_last_reset", None)
+
+    @extend_schema_field(serializers.DateTimeField(allow_null=True))
+    def get_token_expiry(self, instance):
+        """Effective expiry, including the instance-wide default, not just an explicit override."""
+        token = Token.objects.filter(user=instance).first()
+        return token_expires_at(token) if token else None
 
     @extend_schema_field(serializers.DateTimeField(allow_null=True))
     def get_password_last_reset(self, instance):
@@ -236,3 +246,17 @@ class AddUserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.Serializer):
     user = UserSerializer(many=False)
     user_contact_info = UserContactInfoSerializer(many=False, required=False)
+
+
+class RevokeApiTokenSerializer(serializers.Serializer):
+
+    """Input for revoking a single API token by its key value."""
+
+    key = serializers.CharField(write_only=True, trim_whitespace=True, max_length=256)
+
+    def validate_key(self, value):
+        value = value.strip()
+        if not value:
+            msg = "key may not be blank."
+            raise serializers.ValidationError(msg)
+        return value

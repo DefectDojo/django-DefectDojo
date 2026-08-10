@@ -1,0 +1,29 @@
+{
+  "error": {
+    "count": 1,
+    "data": [
+      {
+        "label": "is_latest_tag",
+        "regex": {},
+        "level": "error",
+        "message": "base image uses 'latest' tag",
+        "description": "using the 'latest' tag may cause unpredictable builds. It is recommended that a specific tag is used in the FROM line or *-released which is the latest supported release.",
+        "reference_url": [
+          "https://docs.docker.com/engine/reference/builder/",
+          "#from"
+        ],
+        "lineContent": "FROM ubuntu:latest",
+        "line": 1
+      }
+    ]
+  },
+  "warn": {
+    "count": 0,
+    "data": []
+  },
+  "info": {
+    "count": 0,
+    "data": []
+  },
+  "summary": []
+}
