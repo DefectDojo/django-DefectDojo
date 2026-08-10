@@ -1,5 +1,5 @@
 # requirements.txt for DefectDojo using Python 3.x
-bleach==6.3.0
+bleach==6.4.0
 bleach[css]
 celery[sqs]==5.6.3
 # pycurl and boto3 are included via celery[sqs] for Celery Broker AWS (SQS) support
@@ -20,7 +20,7 @@ django-slack==5.19.0
 django-watson==1.6.3
 django-permissions-policy==4.32.0
 django-prometheus==2.5.0
-Django==5.2.15
+Django==5.2.16
 django-single-session==0.2.0
 djangorestframework==3.17.1
 html2text==2025.4.15

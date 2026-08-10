@@ -62,7 +62,7 @@ class _ChunkRows:
     def __init__(self) -> None:
         self.meta: list[DojoMeta] = []
         self.meta_endpoint_ids: list[int | None] = []
-        self._seen_meta: set[tuple[int, str]] = set()
+        self._seen_meta: set[tuple[int, int | None, str]] = set()
 
         self.finding_refs: list[LocationFindingReference] = []
         self.finding_ref_endpoint_ids: list[int | None] = []
@@ -90,13 +90,22 @@ class _ChunkRows:
         self.product_by_id.setdefault(product.id, product)
         self.location_by_id.setdefault(location.id, location)
 
-    def add_meta(self, meta: DojoMeta, location: Location, endpoint_id: int | None) -> None:
-        """Queue a DojoMeta copy, keyed on its unique_together (location, name)."""
-        key = (location.id, meta.name)
+    def add_meta(
+        self,
+        meta: DojoMeta,
+        location: Location,
+        product: Product | None,
+        endpoint_id: int | None,
+    ) -> None:
+        """Queue a DojoMeta copy, keyed on its unique_together (location, location_product, name)."""
+        product_id = getattr(product, "id", None)
+        key = (location.id, product_id, meta.name)
         if key in self._seen_meta:
             return
         self._seen_meta.add(key)
-        self.meta.append(DojoMeta(name=meta.name, value=meta.value, location=location))
+        self.meta.append(
+            DojoMeta(name=meta.name, value=meta.value, location=location, location_product=product),
+        )
         self.meta_endpoint_ids.append(endpoint_id)
 
     def add_finding_ref(self, reference: LocationFindingReference, endpoint_id: int | None) -> None:
@@ -565,7 +574,7 @@ class Command(BaseCommand):
                 self._bench_end("tags", t)
 
                 for meta in endpoint.endpoint_meta.all():
-                    rows.add_meta(meta, location, endpoint_id)
+                    rows.add_meta(meta, location, endpoint.product, endpoint_id)
 
                 # Track the endpoint's own product as a contributor for the
                 # per-chunk tag inheritance pass (the no-findings branch
@@ -579,7 +588,7 @@ class Command(BaseCommand):
                 logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
                 self._record_endpoint_failure(endpoint_id, exc)
 
-        # DojoMeta: `ignore_conflicts` on unique_together (location, name). A
+        # DojoMeta: `ignore_conflicts` on unique_together (location, location_product, name). A
         # conflict is by definition the row we would otherwise have fetched, so
         # skipping it keeps re-runs no-ops and leaves any post-migration edit to
         # a metadata value alone.

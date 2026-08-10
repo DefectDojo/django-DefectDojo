@@ -9,6 +9,7 @@ from django.shortcuts import render
 from django.utils.translation import gettext as _
 from watson import search as watson
 
+from dojo.authorization.authorization import user_has_global_permission
 from dojo.endpoint.queries import get_authorized_endpoints
 from dojo.endpoint.ui.views import prefetch_for_endpoints
 from dojo.engagement.queries import get_authorized_engagements
@@ -139,7 +140,11 @@ def simple_search(request):
             else:
                 # TODO: Delete this after the move to Locations
                 authorized_endpoints = get_authorized_endpoints("view")
-            authorized_finding_templates = Finding_Template.objects.all()
+            authorized_finding_templates = (
+                Finding_Template.objects.all()
+                if user_has_global_permission(request.user, "edit")
+                else Finding_Template.objects.none()
+            )
             authorized_app_analysis = get_authorized_app_analysis("view")
             authorized_languages = get_authorized_languages("view")
             # The legacy Vulnerability_Id watson index was removed (entity-only cutover), so classic

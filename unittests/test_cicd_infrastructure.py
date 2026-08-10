@@ -5,6 +5,7 @@ Migration behaviour is tested separately in
 ``test_cicd_infrastructure_migration.py``.
 """
 
+from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.urls import reverse
@@ -12,7 +13,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient, APITestCase
 
 from dojo.cicd_infrastructure.ui.forms import CICDInfrastructureForm
-from dojo.models import CICDInfrastructure
+from dojo.models import CICDInfrastructure, User
 from unittests.dojo_test_case import versioned_fixtures
 
 # ---------------------------------------------------------------------------
@@ -127,8 +128,10 @@ class CICDInfrastructureFormTests(APITestCase):
 class CICDInfrastructureAPITests(APITestCase):
 
     """
-    The /cicd_infrastructure endpoint uses UserHasCICDInfrastructurePermission
-    — reads are open to any authenticated user; writes require elevated privileges.
+    Reads stay open to any authenticated user so engagement pickers can offer
+    the CI/CD choices, but identity is all an unprivileged caller gets: the
+    description and url are withheld without view_cicdinfrastructure. Writes
+    require the matching configuration permission.
     """
 
     fixtures = ["dojo_testdata.json"]
@@ -138,6 +141,17 @@ class CICDInfrastructureAPITests(APITestCase):
         c = APIClient()
         c.credentials(HTTP_AUTHORIZATION="Token " + token.key)
         return c
+
+    @staticmethod
+    def _grant_view(username):
+        user = User.objects.get(username=username)
+        user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="dojo",
+                codename="view_cicdinfrastructure",
+            ),
+        )
+        return user
 
     def test_superuser_can_list(self):
         c = self._client_for("admin")
@@ -175,15 +189,70 @@ class CICDInfrastructureAPITests(APITestCase):
         )
         self.assertEqual(r.status_code, 201, r.content[:1000])
 
-    def test_non_superuser_can_list(self):
-        # 'user1' (pk=2 in dojo_testdata.json) is a non-superuser with a token.
-        # Reads are open to authenticated users.
+    def _seed(self):
+        return CICDInfrastructure.objects.create(
+            name="SeededInfra",
+            description="internal note",
+            url="https://build.example.com:8443",
+            infrastructure_type="build_server",
+        )
+
+    def test_list_without_view_permission_returns_identity_only(self):
+        # 'user1' (pk=2 in dojo_testdata.json) is a non-superuser with a token,
+        # no group membership and no configuration permissions. The row is still
+        # listed so engagement pickers keep working; the detail fields are not.
         try:
             c = self._client_for("user1")
         except Token.DoesNotExist:
             self.skipTest("user1 token not present in dojo_testdata fixture.")
+        self._seed()
         r = c.get(reverse("cicd_infrastructure-list"))
         self.assertEqual(r.status_code, 200, r.content[:1000])
+        row = next(x for x in r.json()["results"] if x["name"] == "SeededInfra")
+        self.assertEqual(set(row), {"id", "name", "infrastructure_type"})
+        self.assertNotIn(b"build.example.com", r.content)
+        self.assertNotIn(b"internal note", r.content)
+
+    def test_retrieve_without_view_permission_returns_identity_only(self):
+        try:
+            c = self._client_for("user1")
+        except Token.DoesNotExist:
+            self.skipTest("user1 token not present in dojo_testdata fixture.")
+        infra = self._seed()
+        r = c.get(reverse("cicd_infrastructure-detail", args=[infra.pk]))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(set(r.json()), {"id", "name", "infrastructure_type"})
+
+    def test_editor_without_view_permission_still_sees_detail_fields(self):
+        # An editor round-trips these fields through the edit form; hiding them
+        # would blank the record on save.
+        try:
+            c = self._client_for("user1")
+        except Token.DoesNotExist:
+            self.skipTest("user1 token not present in dojo_testdata fixture.")
+        infra = self._seed()
+        User.objects.get(username="user1").user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="dojo",
+                codename="change_cicdinfrastructure",
+            ),
+        )
+        r = c.get(reverse("cicd_infrastructure-detail", args=[infra.pk]))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        self.assertEqual(r.json()["url"], "https://build.example.com:8443")
+
+    def test_list_with_view_permission_returns_detail_fields(self):
+        try:
+            c = self._client_for("user1")
+        except Token.DoesNotExist:
+            self.skipTest("user1 token not present in dojo_testdata fixture.")
+        self._seed()
+        self._grant_view("user1")
+        r = c.get(reverse("cicd_infrastructure-list"))
+        self.assertEqual(r.status_code, 200, r.content[:1000])
+        row = next(x for x in r.json()["results"] if x["name"] == "SeededInfra")
+        self.assertEqual(row["url"], "https://build.example.com:8443")
+        self.assertEqual(row["description"], "internal note")
 
     def test_non_superuser_cannot_create(self):
         try:
@@ -217,3 +286,46 @@ class CICDInfrastructureAPITests(APITestCase):
         existing.refresh_from_db()
         self.assertEqual(existing.infrastructure_type, "build_server")
         self.assertEqual(existing.description, "still build")
+
+
+# ---------------------------------------------------------------------------
+# UI
+# ---------------------------------------------------------------------------
+
+@versioned_fixtures
+class CICDInfrastructureUIListTests(APITestCase):
+
+    """
+    The UI list view gates on the same configuration permission as its add /
+    edit / delete siblings and as the navigation entry that links to it.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        self.infra = CICDInfrastructure.objects.create(
+            name="UIListed",
+            url="https://build.example.com:8443",
+            infrastructure_type="build_server",
+        )
+        self.user = User.objects.get(username="user1")
+
+    def test_user_without_view_permission_cannot_list(self):
+        self.client.force_login(self.user)
+        r = self.client.get(reverse("cicd_infrastructure"))
+        # PermissionDenied reaches handler403, which renders 403.html with a 400.
+        self.assertEqual(r.status_code, 400, r.content[:300])
+        self.assertNotIn(b"build.example.com", r.content)
+
+    def test_user_with_view_permission_can_list(self):
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="dojo",
+                codename="view_cicdinfrastructure",
+            ),
+        )
+        self.client.force_login(self.user)
+        r = self.client.get(reverse("cicd_infrastructure"))
+        self.assertEqual(r.status_code, 200)
+        self.assertIn(b"UIListed", r.content)

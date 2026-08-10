@@ -130,9 +130,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.update_test_meta()
         # Update the test tags
         self.update_test_tags()
-        # Save the test and engagement for changes to take affect
+        # Save the test for changes to take affect. The engagement is only written back
+        # when update_timestamps() actually moved its target end (CI/CD engagements whose
+        # target end the scan date pushes out); for every other reimport there is nothing to
+        # write, and saving it anyway costs a full UPDATE plus the SELECT its pre_save
+        # receiver issues. A deleted engagement is still caught, by the test save above:
+        # deleting an engagement cascades to its tests.
         self.save_without_resurrecting(self.test)
-        self.save_without_resurrecting(self.test.engagement)
+        if self.engagement_target_end_updated:
+            self.save_without_resurrecting(self.test.engagement)
         logger.debug("REIMPORT_SCAN: Updating test tags")
         # Create a test import history object to record the flags sent to the importer
         # This operation will return None if the user does not have the import history

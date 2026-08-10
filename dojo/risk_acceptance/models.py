@@ -76,10 +76,14 @@ class Risk_Acceptance(models.Model):
         return str(self.name) + (" (expired " if self.is_expired else " (expires ") + (timezone.localtime(self.expiration_date).strftime("%b %d, %Y") if self.expiration_date else "Never") + ")"
 
     def get_breadcrumbs(self):
-        bc = self.engagement_set.first().get_breadcrumbs()
+        engagement = self.engagement
+        if engagement is None:
+            # a risk acceptance is not always reachable through an engagement, and both the
+            # parent crumbs and the URL below need one
+            return [{"title": str(self), "url": None}]
+        bc = engagement.get_breadcrumbs()
         bc += [{"title": str(self),
-                "url": reverse("view_risk_acceptance", args=(
-                    self.engagement_set.first().product.id, self.id))}]
+                "url": reverse("view_risk_acceptance", args=(engagement.id, self.id))}]
         return bc
 
     @property

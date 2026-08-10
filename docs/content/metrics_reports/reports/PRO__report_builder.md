@@ -11,7 +11,7 @@ aliases:
 ---
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: The reusable Report Builder (Themes, Blocks, Templates, and saved Generated Reports) is a DefectDojo Pro feature, currently in beta.</span>
 
-The DefectDojo Pro Report Builder lets you compose polished reports out of reusable parts, so you can build the pieces once and reuse them everywhere instead of rebuilding a report from scratch each time. You reach it from the **📄 Reporting** area in the sidebar (the live UI labels it "Reporting BETA").
+The DefectDojo Pro Report Builder lets you compose polished reports out of reusable parts, so you can build the pieces once and reuse them everywhere instead of rebuilding a report from scratch each time. You reach it from the **📄 Reporting** area in the sidebar.
 
 ## How it compares to open source
 
@@ -161,6 +161,54 @@ Generated reports are collected in the Generated Reports list, which shows each 
 ![Generated reports list](images/pro_generated_reports_list.png)
 
 You can re-run a Template at any time to produce a fresh report. Keep in mind that each Generated Report is frozen in time — it reflects your data as of when it was generated and will not change as DefectDojo data changes, so re-run the Template whenever you need an up-to-date snapshot.
+
+## Moving off the classic report engine
+
+The classic report engine — the **Report Builder**, **Report Templates** and **Generated
+Reports** pages listed under *Classic Report Engine* in the sidebar — is removed in
+**3.3.0 (September 8, 2026)**. Until then those pages carry a banner reminding you of the
+date, and both they and this Report Builder offer a one-click migration.
+
+### Migrating your saved templates
+
+Use **Migrate to the new engine** on any classic page, or **Import from Classic Engine**
+on *All Report Templates* here. Both run the same conversion, so it does not matter which
+you start from, and both are safe to run more than once: a classic template whose name
+already exists here is reported as *already migrated* rather than duplicated.
+
+Each classic widget becomes a Block:
+
+| Classic widget | Becomes |
+|----------------|---------|
+| Cover Page | Cover Page stock Block |
+| Table Of Contents | Table of Contents stock Block |
+| Page Break | Page Break stock Block |
+| Custom Content / WYSIWYG | Text Block |
+| Findings | Tabular Block over Findings, keeping the widget's filters |
+| Vulnerable Endpoints | Tabular Block over URLs |
+| Severities | Active Findings by Severity chart Block |
+
+Two do not carry across, and the migration says so per template rather than converting
+them into something approximate:
+
+- **Executive Summary** — the classic engine derived this from whichever Findings widgets
+  sat in the same report. There is no equivalent aggregate Block; rebuild it as a Text
+  Block if you need it.
+- **Report Options** — not a Block. Its *Report name* becomes the new Template's name.
+  Finding notes, finding images and per-widget page breaks are Theme-level settings in
+  the new engine.
+
+### What happens to reports you have already run
+
+Nothing. Generated Reports produced by the classic engine are finished files, so there is
+nothing to convert. They stay listed and downloadable until the engine is removed — save
+anything you want to keep beyond 3.3.0.
+
+### If the Report Builder is switched off
+
+Migration still works with the **Reporting** feature flag disabled. The converted
+Templates simply do not appear until the flag is switched back on, so you can move your
+templates across on your own schedule.
 
 ## Next steps
 

@@ -38,8 +38,22 @@ class LocationManager(BaseLocationManager):
 
     def __init__(self, product: Product) -> None:
         super().__init__(product)
-        # Maps findings to a list of cleaned locations
-        self._locations_by_finding: dict[Finding, list[AbstractLocation]] = {}
+        # Findings paired with their cleaned locations, in first-recorded order.
+        #
+        # A list of pairs rather than a dict keyed by the finding, because a Finding that has not
+        # been written yet has no primary key and Django's Model.__hash__ raises on it
+        # ("Model instances without primary key value are unhashable"). Keying by the object would
+        # therefore forbid recording locations for a finding before it is saved -- and with it any
+        # importer that buffers inserts to write them in bulk at a batch boundary. Nothing here
+        # needs the object to be hashable: both consumers in _persist_locations() simply iterate,
+        # and they run inside persist(), by which point the findings are written. The tag
+        # accumulator threaded through finding_post_processing() already uses this same shape.
+        self._locations_by_finding: list[tuple[Finding, list[AbstractLocation]]] = []
+        # Slot index into the list above so repeated records for one finding coalesce, keyed by
+        # object identity rather than by the finding itself for the reason above. id() is safe
+        # here specifically because the list holds a strong reference to every finding recorded,
+        # so no entry can be collected and have its id reused while this accumulator is live.
+        self._location_slot_by_finding: dict[int, int] = {}
         # All locations needing product refs (finding-associated + product-only), cleaned at record time
         self._product_locations: list[AbstractLocation] = []
         # Status update entries, which we'll use at persist-time to determine Location statuses by comparing
@@ -70,7 +84,12 @@ class LocationManager(BaseLocationManager):
     ) -> None:
         """Record locations that have already been through clean_unsaved_locations()."""
         if cleaned:
-            self._locations_by_finding.setdefault(finding, []).extend(cleaned)
+            slot = self._location_slot_by_finding.get(id(finding))
+            if slot is None:
+                self._location_slot_by_finding[id(finding)] = len(self._locations_by_finding)
+                self._locations_by_finding.append((finding, list(cleaned)))
+            else:
+                self._locations_by_finding[slot][1].extend(cleaned)
             self._product_locations.extend(cleaned)
 
     def update_location_status(
@@ -153,8 +172,7 @@ class LocationManager(BaseLocationManager):
         # full set — _product_locations is the superset of all locations (finding-associated + product-only).
         all_locations = list({(type(loc), loc.identity_hash): loc for loc in self._product_locations}.values())
         if not all_locations:
-            self._locations_by_finding.clear()
-            self._product_locations.clear()
+            self._clear_location_accumulators()
             return
 
         # Bulk persist all locations to the database
@@ -193,7 +211,7 @@ class LocationManager(BaseLocationManager):
 
         # Determine necessary finding refs to create
         if self._locations_by_finding:
-            all_finding_ids = [finding.id for finding in self._locations_by_finding]
+            all_finding_ids = [finding.id for finding, _ in self._locations_by_finding]
             # Strictly speaking this returns more rows than we need (it's the cross of the location/finding lists rather
             # than scoped per-finding), but more straightforward than constructing a per-finding lookup. We won't create
             # any unwanted associations below anyway.
@@ -204,7 +222,7 @@ class LocationManager(BaseLocationManager):
                 ).values_list("finding_id", "location_id"),
             )
 
-            for finding, cleaned_locations in self._locations_by_finding.items():
+            for finding, cleaned_locations in self._locations_by_finding:
                 # Locations were already cleaned at record time — identity_hash is set, so we can
                 # look up the persisted location directly.
                 for location in cleaned_locations:
@@ -245,7 +263,17 @@ class LocationManager(BaseLocationManager):
             )
 
         # Clear accumulators
+        self._clear_location_accumulators()
+
+    def _clear_location_accumulators(self) -> None:
+        """
+        Reset the location accumulators together.
+
+        The slot index is derived from the pair list, so clearing one without the other would
+        leave stale slots pointing past the end of the list.
+        """
         self._locations_by_finding.clear()
+        self._location_slot_by_finding.clear()
         self._product_locations.clear()
 
     def _persist_status_updates(self) -> None:

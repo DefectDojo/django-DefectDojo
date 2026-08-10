@@ -2,6 +2,12 @@
 title: "Edgescan"
 toc_hide: true
 ---
+> **⚠️ Deprecated — removed in DefectDojo 3.5.0.**
+>
+> The **Edgescan** API pull path described below, and the **Tool Configuration** it depends on, are deprecated as of **3.2.0** and will be **removed in 3.5.0 (November 2026)**. See the [3.2 upgrade notes](/releases/os_upgrading/3.2/).
+>
+> **Migrate to:** the [Edgescan connector](/connectors/upstream/toolreference/#edgescan) (DefectDojo Pro), or import Edgescan results as a [JSON file](../../file/edgescan) — file import is not affected by this deprecation.
+
 Import Edgescan vulnerabilities by API or [JSON file](../../file/edgescan).
 
 All parsers which using API have common basic configuration step but with different values. Please, [read these steps](../) at first.

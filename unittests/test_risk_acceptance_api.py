@@ -1,9 +1,12 @@
 import datetime
+from unittest.mock import patch
 
 from rest_framework.authtoken.models import Token
+from rest_framework.request import Request
 from rest_framework.reverse import reverse
-from rest_framework.test import APIClient, APITestCase
+from rest_framework.test import APIClient, APIRequestFactory, APITestCase
 
+from dojo.authorization.api_permissions import UserHasRiskAcceptancePermission
 from dojo.authorization.models import (
     Product_Type_Member,
     Role,
@@ -19,6 +22,7 @@ from dojo.models import (
     Test_Type,
     User,
 )
+from dojo.risk_acceptance import helper as ra_helper
 
 
 class TestRiskAcceptanceApi(APITestCase):
@@ -419,6 +423,13 @@ class TestRiskAcceptanceApi(APITestCase):
         self.assertIsNone(ra.expiration_date_handled)
         self.assertIsNone(ra.expiration_date_warned)
 
+        # The date the caller asked for is the date that gets stored. reinstate()
+        # used to overwrite it with risk_acceptance_form_default_days.
+        self.assertEqual(
+            future_date.replace(microsecond=0),
+            ra.expiration_date.replace(microsecond=0),
+        )
+
     def test_update_never_expired_risk_acceptance_leaves_findings_unchanged(self):
         """
         Regression test companion: editing the expiration_date of a risk acceptance that
@@ -459,6 +470,119 @@ class TestRiskAcceptanceApi(APITestCase):
         ra.refresh_from_db()
         self.assertIsNone(ra.expiration_date_handled)
         self.assertIsNone(ra.expiration_date_warned)
+
+    def make_risk_acceptance(self, *, expired=False):
+        """Build a risk acceptance covering finding_a1, optionally in the post-expiry state."""
+        stamp = datetime.datetime.now(datetime.UTC) - datetime.timedelta(days=5)
+        risk_acceptance = Risk_Acceptance.objects.create(
+            name="RA under test",
+            recommendation="A",
+            decision="A",
+            accepted_by="Test User",
+            owner=self.user,
+            expiration_date=stamp if expired else datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30),
+            expiration_date_handled=stamp if expired else None,
+        )
+        risk_acceptance.accepted_findings.add(self.finding_a1)
+        self.engagement_a.risk_acceptance.add(risk_acceptance)
+
+        self.finding_a1.active = expired
+        self.finding_a1.risk_accepted = not expired
+        self.finding_a1.save()
+        return risk_acceptance
+
+    def test_expire_action_expires_the_risk_acceptance(self):
+        risk_acceptance = self.make_risk_acceptance()
+
+        response = self.client.post(f"{self.url}{risk_acceptance.id}/expire/", {"reason": "no longer justified"}, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        risk_acceptance.refresh_from_db()
+        self.assertIsNotNone(risk_acceptance.expiration_date_handled)
+        # the finding it covered is open again
+        self.finding_a1.refresh_from_db()
+        self.assertTrue(self.finding_a1.active)
+        self.assertFalse(self.finding_a1.risk_accepted)
+        # and the reason is on the record
+        self.assertIn("no longer justified", " ".join(note.entry for note in risk_acceptance.notes.all()))
+
+    def test_expire_action_rejects_an_already_expired_risk_acceptance(self):
+        risk_acceptance = self.make_risk_acceptance(expired=True)
+
+        response = self.client.post(f"{self.url}{risk_acceptance.id}/expire/", {}, format="json")
+        self.assertEqual(400, response.status_code, response.content)
+
+    def test_reinstate_action_uses_the_requested_expiration_date(self):
+        risk_acceptance = self.make_risk_acceptance(expired=True)
+        requested_date = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=45)
+
+        response = self.client.post(
+            f"{self.url}{risk_acceptance.id}/reinstate/",
+            {"expiration_date": requested_date.strftime("%Y-%m-%dT%H:%M:%SZ"), "reason": "extended pending a fix"},
+            format="json",
+        )
+        self.assertEqual(200, response.status_code, response.content)
+
+        risk_acceptance.refresh_from_db()
+        self.assertEqual(risk_acceptance.expiration_date.date(), requested_date.date())
+        self.assertIsNone(risk_acceptance.expiration_date_handled)
+        self.finding_a1.refresh_from_db()
+        self.assertTrue(self.finding_a1.risk_accepted)
+        self.assertFalse(self.finding_a1.active)
+        self.assertIn("extended pending a fix", " ".join(note.entry for note in risk_acceptance.notes.all()))
+
+    def test_reinstate_action_without_a_date_uses_the_configured_window(self):
+        risk_acceptance = self.make_risk_acceptance(expired=True)
+
+        response = self.client.post(f"{self.url}{risk_acceptance.id}/reinstate/", {}, format="json")
+        self.assertEqual(200, response.status_code, response.content)
+
+        risk_acceptance.refresh_from_db()
+        expected = ra_helper.default_expiration_date()
+        self.assertEqual(risk_acceptance.expiration_date.date(), expected.date())
+
+    def test_reinstate_action_rejects_a_live_risk_acceptance(self):
+        risk_acceptance = self.make_risk_acceptance()
+
+        response = self.client.post(f"{self.url}{risk_acceptance.id}/reinstate/", {}, format="json")
+        self.assertEqual(400, response.status_code, response.content)
+
+    def test_expire_action_is_denied_without_access_to_the_product(self):
+        risk_acceptance = self.make_risk_acceptance()
+        outsider = User.objects.create(username="ra_outsider")
+        outsider_client = APIClient()
+        outsider_client.force_authenticate(user=outsider)
+
+        response = outsider_client.post(f"{self.url}{risk_acceptance.id}/expire/", {}, format="json")
+        self.assertIn(response.status_code, (403, 404), response.content)
+
+        risk_acceptance.refresh_from_db()
+        self.assertIsNone(risk_acceptance.expiration_date_handled, "an outsider must not be able to expire it")
+
+    def test_post_object_permission_names_a_permission(self):
+        """
+        A POST to this viewset must be checked against a real permission, not None.
+
+        ``check_object_permission`` takes the POST permission as its fourth argument. Omitting it
+        passes None down to ``user_has_permission``, which this codebase happens to answer False --
+        but a stricter authorization layer treats an unmapped permission as unimplemented and
+        raises, turning a 403 into a 500. DefectDojo Pro does exactly that, and its own tests
+        caught it on the expire and reinstate actions: the first POST actions this viewset gained.
+
+        Asserted on the call rather than through a request because neither outcome is visible
+        end-to-end here: a superuser is allowed before the permission is read, and a user without
+        access is filtered out of the queryset and gets a 404 first.
+        """
+        risk_acceptance = self.make_risk_acceptance()
+        request = Request(APIRequestFactory().post(f"{self.url}{risk_acceptance.id}/expire/", {}, format="json"))
+        request.user = User.objects.create(username="ra_post_permission_user")
+
+        with patch("dojo.authorization.api_permissions.check_object_permission") as check:
+            UserHasRiskAcceptancePermission().has_object_permission(request, None, risk_acceptance)
+
+        # (request, obj, get, put, delete, post)
+        self.assertEqual(len(check.call_args.args), 6, "the POST permission is missing")
+        self.assertEqual(check.call_args.args[5], "edit")
 
     def test_risk_acceptance_created_filter(self):
         # 1. Create a baseline Risk Acceptance using the existing test setup
