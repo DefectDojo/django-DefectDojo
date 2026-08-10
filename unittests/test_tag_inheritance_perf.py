@@ -624,9 +624,15 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # from close_old_findings; the one with nothing to write is the pair that goes.
     # V2 is unaffected -- EndpointManager.persist() opens no transaction -- which is
     # why only the V3 constants move.
+    # The V3 constants carry +2 since the dedupe loader
+    # (get_finding_models_for_deduplication) prefetches the
+    # locations__location__url chain (3 queries) instead of the V2 endpoints
+    # relation (1 query). That cost is per post-processing batch — one loader
+    # call per import — and is what removes the per-candidate-pair location
+    # queries in are_locations_duplicates, so it doesn't scale with findings.
     EXPECTED_ZAP_IMPORT_V2 = 301
-    EXPECTED_ZAP_IMPORT_V3 = 325
+    EXPECTED_ZAP_IMPORT_V3 = 327
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 82
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 92
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 94
     EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 166
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 193
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 195

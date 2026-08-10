@@ -964,7 +964,7 @@ class Finding(BaseModel):
                     LocationManager,
                 )
                 from dojo.url.models import URL  # noqa: PLC0415 -- lazy import, avoids circular dependency
-                unsaved_locations = LocationManager.clean_unsaved_locations(finding.unsaved_locations)
+                unsaved_locations = LocationManager.cleaned_unsaved_locations(finding)
                 # Only URL locations feed the "endpoints" hash ingredient — the
                 # saved path below filters to URL references, and hashing other
                 # location types here would make a finding's hash change between

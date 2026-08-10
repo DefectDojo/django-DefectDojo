@@ -219,11 +219,30 @@ class URL(AbstractLocation):
             value += f"#{self.fragment}"
         return value
 
+    # Memoized canonical string, stored as (field-values key, value). unparse() does a
+    # full hyperlink round-trip plus idna encoding on every call, and a single import
+    # stringifies the same unsaved URL many times (set-dedupe hashing, __eq__,
+    # identity_hash, location_value), which made str() the top CPU cost of a
+    # locations-on import. Keying the cache by the field values keeps it correct if a
+    # field is mutated after the first str() — no invalidation hook required.
+    _str_cache: tuple[tuple, str] | None = None
+
+    def _str_key(self) -> tuple:
+        return (self.protocol, self.user_info, self.host, self.port, self.path, self.query, self.fragment)
+
     def __str__(self) -> str:
         """Return the string representation of a URL."""
+        key = self._str_key()
+        cached = self._str_cache
+        if cached is not None and cached[0] == key:
+            return cached[1]
+        value = None
         with suppress(Exception):
-            return URL.URL_PARSING_CLASS().unparse(self)
-        return self.manual_str()
+            value = URL.URL_PARSING_CLASS().unparse(self)
+        if value is None:
+            value = self.manual_str()
+        self._str_cache = (key, value)
+        return value
 
     @classmethod
     def get_location_type(cls) -> str:

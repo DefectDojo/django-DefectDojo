@@ -414,7 +414,12 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             if not isinstance(loc, cls):
                 error_message = f"Invalid location type; expected {cls} but got {type(loc)}"
                 raise TypeError(error_message)
-            loc.clean()
+            # A set identity_hash means the instance already went through clean()
+            # (locations are hashed only there) — re-cleaning would repeat idna/URL
+            # normalization work per row for nothing. Callers that mutate a location
+            # after cleaning it must re-clean before passing it in.
+            if not loc.identity_hash:
+                loc.clean()
             hashes.append(loc.identity_hash)
 
         # Look up existing objects, grouping by hash
