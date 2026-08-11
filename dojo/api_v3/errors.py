@@ -19,6 +19,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.utils import IntegrityError
 from django.http import Http404, JsonResponse
+from django.utils.translation import gettext as _
 from ninja.errors import AuthenticationError, ValidationError
 
 if TYPE_CHECKING:
@@ -110,39 +111,55 @@ class ProblemDetail(Exception):  # noqa: N818 -- RFC 9457 "problem detail"; not 
 
 
 # --- Convenience constructors for the common problem kinds -------------------------------------
+#
+# The ``title`` strings are translated, matching what the platform i18n work did to v2's generic
+# API messages (``dojo/api_v2/exception_handler.py``). RFC 9457 §3.1.1 permits exactly this: title
+# "SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of
+# localization". The stable machine identifier is the ``type`` URI, which is never translated, so a
+# client keying off ``type`` is unaffected.
+#
+# ``gettext`` and not ``gettext_lazy``: these values are serialized by ``V3JSONEncoder`` and are
+# resolved per request, so a plain ``str`` in the active locale is what the body needs.
 
 def validation_problem(fields: dict, *, detail: str | None = None) -> ProblemDetail:
     n = len(fields)
     return ProblemDetail(
         status=400,
         error_type="validation",
-        title="Validation failed",
+        title=_("Validation failed"),
         detail=detail if detail is not None else f"{n} field{'s' if n != 1 else ''} failed validation",
         fields=fields,
     )
 
 
 def expand_problem(detail: str) -> ProblemDetail:
-    return ProblemDetail(status=400, error_type="expand", title="Invalid expand", detail=detail)
+    return ProblemDetail(status=400, error_type="expand", title=_("Invalid expand"), detail=detail)
 
 
 def fields_problem(detail: str) -> ProblemDetail:
     # `?fields=` (§4.7) is a distinct capability from `?expand=`; a distinct type URI keeps the
     # error contract closed (I9: new error kinds get new type URIs, not new shapes).
-    return ProblemDetail(status=400, error_type="fields", title="Invalid fields", detail=detail)
+    return ProblemDetail(status=400, error_type="fields", title=_("Invalid fields"), detail=detail)
 
 
 def filter_problem(detail: str) -> ProblemDetail:
-    return ProblemDetail(status=400, error_type="filter", title="Invalid filter", detail=detail)
+    return ProblemDetail(status=400, error_type="filter", title=_("Invalid filter"), detail=detail)
 
 
 def pagination_problem(detail: str) -> ProblemDetail:
-    return ProblemDetail(status=400, error_type="pagination", title="Invalid pagination", detail=detail)
+    return ProblemDetail(status=400, error_type="pagination", title=_("Invalid pagination"), detail=detail)
 
 
-def not_found_problem(detail: str = "Not found") -> ProblemDetail:
-    # 404 for unknown *or unauthorized* objects -- never leak existence (§4.10).
-    return ProblemDetail(status=404, error_type="not-found", title="Not found", detail=detail)
+def not_found_problem(detail: str | None = None) -> ProblemDetail:
+    # 404 for unknown *or unauthorized* objects -- never leak existence (§4.10). The default detail
+    # is resolved here rather than in the signature so it is translated per request, not once at
+    # import time.
+    return ProblemDetail(
+        status=404,
+        error_type="not-found",
+        title=_("Not found"),
+        detail=detail if detail is not None else _("Not found"),
+    )
 
 
 # --- Handler registration ---------------------------------------------------------------------
