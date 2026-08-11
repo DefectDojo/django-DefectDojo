@@ -1,0 +1,24 @@
+{
+  "package": "fakepkg",
+  "results": {
+    "threat-setup-import-aliasing": [],
+    "threat-network-reverse-shell": [],
+    "threat-setup-suspicious-imports": [],
+    "threat-runtime-obfuscation": [],
+    "threat-runtime-keylogging": []
+  },
+  "errors": {},
+  "issues": 0,
+  "risk_score": {
+    "score": 0.0,
+    "label": "no_risks_detected",
+    "findings_count": 0,
+    "score_breakdown": {
+      "severity_component": 0.0,
+      "chain_component": 0.0,
+      "specificity_component": 0.0,
+      "sophistication_component": 0.0
+    }
+  },
+  "risks": []
+}

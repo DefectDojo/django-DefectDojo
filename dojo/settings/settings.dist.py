@@ -267,6 +267,8 @@ env = environ.FileAwareEnv(
     DD_API_TOKENS_ENABLED=(bool, True),
     # Enable endpoint which allow user to get API token when user+pass is provided
     DD_API_TOKEN_AUTH_ENDPOINT_ENABLED=(bool, True),
+    # Default token lifetime in days. 0 = no expiry (tokens last forever).
+    DD_API_TOKEN_DEFAULT_EXPIRY_DAYS=(int, 0),
     # You can set extra Jira headers by suppling a dictionary in header: value format (pass as env var like "headr_name=value,another_header=anohter_value")
     DD_ADDITIONAL_HEADERS=(dict, {}),
     # Set fields used by the hashcode generator for deduplication, via en env variable that contains a JSON string
@@ -729,6 +731,7 @@ DJANGO_ADMIN_ENABLED = env("DD_DJANGO_ADMIN_ENABLED")
 API_TOKENS_ENABLED = env("DD_API_TOKENS_ENABLED")
 
 API_TOKEN_AUTH_ENDPOINT_ENABLED = env("DD_API_TOKEN_AUTH_ENDPOINT_ENABLED")
+API_TOKEN_DEFAULT_EXPIRY_DAYS = env("DD_API_TOKEN_DEFAULT_EXPIRY_DAYS")
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -748,7 +751,7 @@ REST_FRAMEWORK = {
 }
 
 if API_TOKENS_ENABLED:
-    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("rest_framework.authentication.TokenAuthentication",)
+    REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"] += ("dojo.user.authentication.ExpiringTokenAuthentication",)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "DefectDojo API v2",
@@ -775,44 +778,42 @@ if not env("DD_DEFAULT_SWAGGER_UI"):
 # TEMPLATES
 # ------------------------------------------------------------------------------
 
-# Two parallel template trees coexist on this branch: the new Tailwind v4 UI at
-# dojo/templates/ (the default Django app dir) and the classic Bootstrap 3 / SB
-# Admin 2 UI at dojo/templates_classic/. Per-user resolution is handled by
-# UIPreferenceLoader; see dojo/template_loaders.py.
-_DOJO_TAILWIND_TEMPLATES_DIR = root("dojo/templates")
-_DOJO_CLASSIC_TEMPLATES_DIR = root("dojo/templates_classic")
-# Sub-package template dirs (dojo/notifications, dojo/github, ...) share a
-# single list that the FilesystemLoader below reads by reference, so any
+# The UI lives in a single tree at dojo/templates/, searched ahead of the
+# sub-package template dirs (dojo/auditlog, dojo/notifications, dojo/github).
+# The list is shared by reference with the FilesystemLoader entry below, so any
 # late-binding settings can append a template dir at startup and have it
 # picked up at render time.
-_DOJO_EXTRA_TEMPLATE_DIRS = [
+_DOJO_TEMPLATE_DIRS = [
+    root("dojo/templates"),
     root("dojo/auditlog/templates"),
     root("dojo/notifications/templates"),
     root("dojo/github/templates"),
 ]
 
+# Mirrors what APP_DIRS=True would build, except that the filesystem dirs above
+# are searched first and the whole chain is wrapped in the cached loader outside
+# of debug mode.
+_DOJO_TEMPLATE_LOADERS = [
+    ("django.template.loaders.filesystem.Loader", _DOJO_TEMPLATE_DIRS),
+    "django.template.loaders.app_directories.Loader",
+]
+if not env("DD_DEBUG"):
+    _DOJO_TEMPLATE_LOADERS = [
+        ("django.template.loaders.cached.Loader", _DOJO_TEMPLATE_LOADERS),
+    ]
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # DIRS shares the _DOJO_EXTRA_TEMPLATE_DIRS list reference with the
+        # DIRS shares the _DOJO_TEMPLATE_DIRS list reference with the
         # FilesystemLoader entry below; later append()s land in both places.
-        "DIRS": _DOJO_EXTRA_TEMPLATE_DIRS,
-        # APP_DIRS is False because dojo's templates are loaded explicitly via
-        # UIPreferenceLoader; the FilesystemLoader entry below picks up
-        # template dirs from the dojo/auditlog, dojo/notifications and
-        # dojo/github consolidations; other apps' templates are loaded via the
-        # app_directories.Loader entry.
+        "DIRS": _DOJO_TEMPLATE_DIRS,
+        # APP_DIRS must stay False whenever "loaders" is set explicitly; the
+        # app_directories.Loader entry below covers the same ground.
         "APP_DIRS": False,
         "OPTIONS": {
             "debug": env("DD_DEBUG"),
-            "loaders": [
-                ("dojo.template_loaders.UIPreferenceLoader",
-                 _DOJO_TAILWIND_TEMPLATES_DIR,
-                 _DOJO_CLASSIC_TEMPLATES_DIR),
-                ("django.template.loaders.filesystem.Loader",
-                 _DOJO_EXTRA_TEMPLATE_DIRS),
-                "django.template.loaders.app_directories.Loader",
-            ],
+            "loaders": _DOJO_TEMPLATE_LOADERS,
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
@@ -1358,6 +1359,66 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "Sqlmap Scan": ["title", "endpoints"],
     "Nettacker Scan": ["title", "endpoints"],
     "httpx Scan": ["title", "endpoints"],
+    "kube-score Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "ModelScan Scan": ["title", "file_path", "vuln_id_from_tool"],
+    "TFLint Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Kingfisher Scan": ["title", "file_path", "line"],
+    "2ms Scan": ["title", "file_path", "line", "description"],
+    "Quark-Engine Scan": ["title", "component_name", "vuln_id_from_tool"],
+    "ScubaGoggles Scan": ["vuln_id_from_tool", "component_name"],
+    "ScubaGear Scan": ["vuln_id_from_tool", "severity"],
+    "kubesec Scan": ["vuln_id_from_tool", "component_name", "file_path"],
+    "Cloudsplaining Scan": ["vuln_id_from_tool", "component_name"],
+    "bomber Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "sbomqs Scan": ["vuln_id_from_tool", "component_name"],
+    "Pluto Scan": ["vuln_id_from_tool", "component_name", "file_path"],
+    "GuardDog Scan": ["vuln_id_from_tool", "component_name", "file_path", "line"],
+    "kubent Scan": ["vuln_id_from_tool", "component_name"],
+    "OpenSSF Scorecard": ["vuln_id_from_tool", "component_name"],
+    "uv audit Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "Ansible Lint Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "ShellCheck Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Fickling Scan": ["vuln_id_from_tool", "severity"],
+    "Regula Scan": ["vuln_id_from_tool", "component_name", "file_path"],
+    "Threat Dragon Scan": ["title", "component_name", "severity"],
+    "Safety Scan": ["vuln_id_from_tool", "component_name", "component_version"],
+    "Slither Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Binwalk Scan": ["title", "file_path"],
+    "pip-licenses Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "Syft SBOM": ["component_name", "component_version", "vuln_id_from_tool"],
+    "ScubaGear Report Scan": ["vuln_id_from_tool", "severity"],
+    "capa Scan": ["vuln_id_from_tool", "component_name"],
+    "ScubaGoggles Action Plan": ["vuln_id_from_tool", "severity"],
+    "dockerfile_lint Scan": ["title", "line"],
+    "Dodgy Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Licensecheck Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "Noir Scan": ["vuln_id_from_tool", "file_path"],
+    "Grant Scan": ["component_name", "component_version", "vuln_id_from_tool"],
+    "CFRipper Scan": ["vuln_id_from_tool", "component_name"],
+    "Tartufo Scan": ["unique_id_from_tool"],
+    "Prospector Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Gixy Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Python Taint Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Ruff Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "CodeQL Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Psalm Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "PHPStan Scan": ["vuln_id_from_tool", "file_path", "line"],
+    "Staticcheck Scan": ["vuln_id_from_tool", "file_path", "line"],
+    # Runtime tools report an event stream. Keying on the rule and the workload rather than the
+    # event's own detail is what folds a rule firing repeatedly into one Finding.
+    "Falco Scan": ["vuln_id_from_tool", "component_name"],
+    "Tracee Scan": ["vuln_id_from_tool", "component_name"],
+    "Kyverno Scan": ["vuln_id_from_tool", "component_name"],
+    "KubeEye Scan": ["vuln_id_from_tool", "component_name"],
+    "Vuls Scan": ["vulnerability_ids", "component_name"],
+    "terraform-compliance Scan": ["vuln_id_from_tool", "component_name"],
+    "CloudFormation Guard Scan": ["vuln_id_from_tool", "file_path", "component_name"],
+    # component_name holds the injectable parameter, so two parameters on one URL stay apart
+    # while the many payloads Dalfox tries against one parameter fold together.
+    "Dalfox Scan": ["vuln_id_from_tool", "component_name", "endpoints"],
+    "PyRIT Scan": ["title", "vuln_id_from_tool"],
+    "debsecan Scan": ["vulnerability_ids", "component_name"],
+    "PMapper Scan": ["vuln_id_from_tool", "component_name"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1747,6 +1808,64 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "Snyk Code Scan": DEDUPE_ALGO_HASH_CODE,
     "Cycognito Scan": DEDUPE_ALGO_HASH_CODE,
     "n0s1 Scanner": DEDUPE_ALGO_HASH_CODE,
+    "kube-score Scan": DEDUPE_ALGO_HASH_CODE,
+    "ModelScan Scan": DEDUPE_ALGO_HASH_CODE,
+    "TFLint Scan": DEDUPE_ALGO_HASH_CODE,
+    "Kingfisher Scan": DEDUPE_ALGO_HASH_CODE,
+    "2ms Scan": DEDUPE_ALGO_HASH_CODE,
+    "Quark-Engine Scan": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGoggles Scan": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGear Scan": DEDUPE_ALGO_HASH_CODE,
+    "kubesec Scan": DEDUPE_ALGO_HASH_CODE,
+    "Cloudsplaining Scan": DEDUPE_ALGO_HASH_CODE,
+    "bomber Scan": DEDUPE_ALGO_HASH_CODE,
+    "sbomqs Scan": DEDUPE_ALGO_HASH_CODE,
+    "Pluto Scan": DEDUPE_ALGO_HASH_CODE,
+    "GuardDog Scan": DEDUPE_ALGO_HASH_CODE,
+    "kubent Scan": DEDUPE_ALGO_HASH_CODE,
+    "OpenSSF Scorecard": DEDUPE_ALGO_HASH_CODE,
+    "uv audit Scan": DEDUPE_ALGO_HASH_CODE,
+    "Ansible Lint Scan": DEDUPE_ALGO_HASH_CODE,
+    "ShellCheck Scan": DEDUPE_ALGO_HASH_CODE,
+    "Fickling Scan": DEDUPE_ALGO_HASH_CODE,
+    "Regula Scan": DEDUPE_ALGO_HASH_CODE,
+    "Threat Dragon Scan": DEDUPE_ALGO_HASH_CODE,
+    "Safety Scan": DEDUPE_ALGO_HASH_CODE,
+    "Slither Scan": DEDUPE_ALGO_HASH_CODE,
+    "Binwalk Scan": DEDUPE_ALGO_HASH_CODE,
+    "pip-licenses Scan": DEDUPE_ALGO_HASH_CODE,
+    "Syft SBOM": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGear Report Scan": DEDUPE_ALGO_HASH_CODE,
+    "capa Scan": DEDUPE_ALGO_HASH_CODE,
+    "ScubaGoggles Action Plan": DEDUPE_ALGO_HASH_CODE,
+    "dockerfile_lint Scan": DEDUPE_ALGO_HASH_CODE,
+    "Dodgy Scan": DEDUPE_ALGO_HASH_CODE,
+    "Licensecheck Scan": DEDUPE_ALGO_HASH_CODE,
+    "Noir Scan": DEDUPE_ALGO_HASH_CODE,
+    "Grant Scan": DEDUPE_ALGO_HASH_CODE,
+    "CFRipper Scan": DEDUPE_ALGO_HASH_CODE,
+    "Tartufo Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
+    "Prospector Scan": DEDUPE_ALGO_HASH_CODE,
+    "Gixy Scan": DEDUPE_ALGO_HASH_CODE,
+    "Python Taint Scan": DEDUPE_ALGO_HASH_CODE,
+    "Ruff Scan": DEDUPE_ALGO_HASH_CODE,
+    # CodeQL and Psalm both emit SARIF fingerprints, which are more stable across edits than a
+    # file and line, so prefer them and fall back to the hash code when a report has none.
+    "CodeQL Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "Psalm Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL_OR_HASH_CODE,
+    "PHPStan Scan": DEDUPE_ALGO_HASH_CODE,
+    "Staticcheck Scan": DEDUPE_ALGO_HASH_CODE,
+    "Falco Scan": DEDUPE_ALGO_HASH_CODE,
+    "Tracee Scan": DEDUPE_ALGO_HASH_CODE,
+    "Kyverno Scan": DEDUPE_ALGO_HASH_CODE,
+    "KubeEye Scan": DEDUPE_ALGO_HASH_CODE,
+    "Vuls Scan": DEDUPE_ALGO_HASH_CODE,
+    "terraform-compliance Scan": DEDUPE_ALGO_HASH_CODE,
+    "CloudFormation Guard Scan": DEDUPE_ALGO_HASH_CODE,
+    "Dalfox Scan": DEDUPE_ALGO_HASH_CODE,
+    "PyRIT Scan": DEDUPE_ALGO_HASH_CODE,
+    "debsecan Scan": DEDUPE_ALGO_HASH_CODE,
+    "PMapper Scan": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var

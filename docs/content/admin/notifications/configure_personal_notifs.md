@@ -4,6 +4,8 @@ description: "Configure notifications for a personal account"
 aliases:
   - /en/customize_dojo/notifications/configure_personal_notifs
 ---
+
+<span style="background-color:rgba(242, 86, 29, 0.3)">Note: In DefectDojo Pro, notification settings live in the Pro UI as three separate pages rather than one page with a Scope drop-down: **Settings \> Notifications \> Personal Notifications**, **System Notifications** and **Notification Template**. System Notifications and the Notification Template are visible to superusers only. Notification Webhooks moved alongside them, under **Settings \> Notifications \> Notification Webhooks**.</span>
 ## Configure Personal notifications
 
 Personal Notifications are sent in addition to System\-Wide Notifications, and will apply to any Product, Product Type or other data type that you have access to. Personal Notification preferences only apply to a single user, and can only be set on the account which is configuring them.

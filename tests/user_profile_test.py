@@ -29,7 +29,7 @@ class UserProfileTest(BaseTestCase):
         last_name = driver.find_element(By.ID, "id_last_name")
         last_name.clear()
         last_name.send_keys("User")
-        driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+        self.click_submit(driver)
 
         self.assertTrue(
             self.is_success_message_present(text="Profile updated successfully")

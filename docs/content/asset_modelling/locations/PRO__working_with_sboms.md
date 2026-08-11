@@ -100,6 +100,10 @@ When Locations is enabled, the navigation exposes:
 - **New Dependency** — Form to create a single library by entering its pURL components manually.
 - **Findings detail** — A Finding that touches a library shows its Dependency Locations alongside any URL Locations, so you can see *"this CVE affects `log4j-core@2.14.1` on Asset 6 and Asset 9"* in one place.
 
+## Exporting
+
+The inventory flows back out as well: an Asset's dependencies can be exported as a CycloneDX 1.6 or SPDX 2.3 SBOM, and its finding statuses as a CycloneDX VEX document. See [Exporting SBOMs and VEX](../pro__exporting_sboms_and_vex/).
+
 ## What's Not in the MVP
 
 - **SWID Tag SBOM format** — Not parsed. CycloneDX or SPDX is required.

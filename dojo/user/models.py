@@ -124,8 +124,8 @@ class UserContactInfo(models.Model):
         ),
     )
     force_password_reset = models.BooleanField(default=False, help_text=_("Forces this user to reset their password on next login."))
-    ui_use_tailwind = models.BooleanField(default=False, verbose_name=_("Use new UI (beta)"), help_text=_("Opt in to the new Tailwind-based UI. Leave off for the classic UI."))
     token_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent API token reset for this user."))
+    token_expiry = models.DateTimeField(null=True, blank=True, help_text=_("Explicit expiry for this user's API token. Overrides the instance-wide default from DD_API_TOKEN_DEFAULT_EXPIRY_DAYS. Leave empty to use that default. Once the effective expiry has passed the token is rejected at authentication."))
     password_last_reset = models.DateTimeField(null=True, blank=True, help_text=_("Timestamp of the most recent password reset for this user."))
     # Extensible per-user UI state: dismissed banners, "seen"/"don't show again"
     # flags, and similar small ephemeral preferences. Store new flags of this kind

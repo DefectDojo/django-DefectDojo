@@ -1,0 +1,50 @@
+[
+  {
+    "Analysis": {
+      "file_path": "firmware/example.bin",
+      "file_map": [
+        {
+          "offset": 4716889,
+          "id": "fda3280f-8240-4672-8b9e-b6707c6349a1",
+          "size": 49239,
+          "name": "copyright",
+          "confidence": 250,
+          "description": "Copyright text: \"copyrightsbom_toolCOMPONENT[--flags][command]bad indirreflect: WednesdaySeptemberlocaltimeParseBoolP\"",
+          "always_display": false,
+          "extraction_declined": false
+        },
+        {
+          "offset": 11327232,
+          "id": "ca69726c-5868-4088-9403-ee439146c683",
+          "size": 427,
+          "name": "gzip",
+          "confidence": 250,
+          "description": "gzip compressed data, operating system: unknown, timestamp: 1970-01-01 00:00:00, total size: 427 bytes",
+          "always_display": false,
+          "extraction_declined": false
+        },
+        {
+          "offset": 11997952,
+          "id": "80791963-bb6b-4689-b98b-cca6044e7132",
+          "size": 16,
+          "name": "sha256",
+          "confidence": 0,
+          "description": "SHA256 hash constants, little endian",
+          "always_display": false,
+          "extraction_declined": false
+        },
+        {
+          "offset": 11998208,
+          "id": "2b2b9928-bc31-498e-bfec-5e5bd78add98",
+          "size": 4727329,
+          "name": "aes_sbox",
+          "confidence": 0,
+          "description": "AES S-Box",
+          "always_display": false,
+          "extraction_declined": false
+        }
+      ],
+      "extractions": {}
+    }
+  }
+]

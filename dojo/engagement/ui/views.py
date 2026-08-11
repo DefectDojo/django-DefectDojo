@@ -20,7 +20,15 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict, StreamingHttpResponse
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+    QueryDict,
+    StreamingHttpResponse,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
@@ -37,6 +45,7 @@ from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import (
     close_engagement,
+    reassign_engagement_product_endpoints,
     reopen_engagement,
 )
 from dojo.engagement.services import (
@@ -92,6 +101,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
 from dojo.product_announcements import (
@@ -283,13 +293,16 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get("status")
-            if form.cleaned_data.get("product") != engagement.product:
+            old_product = engagement.product
+            new_product = form.cleaned_data.get("product")
+            product_changed = new_product != old_product
+            if product_changed:
                 user_has_permission_or_403(
                     request.user,
-                    form.cleaned_data.get("product"),
+                    new_product,
                     "edit",
                 )
-            engagement.product = form.cleaned_data.get("product")
+            engagement.product = new_product
             engagement = form.save(commit=False)
             if (new_status in {"Cancelled", "Completed"}):
                 engagement.active = False
@@ -297,6 +310,10 @@ def edit_engagement(request, eid):
                 engagement.active = True
             engagement.save()
             form.save_m2m()
+            # When the engagement moves to a different product, re-home its findings'
+            # endpoints/locations onto the new product so they no longer reference the old one.
+            if product_changed:
+                reassign_engagement_product_endpoints(engagement, old_product, new_product)
 
             messages.add_message(
                 request,
@@ -490,7 +507,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -571,7 +588,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -1425,7 +1442,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "engagement": eng,
             "product_tab": product_tab,
             "accepted_findings": fpage,
-            "notes": risk_acceptance.notes.all(),
+            "notes": visible_notes(risk_acceptance.notes.all(), request.user),
             "eng": eng,
             "edit_mode": edit_mode,
             "risk_acceptance_form": risk_acceptance_form,
@@ -1483,7 +1500,14 @@ def download_risk_acceptance(request, eid, raid):
     # Ensure the risk acceptance is under the supplied engagement
     if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
         raise PermissionDenied
-    file_handle = (Path(settings.MEDIA_ROOT) / risk_acceptance.path.name).open(mode="rb")
+    # No proof uploaded, or the file is gone from storage. Opening it blindly raises
+    # ValueError/FileNotFoundError, which surfaces as a 500 rather than a missing file.
+    if not risk_acceptance.path:
+        raise Http404
+    proof_path = Path(settings.MEDIA_ROOT) / risk_acceptance.path.name
+    if not proof_path.is_file():
+        raise Http404
+    file_handle = proof_path.open(mode="rb")
     response = StreamingHttpResponse(FileIterWrapper(file_handle))
     if hasattr(response, "_resource_closers"):
         response._resource_closers.append(file_handle.close)

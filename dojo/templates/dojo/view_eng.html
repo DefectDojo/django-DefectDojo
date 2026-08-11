@@ -52,7 +52,7 @@
                                     </li>
                                 {% endif %}
                                 <li role="presentation">
-                                    <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2">
+                                    <a href="{% url 'engagement_report' eng.id %}?title=&active=1&verified=1&false_p=2&duplicate=2" data-testid="report-link">
                                     <i class="fa-solid fa-file-lines"></i> Report
                                     </a>
                                 </li>
@@ -661,7 +661,7 @@
                                                     {% endif %}
                                                     {% if note.private %}
                                                         <div class="row-sm-2">
-                                                            <span class="text-muted">(will not appear in report)</span>
+                                                            <span class="text-muted">(private to you)</span>
                                                         </div>
                                                     {% endif %}
                                                 </div>

@@ -130,9 +130,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.update_test_meta()
         # Update the test tags
         self.update_test_tags()
-        # Save the test and engagement for changes to take affect
+        # Save the test for changes to take affect. The engagement is only written back
+        # when update_timestamps() actually moved its target end (CI/CD engagements whose
+        # target end the scan date pushes out); for every other reimport there is nothing to
+        # write, and saving it anyway costs a full UPDATE plus the SELECT its pre_save
+        # receiver issues. A deleted engagement is still caught, by the test save above:
+        # deleting an engagement cascades to its tests.
         self.save_without_resurrecting(self.test)
-        self.save_without_resurrecting(self.test.engagement)
+        if self.engagement_target_end_updated:
+            self.save_without_resurrecting(self.test.engagement)
         logger.debug("REIMPORT_SCAN: Updating test tags")
         # Create a test import history object to record the flags sent to the importer
         # This operation will return None if the user does not have the import history
@@ -1082,7 +1088,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # stays a no-query read.
         from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
 
-        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
+        # A finding that has not been written yet has no persisted vulnerability ids, and the read
+        # helper raises on it ("instance needs to have a primary key value before this relationship
+        # can be used"). Treating it as empty is exact rather than a workaround: there are no rows
+        # to compare against, so every parsed id is new. This lets an importer that buffers inserts
+        # reconcile a finding's vulnerability ids before flushing the buffer.
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding)) if finding.pk else set()
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed
@@ -1148,7 +1159,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding = self.reconcile_vulnerability_ids(finding)
         # Save the finding only if the cve field was changed by save_vulnerability_ids
         # This is temporary as the cve field will be phased out
-        if finding.cve != old_cve:
+        #
+        # Only for a finding that already has a row. This save exists to push a changed cve onto
+        # an existing record; for a finding an importer is still buffering there is nothing to
+        # update, and saving here would insert it early -- defeating the buffering and splitting
+        # one batched INSERT into per-finding ones. The value rides along when the buffer flushes.
+        if finding.cve != old_cve and finding.pk:
             finding.save()
         return finding
 

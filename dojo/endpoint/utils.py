@@ -341,6 +341,15 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
 
         for endpoint in endpoints:
             existing_tags = [tag.name for tag in endpoint.tags.all()]
+            # A shared Location has one tag set, so a write here changes what the others see.
+            write_tags = create_tags and not (
+                object_class == Location and endpoint.products.count() > 1
+            )
+            if create_tags and not write_tags:
+                logger.info(
+                    "Skipping tags for location %s: it is shared by more than one product",
+                    endpoint.id,
+                )
             for item in meta:
                 # Determine if there is a value here
                 if item[1] is not None and len(item[1]) > 0:
@@ -354,10 +363,11 @@ def endpoint_meta_import(file, product, create_endpoints, create_tags, create_me
                         elif object_class == Location:
                             dojo_meta = DojoMeta.objects.get_or_create(
                                 location=endpoint,
+                                location_product=product,
                                 name=item[0])[0]
                         dojo_meta.value = item[1]
                         dojo_meta.save()
-                    if create_tags:
+                    if write_tags:
                         for tag in existing_tags:
                             if item[0] not in tag:
                                 continue

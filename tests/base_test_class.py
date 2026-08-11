@@ -6,7 +6,7 @@ import warnings
 from pathlib import Path
 
 from selenium import webdriver
-from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException
+from selenium.common.exceptions import NoAlertPresentException, NoSuchElementException, TimeoutException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
@@ -231,6 +231,50 @@ class BaseTestCase(unittest.TestCase):
         self.wait_for_datatable_if_content("no_findings", "open_findings_wrapper")
         return driver
 
+    def open_product_tab(self, driver, tab):
+        """
+        Click a tab in the product tab bar, e.g. "findings" or "engagements".
+
+        Do not reach for these tabs with By.LINK_TEXT / By.PARTIAL_LINK_TEXT. The
+        global sidebar repeats every one of these labels ("Engagements",
+        "Findings", "Endpoints", "Components", "Metrics") and renders well before
+        the tab bar, so a link-text lookup resolves to the sidebar entry instead.
+        Those sidebar entries only expand a submenu -- they are bound to Alpine
+        with @click.prevent and never navigate -- so the click silently does the
+        wrong thing and the tab's dropdown stays closed. The failure then surfaces
+        much later, as a NoSuchElementException on the menu item you actually
+        wanted, which is in the DOM but not rendered.
+
+        The data-testid attributes live on the tab bar in dojo/templates/base.html.
+        """
+        driver.find_element(By.CSS_SELECTOR, f'[data-testid="product-tab-{tab}"]').click()
+        return driver
+
+    def click_centered(self, driver, element):
+        """
+        Click an element after centring it in the viewport.
+
+        Anything near the bottom of a long form competes with the footer, and
+        the footer wins the click often enough to matter. Selenium sometimes
+        reports that honestly (ElementClickInterceptedException naming
+        #footer-wrapper) and sometimes the click simply lands on the footer and
+        is lost, which is the dangerous case: nothing raises, and the test fails
+        later somewhere that looks unrelated. Centring the element first puts it
+        clear of the footer.
+
+        This bites both kinds of click. A lost click on a submit button leaves
+        the form unsubmitted. A lost click on a checkbox is worse: the submit
+        still happens, so the form saves with the checkbox in its old state and
+        the setting silently does not change.
+        """
+        driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+        element.click()
+        return driver
+
+    def click_submit(self, driver, selector="input.btn.btn-primary"):
+        """Click a form's submit button, clear of the footer. See click_centered()."""
+        return self.click_centered(driver, driver.find_element(By.CSS_SELECTOR, selector))
+
     def wait_for_datatable_if_content(self, no_content_id, wrapper_id):
         if not self.is_element_by_id_present(no_content_id):
             # wait for product_wrapper div as datatables javascript modifies the DOM on page load.
@@ -264,7 +308,23 @@ class BaseTestCase(unittest.TestCase):
         return self.is_element_by_css_selector_present(".alert-info", text=text)
 
     def is_success_message_present(self, text=None):
-        return self.is_element_by_css_selector_present(".alert-success", text=text)
+        """
+        Wait for the success banner, rather than sampling for it once.
+
+        Every caller asserts the banner IS there, and it only renders after the
+        redirect that follows a form POST. Sampling once leaves the assertion
+        riding on the 1s implicit wait, which is enough locally and not always
+        enough on a loaded CI runner -- a slow redirect then reads as a missing
+        message. Nothing asserts the banner's absence, so waiting costs nothing
+        on the happy path and only delays a genuine failure.
+        """
+        try:
+            WebDriverWait(self.driver, 10).until(
+                lambda _: self.is_element_by_css_selector_present(".alert-success", text=text),
+            )
+        except TimeoutException:
+            return False
+        return True
 
     def is_error_message_present(self, text=None):
         return self.is_element_by_css_selector_present(".alert-danger", text=text)
@@ -295,9 +355,9 @@ class BaseTestCase(unittest.TestCase):
         is_enabled = driver.find_element(By.ID, setting_id).is_selected()
         if (enable and not is_enabled) or (not enable and is_enabled):
             # driver.find_element(By.XPATH, '//*[@id=' + setting_id + ']').click()
-            driver.find_element(By.ID, setting_id).click()
+            self.click_centered(driver, driver.find_element(By.ID, setting_id))
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check if it's enabled after reload
 
         is_enabled = driver.find_element(By.ID, setting_id).is_selected()
@@ -338,9 +398,9 @@ class BaseTestCase(unittest.TestCase):
             driver.find_element(By.ID, "id_block_execution").is_selected()
             != block_execution
         ):
-            driver.find_element(By.XPATH, '//*[@id="id_block_execution"]').click()
+            self.click_centered(driver, driver.find_element(By.ID, "id_block_execution"))
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check if it's enabled after reload
             self.assertEqual(
                 driver.find_element(By.ID, "id_block_execution").is_selected(),
@@ -365,7 +425,7 @@ class BaseTestCase(unittest.TestCase):
         if select.first_selected_option.get_attribute("value") != mode:
             select.select_by_value(mode)
             # save settings
-            driver.find_element(By.CSS_SELECTOR, "input.btn.btn-primary").click()
+            self.click_submit(driver)
             # check it persisted after reload
             driver.get(self.base_url + "profile")
             select = Select(driver.find_element(By.ID, "id_deduplication_execution_mode"))
