@@ -1047,7 +1047,7 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         unsaved_finding = self.process_cve(unsaved_finding)
         # Hash code is already calculated earlier as it's the primary matching criteria for reimport
         # Save it. Don't dedupe before endpoints/locations are added.
-        unsaved_finding.save_no_options()
+        self.persist_new_finding(unsaved_finding)
         finding = unsaved_finding
         # Force parsers to use unsaved_tags (stored in finding_post_processing function below)
         finding.tags = None
@@ -1066,6 +1066,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # Process any request/response pairs
         self.process_request_response_pairs(unsaved_finding)
         return unsaved_finding, finding_will_be_grouped
+
+    def persist_new_finding(self, finding: Finding) -> None:
+        """
+        Write a finding the report did not match to an existing one.
+
+        This is intentionally a separate method (like get_original_findings and
+        get_reimport_match_candidates_for_batch) so downstream editions can override it
+        without copying the full process_finding_that_was_not_matched() implementation.
+
+        The override this exists for buffers new findings and writes them in bulk at the batch
+        boundary, where locations, vulnerability ids, tags and post-processing are already
+        flushed. Such an edition overrides this to accumulate, and _flush_post_processing_batch
+        to write the buffer before calling super() -- so the rows exist by the time anything in
+        that block reads a primary key.
+
+        Overriding this is the only supported way to defer the write. Everything after the call
+        in the caller -- grouping, the new_items list, request/response pairs -- is safe on an
+        unwritten finding, and the caller's remaining work is deliberately kept that way.
+        """
+        finding.save_no_options()
 
     def reconcile_vulnerability_ids(
         self,

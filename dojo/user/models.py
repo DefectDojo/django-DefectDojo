@@ -132,6 +132,7 @@ class UserContactInfo(models.Model):
     # as keys here instead of adding a dedicated column per flag (avoids a migration
     # and a schema column for every minor toggle). Not for queryable/behavioral data.
     user_state_details = models.JSONField(default=dict, blank=True, editable=False, help_text=_("Extensible per-user UI state (dismissed banners, 'don't show again' flags, ...)."))
+    language = models.CharField(max_length=12, blank=True, default="", verbose_name=_("Language"), help_text=_("Preferred language for the DefectDojo UI. Leave blank to use the instance default."))
 
 
 class Contact(models.Model):

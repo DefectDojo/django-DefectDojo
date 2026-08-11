@@ -146,69 +146,6 @@ jobs:
           path: migrated-db.dump
           key: ${{ steps.db-key.outputs.key }}
 
-      - name: Wait for Postgres to accept connections
-        run: |
-          for _ in $(seq 1 60); do
-            if docker compose exec -T postgres pg_isready -q -U defectdojo -d test_defectdojo; then
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "Postgres did not become ready in 120s" >&2
-          exit 1
-
-      # Applying 264 migrations takes ~100 seconds and produces the same schema
-      # every time, so restore that result instead of recomputing it. The key is
-      # the migration state: models included, not just migrations, which is what
-      # makes it safe for the entrypoint to skip its makemigrations guard on a
-      # hit (see docker/entrypoint-unit-tests.sh).
-      #
-      # ci-warm-caches.yml is what puts an entry in the base branch's cache scope
-      # for pull requests to find.
-      - name: Restore migrated database snapshot
-        id: db-snapshot
-        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: migrated-db.dump
-          key: ${{ steps.db-key.outputs.key }}
-
-      # pg_restore runs inside the postgres container because it has to match the
-      # server: this one is 18, and the runner's own client is not guaranteed to
-      # be. --single-transaction makes the restore atomic, so a failure leaves the
-      # database empty rather than half-populated, and the migrate below can then
-      # take over cleanly. That is why this step is allowed to fail.
-      - name: Restore snapshot into Postgres
-        id: db-restore
-        if: steps.db-snapshot.outputs.cache-hit == 'true'
-        continue-on-error: true
-        run: |
-          docker compose exec -T postgres pg_restore \
-            --username defectdojo --dbname test_defectdojo \
-            --no-owner --no-privileges --single-transaction < migrated-db.dump
-
-      - name: Migrate and snapshot the database
-        id: db-prepare
-        if: steps.db-snapshot.outputs.cache-hit != 'true' || steps.db-restore.outcome == 'failure'
-        run: |
-          docker compose run --rm -T --no-deps uwsgi
-          docker compose exec -T postgres pg_dump \
-            --username defectdojo --dbname test_defectdojo --format=custom > migrated-db.dump
-        env:
-          DJANGO_VERSION: ${{ matrix.os }}
-          DD_TEST_DB_MODE: prepare
-
-      # Saving here rather than in a post-job step means a snapshot survives a
-      # test failure: it is a function of the migration state, not of whether the
-      # suite passed. Four matrix jobs race for the same key and three of them
-      # lose, which the action reports as a warning, hence continue-on-error.
-      - name: Save migrated database snapshot
-        if: steps.db-prepare.outcome == 'success'
-        continue-on-error: true
-        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: migrated-db.dump
-          key: ${{ steps.db-key.outputs.key }}
-
       # no celery or initializer needed for unit tests
       # The database is migrated by this point on both paths -- restored from the
       # snapshot, or migrated by the step above -- so the entrypoint reuses it.

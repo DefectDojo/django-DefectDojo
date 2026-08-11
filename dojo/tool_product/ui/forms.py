@@ -1,5 +1,6 @@
 from django import forms
 from django.core.validators import URLValidator
+from django.utils.translation import gettext_lazy as _
 
 from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_product.models import Tool_Product_Settings
@@ -15,7 +16,7 @@ class DeleteToolProductSettingsForm(forms.ModelForm):
 
 
 class ToolProductSettingsForm(forms.ModelForm):
-    tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label="Tool Configuration")
+    tool_configuration = forms.ModelChoiceField(queryset=Tool_Configuration.objects.all(), label=_("Tool Configuration"))
 
     class Meta:
         model = Tool_Product_Settings

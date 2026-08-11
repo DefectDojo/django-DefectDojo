@@ -1,4 +1,5 @@
 import logging
+from datetime import timedelta
 
 from django.utils import timezone
 
@@ -46,11 +47,19 @@ class TestEngagementEmptyStatus(DojoTestCase):
             description="Test",
             prod_type=product_type,
         )
+        # CI/CD with a target_end in the past: update_timestamps() only moves target_end for a
+        # CI/CD engagement, and process_scan() only writes the engagement back when that move
+        # happened (`engagement_target_end_updated`, #15512). A non-CI/CD or already-current
+        # engagement would never exercise the write-back the import/reimport tests below are
+        # about. Dates, not datetimes: these back DateFields, and update_timestamps() orders
+        # target_end against scan_date.date().
+        self.past = timezone.now().date() - timedelta(days=30)
         self.engagement, _ = Engagement.objects.get_or_create(
             name="Empty Status Engagement",
             product=self.product,
-            target_start=timezone.now(),
-            target_end=timezone.now(),
+            engagement_type="CI/CD",
+            target_start=self.past,
+            target_end=self.past,
         )
         with (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan:
             self.test, _, len_new_findings, _, _, _, _ = self._importer().process_scan(scan)
@@ -125,25 +134,34 @@ class TestEngagementEmptyStatus(DojoTestCase):
 
     def test_reimport_into_an_engagement_with_null_status_succeeds(self):
         """The reported path: the closing engagement write-back must not fail the scan."""
-        self._store_empty(status=None)
+        # target_end is reset to the past in the same statement that blanks the status:
+        # setUp's initial import already pushed it out to the scan date, and the write-back
+        # below only runs if there is a move for it to make (see setUp).
+        self._store_empty(status=None, target_end=self.past)
 
         with (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan:
             test, _, _, _, _, _, _ = self._reimporter().process_scan(scan)
 
         self.assertEqual(self.test.pk, test.pk)
+        persisted = Engagement.objects.get(pk=self.engagement.pk)
+        # Guard the premise: if the write-back stopped happening, the status assertion below
+        # would pass for the wrong reason -- never having saved the engagement at all.
+        self.assertGreater(persisted.target_end, self.past)
         self.assertEqual(
             "Not Started",
-            Engagement.objects.get(pk=self.engagement.pk).status,
+            persisted.status,
             msg="the reimport write-back must persist the engagement with a valid status",
         )
 
     def test_import_into_an_engagement_with_null_status_succeeds(self):
         """The import path shares the same write-back."""
-        self._store_empty(status=None)
+        self._store_empty(status=None, target_end=self.past)
 
         with (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan:
             new_test, _, len_new_findings, _, _, _, _ = self._importer().process_scan(scan)
 
         self.assertEqual(1, len_new_findings)
         self.assertEqual(self.engagement.pk, new_test.engagement.pk)
-        self.assertEqual("Not Started", Engagement.objects.get(pk=self.engagement.pk).status)
+        persisted = Engagement.objects.get(pk=self.engagement.pk)
+        self.assertGreater(persisted.target_end, self.past)
+        self.assertEqual("Not Started", persisted.status)

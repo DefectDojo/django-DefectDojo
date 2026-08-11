@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from tagulous.forms import TagField
 
 from dojo.endpoint.models import Endpoint
@@ -14,23 +15,23 @@ labels = get_labels()
 class ImportEndpointMetaForm(forms.Form):
     file = forms.FileField(widget=forms.widgets.FileInput(
         attrs={"accept": ".csv"}),
-        label="Choose meta file",
+        label=_("Choose meta file"),
         required=True)  # Could not get required=True to actually accept the file as present
     create_endpoints = forms.BooleanField(
-        label="Create nonexisting Endpoint",
+        label=_("Create nonexisting Endpoint"),
         initial=True,
         required=False,
-        help_text="Create endpoints that do not already exist")
+        help_text=_("Create endpoints that do not already exist"))
     create_tags = forms.BooleanField(
-        label="Add Tags",
+        label=_("Add Tags"),
         initial=True,
         required=False,
-        help_text="Add meta from file as tags in the format key:value")
+        help_text=_("Add meta from file as tags in the format key:value"))
     create_dojo_meta = forms.BooleanField(
-        label="Add Meta",
+        label=_("Add Meta"),
         initial=False,
         required=False,
-        help_text="Add data from file as Metadata. Metadata is used for displaying custom fields")
+        help_text=_("Add data from file as Metadata. Metadata is used for displaying custom fields"))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -86,7 +87,7 @@ class EditEndpointForm(forms.ModelForm):
 
 
 class AddEndpointForm(forms.Form):
-    endpoint = forms.CharField(max_length=5000, required=True, label="Endpoint(s)",
+    endpoint = forms.CharField(max_length=5000, required=True, label=_("Endpoint(s)"),
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
                                widget=forms.widgets.Textarea(attrs={"rows": "15", "cols": "400"}))
