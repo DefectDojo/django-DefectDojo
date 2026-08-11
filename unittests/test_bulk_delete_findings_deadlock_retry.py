@@ -132,17 +132,23 @@ class TestBulkDeleteFindingsDeadlockRetry(DojoTestCase):
         second = self._create_finding("Deadlock F2")
 
         real_execute_delete_sql = utils_cascade_delete.execute_delete_sql
-        state = {"calls": 0}
+        # execute_delete_sql runs several times per chunk (once per cascaded relation,
+        # then for the findings themselves), so do not assume one call per chunk. Fail
+        # only the very first call, then delegate; the retry re-runs the whole chunk and
+        # must complete the delete.
+        state = {"calls": 0, "raised": False}
 
         def execute_delete_sql_deadlock_once(queryset, *args, **kwargs):
             state["calls"] += 1
-            if state["calls"] == 1:
+            if not state["raised"]:
+                state["raised"] = True
                 raise _transient_conflict()
             return real_execute_delete_sql(queryset, *args, **kwargs)
 
         self._delete_with_execute_delete_sql([first, second], execute_delete_sql_deadlock_once)
 
-        self.assertEqual(state["calls"], 2, "The chunk should have been attempted twice: one conflict, one success.")
+        self.assertTrue(state["raised"], "The test must actually inject a transient conflict.")
+        self.assertGreater(state["calls"], 1, "The chunk must be re-run after the injected conflict.")
         self.assertFalse(
             Finding.objects.filter(id__in=[first.id, second.id]).exists(),
             "Both findings should have been deleted after the retry.",
