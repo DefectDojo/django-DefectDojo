@@ -1,8 +1,10 @@
 import datetime
+import html
 import json
 import re
 
 from dojo.models import Endpoint, Finding
+from dojo.utils import parse_cvss_data
 
 
 class OPFParser:
@@ -75,12 +77,25 @@ class OPFParser:
         if cwe is not None:
             finding.cwe = cwe
 
+        # OPF cvssVector is not pinned to a CVSS version, so let DefectDojo detect
+        # v4/v3/v2 and route each to its own field with an authoritative score
+        # rather than storing the vector raw in cvssv3.
         vector = entry.get("cvssVector")
-        if isinstance(vector, str) and vector:
-            finding.cvssv3 = vector
-        score = entry.get("cvssScore")
-        if isinstance(score, (int, float)):
-            finding.cvssv3_score = float(score)
+        cvss = parse_cvss_data(vector) if isinstance(vector, str) and vector else {}
+        if cvss.get("cvssv3"):
+            finding.cvssv3 = cvss["cvssv3"]
+            if cvss.get("cvssv3_score") is not None:
+                finding.cvssv3_score = cvss["cvssv3_score"]
+        if cvss.get("cvssv4"):
+            finding.cvssv4 = cvss["cvssv4"]
+            if cvss.get("cvssv4_score") is not None:
+                finding.cvssv4_score = cvss["cvssv4_score"]
+        # Fall back to the tool-reported score only when the vector yielded none
+        # (no vector, an unparseable one, or a v2 vector with no v3/v4 field to hold it).
+        if finding.cvssv3_score is None and finding.cvssv4_score is None:
+            score = entry.get("cvssScore")
+            if isinstance(score, (int, float)):
+                finding.cvssv3_score = float(score)
 
         impact = self._html_to_text(entry.get("impact", ""))
         if impact:
@@ -178,10 +193,7 @@ class OPFParser:
         text = re.sub(r"</(p|div|li|h[1-6]|tr)>", "\n", text, flags=re.IGNORECASE)
         text = re.sub(r"<li[^>]*>", "- ", text, flags=re.IGNORECASE)
         text = re.sub(r"<[^>]+>", "", text)
-        replacements = {
-            "&nbsp;": " ", "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"',
-            "&#39;": "'", "&rsquo;": "'", "&lsquo;": "'", "&ldquo;": '"', "&rdquo;": '"',
-        }
-        for entity, char in replacements.items():
-            text = text.replace(entity, char)
+        # Decode the full named + numeric HTML entity set rather than a partial
+        # hand-rolled map, so entities like &apos; &#x27; &#8217; do not leak through.
+        text = html.unescape(text)
         return re.sub(r"\n{3,}", "\n\n", text).strip()
