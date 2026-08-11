@@ -293,6 +293,21 @@ data:
 Combine them with `workflow_state` to build a review queue: `?workflow_state=proposed&workflow_state=under_review`
 is everything nobody has decided yet.
 
+### The review thread
+
+The **Approvals** tab shows the decisions and the discussion as one conversation, oldest first:
+every state change with the reason recorded against it, interleaved with comments people have
+added.
+
+They are two different records — a reason belongs to the move that carried it, a comment belongs to
+nobody's decision — but a reviewer reads one thread. Kept apart, "why was this approved?" is
+answered by a reason in one place and the argument that produced it in another, with nothing saying
+which came first.
+
+Comments are ordinary Risk Acceptance notes, so anything written before this existed is already in
+the thread, and anything written here is visible to every other view of those notes. Line breaks are
+preserved.
+
 ### Requested exceptions in your metrics
 
 The problem this solves: a team asks for an exception and waits — on a change board, on a vendor, on
