@@ -28,7 +28,7 @@ class AddDojoUserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput,
         required=settings.REQUIRE_PASSWORD_ON_USER,
         validators=[validate_password],
-        help_text="")
+        help_text=_(""))
 
     class Meta:
         model = Dojo_User
@@ -68,6 +68,12 @@ class DeleteUserForm(forms.ModelForm):
 
 
 class UserContactInfoForm(forms.ModelForm):
+    language = forms.ChoiceField(
+        required=False,
+        choices=[("", _("Use instance default")), *settings.LANGUAGES],
+        label=_("Language"),
+        help_text=_("Preferred language for the DefectDojo UI."),
+    )
     reset_api_token = forms.BooleanField(
         required=False,
         label=_("Reset API token"),

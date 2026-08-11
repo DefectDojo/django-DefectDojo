@@ -1,13 +1,14 @@
 from django import forms
 from django.core.validators import URLValidator
+from django.utils.translation import gettext_lazy as _
 
 from dojo.tool_config.models import Tool_Configuration
 from dojo.tool_type.models import Tool_Type
 
 
 class ToolConfigForm(forms.ModelForm):
-    tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label="Tool Type")
-    ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label="SSH Key")
+    tool_type = forms.ModelChoiceField(queryset=Tool_Type.objects.all(), label=_("Tool Type"))
+    ssh = forms.CharField(widget=forms.Textarea(attrs={}), required=False, label=_("SSH Key"))
 
     class Meta:
         model = Tool_Configuration

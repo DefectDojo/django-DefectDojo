@@ -1,6 +1,7 @@
 from django import forms
 from django.utils import timezone
 from django.utils.dates import MONTHS
+from django.utils.translation import gettext_lazy as _
 
 from dojo.labels import get_labels
 from dojo.models import (
@@ -28,7 +29,7 @@ class ProductForm(forms.ModelForm):
                                        queryset=Product_Type.objects.none(),
                                        required=True)
 
-    sla_configuration = forms.ModelChoiceField(label="SLA Configuration",
+    sla_configuration = forms.ModelChoiceField(label=_("SLA Configuration"),
                                         queryset=SLA_Configuration.objects.all(),
                                         required=True,
                                         initial="Default")
@@ -76,7 +77,7 @@ class DeleteProductForm(forms.ModelForm):
 
 class Add_Product_AuthorizedUsersForm(forms.Form):
     users = forms.ModelMultipleChoiceField(
-        queryset=Dojo_User.objects.none(), required=True, label="Users",
+        queryset=Dojo_User.objects.none(), required=True, label=_("Users"),
     )
 
     def __init__(self, *args, product=None, **kwargs):
@@ -134,7 +135,7 @@ class ProductTagCountsForm(ProductCountsFormBase):
 class Product_API_Scan_ConfigurationForm(forms.ModelForm):
 
     tool_configuration = forms.ModelChoiceField(
-        label="Tool Configuration",
+        label=_("Tool Configuration"),
         queryset=Tool_Configuration.objects.none(),
         required=True,
     )

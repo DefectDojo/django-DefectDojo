@@ -9,6 +9,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.translation import gettext as _
 
 from dojo.authorization.authorization import user_has_permission, user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
@@ -93,7 +94,7 @@ def manage_files(request, oid, obj_type):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Files updated successfully.",
+                _("Files updated successfully."),
                 extra_tags="alert-success")
 
         else:
@@ -101,7 +102,7 @@ def manage_files(request, oid, obj_type):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Please check form data and try again.",
+                _("Please check form data and try again."),
                 extra_tags="alert-danger")
 
         if not error:

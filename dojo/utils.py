@@ -1470,7 +1470,7 @@ def redirect_to_return_url_or_else(request, or_else):
         return redirect(request, return_url.strip())
     if or_else:
         return redirect(request, or_else)
-    messages.add_message(request, messages.ERROR, "Unable to redirect anywhere.", extra_tags="alert-danger")
+    messages.add_message(request, messages.ERROR, _("Unable to redirect anywhere."), extra_tags="alert-danger")
     return redirect(request, request.get_full_path())
 
 
