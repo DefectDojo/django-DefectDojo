@@ -468,6 +468,29 @@ install does not use.
 Where a Finding is covered by more than one Risk Acceptance, these describe the earliest one it was
 accepted under.
 
+#### How severe a Finding a rule may accept
+
+The **Accept Risk** action takes a limit — *Accept Without Review Up To*. Anything more severe than
+that is **not** accepted by the rule.
+
+Those Findings are not dropped. The rule matched them for a reason, so they are put into a Risk
+Acceptance awaiting review, named for the rule that asked and carrying why. They stay **active and
+counted** the whole time, exactly like any other requested exception, and a person decides.
+
+| Setting | What the rule does with a Critical |
+| --- | --- |
+| No limit (default) | Accepts it |
+| Accept up to High | Leaves it active and raises a Risk Acceptance for review |
+
+Two details worth knowing. A severity the rule cannot recognise counts as *over* the limit — if it
+cannot be ranked it cannot be called safe. But a *limit* that cannot be recognised is ignored rather
+than blocking everything, because a rule that silently stops working is harder to notice than one
+that keeps going.
+
+With **Risk Acceptances 2.0** off there is no review state to put them in, so they are simply left
+alone. They are never accepted anyway; that is the one thing the limit exists to prevent. A rule
+preview creates nothing, as with every other action.
+
 ### API
 
 ```
