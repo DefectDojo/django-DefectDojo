@@ -12,6 +12,30 @@ For Open Source release notes, please see the [Releases page on GitHub](https://
 
 ## August 2026: v3.2
 
+### August 10, 2026: v3.2.100
+
+**NOTE: The classic report engine (Report Builder, Report Templates and Generated Reports) will be removed in 3.3.0 on September 8, 2026.**
+
+New features:
+* **(VEX)** Added CycloneDX SBOM / VEX / VDR export and import, as a round trip: a document exported from DefectDojo can be imported back into DefectDojo. The raw CycloneDX VEX analysis is now preserved on parsed Findings.
+* **(SCIM)** Added SCIM 2.0 provisioning. Your identity provider can now create, update and deactivate DefectDojo users and manage groups directly, rather than DefectDojo only learning about a user when that user first signs in. Deactivating a user over SCIM also deletes that user's API tokens. SCIM is configured under **Connect > Authorization**, alongside your login providers, and is tagged **Provisioning** to distinguish it from the providers that put a button on the login page.
+* **(Downstream Connectors)** Added Messaging Connectors (beta), which send alerts to Slack, Microsoft Teams, email, or an Amazon SNS topic. Alerts are routed by Rules Engine 2.0: a rule decides when to send, which Findings qualify, and which connection and destination the message goes to. Requires the **Messaging Connectors** and **Rules Engine 2.0** feature flags.
+* **(Reporting)** Reporting is now generally available, and no longer carries the BETA label.
+* **(Reports)** Both the classic Report Builder and the new Report Builder now offer a one-click migration of your existing report templates. The migration works with the Reporting feature flag off, so you can move on your own schedule. Reports you have already generated are finished files and stay downloadable until removal.
+* **(Page Layouts)** The five View pages now use customizable widget grids, so you can arrange each page's widgets.
+* **(Tables)** Table columns can now be resized, and the widths you set are saved to your table preferences. List tables also render a per-column loading skeleton while data is loading.
+* **(Connectors)** Registered the Tenable Web App Scanning and Rapid7 InsightVM connectors, along with six connectors that had shipped without a registration.
+* **(Sensei)** A provider can now hold several connections rather than one, and setup is scoped to the connection you are working in. Add Repositories now opens on the repository step. Semgrep scans run under a memory cap and recover across a hard kill (OOM).
+* **(Risk Acceptance)** Added Expire and Reinstate to the risk acceptance menu, and as API actions.
+* **(Rules Engine 2.0)** A Rules Engine 2.0 rule can now be given its own schedule. Enabling the feature flag now warns that a worker restart is required before it takes effect.
+* **(Locations)** Added `migrate_locations_to_endpoints`, the reverse of the endpoint-to-location conversion.
+
+Enhancements:
+* **(Connectors)** A connector request now requires a usable credential and a base URL, so a request cannot be submitted with details that will not connect.
+* **(Snyk)** Snyk reachability is now rendered as the raw values Snyk reports, rather than a derived yes/no.
+* **(Performance)** Notes are now serialized a page at a time without re-filtering the page, and deduplication no longer lowercases the hash input on every Finding purely to log it.
+* **(Dashboards)** The two Group By selects now focus their filter automatically when opened.
+
 ### August 4, 2026: v3.2.0
 
 **NOTE: We have deprecated API-based pull parsers, Tool Type/Tool Configuration, and dbbackup, with end-of-life scheduled for 3.5.0.**
