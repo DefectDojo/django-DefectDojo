@@ -258,6 +258,26 @@ An administrator can turn this off with **Block Self-Approval of Risk Acceptance
 Settings (on by default). Turning it off is for a team small enough that one person is the whole
 approval chain, where the alternative is that nobody uses the workflow at all.
 
+### A read-only auditor
+
+An ERM or audit reader needs to see what has been accepted and who agreed, and needs to change
+nothing. Give them a **custom role holding `Risk Acceptance View` and nothing else**, then add them
+as a member of the Assets they audit.
+
+With that role they can:
+
+- list and open Risk Acceptances, including the reasoning
+- read the lifecycle state, the transition history and the finding records
+- read the backlog metrics
+
+and they cannot create, edit, delete, or decide anything — every write answers `403`.
+
+Two things worth knowing. Visibility is scoped like every other read, so an auditor added to one
+Asset sees that Asset's exceptions and no others. And **no built-in role changes**: a plain Reader
+still cannot see Risk Acceptances, because acceptance visibility is deliberately a separate grant
+from Finding visibility — seeing a Finding does not entitle you to the reasoning behind its
+exception.
+
 ### Extending an expired acceptance
 
 An expiration date exists because somebody wanted the risk looked at again on that date. So by
