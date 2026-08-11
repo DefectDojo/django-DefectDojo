@@ -1,5 +1,7 @@
 import io
 
+from django.conf import settings
+
 from dojo.models import Test
 from dojo.tools.dalfox.parser import DalfoxParser
 from unittests.dojo_test_case import DojoTestCase, get_unit_tests_scans_path
@@ -34,13 +36,21 @@ class TestDalfoxParser(DojoTestCase):
             with self.subTest("a verified result says so"):
                 self.assertIn("Verified — payload executed", finding.description)
 
-            with self.subTest("the proof of concept URL becomes a location without the payload"):
-                self.assertEqual(1, len(finding.unsaved_locations))
-                location = finding.unsaved_locations[0]
-                self.assertEqual("url", location.type)
-                self.assertEqual("127.0.0.1", location.data["host"])
-                self.assertEqual(18080, location.data["port"])
-                self.assertEqual("", location.data["query"])
+            if settings.V3_FEATURE_LOCATIONS:
+                with self.subTest("the proof of concept URL becomes a location without the payload"):
+                    self.assertEqual(1, len(finding.unsaved_locations))
+                    location = finding.unsaved_locations[0]
+                    self.assertEqual("url", location.type)
+                    self.assertEqual("127.0.0.1", location.data["host"])
+                    self.assertEqual(18080, location.data["port"])
+                    self.assertEqual("", location.data["query"])
+            else:
+                # TODO: Delete this after the move to Locations
+                with self.subTest("the proof of concept URL becomes an endpoint without the payload"):
+                    self.assertEqual(1, len(finding.unsaved_endpoints))
+                    endpoint = finding.unsaved_endpoints[0]
+                    self.assertEqual("127.0.0.1", endpoint.host)
+                    self.assertEqual(18080, endpoint.port)
 
     def test_parse_many_findings(self):
         """Dalfox grades a verified injection above one it only saw reflected."""
