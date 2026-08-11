@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load navigation_tags %}
 {% load get_config_setting %}
 {% block content %}
@@ -8,7 +9,7 @@
           <div class="panel panel-default table-responsive">
               <div class="panel-heading">
                   <h4>Engagement Presets
-                      <a title="Add New Engagement Preset" class="pull-right btn btn-primary btn-sm"
+                      <a title="{% trans 'Add New Engagement Preset' %}" class="pull-right btn btn-primary btn-sm"
                          href="{% url 'add_engagement_presets' prod.id %}"><span class="fa-solid fa-plus"></span></a>
                   </h4>
               </div>
