@@ -2,7 +2,9 @@ import contextlib
 import json
 from urllib.parse import urlparse
 
-from dojo.models import Finding
+from django.conf import settings
+
+from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
 
@@ -109,28 +111,35 @@ class DalfoxParser:
             with contextlib.suppress(IndexError, ValueError):
                 finding.cwe = int(cwe.split("-", 1)[1])
 
-        location = self._location(poc_url)
-        if location:
-            finding.unsaved_locations.append(location)
+        self._attach_location(finding, poc_url)
         return finding
 
     @staticmethod
-    def _location(poc_url):
+    def _attach_location(finding, poc_url):
         """
-        Turn the proof of concept URL into a location.
+        Turn the proof of concept URL into a location (or, pre-Locations, an endpoint).
 
         The query string is deliberately dropped: it holds the payload, which differs on every
         attempt, so keeping it would make every payload a separate location for what is one
         injectable parameter. The payload itself is on the Finding.
         """
         if not poc_url:
-            return None
+            return
         parsed = urlparse(poc_url)
         if not parsed.hostname:
-            return None
-        return LocationData.url(
-            host=parsed.hostname,
-            port=parsed.port,
-            protocol=parsed.scheme or "",
-            path=parsed.path.lstrip("/"),
-        )
+            return
+        if settings.V3_FEATURE_LOCATIONS:
+            finding.unsaved_locations.append(LocationData.url(
+                host=parsed.hostname,
+                port=parsed.port,
+                protocol=parsed.scheme or "",
+                path=parsed.path.lstrip("/"),
+            ))
+        else:
+            # TODO: Delete this after the move to Locations
+            finding.unsaved_endpoints.append(Endpoint(
+                host=parsed.hostname,
+                port=parsed.port,
+                protocol=parsed.scheme or None,
+                path=parsed.path.lstrip("/") or None,
+            ))

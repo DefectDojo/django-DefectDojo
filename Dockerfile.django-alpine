@@ -95,9 +95,11 @@ RUN \
 # Compile translation catalogs (.mo) into the image (the .mo files are gitignored
 # and generated at build). msgfmt is run directly so no Django settings/env are
 # needed; gettext is only required at build time, so install and remove it here.
+# BusyBox find has no -execdir, so the destination is derived with shell
+# parameter expansion instead of relying on -execdir's working-directory change.
 RUN \
   apk add --no-cache --virtual .build-i18n gettext && \
-  find dojo/locale -name 'django.po' -execdir msgfmt django.po -o django.mo \; && \
+  find dojo/locale -name 'django.po' -exec sh -c 'msgfmt "$1" -o "${1%.po}.mo"' _ {} \; && \
   apk del .build-i18n
 USER root
 RUN \

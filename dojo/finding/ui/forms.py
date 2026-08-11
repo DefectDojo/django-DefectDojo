@@ -177,7 +177,9 @@ class MergeFindings(forms.ModelForm):
         help_text=_("The action to take on the merged finding. Set the findings to inactive or delete the findings."))
 
     def __init__(self, *args, **kwargs):
-        _ = kwargs.pop("finding")
+        # "finding" is popped but unused; kept out of a bare `_` so it doesn't shadow the
+        # gettext_lazy import this method also calls, below, as a translation function.
+        kwargs.pop("finding")
         findings = kwargs.pop("findings")
         super().__init__(*args, **kwargs)
 
