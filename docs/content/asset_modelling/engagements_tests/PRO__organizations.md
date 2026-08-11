@@ -127,6 +127,10 @@ permission on **both** the Organization and the Asset.
 
 - The Organization view gains a **Member Assets** table listing every member with
   its provenance, plus a **Pin Asset** action.
+- The Organization view's Asset list — and the `organization` filter on the Asset
+  and Finding lists — covers **every** member Asset, whether it lives here or is a
+  member through a pin, rule, or connector. (Filtering by the classic organization
+  field alone still matches only Assets whose home is that Organization.)
 - The Asset view gains an **Organizations** tab listing the Asset's memberships —
   each Organization with its type and provenance — plus a **Pin to Organization**
   action.
