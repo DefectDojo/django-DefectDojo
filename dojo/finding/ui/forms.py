@@ -38,7 +38,7 @@ CVSS_CALCULATOR_URLS = {
 
 vulnerability_ids_field = forms.CharField(max_length=5000,
     required=False,
-    label="Vulnerability Ids",
+    label=_("Vulnerability Ids"),
     help_text="Ids of vulnerabilities in security advisories associated with this finding. Can be Common Vulnerabilities and Exposures (CVE) or from other sources."
                 "You may enter one vulnerability id per line.",
     widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
@@ -118,9 +118,9 @@ def hide_cvss_fields_if_disabled(form_instance):
 
 
 class EditFindingGroupForm(forms.ModelForm):
-    name = forms.CharField(max_length=255, required=True, label="Finding Group Name")
-    jira_issue = forms.CharField(max_length=255, required=False, label="Linked JIRA Issue",
-                                 help_text="Leave empty and check push to jira to create a new JIRA issue for this finding group.")
+    name = forms.CharField(max_length=255, required=True, label=_("Finding Group Name"))
+    jira_issue = forms.CharField(max_length=255, required=False, label=_("Linked JIRA Issue"),
+                                 help_text=_("Leave empty and check push to jira to create a new JIRA issue for this finding group."))
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -152,29 +152,29 @@ class DeleteFindingGroupForm(forms.ModelForm):
 class MergeFindings(forms.ModelForm):
     FINDING_ACTION = (("", "Select an Action"), ("inactive", "Inactive"), ("delete", "Delete"))
 
-    append_description = forms.BooleanField(label="Append Description", initial=True, required=False,
-                                            help_text="Description in all findings will be appended into the merged finding.")
+    append_description = forms.BooleanField(label=_("Append Description"), initial=True, required=False,
+                                            help_text=_("Description in all findings will be appended into the merged finding."))
 
-    add_endpoints = forms.BooleanField(label="Add Endpoints and Locations", initial=True, required=False,
-                                           help_text="Endpoints and locations in all findings will be merged into the merged finding.")
+    add_endpoints = forms.BooleanField(label=_("Add Endpoints and Locations"), initial=True, required=False,
+                                           help_text=_("Endpoints and locations in all findings will be merged into the merged finding."))
 
-    dynamic_raw = forms.BooleanField(label="Dynamic Scanner Raw Requests", initial=True, required=False,
-                                           help_text="Dynamic scanner raw requests in all findings will be merged into the merged finding.")
+    dynamic_raw = forms.BooleanField(label=_("Dynamic Scanner Raw Requests"), initial=True, required=False,
+                                           help_text=_("Dynamic scanner raw requests in all findings will be merged into the merged finding."))
 
-    tag_finding = forms.BooleanField(label="Add Tags", initial=True, required=False,
-                                           help_text="Tags in all findings will be merged into the merged finding.")
+    tag_finding = forms.BooleanField(label=_("Add Tags"), initial=True, required=False,
+                                           help_text=_("Tags in all findings will be merged into the merged finding."))
 
-    mark_tag_finding = forms.BooleanField(label="Tag Merged Finding", initial=True, required=False,
-                                           help_text="Creates a tag titled 'merged' for the finding that will be merged. If the 'Finding Action' is set to 'inactive' the inactive findings will be tagged with 'merged-inactive'.")
+    mark_tag_finding = forms.BooleanField(label=_("Tag Merged Finding"), initial=True, required=False,
+                                           help_text=_("Creates a tag titled 'merged' for the finding that will be merged. If the 'Finding Action' is set to 'inactive' the inactive findings will be tagged with 'merged-inactive'."))
 
-    append_reference = forms.BooleanField(label="Append Reference", initial=True, required=False,
-                                            help_text="Reference in all findings will be appended into the merged finding.")
+    append_reference = forms.BooleanField(label=_("Append Reference"), initial=True, required=False,
+                                            help_text=_("Reference in all findings will be appended into the merged finding."))
 
     finding_action = forms.ChoiceField(
         required=True,
         choices=FINDING_ACTION,
-        label="Finding Action",
-        help_text="The action to take on the merged finding. Set the findings to inactive or delete the findings.")
+        label=_("Finding Action"),
+        help_text=_("The action to take on the merged finding. Set the findings to inactive or delete the findings."))
 
     def __init__(self, *args, **kwargs):
         _ = kwargs.pop("finding")
@@ -182,11 +182,11 @@ class MergeFindings(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         self.fields["finding_to_merge_into"] = forms.ModelChoiceField(
-            queryset=findings, initial=0, required="False", label="Finding to Merge Into", help_text="Findings selected below will be merged into this finding.")
+            queryset=findings, initial=0, required="False", label=_("Finding to Merge Into"), help_text=_("Findings selected below will be merged into this finding."))
 
         # Exclude the finding to merge into from the findings to merge into
         self.fields["findings_to_merge"] = forms.ModelMultipleChoiceField(
-            queryset=findings, required=True, label="Findings to Merge",
+            queryset=findings, required=True, label=_("Findings to Merge"),
             widget=forms.widgets.SelectMultiple(attrs={"size": 10}),
             help_text=("Select the findings to merge."))
         self.field_order = ["finding_to_merge_into", "findings_to_merge", "append_description", "add_endpoints", "append_reference"]
@@ -201,7 +201,7 @@ class AddFindingsRiskAcceptanceForm(forms.ModelForm):
     accepted_findings = forms.ModelMultipleChoiceField(
         queryset=Finding.objects.none(),
         required=True,
-        label="",
+        label=_(""),
         widget=TableCheckboxWidget(attrs={"size": 25}),
     )
 
@@ -220,10 +220,10 @@ class AddFindingForm(CweFormMixin, forms.ModelForm):
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwes = cwes_field
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label=_("CVSS3 Vector"), max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label=_("CVSS3 Score"), required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label=_("CVSS4 Vector"), max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label=_("CVSS4 Score"), required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -234,8 +234,8 @@ class AddFindingForm(CweFormMixin, forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label="Systems / Endpoints")
-    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label=_("Systems / Endpoints"))
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label=_("Endpoints to add"),
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
                                widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
@@ -322,15 +322,15 @@ class AdHocFindingForm(CweFormMixin, forms.ModelForm):
     vulnerability_ids = vulnerability_ids_field
 
     cvss_info = forms.CharField(
-        label="CVSS",
+        label=_("CVSS"),
         widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label=_("CVSS3 Vector"), max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label=_("CVSS3 Score"), required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label=_("CVSS4 Vector"), max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label=_("CVSS4 Score"), required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -342,8 +342,8 @@ class AdHocFindingForm(CweFormMixin, forms.ModelForm):
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
     endpoints = forms.ModelMultipleChoiceField(queryset=Location.objects.all(), required=False,
-                                               label="Systems / Endpoints")
-    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+                                               label=_("Systems / Endpoints"))
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label=_("Endpoints to add"),
                                        help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                                  "Each must be valid.",
                                        widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
@@ -429,15 +429,15 @@ class PromoteFindingForm(CweFormMixin, forms.ModelForm):
     vulnerability_ids = vulnerability_ids_field
 
     cvss_info = forms.CharField(
-        label="CVSS",
+        label=_("CVSS"),
         widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label=_("CVSS3 Vector"), max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label=_("CVSS3 Score"), required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label=_("CVSS4 Vector"), max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label=_("CVSS4 Score"), required=False, max_value=10.0, min_value=0.0)
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
         choices=SEVERITY_CHOICES,
@@ -446,8 +446,8 @@ class PromoteFindingForm(CweFormMixin, forms.ModelForm):
             "invalid_choice": "Select valid choice: Critical,High,Medium,Low"})
     mitigation = forms.CharField(widget=forms.Textarea, required=False)
     impact = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label="Systems / Endpoints")
-    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+    endpoints = forms.ModelMultipleChoiceField(Location.objects.none(), required=False, label=_("Systems / Endpoints"))
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label=_("Endpoints to add"),
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
                                widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
@@ -506,22 +506,22 @@ class PromoteFindingForm(CweFormMixin, forms.ModelForm):
 
 class FindingForm(CweFormMixin, forms.ModelForm):
     title = forms.CharField(max_length=1000)
-    group = forms.ModelChoiceField(required=False, queryset=Finding_Group.objects.none(), help_text="The Finding Group to which this finding belongs, leave empty to remove the finding from the group. Groups can only be created via Bulk Edit for now.")
+    group = forms.ModelChoiceField(required=False, queryset=Finding_Group.objects.none(), help_text=_("The Finding Group to which this finding belongs, leave empty to remove the finding from the group. Groups can only be created via Bulk Edit for now."))
     date = forms.DateField(required=True,
                            widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     cwes = cwes_field
     vulnerability_ids = vulnerability_ids_field
 
     cvss_info = forms.CharField(
-        label="CVSS",
+        label=_("CVSS"),
         widget=BulletListDisplayWidget(CVSS_CALCULATOR_URLS),
         required=False,
         disabled=True)
 
-    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(label="CVSS3 Score", required=False, max_value=10.0, min_value=0.0)
-    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(label="CVSS4 Score", required=False, max_value=10.0, min_value=0.0)
+    cvssv3 = forms.CharField(label=_("CVSS3 Vector"), max_length=117, required=False, widget=forms.TextInput(attrs={"class": "cvsscalculator", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(label=_("CVSS3 Score"), required=False, max_value=10.0, min_value=0.0)
+    cvssv4 = forms.CharField(label=_("CVSS4 Vector"), max_length=255, required=False)
+    cvssv4_score = forms.FloatField(label=_("CVSS4 Score"), required=False, max_value=10.0, min_value=0.0)
 
     description = forms.CharField(widget=forms.Textarea)
     severity = forms.ChoiceField(
@@ -533,14 +533,14 @@ class FindingForm(CweFormMixin, forms.ModelForm):
     impact = forms.CharField(widget=forms.Textarea, required=False)
     request = forms.CharField(widget=forms.Textarea, required=False)
     response = forms.CharField(widget=forms.Textarea, required=False)
-    endpoints = forms.ModelMultipleChoiceField(queryset=Location.objects.none(), required=False, label="Systems / Endpoints")
-    endpoints_to_add = forms.CharField(max_length=5000, required=False, label="Endpoints to add",
+    endpoints = forms.ModelMultipleChoiceField(queryset=Location.objects.none(), required=False, label=_("Systems / Endpoints"))
+    endpoints_to_add = forms.CharField(max_length=5000, required=False, label=_("Endpoints to add"),
                                help_text="The IP address, host name or full URL. You may enter one endpoint per line. "
                                          "Each must be valid.",
                                widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
     references = forms.CharField(widget=forms.Textarea, required=False)
 
-    mitigated = forms.DateField(required=False, help_text="Date and time when the flaw has been fixed", widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
+    mitigated = forms.DateField(required=False, help_text=_("Date and time when the flaw has been fixed"), widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
 
     publish_date = forms.DateField(widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}), required=False)
@@ -678,12 +678,12 @@ class ApplyFindingTemplateForm(forms.Form):
 
     title = forms.CharField(max_length=1000, required=True)
 
-    cwe = forms.IntegerField(label="CWE", required=False)
+    cwe = forms.IntegerField(label=_("CWE"), required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(label="CVSSv3", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, label="CVSSv3 Score")
-    cvssv4 = forms.CharField(label="CVSSv4", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(required=False, label="CVSSv4 Score")
+    cvssv3 = forms.CharField(label=_("CVSSv3"), max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(required=False, label=_("CVSSv3 Score"))
+    cvssv4 = forms.CharField(label=_("CVSSv4"), max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, label=_("CVSSv4 Score"))
 
     severity = forms.ChoiceField(required=False, choices=SEVERITY_CHOICES, error_messages={"required": "Select valid choice: In Progress, On Hold, Completed", "invalid_choice": "Select valid choice: Critical,High,Medium,Low"})
 
@@ -705,14 +705,14 @@ class ApplyFindingTemplateForm(forms.Form):
     component_version = forms.CharField(max_length=100, required=False)
 
     # Notes field
-    notes = forms.CharField(widget=forms.Textarea, required=False, help_text="Note content to add when applying template")
+    notes = forms.CharField(widget=forms.Textarea, required=False, help_text=_("Note content to add when applying template"))
 
     # Endpoints field
     endpoints = forms.CharField(max_length=5000, required=False,
-                                help_text="Endpoint URLs (one per line)",
+                                help_text=_("Endpoint URLs (one per line)"),
                                 widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
 
-    tags = TagField(required=False, help_text="Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add.", initial=Finding.tags.tag_model.objects.all().order_by("name"))
+    tags = TagField(required=False, help_text=_("Add tags that help describe this finding template. Choose from the list or add new tags. Press Enter key to add."), initial=Finding.tags.tag_model.objects.all().order_by("name"))
 
     def __init__(self, template=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -786,12 +786,12 @@ class ApplyFindingTemplateForm(forms.Form):
 class FindingTemplateForm(forms.ModelForm):
     title = forms.CharField(max_length=1000, required=True)
 
-    cwe = forms.IntegerField(label="CWE", required=False)
+    cwe = forms.IntegerField(label=_("CWE"), required=False)
     vulnerability_ids = vulnerability_ids_field
-    cvssv3 = forms.CharField(label="CVSS3 Vector", max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
-    cvssv3_score = forms.FloatField(required=False, label="CVSSv3 Score")
-    cvssv4 = forms.CharField(label="CVSS4 Vector", max_length=255, required=False)
-    cvssv4_score = forms.FloatField(required=False, label="CVSSv4 Score")
+    cvssv3 = forms.CharField(label=_("CVSS3 Vector"), max_length=117, required=False, widget=forms.TextInput(attrs={"class": "btn btn-secondary dropdown-toggle", "data-toggle": "dropdown", "aria-haspopup": "true", "aria-expanded": "false"}))
+    cvssv3_score = forms.FloatField(required=False, label=_("CVSSv3 Score"))
+    cvssv4 = forms.CharField(label=_("CVSS4 Vector"), max_length=255, required=False)
+    cvssv4_score = forms.FloatField(required=False, label=_("CVSSv4 Score"))
     severity = forms.ChoiceField(
         required=False,
         choices=SEVERITY_CHOICES,
@@ -812,11 +812,11 @@ class FindingTemplateForm(forms.ModelForm):
     component_version = forms.CharField(max_length=100, required=False)
 
     # Notes field
-    notes = forms.CharField(widget=forms.Textarea, required=False, help_text="Note content to add when applying template")
+    notes = forms.CharField(widget=forms.Textarea, required=False, help_text=_("Note content to add when applying template"))
 
     # Endpoints field
     endpoints = forms.CharField(max_length=5000, required=False,
-                                help_text="Endpoint URLs (one per line)",
+                                help_text=_("Endpoint URLs (one per line)"),
                                 widget=forms.widgets.Textarea(attrs={"rows": "3", "cols": "400"}))
 
     field_order = ["title", "cwe", "vulnerability_ids", "severity", "cvssv3", "cvssv3_score", "cvssv4", "cvssv4_score",
@@ -930,16 +930,16 @@ class FindingBulkUpdateForm(forms.ModelForm):
 class CloseFindingForm(forms.ModelForm):
     entry = forms.CharField(
         required=True, max_length=2400,
-        widget=forms.Textarea, label="Notes:",
+        widget=forms.Textarea, label=_("Notes:"),
         error_messages={"required": ("The reason for closing a finding is "
                                      "required, please use the text area "
                                      "below to provide documentation.")})
 
-    mitigated = forms.DateField(required=False, help_text="Date and time when the flaw has been fixed", widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
+    mitigated = forms.DateField(required=False, help_text=_("Date and time when the flaw has been fixed"), widget=forms.TextInput(attrs={"class": "datepicker", "autocomplete": "off"}))
     mitigated_by = forms.ModelChoiceField(required=False, queryset=Dojo_User.objects.none())
-    false_p = forms.BooleanField(initial=False, required=False, label="False Positive")
-    out_of_scope = forms.BooleanField(initial=False, required=False, label="Out of Scope")
-    duplicate = forms.BooleanField(initial=False, required=False, label="Duplicate")
+    false_p = forms.BooleanField(initial=False, required=False, label=_("False Positive"))
+    out_of_scope = forms.BooleanField(initial=False, required=False, label=_("Out of Scope"))
+    duplicate = forms.BooleanField(initial=False, required=False, label=_("Duplicate"))
 
     def __init__(self, *args, **kwargs):
         queryset = kwargs.pop("missing_note_types")
@@ -950,7 +950,7 @@ class CloseFindingForm(forms.ModelForm):
         if len(queryset) == 0:
             self.fields["note_type"].widget = forms.HiddenInput()
         else:
-            self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label="Note Type", required=True)
+            self.fields["note_type"] = forms.ModelChoiceField(queryset=queryset, label=_("Note Type"), required=True)
 
         if self.can_edit_mitigated_data:
             self.fields["mitigated_by"].queryset = get_authorized_users("edit")
@@ -1006,7 +1006,7 @@ class DefectFindingForm(forms.ModelForm):
 
     entry = forms.CharField(
         required=True, max_length=2400,
-        widget=forms.Textarea, label="Notes:",
+        widget=forms.Textarea, label=_("Notes:"),
         error_messages={"required": ("The reason for closing a finding is "
                                      "required, please use the text area "
                                      "below to provide documentation.")})
@@ -1024,8 +1024,8 @@ class DefectFindingForm(forms.ModelForm):
 class ClearFindingReviewForm(forms.ModelForm):
     entry = forms.CharField(
         required=True, max_length=2400,
-        help_text="Please provide a message.",
-        widget=forms.Textarea, label="Notes:",
+        help_text=_("Please provide a message."),
+        widget=forms.Textarea, label=_("Notes:"),
         error_messages={"required": ("The reason for clearing a review is "
                                      "required, please use the text area "
                                      "below to provide documentation.")})
@@ -1049,14 +1049,14 @@ class ReviewFindingForm(forms.Form):
     )
     entry = forms.CharField(
         required=True, max_length=2400,
-        help_text="Please provide a message for reviewers.",
-        widget=forms.Textarea, label="Notes:",
+        help_text=_("Please provide a message for reviewers."),
+        widget=forms.Textarea, label=_("Notes:"),
         error_messages={"required": ("The reason for requesting a review is "
                                      "required, please use the text area "
                                      "below to provide documentation.")})
     allow_all_reviewers = forms.BooleanField(
         required=False,
-        label="Allow All Eligible Reviewers",
+        label=_("Allow All Eligible Reviewers"),
         help_text=("Checking this box will allow any user in the drop down "
                    "above to provide a review for this finding"))
 

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load display_tags %}
 {% load authorization_tags %}
 {% load humanize %}
@@ -50,7 +51,7 @@
 
                     <div class="dropdown pull-right">
                         <button class="btn btn-primary dropdown-toggle" type="button" id="dropdownMenu1"
-                                data-toggle="dropdown" aria-expanded="true" aria-label="Risk acceptance options">
+                                data-toggle="dropdown" aria-expanded="true" aria-label="{% trans 'Risk acceptance options' %}">
                             <span class="fa-solid fa-bars"></span>
                             <span class="caret"></span>
                         </button>
@@ -214,7 +215,7 @@
             <br/>
             <form method="post" class="">{% csrf_token %}
                 <div class="show_add_findings_form" style="padding: 1em;">
-                    <div class="text-left"><b>Add findings as accepted:</b></div>
+                    <div class="text-start"><b>Add findings as accepted:</b></div>
                     {{ add_findings_form.as_p }}
                 </div>
                 <div class="panel-body">

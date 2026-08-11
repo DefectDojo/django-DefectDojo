@@ -379,6 +379,42 @@ SITE_ID = env("DD_SITE_ID")
 # to load the internationalization machinery.
 USE_I18N = env("DD_USE_I18N")
 
+# Languages offered in the UI. Stored DB values and serialized API values always
+# remain English regardless of the selected language; only displayed text changes.
+LANGUAGES = [
+    ("en", "English"),
+    ("ar", "العربية"),
+    ("bn", "বাংলা"),
+    ("de", "Deutsch"),
+    ("es", "Español"),
+    ("fa", "فارسی"),
+    ("fr", "Français"),
+    ("he", "עברית"),
+    ("hi", "हिन्दी"),
+    ("id", "Bahasa Indonesia"),
+    ("it", "Italiano"),
+    ("ja", "日本語"),
+    ("ko", "한국어"),
+    ("mr", "मराठी"),
+    ("nl", "Nederlands"),
+    ("pl", "Polski"),
+    ("pt-br", "Português (Brasil)"),
+    ("ru", "Русский"),
+    ("ta", "தமிழ்"),
+    ("te", "తెలుగు"),
+    ("th", "ไทย"),
+    ("tl", "Filipino"),
+    ("tr", "Türkçe"),
+    ("uk", "Українська"),
+    ("ur", "اردو"),
+    ("vi", "Tiếng Việt"),
+    ("zh-hans", "简体中文"),
+    ("zh-hant", "繁體中文"),
+]
+# Arabic (ar), Hebrew (he), Persian (fa) and Urdu (ur) are right-to-left; the v3 UI flips
+# layout via dir="rtl" (set in base.html from LANGUAGE_BIDI) plus logical CSS utilities.
+# The classic UI is not RTL-aware.
+
 # If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = env("DD_USE_TZ")
 
@@ -428,6 +464,9 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 # ------------------------------------------------------------------------------
 
 DOJO_ROOT = env("DD_ROOT")
+
+# Where Django looks for translation catalogs: dojo/locale/<lang>/LC_MESSAGES/.
+LOCALE_PATHS = [Path(DOJO_ROOT) / "locale"]
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/var/www/example.com/media/"
@@ -845,10 +884,12 @@ DJANGO_MIDDLEWARE_CLASSES = [
     "dojo.middleware.APITrailingSlashMiddleware",
     "dojo.middleware.DojoSettingsManagerMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django_permissions_policy.PermissionsPolicyMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "dojo.middleware.LanguagePreferenceMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",

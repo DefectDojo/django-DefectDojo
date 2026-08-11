@@ -1088,7 +1088,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # stays a no-query read.
         from dojo.vulnerability.queries import finding_vulnerability_id_strings  # noqa: PLC0415 -- avoid import cycle
 
-        existing_vuln_ids = set(finding_vulnerability_id_strings(finding))
+        # A finding that has not been written yet has no persisted vulnerability ids, and the read
+        # helper raises on it ("instance needs to have a primary key value before this relationship
+        # can be used"). Treating it as empty is exact rather than a workaround: there are no rows
+        # to compare against, so every parsed id is new. This lets an importer that buffers inserts
+        # reconcile a finding's vulnerability ids before flushing the buffer.
+        existing_vuln_ids = set(finding_vulnerability_id_strings(finding)) if finding.pk else set()
         new_vuln_ids = set(vulnerability_ids_to_process)
 
         # Early exit if unchanged — no DB work needed
@@ -1154,7 +1159,12 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding = self.reconcile_vulnerability_ids(finding)
         # Save the finding only if the cve field was changed by save_vulnerability_ids
         # This is temporary as the cve field will be phased out
-        if finding.cve != old_cve:
+        #
+        # Only for a finding that already has a row. This save exists to push a changed cve onto
+        # an existing record; for a finding an importer is still buffering there is nothing to
+        # update, and saving here would insert it early -- defeating the buffering and splitting
+        # one batched INSERT into per-finding ones. The value rides along when the buffer flushes.
+        if finding.cve != old_cve and finding.pk:
             finding.save()
         return finding
 

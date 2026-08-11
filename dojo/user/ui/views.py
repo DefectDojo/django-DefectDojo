@@ -37,6 +37,7 @@ from dojo.forms import (
     ConfigurationPermissionsForm,
 )
 from dojo.labels import get_labels
+from dojo.middleware import set_language_cookie
 from dojo.models import Alerts, Dojo_User, Product, Product_Type, UserContactInfo
 from dojo.user.authentication import reset_token_for_user, token_expires_at
 from dojo.user.ui.filters import UserFilter
@@ -234,7 +235,11 @@ def view_profile(request):
             # Redirect so the response renders against a fresh request, reading
             # the just-saved usercontactinfo instead of any state cached on the
             # POST request. Also prevents form resubmission on refresh.
-            return HttpResponseRedirect(reverse("view_profile"))
+            response = HttpResponseRedirect(reverse("view_profile"))
+            # Reflect a language change immediately on this device by refreshing
+            # the cookie LocaleMiddleware reads; other devices pick the preference
+            # up from UserContactInfo on their next browser session.
+            return set_language_cookie(response, contact.language)
     add_breadcrumb(title=_("User Profile - %(user_full_name)s") % {"user_full_name": user.get_full_name()}, top_level=True, request=request)
     return render(request, "dojo/profile.html", {
         "user": user,

@@ -1077,10 +1077,18 @@ class BaseImporter(ImporterOptions):
         """Accumulate a delete+insert of Finding_CWE rows for a reimported finding when its CWEs changed."""
         new_cwes = set(self.finding_cwe_values(finding))
         # finding_cwe_set is prefetched on reimport candidates (build_candidate_scope_queryset).
-        existing_cwes = {row.cwe for row in finding.finding_cwe_set.all()}
+        # A finding that has not been written yet has no persisted CWEs, and reading the reverse
+        # relation on it raises ("instance needs to have a primary key value before this
+        # relationship can be used"). Treating it as empty is exact rather than a workaround:
+        # there are no rows to compare against, so every parsed CWE is new. This lets an importer
+        # that buffers inserts reconcile a finding's CWEs before flushing the buffer.
+        existing_cwes = {row.cwe for row in finding.finding_cwe_set.all()} if finding.pk else set()
         if existing_cwes == new_cwes:
             return
-        self.pending_cwe_deletes.append(finding.id)
+        # Nothing to delete for a finding with no row yet; appending None would put a NULL in the
+        # filter that flush_vulnerability_ids() builds.
+        if finding.pk:
+            self.pending_cwe_deletes.append(finding.id)
         self.pending_cwes.extend([Finding_CWE(finding=finding, cwe=cwe) for cwe in new_cwes])
 
     def flush_vulnerability_ids(self) -> None:
