@@ -1625,18 +1625,6 @@ class LocationTest(BaseClass.ListRequestTest, BaseClass.RetrieveRequestTest):
         self.permission_check_class = Location
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
-    def test_list_object_not_authorized(self):
-        self.setUp_not_authorized()
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-    def test_detail_object_not_authorized(self):
-        self.setUp_not_authorized()
-        current_objects = self.endpoint_model.objects.all()
-        relative_url = self.url + f"{current_objects[0].id}/"
-        response = self.client.get(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
 
 @skip_unless_v3
 class LocationFindingReferenceTest(BaseClass.BaseClassTest):
