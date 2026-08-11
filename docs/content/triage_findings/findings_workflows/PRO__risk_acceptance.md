@@ -308,6 +308,24 @@ Comments are ordinary Risk Acceptance notes, so anything written before this exi
 the thread, and anything written here is visible to every other view of those notes. Line breaks are
 preserved.
 
+### In reports
+
+Risk Acceptance report blocks can print the approval chain, not just the decision:
+
+| Column | Shows |
+| --- | --- |
+| **Workflow State** | Where the Risk Acceptance is in its lifecycle. Also available as a sort field |
+| **Approved By** | Who made the decision — the person who approved or rejected it |
+| **Approved On** | When they made it |
+| **Decision Reason** | What they said at the time (detail blocks only) |
+
+These read from the review history, so they are filled for Risk Acceptances decided through the
+workflow and **empty for ones accepted before it existed**. That is deliberate: falling back to the
+`Accepted By` field would present something somebody typed as though it were a recorded approval.
+
+Moves that are not decisions — submitting, activating, expiring — are ignored, so the column names
+whoever agreed rather than whoever last touched the record.
+
 ### Is the backlog being managed?
 
 ```
