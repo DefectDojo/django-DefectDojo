@@ -308,6 +308,31 @@ Comments are ordinary Risk Acceptance notes, so anything written before this exi
 the thread, and anything written here is visible to every other view of those notes. Line breaks are
 preserved.
 
+### Is the backlog being managed?
+
+```
+GET /api/v2/risk_acceptance/exception_metrics/?expiring_within_days=30
+```
+
+A count of Risk Acceptances does not answer the question an auditor asks. Fifty active exceptions
+that are all dated and reviewed is a healthy program; three that lapsed a year ago is not. This
+reports the numbers that distinguish them, for the Risk Acceptances **you can see**:
+
+| Field | Means |
+| --- | --- |
+| `active`, `expired`, `rejected` | Where things currently stand. Risk Acceptances predating the feature count as active, which is what they are |
+| `awaiting_decision` | Requests nobody has answered — proposed and under review together, because "waiting" is one queue however it is labelled |
+| `oldest_waiting_days` | How long the longest-waiting request has waited, measured from the move that asked |
+| `average_days_to_decision` | How long requests typically wait for an answer. Only decided requests count; including open ones would make the number fall every time somebody files a request |
+| `expiring_soon` | Expiring within `expiring_within_days` (default 30) |
+| `overdue` | **Past its date and still suppressing findings.** Not the same as `expired` — this is the set nobody has dealt with |
+| `average_age_days` | How long the exceptions in force have been in force |
+| `never_expires` | Active Risk Acceptances with no expiration date at all — the shape of "we accepted this and forgot" |
+
+`expiring_within_days` must be a whole number; a value that is not is refused rather than ignored,
+because a figure that quietly answers a different question than the one asked is worse than an
+error.
+
 ### Requested exceptions in your metrics
 
 The problem this solves: a team asks for an exception and waits — on a change board, on a vendor, on
