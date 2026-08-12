@@ -19,13 +19,27 @@ GET /api/v2/sbom/{asset_id}/?spec=spdx
 | Parameter | Values | Default |
 | --- | --- | --- |
 | `spec` | `cyclonedx` (CycloneDX 1.6 JSON), `spdx` (SPDX 2.3 JSON) | `cyclonedx` |
+| `version` | An Asset version name, e.g. `5.2.0` | *(none — the current inventory)* |
 
 The response is a downloadable JSON document (`Content-Disposition: attachment`). Components carry their Package URL, group/namespace, version, artifact hashes (algorithms each specification supports), and — when the SBOM import recorded one — the license expression for this Asset's use of the component.
 
-Two current-state boundaries to be aware of:
+Without a `version`, the export describes the Asset's **current** inventory, and its `dependencies` section declares root → component edges only: the aggregate inventory is a set of libraries, not a graph.
 
-- The export describes the Asset's **current** inventory. Version-pinned snapshots (the SBOM of release 5.2 specifically) are on the roadmap alongside Asset versions.
-- Imports flatten the dependency graph today, so the exported `dependencies` section declares root → component edges only.
+### Exporting one release
+
+Deployments with [Asset Versions](../pro__working_with_sboms/#asset-versions-and-bom-snapshots) enabled can export a specific release instead of the current aggregate:
+
+```
+GET /api/v2/sbom/{asset_id}/?version=5.2.0
+```
+
+The document is then built from the BOM snapshot recorded for that version, which changes three things:
+
+- **Components** are the ones that version's SBOM declared, with the licenses recorded for it — not everything the Asset has accumulated since.
+- **`dependencies`** reproduces the structure the imported document declared — root → direct components, then component → component — instead of the flat root → everything fan.
+- **The version** appears on `metadata.component` (SPDX: the root package's `versionInfo`), so the document says which release it describes.
+
+A version the Asset does not have returns 404 rather than quietly exporting the aggregate inventory under a version label — a document labelled 5.2.0 that does not describe 5.2.0 is the wrong thing to hand a downstream consumer or a regulator. A version that exists but has no SBOM uploaded yet exports an empty inventory, correctly labelled with that version.
 
 ## Exporting a VEX document
 
@@ -50,3 +64,16 @@ The status of each **finding ↔ location edge** (where per-location triage live
 | Mitigated | `resolved` | |
 
 When the same vulnerability × component pair carries conflicting statuses across findings, the **least-resolved status wins** — exporting `resolved` while any observation is still active would be the dangerous direction to be wrong in.
+
+### VEX for one release
+
+```
+GET /api/v2/sbom/{asset_id}/vex/?version=5.2.0
+```
+
+With Asset Versions enabled, a VEX document can answer for a single release. A Finding carrying a `fixed_in` record for the requested version is reported `resolved` there, while the same Finding stays exploitable at the versions where it was found and on the Asset overall. That is the point of the model: one Finding row, per-version answers, rather than a copy of every Finding in every release.
+
+Two deliberate conservatisms:
+
+- A Finding mitigated on the Asset, but with no `fixed_in` record for the requested version, **keeps its status** for that version. Claiming a fix in a release requires evidence for that release.
+- Nothing is inferred across versions. A Finding found in 5.0 and fixed in 5.2 says nothing here about 5.1, because version strings carry no ordering (see [Asset Versions](../pro__working_with_sboms/#asset-versions-and-bom-snapshots)).
