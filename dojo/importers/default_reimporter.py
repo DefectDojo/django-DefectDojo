@@ -603,14 +603,18 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         finding_will_be_grouped: bool,
     ) -> None:
         """
-        Run one now-persisted new finding's post-processing and queue it for dispatch.
+        Queue one now-prepared new finding for post-processing and dispatch.
 
-        `finding` must already have a primary key (persist_new_findings() has run on it).
+        `finding` is NOT guaranteed to have a primary key yet: persist_new_findings() has
+        run on it, but a downstream edition is allowed to override persist_new_finding()
+        to defer the actual write to its own batch boundary (see that method's docstring).
+        new_items is therefore populated later, from new_findings_in_batch, once
+        _flush_post_processing_batch() has flushed any such buffer and every finding in
+        the batch is guaranteed to have a real id -- not here, while it may still be None.
         Shared by _drain_pending_new_findings (the normal per-matching-batch case) and
         _finalize_specific_pending_new_finding (the on-demand case: a later finding in
         this report just matched against this one while it was still pending).
         """
-        self.new_items.append(finding.id)
         new_findings_in_batch.append(finding)
         finding = self.finding_post_processing(
             finding,
@@ -732,6 +736,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         # their original creation; re-running it on no-change reimports
         # would be ~8 wasted queries per batch.
         apply_inherited_tags_for_findings(new_findings_in_batch)
+        # Read here, not when each finding was queued: a downstream edition's
+        # persist_new_finding() may have deferred the actual write to this flush (see
+        # _finalize_pending_new_finding), so this is the first point every finding in
+        # new_findings_in_batch is guaranteed to have a real id.
+        self.new_items.extend(finding.id for finding in new_findings_in_batch)
         new_findings_in_batch.clear()
         batch_findings.clear()
         # Partition the batch by each finding's own push_to_jira flag so one
