@@ -79,3 +79,9 @@ To have DefectDojo run a Sync operation off\-schedule:
 2. From this page, click the **Sync** button. This button is located next to the **Mapped Records** header.
 
 ![image](images/operations_sync.png)
+
+## Getting told when a Connector stops working
+
+The Operations Page is a record, not an alarm. If you do not want to check it, turn on the **Connector Health Warning** notification, which messages you when a Connector's runs start failing and when its tool stops returning the records it used to return.
+
+Set it on your notification settings page, under **Connections**. See [Connector Health Notifications](/admin/notifications/about_notifications/#connector-health-notifications-pro) for what each message covers and how often it arrives.
