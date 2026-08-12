@@ -20,3 +20,24 @@
   [de.params]
     languageISO = "DE"
     languageTag = "de"
+
+[es]
+  languageName = "Español"
+  weight = 30
+  [es.params]
+    languageISO = "ES"
+    languageTag = "es"
+
+[fr]
+  languageName = "Français"
+  weight = 40
+  [fr.params]
+    languageISO = "FR"
+    languageTag = "fr"
+
+[ja]
+  languageName = "日本語"
+  weight = 50
+  [ja.params]
+    languageISO = "JA"
+    languageTag = "ja"
