@@ -6,7 +6,7 @@ from itertools import batched
 from time import sleep, strftime
 
 from django.conf import settings
-from django.db import transaction
+from django.db import OperationalError, transaction
 from django.db.models import Count
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
@@ -19,6 +19,7 @@ from fieldsignals import pre_save_changed
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
+from dojo.db_utils import is_transient_db_conflict
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
 from dojo.finding.cwe import finding_cwe_labels
@@ -1028,6 +1029,14 @@ def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
     return len(survivors)
 
 
+# A synchronous bulk delete that loses a concurrency race (deadlock or serialization
+# failure) rolls the offending chunk back and would otherwise surface as a 500 to the
+# caller. Retry that chunk a few times, mirroring async_delete_task's backstop for the
+# background cascade deletes that deterministic lock ordering cannot fully rule out.
+BULK_DELETE_RETRY_DELAY = 0.5  # seconds before the first retry of a chunk; doubled each attempt
+BULK_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
 def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=False):
     """
     Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
@@ -1076,11 +1085,31 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
         start=1,
     ):
         chunk_qs = Finding.objects.filter(id__in=chunk_ids)
-        with transaction.atomic():
-            bulk_clear_finding_m2m(chunk_qs)
-            resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
-            cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
-            execute_delete_sql(chunk_qs)
+        for attempt in range(BULK_DELETE_MAX_CONFLICT_RETRIES + 1):
+            try:
+                with transaction.atomic():
+                    bulk_clear_finding_m2m(chunk_qs)
+                    resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
+                    cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
+                    execute_delete_sql(chunk_qs)
+            except OperationalError as exc:
+                # A deadlock or serialization failure aborts and rolls the whole chunk
+                # transaction back, so the aborted work is not wrong -- only undone -- and
+                # re-running the chunk is safe. Earlier chunks already committed and are
+                # untouched. Only transient conflicts are retried; anything else (a
+                # statement timeout, a dropped connection) re-raises at once, as does a
+                # conflict that survives every attempt. Without this backstop a delete
+                # overlapping a concurrent import or dedup returns a 500 to the caller.
+                if not is_transient_db_conflict(exc) or attempt == BULK_DELETE_MAX_CONFLICT_RETRIES:
+                    raise
+                backoff = BULK_DELETE_RETRY_DELAY * (2 ** attempt)
+                logger.warning(
+                    "bulk_delete_findings: transient DB conflict on chunk %d, retry %d/%d in %.1fs: %s",
+                    chunk_num, attempt + 1, BULK_DELETE_MAX_CONFLICT_RETRIES, backoff, exc,
+                )
+                sleep(backoff)
+            else:
+                break
         logger.info(
             "bulk_delete_findings: deleted chunk %d (%d findings)",
             chunk_num, len(chunk_ids),

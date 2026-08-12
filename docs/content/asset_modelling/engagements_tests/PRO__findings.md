@@ -257,9 +257,14 @@ Finding Templates can be created by clicking the **New Finding Template** button
 The ensuing page provides an overview of the metadata that will be applied to a Finding when a Finding Template is used.
 
 ### Applying Finding Templates
-Finding Templates differ between OS DefectDojo and DefectDojo Pro. In Pro, Finding Templates can’t be applied to preexisting Findings, and they can’t be created based on preexisting Findings. 
+Finding Templates can be applied to preexisting Findings, and created from preexisting Findings, using the gear menu on a Finding:
 
-However, you can manually add a Finding to a Test based on a Finding Template using either the ⋮ kebab menu next to the Test in the parent Engagement’s view, or using the gear menu in the Test’s view. 
+- **Apply Template to Finding** opens a dialog to select a template. For each field you can keep the Finding's current value, replace it with the template's value, or combine both. Applying the template also copies the template's CVSS scores, remediation and technical detail fields, adds the template's endpoints, and records the template's note on the Finding.
+- **Make Finding a Template** creates a new Finding Template from the Finding, copying its details, tags, vulnerability IDs, and endpoints. Each template title must be unique.
+
+Applying a template requires edit access to the Finding plus access to Finding Templates; creating a template from a Finding requires the "add finding template" configuration permission.
+
+You can also manually add a Finding to a Test based on a Finding Template using either the ⋮ kebab menu next to the Test in the parent Engagement's view, or using the gear menu in the Test's view.
 
 ![image](images/profindings_ss3.png)
 

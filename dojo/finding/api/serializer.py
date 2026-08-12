@@ -394,6 +394,14 @@ class FindingSerializer(serializers.ModelSerializer):
     sla_days_remaining = serializers.IntegerField(read_only=True, allow_null=True)
     finding_meta = FindingMetaSerializer(read_only=True, many=True)
     related_fields = serializers.SerializerMethodField(allow_null=True)
+    # Flat convenience field: the finding's test type name (e.g. "Cloud Posture
+    # Scan"), without requiring related_fields=true. API consumers that route on
+    # the scanner/tool that produced a finding (the Sensei engine keys IaC
+    # remediation on test_type_name) read this directly. A dotted-source CharField
+    # rather than a method: it is the same read, and allow_null makes DRF return
+    # None if any hop is missing. No extra query — FindingViewSet.get_queryset
+    # already prefetches test__test_type.
+    test_type_name = serializers.CharField(source="test.test_type.name", read_only=True, allow_null=True)
     # for backwards compatibility
     jira_creation = serializers.SerializerMethodField(read_only=True, allow_null=True)
     jira_change = serializers.SerializerMethodField(read_only=True, allow_null=True)
