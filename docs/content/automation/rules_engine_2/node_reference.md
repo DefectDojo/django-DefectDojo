@@ -182,7 +182,7 @@ A rule that can accept risk can accept a Critical, and by default nothing says o
 Without Review Up To* draws that line.
 
 Findings over the limit are not dropped — the rule matched them for a reason. With
-[Risk Acceptances 2.0](../../triage_findings/findings_workflows/pro__risk_acceptance/) enabled they
+[Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled they
 are put into a Risk Acceptance **awaiting review**, named for the rule that asked and carrying why,
 so a person decides. They stay active and counted the whole time. With that feature off there is no
 review state to use, so they are simply left alone — never accepted, which is the point of the

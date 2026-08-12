@@ -100,7 +100,7 @@ A path that does not resolve produces no value rather than an error.
 
 ### Conditioning on an exception
 
-With [Risk Acceptances 2.0](../../triage_findings/findings_workflows/pro__risk_acceptance/) enabled,
+With [Risk Acceptances 2.0](/triage_findings/findings_workflows/pro__risk_acceptance/) enabled,
 a rule can condition on what an acceptance is *doing*, not just on the `Risk Accepted` flag:
 
 ```
