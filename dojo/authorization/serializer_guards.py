@@ -76,3 +76,50 @@ class AuthorizedUsersMemberGuardMixin:
         if not (request_user and user_has_permission(request_user, self.instance, permission)):
             msg = f"You do not have permission to manage authorized users for this {label}."
             raise PermissionDenied(msg)
+
+
+class ToolConfigurationUseGuardMixin:
+
+    """
+    Enforce ``view_tool_configuration`` on ``tool_configuration`` writes.
+
+    Selecting a ``tool_configuration`` lets an import run authenticated requests
+    with the credential stored on it, so it is gated by the same
+    ``view_tool_configuration`` permission that guards the tool-configuration
+    views, not just the object permission these endpoints already check.
+
+    Mix this into *every* serializer exposing the field, including alias
+    serializers over the same model, so the rule holds wherever the field is
+    reachable.
+
+    The check hangs off ``run_validation`` rather than ``validate`` on purpose: a
+    subclass that defines its own ``validate`` would otherwise shadow the mixin's
+    and silently drop the guard.
+
+    No-ops when the field is absent (replay-safe on PATCH), mirroring
+    dojo.authorization.api_permissions.check_update_permission.
+    """
+
+    def run_validation(self, data=serializers.empty):
+        value = super().run_validation(data)
+        self._validate_tool_configuration_use(value)
+        return value
+
+    def _validate_tool_configuration_use(self, data):
+        if "tool_configuration" not in data:
+            return
+
+        from dojo.tool_config.queries import (  # noqa: PLC0415 -- lazy import, avoids circular dependency
+            get_authorized_tool_configurations,
+        )
+
+        # Field-level validation has already resolved the payload to a
+        # Tool_Configuration instance at this point.
+        tool_configuration = data.get("tool_configuration")
+        if tool_configuration is None:
+            return
+        request = self.context.get("request")
+        request_user = getattr(request, "user", None)
+        if not get_authorized_tool_configurations(request_user).filter(pk=tool_configuration.pk).exists():
+            msg = "You do not have permission to use this tool configuration."
+            raise PermissionDenied(msg)
