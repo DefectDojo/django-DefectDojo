@@ -1,11 +1,10 @@
 from django.db.models import QuerySet
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from dojo.api_v2.views import PrefetchDojoModelViewSet
 from dojo.authorization.api_permissions import (
-    IsSuperUser,
     LocationFindingReferencePermission,
     LocationProductReferencePermission,
 )
@@ -27,6 +26,7 @@ from dojo.location.models import (
 from dojo.location.queries import (
     get_authorized_location_finding_reference,
     get_authorized_location_product_reference,
+    get_authorized_locations,
 )
 
 
@@ -38,11 +38,11 @@ class LocationViewSet(ReadOnlyModelViewSet):
     queryset = Location.objects.none()
     filterset_class = LocationFilter
     filter_backends = [DjangoFilterBackend]
-    permission_classes = (IsSuperUser, DjangoModelPermissions)
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self) -> QuerySet[Location]:
-        """Return the queryset of Locations."""
-        return Location.objects.order_by_id()
+        """Return the queryset of Locations the requesting user may view."""
+        return get_authorized_locations("view", Location.objects.order_by_id())
 
 
 class LocationFindingReferenceViewSet(PrefetchDojoModelViewSet):

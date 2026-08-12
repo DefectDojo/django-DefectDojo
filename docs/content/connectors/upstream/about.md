@@ -27,63 +27,108 @@ But everyone needs a starting point, and that's where Upstream Connectors come i
 
 We currently support Upstream Connectors for the following tools, with more on the way:
 
+* **AccuKnox**
+* **Action1**
 * **Acunetix 360**
-* **Akamai API Security**
-* **Anchore**
-* **AWS Security Hub**
+* **Akamai**
+* **Akto**
+* **Alert Logic**
+* **Anchore Enterprise**
+* **AppCheck**
+* **Aqua Security**
+* **Automox**
 * **Azure DevOps**
 * **Backstage**
+* **Beagle Security**
+* **BigID**
 * **Bitbucket**
 * **Black Duck**
+* **Black Duck Continuous Dynamic**
 * **Bright Security**
 * **Bugcrowd**
-* **BurpSuite**
+* **Burp Suite Enterprise**
+* **Calico Cloud**
 * **Censys**
-* **Checkmarx ONE**
+* **Checkmarx One**
+* **Chef Automate**
+* **CI Fuzz**
 * **Cloudflare**
 * **Cobalt.io**
+* **Codacy**
 * **Contrast**
 * **Coverity**
 * **CrowdStrike Falcon**
+* **CyberArk Certificate Manager**
+* **Cyberwatch**
+* **CyCognito**
+* **Datadog**
 * **Deepfence ThreatMapper**
+* **DeepSource**
 * **Dependency-Track**
+* **Detectify**
 * **Docker Scout**
+* **Dragos**
 * **Edgescan**
+* **Elastic Security**
 * **Endor Labs**
 * **Escape**
 * **Fairwinds Insights**
+* **Finite State**
+* **Fleet**
 * **Fortify**
+* **FOSSA**
 * **GitGuardian**
 * **GitHub**
 * **GitHub Advanced Security**
 * **GitLab**
-* **Google Cloud Security Command Center**
+* **Google Artifact Analysis**
+* **Google Cloud SCC**
 * **Group-IB ASM**
 * **HackerOne**
+* **Halo Security**
 * **Harbor**
 * **Have I Been Pwned**
 * **HCL AppScan**
+* **HiddenLayer**
+* **Holm Security**
+* **ImmuniWeb**
+* **InsightCloudSec**
 * **Intigriti**
 * **Intruder**
 * **IriusRisk**
-* **JFrog Xray**
-* **Jira Service Management Assets**
+* **JFrog XRay**
+* **JSM Assets**
+* **Klocwork**
 * **Kubescape**
 * **Lacework / FortiCNAPP**
 * **Mend**
 * **Microsoft Defender**
 * **Microsoft Defender for Cloud**
 * **MobSF**
+* **NetRise**
 * **NeuVector**
+* **Nightfall AI**
+* **NowSecure**
+* **Nozomi Networks**
 * **Nuclei (ProjectDiscovery Cloud)**
 * **OpenVAS / Greenbone**
+* **Orca Security**
+* **Ostorlab**
+* **Parasoft DTP**
+* **Picus Security**
+* **PingCastle**
 * **Probely**
+* **Promptfoo**
 * **Prowler**
 * **Qualys**
 * **Quay**
+* **Qwiet AI**
 * **Rapid7 InsightAppSec**
 * **Rapid7 InsightVM**
+* **Red Hat Satellite**
 * **runZero**
+* **Scantist**
+* **Security Hub**
 * **Semgrep**
 * **ServiceNow CMDB**
 * **Shodan**
@@ -91,17 +136,27 @@ We currently support Upstream Connectors for the following tools, with more on t
 * **Socket**
 * **SonarQube**
 * **Sonatype IQ**
+* **SOOS**
 * **Sysdig Secure**
-* **Tenable**
+* **Tenable.io**
 * **Tenable Web App Scanning**
+* **TruffleHog**
+* **Trustwave Fusion**
+* **Uptycs**
+* **Vanta**
 * **Veracode**
+* **Vulnerability Manager Plus**
+* **Wallarm**
 * **Wazuh**
+* **WebInspect Enterprise**
 * **Wiz**
 * **YesWeHack**
+* **Zimperium**
+* **Zora**
 
 For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
 
-Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **Jira Service Management Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
+Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
 These connections provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 

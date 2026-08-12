@@ -55,7 +55,7 @@ DefectDojo's core functionality is available in DefectDojo Open-Source.
 
 This edition of DefectDojo includes:
 
-- Import/Reimport for all 200+ Supported Tools
+- Import/Reimport for all 500+ Supported Tools
 - REST API
 - Deduplication features
 - Limited UI, metrics and reporting features

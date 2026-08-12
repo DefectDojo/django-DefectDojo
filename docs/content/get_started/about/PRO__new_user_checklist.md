@@ -20,7 +20,7 @@ The essence of DefectDojo is to import security data, organize it, and present i
 
 This is the essence of DefectDojo - import security data, organize it, and present it to the folks who need to know.
 
-All of these features can be automated, and because DefectDojo can handle over 200 tools (at time of writing) you should be all set to create a functional security inventory of your entire organizational output.
+All of these features can be automated, and because DefectDojo can handle over 500 tools (at time of writing) you should be all set to create a functional security inventory of your entire organizational output.
 
 ### Pro Features
 - If your organization uses Jira, ServiceNow, AzureDevops, GitHub or GitLab for issue tracking, check out our [documentation](/connectors/issue_tracking/) on those integrations.
