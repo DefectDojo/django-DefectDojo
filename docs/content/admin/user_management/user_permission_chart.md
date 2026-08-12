@@ -13,6 +13,8 @@ aliases:
 
 This chart is intended to list all permissions related to a Product or Product Type, as well as which permissions are available to each role.
 
+The five roles below are DefectDojo Pro's **built-in roles**. They are locked presets: their permissions are the same on every instance and cannot be changed. If you have built your own roles, this chart describes the built-ins they were cloned from rather than the roles themselves. For the full catalog of permissions a role can be given, see [Custom RBAC Roles](../pro__custom_rbac_roles/#choosing-permissions).
+
 | **Section** | **Permission** | Reader | Writer | Maintainer | Owner | API Importer |
 | --- | --- | --- | --- | --- | --- | --- |
 | **Product / Product Type Access** | View assigned Product or Product Type ¹ | ☑️ | ☑️ | ☑️ | ☑️ | ☑️ |

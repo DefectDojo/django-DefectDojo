@@ -7,7 +7,7 @@ weight: 1
 
 **Locations** are a new asset-modelling tool in DefectDojo Pro. They replace the legacy **Endpoints** model and absorb the previous **Components** (library) data, giving DefectDojo a single, polymorphic way to describe *where* a Finding lives — whether that's a URL, a software dependency from an **SBOM**, or, in the future, a **cloud resource ID**, **container image**, or **code repository**.
 
-Locations are currently in **Beta** and will need to be enabled on your instance. To enable Locations on your instance, contact [support@defectdojo.com](mailto:support@defectdojo.com).
+Locations must be enabled on your instance before you can use them. You can turn Locations on yourself from the [Feature Flags page](/admin/feature_flags/pro__feature_flags/) — no Support request is required. Note that Locations cannot be turned back off once enabled.
 
 ## Why Replace Endpoints?
 
@@ -17,12 +17,13 @@ The original Endpoints model was built around URLs and IP addresses — it carri
 2. **Performance ceiling.** Per-Finding Endpoint_Status rows and the URL-shaped schema did not scale well at large customer volumes.
 3. **Components were second-class.** Software libraries lived only as denormalised fields on a Finding, so a library could not exist independently of a vulnerability — making true SBOM management impossible.
 
-Locations fix all three by introducing a **base `Location` object** with a typed payload, plus dedicated **subtypes** for each asset shape. The MVP ships two subtypes:
+Locations fix all three by introducing a **base `Location` object** with a typed payload, plus dedicated **subtypes** for each asset shape:
 
 - **URL Locations** — functional equivalent of the old Endpoints, with the same protocol/host/port/path/query/fragment fields.
 - **Dependency Locations** — software libraries identified by [Package URL (pURL)](https://github.com/package-url/purl-spec), used to model SBOM contents.
+- **[Source Code Locations](/asset_modelling/locations/pro__source_code_locations/)** — where a static-analysis finding lives in source, identified by file path and line number. Scan-managed, and the substrate for [tracking findings as their code moves](/triage_findings/finding_deduplication/pro__location_drift_matching/).
 
-Future Location types under consideration include cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name), container images (registry/repository:tag and SHA256 fingerprints), and code repositories.
+Future Location types under consideration include cloud provider resource IDs (AWS ARN, Azure Resource ID, GCP Full Resource Name) and container images (registry/repository:tag and SHA256 fingerprints).
 
 ## Key Concepts
 
@@ -66,7 +67,7 @@ Existing parsers have been updated to emit Location data when the feature flag i
 | Endpoint → URL one-way migration command | Shipped |
 | Parser updates (URLs and dependencies) | Shipped for the major parsers |
 | SBOM upload (CycloneDX, SPDX v2/v3) | Shipped via `/api/v2/sbom-import/` |
-| Pro UI for Locations, URLs, Dependencies | Shipped (Beta) |
+| Pro UI for Locations, URLs, Dependencies | Shipped |
 | pURL search/filter | Shipped |
 | License tracking on dependencies | Partial (`license_expression` field) |
 | SWID Tag SBOM format | Not in MVP |

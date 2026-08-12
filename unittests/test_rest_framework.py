@@ -72,6 +72,7 @@ from dojo.models import (
     App_Analysis,
     BurpRawRequestResponse,
     Development_Environment,
+    Dojo_User,
     DojoMeta,
     Endpoint,
     Endpoint_Status,
@@ -1019,6 +1020,77 @@ class FindingVerifyAPITest(DojoAPITestCase):
 
 
 @versioned_fixtures
+class ReportGenerateFormatAPITest(DojoAPITestCase):
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        testuser = User.objects.get(username="admin")
+        token = Token.objects.get(user=testuser)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+    def _product_report_url(self):
+        return "/api/v2/products/1/generate_report/"
+
+    def test_generate_report_defaults_to_json(self):
+        response = self.client.post(self._product_report_url(), {}, format="json")
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("findings", response.data)
+
+    def test_generate_report_returns_html(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "HTML"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("text/html", response["Content-Type"])
+
+    def test_generate_report_returns_csv(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "CSV"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn("text/csv", response["Content-Type"])
+        self.assertIn(
+            "attachment; filename=product_1_findings.csv",
+            response["Content-Disposition"],
+        )
+
+    def test_generate_report_returns_excel(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "Excel"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_200_OK, response.status_code, response.content[:1000])
+        self.assertIn(
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response["Content-Type"],
+        )
+        self.assertIn(
+            "attachment; filename=product_1_findings.xlsx",
+            response["Content-Disposition"],
+        )
+
+    def test_generate_report_rejects_unknown_report_type(self):
+        response = self.client.post(
+            self._product_report_url(),
+            {"report_type": "PDF"},
+            format="json",
+        )
+
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:1000])
+        self.assertIn("report_type", response.data)
+
+
+@versioned_fixtures
 class EngagementCloseReopenAPITest(DojoAPITestCase):
     fixtures = ["dojo_testdata.json"]
 
@@ -1552,18 +1624,6 @@ class LocationTest(BaseClass.ListRequestTest, BaseClass.RetrieveRequestTest):
         self.test_type = TestType.OBJECT_PERMISSIONS
         self.permission_check_class = Location
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
-
-    def test_list_object_not_authorized(self):
-        self.setUp_not_authorized()
-        response = self.client.get(self.url, format="json")
-        self.assertEqual(403, response.status_code, response.content[:1000])
-
-    def test_detail_object_not_authorized(self):
-        self.setUp_not_authorized()
-        current_objects = self.endpoint_model.objects.all()
-        relative_url = self.url + f"{current_objects[0].id}/"
-        response = self.client.get(relative_url)
-        self.assertEqual(403, response.status_code, response.content[:1000])
 
 
 @skip_unless_v3
@@ -2516,6 +2576,69 @@ class JiraIssuesTest(BaseClass.BaseClassTest):
 
 
 @versioned_fixtures
+class JiraIssueProjectScopingTest(DojoAPITestCase):
+
+    """
+    The jira project on a jira finding mapping is writable, so a caller may only
+    reference a project they are allowed to edit. A member of one product must
+    not be able to attach or repoint a mapping to another product's project.
+    """
+
+    fixtures = ["dojo_testdata.json"]
+
+    def setUp(self):
+        super().setUp()
+        pt_a = self.create_product_type("scoping-pt-a")
+        pt_b = self.create_product_type("scoping-pt-b")
+        self.product_a = self.create_product("scoping-prod-a", prod_type=pt_a)
+        self.product_b = self.create_product("scoping-prod-b", prod_type=pt_b)
+
+        self.user = Dojo_User.objects.create(username="jira-scoping-user", is_staff=False, is_superuser=False)
+        self.product_a.authorized_users.add(self.user)
+
+        Test_Type.objects.get_or_create(name="scoping-tt")
+        engagement = self.create_engagement("scoping-eng", self.product_a)
+        test = self.create_test(engagement=engagement, scan_type="scoping-tt", title="scoping-test")
+        self.finding = Finding.objects.create(
+            title="scoping-finding", test=test, severity="Low",
+            numerical_severity="S3", reporter=self.user,
+        )
+
+        # jira_instance is nullable; the scoping check only needs the projects to exist.
+        self.project_a = JIRA_Project.objects.create(product=self.product_a, project_key="AAA")
+        self.project_b = JIRA_Project.objects.create(product=self.product_b, project_key="BBB")
+
+        token = Token.objects.create(user=self.user)
+        self.client = APIClient()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + token.key)
+        self.url = reverse("jira_issue-list")
+
+    def test_create_rejects_unauthorized_jira_project(self):
+        before = JIRA_Issue.objects.count()
+        response = self.client.post(self.url, {
+            "jira_project": self.project_b.id, "jira_id": "1", "jira_key": "BBB-1",
+            "finding": self.finding.id,
+        }, format="json")
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:500])
+        self.assertEqual(before, JIRA_Issue.objects.count())
+
+    def test_create_allows_authorized_jira_project(self):
+        response = self.client.post(self.url, {
+            "jira_project": self.project_a.id, "jira_id": "1", "jira_key": "AAA-1",
+            "finding": self.finding.id,
+        }, format="json")
+        self.assertEqual(status.HTTP_201_CREATED, response.status_code, response.content[:500])
+        self.assertEqual(self.project_a.id, JIRA_Issue.objects.get(id=response.data["id"]).jira_project_id)
+
+    def test_update_rejects_unauthorized_jira_project(self):
+        issue = JIRA_Issue.objects.create(jira_project=self.project_a, jira_id="1", jira_key="AAA-1", finding=self.finding)
+        response = self.client.patch(f"{self.url}{issue.id}/", {"jira_project": self.project_b.id}, format="json")
+        self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code, response.content[:500])
+        issue.refresh_from_db()
+        self.assertEqual(self.project_a.id, issue.jira_project_id)
+
+
+@versioned_fixtures
 class JiraProjectTest(BaseClass.BaseClassTest):
     fixtures = ["dojo_testdata.json"]
 
@@ -2606,6 +2729,15 @@ class Product_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
@@ -2629,6 +2761,15 @@ class Asset_API_Scan_ConfigurationTest(BaseClass.BaseClassTest):
         self.permission_delete = Permissions.Product_API_Scan_Configuration_Delete
         self.deleted_objects = 1
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
 
 
 @versioned_fixtures
@@ -2747,6 +2888,17 @@ class ToolConfigurationsTest(BaseClass.BaseClassTest):
         self.deleted_objects = 2
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0. The DeprecationNoticeMixin
+        # must run in finalize_response, which only happens if it precedes the base
+        # viewset in the MRO (see dojo/api_v2/views.py:DeprecationNoticeMixin).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class ToolProductSettingsTest(BaseClass.BaseClassTest):
@@ -2793,6 +2945,15 @@ class ToolTypesTest(BaseClass.BaseClassTest):
         self.deleted_objects = 3
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
 
+    def test_deprecation_notice_header(self):
+        # Deprecated in 3.2.0, removal planned for 3.5.0 (serves the API-based pull parsers).
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+        self.assertTrue(response.has_header("X-Deprecated"))
+        self.assertEqual("True", str(response["X-Deprecated"]))
+        self.assertTrue(response.has_header("X-End-Of-Life-Date"))
+        self.assertTrue(str(response["X-End-Of-Life-Date"]).startswith("2026-11-01"))
+
 
 @versioned_fixtures
 class NoteTypesTest(BaseClass.BaseClassTest):
@@ -2834,6 +2995,51 @@ class NotesTest(BaseClass.BaseClassTest):
         self.update_fields = {"entry": "changed entry"}
         self.test_type = TestType.STANDARD
         BaseClass.RESTEndpointTest.__init__(self, *args, **kwargs)
+
+    # Regression: PATCH /api/v2/notes/<id>/ without an "entry" (e.g. a body that
+    # only carries read-only fields such as note_type) set entry to None and
+    # inserted a NoteHistory row with data=NULL, hitting the NOT NULL constraint
+    # on dojo_notehistory.data -> HTTP 500. It also silently blanked the note body.
+    @parameterized.expand([
+        # (patch payload, does the note body change?)
+        ({"note_type": None}, False),   # only a read-only field -> empty validated_data
+        ({}, False),                    # empty partial update
+        ({"entry": "changed via patch"}, True),
+    ])
+    def test_partial_update_entry_handling(self, patch_payload, entry_should_change):
+        listing = self.client.get(self.url, format="json").data
+        note_id = listing["results"][0]["id"]
+        detail_url = f"{self.url}{note_id}/"
+        original_entry = Notes.objects.get(id=note_id).entry
+        history_before = Notes.objects.get(id=note_id).history.count()
+
+        response = self.client.patch(detail_url, patch_payload, format="json")
+        self.assertEqual(200, response.status_code, response.content[:1000])
+
+        note = Notes.objects.get(id=note_id)
+        # A NoteHistory row is never written with data=NULL, whichever payload.
+        self.assertFalse(
+            note.history.filter(data__isnull=True).exists(),
+            msg="a NoteHistory row was persisted with data=NULL",
+        )
+        if entry_should_change:
+            self.assertEqual(
+                note.entry, "changed via patch",
+                msg=f"expected entry updated, persisted={note.entry!r}",
+            )
+            self.assertEqual(
+                note.history.count(), history_before + 1,
+                msg="an entry change should append exactly one history revision",
+            )
+        else:
+            self.assertEqual(
+                note.entry, original_entry,
+                msg=f"expected entry preserved={original_entry!r}, persisted={note.entry!r}",
+            )
+            self.assertEqual(
+                note.history.count(), history_before,
+                msg="a partial update that leaves the body unchanged must add no history",
+            )
 
 
 @versioned_fixtures

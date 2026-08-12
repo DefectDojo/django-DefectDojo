@@ -412,6 +412,7 @@ add_core(ptr, offset, val);
                 self.assertEqual("src/common/io.cc", finding.file_path)
                 self.assertEqual(31, finding.line)
                 self.assertEqual(120, finding.cwe)
+                self.assertEqual([120], finding.unsaved_cwes)
                 self.assertEqual("FF1004", finding.vuln_id_from_tool)
                 self.assertEqual(
                     "327fc54b75ab37bbbb31a1b71431aaefa8137ff755acc103685ad5adf88f5dda", finding.unique_id_from_tool,
@@ -434,6 +435,10 @@ add_core(ptr, offset, val);
                 self.assertEqual(description, finding.description)
                 self.assertEqual("src/cli_main.cc", finding.file_path)
                 self.assertEqual(482, finding.line)
+                # rule reports two CWEs (CWE-120, CWE-20); primary cwe keeps the existing
+                # last-extracted choice while the full set is persisted via unsaved_cwes
+                self.assertEqual(20, finding.cwe)
+                self.assertEqual([120, 20], finding.unsaved_cwes)
                 self.assertEqual("FF1021", finding.vuln_id_from_tool)
                 self.assertEqual(
                     "ad8408027235170e870e7662751a01386beb2d2ed8beb75dd4ba8e4a70e91d65", finding.unique_id_from_tool,

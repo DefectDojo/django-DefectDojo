@@ -16,6 +16,7 @@ from django.utils import timezone
 from dojo.authorization.authorization import user_has_permission_or_403
 from dojo.authorization.roles_permissions import Permissions
 from dojo.endpoint.utils import endpoint_meta_import
+from dojo.finding.queries import get_authorized_findings_for_queryset
 from dojo.forms import (
     DeleteEndpointForm,
     DojoMetaFormSet,
@@ -124,20 +125,26 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
     locations = None
     metadata = None
     status = "No relationships defined"
-    base_findings = Finding.objects.only(
-        "id",
-        "title",
-        "severity",
-        "epss_score",
-        "epss_percentile",
-        "date",
-        "found_by",
-        "active",
-        "out_of_scope",
-        "mitigated",
-        "false_p",
-        "duplicate",
-        "found_by",
+    # A Location is shared by every product that references it, so an authorized
+    # Location does not imply its findings are authorized.
+    base_findings = get_authorized_findings_for_queryset(
+        Permissions.Finding_View,
+        Finding.objects.only(
+            "id",
+            "title",
+            "severity",
+            "epss_score",
+            "epss_percentile",
+            "date",
+            "found_by",
+            "active",
+            "out_of_scope",
+            "mitigated",
+            "false_p",
+            "duplicate",
+            "found_by",
+        ),
+        user=request.user,
     ).prefetch_related("locations__location", "found_by")
 
     if host_view:
@@ -159,7 +166,12 @@ def process_endpoint_view(request: HttpRequest, location_id: int, *, host_view=F
         # In endpoint view, show findings and metadata for the specific location.
         all_findings = base_findings.filter(locations__location=location).distinct()
         # Gather metadata for the location as a dictionary of name/value pairs.
-        metadata = dict(location.location_meta.values_list("name", "value"))
+        metadata = dict(
+            DojoMeta.objects.filter(
+                location=location,
+                location_product__in=get_authorized_products(Permissions.Product_View, request.user),
+            ).values_list("name", "value"),
+        )
 
     # Filter active findings for the location or host, ordered by severity
     active_findings = all_findings.filter(locations__status=FindingLocationStatus.Active).order_by("numerical_severity")
@@ -416,9 +428,16 @@ def delete_endpoint(request, location_id):
 def manage_meta_data(request, location_id):
     # Retrieve the Location object by ID and filter its associated metadata
     location = _get_location_or_404(request, location_id, "edit")
-    meta_data_query = DojoMeta.objects.filter(location=location)
-    # Map the foreign key for the formset to the location
-    form_mapping = {"location": location}
+    scoped_products = get_authorized_products(Permissions.Product_Edit, request.user)
+    meta_data_query = DojoMeta.objects.filter(location=location, location_product__in=scoped_products)
+    # The route carries no product, so a new entry is attributed to the caller's first
+    # product on this Location. Any of them is theirs to edit.
+    form_mapping = {
+        "location": location,
+        "location_product": Product.objects.filter(
+            locations__location=location, id__in=scoped_products,
+        ).order_by("id").first(),
+    }
     # Initialize the DojoMetaFormSet with the metadata queryset and mapping
     formset = DojoMetaFormSet(queryset=meta_data_query, form_kwargs={"fk_map": form_mapping})
     if request.method == "POST":

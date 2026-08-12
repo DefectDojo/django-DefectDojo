@@ -9,34 +9,32 @@ aliases:
 ---
 DefectDojo Pro is extending the Product/Product Type object classes to provide greater flexibility with the data model.
 
-Currently, this feature is in Beta.
-
 ## Enabling the Hierarchy Feature
 
-Hierarchy features ship with new versions of DefectDojo Pro by default, but existing customers who wish to migrate these features can do so using the following methods
-
-The two pieces are enabled separately, and by different means.
+The two pieces below are separate, and are controlled by different means.
 
 ### Asset Hierarchy
 
-**Asset Hierarchy** enables parent/child relationships between Assets. Once enabled, the hierarchy can be viewed and managed from the **Product** tab in the navigation.
+**Asset Hierarchy** enables parent/child relationships between Assets. The hierarchy is viewed and managed from the **Product** tab in the navigation.
 
-A superuser can turn it on from **Settings > Feature Flags**, on both Cloud and On-Premise instances. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+Asset Hierarchy is generally available and on for every instance, Cloud and On-Premise. There is nothing to enable, and it is no longer listed on the Feature Flags page.
 
 ### Label Changes (optional)
 
 **Label Changes** renames "Product Type" to "Organization" and "Product" to "Asset" throughout the UI. This is a separate step from enabling the hierarchy and can be done at the same time or later.
 
-Label changes are read from your deployment configuration when DefectDojo starts, so they are not toggled from the Feature Flags page:
+Label changes are on by default as of 3.0. There are two controls, covering different parts of the application:
 
-* **[DefectDojo Pro (Cloud)](/get_started/pro/cloud/)** — email [support@defectdojo.com](mailto:support@defectdojo.com) with your instance URL.
-* **[DefectDojo Pro (On-Premise)](/get_started/pro/onprem/)** — set `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` and restart DefectDojo. Contact Support if you would like guidance before making the change.
+* **Pro UI** (the default UI): a superuser toggles "Organization / Asset Relabeling" at **Settings > Feature Flags**, on both Cloud and On-Premise instances. The new labels appear on the next page load. See [Feature Flags](/admin/feature_flags/pro__feature_flags/).
+* **Classic UI pages and generated reports**: their labels and URLs come from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting, which is read when DefectDojo starts. On-premise, set it and restart DefectDojo. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), email [support@defectdojo.com](mailto:support@defectdojo.com) with your instance URL.
+
+Both default to on, and the Feature Flags value was seeded from the deployment setting, so the two agree unless you change one of them. Keep them in sync if you use the Classic UI as well as the Pro UI.
 
 Note that label changes are cosmetic only: API endpoints and field names remain unchanged, so existing automation will continue to work.
 
 ## Significant Changes
 
-* **Product Types** have been renamed to "Organizations", and **Products** have been renamed to "Assets".  Currently, this name change is opt-in for existing DefectDojo Pro subscriptions.
+* **Product Types** have been renamed to "Organizations", and **Products** have been renamed to "Assets".  As of 3.0 this name change is on by default. See [Label Changes](#label-changes-optional) for the controls that turn it off.
 * **Assets** can now have parent/child relationships with one another to further sub-categorize Organizational components. 
 
 ### Organizations
@@ -89,7 +87,7 @@ Core Application [Organization]
     └── nginx
 ```
 
-In this diagram, every element under "Core Application" could be recorded as a separate Asset, with unique business criticality (see: [Priority & Risk](/asset_modelling/pro_hierarchy/priority_sla/#prioritization-engines/)), RBAC, and corresponding Engagements and Tests.  You could continue to test, and store results, on the parent Asset (for example, `webapp-backend`), but you could also run isolated testing on a particular child Asset (for example, `database`).
+In this diagram, every element under "Core Application" could be recorded as a separate Asset, with unique business criticality (see: [Priority & Risk](/asset_modelling/pro_hierarchy/priority_sla/#prioritization-engines)), RBAC, and corresponding Engagements and Tests.  You could continue to test, and store results, on the parent Asset (for example, `webapp-backend`), but you could also run isolated testing on a particular child Asset (for example, `database`).
 
 ### Pen Tests: Isolated RBAC
 

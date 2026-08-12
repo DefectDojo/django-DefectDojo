@@ -22,15 +22,45 @@ The page lists every optional feature with:
 
 Use the search box to filter the list by feature name or description.
 
+### Features that are not listed
+
+The page lists the features you can choose to adopt. Two kinds of feature are absent from it.
+
+**Always on.** Once a feature reaches general availability it is on for every instance and stops being listed, because there is no longer a decision to make:
+
+* **Downstream Connectors** — see [Downstream Connectors](/connectors/downstream/about/)
+* **Universal Parser** — see [Universal Parser](/import_data/pro/specialized_import/universal_parser/)
+* **Asset Hierarchy** — see [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/)
+* **Appearance** and **Feature Flags** — the two Settings pages of the same name
+
+Nothing changes for your instance if you had one of these turned on. If you had one turned off, it is now on: these features are part of DefectDojo Pro rather than opt-in. Contact [DefectDojo Support](mailto:support@defectdojo.com) if that is a problem for your instance.
+
+**Enabled by DefectDojo on request.** A few capabilities depend on infrastructure that is provisioned per instance, so they are switched on by DefectDojo rather than from this page:
+
+* **Scheduling Service** — see [Scheduling Rules](/automation/rules_engine/scheduling/)
+
+Contact [DefectDojo Support](mailto:support@defectdojo.com) to have one of these enabled. If it is already on for your instance, it stays on.
+
 ## Turning a feature on or off
 
 1. Find the feature in the list.
 2. Click its toggle.
-3. The change takes effect immediately. You do not need to restart anything, and other users pick the change up on their next page load.
+3. The change takes effect immediately. Other users pick the change up on their next page load.
 
 Some features show a confirmation dialog before the change is applied. This happens when enabling a feature that carries a warning (for example one that requires a restart or may affect existing data), or one that cannot be turned back off.
 
-Turning a feature off is normally just the reverse of turning it on. The exceptions are called out in the next section.
+Turning a feature off is normally just the reverse of turning it on. The exceptions are called out in [When a toggle is locked](#when-a-toggle-is-locked).
+
+### Organization / Asset Relabeling
+
+**Organization / Asset Relabeling** renames "Product Type" to "Organization" and "Product" to "Asset". It is on by default and toggles from this page like any other feature, but it is worth knowing which parts of DefectDojo it governs:
+
+* The **Pro UI** follows this toggle. The new labels appear on your next page load.
+* The **Classic UI** pages, their URLs, and generated reports take their naming from the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting (also on by default), which is read when DefectDojo starts. This toggle does not change them, and restarting does not make it change them.
+
+The stored toggle was seeded from that deployment setting, so the two agree until you change one of them. If you turn relabeling off here and you also use the Classic UI, set `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL=False` on your deployment and restart so both surfaces match. On [DefectDojo Pro (Cloud)](/get_started/pro/cloud/), contact [DefectDojo Support](mailto:support@defectdojo.com) to have the deployment setting changed.
+
+The feature carries a **Restart Recommended** tag on the Feature Flags page for this reason: the naming used outside the Pro UI is fixed when the process starts. Relabeling is cosmetic either way. Database models, field names, and API endpoints are unchanged, so existing automation keeps working. See [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/).
 
 ## When a toggle is locked
 
@@ -58,7 +88,7 @@ Cloud instances also have access to features that are not offered on-premise. Se
 
 On [DefectDojo Pro (On-Premise)](/get_started/pro/onprem/), most features work exactly as they do on Cloud: open **Settings > Feature Flags** and toggle them.
 
-A small number of features are read from your deployment configuration instead — they change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them, for example `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`.
+A small number of features are read from your deployment configuration instead. They change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them, for example `DD_V3_FEATURE_LOCATIONS` for [Locations](/asset_modelling/locations/pro__locations_overview/).
 
 Because these features require a restart, and some of them cannot be reversed once enabled, check the feature's own documentation before changing one. Several are best enabled with help from [DefectDojo Support](mailto:support@defectdojo.com).
 
@@ -78,12 +108,27 @@ Most features are available on both installation types. The exceptions are:
 
 | Feature | Availability | How it is controlled |
 | --- | --- | --- |
-| Downstream Connections | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise, which does not run the required infrastructure. See [Pro Integrations](/issue_tracking/pro_integration/integrations/). |
 | Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
-| Locations | Both | Deployment configuration. Locations is in Beta and cannot be turned back off once enabled, so contact [DefectDojo Support](mailto:support@defectdojo.com) to have it enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
-| Organization / Asset Relabeling | Both | Deployment configuration: `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL`. |
+| Locations | Both | Feature Flags page. Note that Locations cannot be turned back off once it is enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
+| Organization / Asset Relabeling | Both | Feature Flags page for the Pro UI; the Classic UI, its URLs and generated reports follow the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting. See [above](#organization--asset-relabeling). |
 
 Every other optional feature is toggled directly on the Feature Flags page on both Cloud and On-Premise instances.
+
+## Reading feature flags outside the UI
+
+You do not have to open the Feature Flags page to find out which features are enabled — flag state can also be read programmatically, which is useful when automation needs to check that a capability is available before depending on it.
+
+```
+GET /api/v2/defectdojo_information/feature_flags/
+```
+
+This returns a JSON array with one object per feature flag. Alongside the flag's `key`, `title` and `description`, each object reports the values automation usually wants: `effective` (whether the feature is actually on for this instance), `default`, `application_value` (the instance's own setting, or `null` if unset), `editable`, and `locked_reason` where a flag cannot be changed. Flags retired from the product are omitted.
+
+Any **authenticated** user can read it — no superuser role is required. For the exact response schema on your version, see your instance's interactive API documentation at `/api/v2/oa3/swagger-ui/`, which is generated from the running build. See also the [API v2 documentation](/automation/api/api-v2-docs/).
+
+The same read-only listing is also published on the instance's `/api/mcp/` surface, at `/api/mcp/defectdojo_information/feature_flags/`.
+
+This endpoint is **read-only**. Turning a feature on or off is still done from the Feature Flags page, or — for the deployment-configured features noted above — in your deployment settings.
 
 ## Frequently asked questions
 

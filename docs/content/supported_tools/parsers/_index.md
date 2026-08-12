@@ -16,7 +16,7 @@ cascade:
 exclude_search: true
 ---
 
-DefectDojo can parse data from 180+ security reports and counting.
+DefectDojo can parse data from 500+ security reports and counting.
 
 ## DefectDojo Pro Methods
 <span style="background-color:rgba(242, 86, 29, 0.3)">DefectDojo Pro</span> users have enhanced methods of import available for certain tools.
@@ -25,7 +25,7 @@ DefectDojo can parse data from 180+ security reports and counting.
 
 **Smart Upload** allows you to split infrastructure-wide scan files up by component or endpoint, and easily combine those results with other Findings from the same location.
 
-| [Connectors](/import_data/pro/connectors/about_connectors/): supported tools | [Smart Upload](/import_data/pro/specialized_import/smart_upload/): supported tools |
+| [Connectors](/connectors/upstream/about/): supported tools | [Smart Upload](/import_data/pro/specialized_import/smart_upload/): supported tools |
 | --- | --- |
 | AWS Security Hub, BurpSuite, Checkmarx ONE, Dependency-Track, Probely, Semgrep, SonarQube, Snyk, Tenable | Nexpose, NMap, OpenVas, Qualys, Tenable, Wiz | 
 

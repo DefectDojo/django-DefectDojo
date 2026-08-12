@@ -63,6 +63,7 @@ from dojo.finding.ui.forms import (
     MergeFindings,
     ReviewFindingForm,
 )
+from dojo.finding_group.queries import get_authorized_finding_groups
 from dojo.forms import (
     GITHUBFindingForm,
     JIRAFindingForm,
@@ -72,6 +73,7 @@ from dojo.forms import (
 from dojo.jira import services as jira_services
 from dojo.location.queries import get_authorized_locations
 from dojo.location.status import FindingLocationStatus
+from dojo.location.utils import copy_location_references
 from dojo.models import (
     IMPORT_UNTOUCHED_FINDING,
     BurpRawRequestResponse,
@@ -81,7 +83,6 @@ from dojo.models import (
     Engagement,
     FileAccessToken,
     Finding,
-    Finding_Group,
     Finding_Template,
     GITHUB_Issue,
     GITHUB_PKey,
@@ -95,6 +96,7 @@ from dojo.models import (
     Test_Import_Finding_Action,
     User,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.tags.utils import bulk_add_tags_to_instances
 from dojo.test.queries import get_authorized_tests
@@ -121,6 +123,7 @@ from dojo.utils import (
     reopen_external_issue,
     update_external_issue,
 )
+from dojo.vulnerability.queries import vulnerability_id_prefetch
 
 JFORM_PUSH_TO_JIRA_MESSAGE = "jform.push_to_jira: %s"
 
@@ -168,7 +171,7 @@ def prefetch_for_similar_findings(findings):
         prefetched_findings = prefetched_findings.prefetch_related("notes")
         prefetched_findings = prefetched_findings.prefetch_related("tags")
         prefetched_findings = prefetched_findings.prefetch_related(
-            "vulnerability_id_set",
+            vulnerability_id_prefetch(),
         )
     else:
         logger.debug("unable to prefetch because query was already executed")
@@ -655,7 +658,7 @@ class ViewFinding(View):
             "finding": finding,
             "dojo_user": user,
             "user": request.user,
-            "notes": notes,
+            "notes": visible_notes(notes, request.user),
             "files": finding.files.all(),
             "note_type_activation": note_type_activation,
             "available_note_types": available_note_types,
@@ -940,6 +943,7 @@ class EditFinding(View):
             self.process_burp_request_response(new_finding, context)
             # Save the vulnerability IDs
             finding_helper.save_vulnerability_ids(new_finding, context["form"].cleaned_data["vulnerability_ids"].split())
+            finding_helper.save_cwes(new_finding)
             # Add a success message
             messages.add_message(
                 request,
@@ -1087,7 +1091,7 @@ class DeleteFinding(View):
     def process_form(self, request: HttpRequest, finding: Finding, context: dict):
         if context["form"].is_valid():
             product = finding.test.engagement.product
-            finding.delete()
+            finding.delete(push_to_jira=context["form"].cleaned_data.get("push_to_jira"))
             # Update the grade of the product async
             dojo_dispatch_task(calculate_grade, product.id)
             # Add a message to the request that the finding was successfully deleted
@@ -1354,6 +1358,7 @@ def defect_finding_review(request, fid):
     )
 
 
+@require_POST
 def reopen_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.active = True
@@ -1363,6 +1368,11 @@ def reopen_finding(request, fid):
     finding.last_reviewed = finding.mitigated
     finding.last_reviewed_by = request.user
     finding.under_review = False
+    # Same reasoning as close_finding: an open review does not survive the
+    # status change, so its requester/reviewers go with it. Reopening matters
+    # more than closing here — the finding comes back active, so stale
+    # reviewers would show up in reviewer-scoped queues as live work.
+    finding.review_requested_by = None
     if settings.V3_FEATURE_LOCATIONS:
         for ref in finding.locations.all():
             ref.set_status(FindingLocationStatus.Active, request.user, timezone.now())
@@ -1377,6 +1387,8 @@ def reopen_finding(request, fid):
     # Clear the risk acceptance, if present
     ra_helper.risk_unaccept(request.user, finding)
     finding.save(dedupe_option=False, push_to_jira=False)
+    # After the save so a failed save doesn't leave the M2M already emptied.
+    finding.reviewers.clear()
     if jira_services.is_push_all_issues(finding) or jira_services.is_keep_in_sync(finding):
         jira_services.push(finding)
 
@@ -1492,6 +1504,7 @@ def remediation_date(request, fid):
     )
 
 
+@require_POST
 def touch_finding(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     finding.last_reviewed = timezone.now()
@@ -1502,6 +1515,7 @@ def touch_finding(request, fid):
     )
 
 
+@require_POST
 def simple_risk_accept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
 
@@ -1519,6 +1533,7 @@ def simple_risk_accept(request, fid):
     )
 
 
+@require_POST
 def risk_unaccept(request, fid):
     finding = get_object_or_404(Finding, id=fid)
     ra_helper.risk_unaccept(request.user, finding)
@@ -1703,9 +1718,11 @@ def clear_finding_review(request, fid):
     )
 
 
+@require_POST
 def mktemplate(request, fid):
-    user_has_global_permission_or_403(request.user, "add")
     finding = get_object_or_404(Finding, id=fid)
+    user_has_permission_or_403(request.user, finding, "view")
+    user_has_global_permission_or_403(request.user, "add")
     templates = Finding_Template.objects.filter(title=finding.title)
     if len(templates) > 0:
         messages.add_message(
@@ -1837,6 +1854,7 @@ def find_template_to_apply(request, fid):
 def choose_finding_template_options(request, tid, fid):
     finding = get_object_or_404(Finding, id=fid)
     user_has_permission_or_403(request.user, finding, "edit")
+    user_has_global_permission_or_403(request.user, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
     data = finding.__dict__.copy()
     # Remove tags and other non-serializable fields
@@ -1925,6 +1943,7 @@ def choose_finding_template_options(request, tid, fid):
 def apply_template_to_finding(request, fid, tid):
     finding = get_object_or_404(Finding, id=fid)
     user_has_permission_or_403(request.user, finding, "edit")
+    user_has_global_permission_or_403(request.user, "edit")
     template = get_object_or_404(Finding_Template, id=tid)
 
     if request.method == "POST":
@@ -2334,12 +2353,14 @@ def merge_finding_product(request, pid):
                         ):
                             finding_references = f"{finding_references}\n{finding.references}"
 
-                        # if checked merge the endpoints
+                        # if checked merge the endpoints and locations
                         if form.cleaned_data["add_endpoints"]:
                             with Endpoint.allow_endpoint_init():  # TODO: Delete this after the move to Locations
                                 finding_to_merge_into.endpoints.add(
                                     *finding.endpoints.all(),
                                 )
+                            if settings.V3_FEATURE_LOCATIONS:
+                                copy_location_references(finding, finding_to_merge_into)
 
                         # if checked merge the tags
                         if form.cleaned_data["tag_finding"]:
@@ -2478,8 +2499,9 @@ def _bulk_delete_findings(request, pid, form, finding_to_update, finds, total_fi
         skipped_find_count = total_find_count - finds.count()
         deleted_find_count = finds.count()
 
+        push_to_jira = form.cleaned_data.get("push_to_jira")
         for find in finds:
-            find.delete()
+            find.delete(push_to_jira=push_to_jira)
 
         if skipped_find_count > 0:
             add_error_message_to_response(
@@ -2707,7 +2729,12 @@ def _bulk_update_finding_groups(finds, form):
     if form.cleaned_data["finding_group_add"]:
         logger.debug("finding_group_add checked!")
         fgid = form.cleaned_data["add_to_finding_group_id"]
-        finding_group = Finding_Group.objects.get(id=fgid)
+        # Scope the target group to the ones the user may edit, the same way the
+        # submitted findings are scoped above. Without this a caller could pass a
+        # group id from a product they have no access to.
+        finding_group = get_object_or_404(
+            get_authorized_finding_groups("edit"), id=fgid,
+        )
         finding_group, added, skipped = finding_helper.add_to_finding_group(
             finding_group, finds,
         )
@@ -3271,7 +3298,7 @@ def push_to_jira(request, fid):
         # but cant't change too much now without having a test suite,
         # so leave as is for now with the addition warning message
         # to check alerts for background errors.
-        if jira_services.push(finding):
+        if jira_services.push_succeeded(jira_services.push(finding)):
             messages.add_message(
                 request,
                 messages.SUCCESS,

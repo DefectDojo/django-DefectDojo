@@ -1,12 +1,41 @@
 import base64
+import math
 
 import dateutil
 from django.conf import settings
 from django.core.files.base import ContentFile
 
+from dojo.finding.cwe import cwe_number
 from dojo.models import Endpoint, FileUpload, Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.parser_test import ParserTest
+
+# Accepted fields that map to a numeric column on Finding, and the type they hold.
+NUMERIC_FIELDS = {
+    "cvssv3_score": float,
+    "cvssv4_score": float,
+    "cwe": int,
+    "epss_percentile": float,
+    "epss_score": float,
+    "line": int,
+    "nb_occurences": int,
+    "sast_source_line": int,
+    "scanner_confidence": int,
+    "thread_id": int,
+}
+
+
+def to_number(value, converter):
+    """Convert value with converter, returning None when it does not hold a number."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, str):
+        value = value.strip()
+    try:
+        number = converter(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
 
 
 class GenericJSONParser:
@@ -44,6 +73,12 @@ class GenericJSONParser:
             if "vulnerability_ids" in item:
                 unsaved_vulnerability_ids = item["vulnerability_ids"]
                 del item["vulnerability_ids"]
+            # remove cwes from the dictionary (multiple CWEs per finding).
+            # "cwes" is not a Finding field, so it is popped like vulnerability_ids.
+            unsaved_cwes = None
+            if "cwes" in item:
+                unsaved_cwes = item["cwes"]
+                del item["cwes"]
             # check for required keys
             required = {"title", "severity", "description"}
 
@@ -116,6 +151,8 @@ class GenericJSONParser:
             if not_allowed:
                 msg = f"Not allowed fields are present: {not_allowed}"
                 raise ValueError(msg)
+
+            self._normalize_numeric_fields(item)
             finding = Finding(**item)
 
             # manage endpoints
@@ -156,6 +193,19 @@ class GenericJSONParser:
                             file_path=file_path,
                         ),
                     )
+                if file_path:
+                    line = item.get("line")
+                    source_line = item.get("sast_source_line")
+                    finding.unsaved_locations.append(
+                        LocationData.code(
+                            file_path=file_path,
+                            line=int(line) if line is not None and str(line).isdigit() else None,
+                            source_object=item.get("sast_source_object") or "",
+                            sink_object=item.get("sast_sink_object") or "",
+                            source_file_path=item.get("sast_source_file_path") or "",
+                            source_line=int(source_line) if source_line is not None and str(source_line).isdigit() else None,
+                        ),
+                    )
             if unsaved_files:
                 for unsaved_file in unsaved_files:
                     data = base64.b64decode(unsaved_file.get("data"))
@@ -178,5 +228,31 @@ class GenericJSONParser:
                     finding.unsaved_vulnerability_ids = list(
                         unsaved_vulnerability_ids,
                     )
+            # multiple CWEs: keep the primary on finding.cwe (only if not already
+            # supplied via "cwe") and persist the full set via unsaved_cwes. The
+            # import pipeline normalizes/deduplicates through finding_cwe_labels().
+            if unsaved_cwes:
+                if not finding.cwe:
+                    finding.cwe = cwe_number(unsaved_cwes[0])
+                finding.unsaved_cwes = unsaved_cwes
             test_internal.findings.append(finding)
         return test_internal
+
+    def _normalize_numeric_fields(self, item):
+        """
+        Coerce the numeric fields of a finding, dropping the ones that hold no number.
+
+        Django accepts any value on assignment and only rejects a non-numeric one when
+        the finding is written, so a report using a placeholder such as "N/A" for a line
+        number it could not determine aborts the whole import from deep inside the
+        database write. Dropping the key here lets the model default apply instead, and
+        a number that arrives quoted is kept by converting it.
+        """
+        for field, converter in NUMERIC_FIELDS.items():
+            if field not in item or item[field] is None:
+                continue
+            number = to_number(item[field], converter)
+            if number is None:
+                del item[field]
+            else:
+                item[field] = number

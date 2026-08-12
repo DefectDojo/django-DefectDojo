@@ -55,7 +55,7 @@ DefectDojo's core functionality is available in DefectDojo Open-Source.
 
 This edition of DefectDojo includes:
 
-- Import/Reimport for all 200+ Supported Tools
+- Import/Reimport for all 500+ Supported Tools
 - REST API
 - Deduplication features
 - Limited UI, metrics and reporting features
@@ -68,8 +68,8 @@ For teams managing a smaller volume of Findings, DefectDojo Open-Source is a gre
 There are a few supported ways to install DefectDojo’s Open-Source edition ([available on Github](https://github.com/DefectDojo/django-DefectDojo)):
 
 [Docker Compose](https://github.com/DefectDojo/django-DefectDojo/blob/master/readme-docs/DOCKER.md) is the easiest method to install the core program and services required to run DefectDojo.
-Our [Architecture](https://docs.defectdojo.com/get_started/open_source/architecture/) guide gives you an overview of each service and component used by DefectDojo.
-[Running In Production](https://docs.defectdojo.com/get_started/open_source/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
+Our [Architecture](/get_started/open_source/architecture/) guide gives you an overview of each service and component used by DefectDojo.
+[Running In Production](/get_started/open_source/running-in-production/) lists system requirements, performance tweaks and maintenance processes for running DefectDojo on a production server (with Docker Compose).
 
 Kubernetes is not fully supported at the Open-Source level, but this guide can be referenced and used as a starting point to integrate DefectDojo into Kubernetes architecture.
 
@@ -81,10 +81,10 @@ If you run into trouble with an Open-Source install, we highly recommend asking 
 
 DefectDojo, Inc. hosts a Pro edition of this software for commercial purposes.  Along with a sleek, modern UI, DefectDojo Pro includes:
 
-* [Connectors](/import_data/pro/connectors/about_connectors/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
+* [Connectors](/connectors/upstream/about/): out-of-the-box API integrations with enterprise-level scanners (such as Checkmarx One, BurpSuite, Semgrep and more)
 * **Configurable Import Methods**: [Universal Parser](/supported_tools/parsers/universal_parser/), [Smart Upload](/import_data/pro/specialized_import/smart_upload/)
 * **[CLI Tools](/import_data/pro/specialized_import/external_tools/)** for rapid integration with your systems
-* **[Additional Project Tracking Integrations](/issue_tracking/intro/intro/)**: ServiceNow, Azure DevOps, GitHub and GitLab
+* **[Additional Project Tracking Integrations](/connectors/issue_tracking/)**: ServiceNow, Azure DevOps, GitHub and GitLab
 * **[Improved Metrics](/metrics_reports/pro_metrics/pro__overview/)** for executive reporting and high-level analysis
 * **[Priority And Risk](/asset_modelling/pro_hierarchy/priority_sla/)** to identify the Findings of highest urgency, system-wide
 * **Premium Support** and implementation guidance for your organization

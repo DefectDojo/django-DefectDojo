@@ -85,6 +85,34 @@ function _toTimePoints(data) {
 function _vals(data) {
     return (data || []).map(function (d) { return d[1]; });
 }
+function _sevVals(data, labels) {
+    var out = labels.map(function () { return 0; });
+    (data || []).forEach(function (d) {
+        if (d[0] >= 0 && d[0] < out.length) out[d[0]] = d[1];
+    });
+    return out;
+}
+
+/** Place Flot-style [[x, val], …] points into the category slots named by `ticks`.
+ *
+ *  Flot let every series carry its own x, so a series could hold a single point
+ *  parked at one tick (severity breakdowns do this: Critical at x=0, High at x=1,
+ *  …). Chart.js instead indexes each dataset positionally against `labels`, so
+ *  taking the bare values would drop every series onto slot 0 and stack them into
+ *  one column. Match each point's x against the tick x that owns it instead.
+ *
+ *  Ticks without x values (plain ["Lbl", …]) keep the positional reading. */
+function _valsAt(data, ticks) {
+    if (!ticks || !ticks.length || !Array.isArray(ticks[0])) return _vals(data);
+    var slotOf = {};
+    ticks.forEach(function (t, i) { slotOf[t[0]] = i; });
+    var out = new Array(ticks.length).fill(null);
+    (data || []).forEach(function (d) {
+        var slot = slotOf[d[0]];
+        if (slot !== undefined) out[slot] = d[1];
+    });
+    return out;
+}
 
 /** Extract label strings from Flot tick arrays.
  *  Accepts [[0,"Lbl"], …] or plain ["Lbl", …]. Strips embedded HTML. */
@@ -213,11 +241,11 @@ function _sevStackedBar(id, d1, d2, d3, d4, d5, ticks, opts) {
         data: {
             labels: labels,
             datasets: [
-                { label: 'Critical', data: _vals(d1), backgroundColor: SEV.critical },
-                { label: 'High',     data: _vals(d2), backgroundColor: SEV.high },
-                { label: 'Medium',   data: _vals(d3), backgroundColor: SEV.medium },
-                { label: 'Low',      data: _vals(d4), backgroundColor: SEV.low },
-                { label: 'Info',     data: _vals(d5), backgroundColor: SEV.info },
+                { label: 'Critical', data: _valsAt(d1, ticks), backgroundColor: SEV.critical },
+                { label: 'High',     data: _valsAt(d2, ticks), backgroundColor: SEV.high },
+                { label: 'Medium',   data: _valsAt(d3, ticks), backgroundColor: SEV.medium },
+                { label: 'Low',      data: _valsAt(d4, ticks), backgroundColor: SEV.low },
+                { label: 'Info',     data: _valsAt(d5, ticks), backgroundColor: SEV.info },
             ],
         },
         options: {
@@ -229,16 +257,13 @@ function _sevStackedBar(id, d1, d2, d3, d4, d5, ticks, opts) {
                     display: opts.showLegend === true,
                     position: 'top',
                     labels: { usePointStyle: true, boxWidth: 8 },
-                },
-            },
-            scales: {
-                x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true } },
-                y: { stacked: true, beginAtZero: true, grid: { color: '#e5e7eb' } },
-            },
-        },
-    });
-}
-
+datasets: [
+    { label: 'Critical', data: _sevVals(d1, labels), backgroundColor: SEV.critical },
+    { label: 'High',     data: _sevVals(d2, labels), backgroundColor: SEV.high },
+    { label: 'Medium',   data: _sevVals(d3, labels), backgroundColor: SEV.medium },
+    { label: 'Low',      data: _sevVals(d4, labels), backgroundColor: SEV.low },
+    { label: 'Info',     data: _sevVals(d5, labels), backgroundColor: SEV.info },
+],                },            },            scales                x: { stacked: true, grid: { display: false }, ticks: { maxRotation: 45, autoSkip: true } }                y: { stacked: true, beginAtZero: true, grid: { color: '#e5e7eb' } }            }        }, 
 /** Pie / doughnut chart. items = [{label, value, color}, …] */
 function _pie(id, items, opts) {
     opts = opts || {};

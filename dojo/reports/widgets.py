@@ -355,7 +355,8 @@ class EndpointList(Widget):
     def get_html(self):
         html = render_to_string("dojo/custom_html_report_endpoint_list.html",
                                 {"title": self.title,
-                                 "endpoints": prefetch_related_endpoints_for_report(self.endpoints.qs),
+                                 "endpoints": prefetch_related_endpoints_for_report(
+                                     self.endpoints.qs, user=getattr(self.request, "user", None)),
                                  "include_finding_notes": self.finding_notes,
                                  "include_finding_images": self.finding_images,
                                  "host": self.host,

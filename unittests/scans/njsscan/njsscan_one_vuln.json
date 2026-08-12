@@ -1,0 +1,29 @@
+{
+  "errors": [],
+  "njsscan_version": "0.4.3",
+  "nodejs": {
+    "node_md5": {
+      "files": [
+        {
+          "file_path": "hash.js",
+          "match_lines": [
+            4,
+            4
+          ],
+          "match_position": [
+            10,
+            34
+          ],
+          "match_string": "  return crypto.createHash('md5').update(value).digest('hex');"
+        }
+      ],
+      "metadata": {
+        "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+        "description": "MD5 is a a weak hash which is known to have collision. Use a strong hashing function.",
+        "owasp-web": "A9: Using Components with Known Vulnerabilities",
+        "severity": "WARNING"
+      }
+    }
+  },
+  "templates": {}
+}

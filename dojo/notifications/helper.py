@@ -527,7 +527,10 @@ class WebhookNotificationManger(NotificationManagerHelpers):
             "X-DefectDojo-Instance": settings.SITE_URL,
             "Accept": "application/json",
         }
-        if endpoint.header_name is not None:
+        # The model default for header_name is "" (not None), so endpoints created
+        # without a custom header via the API/ORM would add a header with an empty
+        # name here, which requests rejects with InvalidHeader.
+        if endpoint.header_name:
             headers[endpoint.header_name] = endpoint.header_value
         yaml_data = self._create_notification_message(
             event,
@@ -771,9 +774,15 @@ class NotificationManager(NotificationManagerHelpers):
         # send notifications to user after merging possible multiple notifications records (i.e. personal global + personal product)
         # kwargs.update({'user': user})
         applicable_notifications = user.applicable_notifications
-        if user.is_superuser:
-            # admin users get all system notifications
-            logger.debug("User %s is superuser", user)
+        if user.is_superuser and not applicable_notifications:
+            # Superusers are included as recipients even with no notification
+            # settings of their own, so fall back to the system defaults for them.
+            # A superuser who *has* configured their own settings keeps them: the
+            # merge below is a union, so folding the system row in would put its
+            # channels back over anything they had switched off. Events that are
+            # meant to override personal settings are handled by
+            # NOTIFICATIONS_SYSTEM_LEVEL_TRUMP on the recipients path instead.
+            logger.debug("User %s is superuser with no notification settings", user)
             applicable_notifications.append(self.system_notifications)
 
         notifications_set = Notifications.merge_notifications_list(

@@ -40,7 +40,7 @@ class BurpParser:
         - impact: Set to background returned by Burp Scanner.
         - unique_id_from_tool: Set to serial_number returned by Burp Scanner.
         - vuln_id_from_tool: Taken from output of Burp Scanner.
-        - cwe: Set to cwe outputted from Burp Scanner. Multiple cwes is not supported by parser.
+        - cwe: Set to primary (first) cwe outputted from Burp Scanner. Additional cwes are stored in unsaved_cwes.
         """
         return [
             "title",
@@ -66,7 +66,7 @@ class BurpParser:
 
         Fields:
         - title: Made using Burp scanner output's name.
-        - cwe: Set to cwe outputted from Burp Scanner. Multiple cwes is not supported by parser.
+        - cwe: Set to primary (first) cwe outputted from Burp Scanner. Additional cwes are stored in unsaved_cwes.
         - description: Made by combining URL, url_host, path, and detail.
 
         NOTE: uses legacy dedupe: ['title', 'cwe', 'line', 'file_path', 'description']
@@ -98,7 +98,12 @@ class BurpParser:
         items = {}
         for node in tree.findall("issue"):
             item = get_item(node, test)
-            dupe_key = item.vuln_id_from_tool
+            # Burp's <type> is 1:1 with the issue name for its own checks, but every
+            # extension-generated issue shares the single type 0x08000000, so keying
+            # on type alone merged unrelated extension findings into one. Include the
+            # title to keep those apart; for native issues the pair is equivalent to
+            # the type on its own.
+            dupe_key = (item.vuln_id_from_tool, item.title)
             if dupe_key in items:
                 if settings.V3_FEATURE_LOCATIONS:
                     items[dupe_key].unsaved_locations += item.unsaved_locations
@@ -306,11 +311,7 @@ def get_item(item_node, test):
         finding.unsaved_endpoints = [Endpoint.from_uri(url_host)]
     # manage cwes
     cwes = do_clean_cwe(item_node.findall("vulnerabilityClassifications"))
-    if len(cwes) > 1:
-        # TODO: support more than one CWE
-        logger.debug(
-            "more than one CWE for a finding %s. NOT supported by parser API", cwes,
-        )
     if len(cwes) > 0:
         finding.cwe = cwes[0]
+        finding.unsaved_cwes = cwes
     return finding

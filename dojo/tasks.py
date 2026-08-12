@@ -115,6 +115,9 @@ def _async_dupe_delete_impl():
     logger.info("total number of excess duplicates to delete: %s", len(ids_to_delete))
 
     if ids_to_delete:
+        # Inbound duplicate_finding references from surviving findings are resolved inside
+        # each chunk's transaction by bulk_delete_findings itself -- see
+        # resolve_inbound_duplicate_references.
         # order_desc=True deletes higher ids before lower ids, consistent with how
         # finding_delete handles duplicate clusters (duplicate_cluster.order_by("-id").delete()).
         bulk_delete_findings(Finding.objects.filter(id__in=ids_to_delete), order_desc=True)
@@ -204,6 +207,11 @@ def update_watson_search_index_for_model(model_name, pk_list, *args, **kwargs):
         instances_added = 0
         instances_skipped = 0
 
+        # This task IS the terminal drain: it accumulates one already-bounded batch (<= 1000
+        # PKs) into its own local SearchContextManager and bulk-saves it once via end(). The
+        # intermediate size-flush hook is bound to the global singleton instance only, so
+        # this private context keeps the stock add_to_context, never re-triggers the flush,
+        # and cannot re-dispatch itself.
         for instance in instances:
             try:
                 # Add to watson context (this will trigger indexing on end())

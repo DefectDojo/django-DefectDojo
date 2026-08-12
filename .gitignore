@@ -152,6 +152,12 @@ docs/.hugo_build.lock
 
 # claude etc
 MEMORY.md
-.claude/
+# Personal agent config stays untracked; the shared branch guard is checked in.
+# (Negations require .claude/* rather than .claude/ — git cannot re-include a
+# path inside a directory that is itself excluded.)
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+.claude/settings.local.json
 CLAUDE.md
 CLAUDE.local.md

@@ -6,6 +6,7 @@ from cvss import parser as cvss_parser
 from dateutil.parser import parse
 from django.conf import settings
 
+from dojo.finding.cwe import cwe_number, parse_cwes
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -71,6 +72,14 @@ class GenericCSVParser:
             # manage CWE
             if "CweId" in row:
                 finding.cwe = int(row["CweId"])
+            # manage multiple CWEs (comma/space separated column), keeping the
+            # primary on finding.cwe; the full set is persisted via unsaved_cwes.
+            if row.get("CweIds"):
+                cwes = parse_cwes(row["CweIds"])
+                if cwes:
+                    if not finding.cwe:
+                        finding.cwe = cwe_number(cwes[0])
+                    finding.unsaved_cwes = cwes
 
             if "epss_score" in row:
                 finding.epss_score = float(row["epss_score"])
@@ -139,6 +148,11 @@ class GenericCSVParser:
                     find.unsaved_vulnerability_ids = (
                         finding.unsaved_vulnerability_ids
                     )
+                if finding.unsaved_cwes:
+                    if find.unsaved_cwes:
+                        find.unsaved_cwes.extend(finding.unsaved_cwes)
+                    else:
+                        find.unsaved_cwes = finding.unsaved_cwes
                 find.nb_occurences += 1
             else:
                 dupes[key] = finding

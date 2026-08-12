@@ -1,10 +1,12 @@
 import logging
 import re
 
+from django.conf import settings
 from django.utils.html import strip_tags
 from lxml import etree
 
 from dojo.models import Finding
+from dojo.tools.locations import LocationData
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +91,12 @@ class SonarQubeSoprasteriaHelper:
                 dynamic_finding=False,
                 nb_occurences=1,
             )
+            if settings.V3_FEATURE_LOCATIONS and vuln_file_path:
+                find.unsaved_locations.append(
+                    # No line number because we have aggregated different
+                    # vulnerabilities that may have different line numbers
+                    LocationData.code(file_path=vuln_file_path),
+                )
             dupes[aggregateKeys] = find
         else:
             # We have already created a finding for this aggregate: updates the
@@ -137,4 +145,11 @@ class SonarQubeSoprasteriaHelper:
             dynamic_finding=False,
             unique_id_from_tool=vuln_key,
         )
+        if settings.V3_FEATURE_LOCATIONS and vuln_file_path:
+            find.unsaved_locations.append(
+                LocationData.code(
+                    file_path=vuln_file_path,
+                    line=int(vuln_line) if str(vuln_line).isdigit() else None,
+                ),
+            )
         dupes[aggregateKeys] = find

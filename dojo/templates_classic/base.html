@@ -30,6 +30,12 @@
         <script src="{% static "jquery-ui/dist/jquery-ui.min.js" %}"></script>
         <!-- Bootstrap Core JavaScript -->
         <script src="{% static "bootstrap/dist/js/bootstrap.min.js" %}"></script>
+        <script>
+            // No tooltip or popover here renders a link or an image, so keep both
+            // out of the markup Bootstrap accepts in one.
+            delete $.fn.popover.Constructor.DEFAULTS.whiteList.a;
+            delete $.fn.popover.Constructor.DEFAULTS.whiteList.img;
+        </script>
         <!-- Bootstrap Select -->
         <script src="{% static "bootstrap-select/dist/js/bootstrap-select.min.js" %}"></script>
 
@@ -610,6 +616,13 @@
                                                     <li>
                                                         <a href="{% url 'tool_type' %}">
                                                             {% trans "Tool Type" %}
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                                {% if "dojo.view_cicdinfrastructure"|has_configuration_permission:request %}
+                                                    <li>
+                                                        <a href="{% url 'cicd_infrastructure' %}">
+                                                            {% trans "CI/CD Infrastructure" %}
                                                         </a>
                                                     </li>
                                                 {% endif %}

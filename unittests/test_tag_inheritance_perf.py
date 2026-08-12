@@ -99,6 +99,8 @@ def _make_locations(product: Product, n: int) -> None:
 @override_settings(
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 class TagInheritancePerfBaselines(DojoTestCase):
 
@@ -135,7 +137,7 @@ class TagInheritancePerfBaselines(DojoTestCase):
         # Per-product flag is also set in _make_product_with_findings as a
         # belt-and-braces measure (tests should not be flag-coupled).
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 
@@ -405,10 +407,10 @@ class TagInheritancePerfBaselines(DojoTestCase):
     EXPECTED_PRODUCT_TAG_REMOVE_100_V2 = 53
     EXPECTED_PRODUCT_TAG_REMOVE_100_V3 = 53
 
-    EXPECTED_CREATE_ONE_FINDING_V2 = 55
-    EXPECTED_CREATE_ONE_FINDING_V3 = 55
-    EXPECTED_CREATE_100_FINDINGS_V2 = 3124
-    EXPECTED_CREATE_100_FINDINGS_V3 = 3124
+    EXPECTED_CREATE_ONE_FINDING_V2 = 56
+    EXPECTED_CREATE_ONE_FINDING_V3 = 56
+    EXPECTED_CREATE_100_FINDINGS_V2 = 3224
+    EXPECTED_CREATE_100_FINDINGS_V3 = 3224
 
     EXPECTED_FINDING_ADD_USER_TAG_V2 = 17
     EXPECTED_FINDING_ADD_USER_TAG_V3 = 17
@@ -433,6 +435,8 @@ class TagInheritancePerfBaselines(DojoTestCase):
     CELERY_TASK_ALWAYS_EAGER=True,
     CELERY_TASK_EAGER_PROPAGATES=True,
     SECURE_SSL_REDIRECT=False,
+    SETTINGS_CACHE_L1_TTL=30,
+    SETTINGS_CACHE_L2_TTL=-1,
 )
 @versioned_fixtures
 class TagInheritanceImportPerfBaselines(DojoAPITestCase):
@@ -457,7 +461,7 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     @classmethod
     def setUpTestData(cls):
         from dojo.models import System_Settings  # noqa: PLC0415
-        ss = System_Settings.objects.get()
+        ss = System_Settings.objects.get(no_cache=True)
         ss.enable_product_tag_inheritance = True
         ss.save()
 
@@ -590,9 +594,40 @@ class TagInheritanceImportPerfBaselines(DojoAPITestCase):
     # the async watson indexer, executed inline under CELERY_TASK_ALWAYS_EAGER);
     # +5 reimport (no-change + with-new) queries from removal of
     # WATSON_ASYNC_INDEX_UPDATE_THRESHOLD making async dispatch unconditional.
-    EXPECTED_ZAP_IMPORT_V2 = 287
-    EXPECTED_ZAP_IMPORT_V3 = 311
+    # Multiple-CWEs feature: +2 import / +2 reimport-no-change (Finding_CWE
+    # store + bulk flush) and +10 reimport-with-new (per-finding reconcile reads
+    # existing Finding_CWE rows for each changed finding).
+    # Vulnerability id writes (entity-only cutover): only the Vulnerability entity +
+    # FindingVulnerabilityReference bulk writes remain (batched, not per-finding). Removing the
+    # legacy Vulnerability_Id dual-write drops the reimport counts by its delete+bulk_insert:
+    # -12 reimport-no-change, -6 reimport-with-new. Import counts are unchanged.
+    # save_without_resurrecting() no longer costs a query. It used to confirm the row
+    # still existed with its own SELECT before writing it back (+3, one per guarded
+    # save); it now passes force_update=True and lets Django refuse the INSERT
+    # fallback, which detects the same vanished row from the UPDATE itself. On top of
+    # that the engagement is only written back when update_timestamps() actually moved
+    # its target end, which happens for CI/CD engagements only — these baselines use
+    # an Interactive engagement, so its save disappears along with the SELECT its
+    # pre_save receiver issued and the indexing its post_save triggered. Net -8 (v2)
+    # and -9 (v3) on every path, constant rather than per-finding.
+    # +2 on the paths that buffer child rows: the batch flush confirms the buffered
+    # findings still exist before inserting their vulnerability id references, CWE rows
+    # and request/response rows, instead of letting a finding deleted mid-batch turn the
+    # bulk insert into a dangling foreign key that PostgreSQL only rejects at COMMIT.
+    # One primary-key lookup per flush method that has something to insert, and a ZAP
+    # batch boundary runs two of them: flush_vulnerability_ids() resolves the set once
+    # for the reference and CWE buffers it shares, then flush_burp_request_response()
+    # resolves its own for the request/response rows the ZAP parser attaches. The
+    # no-change reimport buffers nothing, so it takes no lookup and is unchanged.
+    # +2 on the V3 paths only: the batch deduplication loader now prefetches
+    # locations__location__url instead of the deprecated endpoints m2m, whose
+    # Endpoint.__init__ raises under V3. The locations lookup traverses two more
+    # relations than the single-join endpoints prefetch it replaces, so it costs two
+    # extra queries per load. The V2 counts are untouched because that branch still
+    # prefetches endpoints.
+    EXPECTED_ZAP_IMPORT_V2 = 293
+    EXPECTED_ZAP_IMPORT_V3 = 318
     EXPECTED_ZAP_REIMPORT_NO_CHANGE_V2 = 74
-    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 86
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 148
-    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 177
+    EXPECTED_ZAP_REIMPORT_NO_CHANGE_V3 = 87
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V2 = 158
+    EXPECTED_ZAP_REIMPORT_WITH_NEW_V3 = 188

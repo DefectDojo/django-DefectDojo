@@ -1,11 +1,13 @@
 import logging
+from collections import defaultdict
 from contextlib import suppress
 from datetime import datetime
 from itertools import batched
 from time import sleep, strftime
 
 from django.conf import settings
-from django.db import transaction
+from django.db import OperationalError, transaction
+from django.db.models import Count
 from django.db.models.query_utils import Q
 from django.db.models.signals import post_delete, pre_delete
 from django.db.utils import IntegrityError
@@ -17,8 +19,10 @@ from fieldsignals import pre_save_changed
 
 import dojo.risk_acceptance.helper as ra_helper
 from dojo.celery import app
+from dojo.db_utils import is_transient_db_conflict
 from dojo.endpoint.utils import endpoint_get_or_create, save_endpoints_to_add
 from dojo.file_uploads.helper import delete_related_files
+from dojo.finding.cwe import finding_cwe_labels
 from dojo.finding.deduplication import (
     dedupe_batch_of_findings,
     do_dedupe_finding_task_internal,
@@ -36,12 +40,12 @@ from dojo.models import (
     Engagement,
     FileUpload,
     Finding,
+    Finding_CWE,
     Finding_Group,
     JIRA_Instance,
     Notes,
     System_Settings,
     Test,
-    Vulnerability_Id,
 )
 from dojo.notes.helper import delete_related_notes
 from dojo.notifications.helper import create_notification
@@ -54,6 +58,7 @@ from dojo.utils import (
     get_object_or_none,
     to_str_typed,
 )
+from dojo.vulnerability.manager import persist_for_finding
 
 logger = logging.getLogger(__name__)
 deduplicationLogger = logging.getLogger("dojo.specific-loggers.deduplication")
@@ -68,6 +73,7 @@ NOT_ACCEPTED_FINDINGS_QUERY = Q(risk_accepted=False)
 WAS_ACCEPTED_FINDINGS_QUERY = Q(risk_acceptance__isnull=False) & Q(risk_acceptance__expiration_date_handled__isnull=False)
 CLOSED_FINDINGS_QUERY = Q(is_mitigated=True)
 UNDER_REVIEW_QUERY = Q(under_review=True)
+DELETE_JIRA_SYNC_UNSET = object()
 
 
 # this signal is triggered just before a finding is getting saved
@@ -551,9 +557,15 @@ def finding_pre_delete(sender, instance, **kwargs):
     instance.found_by.clear()
     delete_related_notes(instance)
     delete_related_files(instance)
+    # Finding_Group.findings is a M2M, so deleting the last finding in a group only
+    # removes the through row and leaves the group behind. Record the groups here,
+    # while the membership is still readable, and drop the empty ones afterwards.
+    instance._groups_pending_empty_check = list(
+        instance.finding_group_set.values_list("id", flat=True),
+    )
 
 
-def finding_delete(instance, **kwargs):
+def finding_delete(instance, *, push_to_jira=DELETE_JIRA_SYNC_UNSET, **kwargs):
     logger.debug("finding delete, instance: %s", instance.id)
 
     # the idea is that the engagement/test pre delete already prepared all the duplicates inside
@@ -571,14 +583,30 @@ def finding_delete(instance, **kwargs):
         # but django still calls delete() in this case
         return
 
+    jira_sync_requested = push_to_jira is None or isinstance(push_to_jira, bool)
+    jira_issue_reassigned = False
     duplicate_cluster = instance.original_finding.all()
     if duplicate_cluster:
         if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
             duplicate_cluster.order_by("-id").delete()
         else:
-            reconfigure_duplicate_cluster(instance, duplicate_cluster)
+            new_original = reconfigure_duplicate_cluster(instance, duplicate_cluster)
+            if jira_sync_requested:
+                jira_issue_reassigned = _reassign_jira_issue_to_new_original(
+                    instance,
+                    new_original,
+                    push_to_jira=push_to_jira,
+                )
     else:
         logger.debug("no duplicate cluster found for finding: %d, so no need to reconfigure", instance.id)
+
+    if (
+        jira_sync_requested
+        and not jira_issue_reassigned
+        and instance.has_jira_issue
+        and jira_services.is_delete_sync_allowed(instance, push_to_jira=push_to_jira)
+    ):
+        jira_services.close_issue_for_deleted_finding(instance, push_to_jira=push_to_jira)
 
     # this shouldn't be necessary as Django should remove any Many-To-Many entries automatically, might be a bug in Django?
     # https://code.djangoproject.com/ticket/154
@@ -591,6 +619,58 @@ def finding_post_delete(sender, instance, **kwargs):
     # Catch instances in async delete where a single object is deleted more than once
     with suppress(Finding.DoesNotExist):
         logger.debug("finding post_delete, sender: %s instance: %s", to_str_typed(sender), to_str_typed(instance))
+    delete_emptied_finding_groups(instance)
+
+
+def delete_emptied_finding_groups(finding):
+    """
+    Remove any Finding_Group the given finding was the last member of.
+
+    A group with no findings has nothing left to represent, and leaving it behind
+    kept it in the UI and in JIRA group pushes indefinitely.
+    """
+    group_ids = getattr(finding, "_groups_pending_empty_check", None)
+    if not group_ids:
+        return
+    finding._groups_pending_empty_check = []
+    # Deleting a Test cascades to its groups, so some of these may already be gone.
+    for group in Finding_Group.objects.filter(id__in=group_ids).annotate(
+        remaining=Count("findings"),
+    ):
+        if group.remaining == 0:
+            logger.debug("deleting finding group %d, it has no findings left", group.id)
+            group.delete()
+
+
+def _reassign_jira_issue_to_new_original(deleted_finding, new_original, *, push_to_jira=None):
+    if (
+        not new_original
+        or new_original.has_jira_issue
+        or not jira_services.is_delete_sync_allowed(deleted_finding, push_to_jira=push_to_jira)
+    ):
+        return False
+
+    jira_issue = jira_services.get_issue(deleted_finding)
+    if not jira_issue:
+        return False
+
+    jira_instance = jira_services.get_instance(deleted_finding)
+    if not jira_instance:
+        return False
+
+    jira_id = jira_issue.jira_id
+    jira_instance_id = jira_instance.id
+    comment = (
+        f"DefectDojo finding {deleted_finding.id} was deleted. "
+        f"This Jira issue was reassigned to finding {new_original.id}."
+    )
+    jira_services.reassign_issue_to_finding(jira_issue, new_original)
+    jira_services.add_simple_comment_async(
+        jira_id,
+        jira_instance_id,
+        comment,
+    )
+    return True
 
 
 # can't use model to id here due to the queryset
@@ -600,12 +680,12 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
     # when a finding is deleted, and is an original of a duplicate cluster, we have to chose a new original for the cluster
     # only look for a new original if there is one outside this test
     if original is None or cluster_outside is None or len(cluster_outside) == 0:
-        return
+        return None
 
     if settings.DUPLICATE_CLUSTER_CASCADE_DELETE:
         # Don't delete here — the caller (async_delete_crawl_task or finding_delete)
         # handles deletion of outside-scope duplicates efficiently via bulk_delete_findings.
-        return
+        return None
     logger.debug("reconfigure_duplicate_cluster: cluster_outside: %s", cluster_outside)
     # set new original to first finding in cluster (ordered by id)
     new_original = cluster_outside.order_by("id").first()
@@ -624,6 +704,8 @@ def reconfigure_duplicate_cluster(original, cluster_outside):
 
         # Re-point remaining duplicates to the new original in a single query
         cluster_outside.exclude(id=new_original.id).update(duplicate_finding=new_original)
+        return new_original
+    return None
 
 
 def prepare_duplicates_for_delete(obj, *, preview_only=False):
@@ -751,7 +833,9 @@ def bulk_clear_finding_m2m(finding_qs):
     Bulk-clear M2M through tables for a queryset of findings.
 
     Must be called BEFORE cascade_delete since M2M through tables
-    are not discovered by _meta.related_objects.
+    are not discovered by _meta.related_objects, and inside the same
+    transaction as the delete it clears for -- see
+    _bulk_delete_findings_internal for why the two cannot be separated.
 
     Special handling for FileUpload: deletes via ORM so the custom
     FileUpload.delete() fires and removes files from disk storage.
@@ -819,14 +903,163 @@ def bulk_clear_finding_m2m(finding_qs):
         Notes.objects.filter(id__in=note_ids).delete()
 
 
+# A duplicate chain (A -> B -> C) is pathological; fix_loop_duplicates exists to repair
+# them. The walk below therefore stops after a level or two in practice -- this bound only
+# keeps a chain that loops entirely inside the delete set from looping here too.
+MAX_DUPLICATE_CHAIN_DEPTH = 10
+
+
+def _load_doomed_ancestors(chunk_ids, delete_scope_ids):
+    """
+    Map ``{doomed finding id: its duplicate_finding_id}`` for the chunk and its doomed ancestors.
+
+    Only findings this run will delete are included, so ``id in`` the returned mapping is
+    the test for "this ancestor is going away too" used by _resolve_surviving_root. The
+    chunk itself is one query; each further level costs one more, and levels beyond the
+    first only exist when a duplicate chain runs through the delete set.
+    """
+    parent_of_doomed = dict(
+        Finding.objects.filter(id__in=chunk_ids).values_list("id", "duplicate_finding_id"),
+    )
+    frontier = {
+        parent_id for parent_id in parent_of_doomed.values()
+        if parent_id and parent_id not in parent_of_doomed
+    }
+    for _ in range(MAX_DUPLICATE_CHAIN_DEPTH):
+        if not frontier:
+            break
+        next_level = dict(
+            Finding.objects
+            .filter(id__in=frontier)
+            .filter(id__in=delete_scope_ids)
+            .values_list("id", "duplicate_finding_id"),
+        )
+        if not next_level:
+            break
+        parent_of_doomed.update(next_level)
+        frontier = {
+            parent_id for parent_id in next_level.values()
+            if parent_id and parent_id not in parent_of_doomed
+        }
+    return parent_of_doomed
+
+
+def _resolve_surviving_root(start_id, parent_of_doomed):
+    """Walk up through doomed ancestors; return the first id that outlives the delete, or None."""
+    current = start_id
+    seen = set()
+    while current in parent_of_doomed:
+        if current in seen:
+            # Defensive: a reference loop entirely inside the delete set.
+            return None
+        seen.add(current)
+        current = parent_of_doomed[current]
+    return current  # A surviving finding id, or None when the chain dead-ends.
+
+
+def resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids):
+    """
+    Resolve ``duplicate_finding`` references into ``chunk_ids`` held by findings that survive.
+
+    The duplicate_finding self-FK is ON DELETE DO_NOTHING and, like every Django FK on
+    Postgres, DEFERRABLE INITIALLY DEFERRED. A surviving finding still pointing at a
+    deleted one is therefore only rejected at COMMIT -- far from the code that wrote the
+    reference, as an opaque constraint error that takes the whole chunk with it.
+
+    Belongs inside the chunk's transaction for the same reason bulk_clear_finding_m2m
+    does. Resolving once up front leaves every chunk after the first exposed: each chunk
+    commits separately, so a reference written after that one pass -- deduplication of a
+    concurrent import landing on an original this run has selected but not yet reached --
+    survives into a later chunk's COMMIT. Run per chunk, no such window exists.
+
+    Only findings outside ``delete_scope_ids`` are touched: a reference from one doomed
+    finding to another goes away with the row that holds it.
+
+    Each survivor is re-pointed at its chain's first ancestor outside the delete set, and
+    promoted to an original (``duplicate_finding = None, duplicate = False``) when the
+    chain dead-ends inside it or circles back to the survivor -- mirroring how
+    fix_loop_duplicates treats parentless duplicates rather than fabricating a self-loop.
+
+    Returns the number of survivors whose reference was resolved.
+    """
+    survivors = list(
+        Finding.objects
+        .filter(duplicate_finding_id__in=chunk_ids)
+        .exclude(id__in=delete_scope_ids)
+        .values_list("id", "duplicate_finding_id"),
+    )
+    if not survivors:
+        return 0
+
+    parent_of_doomed = _load_doomed_ancestors(chunk_ids, delete_scope_ids)
+
+    repoint_groups = defaultdict(list)  # surviving root id -> [survivor ids]
+    promote_ids = []
+    for survivor_id, parent_id in survivors:
+        root_id = _resolve_surviving_root(parent_id, parent_of_doomed)
+        if root_id is None or root_id == survivor_id:
+            promote_ids.append(survivor_id)
+        else:
+            repoint_groups[root_id].append(survivor_id)
+
+    # The walk trusts the rows it read; confirm each root really is still there and out of
+    # scope before pointing anything at it, so an already-inconsistent graph degrades to a
+    # promote instead of a fresh dangling reference.
+    if repoint_groups:
+        live_root_ids = set(
+            Finding.objects
+            .filter(id__in=list(repoint_groups))
+            .exclude(id__in=delete_scope_ids)
+            .values_list("id", flat=True),
+        )
+        for root_id in list(repoint_groups):
+            if root_id not in live_root_ids:
+                promote_ids.extend(repoint_groups.pop(root_id))
+
+    deduplicationLogger.warning(
+        "bulk delete: resolving %d inbound duplicate reference(s) (%d re-pointed, %d promoted to original)",
+        len(survivors), len(survivors) - len(promote_ids), len(promote_ids),
+    )
+
+    for root_id, survivor_ids in repoint_groups.items():
+        Finding.objects.filter(id__in=survivor_ids).update(duplicate_finding_id=root_id)
+    if promote_ids:
+        Finding.objects.filter(id__in=promote_ids).update(duplicate_finding=None, duplicate=False)
+
+    return len(survivors)
+
+
+# A synchronous bulk delete that loses a concurrency race (deadlock or serialization
+# failure) rolls the offending chunk back and would otherwise surface as a 500 to the
+# caller. Retry that chunk a few times, mirroring async_delete_task's backstop for the
+# background cascade deletes that deterministic lock ordering cannot fully rule out.
+BULK_DELETE_RETRY_DELAY = 0.5  # seconds before the first retry of a chunk; doubled each attempt
+BULK_DELETE_MAX_CONFLICT_RETRIES = 3
+
+
 def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=False):
     """
     Delete findings and all related objects efficiently. Including any related object in Dojo-Pro
 
-    Sends the pre_bulk_delete signal, clears M2M through tables (not
-    discovered by _meta.related_objects), then uses cascade_delete for
-    all FK relations via raw SQL.
+    Sends the pre_bulk_delete signal, then per chunk clears the chunk's M2M through
+    tables (not discovered by _meta.related_objects) and uses cascade_delete for all
+    FK relations via raw SQL.
     Chunked with per-chunk transaction.atomic() for crash safety.
+
+    The M2M clear belongs inside the chunk's transaction, next to the delete it
+    protects. Clearing once up front for the whole queryset left every chunk after
+    the first exposed: each chunk commits separately, so a through row written after
+    that one pass -- a note added, a finding re-tagged by a concurrent import --
+    survived into its chunk's COMMIT, where the through table's foreign key rejected
+    it. Django declares those keys DEFERRABLE INITIALLY DEFERRED, so the failure
+    landed at COMMIT rather than at the delete, and the caller saw an opaque
+    constraint error naming an internal table. Per chunk, the through rows and the
+    findings they point at go in one transaction and no such window exists.
+
+    Inbound duplicate_finding references are resolved the same way and for the same
+    reason -- see resolve_inbound_duplicate_references. Doing it here rather than in each
+    caller covers every entry point to the chunked delete, not just the one that first
+    hit the constraint.
 
     When order_desc is True, findings are processed highest id first (matches
     finding_delete: duplicate_cluster.order_by("-id").delete()) so self-FK
@@ -839,8 +1072,10 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
     )
 
     pre_bulk_delete_findings.send(sender=Finding, finding_qs=finding_qs)
-    bulk_clear_finding_m2m(finding_qs)
     ordered_qs = finding_qs.order_by("-id") if order_desc else finding_qs.order_by("id")
+    # Kept as a subquery so the full delete scope never materializes in Python; it is only
+    # needed to tell a surviving finding from one this run is about to remove.
+    delete_scope_ids = finding_qs.order_by().values_list("id", flat=True)
     for chunk_num, chunk_ids in enumerate(
         batched(
             ordered_qs.values_list("id", flat=True).iterator(chunk_size=chunk_size),
@@ -850,9 +1085,31 @@ def _bulk_delete_findings_internal(finding_qs, chunk_size=1000, *, order_desc=Fa
         start=1,
     ):
         chunk_qs = Finding.objects.filter(id__in=chunk_ids)
-        with transaction.atomic():
-            cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
-            execute_delete_sql(chunk_qs)
+        for attempt in range(BULK_DELETE_MAX_CONFLICT_RETRIES + 1):
+            try:
+                with transaction.atomic():
+                    bulk_clear_finding_m2m(chunk_qs)
+                    resolve_inbound_duplicate_references(chunk_ids, delete_scope_ids)
+                    cascade_delete_related_objects(Finding, chunk_qs, skip_relations={Finding}, skip_m2m_for={Finding})
+                    execute_delete_sql(chunk_qs)
+            except OperationalError as exc:
+                # A deadlock or serialization failure aborts and rolls the whole chunk
+                # transaction back, so the aborted work is not wrong -- only undone -- and
+                # re-running the chunk is safe. Earlier chunks already committed and are
+                # untouched. Only transient conflicts are retried; anything else (a
+                # statement timeout, a dropped connection) re-raises at once, as does a
+                # conflict that survives every attempt. Without this backstop a delete
+                # overlapping a concurrent import or dedup returns a 500 to the caller.
+                if not is_transient_db_conflict(exc) or attempt == BULK_DELETE_MAX_CONFLICT_RETRIES:
+                    raise
+                backoff = BULK_DELETE_RETRY_DELAY * (2 ** attempt)
+                logger.warning(
+                    "bulk_delete_findings: transient DB conflict on chunk %d, retry %d/%d in %.1fs: %s",
+                    chunk_num, attempt + 1, BULK_DELETE_MAX_CONFLICT_RETRIES, backoff, exc,
+                )
+                sleep(backoff)
+            else:
+                break
         logger.info(
             "bulk_delete_findings: deleted chunk %d (%d findings)",
             chunk_num, len(chunk_ids),
@@ -924,7 +1181,17 @@ def removeLoop(finding_id, counter):
     # in bulk, but loops are rare (only from past bugs or high parallel load) so the
     # current implementation is acceptable.
     # get latest status
-    finding = Finding.objects.get(id=finding_id)
+    #
+    # Every id reaching this function was read earlier -- fix_loop_duplicates streams candidate
+    # ids through a cursor, and the recursion below walks ids off a queryset -- so the row can
+    # already be deleted by the time it is fetched. Callers run alongside deletes (the delete
+    # path itself calls in through prepare_duplicates_for_delete), so get() turned that ordinary
+    # race into a Finding.DoesNotExist that aborted the caller. A row that is gone has no loop
+    # left to repair, so skip it and let the run continue with the remaining candidates.
+    finding = Finding.objects.filter(id=finding_id).first()
+    if finding is None:
+        deduplicationLogger.debug("removeLoop: finding %s no longer exists, skipping", finding_id)
+        return
     real_original = finding.duplicate_finding
 
     if not real_original or real_original is None:
@@ -944,8 +1211,15 @@ def removeLoop(finding_id, counter):
         # If not, swap them around
         tmp = finding_id
         finding_id = real_original.id
-        real_original = Finding.objects.get(id=tmp)
-        finding = Finding.objects.get(id=finding_id)
+        # Same race as the fetch above: both rows were read moments ago, but nothing holds
+        # them, so re-read defensively rather than letting one vanish take out the caller.
+        real_original = Finding.objects.filter(id=tmp).first()
+        finding = Finding.objects.filter(id=finding_id).first()
+        if real_original is None or finding is None:
+            deduplicationLogger.debug(
+                "removeLoop: finding %s or %s no longer exists, skipping", tmp, finding_id,
+            )
+            return
 
     if real_original in finding.original_finding.all():
         # remove the original from the duplicate list if it is there
@@ -1011,22 +1285,34 @@ def save_vulnerability_ids(finding, vulnerability_ids, *, delete_existing: bool 
     vulnerability_ids = list(dict.fromkeys(vulnerability_ids))
     vulnerability_ids = sanitize_vulnerability_ids(vulnerability_ids)
 
-    # Remove old vulnerability ids if requested
+    # Persist the Vulnerability entity + FindingVulnerabilityReference rows.
     # Callers can set delete_existing=False when they know there are no existing IDs
-    # to avoid an unnecessary delete query (e.g., for new findings)
-    if delete_existing:
-        Vulnerability_Id.objects.filter(finding=finding).delete()
-
-    Vulnerability_Id.objects.bulk_create([
-        Vulnerability_Id(finding=finding, vulnerability_id=vid)
-        for vid in vulnerability_ids
-    ])
+    # to avoid an unnecessary delete query (e.g., for new findings).
+    persist_for_finding(finding, vulnerability_ids, delete_existing=delete_existing)
 
     # Set CVE
     if vulnerability_ids:
         finding.cve = vulnerability_ids[0]
     else:
         finding.cve = None
+
+
+def save_cwes(finding, *, delete_existing: bool = True):
+    """
+    Persist the finding's CWEs as Finding_CWE rows.
+
+    The primary Finding.cwe plus any parser-supplied unsaved_cwes, stored as canonical CWE-<n>
+    strings. CWE is a weakness class, kept separate from vulnerability ids.
+    """
+    cwe_values = finding_cwe_labels(finding.cwe, getattr(finding, "unsaved_cwes", None))
+
+    if delete_existing:
+        Finding_CWE.objects.filter(finding=finding).delete()
+
+    Finding_CWE.objects.bulk_create(
+        [Finding_CWE(finding=finding, cwe=cwe) for cwe in cwe_values],
+        ignore_conflicts=True,
+    )
 
 
 def save_vulnerability_ids_template(finding_template, vulnerability_ids):
@@ -1288,6 +1574,12 @@ def close_finding(
     finding.out_of_scope = bool(out_of_scope)
     finding.duplicate = bool(duplicate)
     finding.under_review = False
+    # Closing ends any open peer review, so the requester/reviewer record has
+    # to go with it. Leaving them set strands the review: the finding no
+    # longer offers "Clear Review" (that action is gated on under_review), yet
+    # it still reports reviewers, so queue views built on the reviewers M2M
+    # keep surfacing work nobody can act on.
+    finding.review_requested_by = None
     finding.last_reviewed = mitigated_date
     finding.last_reviewed_by = user
 
@@ -1320,6 +1612,10 @@ def close_finding(
     close_external_issue(finding.id, "Closed by defectdojo", "github")
 
     _save_finding_with_jira_sync(finding, new_note=new_note)
+
+    # Cleared after the save: the M2M write hits the DB immediately, so doing
+    # it earlier would drop the reviewers even if the save above raised.
+    finding.reviewers.clear()
 
     # Notification
     create_notification(

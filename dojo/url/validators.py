@@ -102,7 +102,11 @@ DEFAULT_PORTS = {
     "mqtts": 8883,  # Secure MQTT
     "openvpn": 1194,  # included for completeness, though it doesn't fit the URL scheme exactly
     "irc": 194,
+    "snmp": 161,  # Simple Network Management Protocol (161/udp)
+    "ipp": 631,  # Internet Printing Protocol
     "tcp": None,
+    "udp": None,  # transport protocol; scanner supplies the actual port
+    "icmp": None,  # no port concept
     # Empty string is used when the protocol is not specified, port is then assumed to be None as well
     "": None,
 }

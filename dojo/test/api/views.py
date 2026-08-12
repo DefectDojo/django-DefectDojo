@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
@@ -8,7 +9,7 @@ from rest_framework.permissions import DjangoModelPermissions, IsAuthenticated
 from rest_framework.response import Response
 
 from dojo.api_v2 import serializers as api_v2_serializers
-from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate
+from dojo.api_v2.views import PrefetchDojoModelViewSet, report_generate_response
 from dojo.authorization import api_permissions as permissions
 from dojo.models import (
     FileUpload,
@@ -18,6 +19,7 @@ from dojo.models import (
     Test_Import,
     Test_Type,
 )
+from dojo.notes.helper import notes_prefetch
 from dojo.risk_acceptance import api as ra_api
 from dojo.test.api.filters import ApiTestFilter, TestImportAPIFilter
 from dojo.test.api.serializer import (
@@ -58,7 +60,7 @@ class TestsViewSet(
     def get_queryset(self):
         return (
             get_authorized_tests("view")
-            .prefetch_related("notes", "files")
+            .prefetch_related(notes_prefetch(), "files")
             .distinct()
         )
 
@@ -110,14 +112,13 @@ class TestsViewSet(
             options[
                 "include_table_of_contents"
             ] = report_options.validated_data["include_table_of_contents"]
+            options["report_type"] = report_options.validated_data["report_type"]
         else:
             return Response(
                 report_options.errors, status=status.HTTP_400_BAD_REQUEST,
             )
 
-        data = report_generate(request, test, options)
-        report = api_v2_serializers.ReportGenerateSerializer(data)
-        return Response(report.data)
+        return report_generate_response(request, test, options)
 
     @extend_schema(
         methods=["GET"],
@@ -180,7 +181,7 @@ class TestsViewSet(
         notes = test.notes.all()
 
         serialized_notes = TestToNotesSerializer(
-            {"test_id": test, "notes": notes},
+            {"test_id": test, "notes": notes}, context=self.get_serializer_context(),
         )
         return Response(serialized_notes.data, status=status.HTTP_200_OK)
 
@@ -194,7 +195,7 @@ class TestsViewSet(
         responses={status.HTTP_201_CREATED: api_v2_serializers.FileSerializer},
     )
     @action(
-        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
+        detail=True, methods=["get", "post"], parser_classes=(MultiPartParser,), permission_classes=(IsAuthenticated, permissions.UserHasTestFilePermission),
     )
     def files(self, request, pk=None):
         test = self.get_object()
@@ -233,7 +234,7 @@ class TestsViewSet(
         detail=True,
         methods=["get"],
         url_path=r"files/download/(?P<file_id>\d+)",
-        permission_classes=(IsAuthenticated, permissions.UserHasTestRelatedObjectPermission),
+        permission_classes=(IsAuthenticated, permissions.UserHasTestFilePermission),
     )
     def download_file(self, request, file_id, pk=None):
         test = self.get_object()
@@ -291,12 +292,21 @@ class TestImportViewSet(
     )
 
     def get_queryset(self):
+        # Under V3 the Endpoint model is deprecated and its __init__ raises, so prefetching the
+        # endpoints m2m hydrates the legacy rows a migrated finding still carries and 500s the
+        # whole list response. Select the prefetch by the flag, as the finding viewset does.
+        # TODO: Delete the endpoints branch after the move to Locations
+        location_prefetch = (
+            "findings_affected__locations__location__url"
+            if settings.V3_FEATURE_LOCATIONS
+            else "findings_affected__endpoints"
+        )
         return get_authorized_test_imports(
             "view",
         ).prefetch_related(
             "test_import_finding_action_set",
             "findings_affected",
-            "findings_affected__endpoints",
+            location_prefetch,
             "findings_affected__status_finding",
             "findings_affected__finding_meta",
             "findings_affected__jira_issue",
