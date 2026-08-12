@@ -1,7 +1,22 @@
+# Languages are added here only once their translated content exists, so the
+# switcher never offers a language with nothing behind it. Translations live
+# beside the English page as <page>.<lang>.md (Hugo filename-suffix layout);
+# per-language contentDir would require moving all English content into
+# content/en and would break existing tooling and open PRs.
+#
+# Right-to-left languages (ar, he, fa, ur) need languageDirection = "rtl";
+# layouts/baseof.html emits <html dir> from it.
+
 [en]
   languageName = "English"
-  contentDir = "content/en"
   weight = 10
   [en.params]
     languageISO = "EN"
     languageTag = "en-US"
+
+[de]
+  languageName = "Deutsch"
+  weight = 20
+  [de.params]
+    languageISO = "DE"
+    languageTag = "de"
