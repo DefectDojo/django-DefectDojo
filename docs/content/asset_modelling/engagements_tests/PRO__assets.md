@@ -174,6 +174,55 @@ Because Findings inherit risk, priority, and ownership from their parent Asset, 
 
 Importantly, Assets are also the primary determining factor in a Finding’s SLA characteristics. Therefore, the SLA of a Findings depends on the SLA configuration of its parent Asset. More information about SLA configurations can be found [here](/asset_modelling/pro_hierarchy/priority_sla/#working-with-slas).
 
+## Asset Kinds
+
+An Asset can declare what kind of thing it is: a repository, a service, a host, a domain, a
+container image, a package, a cloud account, a device, or a branch. The kind is optional —
+an Asset without one behaves exactly as it always has — and it is descriptive rather than
+functional: it does not change permissions, deduplication, SLAs, or reporting scope. What it
+does is make a long Asset list readable, by giving each Asset an icon and a label that says
+what you are looking at.
+
+The list of kinds is data, not a fixed set. The kinds DefectDojo ships are marked as system
+kinds and cannot be deleted, but their wording and icons can be changed, and you can add your
+own kinds for anything your inventory contains that the shipped list does not cover.
+
+Kinds are available on the Asset itself and through the API at `/api/v2/asset_kinds/`
+(read-only) and as the `kind` field on `/api/v2/assets/`.
+
+## Asset Identity: Aliases
+
+The same Asset is usually known by different names in different places: a repository id in
+GitHub, a project key in your scanner, a hostname in DNS, an image digest in a registry. An
+**alias** records one of those identifiers against the Asset it refers to, so DefectDojo can
+recognise the Asset from whichever name a source happens to use.
+
+Each alias has three parts:
+
+- a **namespace**, naming the system that issued the identifier — `dns`, `oci`, `purl`, `git`,
+or a specific Connector configuration;
+- a **type**, saying what kind of identifier it is — `external_id`, `hostname`, `image_digest`,
+and so on;
+- the **value** itself.
+
+An identifier resolves to exactly one Asset. Two Assets cannot both claim `api.example.com` in
+the `dns` namespace, which is what makes an alias a reliable answer to "which Asset is this?"
+
+Aliases record where they came from. Ones you add yourself are marked as user-asserted and are
+never rewritten by automation; Connector sync maintains its own. That means you can correct a
+Connector's idea of what an identifier means without the next sync undoing it.
+
+Aliases are asserted or withdrawn, never edited: there is no update action on the API, because
+changing an identifier in place would silently re-point identity with no record of what it used
+to mean. To correct one, remove it and add the right one.
+
+Connector-issued aliases are written by Connector sync rather than by hand, so the API refuses
+writes to a `connector:` namespace. Everything else is yours to declare, through
+`/api/v2/asset_aliases/`.
+
+Aliases require `DD_V3_ASSET_ALIASES` to be enabled before they can be created; existing ones
+stay readable whether it is on or off.
+
 ## Asset Nesting
 
 DefectDojo supports parent-child relationship between two Assets within the same Organization. This can be configured during Asset creation or in the Asset’s settings. 
