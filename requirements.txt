@@ -67,4 +67,4 @@ fontawesomefree==6.6.0
 PyYAML==6.0.3
 pyopenssl==26.4.0
 parameterized==0.9.0
-setuptools==83.0.0
+setuptools==84.0.0
