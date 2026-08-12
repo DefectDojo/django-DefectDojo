@@ -130,7 +130,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             self._hydrate_findings_for_close_old(findings_to_mitigate),
             **kwargs,
         )
-        closed_finding_ids = [f.id for f in closed_findings]
+        # actively_closed_matches: findings process_matched_active_finding closed inline
+        # (see its docstring) rather than via close_old_findings() -- disjoint from
+        # closed_findings by construction, since close_old_findings() no-ops on a finding
+        # that is already mitigated by the time it hydrates it.
+        closed_finding_ids = [f.id for f in closed_findings] + self.actively_closed_matches
         # Update the timestamps of the test object by looking at the findings imported
         logger.debug("REIMPORT_SCAN: Updating test/engagement timestamps")
         # Update the timestamps of the test object by looking at the findings imported
@@ -343,6 +347,14 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         self.new_items = []
         self.reactivated_items = []
         self.unchanged_items = []
+        # Findings process_matched_active_finding closed inline (report re-marked a
+        # matched, previously-active finding as mitigated/risk-accepted/false-p/out-of-
+        # scope) rather than via close_old_findings(). Neither reactivated nor unchanged,
+        # so to_mitigate's arithmetic below still includes their ids -- close_old_findings()
+        # correctly no-ops on them (already mitigated by the time it hydrates them), which
+        # means it never reports them as closed either. Tracked here so process_scan() can
+        # still count them for update_import_history()/notify_scan_added().
+        self.actively_closed_matches: list[int] = []
         self.group_names_to_findings_dict = {}
         # New findings queued by process_finding_that_was_not_matched, drained (persisted
         # via persist_new_findings, then post-processed) once per matching batch -- see
@@ -1200,6 +1212,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
+                existing_finding.notes.create(
+                    author=self.user,
+                    entry=f"Mitigated by {self.test.test_type} re-upload.",
+                )
+                self.actively_closed_matches.append(existing_finding.id)
 
             elif unsaved_finding.risk_accepted or unsaved_finding.false_p or unsaved_finding.out_of_scope:
                 logger.debug("Reimported mitigated item matches a finding that is currently open, closing.")
@@ -1215,6 +1232,11 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                     existing_finding.verified = self.verified
                 existing_finding = self.process_cve(existing_finding)
                 existing_finding.save_no_options()
+                existing_finding.notes.create(
+                    author=self.user,
+                    entry=f"Mitigated by {self.test.test_type} re-upload.",
+                )
+                self.actively_closed_matches.append(existing_finding.id)
             else:
                 # if finding is the same but list of affected was changed, finding is marked as unchanged. This is a known issue
                 self.unchanged_items.append(existing_finding.id)
