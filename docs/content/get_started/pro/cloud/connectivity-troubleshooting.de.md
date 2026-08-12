@@ -4,7 +4,7 @@ description: Erneut mit Ihrer DefectDojo-Instanz verbinden
 weight: 2
 audience: pro
 aliases:
-- /en/cloud_management/connectivity-troubleshooting
+- /de/en/cloud_management/connectivity-troubleshooting
 ---
 
 Wenn Sie Schwierigkeiten haben, auf Ihre DefectDojo-Instanz zuzugreifen, finden Sie hier einige Schritte, mit denen Sie die Verbindung wiederherstellen können:
@@ -55,4 +55,3 @@ Bitte beachten Sie, dass diese Anmeldemethode nur für den **Cloud Manager** fun
 
 * **Für den Cloud Manager:** Wenn Sie den Zugriff auf Ihre MFA-Codes oder Ihre Authenticator-App verlieren, wenden Sie sich bitte an den DefectDojo Support unter [support@defectdojo.com](mailto:support@defectdojo.com).
 * **Für eine DefectDojo-Instanz:** Versuchen Sie zunächst einen der **Wiederherstellungscodes**, die bei der MFA-Einrichtung ausgestellt wurden — geben Sie ihn bei der Anmeldung anstelle des sechsstelligen Codes ein. Sind diese nicht verfügbar, kann ein Administrator mit Server-Zugriff die MFA für das Konto mit `python manage.py remove_mfa --username <username>` zurücksetzen; der Benutzer meldet sich anschließend mit seinem Passwort an und richtet MFA erneut ein, wobei alle bestehenden Berechtigungen und der Verlauf erhalten bleiben. Wenden Sie sich bei DefectDojo Cloud an den Support, damit dieser Befehl ausgeführt wird. Die vollständigen Optionen finden Sie unter [Multi\-Faktor-Authentifizierung](/admin/user_management/pro__mfa/#recovering-a-user-who-has-lost-their-mfa-device).
-

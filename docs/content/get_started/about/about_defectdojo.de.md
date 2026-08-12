@@ -5,7 +5,7 @@ draft: false
 type: docs
 weight: 1
 aliases:
-- /en/about_defectdojo/about_docs
+- /de/en/about_defectdojo/about_docs
 ---
 
 <div class="version-opensource">

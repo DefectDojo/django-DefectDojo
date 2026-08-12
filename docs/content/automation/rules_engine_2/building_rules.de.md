@@ -4,7 +4,7 @@ description: Der Grafikeditor, Trigger, Geltungsbereich, Bedingungen und Nachric
 weight: 2
 audience: pro
 aliases:
-- /automation/rules_engine_v2/building_rules/
+- /de/automation/rules_engine_v2/building_rules/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine 2.0 is a DefectDojo Pro-only feature.</span>

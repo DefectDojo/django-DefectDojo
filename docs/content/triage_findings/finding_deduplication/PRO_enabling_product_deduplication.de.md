@@ -4,7 +4,7 @@ description: So aktivieren Sie die Deduplizierung auf Produkt- oder Engagement-E
 weight: 2
 audience: pro
 aliases:
-- /en/working_with_findings/finding_deduplication/enabling_product_deduplication
+- /de/en/working_with_findings/finding_deduplication/enabling_product_deduplication
 ---
 
 Die Deduplizierung kann produktweit angewendet oder enger auf ein einzelnes Engagement beschränkt werden.

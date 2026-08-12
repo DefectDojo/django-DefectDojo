@@ -5,7 +5,7 @@ description: Was Rules Engine 2.0 ist, wie man sie aktiviert, und die Konzepte, 
 weight: 1
 audience: pro
 aliases:
-- /automation/rules_engine_v2/about/
+- /de/automation/rules_engine_v2/about/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Rules Engine 2.0 ist eine Funktion, die nur in DefectDojo Pro verfügbar ist.</span>

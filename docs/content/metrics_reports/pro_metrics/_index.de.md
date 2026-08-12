@@ -15,4 +15,3 @@ seo:
   robots: ''
 exclude_search: true
 ---
-

@@ -4,7 +4,7 @@ toc_hide: true
 weight: 2
 audience: opensource
 aliases:
-- /en/open_source/contributing/parser-documentation-template
+- /de/en/open_source/contributing/parser-documentation-template
 ---
 
 Diese Vorlage dient dazu, einen neuen oder bestehenden Parser zu dokumentieren. Ergänzen Sie sie gerne um weitere Informationen, die anderen Sicherheitsfachleuten helfen können.

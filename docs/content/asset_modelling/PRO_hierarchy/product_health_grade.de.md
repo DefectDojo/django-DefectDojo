@@ -2,7 +2,7 @@
 title: Product Health Grade
 description: Wie DefectDojo eine Product Health Grade berechnet
 aliases:
-- /en/working_with_findings/organizing_engagements_tests/product_health_grade
+- /de/en/working_with_findings/organizing_engagements_tests/product_health_grade
 ---
 
 DefectDojo kann für Ihre Produkte eine Note basierend auf der Anzahl der darin enthaltenen Befunde berechnen. Die Noten reichen von A \- F.

@@ -4,9 +4,9 @@ description: Synchronisieren Sie DefectDojo-Findings mit Ihrem Issue-Tracking-Sy
   um Behebung und Verantwortlichkeit zu optimieren.
 weight: 5
 aliases:
-- /issue_tracking/
-- /issue_tracking/intro/
-- /issue_tracking/intro/intro/
+- /de/issue_tracking/
+- /de/issue_tracking/intro/
+- /de/issue_tracking/intro/intro/
 ---
 
 ## Übersicht
@@ -28,4 +28,3 @@ Jedes Issue kann wichtige Details zur Schwachstelle enthalten, wie Severity, Bes
 ## Warum Issue-Tracking-Integrationen wichtig sind
 
 Sicherheits-Findings sind dann am wirksamsten, wenn sie umsetzbar sind. Die Integration von DefectDojo mit einem Issue-Tracking-System schließt die Lücke zwischen Erkennung und Behebung, indem Sicherheitsarbeit direkt in etablierte Engineering-Workflows eingebettet wird. Dies reduziert Kontextwechsel, verbessert die Verantwortlichkeit und hilft Teams, Issues schneller zu beheben.
-

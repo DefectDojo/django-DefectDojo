@@ -7,8 +7,8 @@ audience: opensource
 weight: 24
 slug: using-the-report-builder
 aliases:
-- /en/share_your_findings/pro_reports/working_with_generated_reports
-- /metrics_reports/reports/working_with_generated_reports
+- /de/en/share_your_findings/pro_reports/working_with_generated_reports
+- /de/metrics_reports/reports/working_with_generated_reports
 ---
 
 Mit dem Report Builder von DefectDojo können Sie einen benutzerdefinierten Bericht aus einer Reihe von Inhalts-Widgets zusammenstellen, ihn ausführen und das Ergebnis exportieren (zum Beispiel durch Drucken als PDF). Benutzerdefinierte Berichte können die Befunde oder Endpunkte zusammenfassen, die Sie mit einem externen Publikum teilen möchten, und können Branding sowie Standardtext enthalten.

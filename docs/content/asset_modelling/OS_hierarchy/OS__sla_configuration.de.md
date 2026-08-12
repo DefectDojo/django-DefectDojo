@@ -4,7 +4,7 @@ description: Service Level Agreements für verschiedene Produkte konfigurieren
 weight: 2
 audience: opensource
 aliases:
-- /en/working_with_findings/sla_configuration
+- /de/en/working_with_findings/sla_configuration
 ---
 
 Jedes Product in DefectDojo kann über eine eigene Service Level Agreement (SLA)-Konfiguration verfügen, die angibt, wie viele Tage Ihrer Organisation zur Behebung oder anderweitigen Bearbeitung eines Findings zur Verfügung stehen.

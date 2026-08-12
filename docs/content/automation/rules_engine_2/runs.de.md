@@ -5,7 +5,7 @@ description: Wie eine Regel ausgeführt wird, was ein Lauf aufzeichnet und wie d
 weight: 4
 audience: pro
 aliases:
-- /automation/rules_engine_v2/runs/
+- /de/automation/rules_engine_v2/runs/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Rules Engine 2.0 ist eine reine DefectDojo-Pro-Funktion.</span>

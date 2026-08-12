@@ -4,8 +4,8 @@ description: Wie DefectDojo eine Asset-Zustandsbewertung berechnet
 weight: 7
 audience: opensource
 aliases:
-- /asset_modelling/os_hierarchy/product_health_grade/
-- /en/asset_modelling/os_hierarchy/product_health_grade/
+- /de/asset_modelling/os_hierarchy/product_health_grade/
+- /de/en/asset_modelling/os_hierarchy/product_health_grade/
 ---
 
 DefectDojo kann für Ihre Assets eine Bewertung anhand der Anzahl der darin enthaltenen Befunde berechnen. Die Bewertungen reichen von A \- F.

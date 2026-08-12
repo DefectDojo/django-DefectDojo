@@ -4,7 +4,7 @@ description: Überarbeitung, Pro-Funktion
 weight: 3
 audience: pro
 aliases:
-- /en/customize_dojo/user_management/pro_permissions_overhaul
+- /de/en/customize_dojo/user_management/pro_permissions_overhaul
 ---
 
 ## Einführung in die Berechtigungstypen

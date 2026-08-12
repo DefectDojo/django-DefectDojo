@@ -5,7 +5,7 @@ draft: 'false'
 weight: 3
 audience: pro
 aliases:
-- /en/about_defectdojo/new_user_checklist
+- /de/en/about_defectdojo/new_user_checklist
 ---
 
 Das Wesen von DefectDojo besteht darin, Sicherheitsdaten zu importieren, sie zu organisieren und sie den Personen zu präsentieren, die sie kennen müssen. Hier ist eine kurze Referenz, mit der Sie eine erfolgreiche Implementierung sicherstellen können, von der leeren Fläche bis zu einer voll funktionsfähigen App.

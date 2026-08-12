@@ -4,7 +4,7 @@ description: Bestehende Rules-Engine-Regeln in Rules-Engine-2.0-Graphen überfü
 weight: 6
 audience: pro
 aliases:
-- /automation/rules_engine_v2/converting_from_rules_engine/
+- /de/automation/rules_engine_v2/converting_from_rules_engine/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine 2.0 is a DefectDojo Pro-only feature.</span>

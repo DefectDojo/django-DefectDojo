@@ -4,7 +4,7 @@ description: Eingehende Befunde automatisch dem richtigen Produkt zuordnen
 weight: 3
 audience: pro
 aliases:
-- /en/connecting_your_tools/import_scan_files/smart_upload
+- /de/en/connecting_your_tools/import_scan_files/smart_upload
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Smart Upload ist nur in DefectDojo Pro verfügbar.</span>

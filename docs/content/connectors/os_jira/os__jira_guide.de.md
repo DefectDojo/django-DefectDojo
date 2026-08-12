@@ -4,7 +4,7 @@ description: Arbeiten Sie mit der Jira-Integration
 weight: 2
 audience: opensource
 aliases:
-- /issue_tracking/jira/os__jira_guide/
+- /de/issue_tracking/jira/os__jira_guide/
 ---
 
 DefectDojo's Jira-Integration kann verwendet werden, um Befund-Daten an einen oder mehrere Jira-Spaces zu übertragen. Auf diese Weise können Sie DefectDojo in Ihren üblichen Entwicklungsworkflow integrieren. Hier sind einige Beispiele, wie das funktionieren kann:

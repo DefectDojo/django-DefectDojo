@@ -2,8 +2,8 @@
 title: Operationen verwalten
 description: Den Status der Discover- und Sync-Operationen Ihres Connectors prüfen
 aliases:
-- /import_data/pro/connectors/manage_operations/
-- /en/connecting_your_tools/connectors/manage_operations
+- /de/import_data/pro/connectors/manage_operations/
+- /de/en/connecting_your_tools/connectors/manage_operations
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Upstream-Connectors sind eine reine DefectDojo-Pro-Funktion.</span>

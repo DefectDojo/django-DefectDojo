@@ -15,6 +15,5 @@ seo:
   robots: ''
 exclude_search: true
 aliases:
-- /issue_tracking/jira/
+- /de/issue_tracking/jira/
 ---
-

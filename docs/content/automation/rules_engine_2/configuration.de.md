@@ -4,7 +4,7 @@ description: Einstellungen auf Deployment-Ebene für Rules Engine 2.0
 weight: 7
 audience: pro
 aliases:
-- /automation/rules_engine_v2/configuration/
+- /de/automation/rules_engine_v2/configuration/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Note: Rules Engine 2.0 is a DefectDojo Pro-only feature.</span>

@@ -9,4 +9,3 @@ sidebar:
   collapsed: false
 exclude_search: true
 ---
-

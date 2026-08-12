@@ -6,7 +6,7 @@ draft: false
 weight: 14
 audience: pro
 aliases:
-- /get_started/pro/onprem/upgrading/
+- /de/get_started/pro/onprem/upgrading/
 ---
 
 <!--

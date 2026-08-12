@@ -4,7 +4,7 @@ description: Rufen Sie Audit-Protokolle für DefectDojo-Objekte auf
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/user_management/audit_logging
+- /de/en/customize_dojo/user_management/audit_logging
 ---
 
 Audit-Protokolle für DefectDojo können auf verschiedene Arten aufgerufen werden.

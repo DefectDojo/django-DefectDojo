@@ -4,7 +4,7 @@ description: Erfahren Sie, wie Sie Daten manuell, über die API oder per Connect
   importieren
 weight: 1
 aliases:
-- /en/connecting_your_tools/import_intro
+- /de/en/connecting_your_tools/import_intro
 ---
 
 Eines der Dinge, die wir bei DefectDojo verstanden haben, ist, dass die Sicherheitsanforderungen jedes Unternehmens völlig unterschiedlich sind. Es gibt keinen Einheitsansatz. Da sich Ihre Organisation verändert, ist ein flexibler Ansatz entscheidend, und DefectDojo ermöglicht es Ihnen, Ihre Sicherheitstools flexibel anzubinden, um mit diesen Veränderungen Schritt zu halten.

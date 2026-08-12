@@ -17,4 +17,3 @@ seo:
 audience: pro
 exclude_search: true
 ---
-

@@ -3,8 +3,8 @@ title: Referenz zu Upstream-Connector-Tools
 description: Unsere Liste der unterstützten Connector-Tools und wie Sie sie mit DefectDojo
   einrichten
 aliases:
-- /import_data/pro/connectors/connectors_tool_reference/
-- /en/connecting_your_tools/connectors/connectors_tool_reference
+- /de/import_data/pro/connectors/connectors_tool_reference/
+- /de/en/connecting_your_tools/connectors/connectors_tool_reference
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Upstream-Connectors sind eine reine DefectDojo-Pro-Funktion.</span>
@@ -1499,4 +1499,3 @@ Sie benötigen ein YesWeHack-**Personal Access Token (PAT)**. Lesezugriff auf Ih
 3. Legen Sie optional einen **Minimum Severity**-Wert fest, um einzuschränken, welche Befunde importiert werden. Befunde unterhalb des gewählten Schweregrads werden nicht importiert.
 
 DefectDojo erstellt für jedes Programm, auf das Ihr Token zugreifen kann, einen separaten Eintrag und importiert jeden Report als Befund. Der Schweregrad des Befunds wird der CVSS-Bewertung des Reports entnommen (mit Rückgriff auf die Triage-Priorität), und sein Status spiegelt den Workflow-Status des Reports wider — zum Beispiel werden gelöste Reports als behoben importiert, und als ungültig oder außerhalb des Geltungsbereichs markierte Reports werden als inaktiv importiert.
-

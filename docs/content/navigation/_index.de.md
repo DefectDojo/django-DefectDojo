@@ -15,4 +15,3 @@ seo:
   canonical: ''
   robots: ''
 ---
-

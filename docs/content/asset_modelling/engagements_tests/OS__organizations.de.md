@@ -4,8 +4,8 @@ description: Organizations in DefectDojo OS verstehen
 audience: opensource
 weight: 1
 aliases:
-- /asset_modelling/engagements_tests/os_producttype/
-- /en/asset_modelling/engagements_tests/os_producttype/
+- /de/asset_modelling/engagements_tests/os_producttype/
+- /de/en/asset_modelling/engagements_tests/os_producttype/
 ---
 
 **ORGANIZATIONS** → Assets → Engagements → Tests → Befunde

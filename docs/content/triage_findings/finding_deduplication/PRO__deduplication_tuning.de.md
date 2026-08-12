@@ -4,7 +4,7 @@ description: Konfigurieren Sie, wie DefectDojo doppelte Befunde erkennt und verw
 weight: 4
 audience: pro
 aliases:
-- /en/working_with_findings/finding_deduplication/tune_deduplication
+- /de/en/working_with_findings/finding_deduplication/tune_deduplication
 ---
 
 Deduplizierungs-Tuning ist eine DefectDojo-Pro-Funktion, die Ihnen eine feingranulare Kontrolle darüber gibt, wie Befunde dedupliziert werden, sodass Sie die Duplikaterkennung für Ihren spezifischen Sicherheitstest-Workflow optimieren können.

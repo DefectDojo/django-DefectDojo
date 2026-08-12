@@ -4,7 +4,7 @@ description: Jeder Knoten, den Rules Engine 2.0 mitbringt, und was er jeweils tu
 weight: 3
 audience: pro
 aliases:
-- /automation/rules_engine_v2/node_reference/
+- /de/automation/rules_engine_v2/node_reference/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Rules Engine 2.0 ist eine Funktion, die nur in DefectDojo Pro verfügbar ist.</span>

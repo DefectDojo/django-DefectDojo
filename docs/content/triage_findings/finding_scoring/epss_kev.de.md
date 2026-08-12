@@ -5,7 +5,7 @@ description: Wie DefectDojo Pro Befunde mit EPSS- und CISA-KEV-Daten anreichert,
 audience: pro
 weight: 2
 aliases:
-- /triage_findings/epss_kev/
+- /de/triage_findings/epss_kev/
 ---
 
 DefectDojo Pro reichert Ihre Befunde automatisch mit zwei externen Threat-Intelligence-Quellen an — **EPSS** und **CISA KEV** — damit die Priorisierung widerspiegelt, wie wahrscheinlich eine Schwachstelle ausgenutzt wird, und nicht nur ihren CVSS-Schweregrad. Beide Quellen werden Befunden anhand der **CVE** zugeordnet, aktualisieren sich nach einem **täglichen Zeitplan** und fließen direkt in die berechnete **Priorität** jedes Befunds ein.

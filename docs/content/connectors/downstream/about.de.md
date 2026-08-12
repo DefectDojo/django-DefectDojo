@@ -3,8 +3,8 @@ title: Downstream Connectors
 weight: 1
 audience: pro
 aliases:
-- /en/share_your_findings/integrations
-- /issue_tracking/pro_integration/integrations/
+- /de/en/share_your_findings/integrations
+- /de/issue_tracking/pro_integration/integrations/
 ---
 
 **Verfügbarkeit:** Downstream Connectors sind für jede DefectDojo Pro-Instanz allgemein verfügbar und aktiv, sowohl Cloud als auch On-Premise. Es gibt nichts zu aktivieren, und sie werden auf der Seite „Feature Flags" nicht mehr aufgeführt.

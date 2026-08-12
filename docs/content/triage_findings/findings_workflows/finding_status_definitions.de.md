@@ -3,7 +3,7 @@ title: Definitionen der Befund-Status
 description: 'Eine kurze Referenz zu Befund-Status: Offen, Verifiziert, Akzeptiert..'
 weight: 2
 aliases:
-- /en/working_with_findings/findings_workflows/finding_status_definitions
+- /de/en/working_with_findings/findings_workflows/finding_status_definitions
 ---
 
 Jeder in DefectDojo erstellte Befund hat einen Status, der relevante Informationen vermittelt. Status helfen Ihrem Team, den Fortschritt bei der Behebung von Problemen im Blick zu behalten.
@@ -138,4 +138,3 @@ Die Behebung kann im Rahmen normaler Entwicklungs- oder Wartungszyklen erfolgen
 Häufig informative Befunde oder Befunde mit niedrigem Schweregrad, kann jedoch auch Probleme mit höherem Schweregrad umfassen, die gut abgemildert sind
 
 Erwartete Maßnahme: Verfolgen und opportunistisch adressieren Typisches SLA: Best Effort / Backlog
-

@@ -5,7 +5,7 @@ description: HTTP-Webhook-Benachrichtigungen bei DefectDojo-Ereignissen an einen
 weight: 8
 audience: opensource
 aliases:
-- /en/open_source/notification_webhooks/how_to
+- /de/en/open_source/notification_webhooks/how_to
 ---
 
 **Dies ist eine experimentelle Open-Source-Funktion — das Verhalten kann sich in künftigen Releases ändern.**

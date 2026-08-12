@@ -5,7 +5,7 @@ description: Das Protokoll aller ausgehenden Sendungen von Regeln sowie der Funk
 weight: 5
 audience: pro
 aliases:
-- /automation/rules_engine_v2/deliveries/
+- /de/automation/rules_engine_v2/deliveries/
 ---
 
 <span style="background-color:rgba(242, 86, 29, 0.3)">Hinweis: Rules Engine 2.0 ist eine Funktion, die nur in DefectDojo Pro verfügbar ist.</span>

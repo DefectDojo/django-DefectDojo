@@ -2,7 +2,7 @@
 title: Über Benachrichtigungen & 🔔 Warnungen
 description: Erfahren Sie mehr über Benachrichtigungen und In-App-Warnungen
 aliases:
-- /en/customize_dojo/notifications/about_notifications
+- /de/en/customize_dojo/notifications/about_notifications
 ---
 
 DefectDojo hält Sie auf verschiedene Weise auf dem Laufenden. Benachrichtigungen können für bevorstehende Engagements, [Benutzererwähnungen](/triage_findings/findings_workflows/intro_to_findings/#notes-and-mentions), ablaufende SLAs und andere Ereignisse in der Software gesendet werden.

@@ -4,8 +4,8 @@ description: Arbeiten mit der Startseite von DefectDojo
 weight: 1
 audience: opensource
 aliases:
-- /en/customize_dojo/dashboards/Introduction_dashboard
-- /en/customize_dojo/dashboards/pro_dashboards
+- /de/en/customize_dojo/dashboards/Introduction_dashboard
+- /de/en/customize_dojo/dashboards/pro_dashboards
 ---
 
 Das Dashboard ist wahrscheinlich die erste Seite, die Sie sehen, wenn Sie DefectDojo öffnen. Es fasst die Leistung Ihres Teams zusammen und bietet Tracking-Tools, mit denen Sie bestimmte Bereiche Ihrer Schwachstellenverfolgung überwachen können.
