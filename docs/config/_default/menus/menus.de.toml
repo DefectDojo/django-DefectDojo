@@ -2,6 +2,10 @@
 # that section exists in this language, and fall back to the English
 # URL when it does not (e.g. supported_tools), so no nav item 404s.
 # Social entries are copied verbatim so the icons survive.
+# Keep the entry set in step with menus.en.toml: Hugo does not merge menus
+# across languages, so a tab missing here is a tab missing in German, and a
+# URL that only existed in an older English menu is a 404 the link checker
+# will catch.
 [[main]]
   name = "Erste Schritte"
   url = "/de/get_started/about/about_defectdojo"
@@ -19,7 +23,12 @@
 
 [[main]]
   name = "Assets modellieren"
-  url = "/de/asset_modelling/hierarchy/pro__assets_organizations/"
+  url = "/de/asset_modelling/engagements_tests/os__assets/"
+  weight = 13
+
+[[main]]
+  name = "Connectors"
+  url = "/de/connectors/about/"
   weight = 13
 
 [[main]]
@@ -28,14 +37,16 @@
   weight = 14
 
 [[main]]
+  name = "Sensei"
+  # Sensei is Pro-only. Default to the Open Source "Pro feature" page; custom.js
+  # swaps this tab to the full guide (/sensei/about_sensei/) when Pro is selected.
+  url = "/de/sensei/os__sensei/"
+  weight = 14
+
+[[main]]
   name = "Administration"
   url = "/de/admin/admin_intro/intro/"
   weight = 16
-
-[[main]]
-  name = "Issue-Tracking"
-  url = "/de/issue_tracking/intro/intro/"
-  weight = 15
 
 [[main]]
   name = "Automatisierung"
@@ -46,6 +57,33 @@
   name = "Unterstützte Tools"
   url = "/supported_tools/"
   weight = 16
+
+# Left-hand section sidebar for the Sensei chapter. pageRef resolves per
+# language, so these point at the German pages automatically.
+[[sidebar_sensei]]
+  name = "Sensei"
+  pageRef = "/sensei/OS__sensei"
+  weight = 0
+
+[[sidebar_sensei]]
+  name = "Über Sensei"
+  pageRef = "/sensei/about_sensei"
+  weight = 1
+
+[[sidebar_sensei]]
+  name = "Sensei einrichten"
+  pageRef = "/sensei/setup_sensei"
+  weight = 2
+
+[[sidebar_sensei]]
+  name = "Befunde mit Sensei beheben"
+  pageRef = "/sensei/fixing_findings"
+  weight = 3
+
+[[sidebar_sensei]]
+  name = "Sensei-Referenz"
+  pageRef = "/sensei/sensei_reference"
+  weight = 4
 
 [[social]]
   name = "YouTube"
