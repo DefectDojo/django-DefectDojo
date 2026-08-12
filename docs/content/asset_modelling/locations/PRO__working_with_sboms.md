@@ -49,7 +49,8 @@ POST /api/v2/sbom-import/
 | `product` | The target Product (Asset) ID |
 | `file` | The SBOM file |
 | `scan_type` | The SBOM format — see supported formats below |
-| `replace` *(optional)* | If `true`, stale Product associations not backed by an existing Finding reference are removed. Default: `false` (cumulative) |
+| `replace_dependencies` *(optional)* | If `true`, stale Product associations not backed by an existing Finding reference are removed. Default: `false` (cumulative) |
+| `version` *(optional)* | The Asset version this SBOM describes, e.g. `5.2.0`. Requires Asset Versions — see [below](#asset-versions-and-bom-snapshots) |
 
 The importer parses the file, extracts `Dependency` records, deduplicates them against existing Locations (creating new ones as needed), and creates Asset References linking each Dependency to the Product. The Pro UI exposes the same upload flow — see the **Upload SBOM** action on a Product's Locations tab.
 
@@ -66,7 +67,44 @@ SWID Tag format is not yet supported.
 
 By default, repeated uploads are **additive**: dependencies that already exist on the Asset are kept, new ones are added, and nothing is removed. This matches the typical workflow of incremental SBOM updates.
 
-Set `replace=true` to prune. When replace mode is on, after a successful import the importer removes Product associations that were not present in the new SBOM **and** are not currently referenced by an active Finding. References tied to active Findings are preserved even in replace mode, so you do not lose vulnerability context just because a new SBOM omits a package.
+Set `replace_dependencies=true` to prune. When replace mode is on, after a successful import the importer removes Product associations that were not present in the new SBOM **and** are not currently referenced by an active Finding. References tied to active Findings are preserved even in replace mode, so you do not lose vulnerability context just because a new SBOM omits a package.
+
+## Asset Versions and BOM Snapshots
+
+An SBOM describes an Asset at a point in its release history — *the dependencies of Payments API 5.2.0* — but by default DefectDojo records only the Asset's current inventory. Re-uploading either accumulates forever or prunes, and *what shipped in 5.1?* is not a question the data can answer.
+
+Deployments that opt in to **Asset Versions** can bind each upload to a version. This behavior is managed by deployment configuration: set `DD_V3_ASSET_VERSIONS=True` (self-hosted) or contact support (cloud). It is off by default, and while it is off nothing described in this section is recorded — uploads behave exactly as above.
+
+A version is **metadata about an Asset, not another Asset**, and that distinction is the whole point. Modelling releases as child Assets copies every Finding into every release; one customer's 30,000 Findings became 360,000 that way. A Finding stays a single row on its Asset no matter how many versions mention it.
+
+### Binding an upload to a version
+
+Pass `version` to `POST /api/v2/sbom-import/`. The version is created on first sight, so there is no setup step.
+
+If you omit it, the document's own subject version is used — `metadata.component.version` in CycloneDX, the root package's version in SPDX. Most producers stamp it, so uploads usually bind correctly without you passing anything. Omitting `version` *and* uploading a document that declares none leaves the import on the unversioned stream, which is today's behavior.
+
+Versions carry **no ordering**. DefectDojo does not parse or compare version strings — package ecosystems disagree about what "newer" means — so nothing infers that 5.1 sits between 5.0 and 5.2. `released_at` on a version is an optional display and reporting hint.
+
+### Snapshots supersede rather than merge
+
+Each upload records a **BOM snapshot**: the components the document declared, the dependency relationships between them, and the document's own identity (specification, serial number, timestamp, and declared subject).
+
+Uploading again for the same version and format **supersedes** the previous snapshot — the newest one is what per-version reads return — and the superseded snapshots remain queryable as history. Nothing is deleted. Snapshots are scoped per format, so a CycloneDX document and an SPDX document for the same release supersede independently instead of clobbering each other.
+
+This is a separate axis from `replace_dependencies`, which still governs the Asset's aggregate dependency list. A snapshot answers *what did this document say*; the aggregate answers *what is on this Asset now*.
+
+Snapshots also preserve the BOM's **structure**. Each component records whether the document listed it as a direct dependency of its subject, and component → component relationships are recorded as declared, so a per-version export reproduces the graph instead of flattening it (see [Exporting SBOMs and VEX](../pro__exporting_sboms_and_vex/#exporting-one-release)). CycloneDX JSON and XML and SPDX 2 JSON carry full structure; SPDX XML, tag-value, and v3 record components only.
+
+### `found_in` and `fixed_in`
+
+Scan imports contribute the other half of the version story. When an import or reimport carries a `version` — the field `/api/v2/import-scan/` and `/api/v2/reimport-scan/` already accept — and Asset Versions is enabled:
+
+- Findings the import processes are recorded as **found_in** that version.
+- Findings the import mitigates because the scan no longer reports them are recorded as **fixed_in** that version. Previously that version reached the record only as prose inside the auto-close note.
+
+These claims are **additive and never withdrawn automatically**: an import that stops seeing a Finding does not un-say that an earlier version contained it. Because a Finding's mitigation timestamp is write-once while claims are per-version, a reopen-and-refix cycle appends a second `fixed_in` instead of rewriting the first. Re-importing the same version is a no-op.
+
+The claims are what makes [per-version VEX](../pro__exporting_sboms_and_vex/#vex-for-one-release) possible: they let one Finding report *resolved in 5.2* and *exploitable in 5.1* without existing twice.
 
 ## Findings That Reference Libraries
 
@@ -88,8 +126,12 @@ Because Findings and SBOM uploads share the same underlying Dependency objects, 
 | List Dependency Locations | `GET /api/v2/location/?location_type=dependency` |
 | Link a Dependency to a Finding | `POST /api/v2/location_findings/` |
 | Link a Dependency to a Product (with `owned_by` / `used_by`) | `POST /api/v2/location_products/` |
+| List or create Asset versions | `GET` / `POST /api/v2/asset_versions/` |
+| Record a `found_in` / `fixed_in` claim by hand | `POST /api/v2/finding_version_affects/` |
 
 Filters on `/api/v2/dependencies/` include the pURL component fields, tags, and ordering on `name`, `version`, and active-finding count.
+
+The two version endpoints follow the same rule as the rest of the Asset surface: reading is open to anyone who can already see the Asset, while writing requires edit permission on it plus `DD_V3_ASSET_VERSIONS`. Neither offers an update action, deliberately — a version is a name that exported documents and claims already point at, so renaming one would silently rewrite the meaning of every document exported under it, and a claim is stated or withdrawn rather than edited into a different claim. Hand-recorded claims are marked as such, so they stay distinguishable from the ones imports write.
 
 ## In the Pro UI
 
