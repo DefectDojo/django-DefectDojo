@@ -241,6 +241,10 @@ class UserHasDojoMetaPermission(permissions.BasePermission):
             },
         },
         # TODO: Delete this after the move to Locations
+        # This permission table is built once at import to match the /api/v2 routes
+        # mounted at boot, so it stays on settings.V3_FEATURE_LOCATIONS rather than the
+        # runtime dojo.location.feature accessor. See dojo/location/feature.py and
+        # pro/features/relabel.py:14-28.
         "endpoint": {
             "model": Endpoint if not settings.V3_FEATURE_LOCATIONS else Location,
             "permissions": {

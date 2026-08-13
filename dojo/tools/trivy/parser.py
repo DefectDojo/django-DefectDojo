@@ -3,8 +3,7 @@
 import json
 import logging
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.utils import parse_cvss_data
@@ -354,7 +353,7 @@ class TrivyParser:
                 if vuln_id:
                     finding.unsaved_vulnerability_ids = [vuln_id]
 
-                if settings.V3_FEATURE_LOCATIONS and package_name and package_version:
+                if locations_enabled() and package_name and package_version:
                     finding.unsaved_locations.append(
                         LocationData.dependency(name=package_name, version=package_version, file_path=file_path),
                     )
@@ -411,7 +410,7 @@ class TrivyParser:
                     finding.unsaved_vulnerability_ids = []
                     finding.unsaved_vulnerability_ids.append(misc_avdid)
                 finding.unsaved_tags = [tag for tag in (target_type, target_class) if tag]
-                if settings.V3_FEATURE_LOCATIONS and file_path:
+                if locations_enabled() and file_path:
                     finding.unsaved_locations.append(
                         LocationData.code(file_path=file_path),
                     )
@@ -446,7 +445,7 @@ class TrivyParser:
                     service=service_name,
                 )
                 finding.unsaved_tags = [tag for tag in (target_class,) if tag]
-                if settings.V3_FEATURE_LOCATIONS and target_target:
+                if locations_enabled() and target_target:
                     finding.unsaved_locations.append(
                         LocationData.code(file_path=target_target, line=secret_start_line),
                     )

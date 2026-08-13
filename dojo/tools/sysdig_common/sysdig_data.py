@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.tools.locations import LocationData
 
 if TYPE_CHECKING:
@@ -74,7 +73,7 @@ class SysdigData:
 
 
 def add_package_info(finding, package_name, package_type, package_version, package_path):
-    if settings.V3_FEATURE_LOCATIONS and package_name and package_type:
+    if locations_enabled() and package_name and package_type:
         purl_type = SYSDIG_TYPE_TO_PURL.get(package_type.lower())
         finding.unsaved_locations.append(
             LocationData.dependency(

@@ -31,6 +31,7 @@ from dojo.finding.deduplication import (
     get_finding_models_for_deduplication,
 )
 from dojo.jira import services as jira_services
+from dojo.location.feature import locations_enabled
 from dojo.location.models import Location
 from dojo.location.status import FindingLocationStatus
 from dojo.location.utils import save_locations_to_add
@@ -1238,7 +1239,7 @@ def removeLoop(finding_id, counter):
 
 def add_locations(finding, form, *, replace=False):
     # TODO: Delete this after the move to Locations
-    if not settings.V3_FEATURE_LOCATIONS:
+    if not locations_enabled():
         added_endpoints = save_endpoints_to_add(form.endpoints_to_add_list, finding.test.engagement.product)
         endpoint_ids = [endpoint.id for endpoint in added_endpoints]
 
@@ -1443,7 +1444,7 @@ def copy_template_fields_to_finding(
             product = finding.test.engagement.product
             for endpoint_url in endpoint_urls:
                 try:
-                    if settings.V3_FEATURE_LOCATIONS:
+                    if locations_enabled():
                         saved_url = URL.create_location_from_value(endpoint_url)
                         saved_url.location.associate_with_finding(finding)
                     else:
@@ -1591,7 +1592,7 @@ def close_finding(
         note_date=mitigated_date,
     )
 
-    if settings.V3_FEATURE_LOCATIONS:
+    if locations_enabled():
         # Related locations
         for ref in finding.locations.all():
             ref.set_status(FindingLocationStatus.Mitigated, finding.mitigated_by, mitigated_date)

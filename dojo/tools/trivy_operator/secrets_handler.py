@@ -1,5 +1,5 @@
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -58,7 +58,7 @@ class TrivySecretsHandler:
                 service=service,
                 fix_available=True,
             )
-            if settings.V3_FEATURE_LOCATIONS and secret_target:
+            if locations_enabled() and secret_target:
                 finding.unsaved_locations.append(
                     LocationData.code(file_path=secret_target),
                 )

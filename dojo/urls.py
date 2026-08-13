@@ -144,7 +144,12 @@ v2_api = add_tool_config_urls(v2_api)
 v2_api = add_tool_product_urls(v2_api)
 v2_api = add_tool_type_urls(v2_api)
 v2_api = add_user_urls(v2_api)
-# Add the location routes
+# Add the location routes.
+# Module-level route wiring: evaluated once at URLConf build time, so it stays on
+# settings.V3_FEATURE_LOCATIONS rather than the runtime dojo.location.feature
+# accessor. A stored-flag toggle cannot re-mount /api/v2 routes without a restart;
+# the Pro Feature Flag documents that this wiring is fixed at boot.
+# See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Locations
     v2_api = add_locations_urls(v2_api)
@@ -191,6 +196,9 @@ ur += component_urls
 ur += regulations
 ur += announcement_urls
 
+# Module-level Classic UI route wiring: fixed at URLConf build time on
+# settings.V3_FEATURE_LOCATIONS (a stored-flag toggle cannot re-mount these
+# without a restart). See dojo/location/feature.py and pro/features/relabel.py:14-28.
 if settings.V3_FEATURE_LOCATIONS:
     # Endpoints -> Location
     ur += url_patterns

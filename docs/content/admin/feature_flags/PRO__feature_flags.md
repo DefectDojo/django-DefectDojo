@@ -62,6 +62,16 @@ The stored toggle was seeded from that deployment setting, so the two agree unti
 
 The feature carries a **Restart Recommended** tag on the Feature Flags page for this reason: the naming used outside the Pro UI is fixed when the process starts. Relabeling is cosmetic either way. Database models, field names, and API endpoints are unchanged, so existing automation keeps working. See [Asset Hierarchy](/asset_modelling/pro_hierarchy/asset_hierarchy/).
 
+### Locations
+
+**Locations** replaces the legacy Endpoints model: with it on, imports create Location records and the UI and API surface Locations; with it off, imports create Endpoints. It is off by default and is enabled from this page like any other feature, but a few things are worth knowing:
+
+* The **Pro UI** and the **import pipeline** follow this toggle. After you enable Locations, new imports create Locations and the Locations pages appear on your next page load, without a restart.
+* The **Classic UI** pages and the `/api/v2` endpoint/location route wiring are decided from the `DD_V3_FEATURE_LOCATIONS` deployment setting when DefectDojo starts. This toggle does not change them, and restarting does not make it change them. If you use the Classic UI or depend on the `/api/v2` endpoint routes, set `DD_V3_FEATURE_LOCATIONS` to match and restart so every surface agrees. The stored toggle is seeded from that deployment setting, so the two agree until you change one of them.
+* Enabling existing history is not automatic. Legacy endpoint data stays as it is until you run the endpoints-to-locations migration to backfill it. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/).
+
+Enabling Locations is **self-service and one-way**: once it is on, the toggle locks (shown as **Cannot Be Disabled**), because turning it back off would require reversing the endpoint-to-location data migration, which is not yet supported. The feature carries a **Restart Recommended** tag for the Classic UI / API reason above.
+
 ## When a toggle is locked
 
 A feature you cannot change is shown with a lock badge explaining why:
@@ -88,7 +98,7 @@ Cloud instances also have access to features that are not offered on-premise. Se
 
 On [DefectDojo Pro (On-Premise)](/get_started/pro/onprem/), most features work exactly as they do on Cloud: open **Settings > Feature Flags** and toggle them.
 
-A small number of features are read from your deployment configuration instead. They change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them, for example `DD_V3_FEATURE_LOCATIONS` for [Locations](/asset_modelling/locations/pro__locations_overview/).
+A small number of features are read from your deployment configuration instead. They change how the application starts, so they cannot be flipped at runtime. These appear on the page as read-only, labeled **Managed by deployment**, and name the environment variable that controls them.
 
 Because these features require a restart, and some of them cannot be reversed once enabled, check the feature's own documentation before changing one. Several are best enabled with help from [DefectDojo Support](mailto:support@defectdojo.com).
 
@@ -109,7 +119,7 @@ Most features are available on both installation types. The exceptions are:
 | Feature | Availability | How it is controlled |
 | --- | --- | --- |
 | Request a New Connector | [DefectDojo Pro (Cloud)](/get_started/pro/cloud/) only | Feature Flags page. Shown as **Unavailable on This Deployment** on-premise. |
-| Locations | Both | Feature Flags page. Note that Locations cannot be turned back off once it is enabled. See [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
+| Locations | Both | Feature Flags page for the Pro UI and import pipeline; the Classic UI and `/api/v2` route wiring follow the `DD_V3_FEATURE_LOCATIONS` deployment setting. Enabling is self-service and one-way — once on, it cannot be turned back off. See [above](#locations) and [Locations Overview](/asset_modelling/locations/pro__locations_overview/). |
 | Organization / Asset Relabeling | Both | Feature Flags page for the Pro UI; the Classic UI, its URLs and generated reports follow the `DD_ENABLE_V3_ORGANIZATION_ASSET_RELABEL` deployment setting. See [above](#organization--asset-relabeling). |
 
 Every other optional feature is toggled directly on the Feature Flags page on both Cloud and On-Premise instances.

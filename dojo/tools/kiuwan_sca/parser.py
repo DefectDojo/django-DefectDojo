@@ -2,8 +2,7 @@ import hashlib
 import json
 import logging
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 
@@ -95,7 +94,7 @@ class KiuwanSCAParser:
                     ).encode("utf-8"),
                 ).hexdigest()
 
-                if settings.V3_FEATURE_LOCATIONS and finding.component_name and finding.component_version:
+                if locations_enabled() and finding.component_name and finding.component_version:
                     finding.unsaved_locations.append(
                         LocationData.dependency(name=finding.component_name, version=finding.component_version),
                     )

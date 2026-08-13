@@ -1,8 +1,8 @@
 import json
 
 from cvss import parser as cvss_parser
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -75,7 +75,7 @@ class ApiEdgescanParser:
             finding.unsaved_tags = vulnerability["asset_tags"].split(",")
         finding.unique_id_from_tool = vulnerability["id"]
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             finding.unsaved_locations = [
                 LocationData.url(url=vulnerability["location"])
                 if "://" in vulnerability["location"]

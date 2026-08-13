@@ -2,8 +2,8 @@ import io
 import json
 
 from cvss.cvss3 import CVSS3
-from django.conf import settings
 
+from dojo.location.feature import locations_enabled
 from dojo.models import Finding
 from dojo.tools.locations import LocationData
 from dojo.tools.snyk_code.parser import SnykCodeParser
@@ -291,7 +291,7 @@ class SnykParser:
                     finding.mitigation += f"\nUpgrade from {current_pack_version} to {upgraded_pack} to fix this issue, as well as updating the following:\n - "
                     finding.mitigation += "\n - ".join(tertiary_upgrade_list)
 
-        if settings.V3_FEATURE_LOCATIONS:
+        if locations_enabled():
             package_manager = vulnerability.get("packageManager", "")
             purl_type = SNYK_PM_TO_PURL.get(package_manager.lower())
             if purl_type and vulnerability["packageName"] and vulnerability["version"]:

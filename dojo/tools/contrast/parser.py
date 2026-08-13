@@ -3,8 +3,7 @@ import datetime
 import io
 import sys
 
-from django.conf import settings
-
+from dojo.location.feature import locations_enabled
 from dojo.models import Endpoint, Finding
 from dojo.tools.locations import LocationData
 
@@ -58,7 +57,7 @@ class ContrastParser:
                 nb_occurences=1,
             )
             if uri := row.get("Request URI"):
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     location = LocationData.url(
                         host="0.0.0.0",  # noqa: S104
                         path=uri,
@@ -96,7 +95,7 @@ class ContrastParser:
                     + "\n-----\n"
                     + finding.description
                 )
-                if settings.V3_FEATURE_LOCATIONS:
+                if locations_enabled():
                     dupes[dupe_key].unsaved_locations.extend(
                         finding.unsaved_locations,
                     )
