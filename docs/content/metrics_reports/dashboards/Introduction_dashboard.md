@@ -30,7 +30,7 @@ The open-source dashboard provides a high-level snapshot of your security postur
 
 The top row of the dashboard displays four summary cards that give you an at-a-glance view of activity:
 
-* **Active Engagements** — total number of currently open Engagements across all Products.
+* **Active Engagements** — total number of currently open Engagements across all Assets.
 * **Findings Last 7 Days** — new Findings created in the past week.
 * **Closed in Last 7 Days** — Findings that were resolved recently.
 * **Accepted in Last 7 Days** — Findings that were risk-accepted recently.
@@ -51,7 +51,7 @@ Superusers can toggle which charts appear on the dashboard. Navigate to the gear
 
 * **Display Graphs** — controls the Historical Finding Severity and Reported Finding Severity charts.
 * **Display Surveys** — controls the Unassigned Answered Engagement Questionnaires table.
-* **Display Data Tables** — controls the Top 10 / Bottom 10 Graded Products tables.
+* **Display Data Tables** — controls the Top 10 / Bottom 10 Graded Assets tables.
 
 Select **Reset Dashboard Configuration** from the same menu to restore defaults.
 

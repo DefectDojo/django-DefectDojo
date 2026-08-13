@@ -40,7 +40,7 @@ Each onboarded repository has a row-actions menu on the Sensei hub:
 
 - **Scan now:** start an on-demand scan (opens the branch picker).
 - **Scan history:** view this repository's past scans.
-- **Configure:** reopen the configuration form (PR reporting, automated fixes, product linkage).
+- **Configure:** reopen the configuration form (PR reporting, automated fixes, Asset linkage).
 - **Re-stage candidates:** re-evaluate the repository's findings against the auto-fix criteria and stage fresh candidates.
 - **Delete:** remove the repository from Sensei. This stops scanning it; it does not delete the underlying asset or findings.
 
@@ -94,7 +94,7 @@ GitHub Enterprise Server uses the **same GitHub App** model as github.com; only 
 
 ## Troubleshooting
 
-- **The Sensei button on a finding says "Configure Product."** The finding's product isn't onboarded. Click it to onboard a repository for that product, then return to the finding.
+- **The Sensei button on a finding says "Configure Asset."** The finding's Asset isn't onboarded. Click it to onboard a repository for that Asset, then return to the finding.
 - **A fix shows "Failed" in Auto-fix Candidates or Scan Activity.** Open **Scan Activity** and check the **Root Cause** / **Details** for that run. Failed fixes remain listed so they don't disappear before producing a PR; you can re-stage and retry.
 - **A repository isn't listed when onboarding.** Only repositories the connection can access are shown. On **GitHub**, confirm the App is installed on the correct organization and its repository access includes the repository. On **GitLab**, confirm the access token's scope covers the project. On **Bitbucket Cloud**, confirm the **workspace** is set (tokens are workspace-scoped). On **Azure DevOps**, confirm the PAT's organization matches and its **Code** scope is granted.
 - **Scans or fixes never start after a webhook.** Confirm the repository's webhook points at the provider's receiver (`…/sensei/{gitlab,bitbucket,azure}/webhooks`, or `…/sensei/webhooks` for GitHub) with the correct secret/credentials, and subscribes to push + pull-request (+ comment) events. The provider's **recent deliveries** should show `HTTP 200`. Webhook-driven runs fire only for repositories onboarded in **hosted** mode; a push to a non-default branch is scanned via its pull request, not on its own.

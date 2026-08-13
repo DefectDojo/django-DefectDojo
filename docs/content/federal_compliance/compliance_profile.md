@@ -15,7 +15,7 @@ deliverable it produces. Open the Asset that represents your system boundary, go
 
 | Field | What it does |
 | --- | --- |
-| **Enabled** | Turns compliance tracking on for this product. |
+| **Enabled** | Turns compliance tracking on for this Asset. |
 | **Automatic Sync** | Keeps POA&M items in sync with findings. |
 | **POA&M ID Prefix** | Item numbering. Required. Items are numbered `V-1`, `V-2`, and so on by default. |
 | **Impact Level** | LI-SaaS, Low, Moderate, or High. |

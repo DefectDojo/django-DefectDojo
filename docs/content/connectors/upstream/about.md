@@ -156,7 +156,7 @@ We currently support Upstream Connectors for the following tools, with more on t
 
 For step\-by\-step setup instructions for each tool, see the [Tool\-Specific Connector Setup](../toolreference/) reference.
 
-Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Product (Asset) and Product Type (Organization) hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
+Most Connectors import **findings**. A few are **Asset Connectors** that import your **asset inventory** instead — building and maintaining your Asset and Organization hierarchy rather than importing findings: **Azure DevOps**, **Backstage**, **Bitbucket**, **GitHub**, **GitLab**, **JSM Assets**, and **ServiceNow CMDB**. (**runZero** is primarily an Asset Connector, but can optionally import vulnerabilities as findings too.)
 
 These connections provide an API\-speed integration with DefectDojo, and can be used to automatically ingest and organize vulnerability data from the tool.
 
@@ -189,7 +189,7 @@ That's all, really! And remember, even if you create your Connector the 'easy' w
 
 As long as you have the API key from the tool you're trying to connect, a connector can be added in just a few minutes. Once the connection is working, DefectDojo will **Discover** your tool's environment to see how you're organizing your scan data.
 
-Let's say you have a BurpSuite tool, which is set up to scan five different repositories for vulnerabilities. Your Connector will take note of this organizational structure and set up **Records** to help you translate those separate repositories into DefectDojo's Product / Engagement / Test hierarchy. If you have **'Auto\-Map Records'** enabled, DefectDojo will learn and copy that structure automatically.
+Let's say you have a BurpSuite tool, which is set up to scan five different repositories for vulnerabilities. Your Connector will take note of this organizational structure and set up **Records** to help you translate those separate repositories into DefectDojo's Asset / Engagement / Test hierarchy. If you have **'Auto\-Map Records'** enabled, DefectDojo will learn and copy that structure automatically.
 
 ![image](images/_index.png)
 
@@ -205,7 +205,7 @@ On DefectDojo Pro Cloud, you can ask our team to build a connector for a tool we
 
 1. Go to **Connectors → Upstream Connectors** (for tools that import data *into* DefectDojo). Issue-tracker and other outbound integrations can be requested the same way under **Connectors → Downstream Connectors**.
 2. In the **Available Connectors** section, click **Request a Connector**.
-3. Fill in the request form. The **Tool / Product Name**, the **Tool API Base URL**, the **Authentication Type** and the credentials for that authentication type are all required, because our team needs a reachable address and a working credential to build a connector and confirm it works against your tool. Credentials are stored securely. You can optionally add the vendor website, a link to the tool's API docs, and a note describing your use case.
+3. Fill in the request form. The **Tool / Asset Name**, the **Tool API Base URL**, the **Authentication Type** and the credentials for that authentication type are all required, because our team needs a reachable address and a working credential to build a connector and confirm it works against your tool. Credentials are stored securely. You can optionally add the vendor website, a link to the tool's API docs, and a note describing your use case.
 4. Click **Submit Request**. You'll see a confirmation that your request was received. Our team reviews each request to evaluate building support — submitting a request is not a guarantee that the connector will be built.
 
 Requesting a connector requires **global Maintainer** permissions and is available on **DefectDojo Pro Cloud only** — the option does not appear on self-hosted (on-premise) instances.

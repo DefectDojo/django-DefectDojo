@@ -61,11 +61,11 @@ You will see an All Findings table.  Using the All Findings Table, set the Filte
 
 The table will preview the list of existing Findings that you have filtered.
 
-For example, in this screenshot we are filtering for all Findings that are in 'Product One'.  Once we apply this filter (by clicking outside of the Filters menu), it will be added to our list of applicable Filters.
+For example, in this screenshot we are filtering for all Findings that are in 'Asset One'.  Once we apply this filter (by clicking outside of the Filters menu), it will be added to our list of applicable Filters.
 
 ![image](images/rules_engine_3.png)
 
-In the screenshot above, all Findings that are in the Product 'Product One' will have actions taken on them.
+In the screenshot above, all Findings that are in the Asset 'Asset One' will have actions taken on them.
 
 Once you have a set of Filters that you want to apply, Click the Next Button.
 

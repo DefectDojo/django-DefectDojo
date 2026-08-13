@@ -27,7 +27,7 @@ When you open the panel, DefectDojo pre-fills a filter with the current Finding'
 - Line number
 - Unique ID from tool
 - Test type
-- Asset (and Asset type)
+- Asset (and Organization)
 
 The current Finding is always excluded from its own results. Matching is scoped to the Asset, so Similar Findings never reaches across Assets. If either Engagement has Engagement-level deduplication enabled, matches that cross an Engagement boundary cannot be linked (see [Actions](#actions) below).
 

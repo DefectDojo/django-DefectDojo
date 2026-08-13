@@ -34,7 +34,7 @@ was enabled, backfill them:
 manage.py extract_control_mappings --product <id>
 ```
 
-Use `--all` to scan every active finding instead of one product. The command reports how many
+Use `--all` to scan every active finding instead of one Asset. The command reports how many
 mappings it created, and it leaves manual and suppressed mappings alone.
 
 ## Correcting a mapping
