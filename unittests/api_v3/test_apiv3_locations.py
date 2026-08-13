@@ -5,7 +5,7 @@ Covers: the read-only ``/locations`` resource (slim/detail shapes incl. URL-subt
 orderings, pagination, the v2 superuser-only RBAC mirror, constant query count); the
 ``/findings/{id}/locations`` and ``/assets/{id}/locations`` edge sub-resources (edge shapes,
 auditor ref, parent-inherited authorization 404, pagination, constant query count); the
-``?fields=`` / ``?expand=`` interplay; and flag-off behaviour (whole /api/v3-alpha/ tree absent).
+``?fields=`` / ``?expand=`` interplay; and flag-off behaviour (whole /api/v3/ tree absent).
 """
 from __future__ import annotations
 
@@ -300,7 +300,7 @@ class TestApiV3FieldsExpandInterplay(ApiV3TestCase):
 
 class TestApiV3LocationsFlagOff(ApiV3TestCase):
 
-    """With V3_FEATURE_LOCATIONS=False the entire /api/v3-alpha/ tree is unmounted (D5/§4.1)."""
+    """With V3_FEATURE_LOCATIONS=False the entire /api/v3/ tree is unmounted (D5/§4.1)."""
 
     def test_flag_off_unmounts_entire_v3_tree(self):
         # Flag is on in the test settings: the whole v3 tree resolves.

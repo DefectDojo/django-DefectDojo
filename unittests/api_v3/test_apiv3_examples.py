@@ -465,7 +465,7 @@ class TestApiV3Examples(ApiV3TestCase):
     # --- output ---------------------------------------------------------------------------------
     def _header(self) -> str:
         prefix = f"/{self.prefix}" if self.prefix else "/"
-        base = f"{prefix.rstrip('/')}/api/v3-alpha"
+        base = f"{prefix.rstrip('/')}/api/v3"
         return "\n".join([
             "# DefectDojo API v3 (alpha) — worked examples",
             "",

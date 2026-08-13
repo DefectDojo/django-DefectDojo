@@ -3,7 +3,7 @@ API v3 port of the remaining import corpus siblings (§10 backlog #1):
 
   * ``unittests/test_apiv2_scan_import_options.py`` (``ScanImportOptionsTest``) -- empty/full ZAP
     upload scenarios. Ported by subclassing the v2 class and overriding ONLY its ``import_zap_scan``
-    helper to hit ``POST /api/v3-alpha/import``; the scenarios + assertions run unchanged.
+    helper to hit ``POST /api/v3/import``; the scenarios + assertions run unchanged.
   * ``unittests/test_importers_closeold.py`` (``TestDojoCloseOld``) -- these are importer *unit*
     tests that call ``DefaultImporter`` directly (no HTTP endpoint), so they cannot be adapted by a
     helper override. The close-old behaviours that are observable through the consolidated endpoint

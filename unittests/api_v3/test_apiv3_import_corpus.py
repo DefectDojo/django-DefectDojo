@@ -2,7 +2,7 @@
 API v3 import/reimport corpus (ported from ``unittests/test_import_reimport.py``, §10 backlog #1).
 
 Strategy (architect-recorded dual-endpoint adapter): the v2 ``ImportReimportTestAPI`` scenarios and
-assertions run **unchanged** against the consolidated ``POST /api/v3-alpha/import`` endpoint by
+assertions run **unchanged** against the consolidated ``POST /api/v3/import`` endpoint by
 mixing in :class:`ApiV3ImportShim`, which overrides only the two endpoint helper methods
 (``import_scan_with_params`` / ``reimport_scan_with_params``). Everything else -- the finding-list
 DB assertions, the endpoint→location count redirect, ``block_execution`` for synchronous

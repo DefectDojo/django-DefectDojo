@@ -3,7 +3,7 @@ NinjaAPI instance and mount assembly for API v3 (alpha) (D1, D2 / §4.1).
 
 Builds the single ``NinjaAPI`` instance for v3 and assembles the OS routers via their factories
 (I5). Imported (and thus built) only when ``V3_FEATURE_LOCATIONS`` is on -- ``dojo/urls.py`` mounts
-it conditionally, so with the flag off ``/api/v3-alpha/`` does not exist at all and v3 carries no
+it conditionally, so with the flag off ``/api/v3/`` does not exist at all and v3 carries no
 legacy-endpoint code path (D5).
 
 Auth is the pluggable ordered list ``[TokenAuth(), django_auth]`` (I7 / §4.2). CSRF for the
@@ -39,11 +39,12 @@ class V3NinjaAPI(NinjaAPI):
 def build_api() -> NinjaAPI:
     """Construct the v3 NinjaAPI instance and mount the OS1 routers via their factories."""
     api = V3NinjaAPI(
-        title="DefectDojo API v3",
+        title="DefectDojo API v3 (alpha)",
         version=settings.API_V3_VERSION,
         description=(
             "DefectDojo API v3 (alpha). The alpha contract may change at any time; do not build "
-            "production dependencies on this URL. At beta the API moves to /api/v3/ and stays there."
+            "production dependencies on it yet. Alpha status is signaled by the version string and "
+            "the X-API-Status header; the path is /api/v3/ and stays there through beta and GA."
         ),
         auth=[TokenAuth(), django_auth],
         urls_namespace="api_v3",

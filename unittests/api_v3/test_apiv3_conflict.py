@@ -79,6 +79,6 @@ class TestApiV3UniqueViolationConflict(ApiV3TestCase):
 
     def test_foreign_key_violation_is_reraised_for_the_500_path(self):
         """Non-unique IntegrityErrors are not conflicts: the handler re-raises them."""
-        request = RequestFactory().post("/api/v3-alpha/organizations")
+        request = RequestFactory().post("/api/v3/organizations")
         with self.assertRaises(IntegrityError):
             _handle_integrity_error(request, IntegrityError(FOREIGN_KEY_MESSAGE))

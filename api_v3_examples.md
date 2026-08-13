@@ -6,7 +6,7 @@ Captured: 2026-07-21T17:33:30.749529+00:00
 
 ## Conventions (see `API_V3_PLAN.md` §4)
 
-- **Mount:** alpha lives at `/api/v3-alpha/` (moves to `/api/v3/` at beta — one migration, D1). Every response carries `X-API-Status: alpha`.
+- **Mount:** alpha lives at `/api/v3/` (moves to `/api/v3/` at beta — one migration, D1). Every response carries `X-API-Status: alpha`.
 - **Auth (D8):** send an existing v2 token as `Authorization: Token <key>` (works unchanged on v3), or a Django session cookie + `X-CSRFToken` on unsafe methods.
 - **Envelope & pagination (§4.3):** every list is `{count, next, previous, results, meta?}` and nothing else (I1). `next`/`previous` are opaque URLs. Offset mode is the default (`limit=25`, max `250`); `?pagination=cursor` opts into forward-only keyset paging (`count`/`previous` null, opaque signed cursor in `next`).
 - **Refs (§4.4):** relations render as `{id, name}` (locations add `type`). Write payloads reference relations by integer id — the asymmetry is intentional (§4.11).
@@ -25,7 +25,7 @@ Retrieve a single finding. Relations render as closed `{id, name}` refs (§4.4);
 **Request**
 
 ```http
-GET /api/v3-alpha/findings/2
+GET /api/v3/findings/2
 Authorization: Token <your-api-token>
 ```
 
@@ -103,7 +103,7 @@ Authorization: Token <your-api-token>
 **Request**
 
 ```http
-GET /api/v3-alpha/findings/2?expand=test.engagement,locations
+GET /api/v3/findings/2?expand=test.engagement,locations
 Authorization: Token <your-api-token>
 ```
 
@@ -259,7 +259,7 @@ The filter grammar is a documented, snapshot-tested vocabulary (§4.9). The list
 **Request**
 
 ```http
-GET /api/v3-alpha/findings?severity=High&active=true&limit=2&offset=2
+GET /api/v3/findings?severity=High&active=true&limit=2&offset=2
 Authorization: Token <your-api-token>
 ```
 
@@ -268,8 +268,8 @@ Authorization: Token <your-api-token>
 ```json
 {
   "count": 8,
-  "next": "http://testserver/api/v3-alpha/findings?severity=High&active=true&limit=2&offset=4",
-  "previous": "http://testserver/api/v3-alpha/findings?severity=High&active=true&limit=2&offset=0",
+  "next": "http://testserver/api/v3/findings?severity=High&active=true&limit=2&offset=4",
+  "previous": "http://testserver/api/v3/findings?severity=High&active=true&limit=2&offset=0",
   "results": [
     {
       "id": 234,
@@ -365,7 +365,7 @@ Forward-only keyset mode for export/sync consumers (D4/§4.3). Same envelope, bu
 **Request**
 
 ```http
-GET /api/v3-alpha/findings?pagination=cursor&severity=High&active=true&limit=2
+GET /api/v3/findings?pagination=cursor&severity=High&active=true&limit=2
 Authorization: Token <your-api-token>
 ```
 
@@ -374,7 +374,7 @@ Authorization: Token <your-api-token>
 ```json
 {
   "count": null,
-  "next": "http://testserver/api/v3-alpha/findings?pagination=cursor&severity=High&active=true&limit=2&cursor=eyJvIjoiaWQiLCJpZCI6...<cursor truncated>",
+  "next": "http://testserver/api/v3/findings?pagination=cursor&severity=High&active=true&limit=2&cursor=eyJvIjoiaWQiLCJpZCI6...<cursor truncated>",
   "previous": null,
   "results": [
     {
@@ -480,7 +480,7 @@ Follow the page-1 `next` URL verbatim (opaque). The signed cursor encodes only t
 **Request**
 
 ```http
-GET /api/v3-alpha/findings?pagination=cursor&severity=High&active=true&limit=2&cursor=eyJvIjoiaWQiLCJpZCI6...<cursor truncated>
+GET /api/v3/findings?pagination=cursor&severity=High&active=true&limit=2&cursor=eyJvIjoiaWQiLCJpZCI6...<cursor truncated>
 Authorization: Token <your-api-token>
 ```
 
@@ -489,7 +489,7 @@ Authorization: Token <your-api-token>
 ```json
 {
   "count": null,
-  "next": "http://testserver/api/v3-alpha/findings?pagination=cursor&severity=High&active=true&limit=2&cursor=eyJvIjoiaWQiLCJpZCI6...<cursor truncated>",
+  "next": "http://testserver/api/v3/findings?pagination=cursor&severity=High&active=true&limit=2&cursor=eyJvIjoiaWQiLCJpZCI6...<cursor truncated>",
   "previous": null,
   "results": [
     {
@@ -586,7 +586,7 @@ Authorization: Token <your-api-token>
 **Request**
 
 ```http
-GET /api/v3-alpha/findings?include=counts&limit=2
+GET /api/v3/findings?include=counts&limit=2
 Authorization: Token <your-api-token>
 ```
 
@@ -595,7 +595,7 @@ Authorization: Token <your-api-token>
 ```json
 {
   "count": 27,
-  "next": "http://testserver/api/v3-alpha/findings?include=counts&limit=2&offset=2",
+  "next": "http://testserver/api/v3/findings?include=counts&limit=2&offset=2",
   "previous": null,
   "results": [
     {
@@ -716,7 +716,7 @@ A list returns the slim shape by default. `?fields=` may name any **detail** fie
 **Request**
 
 ```http
-GET /api/v3-alpha/findings?id__in=2&fields=id,title,severity,impact
+GET /api/v3/findings?id__in=2&fields=id,title,severity,impact
 Authorization: Token <your-api-token>
 ```
 
@@ -748,7 +748,7 @@ Authorization: Token <your-api-token>
 **Request**
 
 ```http
-GET /api/v3-alpha/findings/export.csv?severity=High&o=id&fields=id,title,severity,asset,cwe,cwes,vulnerability_ids,tags
+GET /api/v3/findings/export.csv?severity=High&o=id&fields=id,title,severity,asset,cwe,cwes,vulnerability_ids,tags
 Authorization: Token <your-api-token>
 ```
 
@@ -782,7 +782,7 @@ Notes are one generic sub-resource across resources (§4.12). Authorization is i
 **Request**
 
 ```http
-POST /api/v3-alpha/findings/2/notes
+POST /api/v3/findings/2/notes
 Authorization: Token <your-api-token>
 Content-Type: application/json
 
@@ -819,7 +819,7 @@ List a finding's notes (paginated envelope). v2 parity: all notes are returned; 
 **Request**
 
 ```http
-GET /api/v3-alpha/findings/2/notes
+GET /api/v3/findings/2/notes
 Authorization: Token <your-api-token>
 ```
 
@@ -857,7 +857,7 @@ Finding↔Location is many-to-many with status on the edge (D5). Each row is a l
 **Request**
 
 ```http
-GET /api/v3-alpha/findings/2/locations
+GET /api/v3/findings/2/locations
 Authorization: Token <your-api-token>
 ```
 
@@ -913,7 +913,7 @@ Partial update (PATCH-only in alpha; §12). Write payloads reference relations b
 **Request**
 
 ```http
-PATCH /api/v3-alpha/findings/240
+PATCH /api/v3/findings/240
 Authorization: Token <your-api-token>
 Content-Type: application/json
 
@@ -988,7 +988,7 @@ Finding writes accept a flat `cwes: list[int]` (§12, 2026-07-21) — symmetric 
 **Request**
 
 ```http
-PATCH /api/v3-alpha/findings/241
+PATCH /api/v3/findings/241
 Authorization: Token <your-api-token>
 Content-Type: application/json
 
@@ -1070,7 +1070,7 @@ Read-back confirms persistence: `cwes` returns the list in storage order and the
 **Request**
 
 ```http
-GET /api/v3-alpha/findings/241
+GET /api/v3/findings/241
 Authorization: Token <your-api-token>
 ```
 
@@ -1143,7 +1143,7 @@ Authorization: Token <your-api-token>
 **Request**
 
 ```http
-PUT /api/v3-alpha/findings/242
+PUT /api/v3/findings/242
 Authorization: Token <your-api-token>
 Content-Type: application/json
 
@@ -1221,7 +1221,7 @@ One endpoint for import, reimport and auto-resolve (§4.13). Destructive flags (
 **Request**
 
 ```http
-POST /api/v3-alpha/import
+POST /api/v3/import
 Authorization: Token <your-api-token>
 Content-Type: multipart/form-data
 
@@ -1268,7 +1268,7 @@ A simple entity for contrast with findings: identity, `organization` ref, and th
 **Request**
 
 ```http
-GET /api/v3-alpha/assets/1
+GET /api/v3/assets/1
 Authorization: Token <your-api-token>
 ```
 
@@ -1317,7 +1317,7 @@ Same envelope and grammar as findings; slim rows only on list (§4.5).
 **Request**
 
 ```http
-GET /api/v3-alpha/assets?limit=2
+GET /api/v3/assets?limit=2
 Authorization: Token <your-api-token>
 ```
 
@@ -1326,7 +1326,7 @@ Authorization: Token <your-api-token>
 ```json
 {
   "count": 3,
-  "next": "http://testserver/api/v3-alpha/assets?limit=2&offset=2",
+  "next": "http://testserver/api/v3/assets?limit=2&offset=2",
   "previous": null,
   "results": [
     {
@@ -1369,7 +1369,7 @@ Create an asset. Relations are referenced by integer id (§4.11); unknown fields
 **Request**
 
 ```http
-POST /api/v3-alpha/assets
+POST /api/v3/assets
 Authorization: Token <your-api-token>
 Content-Type: application/json
 
@@ -1424,7 +1424,7 @@ Partial update; only the changed field is sent.
 **Request**
 
 ```http
-PATCH /api/v3-alpha/assets/4
+PATCH /api/v3/assets/4
 Authorization: Token <your-api-token>
 Content-Type: application/json
 

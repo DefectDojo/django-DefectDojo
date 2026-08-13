@@ -150,7 +150,7 @@ class TestApiV3QueryReport(ApiV3TestCase):
 
     def _openapi_get_paths(self) -> set[str]:
         schema = api_v3.get_openapi_schema()
-        # Schema paths carry the mount prefix (/api/v3-alpha/...); compare mount-relative.
+        # Schema paths carry the mount prefix (/api/v3/...); compare mount-relative.
         return {
             "/" + path.split(settings.API_V3_URL_PREFIX, 1)[-1].lstrip("/")
             for path, ops in schema["paths"].items()

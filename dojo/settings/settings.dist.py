@@ -733,10 +733,11 @@ V3_FEATURE_LOCATIONS = env("DD_V3_FEATURE_LOCATIONS")
 # ------------------------------------------------------------------------------
 # API v3 (alpha)
 # ------------------------------------------------------------------------------
-# Logical name of the API is /api/v3/; during alpha the actual mount prefix carries the
-# instability marker (D1/§4.1). This is the single source of truth for the prefix and version
-# string -- do not hardcode them anywhere else.
-API_V3_URL_PREFIX = "api/v3-alpha"
+# The API is mounted at /api/v3/ and stays there through beta and GA (no URL migration). It is an
+# alpha: the contract may change at any time. Alpha status is signaled by the OpenAPI version
+# (API_V3_VERSION), the X-API-Status header, and the docs banner -- not by the URL (D1/§4.1). This
+# is the single source of truth for the prefix and version string -- do not hardcode them anywhere.
+API_V3_URL_PREFIX = "api/v3"
 API_V3_VERSION = "3.0.0-alpha"
 API_V3_STATUS = "alpha"
 # Count/expand tuning (§4.3, §4.6); settings-overridable per the plan.

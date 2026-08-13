@@ -6,7 +6,7 @@ The v2 corpus (``unittests/test_import_reimport.py``) drives its scenarios throu
 methods -- ``import_scan_with_params`` / ``reimport_scan_with_params`` -- and inspects results with
 the shared ``DojoAPITestCase`` DB/finding helpers. This module supplies a mixin that overrides ONLY
 those two helpers so the *identical* scenarios and assertions run against the consolidated
-``POST /api/v3-alpha/import`` endpoint instead of the v2 ``importscan``/``reimportscan`` endpoints.
+``POST /api/v3/import`` endpoint instead of the v2 ``importscan``/``reimportscan`` endpoints.
 
 Mapping performed by the shim (v2 wire -> v3 wire, D11 §12):
   * ``product_name``       -> ``asset_name``
@@ -41,8 +41,8 @@ def _bool_str(value: object) -> str:
 @skipUnless(
     settings.V3_FEATURE_LOCATIONS,
     "API v3 import endpoint is mounted only when V3_FEATURE_LOCATIONS is enabled (D5); the CI "
-    "unit-test matrix runs a flag-off leg where /api/v3-alpha/ does not exist. Guarding the shim "
-    "skips every corpus test that mixes it in (they hit POST /api/v3-alpha/import).",
+    "unit-test matrix runs a flag-off leg where /api/v3/ does not exist. Guarding the shim "
+    "skips every corpus test that mixes it in (they hit POST /api/v3/import).",
 )
 class ApiV3ImportShim:
 

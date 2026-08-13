@@ -111,7 +111,7 @@ class TestApiV3AuthzSweep(ApiV3TestCase):
         schema = api_v3.get_openapi_schema()
         ops: set[tuple[str, str]] = set()
         for path, item in schema["paths"].items():
-            # Schema paths carry the mount prefix (/api/v3-alpha/...); compare mount-relative,
+            # Schema paths carry the mount prefix (/api/v3/...); compare mount-relative,
             # exactly as test_apiv3_query_report does.
             rel = "/" + path.split(settings.API_V3_URL_PREFIX, 1)[-1].lstrip("/")
             for method in item:

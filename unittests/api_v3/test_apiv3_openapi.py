@@ -32,7 +32,7 @@ class TestApiV3OpenApi(SimpleTestCase):
         self.assertIn("alpha", self.schema["info"]["description"].lower())
 
     def test_expected_paths_present(self):
-        # Paths carry the mount prefix (/api/v3-alpha/...); assert on the operation suffix.
+        # Paths carry the mount prefix (/api/v3/...); assert on the operation suffix.
         # Per D11 the wire paths are /organizations and /assets (not /product_types, /products).
         paths = set(self.schema["paths"])
         for suffix in (

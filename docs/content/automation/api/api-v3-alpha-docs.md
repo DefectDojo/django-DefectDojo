@@ -7,12 +7,12 @@ aliases:
   - /en/api/api-v3-alpha-docs
 ---
 
-> **Alpha — do not build production dependencies on this.**
-> API v3 is in **alpha**. It is mounted at **`/api/v3-alpha/`** precisely so the instability is
-> impossible to miss: the alpha contract may change at any time. At **beta the API moves to
-> `/api/v3/` and stays there** through GA — so you migrate the URL exactly once, at the moment you
-> re-verify against the settled contract. Every v3 response also carries the header
-> `X-API-Status: alpha`.
+> **Alpha — do not build production dependencies on this yet.**
+> API v3 is in **alpha**: the contract may change at any time. It is mounted at **`/api/v3/`** and
+> stays there through beta and GA — the path never changes, so there is no URL migration. Alpha
+> status is signaled **out-of-band**, not by the URL: the OpenAPI `info.version` is `3.0.0-alpha`,
+> every v3 response carries the header `X-API-Status: alpha`, and this banner. Watch those markers
+> to know when the contract has settled before you depend on it.
 
 ## Overview
 
@@ -36,9 +36,9 @@ What v3 gives you over v2:
 
 ### Interactive docs
 
-- Interactive API reference (Swagger UI): **`/api/v3-alpha/docs`**
-- Modern API reference (Scalar): **`/api/v3-alpha/reference`**
-- OpenAPI schema: **`/api/v3-alpha/openapi.json`** (`info.version = 3.0.0-alpha`)
+- Interactive API reference (Swagger UI): **`/api/v3/docs`**
+- Modern API reference (Scalar): **`/api/v3/reference`**
+- OpenAPI schema: **`/api/v3/openapi.json`** (`info.version = 3.0.0-alpha`)
 
 The "try it out" flow works with your logged-in session, or paste a token (see below).
 
@@ -53,7 +53,7 @@ Two modes are active on **every** endpoint:
 
 - **Token — your existing v2 token works unchanged.** Send `Authorization: Token <key>`. v3
   validates against the same token store as v2, so a key that works on `/api/v2/` works on
-  `/api/v3-alpha/` the same day — no new token, no re-issue.
+  `/api/v3/` the same day — no new token, no re-issue.
 
   ```
   Authorization: Token c8572a5adf107a693aa6c72584da31f4d1f1dcff
@@ -75,7 +75,7 @@ Every list returns the same closed envelope — and nothing else:
 ```jsonc
 {
   "count": 4321,          // exact below a cap; a planner estimate above it (see Known gaps)
-  "next": "https://.../api/v3-alpha/findings?limit=25&offset=50&severity=High",
+  "next": "https://.../api/v3/findings?limit=25&offset=50&severity=High",
   "previous": null,
   "results": [ /* slim objects */ ],
   "meta": { }             // present only when ?include= adds content
@@ -112,10 +112,10 @@ one field) returns `400`:
 | users, locations | `id` |
 
 ```jsonc
-// GET /api/v3-alpha/findings?pagination=cursor&limit=25&o=-updated&severity=High
+// GET /api/v3/findings?pagination=cursor&limit=25&o=-updated&severity=High
 {
   "count": null,
-  "next": "https://.../api/v3-alpha/findings?limit=25&o=-updated&severity=High&pagination=cursor&cursor=eyJ...",
+  "next": "https://.../api/v3/findings?limit=25&o=-updated&severity=High&pagination=cursor&cursor=eyJ...",
   "previous": null,
   "results": [ /* slim objects */ ]
 }
@@ -200,14 +200,14 @@ This table doubles as the rename documentation (D11): `product_type` → `organi
 
 | Object | v2 | v3 (alpha) | Notes |
 |---|---|---|---|
-| Organization (v2 "product type") | `/api/v2/product_types/` | `/api/v3-alpha/organizations` | **Renamed** (D11); CRUD (`PATCH` partial + `PUT` full replace) |
-| Asset (v2 "product") | `/api/v2/products/` | `/api/v3-alpha/assets` | **Renamed** (D11); CRUD |
-| Engagement | `/api/v2/engagements/` | `/api/v3-alpha/engagements` | CRUD |
-| Test | `/api/v2/tests/` | `/api/v3-alpha/tests` | CRUD |
-| Finding | `/api/v2/findings/` | `/api/v3-alpha/findings` | CRUD + `?expand=`, `?include=counts` |
-| Location | `/api/v2/endpoints/` (legacy `Endpoint`) | `/api/v3-alpha/locations` | **Concept change** (see below); read-only in alpha |
-| User | `/api/v2/users/` | `/api/v3-alpha/users` | Read + self; admin-only writes |
-| Import | `/api/v2/import-scan/` + `/api/v2/reimport-scan/` | `/api/v3-alpha/import` | **Consolidated** — one endpoint, `mode=auto\|import\|reimport` |
+| Organization (v2 "product type") | `/api/v2/product_types/` | `/api/v3/organizations` | **Renamed** (D11); CRUD (`PATCH` partial + `PUT` full replace) |
+| Asset (v2 "product") | `/api/v2/products/` | `/api/v3/assets` | **Renamed** (D11); CRUD |
+| Engagement | `/api/v2/engagements/` | `/api/v3/engagements` | CRUD |
+| Test | `/api/v2/tests/` | `/api/v3/tests` | CRUD |
+| Finding | `/api/v2/findings/` | `/api/v3/findings` | CRUD + `?expand=`, `?include=counts` |
+| Location | `/api/v2/endpoints/` (legacy `Endpoint`) | `/api/v3/locations` | **Concept change** (see below); read-only in alpha |
+| User | `/api/v2/users/` | `/api/v3/users` | Read + self; admin-only writes |
+| Import | `/api/v2/import-scan/` + `/api/v2/reimport-scan/` | `/api/v3/import` | **Consolidated** — one endpoint, `mode=auto\|import\|reimport` |
 
 ### Naming: organizations and assets
 
@@ -241,12 +241,12 @@ v3 does not expose the legacy `Endpoint` model. A finding relates to **locations
 the status (`Active` / `Mitigated` / `FalsePositive` / `RiskAccepted` / `OutOfScope`) carried on the
 edge. Slim findings carry `locations_count`; the full edge list is a sub-resource:
 
-- `GET /api/v3-alpha/findings/{id}/locations` → `{ location: {id, name, type}, status, audit_time, auditor }`
-- `GET /api/v3-alpha/assets/{id}/locations` → `{ location: {id, name, type}, status }`
+- `GET /api/v3/findings/{id}/locations` → `{ location: {id, name, type}, status, audit_time, auditor }`
+- `GET /api/v3/assets/{id}/locations` → `{ location: {id, name, type}, status }`
 
 ### Import in one call
 
-`POST /api/v3-alpha/import` (multipart) covers all three flows. `mode=auto` resolves an existing
+`POST /api/v3/import` (multipart) covers all three flows. `mode=auto` resolves an existing
 target via `asset_name` + `engagement_name` (+ optional `organization_name`); `import` and `reimport`
 are explicit. **Destructive flags are never implied by mode** — if you omit `close_old_findings`, the
 importer default applies and the response echoes the effective value:
@@ -264,11 +264,11 @@ attached to every resource whose model stores it (notes/files: finding, engageme
 those plus asset):
 
 ```
-GET / POST         /api/v3-alpha/<resource>/{id}/notes      { "entry": "...", "private": false }
-GET / PUT / POST   /api/v3-alpha/<resource>/{id}/tags       { "tags": ["pci"] }   # PUT replaces, POST appends
-DELETE             /api/v3-alpha/<resource>/{id}/tags/{tag}
-GET / POST         /api/v3-alpha/<resource>/{id}/files      (multipart: file, title)
-GET                /api/v3-alpha/<resource>/{id}/files/{file_id}/download
+GET / POST         /api/v3/<resource>/{id}/notes      { "entry": "...", "private": false }
+GET / PUT / POST   /api/v3/<resource>/{id}/tags       { "tags": ["pci"] }   # PUT replaces, POST appends
+DELETE             /api/v3/<resource>/{id}/tags/{tag}
+GET / POST         /api/v3/<resource>/{id}/files      (multipart: file, title)
+GET                /api/v3/<resource>/{id}/files/{file_id}/download
 ```
 
 Authorization for a sub-resource is inherited from its parent object.
@@ -282,7 +282,7 @@ Every top-level list endpoint has a CSV projection at `GET /<resource>/export.cs
 organizations, engagements, tests, users, locations — `locations` keeps its superuser gate):
 
 ```
-GET /api/v3-alpha/findings/export.csv?severity=High&o=-date&fields=id,title,impact
+GET /api/v3/findings/export.csv?severity=High&o=-date&fields=id,title,impact
 ```
 
 - **Same filter contract as the list.** `export.csv` takes the identical filters, `o=` ordering,

@@ -218,7 +218,7 @@ if hasattr(settings, "API_TOKENS_ENABLED") and hasattr(settings, "API_TOKEN_AUTH
         ]
 
 # API v3 (alpha) -- mounted conditionally on V3_FEATURE_LOCATIONS (D5/§4.1). With the flag off the
-# whole /api/v3-alpha/ tree is absent. The prefix and version live in settings (single source).
+# whole /api/v3/ tree is absent. The prefix and version live in settings (single source).
 if getattr(settings, "V3_FEATURE_LOCATIONS", False):
     from dojo.api_v3.api import api_v3
     from dojo.api_v3.reference_docs import scalar_reference

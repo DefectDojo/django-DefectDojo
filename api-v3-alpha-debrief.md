@@ -25,7 +25,7 @@ How this was built: one Opus subagent per phase working from `API_V3_PLAN.md`; a
 
 ## OS1 — Foundation, findings read path, import, framework gate
 
-**Delivered:** `dojo/api_v3/` kernel (`api.py` mount, `auth.py` TokenAuth reusing the v2 token store + session/CSRF via `django_auth`, `pagination.py` envelope with hybrid exact→planner-estimate counts, `errors.py` RFC 9457 problem+json + DRF boundary adapter, `expand.py` cycle guard + budget + expand-driven `select_related`/`prefetch_related`, `filtering.py` django-filter adapter, `include.py` counts); `dojo/finding/api_v3/` (FindingSlim/Detail, `build_findings_router()`); `dojo/importers/services.py` (`ImportResult` replacing the 7-tuple); `POST /import` with mode auto|import|reimport; conditional mount at `/api/v3-alpha/` gated on `V3_FEATURE_LOCATIONS`.
+**Delivered:** `dojo/api_v3/` kernel (`api.py` mount, `auth.py` TokenAuth reusing the v2 token store + session/CSRF via `django_auth`, `pagination.py` envelope with hybrid exact→planner-estimate counts, `errors.py` RFC 9457 problem+json + DRF boundary adapter, `expand.py` cycle guard + budget + expand-driven `select_related`/`prefetch_related`, `filtering.py` django-filter adapter, `include.py` counts); `dojo/finding/api_v3/` (FindingSlim/Detail, `build_findings_router()`); `dojo/importers/services.py` (`ImportResult` replacing the 7-tuple); `POST /import` with mode auto|import|reimport; conditional mount at `/api/v3/` gated on `V3_FEATURE_LOCATIONS`.
 
 **Gate (all 7 criteria pass → GO on Ninja):** constant query counts (5 slim / 7 expanded at 10 and 100 rows vs v2 91→271 / 222→762); import DB-state equivalence vs v2; RBAC via `get_authorized_findings`; django-filter reuse proven; both auth modes on the same endpoints; OpenAPI renders; subclass-and-remount seam demo (I4/I5).
 
@@ -59,7 +59,7 @@ Also fixed en route: a pydantic forward-ref shadowing bug (`date` field default 
 
 ## OS4 — Locations
 
-**Delivered:** `GET /locations` + `/locations/{id}` read-only (superuser gate — verified faithful mirror of v2 `LocationViewSet`'s `IsSuperUser`; rows still drawn via `get_authorized_locations` as the future RBAC seam); `GET /findings/{id}/locations` (edge rows: location ref + status + audit_time + auditor) and `GET /products/{id}/locations` (location ref + status — the model has no audit columns on the product edge); auditor added to `expand=locations` (closing the OS2 deferral); fields/expand interplay resolved kernel-side (`?fields=` allowlist = schema fields ∪ expandable keys); **flag-off test**: in-process URLconf reload proves `V3_FEATURE_LOCATIONS=False` unmounts all of `/api/v3-alpha/`.
+**Delivered:** `GET /locations` + `/locations/{id}` read-only (superuser gate — verified faithful mirror of v2 `LocationViewSet`'s `IsSuperUser`; rows still drawn via `get_authorized_locations` as the future RBAC seam); `GET /findings/{id}/locations` (edge rows: location ref + status + audit_time + auditor) and `GET /products/{id}/locations` (location ref + status — the model has no audit columns on the product edge); auditor added to `expand=locations` (closing the OS2 deferral); fields/expand interplay resolved kernel-side (`?fields=` allowlist = schema fields ∪ expandable keys); **flag-off test**: in-process URLconf reload proves `V3_FEATURE_LOCATIONS=False` unmounts all of `/api/v3/`.
 
 ## OS5 — Notes / tags / files sub-resources
 
@@ -91,7 +91,7 @@ Also fixed en route: a pydantic forward-ref shadowing bug (`date` field default 
 - **`api_v3_examples.md`** (repo root, committed): auto-generated verbatim request/response pairs — findings (detail, expand, filtered+paginated lists, `include=counts`, notes, locations edges, import, PATCH) and products as the simple contrast. Regenerate: `DD_API_V3_EXAMPLES=1` harness (CI-excluded).
 - **Docs page**: `docs/content/automation/api/api-v3-alpha-docs.md` (next to the v2 page; plain markdown, no unverified shortcodes) — overview, auth (v2 tokens work unchanged), contract summary, v2→v3 mapping, **Known alpha gaps** section, beta URL-migration notice.
 - **Invariants I1–I10: all pass** (verdict table in `.claude/os6-report.md`); v2 regression sample untouched-and-green (`test_rest_framework` 879 OK, `test_apiv2_prefetch_rbac` 10 OK); `manage.py check` clean.
-- **Scalar docs-UI: deferred** — alpha keeps ninja's built-in Swagger at `/api/v3-alpha/docs`; vendoring a JS bundle into a security product's repo needs its own supply-chain review (swap = one template view + locally vendored asset, sidecar-style).
+- **Scalar docs-UI: deferred** — alpha keeps ninja's built-in Swagger at `/api/v3/docs`; vendoring a JS bundle into a security product's repo needs its own supply-chain review (swap = one template view + locally vendored asset, sidecar-style).
 
 ---
 
