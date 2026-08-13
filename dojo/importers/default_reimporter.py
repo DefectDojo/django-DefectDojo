@@ -872,17 +872,26 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
             candidates_by_key: Dictionary mapping (title_lower, severity) to list of findings (for legacy algorithm)
 
         Returns:
-            List of matching findings, in priority order. Deliberately NOT re-sorted by id
-            here: a candidate can be a same-report duplicate queued earlier in this matching
-            batch by add_new_finding_to_candidates, which has no primary key yet (persist_new_findings
-            only assigns one once the whole batch is queued -- see _drain_pending_new_findings),
-            and `.id` sorting a list containing None alongside real ids raises. The lists in
-            candidates_by_hash/candidates_by_uid/candidates_by_key are already in the right
-            order by construction: get_reimport_match_candidates_for_batch fetches existing
-            candidates pre-sorted by id, and add_new_finding_to_candidates only ever appends
-            to that same list afterward, in the order findings are processed -- so returning
-            them as-is preserves "existing findings first, then same-report ones in the order
-            they were created" without needing every candidate to have a real id yet.
+            List of matching findings, in a deterministic priority order: persisted existing
+            findings first, ordered by ascending id, then any same-report duplicate queued
+            earlier in this matching batch (which has no primary key yet -- persist_new_findings
+            only assigns one once the whole batch is queued, see _drain_pending_new_findings),
+            in the order it was created. Consumers key off matched_findings[0], so this order
+            must not depend on which key an existing finding happened to match on.
+
+            The single-algorithm branches (hash_code / unique_id_from_tool / legacy) already
+            satisfy this by construction and are returned as-is: get_reimport_match_candidates_for_batch
+            fetches existing candidates pre-sorted by id, and add_new_finding_to_candidates only
+            ever appends to that same list, so "existing by id, then same-report last" holds
+            without touching pk=None candidates.
+
+            The combined unique_id_from_tool_or_hash_code branch merges two such lists (hash
+            matches then uid matches), which is NOT globally id-sorted -- an existing finding
+            matched by hash could otherwise outrank a lower-id existing finding matched by uid,
+            silently changing which finding is reconciled vs. closed as stale. That branch
+            therefore applies a pk-tolerant stable sort to restore the id-ascending order while
+            still tolerating the not-yet-saved (pk=None) same-report case a plain `.id` sort
+            would crash on.
 
         """
         deduplicationLogger.debug("matching finding for reimport using algorithm: %s", self.deduplication_algorithm)
@@ -920,7 +929,15 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
                 for match in uid_matches:
                     matches_by_identity[id(match)] = match
 
-            return list(matches_by_identity.values())
+            # Dict insertion order here is "all hash matches, then all uid matches", which is
+            # not globally id-sorted. Restore a deterministic order so matched_findings[0] is
+            # stable regardless of which key matched: persisted candidates first by ascending
+            # id, then any pk=None same-report duplicate last, in insertion order (sorted() is
+            # stable). The `f.pk is None` first key keeps None out of the id comparison.
+            return sorted(
+                matches_by_identity.values(),
+                key=lambda f: (f.pk is None, f.pk if f.pk is not None else 0),
+            )
 
         if self.deduplication_algorithm == "legacy":
             if candidates_by_key is None or not unsaved_finding.title:
