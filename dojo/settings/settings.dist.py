@@ -1645,6 +1645,12 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "AWS Prowler V3": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "AWS Security Finding Format (ASFF) Scan": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Bandit Scan": DEDUPE_ALGO_HASH_CODE,
+    # NOTE: tests 55 and 66 in dojo_testdata.json use this scan type as the
+    # unique_id_from_tool vehicle for test_deduplication_logic and
+    # test_false_positive_history_logic. Those suites vary title/description/cwe and
+    # assert the hash_code MOVES while the unique id still matches, which only holds
+    # while this scan type has no HASHCODE_FIELDS_PER_SCANNER entry. Giving it one
+    # will fail those suites; repoint the fixture first.
     "Burp REST API": DEDUPE_ALGO_UNIQUE_ID_FROM_TOOL,
     "Burp Enterprise Scan": DEDUPE_ALGO_HASH_CODE,
     "Burp Suite DAST Scan": DEDUPE_ALGO_HASH_CODE,

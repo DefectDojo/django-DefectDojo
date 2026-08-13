@@ -423,7 +423,7 @@
     "pk": 999,
     "model": "dojo.test_type",
     "fields": {
-      "name": "Checkmarx Scan detailed"
+      "name": "Burp REST API"
     }
   },
   {
@@ -1039,7 +1039,7 @@
     "fields": {
       "lead": null,
       "test_type": 999,
-      "scan_type": "Checkmarx Scan detailed",
+      "scan_type": "Burp REST API",
       "engagement": 5,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
@@ -1054,7 +1054,7 @@
     "fields": {
       "lead": null,
       "test_type": 999,
-      "scan_type": "Checkmarx Scan detailed",
+      "scan_type": "Burp REST API",
       "engagement": 5,
       "environment": 1,
       "target_start": "2017-12-01T00:00:00Z",
@@ -1607,7 +1607,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "bc912aacda3a8707cbf94b96e6350a5cc77e7ef4a29a1442cb1a041e4e1f38d8",
+      "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
       "last_reviewed": null
     }
   },
@@ -1655,7 +1655,7 @@
       "url": null,
       "notes": [],
       "dynamic_finding": false,
-      "hash_code": "bc912aacda3a8707cbf94b96e6350a5cc77e7ef4a29a1442cb1a041e4e1f38d8",
+      "hash_code": "9aca00affd340c4da02c934e7e3106a45c6ad0911da479daae421b3b28a2c1aa",
       "last_reviewed": null
     }
   },
