@@ -24,6 +24,8 @@ from dojo.asset.api.serializers import AssetAPIScanConfigurationSerializer
 from dojo.models import Dojo_User, Product_API_Scan_Configuration, Tool_Configuration, Tool_Type
 from dojo.product.api.serializer import ProductAPIScanConfigurationSerializer
 from dojo.product.ui.forms import Product_API_Scan_ConfigurationForm
+from dojo.tool_product.api.serializer import ToolProductSettingsSerializer
+from dojo.tool_product.ui.forms import ToolProductSettingsForm
 
 from .dojo_test_case import DojoTestCase
 
@@ -115,3 +117,42 @@ class ApiScanConfigurationToolAuthzTest(DojoTestCase):
         with impersonate(self.staff):
             serializer = self._alias_serializer(self.staff, product)
             self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    def _tool_product_serializer(self, user, product):
+        return ToolProductSettingsSerializer(
+            data={
+                "name": "tps", "setting_url": "http://example.invalid",
+                "product": product.pk, "tool_configuration": self.tool_config.pk,
+            },
+            context={"request": SimpleNamespace(user=user)},
+        )
+
+    def test_tool_product_rest_rejects_unauthorized_tool_configuration(self):
+        product = self._asset_for(self.unprivileged, "scanconf-tps-unprivileged")
+        with self.assertRaises(PermissionDenied):
+            self._tool_product_serializer(self.unprivileged, product).is_valid(raise_exception=True)
+
+    def test_tool_product_rest_allows_authorized_tool_configuration(self):
+        product = self._asset_for(self.staff, "scanconf-tps-staff")
+        serializer = self._tool_product_serializer(self.staff, product)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    def _tool_product_form(self, user):
+        return ToolProductSettingsForm(
+            {"name": "tps", "url": "http://example.invalid", "tool_configuration": self.tool_config.pk},
+            user=user,
+        )
+
+    def test_tool_product_form_offers_unprivileged_user_no_tool_configurations(self):
+        form = ToolProductSettingsForm(user=self.unprivileged)
+        self.assertNotIn(self.tool_config, form.fields["tool_configuration"].queryset)
+
+    def test_tool_product_form_rejects_unauthorized_tool_configuration(self):
+        form = self._tool_product_form(self.unprivileged)
+        self.assertFalse(form.is_valid())
+        self.assertIn("tool_configuration", form.errors)
+
+    def test_tool_product_form_allows_authorized_tool_configuration(self):
+        form = self._tool_product_form(self.staff)
+        self.assertIn(self.tool_config, form.fields["tool_configuration"].queryset)
+        self.assertNotIn("tool_configuration", form.errors)
