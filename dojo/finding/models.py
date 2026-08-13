@@ -205,6 +205,10 @@ class Finding(BaseModel):
     test = models.ForeignKey("dojo.Test",
                              editable=False,
                              on_delete=models.CASCADE,
+                             # No standalone index: nine composite indexes below already lead with
+                             # `test`, so a query filtering on it alone is served by one of those.
+                             # The single-column copy only added write cost on every finding insert.
+                             db_index=False,
                              verbose_name=_("Test"),
                              help_text=_("The test that is associated with this flaw."))
     active = models.BooleanField(default=True,
@@ -226,6 +230,9 @@ class Finding(BaseModel):
                                           null=True,
                                           related_name="original_finding",
                                           blank=True, on_delete=models.DO_NOTHING,
+                                          # No standalone index: the ("duplicate_finding", "id")
+                                          # composite below covers every lookup this one did.
+                                          db_index=False,
                                           verbose_name=_("Duplicate Finding"),
                                           help_text=_("Link to the original finding if this finding is a duplicate."))
     out_of_scope = models.BooleanField(default=False,
