@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.conf import settings
 
@@ -63,24 +63,31 @@ class XeolParser:
 
             description = "\n".join(description_lines)
 
-            # Determine severity based on EOL date
+            # Severity records whether the component is past its end-of-life date, and
+            # deliberately does not grade how long ago that date fell.
+            #
+            # This used to band the age of the EOL date (Low/Medium/High inside 2/4/6
+            # weeks, Critical beyond), which made the parser's output a function of the
+            # calendar as well as of the report: the same unchanged scan produced a
+            # different severity on a different day, walking one finding through four
+            # severities over six weeks with no upstream event behind it. That churned
+            # severity on every reimport, and on any instance whose hash fields include
+            # severity it churned hash_code too, so reimport stopped matching stored
+            # findings, closed them as absent and created duplicates. A parser's output
+            # has to be reproducible from its input.
+            #
+            # One comparison against the current date remains, because "has this cycle
+            # reached EOL" is a genuine state change rather than an escalation ladder: it
+            # happens once per component, in one direction, on the date the report itself
+            # names.
             severity = "Info"
-            eol_str = cycle.get("Eol", "")
             try:
-                eol_date = datetime.strptime(eol_str, "%Y-%m-%d")
-                now = datetime.now()
-                if eol_date < now:
-                    delta = now - eol_date
-                    if delta <= timedelta(weeks=2):
-                        severity = "Low"
-                    elif delta <= timedelta(weeks=4):
-                        severity = "Medium"
-                    elif delta <= timedelta(weeks=6):
-                        severity = "High"
-                    else:
-                        severity = "Critical"
-            except Exception:
-                severity = "Info"
+                eol_date = datetime.strptime(cycle.get("Eol", ""), "%Y-%m-%d")
+            except (TypeError, ValueError):
+                pass
+            else:
+                if eol_date < datetime.now():
+                    severity = "Critical"
 
             finding = Finding(
                 title=title,
