@@ -20,10 +20,19 @@ from django.db import DEFAULT_DB_ALIAS
 from django.db.models import OuterRef, Q, Value
 from django.db.models.functions import Coalesce
 from django.db.models.query import Prefetch, QuerySet
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse, QueryDict, StreamingHttpResponse
+from django.http import (
+    Http404,
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    JsonResponse,
+    QueryDict,
+    StreamingHttpResponse,
+)
 from django.shortcuts import get_object_or_404, render
 from django.urls import Resolver404, reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.views.decorators.http import require_POST
@@ -37,6 +46,7 @@ from dojo.endpoint.utils import save_endpoints_to_add
 from dojo.engagement.queries import get_authorized_engagements
 from dojo.engagement.services import (
     close_engagement,
+    reassign_engagement_product_endpoints,
     reopen_engagement,
 )
 from dojo.engagement.services import (
@@ -92,6 +102,7 @@ from dojo.models import (
     Test,
     Test_Import,
 )
+from dojo.notes.helper import visible_notes
 from dojo.notifications.helper import create_notification
 from dojo.product.queries import get_authorized_products
 from dojo.product_announcements import (
@@ -283,13 +294,16 @@ def edit_engagement(request, eid):
         if form.is_valid():
             # first save engagement details
             new_status = form.cleaned_data.get("status")
-            if form.cleaned_data.get("product") != engagement.product:
+            old_product = engagement.product
+            new_product = form.cleaned_data.get("product")
+            product_changed = new_product != old_product
+            if product_changed:
                 user_has_permission_or_403(
                     request.user,
-                    form.cleaned_data.get("product"),
+                    new_product,
                     "edit",
                 )
-            engagement.product = form.cleaned_data.get("product")
+            engagement.product = new_product
             engagement = form.save(commit=False)
             if (new_status in {"Cancelled", "Completed"}):
                 engagement.active = False
@@ -297,11 +311,15 @@ def edit_engagement(request, eid):
                 engagement.active = True
             engagement.save()
             form.save_m2m()
+            # When the engagement moves to a different product, re-home its findings'
+            # endpoints/locations onto the new product so they no longer reference the old one.
+            if product_changed:
+                reassign_engagement_product_endpoints(engagement, old_product, new_product)
 
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Engagement updated successfully.",
+                _("Engagement updated successfully."),
                 extra_tags="alert-success")
 
             success, jira_project_form = jira_services.process_project_form(request, instance=jira_project, target="engagement", engagement=engagement, product=engagement.product)
@@ -397,13 +415,13 @@ def copy_engagement(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Engagement Copied successfully.",
+                _("Engagement Copied successfully."),
                 extra_tags="alert-success")
             return redirect_to_return_url_or_else(request, reverse("view_engagements", args=(product.id, )))
         messages.add_message(
             request,
             messages.ERROR,
-            "Unable to copy engagement, please try again.",
+            _("Unable to copy engagement, please try again."),
             extra_tags="alert-danger")
 
     product_tab = Product_Tab(product, title="Copy Engagement", tab="engagements")
@@ -490,7 +508,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -551,7 +569,7 @@ class ViewEngagement(View):
             title = f"Engagement: {eng.name} on {eng.product.name}"
             messages.add_message(request,
                                  messages.SUCCESS,
-                                 "Note added successfully.",
+                                 _("Note added successfully."),
                                  extra_tags="alert-success")
 
         add_breadcrumb(parent=eng, top_level=False, request=request)
@@ -571,7 +589,7 @@ class ViewEngagement(View):
                 "check": check,
                 "threat": eng.tmodel_path,
                 "form": form,
-                "notes": notes,
+                "notes": visible_notes(notes, request.user),
                 "files": files,
                 "risks_accepted": risks_accepted,
                 "jissue": jissue,
@@ -633,7 +651,7 @@ def add_tests(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Test added successfully.",
+                _("Test added successfully."),
                 extra_tags="alert-success")
 
             create_notification(
@@ -1093,7 +1111,7 @@ def close_eng(request, eid):
     messages.add_message(
         request,
         messages.SUCCESS,
-        "Engagement closed successfully.",
+        _("Engagement closed successfully."),
         extra_tags="alert-success")
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -1108,7 +1126,7 @@ def unlink_jira(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Link to JIRA epic successfully deleted",
+                _("Link to JIRA epic successfully deleted"),
                 extra_tags="alert-success",
             )
             return JsonResponse({"result": "OK"})
@@ -1117,7 +1135,7 @@ def unlink_jira(request, eid):
             messages.add_message(
                 request,
                 messages.ERROR,
-                "Link to JIRA epic could not be deleted, see alerts for details",
+                _("Link to JIRA epic could not be deleted, see alerts for details"),
                 extra_tags="alert-danger",
             )
             return HttpResponse(status=500)
@@ -1125,7 +1143,7 @@ def unlink_jira(request, eid):
         messages.add_message(
             request,
             messages.ERROR,
-            "Link to JIRA epic not found",
+            _("Link to JIRA epic not found"),
             extra_tags="alert-danger",
         )
         return HttpResponse(status=400)
@@ -1138,7 +1156,7 @@ def reopen_eng(request, eid):
     messages.add_message(
         request,
         messages.SUCCESS,
-        "Engagement reopened successfully.",
+        _("Engagement reopened successfully."),
         extra_tags="alert-success")
     return HttpResponseRedirect(reverse("view_engagements", args=(eng.product.id, )))
 
@@ -1180,7 +1198,7 @@ def complete_checklist(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Checklist saved.",
+                _("Checklist saved."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(
                 reverse("view_engagement", args=(eid, )))
@@ -1245,7 +1263,7 @@ def add_risk_acceptance(request, eid, fid=None):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Risk acceptance saved.",
+                _("Risk acceptance saved."),
                 extra_tags="alert-success")
 
             return redirect_to_return_url_or_else(request, reverse("view_engagement", args=(eid, )))
@@ -1312,7 +1330,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Risk Acceptance saved successfully.",
+                    _("Risk Acceptance saved successfully."),
                     extra_tags="alert-success")
 
         if "entry" in request.POST:
@@ -1327,7 +1345,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Note added successfully.",
+                    _("Note added successfully."),
                     extra_tags="alert-success")
 
         if "delete_note" in request.POST:
@@ -1338,13 +1356,13 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "Note deleted successfully.",
+                    _("Note deleted successfully."),
                     extra_tags="alert-success")
             else:
                 messages.add_message(
                     request,
                     messages.ERROR,
-                    "Since you are not the note's author, it was not deleted.",
+                    _("Since you are not the note's author, it was not deleted."),
                     extra_tags="alert-danger")
 
         if edit_mode and "remove_finding" in request.POST:
@@ -1357,7 +1375,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Finding removed successfully from risk acceptance.",
+                _("Finding removed successfully from risk acceptance."),
                 extra_tags="alert-success")
 
         if "replace_file" in request.POST:
@@ -1371,7 +1389,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
                 messages.add_message(
                     request,
                     messages.SUCCESS,
-                    "New Proof uploaded successfully.",
+                    _("New Proof uploaded successfully."),
                     extra_tags="alert-success")
             else:
                 logger.error(replace_form.errors)
@@ -1425,7 +1443,7 @@ def view_edit_risk_acceptance(request, eid, raid, *, edit_mode=False):
             "engagement": eng,
             "product_tab": product_tab,
             "accepted_findings": fpage,
-            "notes": risk_acceptance.notes.all(),
+            "notes": visible_notes(risk_acceptance.notes.all(), request.user),
             "eng": eng,
             "edit_mode": edit_mode,
             "risk_acceptance_form": risk_acceptance_form,
@@ -1472,7 +1490,7 @@ def delete_risk_acceptance(request, eid, raid):
     messages.add_message(
         request,
         messages.SUCCESS,
-        "Risk acceptance deleted successfully.",
+        _("Risk acceptance deleted successfully."),
         extra_tags="alert-success")
     return HttpResponseRedirect(reverse("view_engagement", args=(eng.id, )))
 
@@ -1483,7 +1501,14 @@ def download_risk_acceptance(request, eid, raid):
     # Ensure the risk acceptance is under the supplied engagement
     if not Engagement.objects.filter(risk_acceptance=risk_acceptance, id=eid).exists():
         raise PermissionDenied
-    file_handle = (Path(settings.MEDIA_ROOT) / risk_acceptance.path.name).open(mode="rb")
+    # No proof uploaded, or the file is gone from storage. Opening it blindly raises
+    # ValueError/FileNotFoundError, which surfaces as a 500 rather than a missing file.
+    if not risk_acceptance.path:
+        raise Http404
+    proof_path = Path(settings.MEDIA_ROOT) / risk_acceptance.path.name
+    if not proof_path.is_file():
+        raise Http404
+    file_handle = proof_path.open(mode="rb")
     response = StreamingHttpResponse(FileIterWrapper(file_handle))
     if hasattr(response, "_resource_closers"):
         response._resource_closers.append(file_handle.close)
@@ -1519,7 +1544,7 @@ def upload_threatmodel(request, eid):
             messages.add_message(
                 request,
                 messages.SUCCESS,
-                "Threat model saved.",
+                _("Threat model saved."),
                 extra_tags="alert-success")
             return HttpResponseRedirect(
                 reverse("view_engagement", args=(eid, )))

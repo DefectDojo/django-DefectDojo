@@ -23,7 +23,7 @@
                 <input id="custom_search_query" type="text" name="query" class="form-control"
                         placeholder="{% trans "Search" %}..." value="{{clean_query}}">
                 <span class="input-group-btn">
-                    <button class="btn btn-primary" type="submit" aria-label="Search">
+                    <button class="btn btn-primary" type="submit" aria-label="{% trans 'Search' %}">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                 </span>
@@ -420,7 +420,7 @@
                             <tr>
                                 <td>{% trans "Endpoint" %}</td>
                                 <td>
-                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="Endpoint is broken. Check documentation to look for fix process" >&#128681;</span>{% endif %}</a>
+                                    <a class="search-finding" href="{% url 'view_endpoint' endpoint.id %}">{{ endpoint }}{% if endpoint.is_broken %} <span data-toggle="tooltip" title="{% trans 'Endpoint is broken. Check documentation to look for fix process' %}" >&#128681;</span>{% endif %}</a>
                                     {% include "dojo/snippets/tags.html" with tags=endpoint.tags.all %}
                                 </td>
                             </tr>

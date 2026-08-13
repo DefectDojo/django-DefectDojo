@@ -162,6 +162,6 @@ The same access rules apply: a non-superuser gets product-scoped rows with the r
 ## Related
 
 * [Feature Flags](/admin/feature_flags/pro__feature_flags/) — turning optional Pro features on and off
-* [Connectors](/import_data/pro/connectors/about_connectors/) — pulling findings in
-* [Pro Integrations](/issue_tracking/pro_integration/integrations/) — pushing findings out
+* [Connectors](/connectors/upstream/about/) — pulling findings in
+* [Pro Integrations](/connectors/downstream/about/) — pushing findings out
 * [Single Sign-On](/admin/sso/) — the identity providers whose sign-in attempts appear here

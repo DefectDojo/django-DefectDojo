@@ -1,10 +1,13 @@
 import logging
+from unittest.mock import patch
 
 from crum import impersonate
 from django.db import connection
 from django.test.utils import override_settings
 
+from dojo.finding import helper as finding_helper
 from dojo.finding.deduplication import set_duplicate
+from dojo.finding.helper import removeLoop
 from dojo.management.commands.fix_loop_duplicates import fix_loop_duplicates
 from dojo.models import Engagement, Finding, Product, System_Settings, User, copy_model_util
 from dojo.tasks import _async_dupe_delete_impl  # noqa: PLC2701
@@ -504,6 +507,61 @@ class TestDuplicationLoops(DojoTestCase):
         )
         self.finding_a.refresh_from_db()
         self.assertEqual(self.finding_a.duplicate_finding_set().count(), 1)
+
+    def test_remove_loop_skips_a_finding_that_no_longer_exists(self):
+        """
+        Every call to removeLoop passes an id read earlier, so the row can be gone by the time
+        it runs: fix_loop_duplicates streams candidate ids through a cursor, and its callers run
+        while other workers delete findings. Fetching that id with get() turned the race into a
+        Finding.DoesNotExist that killed the whole caller -- observed aborting an async delete
+        task before it had prepared any duplicate cluster. A vanished row has no loop left to
+        repair, so removeLoop must skip it and return.
+        """
+        stale_id = self.finding_b.id
+        self.finding_b.delete()
+        self.assertIsNone(self.finding_b.id)
+
+        # Must not raise; there is nothing to repair and nothing to report.
+        self.assertIsNone(removeLoop(stale_id, 50))
+
+    def test_fix_loop_duplicates_survives_a_finding_deleted_mid_run(self):
+        """
+        The reported path end to end: a candidate id is deleted after fix_loop_duplicates has
+        streamed it but before removeLoop reaches it. The run must carry on and still repair the
+        loops whose findings are still there, instead of dying on the first stale id.
+        """
+        # Two independent self-loops. Candidates are streamed newest id first, so finding_c is
+        # repaired first and finding_b -- deleted while that happens -- is reached second.
+        for finding in (self.finding_b, self.finding_c):
+            finding.duplicate = True
+            finding.duplicate_finding = finding
+            super(Finding, finding).save(skip_validation=True)
+        self.assertLess(self.finding_b.id, self.finding_c.id)
+
+        doomed_id = self.finding_b.id
+        real_remove_loop = finding_helper.removeLoop
+        calls = []
+
+        def remove_loop_with_concurrent_delete(finding_id, counter):
+            if not calls:
+                # Stands in for the concurrent worker: the row goes away between the id being
+                # streamed and removeLoop being called with it.
+                Finding.objects.filter(id=doomed_id).delete()
+            calls.append(finding_id)
+            return real_remove_loop(finding_id, counter)
+
+        with patch.object(finding_helper, "removeLoop", side_effect=remove_loop_with_concurrent_delete):
+            loop_count = fix_loop_duplicates()
+        # Deleted by queryset above, so the instance still carries its old pk; clear it so
+        # tearDown does not try to delete the row a second time.
+        self.finding_b.id = None
+
+        self.assertIn(doomed_id, calls, "the deleted finding's id is still reached by the run")
+        self.assertEqual(loop_count, 0)
+
+        self.finding_c.refresh_from_db()
+        self.assertIsNone(self.finding_c.duplicate_finding, "the surviving self-loop is still repaired")
+        self.assertFalse(self.finding_c.duplicate)
 
     def test_delete_all_engagements(self):
         # make sure there is no exception when deleting all engagements

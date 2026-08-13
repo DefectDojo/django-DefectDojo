@@ -1,0 +1,63 @@
+{
+  "error": {
+    "count": 3,
+    "data": [
+      {
+        "label": "is_latest_tag",
+        "regex": {},
+        "level": "error",
+        "message": "base image uses 'latest' tag",
+        "description": "using the 'latest' tag may cause unpredictable builds. It is recommended that a specific tag is used in the FROM line or *-released which is the latest supported release.",
+        "reference_url": [
+          "https://docs.docker.com/engine/reference/builder/",
+          "#from"
+        ],
+        "lineContent": "FROM ubuntu:latest",
+        "line": 1
+      },
+      {
+        "message": "Required LABEL name/key 'Name' is not defined",
+        "line": -1,
+        "level": "error",
+        "lineContent": "",
+        "reference_url": [
+          "http://docs.projectatomic.io/container-best-practices/#",
+          "_recommended_labels_for_your_project"
+        ]
+      },
+      {
+        "message": "Required LABEL name/key 'Version' is not defined",
+        "line": -1,
+        "level": "error",
+        "lineContent": "",
+        "reference_url": [
+          "http://docs.projectatomic.io/container-best-practices/#",
+          "_recommended_labels_for_your_project"
+        ]
+      }
+    ]
+  },
+  "warn": {
+    "count": 0,
+    "data": []
+  },
+  "info": {
+    "count": 1,
+    "data": [
+      {
+        "label": "no_apt-get_clean",
+        "regex": {},
+        "level": "info",
+        "message": "apt-get clean is not used",
+        "description": "the apt-get cache will remain in this layer making the layer unnecessarily large",
+        "reference_url": [
+          "http://docs.projectatomic.io/container-best-practices/#",
+          "_clear_packaging_caches_and_temporary_package_downloads"
+        ],
+        "lineContent": "RUN apt-get update && apt-get install -y curl",
+        "line": 2
+      }
+    ]
+  },
+  "summary": []
+}

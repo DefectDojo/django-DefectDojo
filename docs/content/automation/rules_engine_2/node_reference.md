@@ -239,7 +239,7 @@ The summary, description and priority come from the product's JIRA configuration
 
 `ticket.downstream`
 
-Creates or updates a ticket through a [Downstream Connector](/issue_tracking/pro_integration/integrations/).
+Creates or updates a ticket through a [Downstream Connector](/connectors/downstream/about/).
 
 | Setting | Default | Notes |
 |---------|---------|-------|
@@ -254,11 +254,12 @@ The rule replaces the assignment's automatic push settings: severity and active-
 
 `notify.slack`
 
-Posts to a Slack channel using the system Slack token from **System Settings**.
+Posts to a Slack channel over a Messaging Connector. The connection carries the bot token; the instance-wide Slack settings under **System Settings** are not used and are not a fallback.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **Channel** | empty | For example `#appsec`. Empty uses the channel from system settings. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one message about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. How many Findings the message lists before it says how many more there were. |
@@ -267,10 +268,12 @@ Posts to a Slack channel using the system Slack token from **System Settings**.
 
 `notify.msteams`
 
-Posts a card to the Microsoft Teams webhook configured in **System Settings**.
+Posts a card over a Messaging Connector. The connection carries the Power Automate workflow URL; the instance-wide Teams webhook under **System Settings** is not used and is not a fallback.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
 | **One Message per Finding** | off | Off sends one card about the batch. |
 | **Message** | `{{finding.severity}}: {{finding.title}} ({{product.name}})` | Rendered per Finding. |
 | **Findings Listed in the Digest** | `10` | Shown for batch messages. |
@@ -279,11 +282,13 @@ Posts a card to the Microsoft Teams webhook configured in **System Settings**.
 
 `notify.email`
 
-Emails a fixed list of addresses.
+Emails a fixed list of addresses over a Messaging Connector. The recipients are the connection's destination.
 
 | Setting | Default | Notes |
 |---------|---------|-------|
-| **To** | none | One or more addresses, comma separated. Required. |
+| **Connection** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) of this type. Required. |
+| **Destination** | empty | Shown once a connection is chosen. The fields depend on the connection's vendor. |
+
 | **Subject** | `[DefectDojo] {{ctx.count}} finding(s) from rule {{ctx.rule_name}}` | Rendered once per message. |
 | **Body** | an HTML body containing `{{ctx.findings_html}}` | HTML. `{{ctx.findings_html}}` renders the Finding list. |
 | **One Message per Finding** | off | Off sends one email about the batch. |
@@ -332,8 +337,8 @@ Generates a report from a template, scoped to the Findings that reached this nod
 | **Report Template** | none | Which template to generate from. Required. |
 | **Format** | `pdf` | `pdf` or `html`. |
 | **Findings Included** | `batch_findings` | `batch_findings` limits the report to the Findings that reached this node. `template_default` lets the template use its own filters. |
-| **Announce the Report** | `none` | `none`, `email` or `slack`. Sends the download link once the report is generated. |
-| **Announce To** | empty | Shown when announcing. A Slack channel, or comma separated email addresses. Slack falls back to system settings. |
+| **Announce Over** | none | A [Messaging Connector](/issue_tracking/pro_integration/messaging_connectors/) to post the download link over once the report is generated. Leave empty to not announce. |
+| **Announce To** | empty | Shown once a connection is chosen. Where that connection sends: a Slack channel ID, email addresses, and so on. |
 | **Announcement** | `Report ready: {{ctx.report_url}}` | Shown when announcing. `{{ctx.report_url}}` is the download link. |
 
 `batch_findings` is what a rule can do that a scheduled report cannot: report on exactly the Findings that just matched.

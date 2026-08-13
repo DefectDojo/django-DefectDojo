@@ -1,7 +1,9 @@
 import logging
+from datetime import timedelta
 from unittest import mock
 
 from django.core.exceptions import ValidationError
+from django.db import DEFAULT_DB_ALIAS, IntegrityError, connections
 from django.utils import timezone
 
 from dojo.importers.default_importer import DefaultImporter
@@ -74,8 +76,8 @@ class TestImportersDeletedTarget(DojoTestCase):
     def _importer(self):
         return DefaultImporter(close_old_findings=False, **self._options(engagement=self.engagement))
 
-    def _reimporter(self):
-        return DefaultReImporter(close_old_findings=False, **self._options(test=self.test))
+    def _reimporter(self, **overrides):
+        return DefaultReImporter(close_old_findings=False, **self._options(test=self.test, **overrides))
 
     def _process_with_delete_mid_run(self, importer, delete, hook):
         """
@@ -198,3 +200,125 @@ class TestImportersDeletedTarget(DojoTestCase):
             msg=f"expected percent_complete=100, persisted={persisted.percent_complete}",
         )
         self.assertTrue(Engagement.objects.filter(pk=self.engagement.pk).exists())
+
+    def test_write_back_still_persists_every_field_it_sets(self):
+        """
+        The forced update writes the whole row, exactly as the plain save() it replaced did.
+
+        Narrowing it to save(update_fields=...) would detect the vanished row the same way
+        and write fewer columns, but would silently drop any field a later change starts
+        setting before the write-back. This pins what the importer sets today to what
+        actually lands in the database.
+        """
+        updated_before_reimport = Test.objects.values_list("updated", flat=True).get(pk=self.test.pk)
+        reimporter = self._reimporter(
+            version="1.2.3",
+            build_id="build-42",
+            branch_tag="release/1.2",
+            commit_hash="deadbeef",
+        )
+
+        with (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan:
+            reimporter.process_scan(scan)
+
+        persisted = Test.objects.get(pk=self.test.pk)
+        self.assertEqual("1.2.3", persisted.version)
+        self.assertEqual("build-42", persisted.build_id)
+        self.assertEqual("release/1.2", persisted.branch_tag)
+        self.assertEqual("deadbeef", persisted.commit_hash)
+        self.assertEqual(100, persisted.percent_complete)
+        self.assertEqual(reimporter.scan_date, persisted.target_end)
+        self.assertGreater(
+            persisted.updated, updated_before_reimport,
+            msg="the auto_now `updated` column must still be bumped by the write-back",
+        )
+
+    def test_unchanged_engagement_is_not_written_back(self):
+        """
+        The engagement is only worth saving when the run actually moved its target end.
+
+        `update_timestamps()` touches the engagement for CI/CD engagements only, so for
+        every other import the write-back was spending a full UPDATE, plus the SELECT its
+        pre_save receiver issues, to store nothing.
+        """
+        reimporter = self._reimporter()
+
+        with (
+            (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan,
+            mock.patch.object(
+                reimporter,
+                "save_without_resurrecting",
+                wraps=reimporter.save_without_resurrecting,
+            ) as write_back,
+        ):
+            reimporter.process_scan(scan)
+
+        written_back = [call.args[0] for call in write_back.call_args_list]
+        self.assertFalse(
+            any(isinstance(instance, Engagement) for instance in written_back),
+            msg=f"an unchanged engagement must not be written back, got: {written_back}",
+        )
+        self.assertFalse(reimporter.engagement_target_end_updated)
+
+    def test_ci_cd_engagement_target_end_is_still_written_back(self):
+        """The engagement save the importer does need: a CI/CD target end the scan pushes out."""
+        Engagement.objects.filter(pk=self.engagement.pk).update(
+            engagement_type="CI/CD",
+            target_end=timezone.now().date() - timedelta(days=7),
+        )
+        # Re-fetch rather than refresh: the test caches its engagement, and the write-back
+        # reads engagement_type off that cached copy.
+        self.test = Test.objects.get(pk=self.test.pk)
+        reimporter = self._reimporter()
+
+        with (get_unit_tests_scans_path("acunetix") / SCAN_FILE).open(encoding="utf-8") as scan:
+            reimporter.process_scan(scan)
+
+        self.assertTrue(reimporter.engagement_target_end_updated)
+        self.assertEqual(
+            reimporter.scan_date.date(),
+            Engagement.objects.values_list("target_end", flat=True).get(pk=self.engagement.pk),
+        )
+
+    def test_a_real_database_error_is_not_reported_as_a_deleted_target(self):
+        """
+        Only Django's "forced update did not affect any rows" means the target vanished.
+
+        Every other DatabaseError is a genuine failure, and relabelling it as a delete that
+        never happened would send whoever debugs it after the wrong thing.
+        """
+        importer = self._reimporter()
+
+        with (
+            mock.patch.object(Test, "save", side_effect=IntegrityError("null value in column violates not-null constraint")),
+            self.assertRaises(IntegrityError),
+        ):
+            importer.save_without_resurrecting(self.test)
+
+    def test_the_transaction_is_still_usable_after_a_vanished_target(self):
+        """
+        The caller has to be able to record why the import failed.
+
+        Model.save_base wraps the write in mark_for_rollback_on_error, so a forced update
+        that matches no rows leaves the transaction marked for rollback and turns the next
+        query into a TransactionManagementError. The UPDATE itself succeeded -- it matched
+        no rows -- so nothing needs rolling back and the mark is cleared.
+        """
+        test_pk = self.test.pk
+        importer = self._reimporter()
+        Test.objects.filter(pk=test_pk).delete()
+
+        with self.assertRaises(ValidationError):
+            importer.save_without_resurrecting(self.test)
+
+        self.assertFalse(
+            connections[DEFAULT_DB_ALIAS].needs_rollback,
+            msg="the connection must not be left marked for rollback",
+        )
+        # The reads and writes a failure handler makes must both still go through.
+        self.assertFalse(Test.objects.filter(pk=test_pk).exists())
+        Engagement.objects.filter(pk=self.engagement.pk).update(description="recorded after the failure")
+        self.assertEqual(
+            "recorded after the failure",
+            Engagement.objects.values_list("description", flat=True).get(pk=self.engagement.pk),
+        )

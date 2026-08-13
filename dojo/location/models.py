@@ -414,7 +414,12 @@ class AbstractLocation(BaseModelWithoutTimeMeta):
             if not isinstance(loc, cls):
                 error_message = f"Invalid location type; expected {cls} but got {type(loc)}"
                 raise TypeError(error_message)
-            loc.clean()
+            # A set identity_hash means the instance already went through clean()
+            # (locations are hashed only there) — re-cleaning would repeat idna/URL
+            # normalization work per row for nothing. Callers that mutate a location
+            # after cleaning it must re-clean before passing it in.
+            if not loc.identity_hash:
+                loc.clean()
             hashes.append(loc.identity_hash)
 
         # Look up existing objects, grouping by hash
@@ -537,6 +542,10 @@ class LocationFindingReference(BaseModel, ReferenceDataMixin):
         copy.finding = finding
         copy.location = self.location
         copy.save()
+        # Re-home the shared location onto the copied finding's product. Without this a
+        # finding copied/moved into a different product keeps a location that is only
+        # associated with the source product. Mirrors associate_with_finding().
+        copy.location.associate_with_product(finding.test.engagement.product)
         return copy
 
     def set_status(self, status: FindingLocationStatus, auditor: Dojo_User, audit_time: datetime) -> None:

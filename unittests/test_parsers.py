@@ -108,7 +108,7 @@ class TestParsers(DojoTestCase):
     def test_parser_existence(self):
         for docs in os.scandir(Path(basedir) / "docs" / "content" / "supported_tools" / "parsers" / "file"):
             if docs.name not in {
-                "_index.md", "codeql.md", "edgescan.md",
+                "_index.md", "edgescan.md",
             }:
                 with self.subTest(parser=docs.name.split(".md")[0], category="parser"):
                     parser = Path(basedir) / "dojo" / "tools" / f"{docs.name.split('.md')[0]}" / "parser.py"

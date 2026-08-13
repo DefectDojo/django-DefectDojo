@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 {% load static %}
 
 {% block content %}
@@ -11,7 +12,7 @@
                 <div class="panel-heading">
                     <h4>Celery Status</h4>
                 </div>
-                <div class="panel-body text-left">
+                <div class="panel-body text-start">
                     <table class="table table-condensed" style="margin-bottom: 0">
                         <tbody>
                             <tr>
@@ -31,16 +32,16 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="panel-body text-left">
+                <div class="panel-body text-start">
                     <span id="celery-queue-msg"><i class="fa-solid fa-spinner fa-spin text-muted"></i></span>
                     <div style="margin-top: 8px;">
-                        <button id="purge-queue-btn" class="btn btn-danger btn-xs" disabled title="Loading...">
+                        <button id="purge-queue-btn" class="btn btn-danger btn-xs" disabled title="{% trans 'Loading...' %}">
                             Purge queue
                         </button>
                         <button id="refresh-status-btn" class="btn btn-default btn-xs" style="margin-left: 6px;">
                             <span class="glyphicon glyphicon-refresh"></span> Refresh
                         </button>
-                        <button id="view-details-btn" class="btn btn-default btn-xs" disabled title="Loading..." style="margin-left: 6px;">
+                        <button id="view-details-btn" class="btn btn-default btn-xs" disabled title="{% trans 'Loading...' %}" style="margin-left: 6px;">
                             View Details
                         </button>
                         <span class="text-muted" style="font-size: 0.85em; margin-left: 6px;">
@@ -54,7 +55,7 @@
                         <code>python manage.py dedupe --dedupe_only</code>
                     </p>
                 </div>
-                <div class="panel-body text-left">
+                <div class="panel-body text-start">
                     <div id="queue-details-container" style="display: none;">
                         <table class="table table-condensed table-bordered table-hover" style="margin-bottom: 0; font-size: 0.9em;">
                             <thead>
@@ -85,7 +86,7 @@
                 <div class="panel-heading">
                     <h4>Celery Settings</h4>
                 </div>
-                <div class="panel-body text-left">
+                <div class="panel-body text-start">
                     <table class="table table-condensed" style="margin-bottom: 0">
                         <thead><tr><th>Setting</th><th>Value</th></tr></thead>
                         <tbody id="celery-config-tbody"></tbody>

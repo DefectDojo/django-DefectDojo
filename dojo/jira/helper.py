@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any
 
 import requests
-from dateutil.relativedelta import relativedelta
 from django.conf import settings
 from django.contrib import messages
 from django.core.cache import cache
@@ -14,6 +13,7 @@ from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
 from jira import JIRA
 from jira.exceptions import JIRAError
 from requests.auth import HTTPBasicAuth
@@ -2004,7 +2004,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
 
                         messages.add_message(request,
                                                 messages.SUCCESS,
-                                                "JIRA Project config stored successfully.",
+                                                _("JIRA Project config stored successfully."),
                                                 extra_tags="alert-success")
                         error = False
                         logger.debug("stored JIRA_Project successfully")
@@ -2018,7 +2018,7 @@ def process_jira_project_form(request, instance=None, target=None, product=None,
         if error:
             messages.add_message(request,
                                     messages.ERROR,
-                                    "JIRA Project config not stored due to errors.",
+                                    _("JIRA Project config not stored due to errors."),
                                     extra_tags="alert-danger")
     return not error, jform
 
@@ -2072,7 +2072,7 @@ def process_jira_epic_form(request, engagement=None):
                     messages.add_message(
                         request,
                         messages.SUCCESS,
-                        "Push to JIRA for Epic queued succesfully, check alerts on the top right for errors",
+                        _("Push to JIRA for Epic queued succesfully, check alerts on the top right for errors"),
                         extra_tags="alert-success")
                 else:
                     error = True
@@ -2158,8 +2158,7 @@ def process_resolution_from_jira(
                     logger.debug(f"Creating risk acceptance for finding linked to {jira_issue.jira_key}.")
                     # loads the expiration from the system setting "Risk acceptance form default days" as otherwise
                     # the acceptance will never expire
-                    risk_acceptance_form_default_days = get_system_setting("risk_acceptance_form_default_days", 90)
-                    expiration_date_from_system_settings = timezone.now() + relativedelta(days=risk_acceptance_form_default_days)
+                    expiration_date_from_system_settings = ra_helper.default_expiration_date()
                     ra = Risk_Acceptance.objects.create(
                         accepted_by=assignee_name,
                         owner=finding.reporter,

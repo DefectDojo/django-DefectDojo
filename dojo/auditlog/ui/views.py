@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
+from django.utils.translation import gettext as _
 
 from dojo.auditlog.filters import LogEntryFilter, PgHistoryFilter
 from dojo.auditlog.helpers import process_events_for_display
@@ -99,7 +100,7 @@ def action_history(request, cid, oid):
     if product_id:
         product_tab = Product_Tab(get_object_or_404(Product, id=product_id), title="History", tab=active_tab)
         if active_tab == "engagements":
-            if str(ct) == "engagement":
+            if ct.model == "engagement":
                 product_tab.setEngagement(object_value)
             else:
                 product_tab.setEngagement(object_value.engagement)
@@ -134,7 +135,7 @@ def action_history(request, cid, oid):
         messages.add_message(
             request,
             messages.WARNING,
-            "Audit logging is currently disabled in System Settings.",
+            _("Audit logging is currently disabled in System Settings."),
             extra_tags="alert-danger")
 
     return render(request, "dojo/action_history.html",

@@ -62,7 +62,7 @@ class _ChunkRows:
     def __init__(self) -> None:
         self.meta: list[DojoMeta] = []
         self.meta_endpoint_ids: list[int | None] = []
-        self._seen_meta: set[tuple[int, str]] = set()
+        self._seen_meta: set[tuple[int, int | None, str]] = set()
 
         self.finding_refs: list[LocationFindingReference] = []
         self.finding_ref_endpoint_ids: list[int | None] = []
@@ -71,13 +71,41 @@ class _ChunkRows:
         # (location_id, product_id) -> (status, product, location, endpoint_id)
         self._product_refs: dict[tuple[int, int], tuple[str, Product, Location, int | None]] = {}
 
-    def add_meta(self, meta: DojoMeta, location: Location, endpoint_id: int | None) -> None:
-        """Queue a DojoMeta copy, keyed on its unique_together (location, name)."""
-        key = (location.id, meta.name)
+        # (product, location) pairs contributed by this chunk, for the per-chunk
+        # tag inheritance pass. Held per chunk — not for the whole run — so
+        # memory stays bounded by --batch-size no matter how large the install
+        # is (retaining every migrated Location object for a single end-of-run
+        # pass is what made multi-million-endpoint runs balloon).
+        self.inheritance_by_product: dict[int, set[int]] = defaultdict(set)
+        self.product_by_id: dict[int, Product] = {}
+        self.location_by_id: dict[int, Location] = {}
+
+    def track_product_location(self, product: Product, location: Location) -> None:
+        """Record a (product, location) pair for this chunk's tag inheritance pass."""
+        if product is None or product.id is None:
+            return
+        if location is None or location.id is None:
+            return
+        self.inheritance_by_product[product.id].add(location.id)
+        self.product_by_id.setdefault(product.id, product)
+        self.location_by_id.setdefault(location.id, location)
+
+    def add_meta(
+        self,
+        meta: DojoMeta,
+        location: Location,
+        product: Product | None,
+        endpoint_id: int | None,
+    ) -> None:
+        """Queue a DojoMeta copy, keyed on its unique_together (location, location_product, name)."""
+        product_id = getattr(product, "id", None)
+        key = (location.id, product_id, meta.name)
         if key in self._seen_meta:
             return
         self._seen_meta.add(key)
-        self.meta.append(DojoMeta(name=meta.name, value=meta.value, location=location))
+        self.meta.append(
+            DojoMeta(name=meta.name, value=meta.value, location=location, location_product=product),
+        )
         self.meta_endpoint_ids.append(endpoint_id)
 
     def add_finding_ref(self, reference: LocationFindingReference, endpoint_id: int | None) -> None:
@@ -135,6 +163,7 @@ PHASES = (
     "finding_refs",     # LocationFindingReference creation per Endpoint_Status
     "product_refs",     # LocationProductReference creation
     "reconcile",        # recompute product-reference status from finding refs
+    "inheritance",      # per-chunk inherited-tag application
 )
 
 
@@ -164,6 +193,16 @@ class Command(BaseCommand):
       are visited in.
     - ``DojoMeta`` rows and tag copies are insert-only, so re-runs neither
       duplicate them nor overwrite edits made after the first migration.
+
+    Built to survive large installs:
+
+    - Endpoints are scanned in id order and every progress line prints the last
+      migrated id, so an interrupted run resumes with ``--start-after-id`` instead
+      of re-scanning from the start (a full re-run also converges, it just costs
+      the whole scan again).
+    - Memory is bounded by ``--batch-size``: every per-endpoint structure —
+      including the (product, location) pairs for tag inheritance, which is applied
+      per chunk — lives on the chunk and is dropped with it.
     """
 
     help = "Usage: manage.py migrate_endpoints_to_locations"
@@ -195,6 +234,16 @@ class Command(BaseCommand):
             help="Force-debug the DB cursor and count queries per chunk. "
                  "Has measurable overhead; use only for profiling runs.",
         )
+        parser.add_argument(
+            "--start-after-id",
+            type=int,
+            default=None,
+            help="Resume after this endpoint id (exclusive). Endpoints are processed "
+                 "in id order and every progress line reports the last id written, so "
+                 "an interrupted run can be resumed from its final progress line "
+                 "instead of rescanning from the start. Re-running without it is also "
+                 "safe — the migration converges — it just repays the full scan.",
+        )
 
     # -- Per-phase timing helpers --------------------------------------------
 
@@ -205,29 +254,6 @@ class Command(BaseCommand):
         if self.benchmark:
             self.timings[phase] += time.perf_counter() - t0
             self.counts[phase] += 1
-
-    # -- Tag inheritance bookkeeping -----------------------------------------
-
-    def _track_product_location(self, product: Product, location: Location) -> None:
-        """
-        Record a (product, location) pair for the post-migration tag inheritance pass.
-
-        The migration creates locations that may be linked to multiple products
-        (via the endpoint's own product and via each finding's product). We
-        collect every contributing product per location so the post-pass can
-        call ``apply_inherited_tags_for_locations`` once per product group —
-        covering the case where a location is shared across products with
-        differing ``enable_product_tag_inheritance`` flags (the helper
-        short-circuits via its own diff check on repeat visits, so redundancy
-        is safe).
-        """
-        if product is None or product.id is None:
-            return
-        if location is None or location.id is None:
-            return
-        self.locations_by_product_id[product.id].add(location.id)
-        self.product_obj_by_id.setdefault(product.id, product)
-        self.location_obj_by_id.setdefault(location.id, location)
 
     # -- Endpoint tag batching -----------------------------------------------
 
@@ -247,12 +273,19 @@ class Command(BaseCommand):
             self.pending_tag_locations[tag_name][location.id] = location
         self.pending_endpoint_tags[endpoint.id] = (location, tag_names)
 
+    # Detailed (id, error) tuples retained for the failure summary. The id SET is
+    # unbounded (needed for dedup and the final count; ints are cheap) but the
+    # error strings are capped: a pathological run where most endpoints fail
+    # would otherwise accumulate an exception string per endpoint.
+    MAX_FAILURE_DETAILS = 1000
+
     def _record_endpoint_failure(self, endpoint_id: int | None, exc: Exception) -> None:
         """Record an Endpoint once even if more than one migration phase fails."""
         if endpoint_id in self.failed_endpoint_ids:
             return
         self.failed_endpoint_ids.add(endpoint_id)
-        self.failed_endpoints.append((endpoint_id, str(exc)))
+        if len(self.failed_endpoints) < self.MAX_FAILURE_DETAILS:
+            self.failed_endpoints.append((endpoint_id, str(exc)))
 
     def _flush_location_tags(self) -> None:
         """Persist queued tags, retrying per Endpoint if the batch write fails."""
@@ -541,21 +574,21 @@ class Command(BaseCommand):
                 self._bench_end("tags", t)
 
                 for meta in endpoint.endpoint_meta.all():
-                    rows.add_meta(meta, location, endpoint_id)
+                    rows.add_meta(meta, location, endpoint.product, endpoint_id)
 
                 # Track the endpoint's own product as a contributor for the
-                # post-migration tag inheritance pass (the no-findings branch
+                # per-chunk tag inheritance pass (the no-findings branch
                 # of `_collect_references` also depends on this product, and it
                 # won't be tracked otherwise).
                 if endpoint.product_id:
-                    self._track_product_location(endpoint.product, location)
+                    rows.track_product_location(endpoint.product, location)
 
                 self._collect_references(endpoint, location, rows)
             except Exception as exc:
                 logger.exception("Failed to migrate endpoint id=%s; continuing", endpoint_id)
                 self._record_endpoint_failure(endpoint_id, exc)
 
-        # DojoMeta: `ignore_conflicts` on unique_together (location, name). A
+        # DojoMeta: `ignore_conflicts` on unique_together (location, location_product, name). A
         # conflict is by definition the row we would otherwise have fetched, so
         # skipping it keeps re-runs no-ops and leaves any post-migration edit to
         # a metadata value alone.
@@ -586,6 +619,10 @@ class Command(BaseCommand):
         )
 
         self._reconcile_product_statuses(list({location.id for _, location in resolved}))
+
+        # Inheritance runs per chunk (bounded memory, converging) — see the
+        # method's docstring for why this is equivalent to an end-of-run pass.
+        self._run_tag_inheritance_for_chunk(rows)
 
     def _collect_references(
         self,
@@ -620,10 +657,10 @@ class Command(BaseCommand):
             if finding is None:
                 continue
             product = finding.test.engagement.product
-            # Track this contributing product for the post-migration tag
+            # Track this contributing product for the per-chunk tag
             # inheritance pass (covers the case where a finding's product
             # differs from endpoint.product).
-            self._track_product_location(product, location)
+            rows.track_product_location(product, location)
             status = self._convert_endpoint_status_to_string_status(endpoint_status)
             rows.record_product(
                 product,
@@ -690,6 +727,7 @@ class Command(BaseCommand):
         run_t0: float,
         queries_this_window: int | None,
         endpoints_this_window: int,
+        last_id: int | None = None,
     ) -> None:
         elapsed = time.time() - run_t0
         rate = i / elapsed if elapsed > 0 else 0.0
@@ -700,6 +738,10 @@ class Command(BaseCommand):
         if queries_this_window is not None and endpoints_this_window:
             # Per-endpoint query count for this reporting window only.
             line += f" — {queries_this_window / endpoints_this_window:.1f} queries/endpoint"
+        if last_id is not None:
+            # The resume cursor: an interrupted run restarts from here with
+            # --start-after-id instead of rescanning everything before it.
+            line += f" — last id {last_id} (resume: --start-after-id {last_id})"
         self.stdout.write(self.style.SUCCESS(line))
 
         if self.benchmark:
@@ -723,52 +765,68 @@ class Command(BaseCommand):
 
     # -- Post-migration tag inheritance --------------------------------------
 
-    def _run_tag_inheritance(self) -> None:
+    def _run_tag_inheritance_for_chunk(self, rows: _ChunkRows) -> None:
         """
-        Apply inherited tags once per contributing product.
+        Apply inherited tags for this chunk's (product, location) pairs.
 
-        Each product batch is wrapped in its own try/except so a
-        failure on one product group doesn't prevent the rest from running —
-        same philosophy as the per-endpoint loop. The underlying
-        location/reference rows are already committed by the main loop, so
-        partial failure here leaves a consistent (if incompletely reconciled)
-        inheritance state that a targeted re-run can finish.
+        Runs at every chunk boundary instead of once at the end of the run,
+        for the same reason ``_reconcile_product_statuses`` does: the helper
+        rediscovers each location's *full* product set from the committed
+        reference rows at call time, so when a shared location gains another
+        product's references in a later chunk, that chunk's pass recomputes the
+        union and the result converges regardless of chunk order. Running
+        per-chunk is what lets the run hold only one chunk's Location objects
+        at a time — the previous end-of-run pass retained every migrated
+        Location for the whole run, which is unsustainable at
+        multi-million-endpoint scale.
+
+        Each product group is wrapped in its own try/except so a failure on one
+        group doesn't prevent the rest — the same philosophy as the
+        per-endpoint loop. The reference rows are already committed, so partial
+        failure leaves a consistent (if incompletely reconciled) inheritance
+        state that a re-run repairs.
         """
-        if not self.locations_by_product_id:
+        if not rows.inheritance_by_product:
             return
 
         # Lazy import: the inheritance module imports the full model layer, so
         # keep it out of management-command discovery.
         from dojo.tags import inheritance as tag_inheritance  # noqa: PLC0415
 
-        t0 = time.time()
-        n_products = len(self.locations_by_product_id)
-        n_pairs = sum(len(loc_ids) for loc_ids in self.locations_by_product_id.values())
-        n_unique_locations = len(self.location_obj_by_id)
-        n_failures = 0
-        for prod_id, loc_ids in self.locations_by_product_id.items():
-            product = self.product_obj_by_id[prod_id]
-            locations = [self.location_obj_by_id[lid] for lid in loc_ids]
-            try:
-                tag_inheritance.apply_inherited_tags_for_locations(
-                    locations,
-                    product=product,
-                )
-            except Exception:
-                logger.exception(
-                    "Tag inheritance pass failed for product id=%s "
-                    "(%d location(s)); continuing with remaining products",
-                    prod_id, len(locations),
-                )
-                n_failures += 1
-        elapsed = time.time() - t0
+        t = self._bench_start()
+        try:
+            for prod_id, loc_ids in rows.inheritance_by_product.items():
+                product = rows.product_by_id[prod_id]
+                locations = [rows.location_by_id[lid] for lid in loc_ids]
+                try:
+                    tag_inheritance.apply_inherited_tags_for_locations(
+                        locations,
+                        product=product,
+                    )
+                except Exception:
+                    logger.exception(
+                        "Tag inheritance pass failed for product id=%s "
+                        "(%d location(s)); continuing with remaining products",
+                        prod_id, len(locations),
+                    )
+                    self.inheritance_failures += 1
+                else:
+                    self.inheritance_pairs += len(loc_ids)
+                    self.inheritance_product_ids.add(prod_id)
+        finally:
+            self._bench_end("inheritance", t)
+
+    def _print_tag_inheritance_summary(self) -> None:
+        if not (self.inheritance_pairs or self.inheritance_failures):
+            return
         msg = (
-            f"Tag inheritance pass: visited {n_pairs:,} (product, location) pair(s) "
-            f"across {n_products:,} product(s), {n_unique_locations:,} unique location(s), "
-            f"in {elapsed:.2f}s"
+            f"Tag inheritance: applied to {self.inheritance_pairs:,} (product, location) "
+            f"pair(s) across {len(self.inheritance_product_ids):,} product(s), "
+            f"per chunk during the run"
         )
-        if n_failures:
-            self.stdout.write(self.style.WARNING(f"{msg} — {n_failures} product group(s) failed"))
+        if self.inheritance_failures:
+            self.stdout.write(self.style.WARNING(
+                f"{msg} — {self.inheritance_failures} product group(s) failed"))
         else:
             self.stdout.write(self.style.SUCCESS(msg))
 
@@ -779,20 +837,17 @@ class Command(BaseCommand):
         self.query_count = bool(options.get("query_count"))
         self.batch_size = int(options["batch_size"])
         self.progress_every = int(options["progress_every"])
+        self.start_after_id = options.get("start_after_id")
 
         # Per-phase wall-clock accumulators.
         self.timings = dict.fromkeys(PHASES, 0.0)
         self.counts = dict.fromkeys(PHASES, 0)
 
-        # Bookkeeping for the post-migration tag inheritance pass.
-        # `locations_by_product_id` maps product.id -> set of location.ids
-        # contributed by that product (via endpoint.product OR finding.test.
-        # engagement.product). We hold the Product/Location objects in
-        # parallel maps so the post-pass can hand them directly to the bulk
-        # inheritance helper.
-        self.locations_by_product_id: dict[int, set[int]] = defaultdict(set)
-        self.product_obj_by_id: dict[int, Product] = {}
-        self.location_obj_by_id: dict[int, Location] = {}
+        # Aggregate counters for the per-chunk tag inheritance pass (the pairs
+        # themselves live on each chunk's _ChunkRows and are dropped with it).
+        self.inheritance_pairs = 0
+        self.inheritance_product_ids: set[int] = set()
+        self.inheritance_failures = 0
 
         # Endpoint tags are copied to Locations once per migration batch.
         # The nested Location-id mapping prevents duplicate through rows and
@@ -829,7 +884,7 @@ class Command(BaseCommand):
         #
         # The work is redundant regardless: a freshly created Location has no
         # product references yet, so the signal has nothing to inherit. Correct
-        # inheritance is applied in bulk by `_run_tag_inheritance()` once the
+        # inheritance is applied in bulk by `_run_tag_inheritance_for_chunk()` once the
         # references exist, which is why that pass already exists.
         with Endpoint.allow_endpoint_init():
             # Prefetch everything the per-endpoint loop will touch so the
@@ -840,8 +895,12 @@ class Command(BaseCommand):
             #   - `status_endpoint` is prefetched together with the FK chain
             #     `finding -> test -> engagement -> product` and `mitigated_by`
             #     so the reference rows can be built without queries.
+            # Explicit id ordering makes the scan deterministic across runs,
+            # which is what gives the progress lines' "last id" its meaning as
+            # a resume cursor for --start-after-id.
             queryset = (
                 Endpoint.objects.all()
+                .order_by("id")
                 .select_related("product")
                 .prefetch_related(
                     "tags",
@@ -855,13 +914,19 @@ class Command(BaseCommand):
                     ),
                 )
             )
+            if self.start_after_id is not None:
+                queryset = queryset.filter(id__gt=self.start_after_id)
             # Grab the total count so we can communicate progress
             endpoint_count = queryset.count()
+            resume_note = (
+                f", resuming after endpoint id {self.start_after_id}"
+                if self.start_after_id is not None else ""
+            )
             self.stdout.write(self.style.WARNING(
                 f"Starting migration of {endpoint_count:,} endpoints "
                 f"(batch={self.batch_size}, progress every {self.progress_every}, "
                 f"benchmark={'on' if self.benchmark else 'off'}, "
-                f"query-count={'on' if self.query_count else 'off'})",
+                f"query-count={'on' if self.query_count else 'off'}{resume_note})",
             ))
 
             run_t0 = time.time()
@@ -874,10 +939,14 @@ class Command(BaseCommand):
             # failures itself: per-endpoint for anything that can raise while
             # building rows, and per-row on a failed batch write, so one bad
             # endpoint still can't abort a multi-hour migration.
+            last_id = None
             with tag_inheritance.suppress_tag_inheritance():
                 for chunk in self._iter_chunks(queryset):
                     self._process_chunk(chunk)
                     i += len(chunk)
+                    # Chunks arrive in id order, so the chunk's last endpoint id
+                    # is the resume cursor for everything migrated so far.
+                    last_id = chunk[-1].id
 
                     # Flush independently of per-endpoint success so a failing
                     # endpoint at a chunk boundary cannot leave the queue growing.
@@ -895,34 +964,30 @@ class Command(BaseCommand):
                             queries_at_window_start = 0
                         self._log_progress(
                             i, endpoint_count, run_t0, queries_in_window, i - last_reported,
+                            last_id=last_id,
                         )
                         last_reported = i
 
             elapsed = time.time() - run_t0
-            successful = i - len(self.failed_endpoints)
+            n_failed = len(self.failed_endpoint_ids)
+            successful = i - n_failed
             self.stdout.write(self.style.SUCCESS(
                 f"Done. Migrated {successful:,}/{i:,} endpoints in {self._fmt_duration(elapsed)} "
                 f"({(i / elapsed if elapsed else 0):.2f} endpoints/sec).",
             ))
-            if self.failed_endpoints:
+            if n_failed:
                 preview_ids = [eid for eid, _ in self.failed_endpoints[:10]]
                 self.stdout.write(self.style.WARNING(
-                    f"{len(self.failed_endpoints):,} endpoint(s) failed; see logger output above "
+                    f"{n_failed:,} endpoint(s) failed; see logger output above "
                     f"for tracebacks. First failing endpoint IDs: {preview_ids}",
                 ))
 
-            # Run the post-migration tag inheritance pass. `bulk_create` skips
-            # the `inherit_tags_on_linked_instance` post_save signal, so for
-            # deployments with `enable_product_tag_inheritance` enabled (per
-            # product or system-wide) the migrated Locations would otherwise
-            # not pick up inherited product tags. We grouped (product,
-            # location) pairs during the main loop and now drive
-            # `apply_inherited_tags_for_locations` once per contributing
-            # product. The helper rediscovers each location's full product
-            # set via LocationProductReference/LocationFindingReference and
-            # diff-checks before writing, so revisits of shared locations
-            # across product groups are idempotent.
-            self._run_tag_inheritance()
+            # Inherited tags were applied per chunk during the loop
+            # (`bulk_create` skips the `inherit_tags_on_linked_instance`
+            # post_save signal, so deployments with
+            # `enable_product_tag_inheritance` on would otherwise miss them);
+            # this just reports the aggregate.
+            self._print_tag_inheritance_summary()
 
             self._print_benchmark_summary(i, elapsed)
 
