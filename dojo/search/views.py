@@ -313,7 +313,7 @@ def simple_search(request):
                 endpoints = apply_tag_filters(endpoints, operators)
                 if settings.V3_FEATURE_LOCATIONS:
                     endpoints = endpoints.filter(Q(url__host__icontains=keywords_query) | Q(url__path__icontains=keywords_query) | Q(url__protocol__icontains=keywords_query) | Q(url__query__icontains=keywords_query) | Q(url__fragment__icontains=keywords_query))
-                    endpoints = prefetch_for_locations(endpoints)
+                    endpoints = prefetch_for_locations(endpoints, user=request.user)
                 else:
                     endpoints = endpoints.filter(Q(host__icontains=keywords_query) | Q(path__icontains=keywords_query) | Q(protocol__icontains=keywords_query) | Q(query__icontains=keywords_query) | Q(fragment__icontains=keywords_query))
                     endpoints = prefetch_for_endpoints(endpoints)
