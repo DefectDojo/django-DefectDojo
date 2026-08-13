@@ -1437,6 +1437,10 @@ HASHCODE_FIELDS_PER_SCANNER = {
     # description is excluded because it embeds every artifact attribute and moves whenever
     # the parser's wording does.
     "Xeol Parser": ["title", "component_name", "component_version"],
+    # Checkmarx One already deduplicates on the vendor id; this makes the STORED hash_code
+    # agree with that instead of falling through to the legacy field set, whose "description"
+    # is what every result family assigns to "title" as well.
+    "Checkmarx One Scan": ["unique_id_from_tool"],
 }
 
 # Override the hardcoded settings here via the env var
