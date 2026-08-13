@@ -1473,13 +1473,16 @@ class DefaultReImporter(BaseImporter, DefaultReImporterOptions):
         if self.findings_groups_enabled and (self.push_to_jira or getattr(self.jira_instance, "finding_jira_sync", False)):
             # reactivated_items/unchanged_items are ids (M1), so the group membership this
             # used to read straight off in-memory instances is resolved in one query instead.
+            # finding_group is the reverse M2M query name (Finding has no finding_group_id
+            # column -- Finding.finding_group is a cached_property over finding_group_set), so
+            # select that relation, not a non-existent *_id field, which raises FieldError.
             finding_group_ids = (
                 Finding.objects.filter(
                     id__in=self.reactivated_items + self.unchanged_items,
                     is_mitigated=False,
                     finding_group__isnull=False,
                 )
-                .values_list("finding_group_id", flat=True)
+                .values_list("finding_group", flat=True)
                 .distinct()
             )
             for finding_group in Finding_Group.objects.filter(id__in=finding_group_ids):
