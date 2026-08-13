@@ -1460,6 +1460,13 @@ HASHCODE_FIELDS_PER_SCANNER = {
     "PyRIT Scan": ["title", "vuln_id_from_tool"],
     "debsecan Scan": ["vulnerability_ids", "component_name"],
     "PMapper Scan": ["vuln_id_from_tool", "component_name"],
+    # Deliberately without "severity", unlike most entries here. The Xeol parser derives
+    # severity from datetime.now() against the component's EOL date, so a stored finding
+    # would change identity on its own as the date passes each band boundary. The product
+    # name in the title plus the component name and version identify the finding; the
+    # description is excluded because it embeds every artifact attribute and moves whenever
+    # the parser's wording does.
+    "Xeol Parser": ["title", "component_name", "component_version"],
 }
 
 # Override the hardcoded settings here via the env var
@@ -1907,6 +1914,10 @@ DEDUPLICATION_ALGORITHM_PER_PARSER = {
     "PyRIT Scan": DEDUPE_ALGO_HASH_CODE,
     "debsecan Scan": DEDUPE_ALGO_HASH_CODE,
     "PMapper Scan": DEDUPE_ALGO_HASH_CODE,
+    # Without this entry Xeol falls through to DEDUPE_ALGO_LEGACY, whose reimport candidate
+    # key is (title.lower(), severity). Xeol's severity is a function of the wall clock, so
+    # that key rewrites itself as time passes even though the report never changed.
+    "Xeol Parser": DEDUPE_ALGO_HASH_CODE,
 }
 
 # Override the hardcoded settings here via the env var
