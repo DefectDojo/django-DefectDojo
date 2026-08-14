@@ -208,7 +208,7 @@ class NotificationDeduplicationRefreshTest(DojoTestCase):
         # Simulate background deduplication having flagged the second finding.
         Finding.objects.filter(pk=dupe.pk).update(duplicate=True)
 
-        importer.notify_scan_added(test, updated_count=2, new_findings=[real, dupe])
+        importer.notify_scan_added(test, updated_count=2, new_findings=[real.id, dupe.id])
 
         kwargs = mock_notify.call_args.kwargs
         self.assertEqual([f.id for f in kwargs["findings_new"]], [real.id])
@@ -226,7 +226,7 @@ class NotificationDeduplicationRefreshTest(DojoTestCase):
         dupe.save()
         Finding.objects.filter(pk=dupe.pk).update(duplicate=True)
 
-        importer.notify_scan_added(test, updated_count=1, new_findings=[dupe])
+        importer.notify_scan_added(test, updated_count=1, new_findings=[dupe.id])
 
         kwargs = mock_notify.call_args.kwargs
         # historical behavior: duplicate still listed/counted as new
@@ -243,7 +243,7 @@ class NotificationDeduplicationRefreshTest(DojoTestCase):
         dupe.save()
         Finding.objects.filter(pk=dupe.pk).update(duplicate=True)
 
-        importer.notify_scan_added(test, updated_count=1, new_findings=[dupe])
+        importer.notify_scan_added(test, updated_count=1, new_findings=[dupe.id])
 
         kwargs = mock_notify.call_args.kwargs
         self.assertEqual(kwargs["findings_new"], [])
